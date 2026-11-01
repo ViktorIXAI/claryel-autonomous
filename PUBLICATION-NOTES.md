@@ -28,7 +28,11 @@ independent scorer (`analytics/second_opinion.py`), dedup-sensitivity tool,
 telemetry collector v2 + join, dashboard, holdout bank generator, privacy
 gateway prototype, CI reproduce/link/sanity scripts.
 
-Allowed portability edits made this pass (code semantics unchanged):
+P1005 passport + sanitized launch config added 2026-11-01 (evening): live-collected
+hardware table, first-run IQ3_S benchmark numbers, and the tuned sm_60 launch
+JSON with `$HOME` placeholders, no api_key, no LAN address, no account paths.
+
+Allowed portability edits made this pass (code semantics unchanged): 
 `make_plan.py`/`second_opinion.py` honour `PARB_BANK`; `check_links.py` uses
 GET for GitHub HTML (HEAD 403 from datacenter IPs); `verify_release_hashes.py`
 accepts both INDEX row formats; repo-move URL updates after the owner's rename
