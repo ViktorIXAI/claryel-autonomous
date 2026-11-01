@@ -31,6 +31,25 @@ configuring a local automation or advisory link.
 Research-history completeness never outweighs secret safety: if a log line
 contains a credential, the line is redacted and the redaction is documented.
 
+## Stricter publication policy adopted 2026-11-01
+
+- A non-critical risk review confirmed that old visual-release browser metadata
+  did not contain usable stored passwords or cookies. Existing history and
+  releases were therefore left unchanged, but browser profile state is now
+  prohibited from future packages.
+- Package builders must exclude browser-profile directories and files, including
+  Chrome profile state, cache, cookies, login data, preferences and session
+  stores.
+- Every publication path must run the scanner before upload. A current-code
+  credential-like finding is blocking. Historical infrastructure findings are
+  reported and moved to local configuration, but history/release deletion
+  remains an explicit maintainer decision.
+- Public reports may contain paths, rule identifiers, commit/release references
+  and counts only. Secret values must never be printed in logs, issues, commits,
+  releases or dashboards.
+- If a future scan finds a real credential, it must be revoked/rotated even if
+  it has not yet been observed in use.
+
 ## Execution-safety notes for users running the suite
 
 - Category-E tasks execute model-generated Python on your machine
