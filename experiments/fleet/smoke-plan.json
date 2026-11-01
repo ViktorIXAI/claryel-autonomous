@@ -1,0 +1,31 @@
+{
+  "id": "agent-lab-smoke-30",
+  "date": "2026-11-01",
+  "purpose": "Validate a newly connected worker without contaminating active paired gate runs.",
+  "scope": {
+    "tasks_per_category": 3,
+    "categories": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"],
+    "repetitions": 1,
+    "max_tasks": 33,
+    "max_runtime_minutes": 45
+  },
+  "constraints": [
+    "Do not launch while a paired v2.1 full gate is active on the same worker.",
+    "Use a scratch output directory.",
+    "Do not download new models or update inference engines.",
+    "Do not reboot or change host configuration.",
+    "Do not publish until secret scan passes."
+  ],
+  "outputs": {
+    "results": "results.jsonl",
+    "ledger": "gate-ledger.jsonl",
+    "events": "events.jsonl",
+    "report": "smoke-report.md"
+  },
+  "stop_criteria": [
+    "Any credential-like scanner finding.",
+    "Repeated SSH/model endpoint failure.",
+    "More than 3 format regressions compared with the same box baseline.",
+    "Runtime exceeds 45 minutes."
+  ]
+}

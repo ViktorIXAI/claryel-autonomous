@@ -1,0 +1,18 @@
+{
+  "observed_at": "2026-11-01",
+  "region": "EU",
+  "currency": "EUR",
+  "observations": [
+    {
+      "component": "gpu",
+      "model": "example GPU 12 GB",
+      "condition": "example",
+      "price": 300,
+      "availability": "unknown",
+      "source_url": "https://example.invalid/public-offer",
+      "source_class": "manual",
+      "confidence": "low",
+      "notes": "Synthetic example row only; replace with a public offer before publication."
+    }
+  ]
+}
