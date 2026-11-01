@@ -17,3 +17,25 @@ keywords:
   - autonomous software engineering
   - reproducible research
   - LLM evaluation
+
+references:
+  - name: "Qwen3.8-Flash-Next (base model of the benchmarked build)"
+    type: software
+    authors:
+      - name: "Qwen team, Alibaba Group"
+    repository-code: "https://huggingface.co/Qwen/Qwen3.8-Flash-Next"
+  - name: "Qwen3.8-Flash-Next-GSQ-RCO-GGUF IQ3_S (quantized GGUF build measured)"
+    type: software
+    authors:
+      - name: "ISTA-DASLab, Institute of Science and Technology Austria"
+    repository-code: "https://huggingface.co/ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF"
+  - name: "Strata inference engine (served all benchmark series)"
+    type: software
+    authors:
+      - name: "Niko1221 and the Strata contributors"
+    repository-code: "https://github.com/Niko1221/Strata"
+  - name: "Hermes Agent (carried every instruction; authored the harness)"
+    type: software
+    authors:
+      - name: "Nous Research"
+    repository-code: "https://github.com/NousResearch/hermes-agent"

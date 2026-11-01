@@ -34,6 +34,14 @@ rejected its own three weak versions first.
 | v1.9 | Agent-proposed (CHRONIC classification) | Agent | Agent-implemented (test-first) | Agent-tested (unit + smoke) | Agent-evaluated (paired, cross-box) | Autonomously-adopted; this is the RELEASED contour |
 | v2.0 | Agent-proposed | Agent | Agent-implemented | Agent-tested (18 probe rows) | Agent-evaluated: insufficient | **not adopted** — published as experimental |
 
+Every operator instruction — including each “continue improving” cycle —
+reached the lab through the Hermes agent (its task queue, cron and terminal);
+there was no side channel around it. Hermes also runs its own documented
+learning loop (skills created from experience, improved during use): that
+loop learned *during* this experiment — a third improvement axis (agent
+procedural memory), deliberately kept separate from model weights and from
+the contour in every claim in this repo.
+
 Cloud models: none participated in the published chain (fully local agent).
 Cloud-collaboration ledgers become possible only after the
 `privacy-boundary` stage — and they will be recorded with the same labels.

@@ -153,12 +153,19 @@ Roadmap by stages: [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Provenance and licensing
 
-Built by an autonomous coding agent (Hermes, Nous Research) operated by
-Viktor Khudiakov on home-lab hardware (passports in `hardware/`). The serving
-engine ("Strata") is not part of this repo and is not required — any
-OpenAI-compatible endpoint works. No model weights are distributed; the
-benchmark subject is an open-weight Qwen-3.8-Flash-Next GGUF quantized to
-IQ3_S (identifiers, sizes, hashes in `hardware/inventory/model-iq3s.md`).
+Built by **[Hermes Agent](https://github.com/NousResearch/hermes-agent)**
+(Nous Research, MIT) operated by Viktor Khudiakov on home-lab hardware
+(passports in `hardware/`) — every instruction in the experiment, including
+all "improve the harness" directives, reached the lab through that agent.
+Serving engine: **[Strata](https://github.com/Niko1221/Strata)** by Niko1221
+and contributors (MIT) — not part of this repo and not required; any
+OpenAI-compatible endpoint works. The benchmark subject is
+**[Qwen3.8-Flash-Next](https://huggingface.co/Qwen/Qwen3.8-Flash-Next)**
+(Qwen team, Alibaba Group), in the recommended IQ3_S build from
+**[ISTA-DASLab](https://huggingface.co/ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF)**
+(Institute of Science and Technology Austria). No weights redistributed —
+identifiers, sizes and SHA-256 in `hardware/inventory/model-iq3s.md`.
+Full credits: **[ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)**.
 
 MIT licensed (`LICENSE`). Publication edits vs the exact run snapshots are
 itemized in `PUBLICATION-NOTES.md`. Keep the decision logs if you fork this —

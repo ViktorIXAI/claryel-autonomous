@@ -10,8 +10,9 @@
 | mtime (both machines) | 2026-10-12 18:12 / 18:27 — identical on B2003 and P2005 |
 | SHA-256 | part1: `4c1eb2ceb4915e1192f4f386021897bde56a97f40a0bb78bb86465e0f7d2aca3` · part2: `316b46f3a2dbd68c900f43136ab9449f9dcc3725dfd8c794847c204bc161e113` (computed 2026-11-01 08:2x CET on P2005, ionice; same-size+same-mtime copies live on B2003 — B2003 re-hash deferred to avoid disturbing its running series) |
 | vision mmproj | mmproj-Qwen3.8-Flash-Next-BF16.gguf (B2003 vision config) |
-| upstream source | open-weight upstream; exact HF repo id `not_recorded` in rig artifacts |
+| upstream source | base: `Qwen/Qwen3.8-Flash-Next` (Qwen team, Alibaba Group) · GGUF build: `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF`, IQ3_S directory — filenames and both shard sizes match our files exactly (verified 2026-11-01); their GGUF release Apache-2.0 over the base Qwen community license |
 | weights redistribution | not done (license-safe pattern: ids + sizes + hashes only) |
+| attribution | full credits in `ACKNOWLEDGMENTS.md` (Qwen team; ISTA-DASLab GSQ+RCO quantization) |
 
 Identical size+mtime across B2003/P2005 makes "same build" a strong claim; the
 SHA-256 will convert it to a proven one. Until then treat it as *size-verified*.
