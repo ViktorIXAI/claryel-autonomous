@@ -72,8 +72,10 @@ def main():
                 continue
             tgt = norm(path, f)
             if tgt not in files:
-                bad.append((f, link, "missing file"))
-                continue
+                # directory links (trailing /) are valid if any tracked file lives under them
+                if not any(x.startswith(tgt + "/") for x in files):
+                    bad.append((f, link, "missing file"))
+                    continue
             if anchor and tgt.endswith(".md"):
                 a = anchor.lower()
                 if a and a not in headings(tgt):
