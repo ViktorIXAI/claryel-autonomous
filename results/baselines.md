@@ -34,6 +34,18 @@ A second contour column shows the published B2003 finals for the same pairs
 | **S3_contour v1.9 (same box)** | 66 | **0.952** | **98%** | 582 | 1.3 | 1.24 |
 | S3_contour v1.9 (B2003, published) | 66 | 0.937 | 98% | 594 | 5.5 | 1.29 |
 
+Independent re-scoring of the same arms (analytics/second_opinion2.py,
+~90% coverage, no harness scorer involved) preserves the ordering and the
+gap — the contour's win is scorer-independent:
+
+| arm | rows rescored | harness mean | independent mean |
+|---|---|---|---|
+| S0_direct | 57 | 0.667 | 0.592 |
+| S1_generic | 60 | 0.769 | 0.671 |
+| S2_min_gate | 60 | 0.711 | 0.587 |
+| S4_best_of_2 | 60 | 0.799 | 0.715 |
+| S3_contour v1.9 (P2005) | 60 | 0.947 | **0.810** |
+
 Paired deltas vs the same-box contour (content, contour − arm):
 
 | arm | mean delta | contour better | arm better | tie |

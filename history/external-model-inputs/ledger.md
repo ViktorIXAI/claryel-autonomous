@@ -42,10 +42,11 @@ forward, not retroactive fiction.
   text to the agent verbatim.
 - Purpose: independent-position critique (benchmark overfitting risk,
   autonomy-evidence strength, positioning tone).
-- Published as: `results/external-review-2026-11-01.md` (Russian original
-  verbatim + English abstract).
+- Published as: `results/external-review-2026-11-01.md` (full English
+  translation in repo). The verbatim Russian original now lives in the
+  release asset `ru-source-records-2026-11-01.tar.zst` (removed from the
+  git tree by the English-first language pass, unmodified inside the asset).
 - SHA-256 (16-hex) of the review text as received: `c26848ffd40c75ce`
-  (stored verbatim: `history/external-model-inputs/ext-001-review-2026-11-01.ru.txt`)
 
 ### EXT-002 (positioning text)
 
@@ -54,3 +55,23 @@ forward, not retroactive fiction.
   adopted into README nearly verbatim.
 - SHA-256 (16-hex) of the adopted English paragraph: `d84091ccb3d652d0`
   (stored verbatim: `history/external-model-inputs/ext-002-positioning-2026-11-01.txt`)
+
+### EXT-003 (second critical audit, same day)
+
+- Date: 2026-11-01 (evening CET)
+- System: external conversational AI assistant used by the owner; the audit
+  text was pasted to the agent verbatim.
+- Purpose: 10-criterion re-audit of the updated public repo (7.0/10); named
+  three scientific gaps (independent scorer dissent, holdout G degradation,
+  missing budget-matched simple baselines) and four polish defects.
+- Published as: `results/external-review-2026-11-01.md` § "Second audit"
+  (English); English translation of the full audit:
+  `history/external-model-inputs/ext-003-audit-2026-11-01.md`.
+- SHA-256 of the audit text as received (Russian):
+  `e5bd7fe19035258c3b31c73a57079d792529a032f5693e54e860e2c6be643b7f`
+  (verbatim original archived in release asset `ext-records-2026-11-01-v2.tar.zst`).
+- Actions taken in response (same day): budget-matched simple-baselines
+  experiment run and published (`results/baselines.md`); independent scorer
+  v2 with ~90% coverage (`results/independent-scorer-v2.md`); holdout-G
+  generator bug found, fixed, pilot re-run; README quickstart fixed;
+  privacy-boundary README corrected; CI failure history documented.

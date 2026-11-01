@@ -13,6 +13,12 @@ This holdout is generated AFTER contour v1.9 was frozen:
   * ids remapped with an "x" level-marker so they are disjoint from dev ids
     (scripts/sanity_data.py asserts disjointness in CI).
 
+Version note: v2 (2026-11-01) assembles the long G documents
+(`assembled_doc`) exactly like the dev-bank prep stage does. The first
+published holdout bank (v1) shipped G tasks WITHOUT the document, making
+holdout G results invalid — the bug and its discovery are recorded in
+history/failures/failures.md; task ids and refs are unchanged between v1/v2.
+
 Generalization reading: a contour gain that survives on holdout instances
 is a real harness property; a gain that only exists on dev instances was
 partly task-tuning. This bank was NOT used during v1.0–v1.9 development
@@ -27,7 +33,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from parb_bank import build  # deterministic generators, same as dev bank
+from parb_bank import build, FILLER, CITIES  # deterministic generators, same as dev bank
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "benchmarks", "holdout", "bank-holdout.json")
@@ -105,9 +111,30 @@ def extra_tasks():
     return t
 
 
+def assemble_G(t):
+    """Same assembly as the dev-bank prep stage (parb_prep): fact units at
+    head/mid/tail, filler units padded to the token target (~3.5 chars/token
+    for Russian, calibrated on the dev bank)."""
+    known = "\n".join(t["head_units"] + t["mid_units"] + t["tail_units"] + [t["prompt"]])
+    target_chars = int(t["target_tokens"] * 3.5)
+    need = max(0, int((target_chars - len(known)) // 150))
+    fillers = [FILLER % (CITIES[j % len(CITIES)], 1000 + j, (j % 7) + 1, (j % 11) + 6)
+               if "%s" in FILLER else
+               FILLER.format(c=CITIES[j % len(CITIES)], n=1000 + j, d=(j % 7) + 1, y=(j % 11) + 6)
+               for j in range(need)]
+    half = need // 2
+    t["assembled_doc"] = "\n".join(t["head_units"] + fillers[:half] + t["mid_units"] +
+                                   fillers[half:] + t["tail_units"])
+    t["filler_units"] = need
+    return t
+
+
 def main():
     counts, dev = dev_counts()
     tasks = build(HOLDOUT_SEED, counts)
+    for t in tasks:
+        if t["cat"] == "G":
+            assemble_G(t)
     # remap ids: level code ea/ha/sa/va -> xe/xh/xs/xv (disjoint from dev bank)
     for t in tasks:
         p = t["id"].split("-")

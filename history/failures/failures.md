@@ -78,3 +78,24 @@ silently yield `None` stats.
   changed; only the archive's completeness changed.
 - **Lesson applied:** CI now fails loudly when any file a published aggregate
   reads is absent from the public archive (silence is a bug).
+
+## Holdout bank v1 shipped category-G tasks without their long documents (2026-11-01)
+
+The first published `bank-holdout.json` (v1) generated G tasks via
+`parb_bank.build()` but skipped the prep-stage document assembly that
+`parb_prep.py` performs for the dev bank. Result: the model received only
+the 5 questions (≈485 chars) and no document, so the published holdout-mini
+G score of 0.167 measured a broken task, not model or contour behaviour.
+Caught during the second external audit follow-up by inspecting the three
+G rows (`ptok` far below `target_tokens`, answers "нет данных"). Fixed in
+generator v2 (`assemble_G`, same layout as dev prep); ids and refs
+unchanged; corrected pilot re-run published in `results/holdout-mini.md`.
+The invalid v1 pilot rows remain in `logs/samples/holdout-p2005-mini/`
+unmodified, annotated as invalid for G.
+
+## Baseline experiment v1 rows did not store answers (2026-11-01)
+
+The first baselines run stored only `answer_sha256`, which made independent
+re-scoring of the arms impossible. Re-ran all 264 arm calls with answers
+stored (same seeds; scores identical). Lesson: research artifacts must
+carry the bytes needed for independent verification, not just hashes.

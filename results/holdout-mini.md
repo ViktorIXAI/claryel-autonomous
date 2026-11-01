@@ -27,16 +27,46 @@ independently rescored, independent mean 0.529 vs harness 0.882 on that
 subset (stricter coverage metric, same semantics gap as documented for the
 dev set in `independent-scorer.md`).
 
-## Reading (no spin)
+## CORRECTION (same day): the G collapse was our own generator bug
 
-1. v1.9 carries over to unseen instances of known families (A/C/E/K perfect,
-   overall 0.819) — but **not uniformly**: G (very-long-context) collapses
-   to 0.167 and D (agent plans) to 0.636 on holdout draws.
-2. These are **easy-level** single-rep draws — small n per cell; the pilot
-   is a signal, not a leaderboard. A full holdout series (all 206 tasks ×
-   standard rep schedule, both boxes) is the next measurement; v2.0
-   candidates must beat v1.9 on dev **and** holdout.
-3. The G gap is a genuine new finding: dev-bank veryhard G tasks had large
-   in-series gains in v1.7 (form repair), but unseen very-long instances
-   with different content defeat the contour today. Recorded as a failure
-   direction, not hidden by averaging.
+The v1 holdout bank shipped G tasks **without their long documents** (the
+prep-stage assembly step was skipped in the holdout generator). The model
+received only the questions — G=0.167 measured a broken task, not model or
+contour behaviour. Root cause, fix and the discovery path are in
+`history/failures/failures.md`. The v1 rows above stay published unmodified,
+annotated as invalid for G.
+
+Corrected pilot (bank v2, identical ids/refs/seeds, P2005SAH, contour v1.9,
+73 records, `logs/samples/holdout-p2005-mini2/`):
+
+| cat | n | mean content |
+|---|---|---|
+| A | 13 | 1.000 |
+| B | 13 | 1.000 |
+| C | 13 | 1.000 |
+| D | 13 | 1.000 |
+| E | 3 | 1.000 |
+| F | 3 | 0.667 |
+| G | 3 | **0.833** |
+| H | 3 | 0.500 |
+| I | 3 | 1.000 |
+| J | 3 | 1.000 |
+| K | 3 | 1.000 |
+| **overall** | **73** | **0.959** |
+
+## Reading (corrected, no spin)
+
+1. With the task fixed, v1.9 **does carry over** to unseen instances of the
+   known families: overall 0.959, G 0.833 — identical to the dev-bank G
+   level. The earlier "transfer failure" claim was an artifact of a broken
+   task; we publish the correction, not the comforting version.
+2. Run-to-run differences between the v1 and v2 pilots on unchanged tasks
+   (B 0.769→1.000, D 0.636→1.000, H 0.667→0.500) despite identical seeds
+   reflect engine-level nondeterminism at temperature 0.7 on this stack —
+   a known caveat, also visible in the dev-set repeatability category L.
+3. Weakest holdout cell now: **H (hallucination/false-premise) 0.500** —
+   consistent with the baselines finding that a generic retry beats the
+   contour on H. That is the next contour hypothesis, to be tested
+   paired on dev and holdout before any adoption.
+4. Still easy-level, single box, small n. The full 206-task holdout series
+   on both boxes remains the gate for any v2.x adoption.
