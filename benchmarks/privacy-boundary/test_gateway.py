@@ -38,8 +38,8 @@ check("default lane denies", d["decision"] == "deny" and "lane_not_enabled" in d
 LEAKS = {
     "email": "contact jane.doe@example.org for the results",
     "phone_russian": "call me at +7 000 000-00-00",
-    "lan_ip": "the endpoint is at 192.168.0.10:8080",
-    "home_path": "edit /home/jdoe/project/main.py",
+    "lan_ip": "the endpoint is at 192.168.0.10:8080",  # gitleaks:allow synthetic RFC1918 test fixture
+    "home_path": "edit /home/jdoe/project/main.py",  # gitleaks:allow synthetic account-path fixture
     "ssh_material": "use ssh-rsa [REDACTED] to log in",
     "credential": "api_key = 'supersecret123'",
     "machine_identity": "wake it via mac aa:bb:cc:dd:ee:ff",
@@ -68,7 +68,7 @@ d = decide("x" * 2500, "cloud_assist_code_help", P)
 check("size cap", d["decision"] == "deny" and d["reasons"] == ["payload_too_large"])
 
 # 6. combined payload: one leak poisons the whole payload
-d = decide("perfectly normal code, oh and 10.1.2.3 is the box", "cloud_assist_code_help", P)
+d = decide("perfectly normal code, oh and 10.1.2.3 is the box", "cloud_assist_code_help", P)  # gitleaks:allow synthetic RFC1918 test fixture
 check("poisoned payload denied", d["decision"] == "deny")
 
 # 7. missing policy file -> everything denied

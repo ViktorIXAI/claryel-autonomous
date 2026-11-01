@@ -3,23 +3,30 @@
 ## Scope
 
 This repository contains benchmark harness code, synthetic task banks and
-research logs. It contains **no** user data, credentials, or private keys —
-and every published artifact passed a secret-scan before commit (see
-`PUBLICATION-NOTES.md`).
+research logs. Published artifacts and the current branch are screened with
+Gitleaks plus infrastructure-pattern scanners. Machine-specific SSH targets,
+host users, key paths and private redaction rules live only in an untracked
+local `publish.env`; public code reads environment variables.
+
+Automation runs a Gitleaks scan on the current checkout and on all branches
+and tags. Publication pipelines re-scan staging and package archives before
+upload. Raw scanner reports are kept outside the public repository.
 
 ## Reporting a vulnerability
 
 Report privately via GitHub Security Advisories
-(https://github.com/ViktorIXAI/autonomous/security/advisories/new).
-Do not open a public issue for exploitable problems.
+(https://github.com/[owner]/[repository]/security/advisories/new).
+Use the current repository URL shown by `git remote get-url origin` when
+configuring a local automation or advisory link.
 
 ## If a secret is ever published here (incident procedure)
 
 1. Immediately stop further publication (disable the pipeline / Actions).
 2. Revoke or rotate the exposed credential at its source.
-3. Purge the secret from git history (history rewrite) and force-delete the
-   release asset; keep a *redacted* audit note of what happened and when.
-4. Re-publish a sanitized tree; append the incident to `history/`.
+3. Record the exact path, commit, release and asset in a private report.
+   Rewrite history or delete a release only after maintainer approval.
+4. Re-publish a sanitized tree; append a *redacted* incident summary to
+   `history/`. Never include the secret itself in the public incident note.
 
 Research-history completeness never outweighs secret safety: if a log line
 contains a credential, the line is redacted and the redaction is documented.

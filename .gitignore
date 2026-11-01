@@ -8,6 +8,12 @@ results*.jsonl
 gate-ledger*.jsonl
 artifacts/
 
+# Local-only publication and security state
+*.env
+!*.env.example
+security-report*.json
+security-report*.md
+
 # keep published samples
 !logs/samples/**
 !logs/samples/**/*.jsonl

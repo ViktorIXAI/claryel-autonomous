@@ -105,10 +105,15 @@ def sha(p):
 
 
 def _owner():
+    repo = os.environ.get("SAH_GITHUB_REPO", "").strip()
+    if repo:
+        return repo
     u = subprocess.run(["git", "remote", "get-url", "origin"], cwd=REPO,
                        capture_output=True, text=True).stdout.strip()
     m = re.search(r"github\.com[:/]([^/]+/[^/.]+)", u)
-    return m.group(1) if m else "ViktorIXAI/claryel-autonomous"
+    if m:
+        return m.group(1)
+    raise SystemExit("set SAH_GITHUB_REPO in local publish.env or configure a GitHub origin")
 
 def load_reg():
     if os.path.exists(REG):
@@ -249,8 +254,20 @@ def cmd_aggregate():
     print("AGGREGATE-RC", code)
 
 
+def security_gate(target, label):
+    """Hard Gitleaks gate; raw reports remain outside the public repository."""
+    report = os.path.join(PUB, f"security-{label}.json")
+    code, out, err = run(f"{sys.executable} {REPO}/scripts/security/secret_scan.py "
+                         f"--dir '{target}' --report '{report}'", timeout=900)
+    print("SECURITY-GATE", label, "rc", code, out[-500:] if code else "")
+    return code == 0
+
+
 def cmd_publish():
     reg = load_reg()
+    if not (security_gate(STAGE, "pre-publish-staging") and security_gate(PKGS, "pre-publish-packages")):
+        print("PUBLISH-BLOCKED: credential-like finding; review local security report")
+        return
     tag = "data-full-2026-11-01"
     for pid, man in reg["packages"].items():
         if man.get("published"):

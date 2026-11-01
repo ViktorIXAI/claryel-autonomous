@@ -83,7 +83,7 @@ def gen(ser, i, att, note=False):
                    capture_output=True, text=True, timeout=600)
     loc = os.path.join(OUTROOT, name)
     os.makedirs(loc, exist_ok=True)
-    subprocess.run(["rsync", "-az", "-e", "ssh -i " + KEY, "%s:visbench/%s/" % (B2003, name), loc + "/"],
+    subprocess.run(["rsync", "-az", "-e", "ssh -i " + KEY, "%s:visbench/%s/" % (B2003, name), loc + "/"],  # gitleaks:allow (KEY/B2003 come from env; no literal values)
                    capture_output=True, timeout=120)
     return name, loc
 

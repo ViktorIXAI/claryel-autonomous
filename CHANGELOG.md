@@ -16,6 +16,12 @@ Contour (harness) generations. Rejected generations are listed under
   Mac paired n=162: no delta, no regressions.
 - No v2.2 is planned for this configuration line unless final paired evidence
   reveals a regression.
+### Publication security
+- Gitleaks configuration and history-aware scanner added; current checkout and
+  all branches/tags scan in CI, staging and package archives scan before upload.
+- Publication host settings moved to untracked `publish.env`; repository ships
+  placeholders only. Browser-profile/cache paths are excluded from visual
+  packages and local account paths/private addresses are sanitized.
 
 ## [2.0] — 2026-11-01 (accepted on Mac; B2003 partial)
 ### Added
