@@ -141,22 +141,24 @@
    "source_rows": 674
   },
   "b2003|B2003|v2.1": {
-   "n": 118,
-   "avg_content": 0.9986,
-   "perfect_share": 0.9915,
-   "format_ok_share": 1.0,
+   "n": 638,
+   "avg_content": 0.9742,
+   "perfect_share": 0.9295,
+   "format_ok_share": 0.9906,
    "cats": {
     "A": 1.0,
     "B": 1.0,
     "C": 1.0,
-    "F": 0.833,
-    "G": 1.0,
-    "H": 1.0,
+    "D": 0.978,
+    "E": 0.961,
+    "F": 0.729,
+    "G": 0.91,
+    "H": 0.962,
     "I": 1.0,
     "J": 1.0,
-    "K": 1.0
+    "K": 0.952
    },
-   "source_rows": 118
+   "source_rows": 638
   },
   "host|B2003|v2.1": {
    "n": 66,
@@ -481,10 +483,10 @@
    "regressed": 24
   },
   "b2003: v2.0 -> v2.1": {
-   "n_pairs": 117,
-   "avg_delta": 0.0112,
-   "improved": 3,
-   "regressed": 0
+   "n_pairs": 636,
+   "avg_delta": 0.0111,
+   "improved": 28,
+   "regressed": 18
   },
   "host: v2.0 -> v2.1": {
    "n_pairs": 160,

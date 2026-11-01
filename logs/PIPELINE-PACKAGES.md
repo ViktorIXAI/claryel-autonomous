@@ -13,3 +13,4 @@ Every package is immutable; content hash is part of the id. Per-file SHA-256 liv
 | `pkg-series-v12-v20.de4f3a8446e0` | 2026-11-01T08:45:22Z | 22 | 24497259 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `1d52b19894a0…` |
 | `pkg-series-v19-live.2f8ced0a853e` | 2026-11-01T08:20:40Z | 3 | 6182140 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `3cd33365ef71…` |
 | `pkg-series-v20-v21-live.c92d3124b07f` | 2026-11-01T14:08:01Z | 12 | 9596816 | [asset](https://github.com/ViktorIXAI/claryel-autonomous/releases/tag/data-full-2026-11-01) | `f6fbd07a33d0…` |
+| `pkg-series-v20-v21-live.cb2c74d49c08` | 2026-11-01T14:53:29Z | 12 | 11076262 | [asset](https://github.com/ViktorIXAI/claryel-autonomous/releases/tag/data-full-2026-11-01) | `cbaffa4db05e…` |

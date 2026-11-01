@@ -98,13 +98,14 @@ def msgs_for(t):
 
 
 def score(t, ans):
-    """Same validators as every published series."""
-    if t["kind"] == "loop":
-        rec = {"answer": ans, "agent_final": ans, "agent_steps": []}
-        c, f, notes = LP.check_D_loop(t, rec)
-        return c, f, notes
-    c, f, notes = CK.check(t, ans)
-    return c, f, notes
+    """Same validators and same dispatch as every published series."""
+    try:
+        if t["kind"] == "loop":
+            rec = {"answer": ans, "agent_final": ans, "agent_steps": []}
+            return LP.check_D_loop(t, rec)
+        return CK.CHECK[t["cat"]](t, ans)
+    except Exception as e:
+        return None, None, ["scorer_error"]
 
 
 def pick_pairs(per_cat):
@@ -132,7 +133,7 @@ def pick_pairs(per_cat):
     return bank, pairs
 
 
-def run_arm(arm, t, gseed, msgs, out):
+def run_arm(arm, t, rep, gseed, msgs, out):
     calls = []
     answers = []
 
@@ -160,13 +161,16 @@ def run_arm(arm, t, gseed, msgs, out):
     best = None
     for a in answers:
         c, f, n = score(t, a)
-        s = (c, f)
-        if best is None or s > (best[0], best[1]):
+        if c is None:
+            continue
+        if best is None or (c, f) > (best[0], best[1]):
             best = (c, f, n, a)
+    if best is None:
+        best = (None, None, ["scorer_error"], "")
     ptok = sum(x["ptok"] or 0 for x in calls)
     ctok = sum(x["ctok"] or 0 for x in calls)
     secs = sum(x["el"] for x in calls)
-    row = {"arm": arm, "task": t["id"], "rep": None, "cat": t["cat"], "kind": t["kind"],
+    row = {"arm": arm, "task": t["id"], "rep": rep, "cat": t["cat"], "kind": t["kind"],
            "calls": len(calls), "ptok": ptok, "ctok": ctok, "total_s": round(secs, 2),
            "content": best[0], "format_ok": best[1], "notes": best[2],
            "answer_sha256": hashlib.sha256(best[3].encode()).hexdigest()[:16],
@@ -203,9 +207,7 @@ def main():
                 continue
             t = bank[tid]
             gseed = v19row["gen"]["request_seed"]
-            row = run_arm(arm, t, gseed, msgs_for(t), res)
-            row["rep"] = rep
-            res.seek(0)
+            run_arm(arm, t, rep, gseed, msgs_for(t), res)
             n += 1
             if n % 10 == 0:
                 log("%d/%d arms done, %.0f s" % (n, len(pairs) * 4, time.time() - t0))
