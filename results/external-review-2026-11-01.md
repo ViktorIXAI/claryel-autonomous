@@ -1,4 +1,4 @@
-# External review of this repository — published verbatim, with our response
+# External reviews of this repository — published in full, with our responses
 
 **Provenance.** On 2026-11-01 the project owner obtained a critical review of
 the public repository from an external conversational AI system and pasted it
@@ -209,3 +209,36 @@ period, with independent verification and honest compute accounting, the
 project can reach a much wider professional audience. It can already be
 shown publicly — positioned as an open research lab, not as a proven
 breakthrough in AI self-development.
+
+
+---
+
+## Second audit (EXT-003, same day) and our response
+
+The same external AI produced a stricter 10-criterion re-audit: **7.0/10**
+("engineering maturity grows faster than scientific evidence"). Full English
+translation: `history/external-model-inputs/ext-003-audit-2026-11-01.md`;
+verbatim Russian original archived in release asset
+`ext-records-2026-11-01-v2.tar.zst` (sha256 `e5bd7fe1…643b7f`), registered
+as EXT-003 in the input ledger.
+
+The audit named three scientific gaps and four polish defects. We answered
+each with a shipped experiment or fix the same day, not a roadmap promise:
+
+| audit finding | response, public evidence |
+|---|---|
+| second scorer did not confirm the v1.8→v1.9 gain (−0.011 on 37% coverage) | independent scorer v2 at ~90% coverage: matched delta **−0.006** — mean gain still not confirmed; but 45/79 harness-reported regressions reverse to improvements, 0 confirmed worse. Published as-is: `results/independent-scorer-v2.md` |
+| holdout G degradation (16.7%) treated as transfer failure | root-caused the same evening: **our holdout generator shipped G tasks without their documents**. Fixed (bank v2, ids/refs unchanged), corrected pilot: overall **0.959**, G **0.833**. Broken v1 rows kept published and annotated: `results/holdout-mini.md`, `history/failures/failures.md` |
+| missing budget-matched simple baselines ("why a harness at all?") | ran 4 simple arms vs contour on 66 identical (task, rep) pairs, same box/seeds/validators: contour **+0.134 over the best arm, 16/0 paired wins**, A-category arithmetic 0.000→1.000 where retries cannot help; independent scorer confirms (0.810 vs 0.715). Honest counterexample: generic retry beats contour on H. `results/baselines.md` |
+| README quickstart broken (old org/dir) | fixed (`cd claryel-autonomous`); link checker now also validates the quickstart block |
+| privacy README said NOT implemented while code exists | corrected to honest prototype status: 18 synthetic tests in CI, no live cloud lanes, no real personal data processed |
+| unexamined CI failure history | documented in `history/failures/failures.md` § CI failure history |
+| autonomy evidence rests on logs, not transcripts | accepted as a standing limitation; primary transcript publication requires a privacy pass — tracked in `docs/limitations.md`, not papered over |
+
+What we do **not** claim in response: that the headline +0.047 is now
+independently confirmed (it is not), or that one 73-row corrected pilot
+establishes generalization (it does not; the full 206-task series is the
+gate). What the day did change: the central question "harness vs a few
+dozen lines of code" now has a measured, reproducible, scorer-independent
+answer on our task families — and the holdout scare turned out to be our
+own bug, found and fixed by taking the criticism seriously.

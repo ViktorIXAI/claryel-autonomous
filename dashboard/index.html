@@ -60,15 +60,25 @@ blocks = validator refusals.</div></div>
 
 <h2>Independent scorer (second opinion)</h2>
 <div class="card warnbox"><table id="second"></table>
-<div class="note">Independent re-scoring of frozen answers (separate implementation,
-bank ref specs only). On its scoreable subset the v1.9 delta is slightly <b>negative</b>
-— published dissent, see <a href="../results/independent-scorer.md">results/independent-scorer.md</a>.</div></div>
+<div class="note">Independent re-scoring of frozen answers (separate implementations,
+bank ref specs only). v1 covers ~37%, v2 ~90% of rows. Neither confirms the +0.047 mean
+gain (v2 matched delta −0.006); v2 reverses 45/79 reported regressions to improvements.
+Published dissent: <a href="../results/independent-scorer.md">v1</a> ·
+<a href="../results/independent-scorer-v2.md">v2</a>.</div></div>
 
-<h2>Holdout pilot (unseen tasks, contour v1.9, P2005SAH)</h2>
+<h2>Control experiment: contour vs simple arms (equal budget, 66 paired pairs)</h2>
+<div class="card"><table id="baselines"></table>
+<div class="note">Same box, seeds, validators; arms = one call / generic retry / validator retry /
+best-of-2. The contour beats every arm; the independent scorer confirms (0.810 vs 0.715 best arm).
+Counterexample published: on H a generic retry wins. See
+<a href="../results/baselines.md">results/baselines.md</a>.</div></div>
+
+<h2>Holdout pilot, corrected bank v2 (unseen tasks, contour v1.9, P2005SAH)</h2>
 <div class="card"><table id="holdout"></table>
 <div class="note">Bank generated <b>after</b> v1.9 was frozen (disjoint ids, CI-enforced).
-The G collapse and D softness on unseen draws are published findings, not smoothed away.
-See <a href="../results/holdout-mini.md">results/holdout-mini.md</a>.</div></div>
+The first pilot's G=0.167 turned out to be our own generator bug (tasks shipped without
+documents) — found, fixed, re-run; broken v1 rows stay published and annotated. See
+<a href="../results/holdout-mini.md">results/holdout-mini.md</a>.</div></div>
 
 <h2>Latest bound telemetry run (P2005SAH · smoke-tel-4)</h2>
 <div class="card"><table id="tel"></table>
@@ -130,6 +140,11 @@ document.getElementById("second").innerHTML =
  `<tr><td>matched pairs</td><td>+0.047 (229↑ 79↓)</td><td>${(SO.matched_independent_delta||{}).avg} (${(SO.matched_independent_delta||{}).improved}↑ ${(SO.matched_independent_delta||{}).regressed}↓) of ${(SO.matched_independent_delta||{}).n}</td></tr>`+
  `<tr><td>coverage</td><td>${SO.side_A.rows}+${SO.side_B.rows} rows</td><td>${SO.side_A.rescored}+${SO.side_B.rescored} rows</td></tr>`;
 
+const BL = D.baselines;
+document.getElementById("baselines").innerHTML =
+ "<tr><th>arm</th><th>pairs</th><th>mean</th><th></th><th>Δ vs contour</th><th>W/L</th><th>independent</th></tr>" +
+ Object.entries(BL.arms).map(([a,v])=>`<tr><td>${a}</td><td>${v.pairs}</td><td>${fmt(v.mean)}</td><td>${bar(v.mean,a.startsWith("S3")?"var(--ok)":"var(--ac)")}</td><td class="${a.startsWith("S3")?"neu":"pos"}">${a.startsWith("S3")?"—":"+"+fmt(v.delta_vs_contour)}</td><td>${a.startsWith("S3")?"—":v.wins+"/"+v.losses}</td><td>${fmt(BL.independent_rescore[a])}</td></tr>`).join("");
+
 const TL = D.telemetry_run.run_level;
 document.getElementById("holdout").innerHTML =
  "<tr><th>cat</th><th>n</th><th>mean content</th><th></th></tr>" +
@@ -142,7 +157,7 @@ document.getElementById("links").innerHTML =
  `<a href="${D.releases["contour-v1.9"]}">release contour-v1.9 (code snapshot + artifacts)</a><br>
   <a href="${D.releases["data-full-2026-11-01"]}">release data-full-2026-11-01 (pipeline packages)</a><br>
   <a href="../logs/INDEX.md">raw-artifact index</a> · <a href="../logs/PIPELINE-PACKAGES.md">pipeline packages</a><br>
-  <a href="../results/summary.json">results/summary.json</a> · <a href="../results/summary-full.json">results/summary-full.json</a> · <a href="../results/second-opinion-v18-v19-b2003.json">second-opinion JSON</a><br>
+  <a href="../results/summary.json">results/summary.json</a> · <a href="../results/summary-full.json">results/summary-full.json</a> · <a href="../results/second-opinion-v18-v19-b2003.json">second-opinion v1 JSON</a> · <a href="../results/independent-scorer-v2.json">v2 JSON</a> · <a href="../results/baselines.json">baselines JSON</a><br>
   <a href="../telemetry/runs/smoke-tel-4.telem.jsonl">telemetry raw</a> · <a href="../telemetry/runs/smoke-tel-4.join.json">join</a><br>
   <a href="../history/failures/failures.md">failures incl. rejected versions</a> · <a href="../history/agent-decisions/gate-versions.en.md">decision log (EN translation)</a><br>
   <a href="../benchmarks/text-gates/bank.json">task bank</a> · <a href="../harness/">harness source</a> · <a href="../hardware/inventory/">hardware passports</a>`;

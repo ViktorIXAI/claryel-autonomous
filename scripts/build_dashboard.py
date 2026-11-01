@@ -30,16 +30,23 @@ def jrel(p):
 summary = jrel("results/summary.json")
 full = jrel("results/summary-full.json")
 second = jrel("results/second-opinion-v18-v19-b2003.json")
+second2 = jrel("results/independent-scorer-v2.json")
+baselines = jrel("results/baselines.json")
 tel = jrel("telemetry/runs/smoke-tel-4.join.json")
 
 # holdout pilot category stats (computed from the published sample rows)
 from collections import defaultdict
-_h = defaultdict(list)
-for line in open(os.path.join(ROOT, "logs", "samples", "holdout-p2005-mini",
-                              "results-holdout-mini.jsonl"), encoding="utf-8"):
-    r = json.loads(line)
-    _h[r["task"][0]].append(float(r.get("content") or 0))
-holdout = {c: {"n": len(v), "mean": round(sum(v) / len(v), 3)} for c, v in sorted(_h.items())}
+def _holdout(dirname, fname):
+    _h = defaultdict(list)
+    for line in open(os.path.join(ROOT, "logs", "samples", dirname, fname),
+                     encoding="utf-8"):
+        r = json.loads(line)
+        _h[r["task"][0]].append(float(r.get("content") or 0))
+    return {c: {"n": len(v), "mean": round(sum(v) / len(v), 3)} for c, v in sorted(_h.items())}
+
+
+holdout = _holdout("holdout-p2005-mini2", "results-holdout-mini2.jsonl")
+holdout_v1_broken_g = _holdout("holdout-p2005-mini", "results-holdout-mini.jsonl")
 
 data = {
     "generated_utc": __import__("time").strftime("%FT%TZ", __import__("time").gmtime()),
@@ -48,8 +55,11 @@ data = {
     "summary": summary,
     "full": full,
     "second_opinion": second,
+    "second_opinion_v2": second2,
+    "baselines": baselines,
     "telemetry_run": tel,
     "holdout_mini": holdout,
+    "holdout_mini_v1_broken_g": holdout_v1_broken_g,
     "releases": {
         "contour-v1.9": _rem() + "/releases/tag/contour-v1.9",
         "external review + our response": _rem() + "/blob/main/results/external-review-2026-11-01.md",

@@ -103,6 +103,14 @@ honest numbers are the **paired deltas**:
 | v1.8 → v1.9 (B2003) | 2127 | **+0.047** | 229 : 79 |
 | v1.8 → v1.9 (Mac) | 2416 | **+0.051** | 183 : **0** |
 
+Scorer-dependence, stated openly: an independent scorer with ~90% task
+coverage puts the same B2003 delta at **−0.006** (flat) while reversing
+45/79 of the reported regressions to improvements — the mean gain is not
+independently confirmed, the no-regression claim is. What *is* confirmed by
+both scorers is the machinery-vs-baseline control: contour 0.810 vs 0.715
+for the best simple arm (paired 16 wins : 2 losses) ([`results/baselines.md`](results/baselines.md),
+[`results/independent-scorer-v2.md`](results/independent-scorer-v2.md)).
+
 Cost curve (same-seed A/B, from the decision log): v1.3→v1.7 cut input
 tokens **−31%**, generation −24%, wall time −19%, model calls spent on form
 **−45%**, with zero quality loss (19/19 vs 19/19).
@@ -114,6 +122,13 @@ A 20-line mechanical normalization took D-ea from **0.34 → 1.00** on both
 boxes (`logs/samples/D-ea-v18-example.json` vs `D-ea-v19-example.json`).
 
 ## What the agent got wrong (kept in the repo, not hidden)
+
+The running failure ledger is [`history/failures/failures.md`](history/failures/failures.md)
+— including the one that mattered most scientifically: the first holdout bank
+shipped long-context tasks **without their documents**, so the alarming
+"G-transfer failure" from the second external audit was our own generator
+bug; found by taking the criticism seriously, fixed, corrected pilot
+republished, broken rows kept.
 
 * **v1.4** bundled two changes (cheap repair + retry cap). 19/19 → 3/19
   correct answers. The log pinpoints the retry cap as the real killer — the

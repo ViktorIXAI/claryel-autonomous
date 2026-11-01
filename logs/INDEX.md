@@ -83,6 +83,27 @@ v2 asset: 998186 bytes, sha256 `42063f2e907d8a00…`
 | `logs/samples/holdout-p2005-mini/gate-ledger-holdout-mini.jsonl` | 71 | 32315 | `d08c01f8cfe13d37…` |
 | `logs/samples/holdout-p2005-mini/results-holdout-mini.jsonl` | 71 | 125403 | `07e9450216129bf7…` |
 
+## Holdout pilot mini-run v2 (corrected bank, P2005SAH, contour v1.9)
+
+Same 14 tasks/seeds with the G-document generator bug fixed
+(`history/failures/failures.md`); interpretation in `results/holdout-mini.md`.
+The v1 rows above remain published unmodified, annotated invalid for G.
+
+| file | lines | sha256 (first 16) |
+|---|---:|---|
+| `logs/samples/holdout-p2005-mini2/gate-ledger-holdout-mini2.jsonl` | 73 | `e4187ad6622c33eb…` |
+| `logs/samples/holdout-p2005-mini2/results-holdout-mini2.jsonl` | 73 | `b445fae9410294e5…` |
+
+## Budget-matched simple baselines (P2005SAH, 2026-11-01)
+
+Design and results: `results/baselines.md`; code `experiments/baselines/`.
+
+| file | lines | sha256 (first 16) |
+|---|---:|---|
+| `experiments/baselines/data/baselines-results.jsonl` (S0/S1/S2/S4, answers stored) | 264 | `d69c1f30eb242f7d…` |
+| `experiments/baselines/data/contour-p2005.jsonl` (v1.9 same-box subset) | 102 | `7bcb36d4b03083b1…` |
+| `experiments/baselines/data/contour-p2005-ledger.jsonl` | 102 | `a035bad687c8b3f6…` |
+
 ## Russian source records (verbatim originals, archived)
 
 The repository presents English-first documentation. Verbatim Russian
@@ -97,6 +118,12 @@ release asset `ru-source-records-2026-11-01.tar.zst`
 | external-review-2026-11-01.md | review file as it appeared with the Russian section inline (pre-translation snapshot) |
 | contour-prompts.md / task-prompts.md | pre-translation versions incl. verbatim Russian prompt quotes |
 | NOTES-method.md | pre-translation Russian method notes |
+
+External audit EXT-003 verbatim Russian original is archived separately in
+release asset `ext-records-2026-11-01-v2.tar.zst`
+(sha256 `4cf55907304ba0c9e52d729b17dea97685bb98ea54fe4444aa8396cb76f654c8`;
+member `ext-003-audit-2026-11-01.ru.txt`, text sha256
+`e5bd7fe19035258c3b31c73a57079d792529a032f5693e54e860e2c6be643b7f`).
 
 Russian strings that are *functional experiment data* (task prompts in
 `bank.json`, contour prompt literals in `gate_run.py`, model outputs in

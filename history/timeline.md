@@ -99,3 +99,13 @@ a finding, not something to smooth over.
   trimmed to the 2421 v1.9 paired keys before launching v2.1.
 - Mac v2.1 runs in parallel on the same trimmed paired subset (2513 keys),
   resumable through state/results/ledger files.
+
+- second external audit received (EXT-003, 7.0/10) and answered with
+  experiments, not prose: budget-matched simple baselines run on 66 paired
+  pairs (contour +0.134 over best simple arm, A-category 0.000→1.000,
+  independent scorer confirms); independent scorer v2 at ~90% coverage
+  (matched delta v1.8→v1.9 = −0.006: mean gain NOT independently confirmed,
+  regressions mostly reversed — published as-is); holdout-G generator bug
+  found (tasks shipped without documents), fixed, corrected pilot 0.959
+  overall / G 0.833; README quickstart and privacy README fixed; CI failure
+  history documented

@@ -1,0 +1,128 @@
+{
+ "design": "66 paired (task, rep) pairs, one per difficulty band across all 11 categories; same box (P2005SAH), same seeds, temperature 0.7, same validators; arms: S0 one call, S1 generic retry on format failure, S2 retry carrying validator complaint, S4 best-of-2; contour v1.9 re-run on the same box",
+ "arms": {
+  "S0_direct": {
+   "pairs": 66,
+   "delta_vs_contour": 0.2975,
+   "wins": 31,
+   "losses": 0,
+   "ties": false,
+   "mean": 0.655
+  },
+  "S1_generic": {
+   "pairs": 66,
+   "delta_vs_contour": 0.1624,
+   "wins": 21,
+   "losses": 2,
+   "ties": false,
+   "mean": 0.79
+  },
+  "S2_min_gate": {
+   "pairs": 66,
+   "delta_vs_contour": 0.2146,
+   "wins": 26,
+   "losses": 0,
+   "ties": false,
+   "mean": 0.737
+  },
+  "S4_best_of_2": {
+   "pairs": 66,
+   "delta_vs_contour": 0.1351,
+   "wins": 16,
+   "losses": 2,
+   "ties": false,
+   "mean": 0.817
+  },
+  "S3_contour_p2005": {
+   "pairs": 66,
+   "mean": 0.952
+  }
+ },
+ "per_category": {
+  "A": {
+   "S0_direct": 0.0,
+   "S1_generic": 0.0,
+   "S2_min_gate": 0.0,
+   "S4_best_of_2": 0.0,
+   "S3_p2005": 1.0
+  },
+  "B": {
+   "S0_direct": 0.5,
+   "S1_generic": 1.0,
+   "S2_min_gate": 1.0,
+   "S4_best_of_2": 1.0,
+   "S3_p2005": 1.0
+  },
+  "C": {
+   "S0_direct": 0.5,
+   "S1_generic": 0.667,
+   "S2_min_gate": 0.667,
+   "S4_best_of_2": 0.667,
+   "S3_p2005": 1.0
+  },
+  "D": {
+   "S0_direct": 0.7,
+   "S1_generic": 0.867,
+   "S2_min_gate": 1.0,
+   "S4_best_of_2": 1.0,
+   "S3_p2005": 1.0
+  },
+  "E": {
+   "S0_direct": 0.667,
+   "S1_generic": 1.0,
+   "S2_min_gate": 1.0,
+   "S4_best_of_2": 1.0,
+   "S3_p2005": 1.0
+  },
+  "F": {
+   "S0_direct": 0.556,
+   "S1_generic": 0.694,
+   "S2_min_gate": 0.667,
+   "S4_best_of_2": 0.75,
+   "S3_p2005": 0.722
+  },
+  "G": {
+   "S0_direct": 0.722,
+   "S1_generic": 0.833,
+   "S2_min_gate": 0.5,
+   "S4_best_of_2": 0.833,
+   "S3_p2005": 0.861
+  },
+  "H": {
+   "S0_direct": 0.806,
+   "S1_generic": 0.917,
+   "S2_min_gate": 0.528,
+   "S4_best_of_2": 0.944,
+   "S3_p2005": 0.889
+  },
+  "I": {
+   "S0_direct": 1.0,
+   "S1_generic": 1.0,
+   "S2_min_gate": 1.0,
+   "S4_best_of_2": 1.0,
+   "S3_p2005": 1.0
+  },
+  "J": {
+   "S0_direct": 1.0,
+   "S1_generic": 1.0,
+   "S2_min_gate": 1.0,
+   "S4_best_of_2": 1.0,
+   "S3_p2005": 1.0
+  },
+  "K": {
+   "S0_direct": 0.75,
+   "S1_generic": 0.708,
+   "S2_min_gate": 0.75,
+   "S4_best_of_2": 0.792,
+   "S3_p2005": 1.0
+  }
+ },
+ "independent_rescore": {
+  "S0_direct": 0.592,
+  "S1_generic": 0.671,
+  "S2_min_gate": 0.587,
+  "S4_best_of_2": 0.715,
+  "S3_contour_p2005": 0.81
+ },
+ "docs": "results/baselines.md"
+}

@@ -24,10 +24,15 @@ cause; old data is never deleted or rewritten; unmeasured stays null.
 - **Dynamic regime adopted** — machines/models/engine versions rotate;
   static-window comparability rule; saturated task families retired:
   [`dynamic-regime.md`](dynamic-regime.md). Status: protocol active.
-- **Budget-matched simple baselines** (single retry, plain JSON validator,
-  generic framework) against the contour at equal token/time budget.
-  Status: planned, top priority — this is the experiment that decides whether
-  the autonomous loop earns its complexity.
+- **Budget-matched simple baselines** (single retry, generic retry, minimal
+  validator gate, best-of-2 sampling) against the contour on 66 paired
+  (task, rep) pairs, same seeds, same box, same validators, plus an
+  independent re-score of every arm.
+  Status: **done 2026-11-01** — `results/baselines.md`. Verdict: the contour
+  beats every simple arm (+0.135 over the best, 16 wins : 2 losses paired,
+  confirmed by the independent scorer); the gain is concentrated in finance
+  arithmetic (0.000 → 1.000) where retries cannot help; on H a generic retry
+  beats the contour — next iteration target.
 - **External-model input ledger**: all copy-pasted AI specs/reviews hashed
   and logged from 2026-11-01 12:00 CET. Status: running
   (`../history/external-model-inputs/ledger.md`).

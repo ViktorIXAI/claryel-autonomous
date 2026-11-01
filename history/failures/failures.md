@@ -99,3 +99,23 @@ The first baselines run stored only `answer_sha256`, which made independent
 re-scoring of the arms impossible. Re-ran all 264 arm calls with answers
 stored (same seeds; scores identical). Lesson: research artifacts must
 carry the bytes needed for independent verification, not just hashes.
+
+## CI failure history (2026-11-01, requested by the second audit)
+
+14 failed Actions runs on 2026-11-01; all causes known, all classes now green:
+
+* 4× `secret-scan` (14:39–14:48 UTC): gitleaks install/binary-path issues in
+  the runner, then the scanner walking the repo scan root, then a step-env
+  mistake. Fixed by `11cb6f9`, `2601d25`, `82a09a8`, `3943c31`; green since.
+* 2× `contour self-tests` at `d114fd8`: broken relative link
+  `versions/VERSIONS.md → gate-versions.en.md` caught by the link checker —
+  the checker doing its job after the English-first move. Fixed next commit.
+* 2× `contour self-tests` at `4030f44`/`c6ff7a1`/`adc51f2`/`c45a4bd`/`ea1f36e`:
+  INDEX row-format regex in the hash verifier and stale path assumptions in
+  `sanity_data.py` after directory reshuffles; fixed in the same sittings.
+* 8× `pages build and deployment` (09:48–09:58 UTC): Pages source/path config
+  during the repo rename chain (`autonomous` → `claryel-autonomous`); the
+  deploy job lagged the renames. Green since the rename-proof pass.
+
+No failure was ever hidden by re-running until green: each has a fix commit
+or a documented cause above.
