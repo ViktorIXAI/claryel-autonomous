@@ -70,9 +70,10 @@ def main():
                          "-L", "--max-time", "25", "-A", "sah-linkcheck/1.0", link],
                         capture_output=True, text=True).stdout.strip()
                     ok = ("200", "301", "302", "405")
-                    if "linkedin.com" in link:
-                        # LinkedIn answers 999/403 to every non-browser agent;
-                        # profile existence is verified through the owner account.
+                    if "linkedin.com" in link or "x.com" in link:
+                        # LinkedIn (999/403) and x.com (403) block every
+                        # datacenter agent; accounts verified out-of-band
+                        # (owner-controlled profiles: @uctive id 434067770).
                         ok = ok + ("999", "403")
                     if code not in ok:
                         bad.append((f, link, "http " + code))
