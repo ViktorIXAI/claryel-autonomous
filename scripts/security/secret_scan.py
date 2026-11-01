@@ -26,7 +26,7 @@ HOME = Path.home()
 REPO = Path(__file__).resolve().parents[2]
 CONFIG = REPO / ".gitleaks.toml"
 PUB = HOME / ".hermes/bench/parb/publish"
-DEFAULT_GITLEAKS = shutil.which("gitleaks") or str(HOME / ".local/bin/gitleaks")
+DEFAULT_GITLEAKS = os.environ.get("GITLEAKS_BIN") or shutil.which("gitleaks") or str(HOME / ".local/bin/gitleaks")
 VERSION = "8.30.1"
 MAX_MB = 300
 
