@@ -17,6 +17,7 @@ regexes = [
   '''invalid\\b''',
   '''evil-inbox\\.example''',
   '''gitleaks:allow''',
+  '''/home/runner/''',
 ]
 paths = [
   '''scripts/publish/publish\.env\.example''',
