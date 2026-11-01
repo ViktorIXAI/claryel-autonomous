@@ -1,7 +1,7 @@
 # Contour version chronology (v1.0 → v2.0-dev)
 
 English narrative of the decision log in
-[`gate-versions.log`](gate-versions.log) (verbatim Russian, agent-authored,
+[`gate-versions.log`](../history/agent-decisions/gate-versions.log) (verbatim Russian, agent-authored,
 written *during* the runs — that file is the primary source; where numbers
 differ slightly the difference is a mid-run snapshot vs. the final recomputed
 aggregate in `analytics/summary.json`).

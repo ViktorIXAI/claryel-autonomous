@@ -54,7 +54,7 @@ adopt, easy to reject) is the safety property.
 
 ## Reproducing the loop without an operator present
 
-Everything above is implementable with cron + this repo (`docs/REPRODUCING.md`
+Everything above is implementable with cron + this repo (`docs/reproduction-guide.md`
 for the mechanics). Two non-negotiables if you automate it fully: the
 decision log stays append-only, and adoption requires the paired
 cross-box gate — a loop that can adopt on vibes is not an evolution loop,
