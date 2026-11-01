@@ -270,19 +270,31 @@ def post_verify(tag):
 
 
 def cmd_watch():
-    """cheap remote wc -l comparison; if anything changed -> full cycle."""
+    """cheap remote wc -l comparison vs stored baseline; publish only on growth.
+    Quiet when nothing changed (cron watchdog pattern)."""
     reg = load_reg()
-    changed = False
+    base = reg.setdefault("remote_watch", {})
+    cur = {}
     for pid, entries in PACKAGES.items():
         for m, pats in entries:
             if ssh_of(m) is None:
                 continue
             for pat in pats:
                 code, out, _ = run(f"{ssh_of(m)} 'wc -l {MACH[m]['dir']}/{pat} 2>/dev/null' < /dev/null", timeout=30)
-                changed = changed or bool(out.strip())
-    if not changed:
-        print("WATCH: nothing listed changed")
+                for ln in out.splitlines():
+                    parts = ln.split()
+                    if len(parts) >= 2:
+                        cur[m + "/" + parts[-1].split("/")[-1]] = parts[0]
+    changed = {k: v for k, v in cur.items() if base.get(k) != v}
+    first = not base
+    reg["remote_watch"] = cur
+    save_reg(reg)
+    if first:
+        print("WATCH-BASELINE stored for %d files" % len(cur))
         return
+    if not changed:
+        return  # silent: nothing moved
+    print("WATCH: changed %s" % sorted(changed))
     cmd_collect(); cmd_snapshot(); cmd_aggregate(); cmd_publish()
 
 

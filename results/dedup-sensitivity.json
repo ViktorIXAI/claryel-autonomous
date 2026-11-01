@@ -1,0 +1,68 @@
+{
+ "v18-final/results-v18-b2003 -> v19-final/results-v19-b2003": {
+  "best": {
+   "mean_a": 0.88,
+   "mean_b": 0.9325,
+   "delta": {
+    "n": 2127,
+    "avg": 0.0472,
+    "up": 229,
+    "down": 79
+   }
+  },
+  "first": {
+   "mean_a": 0.88,
+   "mean_b": 0.9325,
+   "delta": {
+    "n": 2127,
+    "avg": 0.0472,
+    "up": 229,
+    "down": 79
+   }
+  },
+  "worst": {
+   "mean_a": 0.88,
+   "mean_b": 0.9325,
+   "delta": {
+    "n": 2127,
+    "avg": 0.0472,
+    "up": 229,
+    "down": 79
+   }
+  },
+  "rule_insensitive_positive": true
+ },
+ "v18-final/results-v18-mac -> v19-final/results-v19m": {
+  "best": {
+   "mean_a": 0.875,
+   "mean_b": 0.9264,
+   "delta": {
+    "n": 2416,
+    "avg": 0.0505,
+    "up": 183,
+    "down": 0
+   }
+  },
+  "first": {
+   "mean_a": 0.875,
+   "mean_b": 0.9264,
+   "delta": {
+    "n": 2416,
+    "avg": 0.0505,
+    "up": 183,
+    "down": 0
+   }
+  },
+  "worst": {
+   "mean_a": 0.875,
+   "mean_b": 0.9264,
+   "delta": {
+    "n": 2416,
+    "avg": 0.0505,
+    "up": 183,
+    "down": 0
+   }
+  },
+  "rule_insensitive_positive": true
+ }
+}

@@ -9,4 +9,5 @@ Every package is immutable; content hash is part of the id. Per-file SHA-256 liv
 | `pkg-phase0-baseline.0d66376647a5` | 2026-11-01T08:20:39Z | 7 | 3751593 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `122df49ca61b…` |
 | `pkg-probes.2dbe2233cc38` | 2026-11-01T08:20:40Z | 17 | 275912 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `200863a26174…` |
 | `pkg-series-v12-v20.ac0960a05898` | 2026-11-01T08:20:40Z | 22 | 23717056 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `0b73076a8466…` |
+| `pkg-series-v12-v20.de4f3a8446e0` | 2026-11-01T08:45:22Z | 22 | 24497259 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `1d52b19894a0…` |
 | `pkg-series-v19-live.2f8ced0a853e` | 2026-11-01T08:20:40Z | 3 | 6182140 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `3cd33365ef71…` |

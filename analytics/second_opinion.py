@@ -26,7 +26,7 @@ from collections import Counter
 from decimal import Decimal
 
 sys.path.insert(0, ".")   # to load the bank (task definitions), not the scorer
-BANK = "benchmarks/text-gates/bank.json"
+BANK = os.environ.get("PARB_BANK", "benchmarks/text-gates/bank.json")
 
 
 def load_rows(path):

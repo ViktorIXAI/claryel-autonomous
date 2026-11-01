@@ -267,24 +267,24 @@
    "source_rows": 2513
   },
   "mac|mac-studio|v2.0": {
-   "n": 670,
-   "avg_content": 0.9799,
-   "perfect_share": 0.9239,
+   "n": 965,
+   "avg_content": 0.9626,
+   "perfect_share": 0.8705,
    "format_ok_share": 1.0,
    "cats": {
     "A": 1.0,
     "B": 1.0,
     "C": 1.0,
-    "D": 0.987,
-    "E": 0.975,
-    "F": 0.75,
+    "D": 0.99,
+    "E": 0.983,
+    "F": 0.698,
     "G": 1.0,
-    "H": 0.936,
+    "H": 0.963,
     "I": 1.0,
     "J": 1.0,
-    "K": 0.963
+    "K": 0.875
    },
-   "source_rows": 685
+   "source_rows": 980
   }
  },
  "paired": {
@@ -361,9 +361,9 @@
    "regressed": 4
   },
   "mac: v1.8 -> v2.0": {
-   "n_pairs": 670,
-   "avg_delta": 0.0468,
-   "improved": 77,
+   "n_pairs": 965,
+   "avg_delta": 0.0541,
+   "improved": 127,
    "regressed": 0
   }
  }

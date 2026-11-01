@@ -15,3 +15,27 @@ jobs:
         run: python harness/gate_fixers_test.py
       - name: v1.9 slot-normalizer contract
         run: python harness/gate_v19_d_test.py
+      - name: bank & plan-example sanity (178 tasks / 681 positions)
+        run: python scripts/sanity_data.py
+      - name: privacy-boundary gateway rules
+        run: python benchmarks/privacy-boundary/test_gateway.py
+      - name: link integrity (all markdown references resolve)
+        run: python scripts/check_links.py
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: download pinned artifacts from public release (no auth)
+        run: |
+          curl -sL -o art.tar.zst \
+            https://github.com/ViktorIXAI/strata-autonomous-harness/releases/download/contour-v1.9/artifacts-release-2026-11-01.tar.zst
+          mkdir -p artifacts && tar --zstd -xf art.tar.zst -C artifacts --strip-components=1
+      - name: verify every file against logs/INDEX.md sha256 prefixes
+        run: python scripts/verify_release_hashes.py artifacts
+      - name: recompute aggregates from raw rows and diff vs published summary
+        run: |
+          PARB_ARTIFACTS=artifacts python analytics/aggregate.py > recomputed.json
+          python scripts/diff_summary.py recomputed.json results/summary.json
