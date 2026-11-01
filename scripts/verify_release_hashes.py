@@ -7,7 +7,7 @@ import re
 import sys
 
 base = sys.argv[1] if len(sys.argv) > 1 else "artifacts"
-row = re.compile(r"\|\s*`([^`]+\.jsonl)`[^|]*\|\s*\d+\s*\|\s*\d+\s*\|\s*`([0-9a-f]{16})")
+row = re.compile(r"\|\s*`?([^`|\s]+\.jsonl)`?\s*\|\s*\d+\s*\|\s*\d+\s*\|\s*`?([0-9a-f]{16})")
 idx = open("logs/INDEX.md", encoding="utf-8").read()
 want = {}
 for name, h in row.findall(idx):
