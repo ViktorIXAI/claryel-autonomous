@@ -73,3 +73,12 @@ exactly (diffs=0) — no published number changed.
 | `results-v13m.jsonl` | 163 | 251238 | `db8e30b25a9c53c6…` |
 
 v2 asset: 998186 bytes, sha256 `42063f2e907d8a00…`
+
+## Holdout pilot mini-run (P2005SAH, contour v1.9, 2026-11-01)
+
+14 unseen holdout tasks; interpretation in `results/holdout-mini.md`.
+
+| file | lines | bytes | sha256 (first 16) |
+|---|---:|---:|---|
+| `logs/samples/holdout-p2005-mini/gate-ledger-holdout-mini.jsonl` | 71 | 32315 | `d08c01f8cfe13d37…` |
+| `logs/samples/holdout-p2005-mini/results-holdout-mini.jsonl` | 71 | 125403 | `07e9450216129bf7…` |

@@ -21,7 +21,7 @@ published in full, not averaged away. Second opinions on the "improved" and
 Usage: python3 analytics/second_opinion.py <results-a.jsonl> <results-b.jsonl>
        (compares paired (task,rep) deltas AND re-scores both sides)
 """
-import json, re, sys
+import json, os, re, sys
 from collections import Counter
 from decimal import Decimal
 

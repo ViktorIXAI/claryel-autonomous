@@ -1,0 +1,15 @@
+{
+ "files": [
+  "logs/samples/holdout-p2005-mini/results-holdout-mini.jsonl"
+ ],
+ "rescored_share": 0,
+ "side_A": {
+  "rows": 71,
+  "rescored": 34,
+  "agree": 21,
+  "diverge": 13,
+  "not_independently_scoreable": 37,
+  "mean_harness": 0.8824,
+  "mean_independent": 0.5294
+ }
+}
