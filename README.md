@@ -1,4 +1,4 @@
-# Strata Autonomous Harness Lab
+# Claryel Autonomous Harness Lab
 
 **Open Research into Autonomous Local AI Evolution**
 *An AI-built, self-improving harness for local language models.*
