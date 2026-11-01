@@ -18,6 +18,13 @@ What the human actually did across the whole chain (2026-10-30 → 11-01):
 5. **Publication decision** (2026-11-01, this repo): human commissioned the
    publication pass; human chose account, visibility and what stays private
    (agent session transcripts withheld — documented in `docs/limitations.md`).
+6. **Run-order intervention** (2026-11-01 14:46 CET): operator explicitly
+   ordered the agent to stop the in-flight B2003 v2.0 run and start v2.1 on
+   the paired subset to accelerate the final configuration. The agent stopped
+   only the gate process with SIGTERM, preserved partial artifacts and backups,
+   and did not reboot/power off the host. This overrides the normal "do not
+   contaminate paired runs" procedure; the override is recorded here as a
+   human-directed speed-up, not as an adoption decision.
 
 What the human did **not** do: write contour code, edit validators, choose
 version verdicts, or override an agent rejection. There is no recorded

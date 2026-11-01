@@ -1,4 +1,4 @@
-# Contour version chronology (v1.0 → v2.0-dev)
+# Contour version chronology (v1.0 → v2.1)
 
 English narrative of the decision log in
 [`gate-versions.en.md`](../history/agent-decisions/gate-versions.en.md) (agent-authored decision entries, translated to English; verbatim Russian originals archived in the `ru-source-records-2026-11-01.tar.zst` release asset,
@@ -118,13 +118,33 @@ Paired v1.8→v1.9: B2003 **+0.047** (229↑ 79↓, D category 0.42→1.00),
 Mac **+0.051** (183↑ **0**↓, D 0.45→1.00). D-ea subset: 0.34→1.00 on both
 boxes. v1.9 is the released contour of this repository.
 
-## v2.0 — post-normalization for G/H *(experimental, NOT adopted)*
+## v2.0 — post-normalization for G/H *(accepted, Mac complete; B2003 partial)*
 
 Explicit contradiction marker for G, H answers compressed under the 600-char
 limit (`gate_run.py` `POST_NORMALIZE`, gated at `PARB_GATE_VERSION=v2.0`).
-Evidence so far: 18 probe rows on an RTX-5090-class box (`logs/INDEX.md`,
-`v20-*` artifacts). Not paired, not cross-boxed, not adopted — published as
-work-in-progress evidence of the loop still running.
+Mac paired v1.9→v2.0 subset n=2416: avg +0.013, perfect 72.1%→79.8%, better
+185 pairs, worse 0. G improved 0.833→1.000; no observed regression on the Mac
+pair. The B2003 partial pair (n=674) added avg +0.0086 with 57 improved /
+24 regressed. The B2003 v2.0 run was later stopped at 674 rows by a human-directed
+speed-up so v2.1 could be evaluated earlier.
+
+## v2.1 — H safety normalization *(candidate final configuration; running)*
+
+One contour change only: H answers are mechanically safety-normalized. The
+contour removes false action claims from calculation/derivation tasks,
+redacts invented version/serial-shaped tokens in missing-data refusals, and
+adds an explicit uncertainty marker when a refusal omitted the required
+marker. Full-mode H is not rewritten. Event tags: `contour:v21_*`.
+
+Evidence so far: unit tests 10/10, full gate self-tests unchanged; P2005 H
+smoke 9/9 strict and 9/9 format. Current live-partial aggregate (15:0x CET):
+B2003 n=118, avg 0.9986, format 100%; Mac n=162, avg 0.9856, format 100%.
+Paired v2.0→v2.1 B2003 n=117 (+0.0112, 3 improved / 0 regressed), Mac n=162
+(delta 0, 0 regressions). Mac full v2.1 and B2003 v2.1 are running
+on paired subsets. B2003 v2.0 was stopped early on explicit operator
+instruction to accelerate v2.1; B2003 v2.1 started 14:46 CET on the v1.9
+paired subset (2421 rows). No v2.2 is planned in this configuration unless
+new paired evidence reveals a regression.
 
 ## Cross-cutting rules the chain produced
 

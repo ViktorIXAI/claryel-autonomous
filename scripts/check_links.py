@@ -73,7 +73,7 @@ def main():
                     if "linkedin.com" in link or "x.com" in link:
                         # LinkedIn (999/403) and x.com (403) block every
                         # datacenter agent; accounts verified out-of-band
-                        # (owner-controlled profiles: @uctive id 434067770).
+                        # (owner-controlled public profiles).
                         ok = ok + ("999", "403")
                     if code not in ok:
                         bad.append((f, link, "http " + code))

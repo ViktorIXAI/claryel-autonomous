@@ -150,3 +150,37 @@ Visual: contour2 production pgp 5/5, balls 4/5 (seed3 fail x3), pel 5/5.
   (-76%); consumed throughput 124.3 -> 78.2 tok/s (-37%). Per-task cost
   varies: A faster (8.3 s -> 5.8 s), D/E/J/I/K faster, B/F/H slower and more
   expensive.
+
+2026-11-01 13:40 v2.0 intermediate accepted on Mac:
+- paired v1.9 -> v2.0, n=2416, avg 0.926 -> 0.939 (+0.013), perfect
+  72.1% -> 79.8%, better 185, worse 0, format 99.9% -> 100.0%.
+- G category 0.833 -> 1.000, notes q5_contradiction_missed 370 -> 0.
+  contour:v20_g_contradiction_marker fired 200 times.
+- H >600-char answers 1.1% -> 0%, content flat, contour:v20_h_short_summary
+  fired 6 times.
+- B2003 v2.0 launched later because v1.9 was still running. It started at
+  13:31 with a 3117-key plan and later stopped at 674 rows by operator order.
+
+2026-11-01 14:28 v2.1 build (candidate final):
+- one contour change: H safety normalization. It does not change prompts or
+  reference answers; it mechanically removes hallucinated action claims,
+  redacts invented version/serial-shaped tokens in missing-mode H refusals,
+  and adds the required uncertainty marker when missing. Full-mode H remains
+  untouched.
+- tests: gate_fixers 12/12; gate_v19_d_test 4/4; gate_v20_post_test 11/11;
+  gate_v21_h_test 10/10.
+- P2005 H smoke: 9/9 strict and 9/9 format; events h_uncertainty_added x3,
+  h_action_claim_removed x1, h_missing_redacted x3.
+- Mac full v2.1 launched on 2513 paired keys. B2003 v2.1 deployed but not
+  launched yet because B2003 v2.0 was still running.
+
+2026-11-01 14:46 human-directed speed-up on B2003:
+- operator said to stop B2003 v2.0 and start v2.1 immediately. This is an
+  explicit exception to the normal "finish paired predecessor first" rule.
+- B2003 v2.0 process stopped with SIGTERM at 674 rows; no host reboot, no file
+  deletion, state/results/ledger preserved.
+- B2003 plan backed up and trimmed to the 2421 v1.9 paired keys.
+- B2003 v2.1 started 14:46:48 with PARB_GATE_VERSION=v2.1,
+  state-v21/results-v21/gate-ledger-v21 and 21600 s budget.
+- This version line is stopped at v2.1 unless paired evidence shows a
+  regression; no v2.2 is planned for this configuration.

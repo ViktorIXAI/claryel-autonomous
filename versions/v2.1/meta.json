@@ -1,0 +1,8 @@
+{
+ "version": "v2.1",
+ "status": "RUNNING — candidate final configuration (no v2.2 planned)",
+ "change": "h_safety_normalize(): remove false H action claims, redact invented version/serial-shaped tokens in missing-data refusals, add an uncertainty marker when an existing refusal omits one; full-mode H is untouched",
+ "code": "harness/gate_run.py (H_SAFETY); test-first harness/gate_v21_h_test.py",
+ "adopt": "not adopted yet — running paired full subsets on B2003 and Mac",
+ "numbers": "unit tests 10/10; P2005 H smoke 9/9 content and format; current partial aggregate: B2003 n=118 avg 0.9986 / format 100%, Mac n=162 avg 0.9856 / format 100%; paired v2.0 -> v2.1 B2003 n=117 +0.0112 (3 improved, 0 regressed), Mac n=162 delta 0"
+}

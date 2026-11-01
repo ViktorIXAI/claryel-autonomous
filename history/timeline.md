@@ -82,3 +82,20 @@ a finding, not something to smooth over.
   their verbatim Russian originals archived in the `ru-source-records-2026-11-01.tar.zst`
   release asset; functional Russian data (frozen task prompts, model-facing contour
   literals, validator keywords, ledger event tags, historical byte snapshots) untouched
+
+## 2026-11-01 (afternoon): v2.0 accepted on Mac, v2.1 started, B2003 speed-up
+
+- **07:58** v2.0 built as one contour change: POST_NORMALIZE for G/H. P2005
+  targeted probe improved 18 rows: avg 0.787 -> 0.815, perfect 5 -> 13.
+- **13:40** Mac paired v1.9 -> v2.0 evidence: n=2416, avg +0.013, perfect
+  72.1% -> 79.8%, better 185, worse 0, G 0.833 -> 1.000. v2.0 accepted on the
+  Mac pair.
+- **14:28** v2.1 built as one contour change: H safety normalization. Tests:
+  gate_fixers 12/12, v19 D 4/4, v20 post 11/11, v21 H 10/10. P2005 H smoke
+  9/9 strict and 9/9 format.
+- **14:46** operator explicitly ordered a speed-up: stop B2003 v2.0 and start
+  B2003 v2.1 immediately. B2003 v2.0 had 674 rows and was stopped via SIGTERM;
+  host was not rebooted and no files were deleted. B2003 plan was backed up and
+  trimmed to the 2421 v1.9 paired keys before launching v2.1.
+- Mac v2.1 runs in parallel on the same trimmed paired subset (2513 keys),
+  resumable through state/results/ledger files.

@@ -37,10 +37,10 @@ check("default lane denies", d["decision"] == "deny" and "lane_not_enabled" in d
 # 2. each category must be caught (synthetic fixtures)
 LEAKS = {
     "email": "contact jane.doe@example.org for the results",
-    "phone_russian": "call me at +7 912 345-67-89",
-    "lan_ip": "the endpoint is at 192.168.5.42:8080",
+    "phone_russian": "call me at +7 000 000-00-00",
+    "lan_ip": "the endpoint is at 192.168.0.10:8080",
     "home_path": "edit /home/jdoe/project/main.py",
-    "ssh_material": "use ssh-rsa AAAAB3NzaC1qcopy... to log in",
+    "ssh_material": "use ssh-rsa [REDACTED] to log in",
     "credential": "api_key = 'supersecret123'",
     "machine_identity": "wake it via mac aa:bb:cc:dd:ee:ff",
     "russian_person_fullname": "письмо от Ивана Петрова",

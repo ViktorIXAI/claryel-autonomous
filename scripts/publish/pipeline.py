@@ -32,12 +32,28 @@ STAGE = os.path.join(PUB, "staging")
 PKGS = os.path.join(PUB, "pkgs")
 REG = os.path.join(PUB, "registry.json")
 REPO = os.path.join(HOME, "projects", "strata-autonomous-harness")
+PUBLISH_ENV = os.path.join(HOME, ".hermes", "bench", "parb", "publish.env")
+
+def _load_private_env():
+    """Load local-only publish settings. Not tracked in git."""
+    if not os.path.exists(PUBLISH_ENV):
+        return
+    for line in open(PUBLISH_ENV, encoding="utf-8"):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export "):]
+        if "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+_load_private_env()
 
 MACH = {
-    "b2003": {"ssh": "ssh -i ~/.ssh/hermes-netfix -o StrictHostKeyChecking=accept-new claryel001@192.168.1.110",
-              "dir": "~/parb"},
-    "mac":   {"ssh": "ssh -i ~/.ssh/mac_studio_monitor_key -o StrictHostKeyChecking=accept-new viktorkhudiakov@192.168.1.84",
-              "dir": "~/parb"},
+    "b2003": {"ssh": os.environ.get("SAH_SSH_B2003", ""), "dir": "~/parb"},
+    "mac":   {"ssh": os.environ.get("SAH_SSH_MAC", ""),   "dir": "~/parb"},
     "host":  {"ssh": None, "dir": os.path.join(HOME, ".hermes/bench/parb")},
 }
 
@@ -50,17 +66,27 @@ PACKAGES = {
                               ("host", ["ab_b2003_mini.jsonl", "ab_mac_mini.jsonl", "ab_p2005.jsonl", "ab_results.jsonl"])],
     "pkg-probes":            [("b2003", ["results-p2.jsonl", "gate-ledger-p2.jsonl", "results-s3.jsonl", "gate-ledger-s3.jsonl", "results-s4.jsonl", "gate-ledger-s4.jsonl", "results-smk18.jsonl", "gate-ledger-smk18.jsonl", "results-smoke2.jsonl", "gate-ledger-smoke2.jsonl", "p2.log", "smoke2.log", "self-dry.log"]),
                               ("mac", ["results-m1.jsonl", "gate-ledger-m1.jsonl", "results-e6m.jsonl", "gate-ledger-e6m.jsonl"])],
-    "pkg-series-v12-v20":    [("b2003", ["results-v1[2378].jsonl", "gate-ledger-v1[2378].jsonl", "v12.log", "v13.log", "v17.log", "v18.log"]),
+    "pkg-series-v12-v20":    [("b2003", ["results-v1[2378].jsonl", "gate-ledger-v1[2378].jsonl", "v12.log", "v13.log", "v17.log", "v18.log", "v20.log"]),
                               ("mac", ["results-v1[2378]m.jsonl", "gate-ledger-v1[2378]m.jsonl", "results-v20m.jsonl", "gate-ledger-v20m.jsonl"])],
     "pkg-series-v19-live":   [("b2003", ["results-v19.jsonl", "gate-ledger-v19.jsonl", "v19.log"])],
+    "pkg-series-v20-v21-live": [("b2003", ["results-v20.jsonl", "gate-ledger-v20.jsonl", "results-v21.jsonl", "gate-ledger-v21.jsonl", "v20.log", "v21.log"]),
+                                ("mac", ["results-v20m.jsonl", "gate-ledger-v20m.jsonl", "results-v21m.jsonl", "gate-ledger-v21m.jsonl", "v20m.log", "v21m.log"]),
+                                ("host", ["v20-final/results-v20*.jsonl", "v20-final/gate-ledger-v20*.jsonl", "v21-final/results-v21*.jsonl", "v21-final/gate-ledger-v21*.jsonl"])],
 }
 
-SECRET_PATTERNS = [
-    r"192\.168\.\d+\.\d+", r"Strata2026", r"mac_studio_monitor", r"hermes-netfix",
-    r"/home/claryel\w*", r"/home/viktor", r"viktorkhudiakov", r"claryel001",
-    r"claryel\.com", r"ssh-rsa", r"BEGIN [A-Z ]*PRIVATE KEY",
+# Private patterns live in the local publish.env as SAH_SECRET_PATTERNS_JSON.
+# Public defaults are intentionally generic and must not embed account/user/IP
+# values from the home lab.
+try:
+    SECRET_PATTERNS = json.loads(os.environ.get("SAH_SECRET_PATTERNS_JSON", "[]"))
+except Exception:
+    SECRET_PATTERNS = []
+SECRET_PATTERNS += [
+    r"BEGIN [A-Z ]*PRIVATE KEY", r"ssh-rsa AAAA", r"ssh-ed25519 AAAA",
     r"api_key\"?\s*[:=]\s*\"[A-Za-z0-9_\-]{8,}", r"sk-[A-Za-z0-9]{16,}",
-    r"ghp_[A-Za-z0-9]{20,}", r"gho_[A-Za-z0-9]{20,}", r"Bearer\s+[A-Za-z0-9._\-]{16,}",
+    r"gh[pousr]_[A-Za-z0-9]{20,}", r"Bearer\s+[A-Za-z0-9._\-]{16,}",
+    r"192\.168\.\d+\.\d+", r"/home/[a-z0-9_]+",
+    r"\b[A-Za-z0-9._%+-]+@(?!example\.(?:com|org|net)|invalid|test|evil-inbox\.example)[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
 ]
 SECRET_RE = re.compile("|".join(SECRET_PATTERNS))
 

@@ -91,6 +91,8 @@ is marked, never mixed).
 | v1.7 (code-only form repair) | 717 / 0.905 / 92% | 1317 / 0.887 / 93% |
 | v1.8 (targeted nudges) | 3117 / 0.880 / 89% | 2513 / 0.875 / 92% |
 | **v1.9 (slot normalization)** | **2127 / 0.933 / 97%** | **2416 / 0.926 / 100%** |
+| v2.0 (G/H post-normalization) | 674 partial / 0.961 / 99% | 2513 / 0.939 / 100% |
+| v2.1 (H safety normalization) | 118 partial / 0.999 / 100% | 162 partial / 0.986 / 100% |
 
 Raw means across versions are *not* comparable (the plan mix changed); the
 honest numbers are the **paired deltas**:
@@ -121,7 +123,10 @@ boxes (`logs/samples/D-ea-v18-example.json` vs `D-ea-v19-example.json`).
 * **v1.6** saved 45% input tokens and cost 3/19 correct financial answers.
   The skeleton guard passed every corrupted answer (skeleton intact, values
   wrong). Rejected for finance tasks.
-* **v2.0** is published as experimental: 18 probe rows, one box, not adopted.
+* **v2.0** was initially published with only 18 single-box probe rows and was
+  correctly marked **not adopted**. It was later accepted on the Mac after full
+  paired evidence; B2003 remains a partial because the operator stopped it to
+  accelerate v2.1.
 * Two runs invalidated by harness bugs are preserved as named artifacts
   (`…401-invalid`, `…partial-harnessbug`) — see `history/failures/`.
 
@@ -152,7 +157,7 @@ Python ≥ 3.9, standard library only:
 
 ```bash
 git clone https://github.com/ViktorIXAI/claryel-autonomous
-cd strata-autonomous-harness
+cd claryel-autonomous
 ./install.sh                       # venv + contour self-tests (12 fixer cases, D-normalizer contract)
 cp config.example.sh config.sh     # set PARB_API / PARB_MODEL
 source config.sh
