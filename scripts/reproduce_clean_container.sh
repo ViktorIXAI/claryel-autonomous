@@ -4,16 +4,17 @@
 set -e
 cd /work
 echo "== fetch public repo tarball (main) =="
+if [ ! -d /work/repo ]; then
 python3 - <<'EOF'
-import urllib.request, tarfile, io
+import urllib.request, tarfile, io, os
 u="https://codeload.github.com/ViktorIXAI/strata-autonomous-harness/tar.gz/refs/heads/main"
 data=urllib.request.urlopen(u, timeout=120).read()
 tarfile.open(fileobj=io.BytesIO(data)).extractall("/work")
-import os
-d=[x for x in os.listdir("/work") if x.startswith("strata-autonomous-harness")][0]
+d=sorted(x for x in os.listdir("/work") if x.startswith("strata-autonomous-harness"))[0]
 os.rename("/work/"+d, "/work/repo")
 print("repo files:", sum(len(fs) for _,_,fs in os.walk("/work/repo")))
 EOF
+fi
 cd /work/repo
 echo "== self-tests (fresh interpreter, no venv needed: stdlib only) =="
 python3 harness/gate_fixers_test.py | tail -1
