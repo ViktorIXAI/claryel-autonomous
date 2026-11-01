@@ -17,7 +17,7 @@ regexes = [
   '''invalid\\b''',
   '''evil-inbox\\.example''',
   '''gitleaks:allow''',
-  '''/home/runner/''',
+  '''/home/runner/''',  # gitleaks:allow public GitHub CI path
 ]
 paths = [
   '''scripts/publish/publish\.env\.example''',
