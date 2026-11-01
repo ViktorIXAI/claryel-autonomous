@@ -59,3 +59,22 @@ a 681-position plan and filtered it to 0 tasks (tasks missing from bank map).
 Caught in 90 seconds of smoke, fixed the same hour (wrapper now stages both
 files, mirroring what `parb_prep.py` did in the original runs). Contour code
 unaffected. Recorded because this project's rule applies to itself.
+## Publication pass failure: pinned release asset was incomplete (2026-11-01)
+
+The first `contour-v1.9` artifacts asset (`artifacts-release-2026-11-01.tar.zst`)
+was missing three files that the pinned `analytics/aggregate.py` SPECS read:
+`results-v13.jsonl`, `results-v13m.jsonl`, `gate-ledger-v17.jsonl`. An external
+researcher following the reproduce recipe would have gotten incomplete series
+(v1.3 stats and the v1.7 B2003 ledger) with no error, because missing files
+silently yield `None` stats.
+
+- **Found by:** the new CI `reproduce` job (hash verification vs `logs/INDEX.md`
+  + required-file set) — first run, 2026-11-01. This is why the job exists.
+- **Fix:** files collected unchanged from their source machines; complete set
+  republished as `artifacts-release-2026-11-01-v2.tar.zst` (original asset kept
+  as-is — history not rewritten).
+- **Integrity check:** recomputation from the complete snapshot reproduces the
+  published `results/summary.json` with **diffs=0**. No published number
+  changed; only the archive's completeness changed.
+- **Lesson applied:** CI now fails loudly when any file a published aggregate
+  reads is absent from the public archive (silence is a bug).

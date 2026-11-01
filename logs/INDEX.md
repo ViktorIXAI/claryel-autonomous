@@ -56,3 +56,20 @@ Wall 60.2 s vs 60 s without collector — overhead within noise.
 | `logs/samples/smoke-p2005-tel/results-smoke3.jsonl` | 46 | 84920 | `e2ca01280c2bb976…` |
 | `telemetry/runs/smoke-tel-4.join.json` | 791 | 16655 | `24518609c7fc06b5…` |
 | `telemetry/runs/smoke-tel-4.telem.jsonl` | 57 | 58378 | `83d8520e0cc5d6f2…` |
+
+## Supplementary snapshot rows (2026-11-01, found by CI reproduce)
+
+The pinned `artifacts-release-2026-11-01.tar.zst` asset turned out to lack three
+files that `analytics/aggregate.py` reads (CI reproduce job caught this). The
+files were collected from their source machines unchanged; the complete set is
+republished as `artifacts-release-2026-11-01-v2.tar.zst` (old asset kept).
+Recomputing from the complete snapshot reproduces `results/summary.json`
+exactly (diffs=0) — no published number changed.
+
+| file | lines | bytes | sha256 (first 16) |
+|---|---:|---:|---|
+| `results-v13.jsonl` | 342 | 530330 | `3754c3d3d8a47505…` |
+| `gate-ledger-v17.jsonl` | 787 | 345741 | `8c102f0e9bfb2cd3…` |
+| `results-v13m.jsonl` | 163 | 251238 | `db8e30b25a9c53c6…` |
+
+v2 asset: 998186 bytes, sha256 `42063f2e907d8a00…`
