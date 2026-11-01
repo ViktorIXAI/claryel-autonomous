@@ -18,3 +18,19 @@ they produced).
 No file had logic, prompts, scorers or thresholds altered. `PARB_GATE_VERSION`
 selects the contour generation at runtime (`v1.2` … `v1.9` gates are all inside
 `gate_run.py`), so the published runner can reproduce every published comparison.
+
+## Publication-pass additions (2026-11-01, afternoon)
+
+New research infrastructure published alongside the original snapshot — these
+are new files, not edits of rig snapshots: publication pipeline
+(`scripts/publish/`), auto-discovery aggregator (`analytics/aggregate_auto.py`),
+independent scorer (`analytics/second_opinion.py`), dedup-sensitivity tool,
+telemetry collector v2 + join, dashboard, holdout bank generator, privacy
+gateway prototype, CI reproduce/link/sanity scripts.
+
+Allowed portability edits made this pass (code semantics unchanged):
+`make_plan.py`/`second_opinion.py` honour `PARB_BANK`; `check_links.py` uses
+GET for GitHub HTML (HEAD 403 from datacenter IPs); `verify_release_hashes.py`
+accepts both INDEX row formats; repo-move URL updates after the owner's rename
+to `ViktorIXAI/autonomous` (2026-11-01 09:55 UTC — the rename was made by the
+repository owner, not by the agent; old URLs 301 to new).

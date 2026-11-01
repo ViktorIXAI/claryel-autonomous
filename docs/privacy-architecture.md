@@ -1,6 +1,6 @@
-# Privacy architecture (design; NOT yet implemented)
+# Privacy architecture (design + working prototype)
 
-**Status: design only.** Nothing in this repository claims measured privacy
+**Status: design implemented as a research prototype.** `benchmarks/privacy-boundary/gateway.py` (default-deny, 12 deny-pattern categories, per-lane policy, `redact()` for synthetic-safe payloads) ships with 18 synthetic tests run in CI. No real user data has ever passed through any cloud lane: the lanes exist in code, none are enabled in policy. Nothing in this repository claims measured privacy
 guarantees. The published experiment ran with no cloud participant at all.
 This document defines the architecture scheduled as roadmap stage 10, and
 the tests that must pass before any local+cloud cooperation result is

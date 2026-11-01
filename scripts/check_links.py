@@ -17,7 +17,7 @@ import re
 import subprocess
 import sys
 
-REPO = "ViktorIXAI/strata-autonomous-harness"
+REPO = "ViktorIXAI/autonomous"  # renamed 2026-11-01 from strata-autonomous-harness (redirects active)
 MD = re.compile(r"\[([^\]]*)\]\(([^)\s]+)[^)]*\)")
 
 
@@ -56,13 +56,12 @@ def main():
                     if rp and rp not in files:
                         bad.append((f, link, "path not in git"))
                 elif not offline:
-                    url = link
-                    if "/releases/tag/" in url or url.endswith("/releases"):
-                        url = "https://api.github.com/repos/%s/releases/tags/%s" % (
-                            REPO, link.split("/tag/")[-1]) if "/tag/" in link else url
+                    # GET (no range, body discarded): GitHub HTML refuses HEAD from
+                    # datacenter IPs (403), and unauthenticated api.github.com gets
+                    # rate-limited on shared CI runners. GET -L is what a browser does.
                     code = subprocess.run(
                         ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
-                         "-I", "-L", "--max-time", "20", url],
+                         "-L", "--max-time", "25", "-A", "sah-linkcheck/1.0", link],
                         capture_output=True, text=True).stdout.strip()
                     if code not in ("200", "301", "302", "405"):
                         bad.append((f, link, "http " + code))

@@ -45,3 +45,22 @@ than guesses.
 
 Where timestamps and the log disagree, both are kept and the disagreement is
 a finding, not something to smooth over.
+
+## 2026-11-01 (afternoon, same-day infrastructure pass)
+
+- external audit fixes: LICENSE standard MIT text, stale paths, cross-doc consistency
+- publication pipeline written; first automatic cycle proven (watchdog auto-published
+  `pkg-series-v12-v20.de4f3a8446e0` when the Mac v2.0 series grew); scheduled every 6 h
+- full-history publication: 7 immutable packages incl. baseline, A/B arms, probes,
+  rejected-version series; auto-discovered aggregates (`results/summary-full.json`)
+- telemetry v2 (`run_id`, units, sources, `not_available`), P2005 bound smoke,
+  measured sampler overhead ≤0.4%
+- independent scorer published WITH its dissent (matched independent delta −0.011 on
+  the scoreable subset of v1.8→v1.9 B2003); dedup-rule sensitivity: deltas rule-insensitive
+- holdout bank (206 tasks, post-freeze) + pilot run: overall 0.819, G-category
+  generalization gap found and published
+- CI `reproduce` job found the incomplete pinned asset same-day; fixed by supplement
+  asset (original kept), summary recomputes diffs=0
+- clean-room reproduction verified in an isolated container using only public endpoints
+- dashboard live at https://viktorixai.github.io/autonomous/dashboard/
+- repository renamed by owner to `ViktorIXAI/autonomous` (19:55 local); all references updated
