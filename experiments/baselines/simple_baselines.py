@@ -174,6 +174,7 @@ def run_arm(arm, t, rep, gseed, msgs, out):
            "calls": len(calls), "ptok": ptok, "ctok": ctok, "total_s": round(secs, 2),
            "content": best[0], "format_ok": best[1], "notes": best[2],
            "answer_sha256": hashlib.sha256(best[3].encode()).hexdigest()[:16],
+           "answer": best[3][:4000],
            "engine_error": next((x["err"] for x in calls if x["err"]), None)}
     out.write(json.dumps(row, ensure_ascii=False) + "\n")
     out.flush()

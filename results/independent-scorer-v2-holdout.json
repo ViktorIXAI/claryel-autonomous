@@ -1,0 +1,15 @@
+{
+ "bank": "benchmarks/holdout/bank-holdout.json",
+ "files": [
+  "logs/samples/holdout-p2005-mini/results-holdout-mini.jsonl"
+ ],
+ "side_A": {
+  "rows": 71,
+  "rescored": 62,
+  "not_scoreable": 9,
+  "coverage": 0.873,
+  "mean_harness": 0.8575,
+  "mean_independent": 0.5669,
+  "agree_within_0.35": 46
+ }
+}

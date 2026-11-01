@@ -1,0 +1,43 @@
+{
+ "bank": "benchmarks/text-gates/bank.json",
+ "files": [
+  "<release-dir>/v18-final/results-v18-b2003.jsonl",
+  "<release-dir>/v19-final/results-v19-b2003.jsonl"
+ ],
+ "side_A": {
+  "rows": 3117,
+  "rescored": 2813,
+  "not_scoreable": 304,
+  "coverage": 0.902,
+  "mean_harness": 0.8684,
+  "mean_independent": 0.7558,
+  "agree_within_0.35": 2350
+ },
+ "side_B": {
+  "rows": 2127,
+  "rescored": 1905,
+  "not_scoreable": 222,
+  "coverage": 0.896,
+  "mean_harness": 0.9261,
+  "mean_independent": 0.7572,
+  "agree_within_0.35": 1626
+ },
+ "matched_independent_delta": {
+  "n": 1905,
+  "avg": -0.0061,
+  "improved": 127,
+  "regressed": 136
+ },
+ "improved_pairs": {
+  "n": 229,
+  "independently_confirmed": 63,
+  "independently_reversed": 23,
+  "not_scoreable": 6
+ },
+ "regressed_pairs": {
+  "n": 79,
+  "independently_confirmed": 0,
+  "independently_reversed": 45,
+  "not_scoreable": 4
+ }
+}
