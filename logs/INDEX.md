@@ -43,3 +43,16 @@ SHA-256 (first 16 hex) of each file in the archive:
 | `logs/samples/smoke-p2005/gate-ledger-smoke.jsonl` | smoke, P2005 (third-box install check) | 46 | 21584 | `12d4119460cc1a97` |
 
 Run of the *published* tree on P2005 (5-task subset, `plan_hash=f52458ff0f7b64fe`, contour v1.9, 60 s wall, 46 records). It caught the make_plan staging bug that was fixed the same hour (see `history/failures/`).
+
+## Telemetry-bound smoke P2005SAH (run_id smoke-tel-4, 2026-11-01)
+
+Same 5-task subset as the earlier P2005 install smoke, this time with 1 Hz
+telemetry collector bound via run_id; join output restores per-attempt conditions.
+Wall 60.2 s vs 60 s without collector — overhead within noise.
+
+| file | lines | bytes | sha256 (first 16) |
+|---|---:|---:|---|
+| `logs/samples/smoke-p2005-tel/gate-ledger-smoke3.jsonl` | 46 | 21519 | `e869b7fcdca59356…` |
+| `logs/samples/smoke-p2005-tel/results-smoke3.jsonl` | 46 | 84920 | `e2ca01280c2bb976…` |
+| `telemetry/runs/smoke-tel-4.join.json` | 791 | 16655 | `24518609c7fc06b5…` |
+| `telemetry/runs/smoke-tel-4.telem.jsonl` | 57 | 58378 | `83d8520e0cc5d6f2…` |
