@@ -46,9 +46,10 @@ Every push and pull request runs:
 - Gitleaks secret scanning with a self-test canary;
 - release asset scanning for published archives.
 
-For local pre-push gating, run:
+For local pre-push gating, install and run:
 
 ```bash
+scripts/devsecops/install_hook.sh
 scripts/devsecops/prepush.sh
 ```
 
