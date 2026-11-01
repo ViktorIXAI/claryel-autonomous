@@ -1,0 +1,44 @@
+{
+ "files": [
+  "/home/viktor/.hermes/bench/parb/release-2026-11-01/v18-final/results-v18-b2003.jsonl",
+  "/home/viktor/.hermes/bench/parb/release-2026-11-01/v19-final/results-v19-b2003.jsonl"
+ ],
+ "rescored_share": 0,
+ "side_A": {
+  "rows": 3117,
+  "rescored": 1152,
+  "agree": 489,
+  "diverge": 663,
+  "not_independently_scoreable": 1965,
+  "mean_harness": 0.8485,
+  "mean_independent": 0.4913
+ },
+ "side_B": {
+  "rows": 2127,
+  "rescored": 823,
+  "agree": 427,
+  "diverge": 396,
+  "not_independently_scoreable": 1304,
+  "mean_harness": 0.9785,
+  "mean_independent": 0.5152
+ },
+ "matched_independent_delta": {
+  "n": 823,
+  "avg": -0.0109,
+  "improved": 13,
+  "regressed": 22,
+  "note": "same (task,rep) pairs re-scored by the independent scorer only"
+ },
+ "improved_pairs": {
+  "n": 229,
+  "independently_confirmed": 13,
+  "independently_reversed": 22,
+  "not_scoreable": 61
+ },
+ "regressed_pairs": {
+  "n": 79,
+  "independently_confirmed": 0,
+  "independently_reversed": 0,
+  "not_scoreable": 56
+ }
+}
