@@ -1,17 +1,31 @@
-# Карточка результата для видеоролика: как считаем
+# How the video-card results are computed
 
-## Метод
-Зонд `Runtime.evaluate` читает живые переменные страницы (`balls`, `angle`, `HEX_RADIUS`, `CX`, `CY`, `fps`) каждые 0.8 с в течение 20 с. Проверка принадлежности шара шестиугольнику — пересечение полуплоскостей 6 рёбер в локальной системе координат (поворот на `-angle`), знак нормали калибруется по центру шестиугольника, поэтому порядок обхода вершин в коде не влияет на результат. Самопроверка «центр внутри» обязательна: если она падает, геометрия зонда неверна и вердикту верить нельзя.
+(English translation; adopted as the working language of this note. The
+original Russian note is preserved verbatim in the release asset
+`ru-source-records-2026-11-01.tar.zst`, indexed in `logs/INDEX.md`.)
 
-## Постоянство вращения
-Берём `angle` из каждого снимка, разворачиваем modulo 2π, считаем Δangle/Δt. Это и есть ответ на требование «постоянная угловая скорость» — без доверия к комментарию в коде.
+## Method
+The `Runtime.evaluate` probe reads live page variables (`balls`, `angle`,
+`HEX_RADIUS`, `CX`, `CY`, `fps`) every 0.8 s for 20 s. Checking whether a
+ball is inside the hexagon uses half-plane intersection over the 6 edges in
+the hexagon's local coordinate system (rotation by `-angle`); the normal sign
+is calibrated at the hexagon center, so the vertex traversal order in
+generated code cannot affect the verdict. The "center is inside" self-check
+is mandatory: if it fails, the probe geometry is wrong and the verdict must
+not be trusted.
 
-## Что считается провалом
-- анимация не меняется (хэш канваса одинаковый);
-- шаров не 12;
-- хоть один шар за пределами шестиугольника хоть в одном снимке;
-- любая ошибка консоли или непойманное исключение;
-- любой сетевой запрос вне `file://`.
+## Spin constancy
+We take `angle` from every snapshot, unwrap it modulo 2π, and compute
+Δangle/Δt. That is the direct answer to the "constant angular velocity"
+requirement — no trust in code comments.
 
-## Исправления не делаем
-Никогда не правим сгенерированный код. Найденные «страховки» (клампс, телепортация шара) попадают в отчёт как часть результата с первого раза.
+## What counts as failure
+- the animation does not change (canvas hash identical);
+- there are not 12 balls;
+- any ball is outside the hexagon in any snapshot;
+- any console error or uncaught exception;
+- any network request outside `file://`.
+
+## No fixes are applied
+Generated code is never edited. "Cheat" mechanisms found (clamping, ball
+teleportation) are reported as part of the first-shot result.

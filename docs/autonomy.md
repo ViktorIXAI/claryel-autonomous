@@ -48,7 +48,7 @@ Cloud-collaboration ledgers become possible only after the
 
 ## Evidence anchors
 
-- `history/agent-decisions/gate-versions.log` — decision entries written by
+- `history/agent-decisions/gate-versions.en.md` — decision entries written by
   the agent *during* the runs, including self-rejections with numbers.
 - File timestamps + A/B artifacts in `logs/INDEX.md` — sequence matches the
   log (test written before fix: `gate_v19_d_test.py` 02:46 < v1.9 snapshot 07:43).

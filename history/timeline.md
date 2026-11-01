@@ -75,3 +75,10 @@ a finding, not something to smooth over.
   of saturated task families
 - external-model input ledger opened with pre-cutoff disclosure that earlier
   specs contained ChatGPT copy-paste (`history/external-model-inputs/`)
+
+- language pass (English-first repo): Russian comments/docstrings/console output
+  translated across harness and analysis scripts; the decision log, external review,
+  prompt indexes and the visual-method note now live in-repo as English translations,
+  their verbatim Russian originals archived in the `ru-source-records-2026-11-01.tar.zst`
+  release asset; functional Russian data (frozen task prompts, model-facing contour
+  literals, validator keywords, ledger event tags, historical byte snapshots) untouched

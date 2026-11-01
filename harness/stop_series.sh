@@ -1,10 +1,10 @@
 #!/bin/bash
-# Точечная остановка только нужной серии: критерий — переменная PARB_STATE у процесса.
-# Linux: читаем /proc/PID/environ. macOS: берём окружение через `ps -E -o pid,args`.
-# Первый аргумент: подстрока, например "state-v12.json".
+# Targeted stop of only the selected series: the criterion is the process's PARB_STATE variable.
+# Linux: read /proc/PID/environ. macOS: take the environment via `ps -E -o pid,args`.
+# First argument: a substring, e.g. "state-v12.json".
 cd ~/parb || exit 1
 NEED="$1"
-[ -z "$NEED" ] && { echo "нужен аргумент: подстрока PARB_STATE"; exit 1; }
+[ -z "$NEED" ] && { echo "an argument is required: a PARB_STATE substring"; exit 1; }
 
 state_of() {
   local pid="$1"
@@ -30,21 +30,21 @@ for pid in $(pgrep -f 'gate_run\.py'); do
     *"$NEED"*) kill -TERM "$pid" 2>/dev/null; KILLED="$KILLED $pid($st)";;
   esac
 done
-# обёртки nohup bash -c: только те, в командной строке которых есть и gate_run.py, и нужный state.
-# Свой собственный процесс и предков не трогаем (иначе pgrep матчит саму команду остановки).
+# nohup bash -c wrappers: only those whose command line contains both gate_run.py and the needed state.
+# We do not touch our own process or the ancestors (otherwise pgrep matches the stop command itself).
 for pid in $(pgrep -f 'bash -c.*gate_run'); do
   [ "$pid" = "$$" ] && continue
   case "$(ps -o args= -p $pid 2>/dev/null)" in
-    *"bash -c"*gate_run*"$NEED"*) kill -TERM "$pid" 2>/dev/null; KILLED="$KILLED $pid(обёртка)";;
+    *"bash -c"*gate_run*"$NEED"*) kill -TERM "$pid" 2>/dev/null; KILLED="$KILLED $pid(wrapper)";;
   esac
 done
 p=$PPID
 for i in 1 2 3 4; do [ -n "$p" ] && [ "$p" != "1" ] && kill -0 "$p" 2>/dev/null || break
-  for pid in $(pgrep -f 'bash -c.*gate_run'); do [ "$pid" = "$p" ] && KILLED="$KILLED $pid(предок,пропущен)"; done
+  for pid in $(pgrep -f 'bash -c.*gate_run'); do [ "$pid" = "$p" ] && KILLED="$KILLED $pid(ancestor,skipped)"; done
   p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); done
-[ -z "$KILLED" ] && echo "НИЧЕГО с PARB_STATE~$NEED не запущено" || echo "остановлено:$KILLED"
+[ -z "$KILLED" ] && echo "NOTHING with PARB_STATE~$NEED is running" || echo "stopped:$KILLED"
 sleep 3
-echo "живые gate_run:"
+echo "live gate_run:"
 for pid in $(pgrep -f 'gate_run\.py'); do
   echo "  $pid state=$(state_of "$pid") version=$(ver_of "$pid")"
 done

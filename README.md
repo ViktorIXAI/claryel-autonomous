@@ -125,9 +125,24 @@ boxes (`logs/samples/D-ea-v18-example.json` vs `D-ea-v19-example.json`).
 * Two runs invalidated by harness bugs are preserved as named artifacts
   (`…401-invalid`, `…partial-harnessbug`) — see `history/failures/`.
 
-Full chronology: [`versions/VERSIONS.md`](versions/VERSIONS.md) (English);
-primary source: [`history/agent-decisions/gate-versions.log`](history/agent-decisions/gate-versions.log)
-(the agent's own decision log, verbatim Russian).
+Full chronology: [`versions/VERSIONS.md`](versions/VERSIONS.md); the agent's
+own decision log in English translation: [`history/agent-decisions/gate-versions.en.md`](history/agent-decisions/gate-versions.en.md).
+Its verbatim Russian original is preserved unmodified in the release asset
+`ru-source-records-2026-11-01.tar.zst` (sha256 `a37a9c922105f61d…`).
+
+## Language policy
+
+The repository is **English-first**: documentation, code comments, console
+output and translated historical records are English. Russian survives only
+where it is **functional measured data**: the frozen task prompts in
+`bank.json`/`bank-holdout.json` (every published score was produced with
+those bytes), contour prompt literals sent to the model in the measured runs,
+validator keyword lists and event tags recorded in published ledgers, and raw
+model outputs in the sample logs and archives. Non-functional Russian
+originals (decision logs, reviews, prompt indexes) were translated into the
+repo, and their untouched Russian source files are archived verbatim in the
+`ru-source-records-2026-11-01.tar.zst` release asset — nothing was rewritten,
+only relocated and annotated.
 
 ## Two ways to use this lab
 
@@ -136,7 +151,7 @@ Any OpenAI-compatible endpoint (llama.cpp, vLLM, Ollama, LM Studio, …),
 Python ≥ 3.9, standard library only:
 
 ```bash
-git clone https://github.com/ViktorIXAI/autonomous
+git clone https://github.com/ViktorIXAI/claryel-autonomous
 cd strata-autonomous-harness
 ./install.sh                       # venv + contour self-tests (12 fixer cases, D-normalizer contract)
 cp config.example.sh config.sh     # set PARB_API / PARB_MODEL

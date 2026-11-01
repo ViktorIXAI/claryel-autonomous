@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""План испытания: фиксируется до прогона (plan.json + plan_hash).
-Позиция = (задача, повтор, серия). Этапы имеют временные боксы от фактического старта.
+"""Test plan: frozen before the run (plan.json + plan_hash).
+A position = (task, rep, series). Stages have time boxes measured from actual start.
 """
 import random, hashlib
 
@@ -21,11 +21,11 @@ def build(tasks, seed=4242):
         plan.append({"task": tid, "rep": rep, "series": series, "stage": stage,
                      "gseed": rng.randint(10000, 999999), "rep_group": group})
 
-    # этап 1: базовая диагностика и разогрев (короткие задачи, результаты идут в свои категории)
+    # stage 1: baseline diagnostics and warm-up (short tasks; results go to their categories)
     warm = [t["id"] for t in tasks if t["level"] == "easy" and t["cat"] in "ABCFHIJK"][:10]
     for tid in warm:
         add(tid, 0, "main", 1, "warmup")
-    # этапы 2..5: чередование категорий, чтобы не мерить всё одним блоком
+    # stages 2..5: category interleaving so nothing is measured as one block
     for st in (2, 3, 4, 5):
         buckets = {}
         for t in tasks:
@@ -42,20 +42,20 @@ def build(tasks, seed=4242):
             for rep in range(n):
                 for s in ["main"] + t.get("extra_series", []):
                     add(tid, rep, s, st, None)
-    # этап 6: повторяемость (L) — заранее зафиксированная выборка
+    # stage 6: repeatability (L) — a pre-frozen sample
     for lvl, nrep, ntask in LADDER:
         cand = [t["id"] for t in tasks if t["stage"] in (2, 3, 4, 5) and t["level"] == lvl and
                 t["kind"] != "loop"][:ntask]
         for tid in cand:
             for rep in range(nrep):
                 add(tid, 100 + rep, "main", 6, "L-" + lvl)
-    # этап 6/7 стресс-задачи программирования (100 и 200 тестов), если они есть в банке
+    # stage 6/7 programming stress tasks (100 and 200 tests), if present in the bank
     for st in (6, 7):
         for t in tasks:
             if t["stage"] == st and t["cat"] == "E":
                 for rep in range(2 if st == 6 else 1):
                     add(t["id"], rep, "main", st, "stress-E")
-    # этап 7 контрольный срез: по задаче каждой категории + добор сложных
+    # stage 7 final cut: one task per category plus extra hard ones
     ctrl = []
     for c in sorted({t["cat"] for t in tasks}):
         cand = [t["id"] for t in tasks if t["cat"] == c and t["kind"] != "loop"]

@@ -4,7 +4,7 @@ What made the version chain possible was not code but a **protocol** the
 operator set and the agent recorded for itself. Reconstructed here from the
 agent's own run notes and one-shot cron prompts; where text is the agent's
 verbatim log output it is marked as such (Russian originals in
-`versions/gate-versions.log`).
+`history/agent-decisions/gate-versions.en.md`).
 
 ## Standing rules the operator imposed (paraphrase)
 

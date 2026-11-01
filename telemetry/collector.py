@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Телеметрия PARB: 1 Гц, CSV без буферизации.
-Колонки: ts, mem_avail_mb, swap_used_mb, dirty_kb, nvme_rd_kbs, nvme_wr_kbs, vram_used_mb,
+"""PARB telemetry: 1 Hz, unbuffered CSV.
+Columns: ts, mem_avail_mb, swap_used_mb, dirty_kb, nvme_rd_kbs, nvme_wr_kbs, vram_used_mb,
 gpu_util, gpu_power_w, gpu_temp_c, gpu_clk_mhz, cpu_temp_c, load1
 """
 import os, sys, time, subprocess, glob

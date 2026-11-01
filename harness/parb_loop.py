@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Mock-слой агентных циклов категории D и его валидатор.
-Реальных действий нет: файловая система заменена словарём t["files"], опасные
-инструменты возвращают блокировку. Валидатор проверяет последовательность и ответ.
+"""Mock layer for category-D agent loops and its validator.
+There are no real actions: the filesystem is a dict t["files"], dangerous
+tools return a block. The validator checks the sequence and the answer.
 """
 import json, re
 

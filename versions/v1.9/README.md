@@ -5,4 +5,4 @@
 - **Code state:** PUBLISHED BYTE-EXACT: harness/gate_run.py == snapshot gate_run.v19.bak-0745 (pre-portability-edits; edits itemized in PUBLICATION-NOTES.md); test-first: gate_v19_d_test.py
 - **Adoption:** agent (paired + cross-box), human standing-rule authorized
 - **Provenance:** Agent-proposed/implemented/tested/evaluated (docs/autonomy.md);
-  decision entry: history/agent-decisions/gate-versions.log
+  decision entry: history/agent-decisions/gate-versions.en.md (Russian original archived in the ru-source-records release asset)

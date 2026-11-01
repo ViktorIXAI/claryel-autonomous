@@ -7,7 +7,7 @@ forward, not retroactive fiction.
 ## Cutoff and policy
 
 - **Cutoff: 2026-11-01 12:00 CET.**
-- **Before the cutoff:** some task specifications (ТЗ) given to the lab agent
+- **Before the cutoff:** some task specifications given to the lab agent
   contained verbatim copy-pasted text from ChatGPT (and later from other
   external assistants). The exact boundaries of that text inside the pasted
   specifications were not recorded and cannot be reconstructed reliably.

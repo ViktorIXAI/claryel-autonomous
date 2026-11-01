@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Калибровка токенов через сам API (без /tokenize) и подготовка банка к прогону."""
+"""Token calibration through the API itself (no /tokenize) and bank preparation for the run."""
 import json, os, subprocess, time, urllib.request
 
 ROOT = os.path.expanduser("~/parb")
@@ -68,8 +68,8 @@ def calibrate():
 def isolation_probe():
     ok = subprocess.run(["unshare", "-rn", "true"], capture_output=True, text=True)
     return {"unshare_ok": ok.returncode == 0, "detail": (ok.stderr or "").strip()[:150],
-             "method": "unshare -rn + setrlimit + запрещённые модули" if ok.returncode == 0
-             else "setrlimit + запрещённые модули (без сетевого namespace: пользовательские namespace запрещены)"}
+             "method": "unshare -rn + setrlimit + banned modules" if ok.returncode == 0
+             else "setrlimit + banned modules (no network namespace: user namespaces disabled)"}
 
 
 def main():
@@ -131,7 +131,7 @@ def main():
     json.dump(meta, open(os.path.join(ROOT, "bank.meta.json"), "w"), ensure_ascii=False, indent=1)
     print(json.dumps(meta, ensure_ascii=False, indent=1)[:4000])
     if vbad or sfail:
-        print("ВНИМАНИЕ: самопроверка или сверка эталонов не прошли — прогон не запускать до починки")
+        print("WARNING: self-check or reference reconciliation failed — do not start the run until fixed")
 
 
 import parb_bank as B, parb_verify as VR, parb_self as SF, parb_plan as PL

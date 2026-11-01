@@ -44,227 +44,168 @@ Russian; the English abstract below is a translation aid, not a rewrite.
 | scale of claims | README positioning replaced with the home-lab framing; dashboard and timeline show elapsed time honestly (project started 2026-10-30) |
 | stale docs / missing pipeline / dashboard | fixed same day: link-checker in CI, publication pipeline with two automatic publishes, dashboard live |
 
-## Original review (Russian, verbatim)
-
-Независимая оценка Strata Autonomous Harness
-
-Я посмотрел на Strata Autonomous Harness как на незнакомый проект, который мне прислали для профессиональной оценки. Не принимаю на веру утверждения автора, не учитываю наши предыдущие обсуждения как доказательства и сравниваю подход с тем, что сейчас происходит в исследованиях AI-агентов.
-
-Мой вердикт
-
-Это не выглядит как типичный проект новичка. Но пока выглядит скорее как серьёзная экспериментальная лаборатория энтузиаста, чем как завершённое научное исследование.
-
-Именно в таком позиционировании он достаточно убедителен. Проблемы возникнут, если начать представлять его как доказательство того, что ИИ научился самостоятельно развивать собственный интеллект.
-
-Моя субъективная экспертная оценка — не научная метрика
-
-Профессиональность подачи 8/10
-Инженерная организация 7/10
-Прозрачность результатов 8/10
-Научная строгость 5/10
-Доказательность автономности 5/10
-Интерес для AI-исследователей 7/10
-
-Это оценка по опубликованным исходникам, README, методологии, ограничениям, истории версий и структуре исследовательских материалов. Я не проводил независимый запуск всего экспериментального пакета, поэтому не присваиваю проекту статус полностью проверенного.
-
-1. Самое важное: идея совсем не дилетантская
-
-В 2026 году влияние программной обвязки на способности AI-агентов — полноценная исследовательская тема.
-
-Например:
-
-* Harness-Bench изучает, насколько поведение и результативность агента зависят от сочетания модели и инфраструктуры исполнения. arxiv.org
-* Исследование Rethinking the Evaluation of Harness Evolution for Agents специально рассматривает автономное совершенствование harness и проблемы его оценки. arxiv.org
-* Holistic Agent Leaderboard разделяет вклад модели, scaffold и benchmark, уделяя большое внимание воспроизводимости и логам. arxiv.org
-
-Следовательно, постановка вопроса «насколько можно улучшить практическую работу неизменной модели, совершенствуя окружающий её код» абсолютно профессиональна.
-
-Но новизна самой идеи уже не является сильным аргументом. Чтобы проект заинтересовал специалиста, он должен предложить необычные экспериментальные результаты, качественные доказательства или новый подход к автономному улучшению.
-
-И здесь у Strata есть потенциал, но пока недостаточно независимых подтверждений.
-
-2. За что опытный исследователь похвалит проект
-
-В репозитории есть несколько решений, которых часто не хватает любительским AI-проектам.
-
-Первое — публикация неудачных версий. Например, v1.4 резко ухудшила результаты, v1.5 практически ничего не делала, а v1.6 экономила токены ценой потери правильных ответов. Это производит хорошее впечатление: автор не пытается показать исключительно победы.
-
-Второе — сравнения по одинаковым задачам и повторениям. Метод paired A/B с фиксированными заданиями, идентификаторами и seeds значительно лучше, чем просто сравнить два усреднённых процента из разных экспериментов.
-
-Третье — разделение модели и обвязки. README прямо говорит, что веса модели не менялись, а улучшение системы не равнозначно улучшению способностей самой модели. Это правильная научная оговорка.
-
-Четвёртое — публикация инструментария проверки. Репозиторий содержит код скорера, исходные задания, JSONL-результаты, SHA-256-индекс и скрипты воспроизведения. Не только графики и утверждения.
-
-Пятое — документирование ограничений. В docs/limitations.md прямо указаны отсутствующие исторические снимки кода, риск переобучения под тестовый набор и неполная аппаратная телеметрия.
-
-На этом уровне проект определённо выше обычного «я написал агента, и он стал на 50% умнее».
-
-3. А вот где профессионал начнёт жёстко критиковать
-
-Проблема №1. Улучшение результатов может быть улучшением под конкретный тест
-
-Самый серьёзный научный риск
-
-Пример из README: категория D-ea.
-
-Сначала оценка составляла 0,34. Затем программная нормализация преобразовала ответ в ожидаемый JSON-формат, и оценка достигла 1,00.
-
-Это реальное исправление интерфейса, но не обязательно повышение качества принятия решений.
-
-Скептически настроенный инженер скажет:
-
-Вы не научили модель лучше планировать действия. Вы научили программу преобразовывать её ответы в формат, который нравится вашему валидатору.
-
-И это будет вполне обоснованная критика — хотя исправление формата само по себе полезно.
-
-Ещё серьёзнее другое: агент создаёт улучшения, наблюдая результаты того самого банка задач, на котором оценивается.
-
-В исследовании Rethinking the Evaluation of Harness Evolution for Agents эта проблема рассматривается напрямую. Авторы показывают, почему необходимы ранее неизвестные задания и сравнения при одинаковых вычислительных бюджетах. arxiv.org
-
-Что необходимо: новый закрытый для разработчика тестовый набор, независимый валидатор и отдельная оценка до и после применения исправлений.
-
-Без этого специалист не примет высокие проценты как доказательство обобщаемого улучшения системы.
-
-Проблема №2. «Автономное саморазвитие» звучит сильнее имеющихся доказательств
-
-В README есть утверждение, что весь опубликованный код был написан, проверен и улучшен автономным AI-агентом.
-
-В docs/autonomy.md подробно описаны роли человека и агента. Это хорошо.
-
-Но docs/limitations.md одновременно сообщает, что исходные стенограммы агента не опубликованы, а точные снимки многих ранних версий отсутствуют.
-
-Получается, основное доказательство автономности — журналы, составленные самим агентом.
-
-Скептик закономерно спросит: кто проверял, что эти записи полно и точно отражают реальную историю?
-
-Это не означает, что утверждение неправда. Оно означает, что у независимого читателя пока нет достаточно сильной доказательной цепочки.
-
-Профессионально звучало бы:
-
-An AI agent autonomously developed and tested successive harness modifications under human-defined objectives and constraints.
-
-Здесь аккуратно ограничивается автономность: цели и правила задаёт человек, агент самостоятельно реализует и проверяет изменения.
-
-А вот заявления о recursive self-improvement или о том, что система развивает собственный интеллект, потребовали бы гораздо более строгих доказательств.
-
-Проблема №3. Собственный benchmark может оказаться слишком удобным
-
-В README указано 178 синтетических задач в 11 категориях.
-
-Для небольшой исследовательской лаборатории этого достаточно, чтобы начать работу.
-
-Но независимый исследователь захочет узнать, насколько эти задания напоминают реальные пользовательские задачи и насколько они сложны.
-
-В нескольких категориях результаты близки к 100%. Это может означать хорошую систему — или слишком простые задачи, узкие шаблоны и детерминированные исправления.
-
-Особенно осторожно следует относиться к слову «accuracy», когда общий балл смешивает содержательную правильность, структурные требования и программную постобработку.
-
-Здесь нужны внешние наборы заданий, действительно новые сценарии и сравнение с обычными простыми решениями.
-
-Проблема №4. Нет достаточного сравнения с альтернативами
-
-Допустим, harness повысил успешность выполнения задачи.
-
-Профессионал спросит:
-
-* А что, если просто дать модели ещё одну попытку?
-* А если использовать более хороший системный промпт?
-* А если добавить обычный JSON validator?
-* А если использовать стандартный агентный фреймворк?
-* А если выбрать чуть более мощную модель?
-* А сколько дополнительных секунд и токенов стоит улучшение?
-
-Это принципиальный момент.
-
-Если сложный автономный цикл улучшений даёт результат, который достигается десятью строками обычного Python или одним повторным запросом, то научная ценность именно автономного метода становится менее очевидной.
-
-Поэтому сравнивать нужно не только raw versus harness, но и с простейшими альтернативами при одинаковом бюджете.
-
-Проблема №5. Название исследования обещает больше, чем текущий масштаб
-
-Open Research into Autonomous Local AI Evolution звучит почти как название большой исследовательской программы.
-
-А фактически представлен ранний эксперимент на одной модели, одном основном банке задач и нескольких компьютерах, выполненный за короткий промежуток времени.
-
-Это не плохо. Но есть несоответствие масштаба формулировки и масштаба пока подтверждённой работы.
-
-На мой взгляд, лучше подчеркнуть, что это открытый ongoing experiment, а не делать заявления, похожие на объявление фундаментального достижения.
-
-4. Что именно может выглядеть «по-чайниковски»
-
-Не сама архитектура, не использование Python и не домашние компьютеры. Как раз недорогие компьютеры — сильная сторона эксперимента.
-
-Дилетантское впечатление могут производить определённые формулировки и недостающие проверки.
-
-«Self-improving AI» — подозрение в преувеличении, если речь только о коде вокруг модели
-«Every line written autonomously» — слишком категоричное утверждение без полных первичных доказательств
-99–100% на собственных заданиях — риск переобучения под оценку или слишком простых тестов
-Высокие оценки за правильный JSON — подмена содержательной правильности форматным соответствием
-Один тип модели — недостаточно для общих выводов
-Агент разрабатывает и сам себя оценивает — риск систематической ошибки
-Несколько дней эксперимента — недостаточно для доказательства устойчивого долгосрочного саморазвития
-Не реализованная privacy architecture — инженерная гипотеза, а не проверенный результат
-
-Есть и менее серьёзные, но заметные мелочи: отдельные неверные пути в документации, отсутствие полноценной автоматической публикации, незавершённый dashboard, ограниченная история версий. Всё это характерно для раннего проекта.
-
-Ни одна из таких деталей не делает эксперимент несерьёзным. Проблема возникает, когда они складываются с очень масштабными заявлениями.
-
-5. Сравнение с современной исследовательской практикой
-
-Исходный код: Strata — опубликован; ожидание — опубликован
-Исходные результаты: есть архивы; ожидание — полные проверенные записи
-Повторяемость тестов: продуманная схема; ожидание — проверенные независимые прогоны
-Сравнение версий: парные тесты; ожидание — парные тесты + статистическая неопределённость
-Обобщение результатов: не доказано; ожидание — held-out задачи и внешние benchmark
-Контрольные методы: ограничены; ожидание — простые baseline и бюджетно-сопоставимые альтернативы
-Доказательства автономности: журналы решений; ожидание — первичные следы исполнения и независимый аудит
-Разделение ошибок модели и обвязки: частично; ожидание — систематическая декомпозиция
-Продолжительность исследования: короткая; ожидание — достаточная для оценки устойчивости
-
-Здесь важна одна мысль: современная исследовательская практика уже не довольствуется публикацией точности и описанием агента. Например, Holistic Agent Leaderboard специально исследует влияние моделей, обвязок и самих бенчмарков и публикует масштабные трассы выполнения. arxiv.org
-
-В этом смысле Strata движется в правильном направлении, но находится на ранней стадии.
-
-6. Насколько это интересно?
-
-Я бы разделил аудиторию на три группы.
-
-Разработчики локального ИИ. Для них проект потенциально интересен уже сейчас. Особенно сочетание дешёвой RTX 3060, неизменных весов модели, детерминированных исправлений и анализа цены повышения качества. Здесь есть практическая ценность.
-
-Разработчики AI-агентов. Им может быть интересна история автономного принятия и отклонения изменений, особенно если будут доступны полные цепочки принятия решений. Но они захотят сравнения с известными подходами.
-
-Академические исследователи. Для них текущих доказательств пока недостаточно для серьёзных выводов. Тем не менее открытый исследовательский архив может стать материалом для независимого эксперимента.
-
-Здесь есть ещё один интересный аспект: проект одновременно позволяет исследовать не только качество harness, но и то, как сам агент организует программные эксперименты, обнаруживает собственные ошибки и принимает решения об откате.
-
-Именно этот второй аспект может оказаться наиболее оригинальным.
-
-7. Как бы я позиционировал проект, чтобы не вызывать ненужного скепсиса
-
-Не как «мы создали саморазвивающийся искусственный интеллект».
-
-А примерно так:
-
-An open, AI-operated home-lab experiment investigating autonomous harness development around frozen local language models. We publish successful and failed iterations, paired benchmarks, execution costs, and available provenance data. Our goal is to study which improvements generalize, which merely optimize benchmark formatting, and how much autonomy can be demonstrated experimentally.
-
-По-русски:
-
-«Открытый эксперимент домашней AI-лаборатории, исследующий автономную разработку программной обвязки вокруг неизменных локальных языковых моделей. Мы публикуем успешные и неудачные итерации, парные испытания, вычислительные затраты и доступные доказательства происхождения изменений. Наша цель — выяснить, какие улучшения действительно обобщаются, какие лишь подстраиваются под формат тестов и какую степень автономности можно экспериментально подтвердить».
-
-Такая формулировка, на мой взгляд, существенно убедительнее громких обещаний.
-
-Итоговая оценка
-
-На уровне личного инженерного проекта — это серьёзная работа. На уровне научного результата — пока предварительное исследование с существенными методологическими ограничениями.
-
-Я не ожидаю, что компетентный специалист посмотрит на код, историю откатов, парные измерения и исходные данные и автоматически назовёт всё это дилетантством.
-
-Но я вполне ожидаю жёсткую критику по трём направлениям: переобучение на собственных тестах, недостаточная независимость оценки и неполная доказательность автономного происхождения кода.
-
-И это полезная критика.
-
-Самое перспективное в проекте, на мой взгляд, — не высокие проценты успешности и даже не прирост качества модели с обвязкой. А открытая история того, как AI-агент самостоятельно проводит инженерные эксперименты, ошибается, измеряет последствия собственных изменений и отказывается от неудачных решений.
-
-Если удастся продемонстрировать такую работу на новых задачах, в течение длительного периода, с независимой проверкой и честным учётом вычислительных затрат, проект может стать интересен значительно более широкой профессиональной аудитории.
-
-Сейчас его уже можно публично показывать. Но позиционировать следует как открытую исследовательскую лабораторию, а не как доказанный прорыв в саморазвитии ИИ.
+## The review, full English translation
+
+(The Russian original is archived verbatim in release asset
+`ru-source-records-2026-11-01.tar.zst`, sha256 recorded in `logs/INDEX.md`;
+this translation is complete, section by section.)
+
+**Independent evaluation of the Strata Autonomous Harness** — I looked at it
+as an unknown project sent to me for professional assessment. I do not take
+the author's claims on faith, I do not count our previous discussions as
+evidence, and I compare the approach with what is currently happening in
+AI-agent research.
+
+**Verdict.** This is not a typical beginner project. But for now it looks
+more like a serious enthusiast experimental lab than a finished scientific
+study. Positioned that way it is quite convincing; problems arise only if it
+is presented as proof that AI has learned to develop its own intelligence.
+
+**Scores (subjective expert impression, not a scientific metric):**
+presentation 8/10, engineering organization 7/10, transparency 8/10,
+scientific rigor 5/10, autonomy evidence 5/10, interest to AI researchers
+7/10. This is an assessment of published sources, README, methodology,
+limitations, version history and research-materials structure. I did not run
+the full experimental suite myself, so I do not grant the project
+fully-verified status.
+
+**1. The idea is not amateurish.** In 2026, the effect of the software
+wrapping on agent capability is a full research topic (Harness-Bench;
+Rethinking the Evaluation of Harness Evolution for Agents; Holistic Agent
+Leaderboard). Asking how far a frozen model's practical performance can be
+improved by perfecting the code around it is a professional question. But the
+novelty of the idea is no longer a strong argument on its own: to interest a
+specialist the project needs unusual experimental results, strong evidence,
+or a new approach to autonomous improvement. Strata has potential here, but
+not enough independent confirmation yet.
+
+**2. What an experienced researcher will praise:** (1) publishing failed
+versions — v1.4 sharply worse, v1.5 a near-no-op, v1.6 saving tokens at the
+cost of correctness — the author is not showing only wins; (2) paired A/B on
+identical tasks, ids and seeds, far better than comparing averaged
+percentages from different runs; (3) model/harness separation stated plainly
+— system improvement is not model improvement; (4) the checking tooling is
+published: scorer code, task sources, JSONL results, SHA-256 index,
+reproduction scripts — not just charts and claims; (5) limitations are
+documented: missing historical code snapshots, test-set overfitting risk,
+incomplete hardware telemetry. This level is clearly above the usual "I
+wrote an agent and it got 50% smarter".
+
+**3. Where a professional will push hard.**
+
+*Problem 1 — measured improvement may be improvement against the test.* The
+most serious scientific risk. README example: category D-ea went 0.34 →
+1.00 after programmatic normalization produced the JSON shape the validator
+expects. That is a real interface fix, not necessarily better decision
+quality. The skeptical engineer says: "You did not teach the model to plan
+better; you taught the program to reshape its answers into a format your
+validator likes." That criticism is well founded — even though format repair
+is genuinely useful. Sharper still: the agent designs improvements while
+watching results on the very task bank it is scored on. The paper
+"Rethinking the Evaluation of Harness Evolution for Agents" addresses this
+directly: previously unseen tasks and equal-budget comparisons are required.
+What is needed: a developer-blind test set, an independent validator, and a
+separate evaluation before/after fixes. Without it a specialist will not
+accept high percentages as evidence of generalizable system improvement.
+
+*Problem 2 — "autonomous self-development" sounds stronger than the
+evidence.* README claims the whole published code was written, tested and
+improved by an autonomous agent. docs/autonomy.md itemizes roles — good —
+but docs/limitations.md says raw agent transcripts are not published and
+exact snapshots of many early versions are missing. So the main evidence of
+autonomy is logs compiled by the agent itself. A skeptic will ask: who
+checked that those records fully and accurately reflect what happened? That
+does not make the claim false; it means an independent reader lacks a strong
+enough evidence chain. A professional phrasing: "An AI agent autonomously
+developed and tested successive harness modifications under human-defined
+objectives and constraints." Claims of recursive self-improvement or of a
+system developing its own intelligence would require far stricter proof.
+
+*Problem 3 — the self-made benchmark may be too convenient.* 178 synthetic
+tasks in 11 categories are enough to start, but an independent researcher
+will ask how close they are to real user tasks and how hard they are.
+Several categories score near 100% — that can mean a good system, or too
+easy tasks, narrow templates and deterministic repairs. Be careful with the
+word "accuracy" when the composite score mixes substantive correctness,
+structural requirements and programmatic post-processing. External task
+sets, genuinely new scenarios and comparisons against ordinary simple
+solutions are needed.
+
+*Problem 4 — insufficient comparison with alternatives.* If the harness
+raised success, a professional asks: what about just one more attempt? a
+better system prompt? a plain JSON validator? a standard agent framework? a
+slightly stronger model? how many extra seconds and tokens does the gain
+cost? If a complex autonomous improvement loop achieves what ten lines of
+plain Python or a single retry achieves, the scientific value of the
+autonomy itself becomes less obvious. Compare not only raw vs harness, but
+against the simplest alternatives at equal budget.
+
+*Problem 5 — the research title promises more than current scale.* "Open
+Research into Autonomous Local AI Evolution" sounds like a large program;
+what exists is an early experiment with one model, one main task bank and a
+few computers over a short span. Not bad — but the scale of formulation
+exceeds the scale of confirmed work. Better to stress that this is an open
+ongoing experiment than to make statements resembling a fundamental
+achievement announcement.
+
+**4. What can look amateurish.** Not the architecture, not Python, not home
+computers — cheap hardware is a strength. It is the formulations and missing
+checks: "self-improving AI" if only the code around the model improves;
+"every line written autonomously" without complete primary evidence;
+99-100% on self-made tasks; high marks for correct JSON; one model type; the
+agent developing and grading itself; a few days of experiment; an
+unimplemented privacy architecture (hypothesis, not verified result). Minor
+visible warts: wrong paths in docs, no full automatic publication pipeline,
+unfinished dashboard, limited version history — typical of an early project.
+None of them makes the experiment unserious; the problem is when they
+combine with very grand claims.
+
+**5. Against current research practice.** Source code published (expected:
+published). Raw results: archives exist (expected: fully verified records).
+Test repeatability: thoughtful scheme (expected: verified independent runs).
+Version comparison: paired tests (expected: paired + statistical
+uncertainty). Generalization: not proven (expected: held-out tasks and
+external benchmarks). Control methods: limited (expected: simple baselines
+and budget-matched alternatives). Autonomy evidence: decision logs
+(expected: primary execution traces and independent audit). Model/harness
+error separation: partial (expected: systematic decomposition). Study
+duration: short (expected: enough to assess durability). Modern practice is
+no longer satisfied with accuracy plus an agent description — HAL studies
+model/scaffold/benchmark effects and publishes massive execution traces.
+Strata moves in the right direction but is early.
+
+**6. How interesting is it?** Local-AI developers: potentially interesting
+now — cheap RTX 3060, frozen weights, deterministic repairs, cost-of-quality
+analysis has practical value. Agent developers: the history of autonomous
+accept/reject decisions is interesting, especially with full decision chains,
+but they will want comparison with known approaches. Academic researchers:
+current evidence is not enough for strong conclusions, yet the open archive
+can serve as material for independent experiments. Another interesting
+aspect: the project also studies how the agent itself organizes software
+experiments, finds its own errors and decides to roll back. That second
+aspect may turn out the most original.
+
+**7. Positioning that avoids unnecessary skepticism.** Not "we built
+self-developing AI". Rather: "An open, AI-operated home-lab experiment
+investigating autonomous harness development around frozen local language
+models. We publish successful and failed iterations, paired benchmarks,
+execution costs, and available provenance data. Our goal is to study which
+improvements generalize, which merely optimize benchmark formatting, and how
+much autonomy can be demonstrated experimentally." That formulation is much
+more convincing than grand promises.
+
+**Final assessment.** As a personal engineering project — serious work. As a
+scientific result — a preliminary study with substantial methodological
+limitations. A competent specialist looking at the code, rollback history,
+paired measurements and raw data will not call it dilettantism. But expect
+hard criticism along three lines: overfitting to own tests, insufficient
+independence of evaluation, incomplete evidence chain for autonomous code
+origin. And that criticism is useful. The most promising thing here is not
+the high percentages or even the harness-raised model quality, but the open
+history of an AI agent running engineering experiments on its own, making
+mistakes, measuring the consequences of its own changes, and abandoning
+failed decisions. If that can be demonstrated on new tasks, over a long
+period, with independent verification and honest compute accounting, the
+project can reach a much wider professional audience. It can already be
+shown publicly — positioned as an open research lab, not as a proven
+breakthrough in AI self-development.

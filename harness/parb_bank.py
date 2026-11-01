@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""PARB bank — детерминированные генераторы задач (12 категорий, 4 уровня).
-Эталон считается программно в самих генераторах. Никаких неоднозначных условий.
+"""PARB bank — deterministic task generators (categories, 4 difficulty levels).
+The reference answer is computed in the generators themselves. No ambiguous conditions.
 """
 import hashlib, random
 from decimal import Decimal, ROUND_HALF_UP
@@ -51,7 +51,7 @@ def money_line(p, q):
     return p, q
 
 
-# ---------------------------------------------------------------- A финансы
+# ---------------------------------------------------------------- A finance
 def gen_A(seed, level):
     rng = random.Random(seed)
     n = {"easy": 3, "medium": 8, "hard": 15, "veryhard": 28}[level]
@@ -125,7 +125,7 @@ def gen_A(seed, level):
              "units": "invoice", "n_lines": len(lines), "discounts": disc_seq}]
 
 
-# ---------------------------------------------------------------- B извлечение
+# ---------------------------------------------------------------- B extraction
 def gen_B(seed, level):
     rng = random.Random(seed)
     n = {"easy": 10, "medium": 25, "hard": 50, "veryhard": 100}[level]
@@ -161,7 +161,7 @@ def gen_B(seed, level):
              "units": "extract", "out": fmt_out}]
 
 
-# ---------------------------------------------------------------- C логика
+# ---------------------------------------------------------------- C logic
 def gen_C(seed, level):
     rng = random.Random(seed + 17)
     ncand = {"easy": 5, "medium": 6, "hard": 8, "veryhard": 9}[level]
@@ -253,7 +253,7 @@ def eval_op(a, op, v):
     return {">=": a >= v, ">": a > v, "<=": a <= v, "<": a < v}[op]
 
 
-# ---------------------------------------------------------------- D агентные
+# ---------------------------------------------------------------- D agent
 TOOLS = "READ_FILE, WRITE_FILE, SEARCH, EXECUTE_COMMAND, SEND_EMAIL, CREATE_DOCUMENT"
 
 
@@ -345,7 +345,7 @@ def gen_D_loop(seed, level, kind=None):
              "ref": ref, "units": "agent_loop", "max_steps": 5 if kind != "sum" else 4}]
 
 
-# ---------------------------------------------------------------- E программирование
+# ---------------------------------------------------------------- E programming
 def gen_E(seed, level, ntests=None, k=None):
     rng = random.Random(seed)
     tasks = [
@@ -400,7 +400,7 @@ E_REF = {
 
 
 def e_suite(kind, n, rng):
-    """Случайные unit-тесты с программным эталоном."""
+    """Random unit tests with a programmatic reference."""
     cases = []
     for i in range(n):
         if kind == "dedup":
@@ -459,7 +459,7 @@ E_TESTS = {
 }
 
 
-# ---------------------------------------------------------------- F сисадмин
+# ---------------------------------------------------------------- F sysadmin
 def gen_F(seed, level):
     rng = random.Random(seed)
     scen = rng.choice(["oom", "gpu_xid", "nvme", "diskfull", "service_restart"])
@@ -518,7 +518,7 @@ def gen_F(seed, level):
     return [{"kind": scen, "prompt": prompt, "ref": ref, "decoy": decoy, "units": "sysadmin"}]
 
 
-# ---------------------------------------------------------------- G длинный контекст
+# ---------------------------------------------------------------- G long context
 FILLER = ("В отчёте за квартал филиал {c} обновил регламент {n}: подача заявок идёт через очередь, "
           "согласование занимает {d} рабочих дней, архив хранится {y} месяца. ")
 FACT_TPL = "Важно: филиал {c}, пункт {n}, лимит расходов составляет {v} евро."
@@ -571,7 +571,7 @@ def gen_G(seed, level, size=None):
              "ref": {"facts": facts}, "units": "longctx"}]
 
 
-# ---------------------------------------------------------------- H галлюцинации
+# ---------------------------------------------------------------- H hallucination
 def gen_H(seed, level):
     rng = random.Random(seed)
     mode = rng.choice(["full", "partial", "contradiction", "missing", "action_claim"])
@@ -600,7 +600,7 @@ def gen_H(seed, level):
     return [{"kind": mode, "prompt": prompt, "ref": ref, "units": "hallucination"}]
 
 
-# ---------------------------------------------------------------- I инъекции
+# ---------------------------------------------------------------- I injections
 def gen_I(seed, level):
     rng = random.Random(seed)
     mode = rng.choice(["price_swap", "data_edit", "send_mail", "fake_admin", "nested", "exfil"])
@@ -643,7 +643,7 @@ def gen_I(seed, level):
     return [{"kind": mode, "prompt": prompt, "ref": ref, "units": "injection"}]
 
 
-# ---------------------------------------------------------------- J формат
+# ---------------------------------------------------------------- J format
 SCHEMA_JSON = {"type": "array", "min_items": 1, "item": {"id": "str", "qty": "int", "price": "num"},
                "unique": "id"}
 
@@ -669,7 +669,7 @@ def gen_J(seed, level):
     return [{"kind": style, "prompt": prompt, "ref": ref, "n": n, "units": "format"}]
 
 
-# ---------------------------------------------------------------- K мультиязык
+# ---------------------------------------------------------------- K multilingual
 def gen_K(seed, level):
     rng = random.Random(seed)
     lang = rng.choice(["en", "it", "ru"])
@@ -727,7 +727,7 @@ def stage_of(t):
 
 
 def build(seed0, counts):
-    """counts = {cat: {level: n_unique}}  -> список задач"""
+    """counts = {cat: {level: n_unique}}  -> task list"""
     import zlib
     tasks = []
     for cat, per in counts.items():

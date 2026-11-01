@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""A/B: как поднять корректность финансовых расчётов на той же модели и той же арене.
-Варианты (thinking выключен, партия из 8 задач по 5 повторов):
-V0 — промт как в основном прогоне, temperature 0.7 (парный базис);
-V1 — тот же промт, temperature 0.2;
-V2 — модель только раскладывает строки (кол-во × цена), суммы считает код;
-V3 — модель отдаёт строго JSON со строками, суммы считает код.
-Оценка независимая: Decimal + округление до центов, сверка с эталоном банка."""
+"""A/B: how to raise financial-math correctness on the same model and the same arena.
+Variants (thinking off, a batch of 8 tasks x 5 repetitions):
+V0 — the prompt from the main run, temperature 0.7 (paired baseline);
+V1 — same prompt, temperature 0.2;
+V2 — the model only itemises lines (qty x price), code computes the sums;
+V3 — the model returns strict JSON lines, code computes the sums.
+Scoring is independent: Decimal + cent rounding, reconciled against the bank reference."""
 import json, os, re, sys, time, zlib, collections
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 

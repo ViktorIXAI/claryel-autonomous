@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Починка ФОРМА силами кода, без обращений к модели (идея v1.7).
+"""FORM repair by code alone, without calling the model (the v1.7 idea).
 
-Принцип: код вправе менять только оформление, но не данные. Если после причёсывания текст
-разбирается и в нём ровно те же строки и ключи, что были — починка засчитывается, модель
-не вызывается (ноль токенов). Если не разбирается или данные теряются — возвращаем None,
-и гейт идёт своим обычным путём (просьба к модели).
+Principle: code may change only presentation, never data. If after tidying the text
+parses and contains exactly the same rows and keys as before, the fix counts, the model
+is not called (zero tokens). If it does not parse or data is lost, we return None
+and the gate falls back to its normal path (asking the model).
 """
 import json
 import re
@@ -40,7 +40,7 @@ def _balanced(text, open_ch, close_ch):
 
 
 def try_json(text):
-    """Возвращает (объект, способ) или (None, None). Пробует всё, что не меняет данные."""
+    """Returns (object, method) or (None, None). Tries everything that does not change data."""
     raw = _balanced(text, "[", "]") or _balanced(text, "{", "}")
     if raw is None:
         return None, None
@@ -75,7 +75,7 @@ def sig_of_obj(obj):
 
 
 def fix_json_text(acct, text):
-    """Только если исходный текст уже был JSON-подобным и строки/ключи не поменялись."""
+    """Only if the source text was already JSON-like and rows/keys did not change."""
     before = try_json(_balanced(text, "[", "]") or _balanced(text, "{", "}") or "")
     obj, how = try_json(text)
     if obj is None:
@@ -89,8 +89,8 @@ def fix_json_text(acct, text):
 
 
 def fix_fields_text(acct, text, need):
-    """Поля KEY: значение — вытаскиваем их даже если модель добавила пояснения вокруг.
-    Ничего не domысливаем: если ключа нет, починка не помогает."""
+    """KEY: value fields — we extract them even when the model wrapped them in prose.
+    We never invent: if a key is missing, the fix does not help."""
     got = {}
     for ln in text.splitlines():
         m = re.match(r"^\s*(?:[-*\u2022]+\s*)?(?:\*\*)?\s*([A-Z][A-Z0-9_]{2,})\s*(?:\*\*)?\s*[:=]\s*"
@@ -109,7 +109,7 @@ def fix_fields_text(acct, text, need):
 
 
 def fix_csv_text(acct, text, cols=None, nrows=None):
-    """CSV: выкидываем текст до/после таблицы и пустые строки; сам содержимое строк не трогаем."""
+    """CSV: drop text before/after the table and empty lines; never touch row content."""
     lines = [l.strip() for l in (text or "").splitlines() if l.strip()]
     keep = []
     for l in lines:

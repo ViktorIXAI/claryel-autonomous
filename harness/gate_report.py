@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Сравнение базовой серии PARB и серии с верификационным контуром.
+"""Comparison of the base PARB series and the contour series.
 
-Базовая: ~/.hermes/bench/parb/results.jsonl (run_tag != 'gate', series main)
-Контур:  ~/.hermes/bench/parb/results-gate.jsonl + gate-ledger.jsonl (тянем с B2003)
+Base: ~/.hermes/bench/parb/results.jsonl (run_tag != 'gate', series main)
+Contour: ~/.hermes/bench/parb/results-gate.jsonl + gate-ledger.jsonl (pulled from B2003)
 
-Отчёт: по категориям — доля полностью принятых ответов до и после контура, и цена
-в секундах/токенах/потерянных токенах в секунду. Никаких евро: только время и токены.
+Report: per category — share of fully accepted answers before/after the contour, and cost
+in seconds/tokens/wasted tokens per second. No euros: only time and tokens.
 """
 import json
 import os
@@ -15,10 +15,10 @@ import sys
 from collections import defaultdict
 
 ROOT = os.path.expanduser("~/.hermes/bench/parb")
-CATNAME = {"A": "финансовые расчёты", "B": "извлечение данных", "C": "логика и ограничения",
-           "D": "агентное планирование", "E": "программирование", "F": "системное администрирование",
-           "G": "поиск в длинном контексте", "H": "галлюцинации", "I": "защита от инъекций",
-           "J": "надёжность формата", "K": "многоязычные задачи"}
+CATNAME = {"A": "financial math", "B": "data extraction", "C": "logic with constraints",
+           "D": "agent planning", "E": "programming", "F": "sysadmin",
+           "G": "long-context retrieval", "H": "hallucination", "I": "injection defense",
+           "J": "format reliability", "K": "multilingual"}
 
 
 def load(path, gate=None):
@@ -41,7 +41,7 @@ def load(path, gate=None):
 
 
 def acc(rows):
-    g = defaultdict(lambda: [0, 0, 0, 0, []])   # принято, всего, формат, обрезано, секунды
+    g = defaultdict(lambda: [0, 0, 0, 0, []])   # accepted, total, format, truncated, seconds
     for r in rows:
         c = r["cat"]
         cval = r.get("content")
@@ -63,7 +63,7 @@ def main():
     if os.path.exists(lp):
         led = [json.loads(l) for l in open(lp, encoding="utf-8")]
     if not gate:
-        print("серия с контуром ещё не собрана (results-gate.jsonl отсутствует)")
+        print("contour series not collected yet (results-gate.jsonl missing)")
         return 1
     A, B = acc(gate), acc(base)
     lg = defaultdict(list)
@@ -71,7 +71,7 @@ def main():
         lg[r["task"].split("-")[0]].append(r)
 
     print("%-4s %-30s %10s %10s %8s | %8s %8s %9s %9s" % (
-        "кат", "категория", "базовая", "контур", "сдвиг", "сек баз", "сек конт", "ток/с эфф", "потеря %"))
+        "cat", "category", "base", "contour", "shift", "s base", "s contour", "tok/s eff", "waste %"))
     for c in sorted(set(list(A) + list(B))):
         b = B.get(c, [0, 0, 0, 0, []])
         a = A.get(c, [0, 0, 0, 0, []])
@@ -85,13 +85,13 @@ def main():
             c, CATNAME.get(c, c),
             ("%.0f%%" % bs) if bs is not None else "—",
             ("%.0f%%" % as_) if as_ is not None else "—",
-            ("%+.0f п.п." % (as_ - bs)) if (bs is not None and as_ is not None) else "—",
+            ("%+.0f pp" % (as_ - bs)) if (bs is not None and as_ is not None) else "—",
             ("%.1f" % st.mean(b[4])) if b[4] else "—",
             ("%.1f" % st.mean(secs)) if secs else ("%.1f" % st.mean(a[4]) if a[4] else "—"),
             ("%.0f" % st.mean(eff)) if eff else "—",
             ("%.0f" % (100 - 100 * st.mean(eff) / st.mean(raw))) if (eff and raw) else "—"))
 
-    print("\nвсего: базовая %d записей, контур %d записей, бухгалтерия %d строк" % (len(B), len(A), len(led)))
+    print("\ntotals: base %d records, contour %d records, ledger %d rows" % (len(B), len(A), len(led)))
     if led:
         calls = sum(x["model_calls"] for x in led)
         fixes = sum(x["gate_fixes"] for x in led)
@@ -100,16 +100,16 @@ def main():
         secs = sum(x["seconds"] for x in led)
         ctok = sum(x["ctok"] for x in led)
         utok = sum(x["useful_tokens"] for x in led)
-        print("работа контура: вызовов модели %d (переспросов %d, блокировок шага %d, подъёмов лимита %d)" % (
+        print("contour work: model calls %d (re-asks %d, step blocks %d, limit raises %d)" % (
             calls, fixes, blocks, lad))
-        print("время модели %d с, токенов %d, из них принято %d (переработка %d токенов, %d%%)" % (
+        print("model time %d s, tokens %d, accepted %d (rework %d tokens, %d%%)" % (
             secs, ctok, utok, ctok - utok, round(100 * (ctok - utok) / max(ctok, 1))))
         ev = defaultdict(int)
         for x in led:
             for e in x.get("events") or []:
                 ev[e.split(":")[0] + "_" + e.split(":")[1].split("_")[0]] += 1
         top = sorted(ev.items(), key=lambda kv: -kv[1])[:12]
-        print("частые события контура:", ", ".join("%s×%d" % kv for kv in top))
+        print("frequent contour events:", ", ".join("%s x %d" % kv for kv in top))
     return 0
 
 

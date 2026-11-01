@@ -5,4 +5,4 @@
 - **Code state:** gate_fixers.py as published (unchanged v1.7->v1.9) + gate_fixers_test.py 12/12; runner snapshot not retained
 - **Adoption:** agent (paired A/B), human informed at morning report
 - **Provenance:** Agent-proposed/implemented/tested/evaluated (docs/autonomy.md);
-  decision entry: history/agent-decisions/gate-versions.log
+  decision entry: history/agent-decisions/gate-versions.en.md (Russian original archived in the ru-source-records release asset)

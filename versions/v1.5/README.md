@@ -5,4 +5,4 @@
 - **Code state:** not_recorded
 - **Adoption:** agent: marked identical to v1.3
 - **Provenance:** Agent-proposed/implemented/tested/evaluated (docs/autonomy.md);
-  decision entry: history/agent-decisions/gate-versions.log
+  decision entry: history/agent-decisions/gate-versions.en.md (Russian original archived in the ru-source-records release asset)

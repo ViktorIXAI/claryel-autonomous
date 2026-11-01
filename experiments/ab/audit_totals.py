@@ -46,7 +46,7 @@ for p in led_files:
     print(f"{p.replace(BASE,'BASE')} records={rows(p)}")
 
 print("\n== version log ==")
-log = BASE + "/gate-versions.log"
+log = BASE + "/gate-versions.log"  # rig-side Russian decision log; the repo keeps the English translation gate-versions.en.md
 if os.path.exists(log):
     lines = [l.rstrip("\n") for l in open(log, encoding="utf-8", errors="ignore")]
     print("lines", len(lines))

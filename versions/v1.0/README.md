@@ -5,4 +5,4 @@
 - **Code state:** not_recorded (byte-exact snapshot not retained; behavior reconstructable as the v1.2 runner minus later gates)
 - **Adoption:** not_recorded
 - **Provenance:** Agent-proposed/implemented/tested/evaluated (docs/autonomy.md);
-  decision entry: history/agent-decisions/gate-versions.log
+  decision entry: history/agent-decisions/gate-versions.en.md (Russian original archived in the ru-source-records release asset)

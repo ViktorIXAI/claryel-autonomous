@@ -37,7 +37,7 @@ the harness, but only inside these rails.
    attempt; rejected savings: v1.6 (−45% tokens, −3 correct answers).
 9. **The decision log is append-only and adversarial to its author**:
    rejected versions get full post-mortems with the numbers that killed them
-   (`versions/gate-versions.log`).
+   (`history/agent-decisions/gate-versions.en.md`).
 10. **Nightly cadence via one-shot scheduled diagnostics**: scheduled jobs
     pull artifacts, aggregate, classify, propose exactly one hypothesis;
     only the main agent session builds and launches versions. Morning report

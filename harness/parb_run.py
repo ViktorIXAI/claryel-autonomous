@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""PARB runner. Читает bank.json + plan.json, идёт по этапам с временными боксами,
-пишет results.jsonl (flush на запись), ведёт дедлайн 14400 с по wall-clock от старта
-(монотонный внутри сессии) и стоп-гейты ресурсов.
+"""PARB runner. Reads bank.json + plan.json, walks stages with time boxes,
+writes results.jsonl (flush per line), keeps a 14400 s wall-clock deadline from start
+(monotonic within a session) and resource stop-gates.
 """
 import json, os, time, sys, hashlib, signal, subprocess, urllib.request
 
@@ -15,7 +15,7 @@ RESULTS = os.path.join(ROOT, os.environ.get("PARB_RESULTS", "results.jsonl"))
 NOBOX = os.environ.get("PARB_NOBOX", "0") == "1"
 RUNTAG = os.environ.get("PARB_TAG", "")
 SERIES = {"main": 512, "mt1024": 1024, "mt2048": 2048}
-# режим-thinking задаётся переменной окружения: фаза 1 шла с thinking по умолчанию движка
+# thinking mode is set via environment: phase 1 ran with the engine default thinking
 THINKING_OFF = os.environ.get("PARB_THINKING", "off").lower() == "off"
 KEYS = ["mem_avail_mb", "swap_used_mb", "dirty_kb", "nvme_rd_kbs", "nvme_wr_kbs", "vram_used_mb",
         "gpu_util", "gpu_power_w", "gpu_temp_c", "gpu_clk_mhz", "cpu_temp_c", "load1"]
@@ -110,8 +110,8 @@ def call_api(msgs, mt, seed):
     body = {"model": MODEL, "messages": msgs, "temperature": 0.7, "max_tokens": mt,
             "stream": True, "seed": seed}
     if THINKING_OFF:
-        # движок по умолчанию стримит reasoning_content; без этих параметров
-        # условие «thinking выключен» не выполняется
+        # the engine streams reasoning_content by default; without these parameters
+        # the "thinking off" condition is not met
         body["reasoning_effort"] = "none"
         body["chat_template_kwargs"] = {"enable_thinking": False}
     req = urllib.request.Request(API, data=json.dumps(body).encode(), headers=HDRS)
@@ -221,14 +221,14 @@ def run_one(t, pos, done, st):
         return None
     g = gate()
     if g:
-        log("СТОП-ГЕЙТ %s: пауза 90 с, повторная проверка" % g)
+        log("STOP-GATE %s: pause 90 s, re-check" % g)
         time.sleep(90)
         g = gate()
         if g:
             st["stop_reason"] = g
             st["stopped_at"] = time.strftime("%F %T")
             save_state(st)
-            log("испытания остановлены досрочно: %s" % g)
+            log("tests stopped early: %s" % g)
             raise SystemExit(3)
     mt = SERIES[pos["series"]]
     rec = {"task": t["id"], "rep": pos["rep"], "series": pos["series"], "rep_group": pos["rep_group"],
@@ -299,12 +299,12 @@ def main():
     meta = rj(os.path.join(ROOT, "bank.meta.json"), {})
     byid = {t["id"]: t for t in tasks}
     done = done_keys()
-    log("старт: задач %d, позиций плана %d, уже выполнено %d, хеш банка %s, хеш плана %s" %
+    log("start: tasks %d, plan positions %d, already done %d, bank hash %s, plan hash %s" %
         (len(tasks), len(plan), len(done), meta.get("bank_hash"), meta.get("plan_hash")))
     cur = None
     for pos in plan:
         if time.time() >= deadline:
-            log("ДЕДЛАЙН %d с истёк — новых запросов не начинаем" % LIMIT)
+            log("DEADLINE %d s reached — no new requests started" % LIMIT)
             break
         if (pos["task"], pos["rep"], pos["series"]) in done:
             continue
@@ -312,21 +312,21 @@ def main():
         box_end = st["start_wall"] + box[1]
         if not NOBOX and pos["stage"] != 1 and time.time() >= box_end:
             if cur != pos["stage"]:
-                log("этап %d пропущен: время бокса уже вышло" % pos["stage"])
+                log("stage %d skipped: its time box already passed" % pos["stage"])
                 cur = pos["stage"]
             continue
         if cur != pos["stage"]:
             cur = pos["stage"]
             st["current_stage"] = pos["stage"]
             save_state(st)
-            log("=== этап %d (боксы %d..%d с от старта) ===" % (pos["stage"], box[0], box[1]))
+            log("=== stage %d (boxes %d..%d s from start) ===" % (pos["stage"], box[0], box[1]))
         t = byid[pos["task"]]
         try:
             run_one(t, pos, done, st)
         except SystemExit:
             raise
         except Exception as e:
-            log("СБОЙ ПОЗИЦИИ %s: %s" % (pos["task"], str(e)[:150]))
+            log("POSITION FAILURE %s: %s" % (pos["task"], str(e)[:150]))
         if len(done) % 20 == 0:
             st["done"] = len(done)
             save_state(st)
@@ -334,8 +334,8 @@ def main():
     st["finished_at"] = time.strftime("%F %T")
     st["elapsed"] = round(time.time() - st["start_wall"], 1)
     save_state(st)
-    log("прогон завершён: записей %d, длительность %.0f с, стоп-причина: %s" %
-        (len(done), st["elapsed"], st.get("stop_reason", "нет")))
+    log("run finished: records %d, duration %.0f s, stop reason: %s" %
+        (len(done), st["elapsed"], st.get("stop_reason", "none")))
 
 
 if __name__ == "__main__":

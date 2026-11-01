@@ -82,3 +82,23 @@ v2 asset: 998186 bytes, sha256 `42063f2e907d8a00…`
 |---|---:|---:|---|
 | `logs/samples/holdout-p2005-mini/gate-ledger-holdout-mini.jsonl` | 71 | 32315 | `d08c01f8cfe13d37…` |
 | `logs/samples/holdout-p2005-mini/results-holdout-mini.jsonl` | 71 | 125403 | `07e9450216129bf7…` |
+
+## Russian source records (verbatim originals, archived)
+
+The repository presents English-first documentation. Verbatim Russian
+originals of decision records and reviews are preserved unmodified in the
+release asset `ru-source-records-2026-11-01.tar.zst`
+(sha256 `a37a9c922105f61dfcdfaf0d2543ae6c4b956056967a7bc6cd028fd0014ef839`):
+
+| member | content |
+|---|---|
+| gate-versions.log | agent decision log, Russian original (in-repo English translation: `history/agent-decisions/gate-versions.en.md`) |
+| ext-001-review-2026-11-01.ru.txt | external review Russian original (translated copy: `results/external-review-2026-11-01.md`) |
+| external-review-2026-11-01.md | review file as it appeared with the Russian section inline (pre-translation snapshot) |
+| contour-prompts.md / task-prompts.md | pre-translation versions incl. verbatim Russian prompt quotes |
+| NOTES-method.md | pre-translation Russian method notes |
+
+Russian strings that are *functional experiment data* (task prompts in
+`bank.json`, contour prompt literals in `gate_run.py`, model outputs in
+result JSONL, detector regexes, ledger event tags) stay verbatim everywhere —
+they are the measured system, not documentation.

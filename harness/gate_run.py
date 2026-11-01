@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-"""PGR — серия испытаний с верификационным контуром поверх той же конфигурации.
+"""PGR — a test series with a verification contour over the same configuration.
 
-Задачи, сиды, повторы и max_tokens берутся из того же plan.json, что и базовая
-серия PARB, поэтому сравнение попарное: идентичные задачи, отличается только то,
-что ответ теперь идёт через контур (структурированный вывод -> проверка кодом ->
-переспрос с указанием нарушения -> лесенка max_tokens при обрыве).
+Tasks, seeds, repetitions and max_tokens come from the same plan.json as the base
+PARB series, so the comparison is paired: identical tasks; the only difference is
+that the answer now goes through the contour (structured output -> code check ->
+re-ask naming the violation -> max_tokens ladder on truncation).
 
-Пишет:
-  results-gate.jsonl  — оценки (те же валидаторы parb_check / parb_loop, что и в базовой серии)
-  gate-ledger.jsonl   — цена: вызовы модели, правки контура, обрывы, токены, секунды,
-                        скорость декода сырая и эффективная, % потерь
-Учёт ведётся в секундах и токенах в секунду, не в евро.
+Writes:
+  results-gate.jsonl  — scores (same parb_check / parb_loop validators as the base series)
+  gate-ledger.jsonl   — cost: model calls, contour edits, truncations, tokens, seconds,
+                        raw vs effective decode speed, %% waste
+Accounting is in seconds and tokens per second, not in euros.
 """
 import hashlib
 import json
@@ -25,8 +25,8 @@ from decimal import Decimal, ROUND_HALF_UP
 ROOT = os.path.expanduser(os.environ.get("PARB_ROOT", "~/parb"))
 API = os.environ.get("PARB_API", "http://127.0.0.1:8080/v1/chat/completions")
 MODEL = os.environ.get("PARB_MODEL", "qwen3.8-flash-next-iq3_s")
-# метка машины: один и тот же стенд на B2003 и на Mac Studio пишет одну и ту же
-# задачу, а логи потом сводятся попарно именно по (task, rep, box)
+# machine label: the same stand on B2003 and on Mac Studio runs the same task;
+# logs are later joined pairwise by (task, rep, box).
 BOX = os.environ.get("PARB_BOX", "B2003")
 TIMEOUT = 420
 LIMIT = int(os.environ.get("PARB_LIMIT", "14400"))
@@ -35,25 +35,25 @@ RESULTS = os.path.join(ROOT, os.environ.get("PARB_RESULTS", "results-gate.jsonl"
 LEDGER = os.path.join(ROOT, os.environ.get("PARB_LEDGER", "gate-ledger.jsonl"))
 SUBSET = [x for x in os.environ.get("PARB_SUBSET", "").split(",") if x.strip()]
 LADDER = [int(x) for x in os.environ.get("PARB_LADDER", "512,1024,2048").split(",")]
-# Версионность контура пишется в каждую запись результата и бухгалтерии, чтобы серии
-# разных поколений гейта никогда не смешивались в одной статистике.
+# Contour version is stamped into every result and ledger row so series
+# from different gate generations never mix in one statistic.
 CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "v1.3")
-CONTOUR_NOTES = ("v1.0=базовый контур (гейт+переспрос); v1.1=чанковое извлечение счетов >8 позиций "
-                 "и regex-фолбэк, счёт >16 позиций сразу блоками, гейт полноты для логики, "
-                 "структурный гейт для диагностики; v1.2=фильтр для логики считает код из текста задачи, "
-                 "гейт формата уважает требуемый формат (CSV/JSON/число строк/колонки), диапазон букв A-J; "
-                 "v1.7=починка формы только кодом (ноль токенов модели); "
-                 "v1.8=одна точечная подсказка контура по замечанию скорера (из двух ответов лучший) "
-                 "+ отклонение преждевременного ответа в D-цикле до чтения/плана")
+CONTOUR_NOTES = ("v1.0=base contour (gate+re-ask); v1.1=chunked extraction for invoices >8 lines "
+                 "and regex fallback, invoices >16 lines go straight to blocks, completeness gate for logic, "
+                 "structural gate for diagnostics; v1.2=the logic filter is computed by code from the task text, "
+                 "format gate respects the required format (CSV/JSON/row count/columns), letters A-J; "
+                 "v1.7=form repair by code only (zero model tokens); "
+                 "v1.8=one targeted contour nudge per scorer note (best of two answers) "
+                 "+ premature D-loop answer rejected before read/plan")
 sys.path.insert(0, ROOT)
 import parb_check as CK
 try:
-    import gate_fixers as GF          # v1.7: починка формы силами кода (ноль токенов модели)
+    import gate_fixers as GF          # v1.7: form repair by code (zero model tokens)
 except Exception:
     GF = None
 CODE_FIX = (CONTOUR_VERSION >= "v1.7") and (GF is not None)
-# v1.8: одна точечная подсказка контура по типу замечания скорера (не меняя задание),
-# из двух ответов оставляем лучший; в D-цикле до 2 шагов чтения ответ не принимается.
+# v1.8: one targeted contour nudge per scorer-note kind (task unchanged);
+# the better of two answers is kept; in the D-loop an answer before 2 read-steps is not accepted.
 VERIFY_RETRY = CONTOUR_VERSION >= "v1.8"
 SLOT_NORMALIZE = CONTOUR_VERSION >= "v1.9"
 NUDGE = {
@@ -108,7 +108,7 @@ def mem_avail_mb():
 
 def gate_res():
     ma = mem_avail_mb()
-    if ma >= 0 and ma < 700:      # на macOS /proc/meminfo нет: там проверка пропускается
+    if ma >= 0 and ma < 700:      # macOS has no /proc/meminfo: the check is skipped there
         return "low_mem_%dMB" % ma
     try:
         q = subprocess.run(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"],
@@ -187,7 +187,7 @@ def call(msgs, mt, seed):
 
 
 class Acct:
-    """Бухгалтерия одного задания: сырое декод против полезного выхода."""
+    """Bookkeeping for one task: raw decode vs useful output."""
 
     def __init__(self):
         self.calls = 0
@@ -228,19 +228,19 @@ class Acct:
                 "events": self.events[:12]}
 
 
-# v1.4: починка формата не требует всего исходного документа — модели нужен только
-# её предыдущий ответ и список претензий. Это главные сэкономленные токены.
-# v1.4 (дешёвая починка без документа) МЕРИЛИ: токены входа −59%, но верность 19/19 -> 3/19.
-# Значит починку без контекста можно принимать только если она ничего не потеряла:
-# сравнение скелета ответа (число строк и ключей) до и после. Охрана включена с v1.5.
+# v1.4: format repair does not need the full source document — the model only needs
+# its previous answer plus the list of complaints. This is where the tokens are saved.
+# v1.4 (cheap repair without the document) WAS MEASURED: input tokens -59%, but correctness 19/19 -> 3/19.
+# So a context-less repair may be accepted only if it lost nothing:
+# compare the answer skeleton (row count and keys) before/after. The guard is on since v1.5.
 CHEAP_REPAIR = CONTOUR_VERSION >= "v1.4" and os.environ.get("PARB_CHEAP", "0") == "1"
-CHEAP_GUARD = CONTOUR_VERSION >= "v1.5"   # v1.6: дешёвая починка реально получает предыдущий ответ
+CHEAP_GUARD = CONTOUR_VERSION >= "v1.5"   # v1.6: the cheap repair now really receives the previous answer
 MAX_FMT_FIXES = 2
 
 
 def struct_sig(text):
-    """Скелет ответа: сколько строк данных и какие ключи. Нужен, чтобы починка формата
-    не уничтожила содержимое (в v1.4 это и сломало: 19 верных ответов стали 3)."""
+    """Answer skeleton: how many data rows and which keys. Needed so format repair
+    cannot destroy content (this is exactly what broke v1.4: 19 correct answers became 3)."""
     t = (text or "").strip()
     m = re.search(r"\[\s*\{.*\}\s*\]|\{.*\}", t, re.S)
     if m:
@@ -265,7 +265,7 @@ def struct_sig(text):
 
 
 def worse_than_before(new_sig, old_sig):
-    """Дешёвая починка не имеет права терять строки или ключи."""
+    """A cheap repair has no right to lose rows or keys."""
     if not old_sig:
         return False
     if new_sig["rows"] < old_sig["rows"]:
@@ -275,10 +275,10 @@ def worse_than_before(new_sig, old_sig):
 
 
 def ask_repair(acct, msgs0, hint, seed, prev=None):
-    """Повторный вызов после замечания гейта. prev — предыдущий ответ модели: msgs0 в контуре
-    содержит только системное сообщение и задачу (без ответа модели), поэтому ответ передаётся
-    отдельным аргументом. Без него дешёвая починка превращается в просьбу на пустом месте —
-    именно так v1.4 и потерял 16 верных ответов из 19."""
+    """Re-ask after a gate complaint. prev is the model's previous answer: msgs0 in the contour
+    contains only the system message and the task (without the model answer), so the answer is passed
+    as a separate argument. Without it the cheap repair becomes a request out of thin air —
+    that is exactly how v1.4 lost 16 of 19 correct answers."""
     last = prev or ""
     if not last:
         for m in reversed(msgs0):
@@ -296,7 +296,7 @@ def ask_repair(acct, msgs0, hint, seed, prev=None):
 
 
 def ask_ladder(acct, msgs, seed, mt=512):
-    """Обрыв ответа — не провал, а недостающий бюджет: поднимаем max_tokens."""
+    """A truncated answer is not a failure but a missing budget: raise max_tokens."""
     r = call(msgs, mt, seed)
     i = LADDER.index(mt) if mt in LADDER else 0
     while r["finish"] == "length" and i + 1 < len(LADDER):
@@ -361,8 +361,8 @@ def money(acct, t, seed, msgs0):
         except Exception:
             return None
 
-    # Длинный счёт одной пачкой заведомо не вывозится (замерено): не тратим попытки,
-    # сразу идём блоками — это экономит ~4 вызова модели на счёт.
+    # A long invoice cannot be handled in one batch (measured): do not waste attempts,
+    # go straight to blocks — this saves ~4 model calls per invoice.
     first_try = 0 if len(ref) > 16 else 3
     for i in range(first_try):
         obj = one_shot(i)
@@ -380,9 +380,9 @@ def money(acct, t, seed, msgs0):
                 items = [(Decimal(str(x["qty"])), Decimal(str(x["price"]).replace(",", "."))) for x in it]
                 break
 
-    # Длинный счёт одной пачкой не вывозится (замерено: 28 позиций -> осечка).
-    # Дробим документ на блоки по 8 позиций: модель выписывает блок, код склеивает.
-    if items is None and len(ref) > 8:   # блоки по 8 позиций, максимум 2 попытки на блок
+    # A long invoice in one batch fails (measured: 28 lines -> slip).
+    # Split the document into blocks of 8 lines: the model transcribes a block, code joins.
+    if items is None and len(ref) > 8:   # blocks of 8 lines, max 2 attempts per block
         chunks = [ref[i:i + 8] for i in range(0, len(ref), 8)]
         acc_items, okc = [], 0
         marks = re.split(r"(?=Позиция\s+\d+)", doc)
@@ -406,7 +406,7 @@ def money(acct, t, seed, msgs0):
             items = acc_items
             acct.ev("gate", "computed_by_code_chunked")
 
-    # Последний рубеж: если формат документа машиночитаемый, позиции берёт код.
+    # Last resort: if the document format is machine-readable, code takes the lines.
     if items is None:
         rx = [(int(q), dec0(p)) for q, p in PAT_ITEM.findall(doc)]
         if len(rx) == len(ref):
@@ -440,7 +440,7 @@ def money(acct, t, seed, msgs0):
     acct.code_ms += (time.time() - t0) * 1000
     if kind == "find_error":
         stated = dict(stated_model)
-        stated.update({int(n): dec0(s) for n, s in PAT_STATED.findall(doc)})   # документ важнее пересказа
+        stated.update({int(n): dec0(s) for n, s in PAT_STATED.findall(doc)})   # the document beats any retelling
         wrong = [i + 1 for i, w in enumerate(lines) if stated.get(i + 1) is not None and stated[i + 1] != w]
         n = wrong[0] if wrong else 0
         if not n:
@@ -457,7 +457,7 @@ def money(acct, t, seed, msgs0):
 
 
 def json_gate(acct, t, seed, msgs0, keys_hint):
-    """Строгий формат + внутренняя непротиворечивость счётчиков."""
+    """Strict format + internal consistency of the counters."""
     for i in range(3):
         extra = "" if i == 0 else " ПРЕДЫДУЩИЙ ОТВЕТ НЕ РАЗОБРАН ИЛИ НЕВЕРЕН: верни только валидный JSON."
         if i == 0 or not CHEAP_REPAIR:
@@ -487,7 +487,7 @@ def json_gate(acct, t, seed, msgs0, keys_hint):
                 acct.fixes += 1
                 acct.ev("fix", "json_attempt_%d" % (i + 1))
             continue
-        # внутренний контроль: заявленные счётчики и суммы должны совпадать с самими данными
+        # internal check: stated counters and sums must match the data itself
         if isinstance(obj, dict):
             rows = next((v for v in obj.values() if isinstance(v, list)), None)
             if rows:
@@ -498,7 +498,7 @@ def json_gate(acct, t, seed, msgs0, keys_hint):
                         if not re.fullmatch(r"\d+(\.\d+)?", s):
                             continue
                         want = None
-                        if "count" in k.lower() or "всего" in k.lower() or "число" in k.lower():
+                        if "count" in k.lower() or "всего" in k.lower() or "число" in k.lower():  # data keyword kept
                             want = len(rows)
                         if want is not None and Decimal(s) != Decimal(want):
                             acct.ev("gate", "counter_%s" % k)
@@ -598,7 +598,7 @@ def d_order_steps(text):
 
 
 def order_gate(acct, t, seed, msgs0):
-    """Список вызовов инструментов: изменяющее действие раньше чтения — нарушение."""
+    """Tool-call list: a mutating action before any read is a violation."""
     r = ask_ladder(acct, msgs0, seed)
     for i in range(2):
         lines = [re.sub(r"^[\d)\.\-\s]+", "", l).strip().upper()
@@ -660,7 +660,7 @@ FIELD_RE = {
 
 
 def spec_from_doc(doc):
-    """Условия и таблицу кандидатов читает код: фильтр считает тоже код."""
+    """Code reads the constraints and the candidate table; code computes the filter too."""
     conds = []
     for pat, fld, op in COND_PATTERNS:
         for m in re.finditer(pat, doc):
@@ -694,7 +694,7 @@ def fits(row, conds):
 
 
 def logic_by_code(acct, t, seed, msgs0):
-    """Категория C: код читает ограничения и таблицу из текста задачи и считает фильтр сам."""
+    """Category C: code reads constraints and table from the task text and computes the filter itself."""
     doc = (t.get("assembled_doc", "") + "\n" + t["prompt"]) if t.get("assembled_doc") else t["prompt"]
     t0 = time.time()
     conds, cands = spec_from_doc(doc)
@@ -709,7 +709,7 @@ def logic_by_code(acct, t, seed, msgs0):
 
 
 def want_fields(prompt):
-    """Поля вида KEY: значение, которые требует сама задача (прописные токены с двоеточием)."""
+    """KEY: value fields required by the task itself (uppercase tokens with a colon)."""
     out = []
     for m in re.finditer(r"^\s*([A-Z][A-Z0-9_]{2,})\s*:", prompt, re.M):
         k = m.group(1)
@@ -724,11 +724,11 @@ def want_fields(prompt):
 
 
 def want_format(prompt):
-    """Какой формат требует сама задача — контур навязывает именно его, а не свой.
+    """Which format the task itself requires — the contour enforces exactly that, not its own.
 
-    v1.3: если задача упоминает и JSON, и CSV одновременно, структуру НЕ навязываем:
-    угадать нельзя, а навязанная структура ломает ответ. Отдельно вводится "fields"
-    для задач с полями KEY: значение.
+    v1.3: if the task mentions both JSON and CSV, do NOT impose a structure:
+    guessing is unsafe and an imposed structure breaks the answer. A separate "fields"
+    gate exists for KEY: value tasks.
     """
     low = prompt.lower()
     has_json = "json" in low
@@ -763,10 +763,10 @@ def want_cols(prompt):
 
 
 def format_gate(acct, t, seed, msgs0):
-    """B/J: сверяем вывод с требованием задачи (формат, число строк, состав колонок, типы).
+    """B/J: check the output against the task requirement (format, row count, columns, types).
 
-    Правильные значения здесь не подглядываются: код проверяет только структуру,
-    которую задал сам пользователь в тексте задачи.
+    Correct values are not peeked at here: code checks only the structure
+    the user themselves specified in the task text.
     """
     fmt = want_format(t["prompt"])
     if fmt in ("text", "ambiguous", "fields"):
@@ -855,7 +855,7 @@ def format_gate(acct, t, seed, msgs0):
 
 
 def fields_gate(acct, t, seed, msgs0):
-    """Поля KEY: значение — код проверяет полноту и непустоту, не подглядывая правильные числа."""
+    """KEY: value fields — code checks completeness and non-emptiness without peeking at correct values."""
     need = want_fields(t["prompt"])
     hint = ("ВЫВЕДИ строки вида КЛЮЧ: значение ровно для таких ключей: %s. "
             "Каждый ключ один раз, значение без пояснений." % ", ".join(need))
@@ -908,11 +908,11 @@ MUT_CMDS = ("rm ", "sudo ", "systemctl restart", "systemctl stop", "apt-get", "c
 
 
 def coverage_gate(acct, t, seed, msgs0):
-    """Логика с ограничениями: код не знает правильный ответ, но следит за полнотой.
+    """Logic with constraints: code does not know the right answer but watches completeness.
 
-    Модель обязана вынести вердикт каждому варианту, а финальный набор должен совпадать
-    с тем, что она сама же отметила подходящим. Провал — один переспрос с указанием,
-    какой вариант проигнорирован или где противоречие. Так лечится потерянный вариант.
+    The model must give a verdict for every candidate, and the final set must match
+    what it itself marked as suitable. On failure — one re-ask naming
+    which candidate was ignored or where the contradiction is. This cures the lost candidate.
     """
     n = int(t.get("n_cand") or 0)
     if n <= 0:
@@ -951,10 +951,10 @@ def coverage_gate(acct, t, seed, msgs0):
 
 
 def sysadmin_gate(acct, t, seed, msgs0):
-    """Диагностика: проверяем структуру и запрет изменяющих команд (правило есть в самой задаче).
+    """Diagnostics: check structure and the ban on mutating commands (the rule is in the task itself).
 
-    Содержание по логу проверяет человек или более сильная модель - тут код следит, чтобы причина была
-    названа, шагов было не меньше трёх и в ответе не было команды, меняющей систему.
+    Log content is judged by a human or a stronger model — here code only ensures the cause is
+    named, there are at least three steps, and no system-mutating command appears.
     """
     for i in range(2):
         r = ask_ladder(acct, msgs0 + ([{"role": "user", "content":
@@ -984,7 +984,7 @@ def sysadmin_gate(acct, t, seed, msgs0):
 
 
 def plan_loop(acct, t, seed, rec):
-    """Агентный цикл с гейтом: изменяющее действие раньше чтения не выполняется вовсе."""
+    """Agent loop with a gate: a mutating action before the read is never executed."""
     msgs = ([{"role": "system", "content": t["sys"]}] if t.get("sys") else []) + \
            [{"role": "user", "content": t["prompt"]}]
     steps, final = [], None
@@ -1029,7 +1029,7 @@ def plan_loop(acct, t, seed, rec):
 
 
 def code_gate(acct, t, seed, msgs0):
-    """Код модели исполняется; провал тестов — правка с текстом ошибки."""
+    """Model code is executed; failing tests trigger a repair carrying the error text."""
     last = None
     for i in range(3):
         extra = "" if i == 0 else "\n\nПРЕДЫДУЩАЯ ВЕРСИЯ ПРОВАЛИЛАСЬ:\n%s\nДай исправленный код без пояснений." % last[:900]
@@ -1051,7 +1051,7 @@ def code_gate(acct, t, seed, msgs0):
         acct.ev("gate", "tests_%d_of_%d" % (okc, totc))
         if totc and okc == totc:
             return r
-        last = errtxt or "тесты не пройдены (%d/%d)" % (okc, totc)
+        last = errtxt or "tests not passed (%d/%d)" % (okc, totc)
         if i < 2:
             acct.fixes += 1
             acct.ev("fix", "test_attempt_%d" % (i + 1))
@@ -1064,14 +1064,14 @@ def run_one(t, pos, done, st):
         return None
     g = gate_res()
     if g:
-        log("СТОП-ГЕЙТ %s: пауза 90 с" % g)
+        log("STOP-GATE %s: pause 90 s" % g)
         time.sleep(90)
         g = gate_res()
         if g:
             st["stop_reason"] = g
             st["stopped_at"] = time.strftime("%F %T")
             save_state(st)
-            log("серия остановлена: %s" % g)
+            log("series stopped: %s" % g)
             raise SystemExit(3)
     acct = Acct()
     cat = t["cat"]
@@ -1096,7 +1096,7 @@ def run_one(t, pos, done, st):
     if cat == "A":
         ans = money(acct, t, seed, msgs0)
         fb = None
-        if ans is None:                      # контур не смог — считаем базовым путём, но помечено
+        if ans is None:                      # contour failed — count via base path, but marked
             fb = ask_ladder(acct, msgs0, seed)
             ans = fb["text"]
             rec["fallback"] = True
@@ -1202,11 +1202,11 @@ def main():
     if SUBSET:
         tasks = [p for p in tasks if p["task"] in SUBSET]
     done = set(tuple(k) for k in st.get("done", []))
-    log("PGR: заданий в плане %d, выполнено ранее %d, лимит %d с" % (len(tasks), len(done), LIMIT))
+    log("PGR: planned tasks %d, previously done %d, limit %d s" % (len(tasks), len(done), LIMIT))
     n = 0
     for pos in tasks:
         if time.time() - st["start_wall"] > LIMIT:
-            log("лимит времени истёк — новых запросов не начинаем")
+            log("time limit reached — no new requests started")
             break
         t = bank[pos["task"]]
         try:
@@ -1215,7 +1215,7 @@ def main():
         except SystemExit:
             raise
         except Exception as e:
-            log("СБОЙ %s: %s" % (pos["task"], ("%s: %s" % (type(e).__name__, e))[:200]))
+            log("FAILURE %s: %s" % (pos["task"], ("%s: %s" % (type(e).__name__, e))[:200]))
         if n % 25 == 0:
             st["done"] = [list(k) for k in done]
             save_state(st)
@@ -1224,8 +1224,8 @@ def main():
     st["elapsed"] = round(time.time() - st["start_wall"], 1)
     st.setdefault("stop_reason", None)
     save_state(st)
-    log("PGR завершён: записей %d, длительность %.0f с, стоп-причина: %s" % (
-        len(done), st["elapsed"], st["stop_reason"] or "нет"))
+    log("PGR finished: records %d, duration %.0f s, stop reason: %s" % (
+        len(done), st["elapsed"], st["stop_reason"] or "none"))
 
 
 if __name__ == "__main__":
