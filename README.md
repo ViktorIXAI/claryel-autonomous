@@ -1,4 +1,4 @@
-# Strata Autonomous Harness
+# Strata Autonomous Harness Lab
 
 **Open Research into Autonomous Local AI Evolution**
 *An AI-built, self-improving harness for local language models.*
@@ -29,6 +29,20 @@ and (sometimes) rolled back by an autonomous AI coding agent between
 Who did what is itemized in [`docs/autonomy.md`](docs/autonomy.md): no human
 work is claimed as autonomous, and nothing autonomous is hidden behind "the
 team".
+
+## Live research infrastructure
+
+| what | where |
+|---|---|
+| public dashboard (built only from repo JSON) | https://viktorixai.github.io/strata-autonomous-harness/dashboard/ |
+| automatic publication pipeline + watchdog | [`scripts/publish/pipeline.py`](scripts/publish/pipeline.py), package index [`logs/PIPELINE-PACKAGES.md`](logs/PIPELINE-PACKAGES.md) |
+| every contour generation incl. rejected, auto-aggregated | [`results/summary-full.json`](results/summary-full.json) |
+| independent second-opinion scorer + its dissent | [`analytics/second_opinion.py`](analytics/second_opinion.py), [`results/independent-scorer.md`](results/independent-scorer.md) |
+| dedup-rule sensitivity of published deltas | [`results/dedup-sensitivity.md`](results/dedup-sensitivity.md) |
+| held-out bank (never used in dev) + pilot | [`benchmarks/holdout/`](benchmarks/holdout/), [`results/holdout-mini.md`](results/holdout-mini.md) |
+| per-run telemetry (run_id-bound) + join | [`telemetry/`](telemetry/), example [`telemetry/runs/smoke-tel-4.join.json`](telemetry/runs/smoke-tel-4.join.json) |
+| privacy-boundary gateway prototype + tests | [`benchmarks/privacy-boundary/`](benchmarks/privacy-boundary/) |
+| CI: self-tests, data sanity, link integrity, and a `reproduce` job that re-hashes the public archive and recomputes the published summary | [`.github/workflows/selftest.yml`](.github/workflows/selftest.yml) |
 
 ## What "self-improving" means here — and what it does not
 

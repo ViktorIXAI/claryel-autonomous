@@ -64,6 +64,12 @@ blocks = validator refusals.</div></div>
 bank ref specs only). On its scoreable subset the v1.9 delta is slightly <b>negative</b>
 — published dissent, see <a href="../results/independent-scorer.md">results/independent-scorer.md</a>.</div></div>
 
+<h2>Holdout pilot (unseen tasks, contour v1.9, P2005SAH)</h2>
+<div class="card"><table id="holdout"></table>
+<div class="note">Bank generated <b>after</b> v1.9 was frozen (disjoint ids, CI-enforced).
+The G collapse and D softness on unseen draws are published findings, not smoothed away.
+See <a href="../results/holdout-mini.md">results/holdout-mini.md</a>.</div></div>
+
 <h2>Latest bound telemetry run (P2005SAH · smoke-tel-4)</h2>
 <div class="card"><table id="tel"></table>
 <div class="note">Sampler overhead measured ≤0.4% (60.0 s vs 60.2 s identical smoke).
@@ -125,6 +131,9 @@ document.getElementById("second").innerHTML =
  `<tr><td>coverage</td><td>${SO.side_A.rows}+${SO.side_B.rows} rows</td><td>${SO.side_A.rescored}+${SO.side_B.rescored} rows</td></tr>`;
 
 const TL = D.telemetry_run.run_level;
+document.getElementById("holdout").innerHTML =
+ "<tr><th>cat</th><th>n</th><th>mean content</th><th></th></tr>" +
+ Object.entries(D.holdout_mini).map(([c,v])=>`<tr><td>${c}</td><td>${v.n}</td><td>${fmt(v.mean)}</td><td>${bar(v.mean,v.mean<0.5?"var(--bad)":"var(--ok)")}</td></tr>`).join("");
 document.getElementById("tel").innerHTML =
  "<tr><th>machine</th><th>samples</th><th>span s</th><th>peak cpu °C</th><th>peak gpu °C</th><th>mean gpu W</th><th>peak vram MB</th><th>mean cpu %</th></tr>" +
  Object.entries(TL).map(([m,v])=>`<tr><td>${m}</td><td>${v.samples}</td><td>${v.span_s}</td><td>${v.peak.cpu_temp_c}</td><td>${v.peak.gpu_temp_c}</td><td>${v.mean.gpu_power_w}</td><td>${v.peak.vram_used_mb}</td><td>${v.mean.cpu_pct}</td></tr>`).join("");
