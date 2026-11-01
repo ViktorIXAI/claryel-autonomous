@@ -1,0 +1,8 @@
+{
+ "version": "v1.5",
+ "status": "NO-OP",
+ "change": "skeleton guard (rows+keys) on cheap repairs; retries restored to 2",
+ "code": "not_recorded",
+ "adopt": "agent: marked identical to v1.3",
+ "numbers": "A/B identical to v1.3; guard fired 0 times (dead branch) -> unverified-guard lesson"
+}

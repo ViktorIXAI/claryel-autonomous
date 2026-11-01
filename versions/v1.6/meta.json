@@ -1,0 +1,8 @@
+{
+ "version": "v1.6",
+ "status": "REJECTED",
+ "change": "prev answer passed explicitly into all three repair gates (cheap path becomes reachable)",
+ "code": "not_recorded (reverted)",
+ "adopt": "agent-rejected",
+ "numbers": "-45% input tokens but 16/19 vs 19/19; guard blind to corrupted values"
+}

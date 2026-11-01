@@ -1,0 +1,25 @@
+Create a complete, standalone HTML file containing an animated 2D physics simulation.
+
+Requirements:
+
+• A large regular hexagon rotates continuously at a constant angular velocity.
+• Exactly 12 colorful balls move inside the hexagon.
+• The balls are affected by gravity.
+• Balls bounce realistically off the rotating walls, taking wall velocity into account.
+• Balls must not escape the hexagon.
+• Add damping and restitution.
+• Display smooth animation using HTML Canvas and JavaScript.
+• Use a dark background and attractive neon colors.
+• The simulation should fit a 1280×720 browser window.
+• Show a small FPS counter.
+
+Restrictions:
+
+• Use only HTML, CSS and vanilla JavaScript.
+• No external libraries, CDN, network access or image assets.
+• Return the complete source code of a single index.html file.
+• Do not include explanations or Markdown code fences.
+• Do not ask questions.
+• Do not use external tools.
+
+The application must run immediately when index.html is opened in a browser.

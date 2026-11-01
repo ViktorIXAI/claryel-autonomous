@@ -1,0 +1,7 @@
+{
+ "version": "v1.0",
+ "status": "historical (pre-log)",
+ "change": "baseline contour: structured ask -> code gate -> re-ask naming the violation -> max-token ladder (512/1024/2048)",
+ "code": "not_recorded (byte-exact snapshot not retained; behavior reconstructable as the v1.2 runner minus later gates)",
+ "adopt": "not_recorded"
+}

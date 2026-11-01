@@ -1,0 +1,39 @@
+17:43:49 contour2 start; B2003 gate procs=2
+17:47:47 pgp seed0 PASS att=2 blobs=15
+17:47:47 pgp seed0 PASS attempts=2
+17:52:37 pgp seed1 PASS att=2 blobs=2
+17:52:37 pgp seed1 PASS attempts=2
+17:54:32 pgp seed2 PASS att=1 blobs=2
+17:54:32 pgp seed2 PASS attempts=1
+17:58:18 pgp seed3 PASS att=2 blobs=14
+17:58:18 pgp seed3 PASS attempts=2
+18:02:17 pgp seed4 PASS att=2 blobs=61
+18:02:17 pgp seed4 PASS attempts=2
+18:02:17 SERIES pgp: 5/5 PASS
+18:03:32 balls seed0 PASS att=1 blobs=11
+18:03:32 balls seed0 PASS attempts=1
+18:05:24 balls seed1 PASS att=1 blobs=7
+18:05:24 balls seed1 PASS attempts=1
+Traceback (most recent call last):
+  File "$HOME/.hermes/cache/scratch/visbench/contour_run2.py", line 158, in <module>
+    main()
+    ~~~~^^
+  File "$HOME/.hermes/cache/scratch/visbench/contour_run2.py", line 136, in main
+    v = run_validator(loc, ser)
+  File "$HOME/.hermes/cache/scratch/visbench/contour_run2.py", line 91, in run_validator
+    r = subprocess.run([PY, HOME + "/.hermes/cache/scratch/visbench/pag_validate.py", loc],
+                       capture_output=True, text=True, timeout=180)
+  File "$HOME/.hermes/tools/python-3.14.9+20261021-linux-x64/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$HOME/.hermes/tools/python-3.14.9+20261021-linux-x64/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$HOME/.hermes/tools/python-3.14.9+20261021-linux-x64/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$HOME/.hermes/tools/python-3.14.9+20261021-linux-x64/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['$HOME/.hermes/installs/d14c4ca51ea50e4a/environments/8dbdfa047bfa45a99b150e7b77b47b43/venv/bin/python3', '$HOME/.hermes/cache/scratch/visbench/pag_validate.py', '$HOME/.hermes/bench/visbench/contour2/ct2_balls_2_a2']' timed out after 180 seconds

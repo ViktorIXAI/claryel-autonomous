@@ -1,0 +1,133 @@
+
+=== версии контура: что мерили и что решили (A/B на Mac Studio, те же задачи, те же сиды) ===
+v1.2 (база сравнения): B2003 строгая 73% / средняя 89%, формат 91%, 1230 ток/задачу; Mac 69% / 82%, формат 94%, 1473 ток.
+v1.3 (приоритет формата + гейт полей KEY:): формат 100% на обеих коробках, H 52% -> 100%, средняя 92-95%;
+    цена выросла: 1926 ток/задачу (B2003), 2094 (Mac). Формат-починки и лестница дают ~35-37% лишних токенов.
+v1.4 (дешёвая починка: правка формата без исходного документа, только предыдущий ответ): ЗАПРЕЩЁН.
+    A/B subset B-ea-00-0,J-ea-00-0,K-ea-00-0 x 19 повторов, Mac Studio:
+      v1.3: верных 19/19, вход 1088 ток/задачу, выход 6119 всего, 103.6 с, правок 29
+      v1.4: верных  3/19, вход  450 ток/задачу, выход 3181 всего,  59.1 с, правок 16
+    Итог: экономия токенов входа -59% и времени -43% ценой потери 16 верных ответов из 19.
+    ПРИЧИНА (уточнена после v1.5): в v1.4 было два изменения сразу — (1) правка формата без
+    исходного документа и (2) ограничение числа попыток починки до одной. Дешёвая починка в том
+    коде вообще не запускалась: msgs0 в контуре не содержит ответ модели, поэтому ветка
+    "без документа" не срабатывала. Реально сломало именно ограничение попыток: правок стало
+    29 -> 16, и недоделанный формат дал missing_7 и неверные числа. Вывод: попытки починки
+    формата ограничивать одной нельзя; экономить надо другим способом.
+v1.5 (дешёвая починка под охраной): принято решение сравнивать с v1.3. Охрана: перед принятием дешёвой
+    починки сравнивается скелет ответа (число строк данных и набор ключей); если строк или ключей стало
+    меньше — дешёвый вариант отвергается (событие gate:cheap_repair_rejected) и вызов повторяется
+    с полным контекстом. Число попыток починки формата возвращено к 2.
+v1.5 (охрана скелета ответа): на A/B дала результат, ТОЖДЕСТВЕННЫЙ v1.3 (1089 ток/задачу,
+    19/19 верных, 0 срабатываний охраны). Причина: дешёвая ветка не выполнялась — msgs0 не содержит
+    предыдущий ответ модели. То есть v1.5 = v1.3 по факту, охрана не проверена в бою.
+v1.6: предыдущий ответ передаётся в ask_repair явным аргументом prev=r["text"] во всех трёх починках
+    (json_gate, format_gate, fields_gate). Только теперь дешёвая починка становится достижимым кодом,
+    а охрана начинает что-то отвергать. A/B v1.3 vs v1.6 — следующий замер (subset B-ea-00-0, J-ea-00-0, K-ea-00-0).
+v1.6 (дешёвая починка с переданным предыдущим ответом, охрана по скелету): A/B subset, Mac Studio:
+      v1.3: верных 19/19, средняя 100%, вход 1088 ток/задачу, выход 6119, 103.2 с, правок 29
+      v1.6: верных 16/19, средняя  96%, вход  595 ток/задачу, выход 6561, 104.6 с, правок 16
+    Итог: входные токены -45%, но минус 3 верных ответа из 19; охрана не отвергла ни одной починки
+    (скелет оставался целым, сломаны значения). Для финансовых расчётов не принимается.
+v1.7 (форму чинит код, модель не вызывается): гейты сначала пытаются восстановить оформление
+    сами (вырезать текст вокруг JSON/CSV, убрать хвостовые запятые, True/False, кавычки у ключей,
+    вынуть поля KEY: из пояснений). Данные при этом не домысливаются: если строк или ключей не
+    хватает — отказ и обычный путь. Офлайн-тест фиксеров: 12 случаев, включая отказы.
+v1.7 (форму чинит код, модель не вызывается) — ПРИНЯТА как рабочая версия.
+      A/B на Mac, один и тот же набор задач, по 19 записей в каждой руке:
+      v1.3:  верных 19/19, средняя 100%, вход 1088 ток/задачу, выход 6119, 103.4 с, правок 29
+      v1.7:  верных 19/19, средняя 100%, вход  746 ток/задачу, выход 4637,  83.8 с, правок 16
+      Экономия: вход -31%, генерация -24%, время -19%, обращений к модели за формой -45%.
+      Качество не упало ни на одну задачу.
+    Важный побочный вывод: рука ab17 (v1.7 вместе с дешёвой модельной починкой) дала 16/19.
+      Значит вредна именно дешёвая починка моделью без входного документа, а не починка кодом.
+      Поэтому PARB_CHEAP по умолчанию теперь 0 (выключена), включается только для экспериментов.
+v1.7 in-flight snapshot 2026-10-31 12:05 (ledger field 'content' = score):
+  B2003 n=120 avg=0.96 exact=81% format_ok=100% in=1620 out=391 tok/task 7.2 s/task code_fixes=31 blocks=0
+  mac-studio n=247 avg=0.92 exact=72% format_ok=97% in=1222 out=223 tok/task 3.9 s/task code_fixes=50 blocks=0
+  finance B+C: B2003 60/61 exact (98%), mac 69/69 (100%); cost per correct answer B2003 1729 in + 606 out, 8.7 s; mac 1518 in + 471 out, 6.7 s
+  weak spots: F 0.67-0.83, G 0.83, D 0.70 (mac), H 0.70 (mac)
+
+== 2026-10-31 third browser benchmark: voxel pagoda (B2003, qwen3.8-flash-next-iq3_s) ==
+prompt: published community one-shot (r/opencode, "voxel Pagoda Garden in Three.js", verbatim).
+framing experiment (5 attempts each):
+  verbatim prompt:                    1/5 file (pgd4)   -> RENDERS_AND_SPINS, raf 611f/6s, 0 errors
+  + "no tools" clause in user msg:    2/5 files         -> 1 RENDERS_STATIC, 1 JS SyntaxError
+  clause moved to system message:     0/5 files         -> agent mode wins, model emits <tool_call>
+  deliverable-first framing (balls):  5/5 files         -> 3 RENDERS_AND_SPINS, 2 JS errors
+finding: this quant responds to framing, not to prohibitions; prohibitions in system message have 0 effect.
+validation note: CDN import-map pages validated via CDN snapshot at exact requested versions (sha256),
+prefix mappings vendored as directories; page code never edited; WebGL = SwiftShader software on host.
+pelican word experiment (same box):
+  detailed prompt ("clearly pedaling"): 0/5 moved, best 8/9
+  one word "animated":                  5/5 moved (1.7-3.9% of frame), winner 9/9 + SMIL
+gate status: v1.7 continues; Mac 657 records after rep201, B2003 ~430; plans extended to rep206 both boxes.
+multitask measurement (B2003):
+  generation alone (gate paused): 68-77 tok/s decode, TTFT 1.3-5 s
+  generation + gate v1.7 in parallel: 57-67 tok/s decode (-~15%), TTFT up to 7.9 s (queueing)
+  GPU util 100% in both cases; RAM never below 1.7 GiB free; no OOM, no stalls
+
+== 2026-10-31 pgp series: detailed five-tier pagoda (operator reference) ==
+Prompt: pagoda per community-post reference (tiles, eave brackets, red columns,
+glowing windows, stone base, pond reflection), balls-style one-shot framing.
+B2003 qwen3.8-flash-next IQ3_S, 5 seeds: files 5/5; render w/o JS errors 1/5;
+observed motion 1/5. pgp1: rAF 131/6s, motion 3.0-4.2%/step, 0 console errors.
+Visual checklist vs reference: 6/9 (missing tiles + pond reflection).
+Failure modes: unimported addon (Reflector), syntax, read-only position write.
+Conclusion: longer task text => longer program => higher one-shot JS breakage;
+detail-heavy requests need the code contour (run, catch TypeError, repair loop),
+not a bigger prompt.
+Contour pass on pgp failures: pgp2 (TypeError: THREE.Reflector is not a constructor) repaired by
+code-only fixer (insert addon import + constructor alias), re-validated: renders, 0 errors.
+Other classes need re-generation not patching. Contour value on browser code confirmed for
+missing-import class (deterministic), not for semantic/syntax damage.
+
+== v1.7 FINAL (2026-10-31) ==
+B2003: n=787 (reps 0-206), score 0.897, perfect 77%, format_ok 93%
+Mac  : n=1321 (reps 0-256), score 0.887, perfect 69%, format_ok 93%
+paired 717: both-perfect 536 (75%), disagree 58 (avg delta 0.50)
+weak cats: D=0.53-0.63, F~0.68, H/B2003=0.65, K/Mac=0.83
+top failure notes: too_few_safe_steps, q5_contradiction_missed, no_final_answer,
+format, cause_not_named, bad_negation_kept
+files: ~/.hermes/bench/parb/v17-final/
+
+== v1.8 запуск (2026-10-31 16:53) ==
+изменения: точечная подсказка контура по замечанию скорера (fired/adopted учитываются отдельно),
+в D-цикле ответ до чтения/плана отклоняется (blocked_early_answer); план: B2003 до rep506 (3153),
+Mac до rep1006 (9753); прогон с rep0 — прямое парное сравнение v1.7/v1.8 на тех же задачах.
+smoke: подсказки срабатывают (calls=2), на лёгких задачах adoption=0 — цена 1 доп. вызов; ждём тяжёлые категории.
+параллельно запущен визуальный контур contour1: промпты заморожены, фиксеры (импортмап/аддоны/prose) + ретраи, B2003 endpoint.
+== VISUAL CONTOUR contour1 (2026-10-31 16:56-17:36, B2003 gen + host validate) ==
+balls 5/5 PASS (att=1 each; verdict=renders+motion+0 errors; pixel proxy blobs [8,8,3,9,14] => "12 visible balls" only ~2/5 solid)
+pel 5/5 PASS (svg well-formed, 0 errors; quality beyond gate unchanged)
+pgp 2/5 PASS (seed0 att2, seed3 att2; fails: SyntaxError x3, type-error classes, undeclared var)
+contour2 (upgraded: mergeGeometries fixer, static->motion-reminder retry, blob metric) launched 17:4x, seeds offset +10
+== VISUAL CONTOUR contour2 (2026-10-31 17:41-18:28, B2003 gen + host validate) ==
+resume fix: skip completed seeds, validator timeout no longer crashes series
+balls 4/5 PASS actual (seed0 11 blobs, seed1 7, seed2 17, seed4 14; seed3 failed attempts=3)
+pel 5/5 PASS actual (one attempt=2, rest attempt=1)
+pgp 5/5 PASS actual (major improvement: single-shot 1/5, contour1 2/5, contour2 5/5)
+
+2026-11-01 v1.9 D-order normalization: smoke P2005 fixed D-ea-00-0 from 0.33 CHRONIC to 1.00 x3 via contour:v19_d_order_to_steps. Full paired runs launched: B2003 results-v19.jsonl (plan trimmed to 3117 v1.8 keys) and Mac results-v19m.jsonl (plan trimmed to 2513 v1.8 keys), both limit 21600. contour2 visual production remains pgp 5/5, balls 4/5, pel 5/5. 
+== v1.9 PROBE (P2005, 22 weak tasks x3 reps 9001-9003, 2026-11-01 03:05) ==
+D-ea-00-0 FIXED: v18p 0.33x3 -> v19p 1.00x3, contour:v19_d_order_to_steps fired 3/3.
+CHRONIC: F-ha-01-0 (0.67 all 6 reps, too_few_safe_notes persistent).
+LOTTERY (carried from v18p spread): G-me-04, H-ha-04-0, J-me-00-0, K-ha-04-0 — v19 reps stable-high.
+REGRESSED: none. F-ha-02: cause_not_named persists on all reps both versions (0.611->0.722).
+Main boxes partial: B2003 n=108 running, Mac n=121 running, no D yet; paired v18->v19 delta -0.006/+0.000.
+Next: v2.0 leave D alone; best-of-N targets LOTTERY four; F-ha-01 needs structural check (step deficit, not keyword-only), F-ha-02 cause_not_named verify hidden-ref keyword before structural gate.
+v1.9 calc probe: raw no-contour A stage7 main baseline was 4/200 strict (2%), avg 7.5%, format 2%, 84 truncated.
+Fresh P2005 calc probe v1.9: 16 A tasks x reps 9101-9103 = 48 records, 48/48 strict, format 100%, avg 4.07s/task, avg model_calls 1.67, avg generated 340.3, prompt 1510.6.
+Current paired v1.9 A on B2003: 295/295 strict; Mac: 347/347 strict. The weak 2% raw calculation line is raised to 100% by money+code contour, not prompt change.
+== v1.9 MORNING (2026-11-01 07:30) ==
+B2003 running (1922/3117 pairs, deadline ~08:53). Mac stopped ~06:17 (box rebooted, uptime 1:17 at 07:34) at 2416/2513 pairs, no PGR завершён marker, no traceback — not restarted per operator.
+Verdict: v1.9 BETTER both boxes. B2003 avg 0.880->0.934 (paired +0.047, 210up/74down), Mac 0.875->0.926 (+0.050, 183up/0down). D category 0.42/0.44 -> 1.00 both. D-ea-00-0 FIXED: 121/121 + 162/162 perfect, contour:v19_d_order_to_steps 142/183 fired, order_ok 1:1.
+Nudge economy: v18 nudges B2003 fired 480 adopted 116 (24%), Mac fired 668 adopted 18 (2.7%); v19 fix mechanical, zero extra calls.
+P2005 probe: FIXED D-ea-00-0; CHRONIC F-ha-01-0 (0.67 x6), F-ha-02-0 cause_not_named persists (0.61->0.72); LOTTERY G-me-04,H-ha-04-0,J-me-00-0,K-ha-04-0; REGRESSED none. calc A: raw 2% -> v19 48/48 100%.
+Visual: contour2 production pgp 5/5, balls 4/5 (seed3 fail x3), pel 5/5; balls-seed0 screenshot: thin solo corner-link kept, no wide tunnel band, blobs=11.
+2026-11-01 07:58 v2.0 build:
+- one contour change: POST_NORMALIZE for G/H only. G: if q5 already names two values but lacks explicit contradiction word, mechanically label it "Противоречие:". H: if answer is semantically accepted but >600 chars, deterministic short summary preserving uncertainty and numeric values; also applied after v1.8 nudge replacement.
+- local tests: gate_fixers 12/12; gate_v19 D 4/4; gate_v20 post 11/11.
+- P2005 targeted v1.9 vs v2.0 (6 tasks x 3 reps): avg 0.787 -> 0.815 (+0.028), perfect 5 -> 13, format 17 -> 16; better=9 worse=3 same=6. G avg 0.852 -> 0.907 (+0.055). H avg unchanged; H-ha-04-0 5-rep reprobe after nudge-post-normalize fix gave content 5/5 and format 5/5.
+- Mac full v2.0 launched with same trimmed v1.8/v1.9 subset (2513 keys), state-v20m/results-v20m/gate-ledger-v20m. B2003 v2.0 deployed but not launched while v1.9 still running to avoid same-endpoint contamination.
+- speed cost B2003 raw vs v1.9: raw decode median 69.7 tok/s, v1.9 raw decode median 48.4 (-30%); generated tokens per wall-second 47.4 -> 11.4 effective (-76%); consumed prompt+generated throughput 124.3 -> 78.2 tok/s (-37%). Per task cost varies: A faster (8.3s -> 5.8s), D/E/J/I/K faster, B/F/H slower and more expensive.

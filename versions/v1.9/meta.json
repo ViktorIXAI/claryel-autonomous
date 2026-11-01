@@ -1,0 +1,8 @@
+{
+ "version": "v1.9",
+ "status": "RELEASED (this repo's contour)",
+ "change": "d_order_steps(): mechanical normalization of the model's ordered tool list into scorer-required agent_steps + summary answer; no prompt/reference edits",
+ "code": "PUBLISHED BYTE-EXACT: harness/gate_run.py == snapshot gate_run.v19.bak-0745 (pre-portability-edits; edits itemized in PUBLICATION-NOTES.md); test-first: gate_v19_d_test.py",
+ "adopt": "agent (paired + cross-box), human standing-rule authorized",
+ "numbers": "paired vs v1.8: B2003 +0.047 (229:79, n=2127), Mac +0.051 (183:0, n=2416); D 0.42->1.00 (B2003), D-ea 0.34->1.00 both boxes"
+}

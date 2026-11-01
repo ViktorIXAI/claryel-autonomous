@@ -1,0 +1,21 @@
+[project]
+name = "strata-autonomous-harness"
+version = "1.9.0"
+description = "Open research record + runnable harness for autonomous local-AI evolution (contour v1.9)."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "Viktor Khudiakov" },
+  { name = "Hermes (autonomous coding agent, Nous Research)" },
+]
+requires-python = ">=3.9"
+dependencies = []   # standard library only, on purpose
+
+[project.urls]
+Repository = "https://github.com/ViktorIXAI/strata-autonomous-harness"
+
+[project.scripts]
+sah-plan = "make_plan:main"
+
+[tool.setuptools]
+py-modules = ["make_plan"]

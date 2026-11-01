@@ -1,0 +1,65 @@
+{
+ "task": "D-ea-00-0",
+ "rep": 0,
+ "series": "main",
+ "rep_group": null,
+ "cat": "D",
+ "subcat": "order_of_ops",
+ "level": "easy",
+ "seed": 879925,
+ "run_tag": "gate",
+ "stage": 4,
+ "gen": {
+  "temperature": 0.7,
+  "thinking": false,
+  "max_tokens": 512,
+  "request_seed": 932993,
+  "fresh_context": true,
+  "ladder": [
+   512,
+   1024,
+   2048
+  ]
+ },
+ "box": "B2003",
+ "contour_version": "v1.9",
+ "contour_notes": "v1.0=базовый контур (гейт+переспрос); v1.1=чанковое извлечение счетов >8 позиций и regex-фолбэк, счёт >16 позиций сразу блоками, гейт полноты для логики, структурный гейт для диагностики; v1.2=фильтр для логики считает код из текста задачи, гейт формата уважает требуемый формат (CSV/JSON/число строк/колонки), диапазон букв A-J; v1.7=починка формы только кодом (ноль токенов модели); v1.8=одна точечная подсказка контура по замечанию скорера (из двух ответов лучший) + отклонение преждевременного ответа в D-цикле до чтения/плана",
+ "contour": "plan_gate",
+ "prompt_sha256": "9186fe54856a78a5",
+ "t_wall": 1793500039.9378831,
+ "answer": "READ_FILE\nSEARCH\nWRITE_FILE",
+ "truncated": false,
+ "finish": "stop",
+ "engine_error": null,
+ "prompt_chars": 419,
+ "mem_avail_mb_at_start": 2303,
+ "agent_steps": [
+  {
+   "tool": "READ_FILE",
+   "parsed": {
+    "tool": "READ_FILE"
+   }
+  },
+  {
+   "tool": "SEARCH",
+   "parsed": {
+    "tool": "SEARCH"
+   }
+  },
+  {
+   "tool": "WRITE_FILE",
+   "parsed": {
+    "tool": "WRITE_FILE"
+   }
+  },
+  {
+   "tool": "FINAL",
+   "parsed": {
+    "answer": "План действий: READ_FILE, SEARCH, WRITE_FILE"
+   }
+  }
+ ],
+ "content": 1.0,
+ "format_ok": 1,
+ "notes": []
+}

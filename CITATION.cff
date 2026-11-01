@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this lab in your research, cite it as the research record it is."
+title: "Strata Autonomous Harness: an open record of an AI agent building, testing and rejecting its own local-AI harness (v1.0–v1.9)"
+type: software
+authors:
+  - name: "Viktor Khudiakov"
+    role: supervisor
+  - name: "Hermes (autonomous coding agent, Nous Research)"
+    role: author            # wrote the harness, tests, experiments and decision logs
+repository-code: "https://github.com/ViktorIXAI/strata-autonomous-harness"
+license: MIT
+date-released: "2026-11-01"
+version: "1.9.0"
+keywords:
+  - local AI
+  - benchmark harness
+  - autonomous software engineering
+  - reproducible research
+  - LLM evaluation

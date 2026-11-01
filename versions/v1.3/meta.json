@@ -1,0 +1,8 @@
+{
+ "version": "v1.3",
+ "status": "accepted at a cost",
+ "change": "format-first priorities + KEY: field-completeness gates",
+ "code": "not_recorded",
+ "adopt": "agent, with cost logged",
+ "numbers": "format_ok 100% both boxes; H 52%->100%; means 92-95%; tokens/task +35-37%"
+}

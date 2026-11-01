@@ -1,0 +1,815 @@
+{
+ "series": {
+  "v1.2-b2003": {
+   "n": 590,
+   "avg_content": 0.9051,
+   "perfect_share": 0.7729,
+   "format_ok_share": 0.922,
+   "cats": {
+    "A": 1.0,
+    "B": 0.984,
+    "C": 1.0,
+    "D": 0.671,
+    "E": 0.974,
+    "F": 0.694,
+    "G": 0.77,
+    "H": 0.694,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.855
+   },
+   "ledger": {
+    "attempts": 549,
+    "model_calls_per_attempt": 1.29,
+    "fixes_per_attempt": 0.28,
+    "blocks_per_attempt": 0.0,
+    "ptok_per_attempt": 1167.2,
+    "ctok_per_attempt": 269.0,
+    "seconds_per_attempt": 5.9,
+    "top_events": [
+     [
+      "gate:format_gap_json",
+      104
+     ],
+     [
+      "ladder:512->1024",
+      83
+     ],
+     [
+      "gate:computed_by_code",
+      76
+     ],
+     [
+      "fix:format_attempt_1",
+      52
+     ],
+     [
+      "fix:format_attempt_2",
+      52
+     ],
+     [
+      "gate:no_quotes",
+      51
+     ],
+     [
+      "ladder:1024->2048",
+      39
+     ],
+     [
+      "gate:order_ok",
+      36
+     ],
+     [
+      "gate:tests_50_of_50",
+      35
+     ],
+     [
+      "fix:quote_attempt_1",
+      32
+     ],
+     [
+      "gate:logic_by_code:5_условий_5_кандидатов",
+      26
+     ],
+     [
+      "gate:sysadmin_structure_ok",
+      24
+     ],
+     [
+      "gate:logic_by_code:7_условий_6_кандидатов",
+      21
+     ],
+     [
+      "gate:format_ok_csv",
+      17
+     ],
+     [
+      "gate:audit_ok",
+      15
+     ]
+    ]
+   }
+  },
+  "v1.2-mac": {
+   "n": 645,
+   "avg_content": 0.8231,
+   "perfect_share": 0.6899,
+   "format_ok_share": 0.9395,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "D": 0.68,
+    "E": 0.0,
+    "F": 0.673,
+    "G": 0.833,
+    "H": 0.698,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.805
+   },
+   "ledger": {
+    "attempts": 645,
+    "model_calls_per_attempt": 1.41,
+    "fixes_per_attempt": 0.42,
+    "blocks_per_attempt": 0.0,
+    "ptok_per_attempt": 1211.3,
+    "ctok_per_attempt": 262.1,
+    "seconds_per_attempt": 7.0,
+    "top_events": [
+     [
+      "gate:computed_by_code",
+      183
+     ],
+     [
+      "gate:tests_0_of_1",
+      180
+     ],
+     [
+      "gate:format_gap_json",
+      124
+     ],
+     [
+      "fix:format_attempt_1",
+      62
+     ],
+     [
+      "fix:format_attempt_2",
+      62
+     ],
+     [
+      "fix:test_attempt_1",
+      60
+     ],
+     [
+      "fix:test_attempt_2",
+      60
+     ],
+     [
+      "ladder:512->1024",
+      47
+     ],
+     [
+      "gate:no_quotes",
+      43
+     ],
+     [
+      "gate:order_ok",
+      35
+     ],
+     [
+      "gate:logic_by_code:5_условий_5_кандидатов",
+      26
+     ],
+     [
+      "gate:sysadmin_structure_ok",
+      26
+     ],
+     [
+      "fix:quote_attempt_1",
+      24
+     ],
+     [
+      "gate:format_ok_csv",
+      18
+     ],
+     [
+      "gate:audit_ok",
+      16
+     ]
+    ]
+   }
+  },
+  "v1.7-b2003": {
+   "n": 717,
+   "avg_content": 0.9047,
+   "perfect_share": 0.7768,
+   "format_ok_share": 0.9247,
+   "cats": {
+    "A": 1.0,
+    "B": 0.956,
+    "C": 1.0,
+    "D": 0.641,
+    "E": 0.968,
+    "F": 0.68,
+    "G": 0.773,
+    "H": 0.684,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.98
+   },
+   "ledger": null
+  },
+  "v1.7-mac": {
+   "n": 1317,
+   "avg_content": 0.8875,
+   "perfect_share": 0.6925,
+   "format_ok_share": 0.9279,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "D": 0.53,
+    "E": 0.987,
+    "F": 0.668,
+    "G": 0.833,
+    "H": 0.89,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.832
+   },
+   "ledger": {
+    "attempts": 40,
+    "model_calls_per_attempt": 1.02,
+    "fixes_per_attempt": 0.23,
+    "blocks_per_attempt": 0.0,
+    "ptok_per_attempt": 888.8,
+    "ctok_per_attempt": 245.5,
+    "seconds_per_attempt": 3.8,
+    "top_events": [
+     [
+      "gate:format_gap_json",
+      16
+     ],
+     [
+      "gate:computed_by_code",
+      10
+     ],
+     [
+      "gate:json_fixed_by_code_as_is",
+      8
+     ],
+     [
+      "gate:format_repaired_by_code",
+      8
+     ],
+     [
+      "fix:format_attempt_2",
+      8
+     ],
+     [
+      "ladder:512->1024",
+      8
+     ],
+     [
+      "gate:logic_by_code:5_условий_5_кандидатов",
+      6
+     ],
+     [
+      "gate:logic_by_code:7_условий_8_кандидатов",
+      2
+     ],
+     [
+      "gate:sysadmin_structure_ok",
+      1
+     ],
+     [
+      "gate:quotes_verified",
+      1
+     ],
+     [
+      "gate:format_ok_csv",
+      1
+     ],
+     [
+      "gate:fields_gap_1",
+      1
+     ],
+     [
+      "fix:fields_attempt_1",
+      1
+     ],
+     [
+      "gate:fields_ok",
+      1
+     ]
+    ]
+   }
+  },
+  "v1.8-b2003": {
+   "n": 3117,
+   "avg_content": 0.88,
+   "perfect_share": 0.6773,
+   "format_ok_share": 0.8896,
+   "cats": {
+    "A": 1.0,
+    "B": 0.996,
+    "C": 1.0,
+    "D": 0.421,
+    "E": 0.989,
+    "F": 0.682,
+    "G": 0.833,
+    "H": 0.946,
+    "I": 1.0,
+    "J": 0.999,
+    "K": 0.936
+   },
+   "ledger": {
+    "attempts": 3117,
+    "model_calls_per_attempt": 1.5,
+    "fixes_per_attempt": 0.24,
+    "blocks_per_attempt": 0.01,
+    "ptok_per_attempt": 1263.0,
+    "ctok_per_attempt": 237.4,
+    "seconds_per_attempt": 9.3,
+    "top_events": [
+     [
+      "gate:format_gap_json",
+      536
+     ],
+     [
+      "gate:sysadmin_structure_ok",
+      438
+     ],
+     [
+      "gate:no_quotes",
+      367
+     ],
+     [
+      "contour:v18_nudge_fired_contradiction",
+      361
+     ],
+     [
+      "gate:format_repaired_by_code",
+      268
+     ],
+     [
+      "fix:format_attempt_2",
+      268
+     ],
+     [
+      "gate:json_fixed_by_code_as_is",
+      267
+     ],
+     [
+      "gate:tests_50_of_50",
+      242
+     ],
+     [
+      "gate:order_ok",
+      241
+     ],
+     [
+      "contour:v18_nudge_fired_no_final_answer",
+      241
+     ],
+     [
+      "ladder:512->1024",
+      237
+     ],
+     [
+      "gate:fields_ok",
+      234
+     ],
+     [
+      "contour:v18_nudge_fired_cause_not_named_too_few_safe_steps",
+      226
+     ],
+     [
+      "fix:quote_attempt_1",
+      226
+     ],
+     [
+      "gate:format_ok_csv",
+      224
+     ]
+    ]
+   }
+  },
+  "v1.8-mac": {
+   "n": 2513,
+   "avg_content": 0.875,
+   "perfect_share": 0.6431,
+   "format_ok_share": 0.9232,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "D": 0.44,
+    "E": 0.993,
+    "F": 0.674,
+    "G": 0.833,
+    "H": 0.988,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.789
+   },
+   "ledger": {
+    "attempts": 2513,
+    "model_calls_per_attempt": 1.49,
+    "fixes_per_attempt": 0.17,
+    "blocks_per_attempt": 0.02,
+    "ptok_per_attempt": 1374.4,
+    "ctok_per_attempt": 231.5,
+    "seconds_per_attempt": 4.5,
+    "top_events": [
+     [
+      "gate:format_gap_json",
+      436
+     ],
+     [
+      "gate:no_quotes",
+      353
+     ],
+     [
+      "gate:sysadmin_structure_ok",
+      338
+     ],
+     [
+      "gate:json_fixed_by_code_as_is",
+      218
+     ],
+     [
+      "gate:format_repaired_by_code",
+      218
+     ],
+     [
+      "fix:format_attempt_2",
+      218
+     ],
+     [
+      "contour:v18_nudge_fired_contradiction",
+      205
+     ],
+     [
+      "ladder:512->1024",
+      193
+     ],
+     [
+      "gate:tests_50_of_50",
+      191
+     ],
+     [
+      "gate:order_ok",
+      191
+     ],
+     [
+      "contour:v18_nudge_fired_no_final_answer",
+      191
+     ],
+     [
+      "gate:computed_by_code",
+      183
+     ],
+     [
+      "gate:fields_ok",
+      183
+     ],
+     [
+      "fix:quote_attempt_1",
+      179
+     ],
+     [
+      "contour:v18_nudge_fired_too_few_safe_steps",
+      174
+     ]
+    ]
+   }
+  },
+  "v1.9-b2003": {
+   "n": 2127,
+   "avg_content": 0.9325,
+   "perfect_share": 0.7668,
+   "format_ok_share": 0.968,
+   "cats": {
+    "A": 1.0,
+    "B": 0.978,
+    "C": 1.0,
+    "D": 0.999,
+    "E": 0.987,
+    "F": 0.684,
+    "G": 0.825,
+    "H": 0.912,
+    "I": 1.0,
+    "J": 0.999,
+    "K": 0.945
+   },
+   "ledger": {
+    "attempts": 2127,
+    "model_calls_per_attempt": 1.4,
+    "fixes_per_attempt": 0.23,
+    "blocks_per_attempt": 0.02,
+    "ptok_per_attempt": 1231.4,
+    "ctok_per_attempt": 236.7,
+    "seconds_per_attempt": 7.8,
+    "top_events": [
+     [
+      "gate:format_gap_json",
+      372
+     ],
+     [
+      "gate:sysadmin_structure_ok",
+      273
+     ],
+     [
+      "contour:v18_nudge_fired_contradiction",
+      228
+     ],
+     [
+      "gate:no_quotes",
+      222
+     ],
+     [
+      "gate:json_fixed_by_code_as_is",
+      186
+     ],
+     [
+      "gate:format_repaired_by_code",
+      186
+     ],
+     [
+      "fix:format_attempt_2",
+      186
+     ],
+     [
+      "gate:computed_by_code",
+      183
+     ],
+     [
+      "ladder:512->1024",
+      161
+     ],
+     [
+      "gate:tests_50_of_50",
+      159
+     ],
+     [
+      "gate:order_ok",
+      159
+     ],
+     [
+      "contour:v19_d_order_to_steps",
+      159
+     ],
+     [
+      "gate:fields_ok",
+      151
+     ],
+     [
+      "fix:quote_attempt_1",
+      147
+     ],
+     [
+      "contour:v18_nudge_fired_cause_not_named_too_few_safe_steps",
+      145
+     ]
+    ]
+   }
+  },
+  "v1.9-mac": {
+   "n": 2416,
+   "avg_content": 0.9264,
+   "perfect_share": 0.7214,
+   "format_ok_share": 0.9992,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "D": 0.995,
+    "E": 0.993,
+    "F": 0.674,
+    "G": 0.833,
+    "H": 0.988,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.791
+   },
+   "ledger": {
+    "attempts": 2416,
+    "model_calls_per_attempt": 1.41,
+    "fixes_per_attempt": 0.17,
+    "blocks_per_attempt": 0.02,
+    "ptok_per_attempt": 1362.8,
+    "ctok_per_attempt": 229.9,
+    "seconds_per_attempt": 4.3,
+    "top_events": [
+     [
+      "gate:format_gap_json",
+      420
+     ],
+     [
+      "gate:no_quotes",
+      337
+     ],
+     [
+      "gate:sysadmin_structure_ok",
+      322
+     ],
+     [
+      "gate:json_fixed_by_code_as_is",
+      210
+     ],
+     [
+      "gate:format_repaired_by_code",
+      210
+     ],
+     [
+      "fix:format_attempt_2",
+      210
+     ],
+     [
+      "contour:v18_nudge_fired_contradiction",
+      196
+     ],
+     [
+      "ladder:512->1024",
+      185
+     ],
+     [
+      "gate:computed_by_code",
+      183
+     ],
+     [
+      "gate:tests_50_of_50",
+      183
+     ],
+     [
+      "gate:order_ok",
+      183
+     ],
+     [
+      "contour:v19_d_order_to_steps",
+      183
+     ],
+     [
+      "gate:fields_ok",
+      175
+     ],
+     [
+      "fix:quote_attempt_1",
+      171
+     ],
+     [
+      "contour:v18_nudge_fired_too_few_safe_steps",
+      166
+     ]
+    ]
+   }
+  },
+  "v2.0-p2005": {
+   "n": 18,
+   "avg_content": 0.787,
+   "perfect_share": 0.2778,
+   "format_ok_share": 0.9444,
+   "cats": {
+    "G": 0.852,
+    "H": 0.722
+   },
+   "ledger": {
+    "attempts": 18,
+    "model_calls_per_attempt": 2.0,
+    "fixes_per_attempt": 0.56,
+    "blocks_per_attempt": 0.0,
+    "ptok_per_attempt": 1206.1,
+    "ctok_per_attempt": 163.8,
+    "seconds_per_attempt": 2.5,
+    "top_events": [
+     [
+      "gate:no_quotes",
+      12
+     ],
+     [
+      "contour:v18_nudge_fired_contradiction",
+      10
+     ],
+     [
+      "fix:quote_attempt_1",
+      8
+     ],
+     [
+      "gate:quote_not_in_source",
+      3
+     ],
+     [
+      "fix:v18_nudge_contradiction",
+      2
+     ],
+     [
+      "gate:quotes_verified",
+      2
+     ]
+    ]
+   }
+  }
+ },
+ "paired": {
+  "v1.7-b2003 -> v1.8-b2003": {
+   "n_pairs": 717,
+   "avg_delta": 0.0123,
+   "improved": 43,
+   "regressed": 21,
+   "unchanged": 653,
+   "per_cat_delta": {
+    "A": 0.0,
+    "B": 0.029,
+    "C": 0.0,
+    "D": 0.001,
+    "E": -0.015,
+    "F": 0.044,
+    "G": 0.027,
+    "H": 0.175,
+    "I": 0.0,
+    "J": 0.0,
+    "K": -0.046
+   }
+  },
+  "v1.7-mac -> v1.8-mac": {
+   "n_pairs": 1317,
+   "avg_delta": 0.0067,
+   "improved": 18,
+   "regressed": 4,
+   "unchanged": 1295,
+   "per_cat_delta": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0,
+    "D": -0.008,
+    "E": 0.0,
+    "F": 0.017,
+    "G": 0.0,
+    "H": 0.085,
+    "I": 0.0,
+    "J": 0.0,
+    "K": 0.0
+   }
+  },
+  "v1.8-b2003 -> v1.9-b2003": {
+   "n_pairs": 2127,
+   "avg_delta": 0.0472,
+   "improved": 229,
+   "regressed": 79,
+   "unchanged": 1819,
+   "per_cat_delta": {
+    "A": 0.0,
+    "B": -0.016,
+    "C": 0.0,
+    "D": 0.542,
+    "E": 0.003,
+    "F": -0.0,
+    "G": -0.004,
+    "H": -0.034,
+    "I": 0.0,
+    "J": 0.0,
+    "K": 0.013
+   }
+  },
+  "v1.8-mac -> v1.9-mac": {
+   "n_pairs": 2416,
+   "avg_delta": 0.0505,
+   "improved": 183,
+   "regressed": 0,
+   "unchanged": 2233,
+   "per_cat_delta": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0,
+    "D": 0.552,
+    "E": 0.0,
+    "F": 0.0,
+    "G": 0.0,
+    "H": 0.0,
+    "I": 0.0,
+    "J": 0.0,
+    "K": 0.0
+   }
+  }
+ },
+ "D_ea_only": {
+  "v1.7-b2003": {
+   "n": 22,
+   "avg_content": 0.3939,
+   "perfect_share": 0.0909,
+   "format_ok_share": 0.0909
+  },
+  "v1.8-b2003": {
+   "n": 222,
+   "avg_content": 0.3393,
+   "perfect_share": 0.009,
+   "format_ok_share": 0.009
+  },
+  "v1.9-b2003": {
+   "n": 140,
+   "avg_content": 1.0,
+   "perfect_share": 1.0,
+   "format_ok_share": 1.0
+  },
+  "v1.7-mac": {
+   "n": 72,
+   "avg_content": 0.3519,
+   "perfect_share": 0.0278,
+   "format_ok_share": 0.0278
+  },
+  "v1.8-mac": {
+   "n": 172,
+   "avg_content": 0.3411,
+   "perfect_share": 0.0116,
+   "format_ok_share": 0.0116
+  },
+  "v1.9-mac": {
+   "n": 164,
+   "avg_content": 1.0,
+   "perfect_share": 1.0,
+   "format_ok_share": 1.0
+  }
+ }
+}

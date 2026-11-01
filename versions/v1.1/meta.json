@@ -1,0 +1,7 @@
+{
+ "version": "v1.1",
+ "status": "historical (pre-log)",
+ "change": "chunked extraction for invoices >8 items; regex fallback; block-wise counting >16 items; completeness gate for logic; structural gate for diagnosis",
+ "code": "not_recorded",
+ "adopt": "not_recorded"
+}

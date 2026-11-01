@@ -1,0 +1,5 @@
+Create a complete, standalone HTML file. The file must contain the following scene, exactly as specified:
+
+Make a highly detailed 5-tier East Asian pagoda (five-story tower) scene in Three.js. One file index.html, Three.js + OrbitControls from CDN via import map. The pagoda stands on a dark ground plane at dusk and must have: five stacked dark curved roofs with visible roof tiles; ornate bracket clusters and beams under every roof eave; red lacquer columns, walls and railings; warm glowing yellow windows on each tier; a stone base with steps. In front of the pagoda there is a calm pond that shows its reflection. Warm sunset/lantern lighting with soft shadows, slowly auto-rotating orbit camera. No external image assets - all detail must come from geometry and procedural canvas textures. Only standard Three.js materials, no custom shaders. Keep it simple and make it work.
+
+Return the complete source code of a single index.html file. Do not include explanations or Markdown code fences. Do not ask questions. Do not use external tools. Do not explore the project. Start the answer with <!DOCTYPE html>.

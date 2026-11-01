@@ -1,0 +1,98 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "telemetry sample",
+ "description": "One row per sample; unknown sensors MUST be null (published as not_available), never estimated. Phase-1 columns map 1:1.",
+ "type": "object",
+ "required": [
+  "ts"
+ ],
+ "properties": {
+  "ts": {
+   "type": "number"
+  },
+  "machine_id": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "mem_avail_mb": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "swap_used_mb": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "dirty_kb": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "nvme_rd_kbs": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "nvme_wr_kbs": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "vram_used_mb": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "gpu_util": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "gpu_power_w": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "gpu_temp_c": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "gpu_clk_mhz": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "cpu_temp_c": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "load1": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "monitor_overhead_pct": {
+   "type": [
+    "number",
+    "null"
+   ]
+  }
+ }
+}

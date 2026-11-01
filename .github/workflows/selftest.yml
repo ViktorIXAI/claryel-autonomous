@@ -1,0 +1,17 @@
+name: contour self-tests
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - name: fixer suite (12 cases incl. refusal paths)
+        run: python harness/gate_fixers_test.py
+      - name: v1.9 slot-normalizer contract
+        run: python harness/gate_v19_d_test.py

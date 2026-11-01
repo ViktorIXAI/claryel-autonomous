@@ -1,0 +1,61 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "hardware passport",
+ "type": "object",
+ "required": [
+  "machine_id",
+  "public_name",
+  "collected_utc"
+ ],
+ "properties": {
+  "machine_id": {
+   "type": "string"
+  },
+  "public_name": {
+   "type": "string"
+  },
+  "collected_utc": {
+   "type": "string"
+  },
+  "cpu": {
+   "type": "object"
+  },
+  "cores": {
+   "type": "object"
+  },
+  "gpu": {
+   "type": "object"
+  },
+  "ram": {
+   "type": "object"
+  },
+  "storage": {
+   "type": "array"
+  },
+  "os": {
+   "type": "object"
+  },
+  "engine": {
+   "type": "object"
+  },
+  "model_build_ref": {
+   "type": "string"
+  },
+  "launch_config_ref": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "sensors": {
+   "type": "object",
+   "description": "each sensor: available|not_available|unverified"
+  },
+  "change_log_ref": {
+   "type": [
+    "string",
+    "null"
+   ]
+  }
+ }
+}

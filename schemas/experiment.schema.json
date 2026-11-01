@@ -1,0 +1,112 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "experiment record",
+ "type": "object",
+ "required": [
+  "experiment_id",
+  "hypothesis",
+  "harness_version",
+  "plan_hash",
+  "verdict"
+ ],
+ "properties": {
+  "experiment_id": {
+   "type": "string"
+  },
+  "started_utc": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "hypothesis": {
+   "type": "string"
+  },
+  "harness_version": {
+   "type": "string"
+  },
+  "parent_version": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "plan_hash": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "task_set_version": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "scorer_version": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "boxes": {
+   "type": "array"
+  },
+  "pairs_n": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  },
+  "avg_delta": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "improved": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  },
+  "regressed": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  },
+  "cost_delta": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "verdict": {
+   "enum": [
+    "accepted",
+    "rejected",
+    "no_op",
+    "experimental",
+    "in_progress",
+    "not_recorded"
+   ]
+  },
+  "origin": {
+   "type": "object",
+   "description": "autonomy labels per docs/autonomy.md"
+  },
+  "artifacts_ref": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "log_entry_ref": {
+   "type": [
+    "string",
+    "null"
+   ]
+  }
+ }
+}

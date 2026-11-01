@@ -1,0 +1,8 @@
+{
+ "version": "v1.4",
+ "status": "REJECTED",
+ "change": "cheap repair without source document + repair retries capped at 1 (BUNDLED - rule violation)",
+ "code": "not_recorded (reverted)",
+ "adopt": "agent-rejected",
+ "numbers": "Mac A/B: 19/19 -> 3/19 correct; -59% input tokens, -43% time; cause later pinpointed to the retry cap; cheap branch was dead code"
+}
