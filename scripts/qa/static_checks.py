@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Repository static QA gates without external dependencies."""
+from __future__ import annotations
+
+import compileall
+import subprocess
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+TEST_FILES = sorted((ROOT / "harness").glob("*test.py"))
+EXTRA_SCRIPTS = [
+    "scripts/sanity_data.py",
+    "scripts/check_links.py",
+    "scripts/qa/validate_json.py",
+]
+
+
+def run(cmd: list[str]) -> None:
+    print("+", " ".join(cmd))
+    subprocess.run(cmd, cwd=ROOT, check=True)
+
+
+def main() -> int:
+    ok = True
+
+    if not compileall.compile_dir(ROOT, quiet=1, maxlevels=10, force=True):
+        print("compileall failed")
+        ok = False
+
+    for test in TEST_FILES:
+        try:
+            run([sys.executable, str(test.relative_to(ROOT))])
+        except subprocess.CalledProcessError:
+            ok = False
+
+    for script in EXTRA_SCRIPTS:
+        path = ROOT / script
+        if path.exists():
+            try:
+                run([sys.executable, script])
+            except subprocess.CalledProcessError:
+                ok = False
+
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

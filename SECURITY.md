@@ -44,6 +44,9 @@ contains a credential, the line is redacted and the redaction is documented.
   credential-like finding is blocking. Historical infrastructure findings are
   reported and moved to local configuration, but history/release deletion
   remains an explicit maintainer decision.
+- CI runs QA gates for code syntax, harness contract tests, data sanity,
+  JSON/JSONL/schema validation, dependency policy and link integrity. Release
+  events additionally scan all release assets.
 - Public reports may contain paths, rule identifiers, commit/release references
   and counts only. Secret values must never be printed in logs, issues, commits,
   releases or dashboards.

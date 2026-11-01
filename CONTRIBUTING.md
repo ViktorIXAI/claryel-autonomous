@@ -33,6 +33,29 @@ Add a hardware passport under `hardware/inventory/` (live-collected, per
 (`not_available` is a valid value), and record every configuration change in
 `hardware/changes/`. Comparisons must name machines by passport id.
 
+## DevSecOps automation
+
+Every push and pull request runs:
+
+- contour unit tests, v1.9/v2.0/v2.1 contracts;
+- bank and plan sanity checks;
+- privacy-boundary tests;
+- link integrity checks;
+- JSON/JSONL and schema validation;
+- dependency-policy checks;
+- Gitleaks secret scanning with a self-test canary;
+- release asset scanning for published archives.
+
+For local pre-push gating, run:
+
+```bash
+scripts/devsecops/prepush.sh
+```
+
+The repository ships a `.git/hooks/pre-push` installer pattern; if the hook is
+present, these gates run before each push. Raw security scanner reports are kept
+outside the public repository.
+
 ## PRs
 
 PRs that touch `harness/` must state: hypothesis, files changed, test run

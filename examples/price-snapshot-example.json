@@ -6,7 +6,7 @@
     {
       "component": "gpu",
       "model": "example GPU 12 GB",
-      "condition": "example",
+      "condition": "new",
       "price": 300,
       "availability": "unknown",
       "source_url": "https://example.invalid/public-offer",
