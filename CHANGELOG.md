@@ -25,6 +25,7 @@ Contour (harness) generations. Rejected generations are listed under
 - Automated QA gates added: JSON/JSONL/schema validation, dependency-policy
   checks, all harness contract suites in `scripts/qa/static_checks.py`, and a
   local `scripts/devsecops/prepush.sh` gate for pre-push execution.
+- GitHub Actions dependency updates are tracked through Dependabot.
 
 ## [2.0] — 2026-11-01 (accepted on Mac; B2003 partial)
 ### Added
