@@ -1,6 +1,6 @@
 # Task prompts and the frozen task bank
 
-The 178-task bank (`tests/bank.json`) is **deterministic**: fixed generator
+The 178-task bank (`benchmarks/text-gates/bank.json`) is **deterministic**: fixed generator
 templates in `harness/parb_bank.py` under `bank_seed=20261031` with per-task
 seeds; every task carries its `ref` (expected values), `req_numbers`, level,
 and category. Regenerating the bank reproduces byte-identical prompts.

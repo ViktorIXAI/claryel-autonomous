@@ -1,0 +1,370 @@
+{
+ "series": {
+  "b2003|?|contour-free": {
+   "n": 645,
+   "avg_content": 0.8834,
+   "perfect_share": 0.7504,
+   "format_ok_share": 0.9054,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 0.977,
+    "D": 0.678,
+    "E": 0.937,
+    "F": 0.686,
+    "G": 0.763,
+    "H": 0.698,
+    "I": 1.0,
+    "J": 0.5,
+    "K": 0.883
+   },
+   "source_rows": 795
+  },
+  "b2003|B2003|v1.2": {
+   "n": 645,
+   "avg_content": 0.9097,
+   "perfect_share": 0.7829,
+   "format_ok_share": 0.9256,
+   "cats": {
+    "A": 1.0,
+    "B": 0.984,
+    "C": 1.0,
+    "D": 0.666,
+    "E": 0.976,
+    "F": 0.692,
+    "G": 0.772,
+    "H": 0.688,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.852
+   },
+   "source_rows": 705
+  },
+  "b2003|B2003|v1.3": {
+   "n": 319,
+   "avg_content": 0.8939,
+   "perfect_share": 0.7179,
+   "format_ok_share": 0.9248,
+   "cats": {
+    "A": 1.0,
+    "B": 0.968,
+    "C": 1.0,
+    "D": 0.704,
+    "E": 0.972,
+    "F": 0.688,
+    "G": 0.839,
+    "H": 0.763,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.75
+   },
+   "source_rows": 342
+  },
+  "b2003|B2003|v1.7": {
+   "n": 717,
+   "avg_content": 0.9047,
+   "perfect_share": 0.7768,
+   "format_ok_share": 0.9247,
+   "cats": {
+    "A": 1.0,
+    "B": 0.956,
+    "C": 1.0,
+    "D": 0.641,
+    "E": 0.968,
+    "F": 0.68,
+    "G": 0.773,
+    "H": 0.684,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.98
+   },
+   "source_rows": 787
+  },
+  "b2003|B2003|v1.8": {
+   "n": 3117,
+   "avg_content": 0.88,
+   "perfect_share": 0.6773,
+   "format_ok_share": 0.8896,
+   "cats": {
+    "A": 1.0,
+    "B": 0.996,
+    "C": 1.0,
+    "D": 0.421,
+    "E": 0.989,
+    "F": 0.682,
+    "G": 0.833,
+    "H": 0.946,
+    "I": 1.0,
+    "J": 0.999,
+    "K": 0.936
+   },
+   "source_rows": 3140
+  },
+  "b2003|B2003|v1.9": {
+   "n": 2421,
+   "avg_content": 0.9315,
+   "perfect_share": 0.7621,
+   "format_ok_share": 0.9665,
+   "cats": {
+    "A": 1.0,
+    "B": 0.981,
+    "C": 1.0,
+    "D": 0.999,
+    "E": 0.988,
+    "F": 0.682,
+    "G": 0.829,
+    "H": 0.919,
+    "I": 1.0,
+    "J": 0.999,
+    "K": 0.943
+   },
+   "source_rows": 2421
+  },
+  "mac|B2003|v1.3": {
+   "n": 9717,
+   "avg_content": 0.3899,
+   "perfect_share": 0.1822,
+   "format_ok_share": 0.5094,
+   "cats": {
+    "A": 1.0,
+    "B": 0.0,
+    "C": 1.0,
+    "D": 0.329,
+    "E": 0.0,
+    "F": 0.5,
+    "G": 0.167,
+    "H": 0.012,
+    "I": 0.667,
+    "J": 0.393,
+    "K": 0.0
+   },
+   "source_rows": 9717
+  },
+  "mac|mac-studio|v1.1": {
+   "n": 8,
+   "avg_content": 0.875,
+   "perfect_share": 0.625,
+   "format_ok_share": 1.0,
+   "cats": {
+    "A": 1.0,
+    "C": 1.0,
+    "F": 0.667
+   },
+   "source_rows": 8
+  },
+  "mac|mac-studio|v1.2": {
+   "n": 645,
+   "avg_content": 0.8386,
+   "perfect_share": 0.7054,
+   "format_ok_share": 0.9395,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "D": 0.68,
+    "E": 0.167,
+    "F": 0.673,
+    "G": 0.833,
+    "H": 0.698,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.805
+   },
+   "source_rows": 655
+  },
+  "mac|mac-studio|v1.3": {
+   "n": 132,
+   "avg_content": 0.9697,
+   "perfect_share": 0.8333,
+   "format_ok_share": 1.0,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "F": 0.5,
+    "G": 0.833,
+    "H": 1.0,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 1.0
+   },
+   "source_rows": 258
+  },
+  "mac|mac-studio|v1.4": {
+   "n": 19,
+   "avg_content": 0.1579,
+   "perfect_share": 0.1579,
+   "format_ok_share": 1.0,
+   "cats": {
+    "B": 0.0,
+    "J": 1.0,
+    "K": 0.0
+   },
+   "source_rows": 19
+  },
+  "mac|mac-studio|v1.5": {
+   "n": 19,
+   "avg_content": 1.0,
+   "perfect_share": 1.0,
+   "format_ok_share": 1.0,
+   "cats": {
+    "B": 1.0,
+    "J": 1.0,
+    "K": 1.0
+   },
+   "source_rows": 19
+  },
+  "mac|mac-studio|v1.6": {
+   "n": 19,
+   "avg_content": 0.9605,
+   "perfect_share": 0.8421,
+   "format_ok_share": 0.3158,
+   "cats": {
+    "B": 1.0,
+    "J": 1.0,
+    "K": 0.75
+   },
+   "source_rows": 19
+  },
+  "mac|mac-studio|v1.7": {
+   "n": 1317,
+   "avg_content": 0.8875,
+   "perfect_share": 0.6925,
+   "format_ok_share": 0.918,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "D": 0.53,
+    "E": 0.987,
+    "F": 0.668,
+    "G": 0.833,
+    "H": 0.89,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.832
+   },
+   "source_rows": 1359
+  },
+  "mac|mac-studio|v1.8": {
+   "n": 2513,
+   "avg_content": 0.875,
+   "perfect_share": 0.6431,
+   "format_ok_share": 0.9232,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "D": 0.44,
+    "E": 0.993,
+    "F": 0.674,
+    "G": 0.833,
+    "H": 0.988,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.789
+   },
+   "source_rows": 2513
+  },
+  "mac|mac-studio|v2.0": {
+   "n": 670,
+   "avg_content": 0.9799,
+   "perfect_share": 0.9239,
+   "format_ok_share": 1.0,
+   "cats": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "D": 0.987,
+    "E": 0.975,
+    "F": 0.75,
+    "G": 1.0,
+    "H": 0.936,
+    "I": 1.0,
+    "J": 1.0,
+    "K": 0.963
+   },
+   "source_rows": 685
+  }
+ },
+ "paired": {
+  "b2003: contour-free -> v1.2": {
+   "n_pairs": 645,
+   "avg_delta": 0.0263,
+   "improved": 47,
+   "regressed": 30
+  },
+  "b2003: v1.2 -> v1.3": {
+   "n_pairs": 319,
+   "avg_delta": 0.0044,
+   "improved": 17,
+   "regressed": 13
+  },
+  "b2003: v1.3 -> v1.7": {
+   "n_pairs": 319,
+   "avg_delta": -0.0095,
+   "improved": 15,
+   "regressed": 20
+  },
+  "b2003: v1.7 -> v1.8": {
+   "n_pairs": 717,
+   "avg_delta": 0.0123,
+   "improved": 43,
+   "regressed": 21
+  },
+  "b2003: v1.8 -> v1.9": {
+   "n_pairs": 2421,
+   "avg_delta": 0.0478,
+   "improved": 264,
+   "regressed": 91
+  },
+  "mac: v1.1 -> v1.2": {
+   "n_pairs": 8,
+   "avg_delta": 0.0,
+   "improved": 0,
+   "regressed": 0
+  },
+  "mac: v1.2 -> v1.3": {
+   "n_pairs": 132,
+   "avg_delta": 0.0057,
+   "improved": 3,
+   "regressed": 0
+  },
+  "mac: v1.3 -> v1.4": {
+   "n_pairs": 19,
+   "avg_delta": -0.8421,
+   "improved": 0,
+   "regressed": 16
+  },
+  "mac: v1.4 -> v1.5": {
+   "n_pairs": 19,
+   "avg_delta": 0.8421,
+   "improved": 16,
+   "regressed": 0
+  },
+  "mac: v1.5 -> v1.6": {
+   "n_pairs": 19,
+   "avg_delta": -0.0395,
+   "improved": 0,
+   "regressed": 3
+  },
+  "mac: v1.6 -> v1.7": {
+   "n_pairs": 19,
+   "avg_delta": 0.0395,
+   "improved": 3,
+   "regressed": 0
+  },
+  "mac: v1.7 -> v1.8": {
+   "n_pairs": 1317,
+   "avg_delta": 0.0067,
+   "improved": 18,
+   "regressed": 4
+  },
+  "mac: v1.8 -> v2.0": {
+   "n_pairs": 670,
+   "avg_delta": 0.0468,
+   "improved": 77,
+   "regressed": 0
+  }
+ }
+}

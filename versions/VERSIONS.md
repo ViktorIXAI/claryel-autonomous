@@ -4,7 +4,7 @@ English narrative of the decision log in
 [`gate-versions.log`](../history/agent-decisions/gate-versions.log) (verbatim Russian, agent-authored,
 written *during* the runs — that file is the primary source; where numbers
 differ slightly the difference is a mid-run snapshot vs. the final recomputed
-aggregate in `analytics/summary.json`).
+aggregate in `results/summary.json`).
 
 Method that applies to every entry: **A/B on the same frozen plan** — same
 tasks, same `(task, rep)` keys, same generation seeds — on two physically

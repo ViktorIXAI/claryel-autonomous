@@ -71,7 +71,7 @@ idle endpoint, then classify:
 
 ## Aggregates
 
-`analytics/aggregate.py` recomputes `analytics/summary.json` from raw
+`analytics/aggregate.py` recomputes `results/summary.json` from raw
 `results-*.jsonl` + `gate-ledger-*.jsonl`. The raw archives are **not**
 committed (they carry ~40k model outputs); point `PARB_ARTIFACTS` at a
 downloaded release archive's `artifacts/` directory to recheck every published
