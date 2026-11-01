@@ -119,3 +119,13 @@ carry the bytes needed for independent verification, not just hashes.
 
 No failure was ever hidden by re-running until green: each has a fix commit
 or a documented cause above.
+
+## Publication watchdog commits sweep up unrelated work-in-progress (2026-11-01)
+
+`ce60f32` ("publish: pipeline packages") was created by the publication
+watchdog's `git add -A` and silently committed a batch of in-progress
+research files (holdout v2, EXT-003 registration, baselines data) under a
+misleading message. Content and hashes were unaffected, and the intended
+commit (`0d28de5`) later restates the same work with a proper message —
+but commit hygiene matters for an audit trail. Fix queued for the watchdog:
+stage only pipeline-generated paths, never `-A`.

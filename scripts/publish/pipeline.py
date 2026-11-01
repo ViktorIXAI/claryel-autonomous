@@ -282,7 +282,10 @@ def cmd_publish():
     # regenerate INDEX + summary in repo, commit, push
     rebuild_index(reg)
     run(f"cp {STAGE}/summary-full.json {REPO}/results/summary-full.json")
-    run(f"cd {REPO} && git add -A && git commit -qm 'publish: pipeline packages {tag}' && git push -q")
+    # stage ONLY pipeline-generated paths: `git add -A` once swept unrelated
+    # work-in-progress into a "publish" commit (see history/failures/failures.md)
+    run(f"cd {REPO} && git add logs/PIPELINE-PACKAGES.md results/summary-full.json "
+        f"&& git commit -qm 'publish: pipeline packages {tag}' && git push -q")
     post_verify(tag)
 
 
