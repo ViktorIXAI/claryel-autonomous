@@ -9,8 +9,17 @@ publish:  python3 scripts/build_dashboard.py
 """
 import json
 import os
+import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _rem():
+    import subprocess
+    u = subprocess.run(["git", "remote", "get-url", "origin"], cwd=ROOT,
+                       capture_output=True, text=True).stdout.strip()
+    m = re.search(r"github\.com[:/]([^/]+/[^/.]+)", u)
+    return "https://github.com/" + (m.group(1) if m else "ViktorIXAI/claryel-autonomous")
 
 
 def jrel(p):
@@ -42,8 +51,8 @@ data = {
     "telemetry_run": tel,
     "holdout_mini": holdout,
     "releases": {
-        "contour-v1.9": "https://github.com/ViktorIXAI/autonomous/releases/tag/contour-v1.9",
-        "data-full-2026-11-01": "https://github.com/ViktorIXAI/autonomous/releases/tag/data-full-2026-11-01",
+        "contour-v1.9": _rem() + "/releases/tag/contour-v1.9",
+        "data-full-2026-11-01": _rem() + "/releases/tag/data-full-2026-11-01",
     },
 }
 

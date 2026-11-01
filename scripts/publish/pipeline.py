@@ -78,6 +78,12 @@ def sha(p):
     return h.hexdigest()
 
 
+def _owner():
+    u = subprocess.run(["git", "remote", "get-url", "origin"], cwd=REPO,
+                       capture_output=True, text=True).stdout.strip()
+    m = re.search(r"github\.com[:/]([^/]+/[^/.]+)", u)
+    return m.group(1) if m else "ViktorIXAI/claryel-autonomous"
+
 def load_reg():
     if os.path.exists(REG):
         return json.load(open(REG))
@@ -228,7 +234,7 @@ def cmd_publish():
         if code != 0:
             print("UPLOAD-FAIL", pid, out[-300:]);
             return
-        man["published"] = {"tag": tag, "url": f"https://github.com/ViktorIXAI/autonomous/releases/tag/{tag}", "at": time.strftime("%FT%TZ", time.gmtime())}
+        man["published"] = {"tag": tag, "url": f"https://github.com/{_owner()}/releases/tag/{tag}", "at": time.strftime("%FT%TZ", time.gmtime())}
         save_reg(reg)
     # regenerate INDEX + summary in repo, commit, push
     rebuild_index(reg)
@@ -257,7 +263,7 @@ def post_verify(tag):
     reg = load_reg()
     ok = True
     for man in reg["packages"].values():
-        url = "https://github.com/ViktorIXAI/autonomous/releases/download/%s/%s" % (tag, man["asset"])
+        url = "https://github.com/%s/releases/download/%s/%s" % (_owner(), tag, man["asset"])
         code, out, _ = run(f"curl -sL -o /tmp/pv.bin -w '%{{http_code}} %{{size_download}}' {url}", timeout=300)
         parts = out.split()
         want = os.path.getsize(os.path.join(PKGS, man["asset"]))

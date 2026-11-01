@@ -17,7 +17,13 @@ import re
 import subprocess
 import sys
 
-REPO = "ViktorIXAI/autonomous"  # renamed 2026-11-01 from strata-autonomous-harness (redirects active)
+def _repo_from_origin():
+    u = subprocess.run(["git", "remote", "get-url", "origin"], 
+                       capture_output=True, text=True).stdout.strip()
+    m = re.search(r"github\.com[:/]([^/]+/[^/.]+)", u)
+    return m.group(1) if m else "ViktorIXAI/claryel-autonomous"
+
+REPO = _repo_from_origin()  # rename-proof: read from the remote, not hardcoded
 MD = re.compile(r"\[([^\]]*)\]\(([^)\s]+)[^)]*\)")
 
 
