@@ -64,3 +64,14 @@ a finding, not something to smooth over.
 - clean-room reproduction verified in an isolated container using only public endpoints
 - dashboard live at https://viktorixai.github.io/autonomous/dashboard/
 - repository renamed by owner to `ViktorIXAI/autonomous` (19:55 local); all references updated
+
+## 2026-11-01 (evening): external review adopted as record
+
+- owner obtained a critical external review from an outside AI system and
+  pasted it verbatim; published unedited in `results/external-review-2026-11-01.md`
+- positioning narrowed to home-lab framing (EXT-002); README claims rewritten
+- dynamic research regime adopted (`docs/dynamic-regime.md`): rotating
+  hardware/model/engine generations, static-window comparability, retirement
+  of saturated task families
+- external-model input ledger opened with pre-cutoff disclosure that earlier
+  specs contained ChatGPT copy-paste (`history/external-model-inputs/`)

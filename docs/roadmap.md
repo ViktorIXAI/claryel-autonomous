@@ -18,3 +18,19 @@
 Standing constraints while executing the roadmap: running series are never
 killed for publication purposes; configurations are not changed without
 cause; old data is never deleted or rewritten; unmeasured stays null.
+
+## Added 2026-11-01 after the external review
+
+- **Dynamic regime adopted** — machines/models/engine versions rotate;
+  static-window comparability rule; saturated task families retired:
+  [`dynamic-regime.md`](dynamic-regime.md). Status: protocol active.
+- **Budget-matched simple baselines** (single retry, plain JSON validator,
+  generic framework) against the contour at equal token/time budget.
+  Status: planned, top priority — this is the experiment that decides whether
+  the autonomous loop earns its complexity.
+- **External-model input ledger**: all copy-pasted AI specs/reviews hashed
+  and logged from 2026-11-01 12:00 CET. Status: running
+  (`../history/external-model-inputs/ledger.md`).
+- **External critical review published verbatim**:
+  `../results/external-review-2026-11-01.md`. Status: done; response table
+  inline.

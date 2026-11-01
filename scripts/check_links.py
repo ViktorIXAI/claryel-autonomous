@@ -69,7 +69,12 @@ def main():
                         ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
                          "-L", "--max-time", "25", "-A", "sah-linkcheck/1.0", link],
                         capture_output=True, text=True).stdout.strip()
-                    if code not in ("200", "301", "302", "405"):
+                    ok = ("200", "301", "302", "405")
+                    if "linkedin.com" in link:
+                        # LinkedIn answers 999/403 to every non-browser agent;
+                        # profile existence is verified through the owner account.
+                        ok = ok + ("999", "403")
+                    if code not in ok:
                         bad.append((f, link, "http " + code))
                 continue
             path, _, anchor = link.partition("#")

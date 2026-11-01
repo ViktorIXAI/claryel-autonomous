@@ -52,6 +52,7 @@ data = {
     "holdout_mini": holdout,
     "releases": {
         "contour-v1.9": _rem() + "/releases/tag/contour-v1.9",
+        "external review + our response": _rem() + "/blob/main/results/external-review-2026-11-01.md",
         "data-full-2026-11-01": _rem() + "/releases/tag/data-full-2026-11-01",
     },
 }

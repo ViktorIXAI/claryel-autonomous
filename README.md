@@ -1,16 +1,20 @@
 # Claryel Autonomous Harness Lab
 
-**Open Research into Autonomous Local AI Evolution**
-*An AI-built, self-improving harness for local language models.*
+**An open, AI-operated home-lab experiment investigating autonomous harness
+development around frozen local language models.** We publish successful and
+failed iterations, paired benchmarks, execution costs, and available
+provenance data. Our goal is to study which improvements generalize, which
+merely optimize benchmark formatting, and how much autonomy can be
+demonstrated experimentally.
 
-This is an open research experiment, not a finished commercial product.
-
-We investigate whether local AI systems can autonomously develop and improve
-their own software harnesses — discover failures, write code, test changes,
-optimize performance, and evolve over time. The project also explores
-cooperation between local and cloud AI, with locally-enforced privacy
-boundaries. The same frozen model is measured across very different
-hardware, from an affordable consumer GPU to a high-memory workstation.
+This is an open **ongoing experiment**, not a finished product and not a
+claim that AI has learned to grow its own intelligence. The research runs as
+a living lab on household hardware: machines join and leave, model and
+inference-engine generations rotate, and the task bank is deliberately kept
+moving — see [docs/dynamic-regime.md](docs/dynamic-regime.md). The practical
+target is working automation on extremely affordable hardware, with data kept
+local and optional cooperation with inexpensive cloud models under a
+default-deny privacy boundary.
 
 **The full research history matters more than impressive benchmark numbers.**
 Every version below — including the rejected ones — ships with its decision
@@ -22,13 +26,25 @@ same model  ·  same frozen task prompts  ·  same seeds
         only the software around the model improves
 ```
 
-Every line of the published code — runner, validators, mechanical fixers,
-task bank, A/B tooling, experiment scripts — was written, tested, benchmarked
-and (sometimes) rolled back by an autonomous AI coding agent between
-2026-10-30 and 2026-11-01, under an operator who set the standing rules.
-Who did what is itemized in [`docs/autonomy.md`](docs/autonomy.md): no human
-work is claimed as autonomous, and nothing autonomous is hidden behind "the
-team".
+An AI agent autonomously developed and tested successive harness
+modifications — runner, validators, mechanical fixers, task bank, A/B
+tooling, experiment scripts — between 2026-10-30 and today, under
+human-defined objectives and constraints; the operator set the standing
+rules, chose the publication scope, and performed the renames visible in the
+history. Who did what is itemized in [`docs/autonomy.md`](docs/autonomy.md):
+no human work is claimed as autonomous, nothing autonomous is hidden behind
+"the team", and the primary evidence remains the agent's own decision logs
+(their limits are stated in [`docs/limitations.md`](docs/limitations.md)).
+
+External AI models were used by the owner to draft some task specifications
+and to obtain reviews — before 2026-11-01 some of that text was copy-pasted
+from ChatGPT. From 2026-11-01 every such input is hashed and logged:
+[`history/external-model-inputs/ledger.md`](history/external-model-inputs/ledger.md).
+A full critical external review, published unedited with our response, is in
+[`results/external-review-2026-11-01.md`](results/external-review-2026-11-01.md).
+
+**Updates and announcements are published on X: [@uctive](https://x.com/uctive).**
+Owner profile: [LinkedIn](https://www.linkedin.com/in/viktor-khudiakov-44a5447b).
 
 ## Live research infrastructure
 
