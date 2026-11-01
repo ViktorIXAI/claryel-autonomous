@@ -12,7 +12,7 @@
 | 8 | Automated publication | **done (first cycle proven)** — `scripts/publish/pipeline.py` (collect→verify→privacy-scan→immutable snapshot→aggregate→publish→public re-check); watchdog proven live: auto-published `pkg-series-v12-v20.de4f3a8446e0` when the Mac series grew; scheduled every 6 h |
 | 9 | Install for others | **done** — Mode 1 quickstart + self-tests + smoke on a third box; holdout bank (`benchmarks/holdout/`) with disjoint ids validated in CI; pilot run published (`results/holdout-mini.md`) |
 | 10 | Local+cloud privacy layer | **partial** — working prototype `benchmarks/privacy-boundary/gateway.py` (default-deny, 12 deny categories, lane policy) + 18 synthetic tests in CI; no real data ever sent; paraphrase-leak resistance is an open research problem, no finished-protection claim |
-| 11 | Public dashboard | **done** — https://viktorixai.github.io/strata-autonomous-harness/dashboard/ rendered entirely from repo JSON (`scripts/build_dashboard.py`) |
+| 11 | Public dashboard | **done** — https://viktorixai.github.io/autonomous/dashboard/ rendered entirely from repo JSON (`scripts/build_dashboard.py`) |
 | 12 | Research expansion | **in progress** — v2.0-dev contour runs (auto-published); holdout pilot found a real G-category generalization gap; full 206-task holdout series next; v2.0 must beat dev **and** holdout sets |
 
 Standing constraints while executing the roadmap: running series are never

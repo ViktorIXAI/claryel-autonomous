@@ -7,7 +7,7 @@ echo "== fetch public repo tarball (main) =="
 if [ ! -d /work/repo ]; then
 python3 - <<'EOF'
 import urllib.request, tarfile, io, os
-u="https://codeload.github.com/ViktorIXAI/strata-autonomous-harness/tar.gz/refs/heads/main"
+u="https://codeload.github.com/ViktorIXAI/autonomous/tar.gz/refs/heads/main"
 data=urllib.request.urlopen(u, timeout=120).read()
 tarfile.open(fileobj=io.BytesIO(data)).extractall("/work")
 d=sorted(x for x in os.listdir("/work") if x.startswith("strata-autonomous-harness"))[0]
@@ -24,7 +24,7 @@ python3 benchmarks/privacy-boundary/test_gateway.py | tail -1
 echo "== download pinned artifacts asset (public, no auth) =="
 python3 - <<'EOF'
 import urllib.request
-u="https://github.com/ViktorIXAI/strata-autonomous-harness/releases/download/contour-v1.9/artifacts-release-2026-11-01-v2.tar.zst"
+u="https://github.com/ViktorIXAI/autonomous/releases/download/contour-v1.9/artifacts-release-2026-11-01-v2.tar.zst"
 open("/work/art.tar.zst","wb").write(urllib.request.urlopen(u, timeout=300).read())
 import os; print("asset bytes:", os.path.getsize("/work/art.tar.zst"))
 EOF

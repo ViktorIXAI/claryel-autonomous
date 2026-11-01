@@ -34,7 +34,7 @@ team".
 
 | what | where |
 |---|---|
-| public dashboard (built only from repo JSON) | https://viktorixai.github.io/strata-autonomous-harness/dashboard/ |
+| public dashboard (built only from repo JSON) | https://viktorixai.github.io/autonomous/dashboard/ |
 | automatic publication pipeline + watchdog | [`scripts/publish/pipeline.py`](scripts/publish/pipeline.py), package index [`logs/PIPELINE-PACKAGES.md`](logs/PIPELINE-PACKAGES.md) |
 | every contour generation incl. rejected, auto-aggregated | [`results/summary-full.json`](results/summary-full.json) |
 | independent second-opinion scorer + its dissent | [`analytics/second_opinion.py`](analytics/second_opinion.py), [`results/independent-scorer.md`](results/independent-scorer.md) |
@@ -120,7 +120,7 @@ Any OpenAI-compatible endpoint (llama.cpp, vLLM, Ollama, LM Studio, …),
 Python ≥ 3.9, standard library only:
 
 ```bash
-git clone https://github.com/ViktorIXAI/strata-autonomous-harness
+git clone https://github.com/ViktorIXAI/autonomous
 cd strata-autonomous-harness
 ./install.sh                       # venv + contour self-tests (12 fixer cases, D-normalizer contract)
 cp config.example.sh config.sh     # set PARB_API / PARB_MODEL

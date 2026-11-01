@@ -10,7 +10,7 @@ and every published artifact passed a secret-scan before commit (see
 ## Reporting a vulnerability
 
 Report privately via GitHub Security Advisories
-(https://github.com/ViktorIXAI/strata-autonomous-harness/security/advisories/new).
+(https://github.com/ViktorIXAI/autonomous/security/advisories/new).
 Do not open a public issue for exploitable problems.
 
 ## If a secret is ever published here (incident procedure)

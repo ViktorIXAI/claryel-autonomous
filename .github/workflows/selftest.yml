@@ -31,7 +31,7 @@ jobs:
       - name: download pinned artifacts from public release (no auth)
         run: |
           curl -sL -o art.tar.zst \
-            https://github.com/ViktorIXAI/strata-autonomous-harness/releases/download/contour-v1.9/artifacts-release-2026-11-01-v2.tar.zst
+            https://github.com/ViktorIXAI/autonomous/releases/download/contour-v1.9/artifacts-release-2026-11-01-v2.tar.zst
           mkdir -p artifacts && tar --zstd -xf art.tar.zst -C artifacts --strip-components=1
       - name: verify every file against logs/INDEX.md sha256 prefixes
         run: python scripts/verify_release_hashes.py artifacts

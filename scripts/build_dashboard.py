@@ -42,8 +42,8 @@ data = {
     "telemetry_run": tel,
     "holdout_mini": holdout,
     "releases": {
-        "contour-v1.9": "https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/contour-v1.9",
-        "data-full-2026-11-01": "https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01",
+        "contour-v1.9": "https://github.com/ViktorIXAI/autonomous/releases/tag/contour-v1.9",
+        "data-full-2026-11-01": "https://github.com/ViktorIXAI/autonomous/releases/tag/data-full-2026-11-01",
     },
 }
 
