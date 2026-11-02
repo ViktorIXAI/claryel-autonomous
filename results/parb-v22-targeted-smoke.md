@@ -22,6 +22,18 @@ bank, model and quantization were frozen.
 - unchanged: 0
 - regressed: 0
 
+## P3001 budget worker
+
+- n=30 F pairs, identical task/rep/seed on the same RTX 3060 endpoint
+- v2.1 average content: 0.7167
+- v2.2 average content: 1.0000
+- improved: 27
+- unchanged: 3
+- regressed: 0
+- perfect answers: 3 → 30
+- Runtime: baseline 552 s, candidate 184 s.
+- Every F task average became 1.0000.
+
 ## Offline B2003 replay
 
 - Recorded v2.1 B2003 F answers were replayed through the v2.2 normalizer and

@@ -104,6 +104,7 @@ honest numbers are the **paired deltas**:
 | v1.8 → v1.9 (Mac) | 2416 | **+0.051** | 183 : **0** |
 | v2.1 → v2.2, P2005 F subset | 30 | **+0.283** | 29 improved, 1 unchanged, **0** regressed |
 | v2.1 → v2.2, Mac F subset | 30 | **+0.250** | 30 improved, **0** regressed |
+| v2.1 → v2.2, P3001 F subset | 30 | **+0.283** | 27 improved, 3 unchanged, **0** regressed |
 
 Scorer-dependence, stated openly: an independent scorer with ~90% task
 coverage puts the same B2003 delta at **−0.006** (flat) while reversing

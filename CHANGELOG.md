@@ -15,6 +15,8 @@ Contour (harness) generations. Rejected generations are listed under
   29 improved / 1 unchanged / 0 regressed.
 - Mac Studio paired F smoke (n=30, same task/rep/seed): 0.7500 → 1.0000;
   30 improved / 0 unchanged / 0 regressed.
+- P3001 budget-worker paired F smoke (n=30, same task/rep/seed): 0.7167 →
+  1.0000; 27 improved / 3 unchanged / 0 regressed.
 - Offline replay through v2.2 of recorded B2003 v2.1 F answers (n=323):
   every F task average becomes 1.0000.
 - Contract tests: v19 4/4, v20 post 11/11, v21 H 10/10, v22 F 8/8.

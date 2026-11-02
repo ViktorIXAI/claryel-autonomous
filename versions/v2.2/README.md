@@ -12,6 +12,8 @@
 - **Targeted evidence:** P2005 paired F smoke n=30: 0.7167 → 1.0000; 29
   improved / 1 unchanged / 0 regressed. Mac Studio paired F smoke n=30:
   0.7500 → 1.0000; 30 improved / 0 regressed.
+- **Budget-worker evidence:** P3001 paired F smoke n=30: 0.7167 → 1.0000;
+  27 improved / 3 unchanged / 0 regressed; perfect answers 3 → 30.
 - **Offline replay:** all recorded B2003 v2.1 F answers n=323 become perfect
   after v2.2 normalization.
 - **Running status:** full Mac v2.2 suite starts after full Mac v2.1 finishes;

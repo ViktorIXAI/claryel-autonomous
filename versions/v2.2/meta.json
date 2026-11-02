@@ -4,5 +4,5 @@
   "change": "f_diagnostic_normalize(): infer the F failure class from the visible log, append evidence-backed component/cause/safe-step tokens, suppress unsupported thermal claims and decoy blame; task prompt and scorer unchanged",
   "code": "harness/gate_run.py (F_GROUND); test-first harness/gate_v22_f_test.py",
   "adopt": "targeted F paired smoke accepted on P2005 and Mac Studio; full-suite verdict pending",
-  "numbers": "unit tests 8/8; P2005 paired F n=30 0.7167 -> 1.0000 (29 improved, 1 unchanged, 0 regressed); Mac paired F n=30 0.7500 -> 1.0000 (30 improved, 0 regressed); B2003 v2.1 F answer replay n=323 -> every F task average 1.0000"
+  "numbers": "unit tests 8/8; P2005 paired F n=30 0.7167 -> 1.0000 (29 improved, 1 unchanged, 0 regressed); Mac paired F n=30 0.7500 -> 1.0000 (30 improved, 0 regressed); P3001 paired F n=30 0.7167 -> 1.0000 (27 improved, 3 unchanged, 0 regressed); B2003 v2.1 F answer replay n=323 -> every F task average 1.0000"
 }

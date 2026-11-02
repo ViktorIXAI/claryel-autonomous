@@ -162,6 +162,8 @@ Paired F subset results:
   0 regressed.
 - Mac Studio (n=30, same task/rep/seed): 0.7500 → 1.0000; 30 improved,
   0 regressed.
+- P3001 budget worker (n=30, same task/rep/seed): 0.7167 → 1.0000; 27 improved,
+  3 unchanged, 0 regressed; perfect answers increased from 3 to 30.
 - Recorded B2003 v2.1 F answers replayed offline through v2.2: n=323, every F
   task average becomes 1.0000.
 
