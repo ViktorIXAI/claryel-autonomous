@@ -1,13 +1,19 @@
 # Telemetry
 
-- `collector2.py` — v2 sampler (2026-11-01): JSONL, self-describing header
-  (units + per-metric source), `run_id` binding via `PARB_RUN_ID`, macOS and
-  Linux paths, every absent sensor literally `null` + `not_available` with a
-  reason. 1 Hz, ~2 KB/s.
+- `collector2.py` — v2 sampler (updated 2026-11-02): JSONL, self-describing
+  header (units + per-metric source), `run_id` binding via `PARB_RUN_ID`,
+  macOS and Linux paths, every absent sensor literally `null` +
+  `not_available` with a reason. 1 Hz, ~2 KB/s. Linux nvidia-smi now selects
+  the largest-VRAM GPU by default, or the `PARB_GPU_INDEX` device.
 - `join.py` — binds results to telemetry: per-attempt windows
   (`[t_wall − attempt_seconds, t_wall]`) report medians of CPU/GPU/RAM
   metrics inside the window; no samples in window ⇒ `not_available`.
   Example output committed at `runs/smoke-tel-4.join.json`.
+- `resource_quality.py` — required methodology join: answer quality,
+  end-to-end latency, peak RAM/VRAM/power, min available RAM and estimated
+  energy per attempt, with p50/p95/max aggregate summaries.
+- `resource_quality_test.py` — synthetic test for window joins, peak/min
+  selection, latency and energy calculations.
 - **Sampler overhead, measured:** identical 5-task/46-record smoke on
   P2005SAH — 60 s without collector, 60.2 s with 1 Hz collector + join.
   Overhead within measurement noise (≤0.4%).

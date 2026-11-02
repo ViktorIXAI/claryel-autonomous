@@ -9,7 +9,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-TEST_FILES = sorted((ROOT / "harness").glob("*test.py"))
+TEST_FILES = sorted((ROOT / "harness").glob("*test.py")) + [
+    ROOT / "telemetry" / "resource_quality_test.py",
+]
 EXTRA_SCRIPTS = [
     "scripts/sanity_data.py",
     "scripts/check_links.py",

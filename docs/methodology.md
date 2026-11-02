@@ -27,8 +27,10 @@
 - Failure classification feeds the next hypothesis:
   CHRONIC (structural contour change) / LOTTERY (retry & selection) /
   FIXED (confirmed win) — see `experiments/ab/classify_v19p.py`.
-- Cost tracked next to quality: model calls, tokens (useful vs overhead),
-  seconds per attempt, per-correct-answer economics for finance categories.
+- Cost and physical execution tracked next to quality: model calls, tokens
+  (useful vs overhead), end-to-end seconds, peak host RAM, peak/min available
+  memory, peak VRAM and headroom, peak GPU utilization/power, estimated GPU
+  energy, and per-correct-answer economics for finance categories.
 - Dedup rule everywhere: `(task, rep[, box])` keeping the best `content`;
   raw logs are never edited.
 

@@ -28,13 +28,23 @@ INTERVAL = float(os.environ.get("PARB_TELEM_INTERVAL", "1.0"))
 IS_MAC = platform.system() == "Darwin"
 
 UNITS = {"cpu_pct": "%", "load1": "procs", "cpu_ghz": "GHz", "cpu_temp_c": "C",
-         "ram_used_mb": "MB", "ram_avail_mb": "MB", "swap_used_mb": "MB",
+         "ram_used_mb": "MB", "ram_avail_mb": "MB", "ram_wired_mb": "MB",
+         "ram_compressor_mb": "MB", "swap_used_mb": "MB",
          "vram_used_mb": "MB", "vram_total_mb": "MB", "gpu_util_pct": "%",
          "gpu_power_w": "W", "gpu_temp_c": "C", "gpu_clk_mhz": "MHz",
          "gpu_throttle": "flags", "disk_rd_kbps": "kB/s", "disk_wr_kbps": "kB/s"}
 Nvidia = ["utilization.gpu,power.draw,temperature.gpu,clocks.current.graphics,"
           "clocks_event_reasons.active,memory.used,memory.total",
           "--format=csv,noheader,nounits"]
+
+
+def parse_mac_bytes(value):
+    m = re.fullmatch(r"([\d.]+)([KMGT]?B)", value)
+    if not m:
+        return 0.0
+    n = float(m.group(1))
+    unit = m.group(2)[:-1] or ""
+    return n * {"": 1, "K": 1024, "M": 1024**2, "G": 1024**3, "T": 1024**4}[unit]
 
 
 def meminfo():
@@ -91,13 +101,25 @@ def nvidia():
     try:
         out = subprocess.run(["nvidia-smi", "--query-gpu=" + Nvidia[0]] + Nvidia[1:],
                              capture_output=True, text=True, timeout=5).stdout.strip()
-        p = [x.strip() for x in out.split("\n")[0].split(",")]
-        if len(p) < 7:
+        rows = []
+        for line in out.splitlines():
+            p = [x.strip() for x in line.split(",")]
+            if len(p) < 7:
+                continue
+            try:
+                rows.append({"gpu_util_pct": float(p[0]), "gpu_power_w": float(p[1]),
+                             "gpu_temp_c": float(p[2]), "gpu_clk_mhz": float(p[3]),
+                             "gpu_throttle": p[4], "vram_used_mb": float(p[5]),
+                             "vram_total_mb": float(p[6])})
+            except ValueError:
+                continue
+        if not rows:
             return {}
-        return {"gpu_util_pct": float(p[0]), "gpu_power_w": float(p[1]),
-                "gpu_temp_c": float(p[2]), "gpu_clk_mhz": float(p[3]),
-                "gpu_throttle": p[4], "vram_used_mb": float(p[5]),
-                "vram_total_mb": float(p[6])}
+        env_idx = os.environ.get("PARB_GPU_INDEX")
+        if env_idx is not None:
+            idx = int(env_idx)
+            return rows[idx] if 0 <= idx < len(rows) else {}
+        return max(rows, key=lambda g: (g["vram_total_mb"], g["vram_used_mb"]))
     except Exception:
         return {}
 
@@ -118,7 +140,9 @@ def cpu_pct(prev):
 
 def sample():
     global _PREV_CPU, _PREV_DISK
-    s, src = {}, {}
+    s, src = {}, {k: "not_available" for k in UNITS}
+    for k in UNITS:
+        s[k] = None
     now = time.time()
     s["ts"] = round(now, 2)
     s["ts_iso"] = time.strftime("%FT%TZ", time.gmtime(now))
@@ -135,20 +159,43 @@ def sample():
             out = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=5).stdout
             page = int(re.search(r"page size of (\d+)", out).group(1))
             def pg(name):
-                m = re.search(name + r"\s+\((\d+)\)", out)
-                return int(m.group(1)) * page / 1048576 if m else 0
-            used = pg("Pages wired down") + pg("Pages occupied by compressor") + \
-                pg("Active") + pg("Inactive") + pg("Speculative")
-            s["ram_used_mb"] = round(used, 0)
-            src["ram_used_mb"] = "vm_stat"
+                m = re.search(r"^" + name + r":\s+([\d.]+)\.", out, re.M)
+                return float(m.group(1)) if m else None
+            total_mb = int(subprocess.run(["sysctl", "-n", "hw.memsize"], capture_output=True,
+                                          text=True, timeout=5).stdout.strip()) / 1048576
+            free = pg("Pages free") or 0
+            inactive = pg("Pages inactive") or 0
+            speculative = pg("Pages speculative") or 0
+            wired = pg("Pages wired down") or 0
+            compressor = pg("Pages occupied by compressor") or 0
+            s["ram_avail_mb"] = round((free + inactive + speculative) * page / 1048576, 0)
+            src["ram_avail_mb"] = "vm_stat(free+inactive+speculative)"
+            s["ram_used_mb"] = round(max(total_mb - free * page / 1048576, 0), 0)
+            src["ram_used_mb"] = "vm_stat(total-free)"
+            s["ram_wired_mb"] = round(wired * page / 1048576, 0)
+            src["ram_wired_mb"] = "vm_stat(wired)"
+            s["ram_compressor_mb"] = round(compressor * page / 1048576, 0)
+            src["ram_compressor_mb"] = "vm_stat(compressor)"
         except Exception:
-            s["ram_used_mb"] = None; src["ram_used_mb"] = "not_available"
-        for k in ("cpu_pct", "cpu_ghz", "cpu_temp_c", "swap_used_mb", "vram_used_mb",
-                  "vram_total_mb", "gpu_util_pct", "gpu_power_w", "gpu_temp_c",
+            for k in ("ram_used_mb", "ram_avail_mb", "ram_wired_mb", "ram_compressor_mb"):
+                s[k] = None
+                src[k] = "not_available"
+        try:
+            out = subprocess.run(["sysctl", "-n", "vm.swapusage"], capture_output=True,
+                                 text=True, timeout=5).stdout
+            m = re.search(r"used\s*=\s*([\d.]+)([KMGT]?B)", out)
+            if m:
+                s["swap_used_mb"] = round(parse_mac_bytes(m.group(1) + m.group(2)) / 1048576, 0)
+                src["swap_used_mb"] = "sysctl(vm.swapusage)"
+        except Exception:
+            s["swap_used_mb"] = None; src["swap_used_mb"] = "not_available"
+        for k in ("cpu_ghz", "vram_used_mb", "vram_total_mb",
+                  "gpu_util_pct", "gpu_power_w", "gpu_temp_c",
                   "gpu_clk_mhz", "gpu_throttle", "disk_rd_kbps", "disk_wr_kbps"):
             s[k] = None
-            src[k] = "not_available(root-required on macOS)" if k in ("cpu_temp_c", "gpu_power_w", "gpu_temp_c", "gpu_util_pct") else "not_available"
-        s["ram_avail_mb"] = None; src["ram_avail_mb"] = "not_available(macOS hides free RAM; see vm_stat used)"
+            src[k] = "not_available(root-required on macOS)" if k in ("gpu_power_w", "gpu_temp_c", "gpu_util_pct") else "not_available"
+        if s.get("ram_avail_mb") is None:
+            s["ram_avail_mb"] = None; src["ram_avail_mb"] = "not_available(macOS vm_stat could not expose reclaimable memory)"
         return s, src
     m = meminfo()
     # /proc/meminfo values are kB; convert to MB so the unit label is honest
