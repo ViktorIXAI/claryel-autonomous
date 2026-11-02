@@ -161,3 +161,12 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 | bench-sampler-pass4.csv (uncapped A/B) | 144 | 16992 | `865a033293003a09` |
 | bench-ladder4-run.log | 6 | 1010 | `d6c6320afd7906da` |
 | results/p3032-iq3s-power-envelope.jsonl (committed) | 5 | — | — |
+
+## Pending bundle: P3032 contour sweep v2.4 (2026-11-02)
+
+| artifact | records | bytes | sha256/16 |
+|---|---:|---:|---|
+| results-p3032-v22.jsonl | 178 | 396343 | `44fff0c6aee73d7a` |
+| gate-ledger-p3032-v22.jsonl | 178 | 80166 | `dc7db7980a35c2b4` |
+| telem-p3032-v22.jsonl (1 Hz, run_id p3032-v22) | 3429 | 3929260 | `0a41d41b7def3a16` |
+| runner log | — | 22520 | `9f71c3f3b20f092d` |

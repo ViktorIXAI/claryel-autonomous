@@ -73,3 +73,11 @@ degrees, rates only.
 Maintainer decision: the 150 W cap is permanently removed (GPU
 removal/replacement planned). Inventory and change record updated; the
 A/B envelope doc kept as historical record.
+
+## 2026-11-02 (late) — P3032 contour sweep, harness v2.4 (contour 2.2)
+
+Added results/p3032-parb-v24.md: full 178-task rep0 plan on P3032 uncapped,
+mean 0.9867 capacity-valid, F-category 0.70->1.00 vs P3001 v2.1, p50 12.6 s,
+1 Hz resource telemetry complete (VRAM 91% = tight by 12 GB rule; single
+185.9 W peak recorded under uncapped state — hardware decision on record).
+G-ve-13/14 published as capacity rejects. Raw sha-pinned above.
