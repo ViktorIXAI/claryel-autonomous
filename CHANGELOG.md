@@ -3,6 +3,20 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
+## [Unreleased] — 0.0.2.4 (full-Mac resource and economic verdict)
+### Added
+- Full Mac paired report for `0.0.2.1` vs `0.0.2.2` with resource telemetry:
+  `results/parb-v22-mac-full-resource.md`.
+- Permanent resource-telemetry rule: required for full paired gates and
+  hardware-class runs; optional only for idle endpoint smokes.
+### Results
+- 2513 unique paired rows: content mean 0.9394 → 0.9833, +0.0438.
+- F category: 0.6741 → 1.0000, +0.3259.
+- Perfect attempts: 2006 → 2344; improved 338; regressions 0.
+- Raw ledger total: 28,088.7 s → 13,294.5 s; p99 latency 177.35 s → 25.31 s.
+- Mac telemetry: 11,282 samples, 1734 / 2513 attempts covered, peak RAM used
+  177,900 MB, minimum available RAM 133,631 MB.
+
 ## [Unreleased] — 0.0.2.3 (resource telemetry and documentation policy)
 ### Added
 - Four-part version scheme `A.B.C.D` in `harness/gate_versioning.py`.

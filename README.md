@@ -30,7 +30,7 @@ The version scheme is four digits: `A.B.C.D`.
 |---|---|---|
 | `A.B` | operator release line; the operator changes these first two digits | `0.0` |
 | `C` | contour track; `1` is the first contour family, `2` is the second | `2` |
-| `D` | contour revision inside that track | `3` for tooling/measurement, `2` for the active F-grounding contour |
+| `D` | contour revision inside that track | `4` for the full-Mac resource decision and current tooling release |
 
 Current mapping:
 
@@ -38,9 +38,10 @@ Current mapping:
 |---|---|---|---|
 | `0.0.1.9` | `v1.9` | D action-order normalization | full accepted baseline |
 | `0.0.2.0` | `v2.0` | G/H post-normalization | accepted on Mac pair; B2003 partial |
-| `0.0.2.1` | `v2.1` | H safety normalization | full runs in progress on Mac; full P3001 complete |
-| `0.0.2.2` | `v2.2` | F diagnostic grounding | targeted F smoke accepted; full Mac pair running |
-| `0.0.2.3` | — | resource telemetry and documentation policy | current tooling release, contour behavior unchanged |
+| `0.0.2.1` | `v2.1` | H safety normalization | full Mac pair used as baseline; full P3001 complete |
+| `0.0.2.2` | `v2.2` | F diagnostic grounding | full Mac paired run accepted: +0.0438 overall, +0.3259 F, 0 regressions |
+| `0.0.2.3` | — | resource telemetry and documentation policy | current measurement release |
+| `0.0.2.4` | — | full-Mac resource/economic verdict | current release line |
 
 Legacy `v1.x` and `v2.x` names still work as inputs. New reports should use the
 canonical four-part form.
@@ -52,9 +53,9 @@ canonical four-part form.
 | P2005 targeted F smoke | complete; `0.0.2.1 -> 0.0.2.2`, 30 paired rows, 0 regressions |
 | Mac targeted F smoke | complete; 30 paired rows, 0 regressions |
 | P3001 targeted F smoke | complete; 30 paired rows, 0 regressions, perfect answers 3 -> 30 |
-| Mac full `0.0.2.2` paired run | running with resource telemetry; 934 rows copied at check time |
+| Mac full `0.0.2.2` paired run | complete with resource telemetry; 2513 paired rows, +0.0438 overall, 0 regressions |
 | B2003 offline replay | complete; recorded F answers replayed through `0.0.2.2`, n=323 |
-| resource telemetry | active: 1 Hz RAM/VRAM/power/util sampler plus join tool |
+| resource telemetry | permanent for full paired gates and hardware-class runs |
 | documentation freshness | daily policy added; scheduled check added |
 
 ## Headline results

@@ -37,3 +37,14 @@ whether a local AI system is useful, safe and affordable.
 
 These questions are answered one decision at a time through paired runs,
 resource telemetry, cost tables and published failures.
+
+## Recently closed operational decision
+
+Question: should end-to-end latency, peak RAM/VRAM and power/energy become a
+permanent part of the testing methodology after one Mac round?
+
+Decision: yes, for full paired gates and hardware-class runs. The Mac round
+showed large unified-memory headroom and a large quality/latency improvement in
+`0.0.2.2`; the 12 GB P3001 round showed high answer quality with only 903 MB
+VRAM headroom. Quality alone can hide a hardware boundary. See
+[`../results/parb-v22-mac-full-resource.md`](../results/parb-v22-mac-full-resource.md).

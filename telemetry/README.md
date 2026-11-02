@@ -28,5 +28,12 @@
   `not_available`, not sudo'd around.
 - Results rows additionally embed `mem_avail_mb` and contour stop-gate
   readings (RAM<700 MB, GPU>89 °C, endpoint health).
+- `scripts/telemetry/run_with_collector.sh` starts a collector, runs the gate
+  command, then stops the collector on exit.
+- Permanent policy: resource telemetry is required for full paired gates and
+  hardware-class runs. It may be skipped only for idle endpoint smokes where
+  the goal is to check that the endpoint responds.
+- Full-Mac evidence for the policy is recorded in
+  `results/parb-v22-mac-full-resource.md`.
 - Known gap, recorded not hidden: B2003 phase-2 `samp.out` is 0 bytes
   (sampler misconfigured mid-series) — see `history/failures/`.

@@ -34,6 +34,9 @@ series affected. Comparisons spanning a change boundary are flagged.
 - `telemetry/resource_quality.py` performs the join and reports both per-task
   peaks and per-run aggregates. A missing sensor remains `not_available`;
   it is not inferred.
+- Resource telemetry is permanent for full paired gates and hardware-class
+  runs. It may be skipped only for idle endpoint smokes where the goal is a
+  simple availability check.
 - Multi-GPU Linux endpoints: choose the GPU with the largest VRAM by default,
   or pin the serving GPU with `PARB_GPU_INDEX`. Do not mix an idle desktop
   GPU with the serving GPU in one report.

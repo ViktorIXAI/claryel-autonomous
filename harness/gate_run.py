@@ -44,7 +44,7 @@ sys.path.insert(0, ROOT)
 try:
     import gate_versioning as _GV
 
-    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION", "v2.3"))
+    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION", "v2.4"))
     CONTOUR_SUMMARY = _GV.summary(CONTOUR_VERSION)
 
     def contour_at_least(track: int, revision: int) -> bool:
@@ -53,7 +53,7 @@ try:
 except Exception:
     # Fallback keeps old standalone snapshots usable until the versioning
     # module is deployed next to the harness.
-    CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "2.3")
+    CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "2.4")
     parts = [int(x) for x in CONTOUR_VERSION.replace("v", "").split(".") if x.isdigit()]
     if len(parts) >= 4:
         CONTOUR_SUMMARY = {

@@ -10,7 +10,7 @@ authors:
 repository-code: "https://github.com/ViktorIXAI/strata-autonomous-harness"
 license: MIT
 date-released: "2026-11-01"
-version: "0.0.2.3"
+version: "0.0.2.4"
 keywords:
   - local AI
   - benchmark harness

@@ -20,6 +20,7 @@ Compatibility mapping:
 | `0.0.2.1` | `v2.1` | H safety normalization |
 | `0.0.2.2` | `v2.2` | F diagnostic grounding |
 | `0.0.2.3` | — | resource telemetry methodology, contour behavior unchanged |
+| `0.0.2.4` | — | full-Mac resource/economic verdict, contour behavior unchanged |
 
 Legacy names remain valid as inputs and appear in historical records. New
 artifacts should record the canonical four-part form.
@@ -213,6 +214,42 @@ latency median 5.88 s / p95 7.96 s, peak VRAM 11,385 MB of 12,288 MB,
 peak GPU power 113.4 W. The run passed quality but exposed only 903 MB VRAM
 headroom, which is exactly why resource telemetry is now a permanent part of
 full paired gates.
+
+## 0.0.2.4 — full-Mac resource and economic verdict *(current release line)*
+
+This revision does not change the model-facing contour. It closes the Mac
+round requested for the resource-analytics decision.
+
+Full Mac paired result, `0.0.2.1` vs `0.0.2.2`:
+
+- 2513 unique paired rows;
+- content mean: 0.9394 → 0.9833, +0.0438;
+- F category: 0.6741 → 1.0000, +0.3259;
+- perfect attempts: 2006 → 2344;
+- improved pairs: 338;
+- regressed pairs: 0;
+- raw ledger total: 28,088.7 s → 13,294.5 s;
+- p99 non-zero attempt latency: 177.35 s → 25.31 s.
+
+Telemetry join on the Mac run:
+
+- 1 Hz RAM sampling, 11,282 samples;
+- attempt-level resource coverage: 1734 / 2513 attempts;
+- peak RAM used inside attempt windows: 177,900 MB;
+- minimum RAM available inside attempt windows: 133,631 MB;
+- dedicated VRAM and system power: `not_available` on rootless macOS collector.
+
+The Mac profile shows large unified-memory headroom. The 12 GB P3001 profile
+shows the opposite: 11,385 MB of 12,288 MB VRAM used, 903 MB headroom, despite
+a high answer-quality score. That contrast is the basis for the permanence
+decision.
+
+Decision: keep resource telemetry permanently in full paired gates and
+hardware-class runs. Quick smoke runs may skip it only when the machine is
+idle and the objective is a simple endpoint check.
+
+See [`results/parb-v22-mac-full-resource.md`](../results/parb-v22-mac-full-resource.md)
+for the full report and cost/benefit estimate.
 
 ## Cross-cutting rules the chain produced
 

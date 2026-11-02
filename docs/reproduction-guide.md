@@ -55,9 +55,10 @@ PARB_LEDGER=gate-ledger-smoke.jsonl PARB_LIMIT=1000 \
 
 `PARB_GATE_VERSION` selects the contour generation inside one codebase.
 Canonical values are four-part, such as `0.0.1.9`, `0.0.2.0`, `0.0.2.1` and
-`0.0.2.2`; legacy `v1.x`/`v2.x` names are accepted and normalized. `0.0.2.2`
-adds targeted F diagnostic grounding; `0.0.2.3` adds resource telemetry
-methodology without changing contour behavior (see `versions/VERSIONS.md`).
+`0.0.2.2`; legacy `v1.x`/`v2.x` names are accepted and normalized.
+`0.0.2.2` adds targeted F diagnostic grounding; `0.0.2.3` adds resource
+telemetry methodology; `0.0.2.4` records the full-Mac resource/economic verdict
+without changing contour behavior (see `versions/VERSIONS.md`).
 `PARB_CHEAP=1` re-enables
 the *rejected* cheap-model-repair path for experiments only — beware, it is
 rejected for a reason.
