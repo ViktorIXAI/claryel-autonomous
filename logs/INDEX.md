@@ -158,3 +158,6 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 | strata serve engine log (sanitized twin committed as launch json) | — | 56323 | `708f68d35beca386` |
 | build-floor round-1 raw build log (failure) | — | 322188 | `7a70d58def37131a` |
 | results/p3032-iq3s-context-ladder.jsonl (committed) | 5 | 1010 | `c1781708b2f5ba3f` |
+| bench-sampler-pass4.csv (uncapped A/B) | 144 | 16992 | `865a033293003a09` |
+| bench-ladder4-run.log | 6 | 1010 | `d6c6320afd7906da` |
+| results/p3032-iq3s-power-envelope.jsonl (committed) | 5 | — | — |

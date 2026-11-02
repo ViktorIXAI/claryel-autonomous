@@ -1,0 +1,5 @@
+{"rung": 1000, "cold": {"prompt": 1000, "completion": 700, "dt": 31.84, "cached": 0, "finish": "length"}, "warm": {"prompt": 1000, "completion": 700, "dt": 15.77, "cached": 993, "finish": "length"}}
+{"rung": 4000, "cold": {"prompt": 3976, "completion": 700, "dt": 36.75, "cached": 0, "finish": "length"}, "warm": {"prompt": 3976, "completion": 131, "dt": 5.98, "cached": 3969, "finish": "stop"}}
+{"rung": 8000, "cold": {"prompt": 8231, "completion": 131, "dt": 48.65, "cached": 0, "finish": "stop"}, "warm": {"prompt": 8231, "completion": 36, "dt": 1.38, "cached": 8224, "finish": "stop"}}
+{"rung": 16000, "cold": {"prompt": 16968, "completion": 74, "dt": 92.4, "cached": 0, "finish": "stop"}, "warm": {"prompt": 16968, "completion": 700, "dt": 13.91, "cached": 16961, "finish": "length"}}
+{"rung": 30000, "cold": {"prompt": 31818, "completion": 700, "dt": 173.65, "cached": 0, "finish": "length"}, "warm": {"prompt": 31818, "completion": 700, "dt": 14.73, "cached": 31811, "finish": "length"}}

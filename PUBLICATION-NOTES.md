@@ -58,3 +58,12 @@ launch profile. Two discarded ladder passes (prompt-cache contamination;
 44k-token HTTP 400 capacity rejection) are published as evidence with
 sha256-16 pins; raw logs on the workstation (logs/INDEX.md pending bundle).
 No secrets surface: rates, temperatures, power, counts only.
+
+## 2026-11-02 (late) — P3032 power-envelope A/B, cap kept at 150 W
+
+Added results/p3032-iq3s-power-envelope.md (+jsonl): one ladder pass at the
+card's 187 W factory max. Decision: prefill cap-independent, warm decode
++10-24 %, but the box's PSU/power cable is the weak point (177.4 W peak
+observed) — the maintainer ordered the uncapped state explicitly short-term;
+cap restored same day and recorded as standing. No new secrets: watts,
+degrees, rates only.
