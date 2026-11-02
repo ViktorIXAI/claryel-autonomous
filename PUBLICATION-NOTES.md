@@ -47,3 +47,14 @@ G-ve-13/14 rows published explicitly as capacity rejects (HTTP 400,
 113k-char documents vs 32k context), not capability failures — adjusted means
 exclude them. No new secrets surface: scores/aggregates only; raw JSONL not
 committed.
+
+## 2026-11-02 — P3032 onboarding: AVX1 engine build + first 32k ladder
+
+Added hardware/inventory/P3032.md, hardware/changes/P3032.md (onboarding,
+failed CUDA-12.0 build round with exact ptxas diagnosis, successful
+avx-floor/sm_86 build — builds are published per fleet rule),
+results/p3032-iq3s-context-ladder.md + committed dataset jsonl, sanitized
+launch profile. Two discarded ladder passes (prompt-cache contamination;
+44k-token HTTP 400 capacity rejection) are published as evidence with
+sha256-16 pins; raw logs on the workstation (logs/INDEX.md pending bundle).
+No secrets surface: rates, temperatures, power, counts only.

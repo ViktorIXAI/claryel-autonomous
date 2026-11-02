@@ -140,3 +140,21 @@ they are the measured system, not documentation.
 
 Held on the workstation (`~/parb/`) until the next release bundle; numbers
 cited in results/p3001-parb-v21.md.
+
+## Pending bundle: p3032 onboarding + IQ3_S context ladder (2026-11-02)
+
+Raw run artifacts are held on the rig and the workstation mirror (not in
+git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
+
+| artifact | records | bytes | sha256/16 |
+|---|---:|---:|---|
+| bench-sampler-pass1.csv | 122 | 14281 | `a0b69e05204c85b3` |
+| bench-sampler-pass2.csv | 96 | 11362 | `a5c8a394e2944529` |
+| bench-sampler-pass3.csv | 152 | 17987 | `29ca83244f5f4da2` |
+| bench-ladder.jsonl (pass 1) | 5 | 1114 | `d7e8e1664ec8bc1f` |
+| bench-ladder2-run.log (capacity rejects) | 28 | 1807 | `50fa0064c68491bf` |
+| bench-ladder3-run.log | 6 | 1010 | `ea2d5336679d0596` |
+| bench-engine-lines-pass1.txt | 78 | 11003 | `dd949fbbbd8889a8` |
+| strata serve engine log (sanitized twin committed as launch json) | — | 56323 | `708f68d35beca386` |
+| build-floor round-1 raw build log (failure) | — | 322188 | `7a70d58def37131a` |
+| results/p3032-iq3s-context-ladder.jsonl (committed) | 5 | 1010 | `c1781708b2f5ba3f` |
