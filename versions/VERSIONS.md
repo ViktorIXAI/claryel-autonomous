@@ -1,4 +1,4 @@
-# Contour version chronology (v1.0 → v2.1)
+# Contour version chronology (v1.0 → v2.2)
 
 English narrative of the decision log in
 [`gate-versions.en.md`](../history/agent-decisions/gate-versions.en.md) (agent-authored decision entries, translated to English; verbatim Russian originals archived in the `ru-source-records-2026-11-01.tar.zst` release asset,
@@ -143,8 +143,30 @@ Paired v2.0→v2.1 B2003 n=117 (+0.0112, 3 improved / 0 regressed), Mac n=162
 (delta 0, 0 regressions). Mac full v2.1 and B2003 v2.1 are running
 on paired subsets. B2003 v2.0 was stopped early on explicit operator
 instruction to accelerate v2.1; B2003 v2.1 started 14:46 CET on the v1.9
-paired subset (2421 rows). No v2.2 is planned in this configuration unless
-new paired evidence reveals a regression.
+paired subset (2421 rows). The original plan stopped at v2.1; full P3001
+evidence later confirmed chronic F weakness, so the line was reopened with a
+v2.2 change scoped to that class.
+
+## v2.2 — F diagnostic grounding *(targeted acceptance; full Mac run pending)*
+
+The P3001 full v2.1 sweep found F at 0.70, specifically `too_few_safe_steps`:
+the model diagnosed the failure correctly but phrased safe diagnostics in
+Russian prose rather than the canonical tool/resource tokens demanded by the
+F scorer. `f_diagnostic_normalize()` classifies the failure from the visible
+synthetic log, appends evidence-backed component/cause/safe-step tokens,
+removes unsupported thermal claims, and suppresses decoy blame in the
+cause/component lines. Event tags: `contour:v22_*`.
+
+Paired F subset results:
+- P2005 (n=30, same task/rep/seed): 0.7167 → 1.0000; 29 improved, 1 unchanged,
+  0 regressed.
+- Mac Studio (n=30, same task/rep/seed): 0.7500 → 1.0000; 30 improved,
+  0 regressed.
+- Recorded B2003 v2.1 F answers replayed offline through v2.2: n=323, every F
+  task average becomes 1.0000.
+
+Contract tests: 8/8. The Mac full v2.2 suite starts automatically after the
+Mac full v2.1 suite finishes; no full-suite v2.2 verdict is claimed yet.
 
 ## Cross-cutting rules the chain produced
 

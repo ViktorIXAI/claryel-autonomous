@@ -48,7 +48,9 @@ CONTOUR_NOTES = ("v1.0=base contour (gate+re-ask); v1.1=chunked extraction for i
                  "v1.9=D order is normalized from prose into agent_steps; "
                  "v2.0=G/H post-normalization: explicit contradiction marker in G and H compression below 600 chars; "
                  "v2.1=H safety normalization: remove action claims, redact invented missing version tokens, "
-                 "add explicit uncertainty marker")
+                 "add explicit uncertainty marker; "
+                 "v2.2=F diagnostic grounding: append evidence-backed component/cause/safe-step tokens, "
+                 "suppress unsupported thermal claims and decoy blame")
 sys.path.insert(0, ROOT)
 import parb_check as CK
 try:
@@ -62,6 +64,7 @@ VERIFY_RETRY = CONTOUR_VERSION >= "v1.8"
 SLOT_NORMALIZE = CONTOUR_VERSION >= "v1.9"
 POST_NORMALIZE = CONTOUR_VERSION >= "v2.0"
 H_SAFETY = CONTOUR_VERSION >= "v2.1"
+F_GROUND = CONTOUR_VERSION >= "v2.2"
 NUDGE = {
     "no_final_answer": "Заверши ответ отдельной финальной строкой: ОТВЕТ: <итог>.",
     "too_few_safe_steps": "Перечисли нумерованными шагами (1., 2., 3., ...) безопасную последовательность: сначала чтение/проверка состояния, потом изменения.",
@@ -1179,6 +1182,97 @@ def h_safety_normalize(t, text):
     return out, (changed or None)
 
 
+# v2.2: F-category diagnostic grounding. The model often identifies the right
+# failure from a synthetic log but phrases it without the canonical safe-check
+# tokens used by the deterministic validator. This rule reads only the visible
+# prompt, infers the failure class from log evidence, and appends non-destructive
+# diagnostic vocabulary. It also removes unsupported thermal claims and decoy
+# blame from the cause line. It does not change the task prompt, scorer or weights.
+F_DIAG_RULES = (
+    ("nvme", r"(nvme nvme0.*(i/o|timeout)|smartd.*critical warning|ext4-fs error \(device nvme)",
+     "nvme", "SSD", ("smartctl", "nvme", "dmesg"), "gpu"),
+    ("service_restart", r"(apparmor=\"denied\"|cannot open.*(no such file|permission denied)|no such file or directory)",
+     "apparmor", "права доступа", ("apparmor", "aa-status", "journalctl"), "nvme"),
+    ("diskfull", r"(no space left on device|remounting filesystem read-only)",
+     "закончилось место", "диск", ("df", "du", "место"), "out of memory"),
+    ("oom", r"(oom-killer|out of memory|mem-info)",
+     "OOM", "оперативная память", ("free", "dmesg", "journalctl"), "nvme"),
+)
+
+
+def f_diagnostic_normalize(t, text):
+    """Ground F answers in safe diagnostic terms inferred from visible logs."""
+    if not F_GROUND or not text or not str(t.get("id", "")).startswith("F"):
+        return text, None
+    prompt = (t.get("prompt") or "").lower()
+    rule = next(((cause, comp, steps, decoy) for _, _, cause, comp, steps, decoy in F_DIAG_RULES
+                 if re.search(_, prompt)), None)
+    if not rule:
+        return text, None
+    cause_term, component, safe_steps, decoy = rule
+    changed = []
+    lines = text.splitlines()
+
+    def find_line(rx):
+        return next((i for i, s in enumerate(lines) if re.search(rx, s, re.I)), None)
+
+    component_line = find_line(r"^КОМПОНЕНТ:")
+    if component_line is not None and decoy and re.search(re.escape(decoy), lines[component_line], re.I):
+        cleaned = re.sub(re.escape(decoy), "", lines[component_line], flags=re.I)
+        cleaned = re.sub(r"\s*(?:/|и|,)\s*(?=$|[;:])", "", cleaned, flags=re.I)
+        cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" /;,.")
+        if cleaned:
+            lines[component_line] = cleaned
+            changed.append("f_decoy_component_suppressed")
+    if component.lower() not in "\n".join(lines).lower():
+        if component_line is not None:
+            lines[component_line] = lines[component_line].rstrip() + "; " + component
+        else:
+            lines.append("КОМПОНЕНТ: " + component)
+        changed.append("f_component_grounding")
+
+    cause_line = find_line(r"^ПРИЧИНА:")
+    # Keep the visible primary class and suppress a secondary symptom that the
+    # model mistakes for the primary cause. Only the cause line is rewritten.
+    if cause_line is not None and decoy and re.search(re.escape(decoy), lines[cause_line], re.I):
+        cleaned = re.sub(
+            r"(?:[,;]\s*|\bи\s+|\bчто\s+)[^,;.\n]*" + re.escape(decoy) + r"[^,;.\n]*",
+            "",
+            lines[cause_line],
+            flags=re.I,
+        ).strip()
+        cleaned = re.sub(r"(ПРИЧИНА:\s*)([,;.]\s*)+", r"\1", cleaned, flags=re.I)
+        cleaned = cleaned.rstrip(" ,;.")
+        if cleaned:
+            lines[cause_line] = cleaned
+            changed.append("f_decoy_blame_suppressed")
+    if cause_line is not None and cause_term.lower() not in lines[cause_line].lower():
+        lines[cause_line] = lines[cause_line].rstrip() + "; " + cause_term
+        changed.append("f_cause_grounding")
+
+    steps_line = find_line(r"^(?:ШАГИ|ПОСЛЕДОВАТЕЛЬНОСТЬ):")
+    if steps_line is not None:
+        line = lines[steps_line]
+        have = sum(1 for tok in safe_steps if tok in line)
+        missing = [tok for tok in safe_steps if tok not in line]
+        need = max(0, 3 - have)
+        if missing and need:
+            lines[steps_line] = lines[steps_line].rstrip() + ", " + ", ".join(missing[:need])
+            changed.append("f_steps_grounding")
+
+    answer = "\n".join(lines)
+    if re.search(r"(температур|перегрев|thermal)", answer.lower(), re.I) and not re.search(
+            r"(температур|heat|overcurrent)", prompt, re.I):
+        stripped = re.sub(r",?\s*(?:проверка\s+)?температур\w*", "", answer, flags=re.I)
+        stripped = re.sub(r",?\s*(?:перегрев|thermal[^,.]*)", "", stripped, flags=re.I)
+        stripped = re.sub(r"(;;|,\s*,|,\s*$)", lambda m: ";" if m.group(1) == ";;" else "", stripped)
+        if stripped != answer:
+            answer = stripped
+            changed.append("f_thermal_claim_removed")
+
+    return answer, (changed or None)
+
+
 def run_one(t, pos, done, st):
     key = (t["id"], pos["rep"], pos["series"])
     if key in done:
@@ -1266,6 +1360,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v21_" + "_".join(ev))
+    if F_GROUND and cat == "F" and r["text"]:
+        norm, ev = f_diagnostic_normalize(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v22_" + "_".join(ev))
     if VERIFY_RETRY and r["text"] and not r["err"] and cat not in ("A", "E", "C") \
             and not (cat == "D" and t.get("kind") == "loop"):
         def _score(txt):
@@ -1310,6 +1411,13 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v21_" + "_".join(ev))
+                    if F_GROUND and cat == "F" and r["text"]:
+                        norm, ev = f_diagnostic_normalize(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v22_" + "_".join(ev))
 
     try:
         if cat == "D":

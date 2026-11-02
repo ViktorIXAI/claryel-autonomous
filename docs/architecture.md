@@ -15,6 +15,7 @@
                     │  fixers: mechanical form repair (no model call)│
                     │  nudges: answer-form reminders (adopt-if-better)│
                     │  slot normalizer (v1.9) · post-normalizer (v2.0)│
+                    │  F diagnostic grounding (v2.2)                 │
                     └───────────────┬────────────────────────────────┘
         results-*.jsonl ◄───────────┤───────────► gate-ledger-*.jsonl
         (score, notes, answer)      │             (calls, tokens, events)

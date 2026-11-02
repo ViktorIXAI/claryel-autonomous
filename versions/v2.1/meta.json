@@ -1,6 +1,6 @@
 {
  "version": "v2.1",
- "status": "RUNNING — candidate final configuration (no v2.2 planned)",
+ "status": "RUNNING — H/G contour retained; line reopened for scoped v2.2 after P3001 F evidence",
  "change": "h_safety_normalize(): remove false H action claims, redact invented version/serial-shaped tokens in missing-data refusals, add an uncertainty marker when an existing refusal omits one; full-mode H is untouched",
  "code": "harness/gate_run.py (H_SAFETY); test-first harness/gate_v21_h_test.py",
  "adopt": "not adopted yet — running paired full subsets on B2003 and Mac",

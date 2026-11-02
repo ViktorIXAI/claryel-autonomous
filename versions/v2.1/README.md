@@ -14,6 +14,6 @@
   Mac n=162, avg 0.9856, format 100%. Paired B2003 v2.0 → v2.1:
   n=117, avg +0.0112, 3 improved / 0 regressed. Mac paired: n=162, delta 0,
   no regressions.
-- **Versioning decision:** v2.1 is the final configuration for this
-  configuration line; no v2.2 is planned unless new paired evidence shows a
-  regression.
+- **Versioning decision:** v2.1 remains the H/G contour. The line was later
+  reopened for v2.2 after full P3001 evidence showed chronic F weakness; the
+  new version is scoped to that failure class.

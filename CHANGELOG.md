@@ -3,6 +3,23 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
+## [Unreleased] — v2.2 (targeted F contour, paired smoke accepted)
+### Added
+- F diagnostic grounding (`f_diagnostic_normalize`): infers the failure class
+  from the visible synthetic log, adds canonical component/cause/safe-step
+  tokens, suppresses unsupported thermal claims, and removes decoy blame from
+  the cause/component lines. The task prompt, scorer and model weights are not
+  changed.
+### Evidence
+- P2005 paired F smoke (n=30, same task/rep/seed): 0.7167 → 1.0000;
+  29 improved / 1 unchanged / 0 regressed.
+- Mac Studio paired F smoke (n=30, same task/rep/seed): 0.7500 → 1.0000;
+  30 improved / 0 unchanged / 0 regressed.
+- Offline replay through v2.2 of recorded B2003 v2.1 F answers (n=323):
+  every F task average becomes 1.0000.
+- Contract tests: v19 4/4, v20 post 11/11, v21 H 10/10, v22 F 8/8.
+- Mac full v2.2 suite is scheduled to start after Mac full v2.1 finishes.
+
 ## [Unreleased] — v2.1 (candidate final configuration, running)
 ### Added
 - H safety normalization (`h_safety_normalize`): removes false action claims,
@@ -14,8 +31,8 @@ Contour (harness) generations. Rejected generations are listed under
 - B2003 partial n=118 avg 0.9986 / format 100%; Mac partial n=162 avg 0.9856 /
   format 100%. Paired B2003 v2.0→v2.1 n=117: +0.0112, 3 improved / 0 regressed;
   Mac paired n=162: no delta, no regressions.
-- No v2.2 is planned for this configuration line unless final paired evidence
-  reveals a regression.
+- The original plan stopped at v2.1. The operator later reopened the line after
+  full P3001 evidence confirmed chronic F weakness; v2.2 is scoped to that class.
 ### Publication security and DevSecOps
 - Gitleaks configuration and history-aware scanner added; current checkout and
   all branches/tags scan in CI, staging and package archives scan before upload.

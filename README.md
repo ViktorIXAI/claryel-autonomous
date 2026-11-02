@@ -92,6 +92,7 @@ is marked, never mixed).
 | **v1.9 (slot normalization)** | **2127 / 0.933 / 97%** | **2416 / 0.926 / 100%** |
 | v2.0 (G/H post-normalization) | 674 partial / 0.961 / 99% | 2513 / 0.939 / 100% |
 | v2.1 (H safety normalization) | 118 partial / 0.999 / 100% | 162 partial / 0.986 / 100% |
+| v2.2 targeted F smoke | 30 / 1.000 / 100% | 30 / 1.000 / 100% |
 
 Raw means across versions are *not* comparable (the plan mix changed); the
 honest numbers are the **paired deltas**:
@@ -101,6 +102,8 @@ honest numbers are the **paired deltas**:
 | v1.7 → v1.8 (B2003) | 717 | +0.012 | 43 : 21 (weak cats H +0.18, F +0.04) |
 | v1.8 → v1.9 (B2003) | 2127 | **+0.047** | 229 : 79 |
 | v1.8 → v1.9 (Mac) | 2416 | **+0.051** | 183 : **0** |
+| v2.1 → v2.2, P2005 F subset | 30 | **+0.283** | 29 improved, 1 unchanged, **0** regressed |
+| v2.1 → v2.2, Mac F subset | 30 | **+0.250** | 30 improved, **0** regressed |
 
 Scorer-dependence, stated openly: an independent scorer with ~90% task
 coverage puts the same B2003 delta at **−0.006** (flat) while reversing
