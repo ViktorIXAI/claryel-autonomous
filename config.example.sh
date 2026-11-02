@@ -12,8 +12,9 @@ export PARB_LIMIT="14400"                                     # wall-clock budge
 # Optional: JSON file containing {"api_key": "..."} for protected endpoints.
 # export PARB_KEY_FILE="$HOME/endpoint-key.json"
 # Optional: 1 Hz resource telemetry. When PARB_TELEM is non-empty, run_gate.sh
-# starts telemetry/collector2.py around the gate automatically.
-export PARB_TELEM=""                                          # e.g. telemetry-run.jsonl
+# starts telemetry/collector2.py around the gate automatically. Prefer an
+# absolute path so joins from $PARB_ROOT are unambiguous.
+export PARB_TELEM=""                                          # e.g. $HOME/parb/telemetry-run.jsonl
 export PARB_TELEM_INTERVAL="1.0"                              # seconds
 # Optional: pin the serving GPU on Linux. Empty means largest-VRAM GPU.
 export PARB_GPU_INDEX=""
