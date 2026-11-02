@@ -37,34 +37,77 @@ SUBSET = [x for x in os.environ.get("PARB_SUBSET", "").split(",") if x.strip()]
 LADDER = [int(x) for x in os.environ.get("PARB_LADDER", "512,1024,2048").split(",")]
 # Contour version is stamped into every result and ledger row so series
 # from different gate generations never mix in one statistic.
-CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "v1.3")
-CONTOUR_NOTES = ("v1.0=base contour (gate+re-ask); v1.1=chunked extraction for invoices >8 lines "
-                 "and regex fallback, invoices >16 lines go straight to blocks, completeness gate for logic, "
-                 "structural gate for diagnostics; v1.2=the logic filter is computed by code from the task text, "
-                 "format gate respects the required format (CSV/JSON/row count/columns), letters A-J; "
-                 "v1.7=form repair by code only (zero model tokens); "
-                 "v1.8=one targeted contour nudge per scorer note (best of two answers) "
-                 "+ premature D-loop answer rejected before read/plan; "
-                 "v1.9=D order is normalized from prose into agent_steps; "
-                 "v2.0=G/H post-normalization: explicit contradiction marker in G and H compression below 600 chars; "
-                 "v2.1=H safety normalization: remove action claims, redact invented missing version tokens, "
-                 "add explicit uncertainty marker; "
-                 "v2.2=F diagnostic grounding: append evidence-backed component/cause/safe-step tokens, "
-                 "suppress unsupported thermal claims and decoy blame")
+# Canonical scheme is A.B.C.D: A.B is the operator release line, C is the
+# contour track and D is the contour revision. Legacy v1.x/v2.x names are
+# accepted and normalized to the current release line.
 sys.path.insert(0, ROOT)
+try:
+    import gate_versioning as _GV
+
+    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION", "v2.3"))
+    CONTOUR_SUMMARY = _GV.summary(CONTOUR_VERSION)
+
+    def contour_at_least(track: int, revision: int) -> bool:
+        return _GV.at_least(track, revision, CONTOUR_VERSION)
+
+except Exception:
+    # Fallback keeps old standalone snapshots usable until the versioning
+    # module is deployed next to the harness.
+    CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "2.3")
+    parts = [int(x) for x in CONTOUR_VERSION.replace("v", "").split(".") if x.isdigit()]
+    if len(parts) >= 4:
+        CONTOUR_SUMMARY = {
+            "canonical_version": ".".join(map(str, parts[:4])),
+            "release_line": ".".join(map(str, parts[:2])),
+            "contour_version": ".".join(map(str, parts[2:4])),
+        }
+    elif len(parts) == 2:
+        CONTOUR_SUMMARY = {
+            "canonical_version": "0.0." + ".".join(map(str, parts)),
+            "release_line": "0.0",
+            "contour_version": ".".join(map(str, parts)),
+        }
+    else:
+        CONTOUR_SUMMARY = {
+            "canonical_version": CONTOUR_VERSION,
+            "release_line": "not_available",
+            "contour_version": CONTOUR_VERSION,
+        }
+
+    def contour_at_least(track: int, revision: int) -> bool:
+        if len(parts) >= 4:
+            return tuple(parts[-2:]) >= (track, revision)
+        if len(parts) == 2:
+            return tuple(parts) >= (track, revision)
+        return False
+
+CONTOUR_NOTES = ("0.0.1.0=base contour (gate+re-ask); 0.0.1.1=chunked extraction for invoices >8 lines "
+                 "and regex fallback, invoices >16 lines go straight to blocks, completeness gate for logic, "
+                 "structural gate for diagnostics; 0.0.1.2=the logic filter is computed by code from the task text, "
+                 "format gate respects the required format (CSV/JSON/row count/columns), letters A-J; "
+                 "0.0.1.7=form repair by code only (zero model tokens); "
+                 "0.0.1.8=one targeted contour nudge per scorer note (best of two answers) "
+                 "+ premature D-loop answer rejected before read/plan; "
+                 "0.0.1.9=D order is normalized from prose into agent_steps; "
+                 "0.0.2.0=G/H post-normalization: explicit contradiction marker in G and H compression below 600 chars; "
+                 "0.0.2.1=H safety normalization: remove action claims, redact invented missing version tokens, "
+                 "add explicit uncertainty marker; "
+                 "0.0.2.2=F diagnostic grounding: append evidence-backed component/cause/safe-step tokens, "
+                 "suppress unsupported thermal claims and decoy blame; "
+                 "0.0.2.3=resource telemetry methodology: bind answer quality to latency, RAM/VRAM and power")
 import parb_check as CK
 try:
-    import gate_fixers as GF          # v1.7: form repair by code (zero model tokens)
+    import gate_fixers as GF          # 0.0.1.7: form repair by code (zero model tokens)
 except Exception:
     GF = None
-CODE_FIX = (CONTOUR_VERSION >= "v1.7") and (GF is not None)
-# v1.8: one targeted contour nudge per scorer-note kind (task unchanged);
+CODE_FIX = contour_at_least(1, 7) and (GF is not None)
+# 0.0.1.8: one targeted contour nudge per scorer-note kind (task unchanged);
 # the better of two answers is kept; in the D-loop an answer before 2 read-steps is not accepted.
-VERIFY_RETRY = CONTOUR_VERSION >= "v1.8"
-SLOT_NORMALIZE = CONTOUR_VERSION >= "v1.9"
-POST_NORMALIZE = CONTOUR_VERSION >= "v2.0"
-H_SAFETY = CONTOUR_VERSION >= "v2.1"
-F_GROUND = CONTOUR_VERSION >= "v2.2"
+VERIFY_RETRY = contour_at_least(1, 8)
+SLOT_NORMALIZE = contour_at_least(1, 9)
+POST_NORMALIZE = contour_at_least(2, 0)
+H_SAFETY = contour_at_least(2, 1)
+F_GROUND = contour_at_least(2, 2)
 NUDGE = {
     "no_final_answer": "Заверши ответ отдельной финальной строкой: ОТВЕТ: <итог>.",
     "too_few_safe_steps": "Перечисли нумерованными шагами (1., 2., 3., ...) безопасную последовательность: сначала чтение/проверка состояния, потом изменения.",
@@ -242,8 +285,8 @@ class Acct:
 # v1.4 (cheap repair without the document) WAS MEASURED: input tokens -59%, but correctness 19/19 -> 3/19.
 # So a context-less repair may be accepted only if it lost nothing:
 # compare the answer skeleton (row count and keys) before/after. The guard is on since v1.5.
-CHEAP_REPAIR = CONTOUR_VERSION >= "v1.4" and os.environ.get("PARB_CHEAP", "0") == "1"
-CHEAP_GUARD = CONTOUR_VERSION >= "v1.5"   # v1.6: the cheap repair now really receives the previous answer
+CHEAP_REPAIR = contour_at_least(1, 4) and os.environ.get("PARB_CHEAP", "0") == "1"
+CHEAP_GUARD = contour_at_least(1, 5)   # 0.0.1.6: the cheap repair now really receives the previous answer
 MAX_FMT_FIXES = 2
 
 
@@ -1300,6 +1343,7 @@ def run_one(t, pos, done, st):
            "gen": {"temperature": 0.7, "thinking": False, "max_tokens": LADDER[0],
                    "request_seed": seed, "fresh_context": True, "ladder": LADDER},
            "box": BOX, "contour_version": CONTOUR_VERSION, "contour_notes": CONTOUR_NOTES,
+           "versioning": CONTOUR_SUMMARY,
            "contour": ("money+code" if cat == "A" else "strict_json" if cat in ("B", "J")
                        else "quote_check" if cat == "H" else "code_exec_fix" if cat == "E"
                        else "plan_gate" if cat == "D" else "coverage_choice" if cat == "C"

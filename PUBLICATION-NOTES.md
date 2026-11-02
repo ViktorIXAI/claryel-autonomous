@@ -21,7 +21,7 @@ selects the contour generation at runtime (`v1.2` … `v1.9` gates are all insid
 
 ## Publication-pass additions (2026-11-01, afternoon)
 
-New research infrastructure published alongside the original snapshot — these
+New automation infrastructure published alongside the original snapshot — these
 are new files, not edits of rig snapshots: publication pipeline
 (`scripts/publish/`), auto-discovery aggregator (`analytics/aggregate_auto.py`),
 independent scorer (`analytics/second_opinion.py`), dedup-sensitivity tool,

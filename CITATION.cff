@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-message: "If you use this lab in your research, cite it as the research record it is."
-title: "Strata Autonomous Harness: an open record of an AI agent building, testing and rejecting its own local-AI harness (v1.0–v1.9)"
+message: "If you use this harness in an evaluation, cite it as a public engineering and benchmark record."
+title: "Claryel Autonomous Harness: an open record of an AI agent building, testing and rejecting its own local-AI harness (0.0.1.0-0.0.2.3)"
 type: software
 authors:
   - name: "Viktor Khudiakov"
@@ -10,12 +10,12 @@ authors:
 repository-code: "https://github.com/ViktorIXAI/strata-autonomous-harness"
 license: MIT
 date-released: "2026-11-01"
-version: "1.9.0"
+version: "0.0.2.3"
 keywords:
   - local AI
   - benchmark harness
   - autonomous software engineering
-  - reproducible research
+  - resource telemetry
   - LLM evaluation
 
 references:

@@ -17,6 +17,9 @@ EXTRA_SCRIPTS = [
     "scripts/check_links.py",
     "scripts/qa/validate_json.py",
 ]
+EXTRA_ARG_SCRIPTS = [
+    ["scripts/qa/docs_policy.py", "--push"],
+]
 
 
 def run(cmd: list[str]) -> None:
@@ -42,6 +45,13 @@ def main() -> int:
         if path.exists():
             try:
                 run([sys.executable, script])
+            except subprocess.CalledProcessError:
+                ok = False
+
+    for cmd in EXTRA_ARG_SCRIPTS:
+        if (ROOT / cmd[0]).exists():
+            try:
+                run([sys.executable] + cmd)
             except subprocess.CalledProcessError:
                 ok = False
 

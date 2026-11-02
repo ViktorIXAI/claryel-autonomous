@@ -1,4 +1,28 @@
-# Contour version chronology (v1.0 → v2.2)
+# Contour version chronology (`0.0.1.0 → 0.0.2.3`)
+
+The current public version format is four digits: `A.B.C.D`.
+
+- `A.B` is the operator release line. The operator controls these first two
+  digits. The public repository currently uses `0.0`.
+- `C` is the contour track. Track `1` contains the old `v1.x` contour family;
+  track `2` contains the `v2.x` contour family.
+- `D` is the contour revision inside that track. It increases when a contour
+  change or measurement/reporting change must be distinguishable in paired
+  results.
+
+Compatibility mapping:
+
+| canonical | legacy name | meaning |
+|---|---|---|
+| `0.0.1.0` | `v1.0` | baseline contour |
+| `0.0.1.9` | `v1.9` | D action-order normalization |
+| `0.0.2.0` | `v2.0` | G/H post-normalization |
+| `0.0.2.1` | `v2.1` | H safety normalization |
+| `0.0.2.2` | `v2.2` | F diagnostic grounding |
+| `0.0.2.3` | — | resource telemetry methodology, contour behavior unchanged |
+
+Legacy names remain valid as inputs and appear in historical records. New
+artifacts should record the canonical four-part form.
 
 English narrative of the decision log in
 [`gate-versions.en.md`](../history/agent-decisions/gate-versions.en.md) (agent-authored decision entries, translated to English; verbatim Russian originals archived in the `ru-source-records-2026-11-01.tar.zst` release asset,
@@ -169,6 +193,26 @@ Paired F subset results:
 
 Contract tests: 8/8. The Mac full v2.2 suite starts automatically after the
 Mac full v2.1 suite finishes; no full-suite v2.2 verdict is claimed yet.
+
+## 0.0.2.3 — resource telemetry and documentation policy *(current tooling release)*
+
+This revision does not change the model-facing contour. It makes the
+measurement layer part of the release:
+
+- `telemetry/resource_quality.py` joins answer quality with end-to-end
+  latency, peak RAM, peak VRAM, GPU power and estimated GPU energy;
+- `telemetry/collector2.py` adds multi-GPU selection and macOS RAM/swap
+  parsing;
+- `harness/gate_versioning.py` adds the four-part version scheme and keeps
+  legacy `v1.x`/`v2.x` inputs compatible;
+- `scripts/qa/docs_policy.py` checks that public pages remain current,
+  structured and free of inflated self-labeling.
+
+Initial P3001 12 GB evidence: n=30, answer mean 0.9944, perfect 29/30,
+latency median 5.88 s / p95 7.96 s, peak VRAM 11,385 MB of 12,288 MB,
+peak GPU power 113.4 W. The run passed quality but exposed only 903 MB VRAM
+headroom, which is exactly why resource telemetry is now a permanent part of
+full paired gates.
 
 ## Cross-cutting rules the chain produced
 

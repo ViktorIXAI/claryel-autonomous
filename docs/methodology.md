@@ -12,9 +12,14 @@
   is paired on identical keys.
 
 ## Contour versioning
-- One codebase, generations selected at runtime (`PARB_GATE_VERSION=v1.2…v1.9`);
-  each run stamps `contour_version` into every results and ledger row so
-  generations never mix in one statistic.
+- Version scheme is four digits: `A.B.C.D`. `A.B` is the operator release line;
+  `C.D` is the contour track and revision. Current operator line is `0.0`,
+  current contour line is `2.3`.
+- One codebase, generations selected at runtime. Canonical values such as
+  `0.0.1.9`, `0.0.2.1` and `0.0.2.2` are preferred. Legacy `v1.x` and `v2.x`
+  names are still accepted and normalized to the current operator line.
+- Each run stamps canonical `contour_version` into every results and ledger
+  row so generations never mix in one statistic.
 - One substantive change per version; unit tests for mechanical fixers first
   (refusal paths included); smoke subset before overnight launches.
 

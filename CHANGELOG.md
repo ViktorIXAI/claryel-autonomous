@@ -3,6 +3,28 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
+## [Unreleased] — 0.0.2.3 (resource telemetry and documentation policy)
+### Added
+- Four-part version scheme `A.B.C.D` in `harness/gate_versioning.py`.
+  `A.B` is the operator-controlled release line; `C.D` is the contour track and
+  revision. Legacy `v1.x` and `v2.x` inputs remain compatible.
+- `harness/gate_versioning_test.py` covers legacy compatibility, operator-line
+  changes and feature gates.
+- `docs/documentation-policy.md` defines the daily public-page maintenance
+  rule, simple wording policy, required README structure and update rules.
+- `scripts/qa/docs_policy.py` checks required sections, local links, forbidden
+  self-labeling and, in daily mode, a status date no older than one day.
+- `.github/workflows/docs-freshness.yml` runs the daily check on a schedule.
+- `docs/source-policy.md` and `sources/reading-list.md` record external
+  scientific, economics and sociology inputs without presenting the repository
+  itself as a scientific paper.
+### Evidence
+- P3001 12 GB RTX 3060 targeted F smoke with telemetry: n=30, answer mean
+  0.9944, perfect 29/30, latency median 5.88 s / p95 7.96 s, peak VRAM
+  11,385 MB of 12,288 MB, VRAM headroom 903 MB, peak GPU power 113.4 W.
+- Mac full `0.0.2.2` paired run started with 1 Hz resource telemetry; joined
+  Mac report is generated after the run completes.
+
 ## [Unreleased] — v2.2 (targeted F contour, paired smoke accepted)
 ### Added
 - F diagnostic grounding (`f_diagnostic_normalize`): infers the failure class

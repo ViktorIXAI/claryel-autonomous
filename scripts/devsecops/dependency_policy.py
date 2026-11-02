@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Dependency supply-chain policy.
 
-This research repository intentionally keeps the runtime dependency set empty.
+This repository intentionally keeps the runtime dependency set empty.
 If dependencies are ever added, they must be pinned and reviewed.
 """
 from __future__ import annotations

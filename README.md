@@ -1,244 +1,186 @@
-# Claryel Autonomous Harness Lab
+# Claryel Autonomous Harness
 
-**An open, AI-operated home-lab experiment investigating autonomous harness
-development around frozen local language models.** We publish successful and
-failed iterations, paired benchmarks, execution costs, and available
-provenance data. Our goal is to study which improvements generalize, which
-merely optimize benchmark formatting, and how much autonomy can be
-demonstrated experimentally.
+**An open local-AI automation harness for measuring model tasks, answer
+quality, latency, memory, power and cost on real machines.** The system runs a
+frozen model against a fixed task bank, records every attempt, repairs safe
+harness mistakes by code, and compares versions only with paired evidence.
 
-This is an open **ongoing experiment**, not a finished product and not a
-claim that AI has learned to grow its own intelligence. The research runs as
-a living lab on household hardware: machines join and leave, model and
-inference-engine generations rotate, and the task bank is deliberately kept
-moving — see [docs/dynamic-regime.md](docs/dynamic-regime.md). The practical
-target is working automation on extremely affordable hardware, with data kept
-local and optional cooperation with inexpensive cloud models under a
-default-deny privacy boundary.
-
-**The full research history matters more than impressive benchmark numbers.**
-Every version below — including the rejected ones — ships with its decision
-record. Results are preliminary until independently verified; the tooling for
-that independent verification is part of this repository.
+This is a working engineering project, not a finished product. It publishes
+accepted versions, rejected versions, broken runs and hardware limits. The
+main question is practical: how much reliable local AI can be obtained on
+affordable hardware without hiding failures?
 
 ```
 same model  ·  same frozen task prompts  ·  same seeds
-        only the software around the model improves
+        only the software around the model changes
 ```
 
-An AI agent autonomously developed and tested successive harness
-modifications — runner, validators, mechanical fixers, task bank, A/B
-tooling, experiment scripts — between 2026-10-30 and today, under
-human-defined objectives and constraints; the operator set the standing
-rules, chose the publication scope, and performed the renames visible in the
-history. Who did what is itemized in [`docs/autonomy.md`](docs/autonomy.md):
-no human work is claimed as autonomous, nothing autonomous is hidden behind
-"the team", and the primary evidence remains the agent's own decision logs
-(their limits are stated in [`docs/limitations.md`](docs/limitations.md)).
+An AI agent developed and tested many harness changes under operator rules.
+The operator set objectives, constraints, publication scope and final adoption
+decisions. The agent's own work is itemized in [`docs/autonomy.md`](docs/autonomy.md);
+its limits are in [`docs/limitations.md`](docs/limitations.md).
 
-External AI models were used by the owner to draft some task specifications
-and to obtain reviews — before 2026-11-01 some of that text was copy-pasted
-from ChatGPT. From 2026-11-01 every such input is hashed and logged:
-[`history/external-model-inputs/ledger.md`](history/external-model-inputs/ledger.md).
-A full critical external review, published unedited with our response, is in
-[`results/external-review-2026-11-01.md`](results/external-review-2026-11-01.md).
+Status checked: 2026-11-02
 
-**Updates and announcements are published on X: [@uctive](https://x.com/uctive).**
-Owner profile: [LinkedIn](https://www.linkedin.com/in/viktor-khudiakov-44a5447b).
+## Current version
 
-## Live research infrastructure
+The version scheme is four digits: `A.B.C.D`.
 
-| what | where |
-|---|---|
-| automatic publication pipeline + watchdog | [`scripts/publish/pipeline.py`](scripts/publish/pipeline.py), package index [`logs/PIPELINE-PACKAGES.md`](logs/PIPELINE-PACKAGES.md) |
-| every contour generation incl. rejected, auto-aggregated | [`results/summary-full.json`](results/summary-full.json) |
-| independent second-opinion scorer + its dissent | [`analytics/second_opinion.py`](analytics/second_opinion.py), [`results/independent-scorer.md`](results/independent-scorer.md) |
-| dedup-rule sensitivity of published deltas | [`results/dedup-sensitivity.md`](results/dedup-sensitivity.md) |
-| held-out bank (never used in dev) + pilot | [`benchmarks/holdout/`](benchmarks/holdout/), [`results/holdout-mini.md`](results/holdout-mini.md) |
-| per-run telemetry (run_id-bound) + join | [`telemetry/`](telemetry/), example [`telemetry/runs/smoke-tel-4.join.json`](telemetry/runs/smoke-tel-4.join.json) |
-| privacy-boundary gateway prototype + tests | [`benchmarks/privacy-boundary/`](benchmarks/privacy-boundary/) |
-| CI: self-tests, data sanity, link integrity, and a `reproduce` job that re-hashes the public archive and recomputes the published summary | [`.github/workflows/selftest.yml`](.github/workflows/selftest.yml) |
-
-## What "self-improving" means here — and what it does not
-
-The model is **frozen** end to end: identical GGUF weights
-(`qwen3.8-flash-next-iq3_s`, served over an OpenAI-compatible API), identical
-task prompts, identical per-(task, repetition) seeds. No fine-tuning, no
-weight editing, no prompt rewriting on the measured tasks. Improving the
-harness is *not* evidence of improving the model's own capabilities — we
-measure the whole system and label the parts.
-
-The **harness** (the lab calls it the *contour*): structured-output gates,
-code validators, mechanical form fixers, refusal retries, max-token ladders,
-and safety blocks around agent-style tasks. Every published delta is a
-contour-only delta.
-
-## Headline results (recomputed from raw ledgers, pinned snapshot)
-
-Two physically different machines ran the identical frozen plan — a consumer
-desktop (**B2003**: RTX 3060 12 GB, 24 GB single-channel DDR5) and a
-high-memory workstation (**Mac Studio**: M3 Ultra, 256 GB unified) — so every
-version delta is paired per `(task, rep)` *and* replicated on independent
-hardware. `results/summary.json` recomputes byte-identically from the release
-archive via `analytics/aggregate.py` (pinned snapshot `release-2026-11-01`;
-the v1.9 series was still running when it was frozen — in-progress vs final
-is marked, never mixed).
-
-| contour | B2003 n / avg content / format | Mac n / avg content / format |
+| part | meaning | current value |
 |---|---|---|
-| v1.2 (first full series) | 590 / 0.905 / 92% | 645 / 0.823 / 94% |
-| v1.7 (code-only form repair) | 717 / 0.905 / 92% | 1317 / 0.887 / 93% |
-| v1.8 (targeted nudges) | 3117 / 0.880 / 89% | 2513 / 0.875 / 92% |
-| **v1.9 (slot normalization)** | **2127 / 0.933 / 97%** | **2416 / 0.926 / 100%** |
-| v2.0 (G/H post-normalization) | 674 partial / 0.961 / 99% | 2513 / 0.939 / 100% |
-| v2.1 (H safety normalization) | 118 partial / 0.999 / 100% | 162 partial / 0.986 / 100% |
-| v2.2 targeted F smoke | 30 / 1.000 / 100% | 30 / 1.000 / 100% |
+| `A.B` | operator release line; the operator changes these first two digits | `0.0` |
+| `C` | contour track; `1` is the first contour family, `2` is the second | `2` |
+| `D` | contour revision inside that track | `3` for tooling/measurement, `2` for the active F-grounding contour |
 
-Raw means across versions are *not* comparable (the plan mix changed); the
-honest numbers are the **paired deltas**:
+Current mapping:
 
-| change | pairs | avg Δ content | improved : regressed |
-|---|---:|---:|---|
-| v1.7 → v1.8 (B2003) | 717 | +0.012 | 43 : 21 (weak cats H +0.18, F +0.04) |
-| v1.8 → v1.9 (B2003) | 2127 | **+0.047** | 229 : 79 |
-| v1.8 → v1.9 (Mac) | 2416 | **+0.051** | 183 : **0** |
-| v2.1 → v2.2, P2005 F subset | 30 | **+0.283** | 29 improved, 1 unchanged, **0** regressed |
-| v2.1 → v2.2, Mac F subset | 30 | **+0.250** | 30 improved, **0** regressed |
-| v2.1 → v2.2, P3001 F subset | 30 | **+0.283** | 27 improved, 3 unchanged, **0** regressed |
+| canonical version | legacy name | meaning | status |
+|---|---|---|---|
+| `0.0.1.9` | `v1.9` | D action-order normalization | full accepted baseline |
+| `0.0.2.0` | `v2.0` | G/H post-normalization | accepted on Mac pair; B2003 partial |
+| `0.0.2.1` | `v2.1` | H safety normalization | full runs in progress on Mac; full P3001 complete |
+| `0.0.2.2` | `v2.2` | F diagnostic grounding | targeted F smoke accepted; full Mac pair running |
+| `0.0.2.3` | — | resource telemetry and documentation policy | current tooling release, contour behavior unchanged |
 
-Scorer-dependence, stated openly: an independent scorer with ~90% task
-coverage puts the same B2003 delta at **−0.006** (flat) while reversing
-45/79 of the reported regressions to improvements — the mean gain is not
-independently confirmed, the no-regression claim is. What *is* confirmed by
-both scorers is the machinery-vs-baseline control: contour 0.810 vs 0.715
-for the best simple arm (paired 16 wins : 2 losses) ([`results/baselines.md`](results/baselines.md),
-[`results/independent-scorer-v2.md`](results/independent-scorer-v2.md)).
+Legacy `v1.x` and `v2.x` names still work as inputs. New reports should use the
+canonical four-part form.
 
-Cost curve (same-seed A/B, from the decision log): v1.3→v1.7 cut input
-tokens **−31%**, generation −24%, wall time −19%, model calls spent on form
-**−45%**, with zero quality loss (19/19 vs 19/19).
+## Current status
 
-The single biggest win is a **diagnosis, not a patch**: category D-ea scored
-0.34 for three versions straight. v1.9 found the model was never wrong — the
-contour emitted a prose tool-sequence while the scorer demanded JSON steps.
-A 20-line mechanical normalization took D-ea from **0.34 → 1.00** on both
-boxes (`logs/samples/D-ea-v18-example.json` vs `D-ea-v19-example.json`).
+| item | status as of 2026-11-02 |
+|---|---|
+| P2005 targeted F smoke | complete; `0.0.2.1 -> 0.0.2.2`, 30 paired rows, 0 regressions |
+| Mac targeted F smoke | complete; 30 paired rows, 0 regressions |
+| P3001 targeted F smoke | complete; 30 paired rows, 0 regressions, perfect answers 3 -> 30 |
+| Mac full `0.0.2.2` paired run | running with resource telemetry; 934 rows copied at check time |
+| B2003 offline replay | complete; recorded F answers replayed through `0.0.2.2`, n=323 |
+| resource telemetry | active: 1 Hz RAM/VRAM/power/util sampler plus join tool |
+| documentation freshness | daily policy added; scheduled check added |
 
-## What the agent got wrong (kept in the repo, not hidden)
+## Headline results
 
-The running failure ledger is [`history/failures/failures.md`](history/failures/failures.md)
-— including the one that mattered most scientifically: the first holdout bank
-shipped long-context tasks **without their documents**, so the alarming
-"G-transfer failure" from the second external audit was our own generator
-bug; found by taking the criticism seriously, fixed, corrected pilot
-republished, broken rows kept.
+The numbers below are paired where they compare versions. Raw means across
+different plan mixes are not comparable.
 
-* **v1.4** bundled two changes (cheap repair + retry cap). 19/19 → 3/19
-  correct answers. The log pinpoints the retry cap as the real killer — the
-  cheap-repair branch never even executed (dead code). Banned.
-* **v1.5** added a guard that fired **zero times** in the whole A/B — an
-  unexercised guard is an unverified guard.
-* **v1.6** saved 45% input tokens and cost 3/19 correct financial answers.
-  The skeleton guard passed every corrupted answer (skeleton intact, values
-  wrong). Rejected for finance tasks.
-* **v2.0** was initially published with only 18 single-box probe rows and was
-  correctly marked **not adopted**. It was later accepted on the Mac after full
-  paired evidence; B2003 remains a partial because the operator stopped it to
-  accelerate v2.1.
-* Two runs invalidated by harness bugs are preserved as named artifacts
-  (`…401-invalid`, `…partial-harnessbug`) — see `history/failures/`.
+### F diagnostic grounding, targeted subset
 
-Full chronology: [`versions/VERSIONS.md`](versions/VERSIONS.md); the agent's
-own decision log in English translation: [`history/agent-decisions/gate-versions.en.md`](history/agent-decisions/gate-versions.en.md).
-Its verbatim Russian original is preserved unmodified in the release asset
-`ru-source-records-2026-11-01.tar.zst` (sha256 `a37a9c922105f61d…`).
+`0.0.2.1 -> 0.0.2.2`, same task, same repetition, same seed:
 
-## Language policy
+| machine | pairs | answer score | better | unchanged | worse |
+|---|---:|---:|---:|---:|---:|
+| P2005 | 30 | 0.7167 -> 1.0000 | 29 | 1 | 0 |
+| Mac Studio | 30 | 0.7500 -> 1.0000 | 30 | 0 | 0 |
+| P3001 | 30 | 0.7167 -> 1.0000 | 27 | 3 | 0 |
 
-The repository is **English-first**: documentation, code comments, console
-output and translated historical records are English. Russian survives only
-where it is **functional measured data**: the frozen task prompts in
-`bank.json`/`bank-holdout.json` (every published score was produced with
-those bytes), contour prompt literals sent to the model in the measured runs,
-validator keyword lists and event tags recorded in published ledgers, and raw
-model outputs in the sample logs and archives. Non-functional Russian
-originals (decision logs, reviews, prompt indexes) were translated into the
-repo, and their untouched Russian source files are archived verbatim in the
-`ru-source-records-2026-11-01.tar.zst` release asset — nothing was rewritten,
-only relocated and annotated.
+Recorded B2003 `0.0.2.1` F answers replayed offline through `0.0.2.2`:
+n=323, every F task average becomes 1.0000.
 
-## Two ways to use this lab
+### Resource and cost side of the answer
 
-**Mode 1 — run the finished v1.9 harness against your own local model.**
-Any OpenAI-compatible endpoint (llama.cpp, vLLM, Ollama, LM Studio, …),
-Python ≥ 3.9, standard library only:
+The P3001 RTX 3060 12 GB targeted F smoke with 1 Hz telemetry measured:
+
+| metric | value |
+|---|---:|
+| answer mean | 0.9944 |
+| perfect attempts | 29 / 30 |
+| latency median | 5.88 s |
+| latency p95 | 7.96 s |
+| peak VRAM used | 11,385 MB of 12,288 MB |
+| VRAM headroom | 903 MB |
+| peak GPU power | 113.4 W |
+| estimated GPU energy | 0.15 Wh per attempt |
+
+The important engineering lesson: answer quality alone can look acceptable
+while the 12 GB GPU is already near its safe memory boundary. This is why
+resource telemetry is now part of the testing method.
+
+## How to use it
+
+The runner uses Python standard library only. It works with any OpenAI-compatible
+endpoint:
 
 ```bash
 git clone https://github.com/ViktorIXAI/claryel-autonomous
 cd claryel-autonomous
-./install.sh                       # venv + contour self-tests (12 fixer cases, D-normalizer contract)
-cp config.example.sh config.sh     # set PARB_API / PARB_MODEL
+./install.sh
+cp config.example.sh config.sh
 source config.sh
-bash run_gate.sh                   # 178 tasks × 11 categories, resumable, budgeted
-python3 harness/gate_report.py     # per-category scores, costs, failure causes
+bash run_gate.sh
+python3 harness/gate_report.py
 ```
 
-**Mode 2 — Autonomous Evolution Mode.** The loop under which the contour
-grew — measure → diagnose → one hypothesis → smoke → paired A/B → cross-box
-replication → accept/reject → append to the decision log — is documented
-with its rails in [`docs/EVOLUTION.md`](docs/EVOLUTION.md). Adoption requires
-paired evidence; three agent-authored versions were rejected on numbers the
-agent itself generated. Safety rails: [`docs/SAFETY.md`](docs/SAFETY.md).
+Set `PARB_API`, `PARB_MODEL`, `PARB_KEY_FILE` and `PARB_BOX` in `config.sh`.
+Select a contour generation with `PARB_GATE_VERSION`, for example `0.0.2.2`.
 
-## Repository map (research-infrastructure layout)
+For paired A/B work, keep the same plan, task bank, per-task seeds and machine
+passport. The method is documented in
+[`docs/reproduction-guide.md`](docs/reproduction-guide.md).
 
+## Documentation policy
+
+The landing page is maintained daily and checked by a script. It must remain
+short, dated, structurally stable and free of inflated self-labeling. See
+[`docs/documentation-policy.md`](docs/documentation-policy.md).
+
+The daily check verifies:
+
+- required README sections;
+- a `Status checked:` date no older than one day;
+- local links that still exist;
+- forbidden public self-labels;
+- version statements that point to the current versioning map.
+
+## Source and citation policy
+
+The operator reads scientific, economics and sociology articles and cites them
+when useful. External sources are recorded as methods, context, comparisons or
+warnings. They are not used as automatic proof of this repository's results.
+See [`docs/source-policy.md`](docs/source-policy.md) and
+[`sources/reading-list.md`](sources/reading-list.md).
+
+## Where the evidence lives
+
+| area | location |
+|---|---|
+| version chronology | [`versions/VERSIONS.md`](versions/VERSIONS.md) |
+| full results and summaries | [`results/summary-full.json`](results/summary-full.json) |
+| independent second-opinion scorer | [`analytics/second_opinion.py`](analytics/second_opinion.py), [`results/independent-scorer.md`](results/independent-scorer.md) |
+| hold-out bank | [`benchmarks/holdout/`](benchmarks/holdout/), [`results/holdout-mini.md`](results/holdout-mini.md) |
+| resource telemetry | [`telemetry/README.md`](telemetry/README.md) |
+| hardware passports | [`hardware/`](hardware/) |
+| failures and rejected versions | [`history/failures/failures.md`](history/failures/failures.md) |
+| agent decision log | [`history/agent-decisions/gate-versions.en.md`](history/agent-decisions/gate-versions.en.md) |
+| open engineering and economic questions | [`docs/open-questions.md`](docs/open-questions.md) |
+
+## Repository map
+
+```text
+docs/        operating policy, methodology, source policy, limitations, roadmap
+harness/     runner, contour gates, validators, fixers, tests
+benchmarks/  task banks, visual benchmarks, performance and privacy boundaries
+versions/    version records, including rejected versions
+history/     decision logs, failures, rollbacks, external inputs
+hardware/    machine passports and measured hardware profiles
+telemetry/   resource sampler, join tools, overhead notes
+results/     summaries, paired deltas, independent validation notes
+schemas/     schemas for runs, telemetry, hardware and experiments
+analytics/   reproducible aggregation scripts
+logs/        artifact index and samples
+prompts/     contour prompts used in measured runs
+experiments/ A/B runners and classification helpers
 ```
-docs/          mission, research questions, methodology, autonomy ledger,
-               hardware methodology, privacy architecture, limitations, roadmap
-harness/       runner + contour v1.9: gates, validators, fixers, plan builder,
-               baseline (contour-free) control runner
-benchmarks/    text-gates/    11 categories A–K, 178 frozen synthetic tasks + self-tests
-               browser-visual/ WebGL/SVG code-gen contour (single-shot 1/5 → 5/5)
-               performance/   speed-vs-quality methodology
-               privacy-boundary/ design + planned tests (status stated honestly)
-versions/      v1.0…v1.9 records incl. rejected + code-snapshot status
-history/       timeline, agent decisions (verbatim log), failures, rollbacks,
-               human interventions
-hardware/      per-machine passports (live-verified), launch configs, change log
-telemetry/     phase-1 collector + CSV, sensor-availability matrix
-results/       summary.json, version comparisons, regressions, independent-validation
-schemas/       run / telemetry / hardware / experiment record schemas
-analytics/     aggregator that reproduces every published number
-logs/          SHA-256-pinned artifact index + samples (raw archives: Releases)
-prompts/       development / testing — contour prompts verbatim + translations
-experiments/   A/B runners, deep-probe classifier (CHRONIC/LOTTERY/FIXED), audits
-```
 
-Research questions answered so far and what stays open:
-[`docs/research-questions.md`](docs/research-questions.md).
-Known limits of this record: [`docs/limitations.md`](docs/limitations.md).
-Roadmap by stages: [`docs/roadmap.md`](docs/roadmap.md).
+## What "self-improving" means here
 
-## Provenance and licensing
+The model weights are frozen. The measured improvement is the software around
+the model: gates, validators, retries, repair paths, safety blocks and
+measurement tooling. This is not a claim that the model's weights have learned
+to improve themselves.
 
-Built by **[Hermes Agent](https://github.com/NousResearch/hermes-agent)**
-(Nous Research, MIT) operated by Viktor Khudiakov on home-lab hardware
-(passports in `hardware/`) — every instruction in the experiment, including
-all "improve the harness" directives, reached the lab through that agent.
-Serving engine: **[Strata](https://github.com/Niko1221/Strata)** by Niko1221
-and contributors (MIT) — not part of this repo and not required; any
-OpenAI-compatible endpoint works. The benchmark subject is
-**[Qwen3.8-Flash-Next](https://huggingface.co/Qwen/Qwen3.8-Flash-Next)**
-(Qwen team, Alibaba Group), in the recommended IQ3_S build from
-**[ISTA-DASLab](https://huggingface.co/ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF)**
-(Institute of Science and Technology Austria). No weights redistributed —
-identifiers, sizes and SHA-256 in `hardware/inventory/model-iq3s.md`.
-Full credits: **[ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)**.
+## Updates
 
-MIT licensed (`LICENSE`). Publication edits vs the exact run snapshots are
-itemized in `PUBLICATION-NOTES.md`. Keep the decision logs if you fork this —
-they are the part with the most value.
+Announcements are published on X: [@uctive](https://x.com/uctive).
+Owner profile: [LinkedIn](https://www.linkedin.com/in/viktor-khudiakov-44a5447b).
 
-> Publish the evidence, not just the claims.
-> Preserve the failures, not just the successes.
-> Measure the entire system, not just the model.
+MIT licensed. Keep the decision logs if you fork this: the failures and rejected
+versions are as important as the accepted ones.

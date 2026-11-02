@@ -53,10 +53,12 @@ PARB_LEDGER=gate-ledger-smoke.jsonl PARB_LIMIT=1000 \
    pairing keys are machine-independent; extension seeds come from
    `sha256(f"{task}|{rep}")` so every box draws identical samples).
 
-`PARB_GATE_VERSION` selects the contour generation inside one codebase:
-`v1.2` … `v1.9` (released) — gates at each version boundary; `v2.0`/`v2.1` are
-post-normalization contours and `v2.2` adds targeted F diagnostic grounding
-(see `versions/VERSIONS.md`). `PARB_CHEAP=1` re-enables
+`PARB_GATE_VERSION` selects the contour generation inside one codebase.
+Canonical values are four-part, such as `0.0.1.9`, `0.0.2.0`, `0.0.2.1` and
+`0.0.2.2`; legacy `v1.x`/`v2.x` names are accepted and normalized. `0.0.2.2`
+adds targeted F diagnostic grounding; `0.0.2.3` adds resource telemetry
+methodology without changing contour behavior (see `versions/VERSIONS.md`).
+`PARB_CHEAP=1` re-enables
 the *rejected* cheap-model-repair path for experiments only — beware, it is
 rejected for a reason.
 
