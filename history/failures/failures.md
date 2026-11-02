@@ -130,7 +130,10 @@ system RAM rule of thumb unmet): the kernel OOM-killed the engine during expert
 placement — `Out of memory: Killed process ... (strata) anon-rss:14935564kB`,
 exit code 137, dmesg-confirmed. A retry with a 24 GB swapfile on NVMe completes
 placement (156.5 s) and runs the bench only under heavy thrash (swap 10–13 GiB
-used, iowait 83–87 %), i.e. functionally unusable for serving. Upstream's own
+used, iowait 83–87 %): three bench rounds — pp256 1.3 / 1.5 / 1.4 tok/s and
+tg128 13.7 / 6.4 / 16.9 tok/s, with 33.6 % of batch expert entries computed on
+the GPU and 1,997 expert-slot replacements — functionally unusable for
+serving (a 200-token prompt would take minutes). Upstream's own
 minimum for this size is 32 GB RAM. Decision: q36-class models are out of scope
 for ≤16 GiB fleet nodes; IQ3_S stays on P3001 (its pack supports a file tier).
 The model file itself (22,853,663,008 bytes, sha256 55983c5a…fe9f1, verified
