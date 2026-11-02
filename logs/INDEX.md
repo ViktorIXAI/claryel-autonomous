@@ -129,3 +129,14 @@ Russian strings that are *functional experiment data* (task prompts in
 `bank.json`, contour prompt literals in `gate_run.py`, model outputs in
 result JSONL, detector regexes, ledger event tags) stay verbatim everywhere —
 they are the measured system, not documentation.
+
+## Post-snapshot artifacts (pending next release bundle)
+
+| artifact | records | bytes | sha256/16 |
+|---|---:|---:|---|
+| p3001/results-p3001-v21.jsonl | 178 | 425485 | `b08d27f902db3b89` |
+| p3001/ledger-p3001-v21.jsonl | 178 | 79870 | `2acb03c7b8b46920` |
+| p3001/p3001-v21.log | 180 | 22756 | `0179a686232ba68c` |
+
+Held on the workstation (`~/parb/`) until the next release bundle; numbers
+cited in results/p3001-parb-v21.md.

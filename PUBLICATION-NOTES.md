@@ -38,3 +38,12 @@ GET for GitHub HTML (HEAD 403 from datacenter IPs); `verify_release_hashes.py`
 accepts both INDEX row formats; repo-move URL updates after the owner's rename
 to `ViktorIXAI/autonomous` (2026-11-01 09:55 UTC — the rename was made by the
 repository owner, not by the agent; old URLs 301 to new).
+
+## 2026-11-02 — P3001 v2.1 contour sweep
+
+Added results/p3001-parb-v21.md + post-snapshot artifact rows in logs/INDEX.md
+(sha256-16 pinned, raw files held on the workstation until the next bundle).
+G-ve-13/14 rows published explicitly as capacity rejects (HTTP 400,
+113k-char documents vs 32k context), not capability failures — adjusted means
+exclude them. No new secrets surface: scores/aggregates only; raw JSONL not
+committed.
