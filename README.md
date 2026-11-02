@@ -111,6 +111,9 @@ python3 harness/gate_report.py
 ```
 
 Set `PARB_API`, `PARB_MODEL`, `PARB_KEY_FILE` and `PARB_BOX` in `config.sh`.
+For full paired gates, also set `PARB_TELEM` to a JSONL path; `run_gate.sh`
+then starts the resource collector automatically and stops it when the run
+finishes.
 Select a contour generation with `PARB_GATE_VERSION`, for example `0.0.2.2`.
 
 For paired A/B work, keep the same plan, task bank, per-task seeds and machine

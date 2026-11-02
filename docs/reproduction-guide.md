@@ -19,11 +19,15 @@ validators, ledgers) is what transfers.
 
 ```bash
 ./install.sh
-cp config.example.sh config.sh && $EDITOR config.sh   # PARB_API, PARB_MODEL, PARB_BOX
+cp config.example.sh config.sh && $EDITOR config.sh   # PARB_API, PARB_MODEL, PARB_BOX, PARB_TELEM
 source config.sh
 bash run_gate.sh                    # plan built once (plan_hash printed), then frozen
 python3 harness/gate_report.py      # category table + failure causes + costs
 ```
+
+For a full run, leave `PARB_TELEM` non-empty in `config.sh`. `run_gate.sh`
+starts the 1 Hz resource collector automatically, runs the gate, then stops the
+collector when the gate exits.
 
 The runner is **resumable**: `state*.json` tracks completed `(task, rep, series)`
 positions; Ctrl-C / `harness/stop_series.sh <state-substring>` and re-run to
@@ -38,6 +42,7 @@ silently.
 PARB_SUBSET="A-ea-00-0,B-ea-00-0,D-ea-00-0,J-ea-00-0,K-ea-00-0" \
 PARB_STATE=state-smoke.json PARB_RESULTS=results-smoke.jsonl \
 PARB_LEDGER=gate-ledger-smoke.jsonl PARB_LIMIT=1000 \
+PARB_TELEM=telemetry-smoke.jsonl PARB_TELEM_INTERVAL=1.0 \
   bash run_gate.sh
 ```
 

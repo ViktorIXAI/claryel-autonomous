@@ -28,8 +28,10 @@
   `not_available`, not sudo'd around.
 - Results rows additionally embed `mem_avail_mb` and contour stop-gate
   readings (RAM<700 MB, GPU>89 °C, endpoint health).
-- `scripts/telemetry/run_with_collector.sh` starts a collector, runs the gate
-  command, then stops the collector on exit.
+- `run_gate.sh` starts the collector automatically when `PARB_TELEM` is
+  non-empty, then starts the gate. This is the recommended full-run path.
+- `scripts/telemetry/run_with_collector.sh` starts a collector, runs any command,
+  then stops the collector on exit.
 - Permanent policy: resource telemetry is required for full paired gates and
   hardware-class runs. It may be skipped only for idle endpoint smokes where
   the goal is to check that the endpoint responds.
