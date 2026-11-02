@@ -81,3 +81,11 @@ mean 0.9867 capacity-valid, F-category 0.70->1.00 vs P3001 v2.1, p50 12.6 s,
 1 Hz resource telemetry complete (VRAM 91% = tight by 12 GB rule; single
 185.9 W peak recorded under uncapped state — hardware decision on record).
 G-ve-13/14 published as capacity rejects. Raw sha-pinned above.
+
+## 2026-11-02 (late) — P3032 slow-disk swap test
+
+Added results/p3032-slow-disk-comparison.md: full model stack moved to the
+system SATA SSD with the NVMe unmounted — 3-4.3x slower prefill, 4x slower
+decode; GPU starves. Three orchestration failures published with diagnosis
+(self-kill via fuser, second-instance race, expert-profile path miss). Raw
+bundle sha-pinned. No secrets: rates/temps only.

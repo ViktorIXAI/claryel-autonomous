@@ -170,3 +170,14 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 | gate-ledger-p3032-v22.jsonl | 178 | 80166 | `dc7db7980a35c2b4` |
 | telem-p3032-v22.jsonl (1 Hz, run_id p3032-v22) | 3429 | 3929260 | `0a41d41b7def3a16` |
 | runner log | — | 22520 | `9f71c3f3b20f092d` |
+
+## Pending bundle: P3032 slow-disk swap test (2026-11-02)
+
+| artifact | records | bytes | sha256/16 |
+|---|---:|---:|---|
+| slowart.tar (bundle: ladder jsonl 6, engine log, telemetry 1241, serve log, orchestrator) | — | — | `ed90e2a0d2a58ce4` |
+|   inner: slow-ladder.log | 6 | 652 | `ce22481ce94396e1` |
+|   inner: strata engine log (slow run) | — | 30858 | `2a2867500be4ef21` |
+|   inner: telem-slow3.jsonl (1 Hz) | 1241 | 1412473 | `4493a8d9c1dd08aa` |
+|   inner: slow-serve.log | — | 20694 | `269771f5249177a8` |
+|   inner: orchestrator slow3.sh | — | — | `09b093d516401ec2` |
