@@ -120,6 +120,23 @@ carry the bytes needed for independent verification, not just hashes.
 No failure was ever hidden by re-running until green: each has a fix commit
 or a documented cause above.
 
+## Qwen3.6-35B-A3B UD-Q4_K_XL does not fit the 15 GiB node P3001 (2026-11-02)
+
+The q36 family has no low-RAM pack/file-tier mode: the engine reads the GGUF
+directly and, in hybrid mode, keeps a pageable copy of the whole expert set in
+host memory (18.75 GiB measured) plus whatever fits in VRAM (2.64 GiB, 36/256
+experts per layer on the 12 GB card). First run on P3001 (15.5 GiB RAM, 24 GB
+system RAM rule of thumb unmet): the kernel OOM-killed the engine during expert
+placement — `Out of memory: Killed process ... (strata) anon-rss:14935564kB`,
+exit code 137, dmesg-confirmed. A retry with a 24 GB swapfile on NVMe completes
+placement (156.5 s) and runs the bench only under heavy thrash (swap 10–13 GiB
+used, iowait 83–87 %), i.e. functionally unusable for serving. Upstream's own
+minimum for this size is 32 GB RAM. Decision: q36-class models are out of scope
+for ≤16 GiB fleet nodes; IQ3_S stays on P3001 (its pack supports a file tier).
+The model file itself (22,853,663,008 bytes, sha256 55983c5a…fe9f1, verified
+against the upstream digest) remains on the box's NVMe for a future RAM
+upgrade; failure evidence lives in the box's engine logs.
+
 ## Publication watchdog commits sweep up unrelated work-in-progress (2026-11-01)
 
 `ce60f32` ("publish: pipeline packages") was created by the publication
