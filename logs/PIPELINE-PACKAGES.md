@@ -13,6 +13,7 @@ Every package is immutable; content hash is part of the id. Per-file SHA-256 liv
 | `pkg-series-v12-v20.de4f3a8446e0` | 2026-11-01T08:45:22Z | 22 | 24497259 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `1d52b19894a0…` |
 | `pkg-series-v19-live.2f8ced0a853e` | 2026-11-01T08:20:40Z | 3 | 6182140 | [asset](https://github.com/ViktorIXAI/strata-autonomous-harness/releases/tag/data-full-2026-11-01) | `3cd33365ef71…` |
 | `pkg-series-v20-v21-live.40b80e946fff` | 2026-11-02T03:01:25Z | 12 | 17492217 | [asset](https://github.com/ViktorIXAI/claryel-autonomous/releases/tag/data-full-2026-11-01) | `6dbde9bb1cbc…` |
+| `pkg-series-v20-v21-live.43e9a224e9f5` | 2026-11-02T15:13:14Z | 12 | 23219307 | [asset](https://github.com/ViktorIXAI/claryel-autonomous/releases/tag/data-full-2026-11-01) | `a03814571b4c…` |
 | `pkg-series-v20-v21-live.c00996544b28` | 2026-11-01T20:55:29Z | 12 | 16345147 | [asset](https://github.com/ViktorIXAI/claryel-autonomous/releases/tag/data-full-2026-11-01) | `504441462057…` |
 | `pkg-series-v20-v21-live.c92d3124b07f` | 2026-11-01T14:08:01Z | 12 | 9596816 | [asset](https://github.com/ViktorIXAI/claryel-autonomous/releases/tag/data-full-2026-11-01) | `f6fbd07a33d0…` |
 | `pkg-series-v20-v21-live.cb2c74d49c08` | 2026-11-01T14:53:29Z | 12 | 11076262 | [asset](https://github.com/ViktorIXAI/claryel-autonomous/releases/tag/data-full-2026-11-01) | `cbaffa4db05e…` |
