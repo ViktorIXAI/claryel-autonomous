@@ -50,7 +50,6 @@ Owner profile: [LinkedIn](https://www.linkedin.com/in/viktor-khudiakov-44a5447b)
 
 | what | where |
 |---|---|
-| public dashboard (built only from repo JSON) | https://viktorixai.github.io/claryel-autonomous/dashboard/ |
 | automatic publication pipeline + watchdog | [`scripts/publish/pipeline.py`](scripts/publish/pipeline.py), package index [`logs/PIPELINE-PACKAGES.md`](logs/PIPELINE-PACKAGES.md) |
 | every contour generation incl. rejected, auto-aggregated | [`results/summary-full.json`](results/summary-full.json) |
 | independent second-opinion scorer + its dissent | [`analytics/second_opinion.py`](analytics/second_opinion.py), [`results/independent-scorer.md`](results/independent-scorer.md) |
