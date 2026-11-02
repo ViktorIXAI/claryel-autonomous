@@ -181,24 +181,24 @@
    "source_rows": 1348
   },
   "host|B2003|v2.1": {
-   "n": 2210,
-   "avg_content": 0.9494,
-   "perfect_share": 0.8443,
-   "format_ok_share": 0.9928,
+   "n": 2421,
+   "avg_content": 0.948,
+   "perfect_share": 0.8397,
+   "format_ok_share": 0.993,
    "cats": {
     "A": 1.0,
     "B": 1.0,
     "C": 1.0,
-    "D": 0.992,
-    "E": 0.988,
+    "D": 0.993,
+    "E": 0.989,
     "F": 0.683,
-    "G": 0.98,
-    "H": 0.968,
+    "G": 0.982,
+    "H": 0.966,
     "I": 1.0,
     "J": 0.999,
-    "K": 0.948
+    "K": 0.944
    },
-   "source_rows": 3730
+   "source_rows": 6296
   },
   "host|P2005V19P2|v1.9": {
    "n": 18,
@@ -279,7 +279,7 @@
     "J": 1.0,
     "K": 1.0
    },
-   "source_rows": 334
+   "source_rows": 335
   },
   "mac|B2003|v1.3": {
    "n": 9717,
@@ -448,23 +448,24 @@
    "source_rows": 2528
   },
   "mac|mac-studio|v2.1": {
-   "n": 162,
-   "avg_content": 0.9856,
-   "perfect_share": 0.9383,
+   "n": 1070,
+   "avg_content": 0.9603,
+   "perfect_share": 0.8636,
    "format_ok_share": 1.0,
    "cats": {
     "A": 1.0,
     "B": 1.0,
     "C": 1.0,
-    "E": 1.0,
-    "F": 0.767,
+    "D": 0.991,
+    "E": 0.974,
+    "F": 0.693,
     "G": 1.0,
     "H": 1.0,
     "I": 1.0,
     "J": 1.0,
-    "K": 1.0
+    "K": 0.858
    },
-   "source_rows": 173
+   "source_rows": 1082
   }
  },
  "paired": {
@@ -565,10 +566,10 @@
    "regressed": 0
   },
   "mac: v2.0 -> v2.1": {
-   "n_pairs": 162,
-   "avg_delta": 0.0,
-   "improved": 0,
-   "regressed": 0
+   "n_pairs": 1070,
+   "avg_delta": 0.0011,
+   "improved": 5,
+   "regressed": 1
   }
  }
 }
