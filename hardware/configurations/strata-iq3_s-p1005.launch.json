@@ -26,12 +26,14 @@
   "--mmap-experts",
   "--vision",
   "--vram-reserve-mib",
-  "960",
+  "512",
   "--pool-workers",
   "16",
   "--resident-experts",
   "--resident-budget-gib",
-  "20"
+  "25",
+  "--memory-limit-mib",
+  "28672"
  ],
  "cwd": "$HOME/Strata",
  "tokenizer": "$HOME/Strata-data/packs/iq3_s/tokenizer",
@@ -46,7 +48,9 @@
   "STRATA_DENSE_F32": "1",
   "STRATA_FILE_CACHE_OLD_RULE": "1",
   "STRATA_IO_PREFETCH": "0",
-  "STRATA_UNBUFFERED_LOAD": "1"
+  "STRATA_UNBUFFERED_LOAD": "1",
+  "STRATA_ROUTE_PRIOR": "1.5",
+  "STRATA_RESIDENT_HEADROOM_GIB": "1"
  },
  "vision": {
   "exe": "$HOME/Strata/engine-cuda12/strata-vision",
