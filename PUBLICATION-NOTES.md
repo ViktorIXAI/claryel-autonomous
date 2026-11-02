@@ -67,3 +67,9 @@ card's 187 W factory max. Decision: prefill cap-independent, warm decode
 observed) — the maintainer ordered the uncapped state explicitly short-term;
 cap restored same day and recorded as standing. No new secrets: watts,
 degrees, rates only.
+
+## 2026-11-02 (late2) — P3032 power policy change
+
+Maintainer decision: the 150 W cap is permanently removed (GPU
+removal/replacement planned). Inventory and change record updated; the
+A/B envelope doc kept as historical record.
