@@ -67,7 +67,10 @@ def main():
                     # rate-limited on shared CI runners. GET -L is what a browser does.
                     code = subprocess.run(
                         ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
-                         "-L", "--max-time", "25", "-A", "sah-linkcheck/1.0", link],
+                         "-L", "--max-time", "25", "--retry", "3",
+                         "--retry-delay", "2", "--retry-all-errors",
+                         "--retry-connrefused",
+                         "-A", "sah-linkcheck/1.0", link],
                         capture_output=True, text=True).stdout.strip()
                     ok = ("200", "301", "302", "405")
                     if "linkedin.com" in link or "x.com" in link:

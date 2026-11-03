@@ -10,6 +10,7 @@ is deliberately narrow and commits only the date marker.
 from __future__ import annotations
 
 import datetime as dt
+import os
 import re
 import subprocess
 import sys
@@ -31,7 +32,9 @@ def main() -> int:
         return 1
 
     run(sys.executable, "scripts/qa/docs_policy.py", "--daily")
-    run(sys.executable, "scripts/qa/static_checks.py")
+    env = os.environ.copy()
+    env["SAH_LINK_MODE"] = "offline"
+    subprocess.run([sys.executable, "scripts/qa/static_checks.py"], cwd=ROOT, check=True, env=env)
 
     if run("git", "status", "--porcelain", check=False) != 0:
         print("git status failed")

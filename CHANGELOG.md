@@ -3,6 +3,14 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
+## [Unreleased] — 0.0.2.5 (deterministic local docs pass)
+### Changed
+- The local daily docs refresh now checks repository links offline, so a
+  temporary public-internet timeout cannot block the status-date pass.
+- The online link checker retries transport failures up to three times before
+  classifying a public URL as broken.
+- GitHub Actions and pre-push remain the strict online link gates.
+
 ## [Unreleased] — 0.0.2.4 (full-Mac resource and economic verdict)
 ### Added
 - Full Mac paired report for `0.0.2.1` vs `0.0.2.2` with resource telemetry:

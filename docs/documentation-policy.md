@@ -27,6 +27,11 @@ GitHub runs the daily check through
 maintenance pass that updates the status line when the check is clean or writes
 a concrete correction task when it is not.
 
+The local maintenance pass checks link targets inside the repository without
+depending on the public internet. GitHub Actions and pre-push checks perform the
+online link check, with transport retries, so a temporary network timeout cannot
+by itself block a dated status refresh.
+
 ## Simple public wording
 
 Public pages must say what the system does and what evidence exists. Avoid

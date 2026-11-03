@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import compileall
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -20,6 +21,7 @@ EXTRA_SCRIPTS = [
 EXTRA_ARG_SCRIPTS = [
     ["scripts/qa/docs_policy.py", "--push"],
 ]
+LINK_MODE = os.environ.get("SAH_LINK_MODE", "online")
 
 
 def run(cmd: list[str]) -> None:
@@ -43,8 +45,11 @@ def main() -> int:
     for script in EXTRA_SCRIPTS:
         path = ROOT / script
         if path.exists():
+            cmd = [sys.executable, script]
+            if script == "scripts/check_links.py" and LINK_MODE == "offline":
+                cmd.append("--offline")
             try:
-                run([sys.executable, script])
+                run(cmd)
             except subprocess.CalledProcessError:
                 ok = False
 
