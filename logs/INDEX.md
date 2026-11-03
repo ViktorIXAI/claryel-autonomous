@@ -197,3 +197,9 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 |---|---:|---|
 | logs/p100-gpumode-flash.log | 5050 | `9f8907a896537255` |
 | p100_original.rom (firmware backup, kept private, not committed) | 272896 | `c9c09173b69a0082` |
+
+## P3032 P100 bring-up + thermal governor evidence (2026-11-03)
+
+| artifact | records | sha256/16 |
+|---|---:|---|
+| p100-thermal.csv (15 s sampler, incl. two synthetic load passes) | 80 | `d1af44f78bda17cb` |
