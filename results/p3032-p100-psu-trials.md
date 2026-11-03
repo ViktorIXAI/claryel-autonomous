@@ -1,9 +1,10 @@
 # P3032 (HP Z220 + Tesla P100): raw-model ladder and PSU reality
 
-Date: 2026-11-03. Status: intermediate — contour-with-harness run in
-progress, artifacts attach after machine recovery. Maintainer tolerates
-max fan noise (BIOS all-fans-together) for this test window only; the
-board is not the long-term home of this card (see
+Date: 2026-11-03. Status: CLOSED by maintainer decision — the box's
+400 W PSU / single 6-pin 12 V line cannot carry this card; further
+torture cancelled, machine powered down. Contour stopped at 13/178
+records (resume state kept in case the rig ever gets a proper PSU).
+Board is not the long-term home of this card (see
 results/p3032-p100-bringup-thermal.md).
 
 ## Raw model, no harness (context ladder, PL=150 W, clock cap ~1000-1100,
@@ -52,3 +53,18 @@ Started 17:08 CET, 13/178 records before event 2, resume state kept;
 continues after power-cycle at 900 MHz profile. Telemetry file on box:
 `telem-p3032p100.jsonl` (collector2). Ladder raw artifacts (log, sampler
 CSV, thermal session CSV) attach here once the box is back online.
+
+## Final incident log (CET)
+
+- 16:43 trip #1 (ladder rung 1) — revived by WOL in 2.5 min.
+- 17:15 trip #2 (contour, 13 records in) — PSU latched, WOL ineffective.
+- 17:3x-17:5x boot-loop: PSU self-recovery + BIOS "power on after AC
+  restore" + watchdog engine start at boost = repeated trips every few
+  minutes; WOL watchers stopped at 17:5x to end the cycle.
+- 17:52 caught boot, keep-up disabled, PL 150 W + clock cap 900 applied,
+  engine killed, clean shutdown confirmed.
+
+Maintainer verdict (verbatim intent): insufficient 12 V rail power; the
+card is set aside on this platform. Published data from this session:
+raw ladder (full), thermal envelope at BIOS fan max, and the PSU trip
+signature — all reproducible with the attached method.
