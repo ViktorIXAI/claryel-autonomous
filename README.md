@@ -20,7 +20,7 @@ The operator set objectives, constraints, publication scope and final adoption
 decisions. The agent's own work is itemized in [`docs/autonomy.md`](docs/autonomy.md);
 its limits are in [`docs/limitations.md`](docs/limitations.md).
 
-Status checked: 2026-11-02
+Status checked: 2026-11-03
 
 ## Current version
 
