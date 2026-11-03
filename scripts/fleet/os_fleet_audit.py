@@ -29,6 +29,7 @@ CONFIG = pathlib.Path(os.environ.get(
     "PARB_FLEET_OS_CONFIG", str(pathlib.Path.home() / ".hermes" / "fleet-os.json")))
 MODULE = (ROOT / "harness" / "os_record.py").read_text(encoding="utf-8")
 SNAP_DIR = ROOT / "hardware" / "os-snapshots"
+LATEST = SNAP_DIR / "latest.json"
 
 
 def local_record() -> dict:
@@ -58,6 +59,37 @@ def remote_record(entry: dict) -> dict:
         return {"label": label, "reachable": False, "error": "ssh_or_parser_error"}
 
 
+def snapshot_summary(snap: dict) -> list[dict]:
+    out = []
+    for m in snap["machines"]:
+        row = {"label": m.get("label", ""), "reachable": bool(m.get("reachable"))}
+        if row["reachable"]:
+            row["os"] = m.get("os", {})
+        else:
+            row["error"] = m.get("error", "")
+        out.append(row)
+    return out
+
+
+def previous_snapshot() -> dict | None:
+    try:
+        return json.loads(LATEST.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def changed_rows(previous: list[dict], current: list[dict]) -> list[dict]:
+    old = {r["label"]: r for r in previous}
+    changed = []
+    for row in current:
+        if old.get(row["label"]) != row:
+            changed.append(row)
+    for label, row in old.items():
+        if label not in {r["label"] for r in current}:
+            changed.append(row)
+    return changed
+
+
 def main() -> int:
     snap = {
         "kind": "fleet-os-snapshot",
@@ -81,14 +113,36 @@ def main() -> int:
 
     SNAP_DIR.mkdir(parents=True, exist_ok=True)
     path = SNAP_DIR / (dt.date.today().isoformat() + ".json")
+    previous = previous_snapshot()
+    previous_rows = snapshot_summary(previous) if previous else None
+    current_rows = snapshot_summary(snap)
     path.write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    LATEST.write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
-    print(f"wrote {path}")
-    for m in snap["machines"]:
-        if m.get("reachable"):
-            print("%-12s %s" % (m["label"], os_record.compact(m["os"])))
-        else:
-            print("%-12s unreachable: %s" % (m["label"], m.get("error", "")))
+    print(f"wrote {path}", file=sys.stderr)
+    if "--print-all" in sys.argv:
+        for m in snap["machines"]:
+            if m.get("reachable"):
+                print("%-12s %s" % (m["label"], os_record.compact(m["os"])), file=sys.stderr)
+            else:
+                print("%-12s unreachable: %s" % (m["label"], m.get("error", "")), file=sys.stderr)
+
+    # A scheduled audit is silent when the fleet OS baseline has not changed.
+    # It alerts only on a new OS/kernel/flavor value, an unreachable machine
+    # becoming reachable, or a reachable machine disappearing from the fleet.
+    if previous_rows is None:
+        print("Fleet OS baseline recorded: %d machines. "
+              "Canonical OS records are now written into gates, ledgers and telemetry headers." % len(current_rows))
+    else:
+        changes = changed_rows(previous_rows, current_rows)
+        if changes:
+            lines = []
+            for row in changes:
+                if not row.get("reachable"):
+                    lines.append("%s: unreachable (%s)" % (row["label"], row.get("error", "")))
+                else:
+                    lines.append("%s: %s" % (row["label"], os_record.compact(row.get("os", {}))))
+            print("Fleet OS change detected:\n" + "\n".join(lines))
     return 0
 
 
