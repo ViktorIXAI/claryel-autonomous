@@ -190,3 +190,10 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 | gate-ledger-quick-v22.jsonl | 178 | 80643 | `89a59bb8e298391f` |
 | telemetry-quick.csv (60 s sampler) | 41 | 3494 | `57a6536a2e0e9b70` |
 | runner log | — | 22624 | `62e87ea2bfe7003b` |
+
+## P100 GPU-mode switch evidence (2026-11-03)
+
+| artifact | bytes | sha256/16 |
+|---|---:|---|
+| logs/p100-gpumode-flash.log | 5050 | `9f8907a896537255` |
+| p100_original.rom (firmware backup, kept private, not committed) | 272896 | `c9c09173b69a0082` |
