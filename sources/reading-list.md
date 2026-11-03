@@ -28,7 +28,7 @@ automatically treated as proof of this repository's results.
 
 | source | level | why it matters here | status |
 |---|---|---|---|
-| [The Household Impact of Generative AI: Evidence from Internet Browsing Behavior](https://afajof.org/management/viewp.php?n=202076), Blank/Schubert/Zhang, accessed 2026-11-02 | `context` | Household adoption and time-use effects; useful for why home-local AI may matter outside work tasks. | reviewed from search snippet |
+| [The Household Impact of Generative AI: Evidence from Internet Browsing Behavior](https://arxiv.org/abs/2603.03144), Blank/Schubert/Zhang, arXiv:2603.03144, accessed 2026-11-03 | `context` | Household adoption and time-use effects; useful for why home-local AI may matter outside work tasks. | reviewed from search snippet |
 | [Adoption and Expected Impact of Generative AI: Evidence from Italian Households](https://www.bancaditalia.it/pubblicazioni/qef/2025-0929/QEF_929_25.pdf), Bank of Italy QEF 929/25, accessed 2026-11-02 | `context` | Survey-based adoption, trust and job expectations in households. | reviewed from search/PDF snippet |
 | [Socioeconomic Status Influences the Usage of Language Technologies](https://arxiv.org/abs/2505.12158), arXiv:2505.12158, accessed 2026-11-02 | `warning` | Shows socioeconomic differences in prompts and interaction styles; useful for user-facing task design and fairness limits. | reviewed from abstract/search snippet |
 | [Advancing AI Capabilities and Evolving Labor Outcomes](https://arxiv.org/abs/2507.08244), arXiv:2507.08244, accessed 2026-11-02 | `context` | Links occupational AI exposure to near-real-time labour outcomes. | reviewed from abstract/search snippet |

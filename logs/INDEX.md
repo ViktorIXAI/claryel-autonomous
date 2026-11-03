@@ -181,3 +181,12 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 |   inner: telem-slow3.jsonl (1 Hz) | 1241 | 1412473 | `4493a8d9c1dd08aa` |
 |   inner: slow-serve.log | — | 20694 | `269771f5249177a8` |
 |   inner: orchestrator slow3.sh | — | — | `09b093d516401ec2` |
+
+## Pending bundle: P1005 post-swap quick contour sweep v0.0.2.2 (2026-11-03)
+
+| artifact | records | bytes | sha256/16 |
+|---|---:|---:|---|
+| results-quick-v22.jsonl | 178 | 392880 | `92098862a4883ca2` |
+| gate-ledger-quick-v22.jsonl | 178 | 80643 | `89a59bb8e298391f` |
+| telemetry-quick.csv (60 s sampler) | 41 | 3494 | `57a6536a2e0e9b70` |
+| runner log | — | 22624 | `62e87ea2bfe7003b` |

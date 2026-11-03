@@ -48,12 +48,14 @@ canonical four-part form.
 
 ## Current status
 
-| item | status as of 2026-11-02 |
+| item | status as of 2026-11-03 |
 |---|---|
 | P2005 targeted F smoke | complete; `0.0.2.1 -> 0.0.2.2`, 30 paired rows, 0 regressions |
 | Mac targeted F smoke | complete; 30 paired rows, 0 regressions |
 | P3001 targeted F smoke | complete; 30 paired rows, 0 regressions, perfect answers 3 -> 30 |
 | Mac full `0.0.2.2` paired run | complete with resource telemetry; 2513 paired rows, +0.0438 overall, 0 regressions |
+| P3032 full 178-task sweep | complete; adjusted mean 0.9867, adjusted perfect 94.9%, F 1.00 |
+| P1005 post-GPU-swap quick sweep | complete; capacity-valid mean 0.9851, F 1.00; full paired A/B still pending |
 | B2003 offline replay | complete; recorded F answers replayed through `0.0.2.2`, n=323 |
 | resource telemetry | permanent for full paired gates and hardware-class runs |
 | documentation freshness | daily policy added; scheduled check added |

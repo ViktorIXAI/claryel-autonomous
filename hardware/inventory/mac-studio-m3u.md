@@ -9,7 +9,7 @@ Live-collected 2026-11-01.
 | memory | 274,877,906,944 B = 256 GiB unified |
 | GPU | integrated (Metal); no discrete GPU |
 | OS | macOS ProductVersion 27.2 (build 26B123), kernel 27.2.0 |
-| serving engine | [Strata](https://github.com/Niko1221/Strata) for macOS (Flash-Next supported), engine version `not_recorded` |
+| serving engine | [Strata](https://github.com/Niko1221/Strata) repo v0.2.10, prebuilt Metal engine 0.1.56; text-only serve on :8080 (checked 2026-11-03) |
 | model build | same IQ3_S GGUF build family; on-box copy path differs |
 
 **Sensors:** temperature/power/VRAM-per-component ✖ `not_available` (Apple
