@@ -89,3 +89,16 @@ system SATA SSD with the NVMe unmounted — 3-4.3x slower prefill, 4x slower
 decode; GPU starves. Three orchestration failures published with diagnosis
 (self-kill via fuser, second-instance race, expert-profile path miss). Raw
 bundle sha-pinned. No secrets: rates/temps only.
+
+## 2026-11-03 — P1005 RTX 3060 era + platform-state restructure
+
+Published the closed RTX 3060 era (gpu-unlock 2.0 verified active, 187 W
+ceiling, paired v2.2 quick runs 0.9759/0.9829, raw 3060 records) and then the
+GPU return to a Tesla P100 — see hardware/changes/P1005.md (CHG-001/002).
+The P1005 passport was restructured to the **platform convention**: the
+published anchor is chassis + board; CPU, RAM, storage and GPU are numbered
+hardware states (S1/S2/S3), and every benchmark line names its state. Going
+forward any P1005 component swap follows the same shape: CHG entry before the
+box goes down, state re-numbering in the passport, same-suite before/after
+table. No new secrets: rates, watts, degrees, PCI ids only; launch config
+stays `$HOME`-sanitized.
