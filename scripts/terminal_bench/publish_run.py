@@ -536,7 +536,8 @@ def main() -> int:
                 print(f"PUBLISH_BLOCKED finding_count={len(findings)}")
                 for f in findings[:20]:
                     print(f"  {f}")
-                return 2
+                if not args.loop:
+                    return 2
             if args.commit:
                 run(["git", "add", "--", str(run_dir.relative_to(repo)), "README.md", "logs/INDEX.md", "CHANGELOG.md"], repo)
                 message = (
@@ -557,7 +558,8 @@ def main() -> int:
                         run(["git", "push", "origin", "main"], repo)
                     except Exception as exc:
                         print(f"PUSH_FAILED local_commit={sha} reason={exc}")
-                        return 1
+                        if not args.loop:
+                            return 1
             for x in trials:
                 seen_value.add(x.name)
             args.state.write_text(json.dumps(sorted(seen_value), indent=2))
