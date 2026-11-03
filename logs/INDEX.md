@@ -204,3 +204,7 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 |---|---:|---|
 | p100-thermal.csv (15 s sampler, incl. two synthetic load passes) | 80 | `d1af44f78bda17cb` |
 | p100-thermal-full.csv (governor log, full session, peak 82 °C) | 244 | `8b945f32a29748b9` |
+| 2026-11-03 22:39 | task-log | decision: 2026-11-03-terminal-bench-monitoring-task-44ebd41a.md | Terminal-Bench monitoring task (requested by Viktor Khudiakov via Telegram chat; user-stated source: ChatGPT subscription plus task) |
+| 2026-11-03 22:43 | task-log | decision: 2026-11-03-terminal-bench-two-task-passive-analysis-f8a7552d.md | Terminal-Bench two-task passive analysis (requested by Viktor Khudiakov via Telegram chat; user-stated source: ChatGPT subscription plus task) |
+| 2026-11-03 22:46 | task-log | decision: 2026-11-03-terminal-bench-harness-participation-audit-ae4388fd.md | Terminal-Bench harness participation audit (requested by Viktor Khudiakov via Telegram chat; user-stated source: ChatGPT subscription plus task) |
+| 2026-11-03 22:58 | task-log | decision: 2026-11-03-terminal-bench-automatic-github-publication-7b15d437.md | Terminal-Bench automatic GitHub publication (requested by Viktor Khudiakov via Telegram chat; user-stated source: ChatGPT subscription plus task) |

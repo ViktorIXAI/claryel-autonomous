@@ -1,0 +1,85 @@
+{
+  "run_id": "tb4-66-verified-p2005-20261103-203323",
+  "measurement_class": "independent one-pass run; not an official Terminal-Bench 4.0 leaderboard submission",
+  "dataset": {
+    "name": "Terminal-Bench 4.0",
+    "tasks": 66,
+    "attempts_per_task": 1,
+    "official_leaderboard_attempts_per_task": 5
+  },
+  "runner": {
+    "command_sha256": "d69ffda1df35d67b4a52d02a312b3fae2480fd2f0738a32d9ece8d276b3559de",
+    "agent": "terminal_bench_hermes_harness.hermes_verified:VerifiedHermes",
+    "agent_adapter_sha256": "92652f3dfd5a5ae5c631ff7a7d6d055a0f4d152f80cb1aa7cb883f46d089eee8",
+    "hermes_version": "v0.22.6",
+    "harbor_version": "0.25.0",
+    "max_turns": 1000,
+    "parallelism": 1,
+    "retries": 0,
+    "environment": "docker",
+    "network_policy": "official task network policy; local inference endpoint allowlisted at runtime"
+  },
+  "model": {
+    "requested_model": "openai/qwen3.8-flash-next-iq3_s",
+    "base_model": "Qwen3.8 Flash Next",
+    "quantization": "IQ3_S GSQ RCO",
+    "parameters_visible_in_package": "83.6 GB across two GGUF parts",
+    "endpoint_host_label": "P2005",
+    "endpoint_scheme": "openai_chat_completions",
+    "api_key_name": "STRATA_API_KEY",
+    "api_key_value": "[REDACTED]"
+  },
+  "inference_server": {
+    "product": "Strata",
+    "application_version": "0.2.10",
+    "engine_version": "0.1.56",
+    "max_context": 262144,
+    "kv_quantization": "int8",
+    "speculative_decoding": "4, min probability 0.5",
+    "conversation_cache_mib": 2560
+  },
+  "hardware": {
+    "host": "P2005",
+    "os_kernel": "7.0.0-38-generic",
+    "cpu_model": "AMD Ryzen 9 9955HX 16-Core Processor",
+    "logical_cpus": 32,
+    "memory_gib": 60,
+    "gpu_model": "NVIDIA GeForce RTX 5090 Laptop GPU",
+    "gpu_memory_mib": 24463,
+    "driver_version": "615.71.09"
+  },
+  "skills": [
+    {
+      "name": "task-discipline",
+      "attached_by_runner": true,
+      "sha256": "e2045f328bd6d25fceb2ee2c91402090ee000c2a017df08e127d40337bb1264e",
+      "source_snapshot": "config/task-discipline-SKILL.md"
+    }
+  ],
+  "claryel_autonomous_harness": {
+    "repository_version_at_run_start": "0.0.2.8",
+    "contour_used_in_task_solving": false,
+    "active_contour_in_this_benchmark": null,
+    "evidence": [
+      "The running Harbor command uses terminal_bench_hermes_harness.hermes_verified:VerifiedHermes.",
+      "The only attached benchmark skill is task-discipline.",
+      "No Claryel autonomous-harness contour invocation was present in the benchmark process tree.",
+      "No skill_manage or memory tool call was present in the completed trial session exports."
+    ],
+    "hermes_self_learning_used_in_trial": false,
+    "skill_or_memory_changes_during_trial": false
+  },
+  "resource_telemetry": {
+    "continuous_gpu_power_energy_sampling": false,
+    "reason": "The benchmark was started without a resource collector; adding a collector now would change the measurement conditions.",
+    "gpu_peak_and_energy": null,
+    "note": "A passive point sample showed the Strata process using 23112 MiB and the GPU at 100% utilization with 69.39 W on 2026-11-04T00:18+01:00, but this is not an interval aggregate."
+  },
+  "sanitization": {
+    "private_ips": "replaced with [PRIVATE_IP]",
+    "local_account_paths": "replaced with [LOCAL_PATH]",
+    "credentials": "replaced with [REDACTED]",
+    "hidden_verifier_stdout": "not published; only redacted test names, statuses and short messages are published",
+    "system_prompts": "removed from session exports"
+  }
+}

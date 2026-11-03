@@ -3,6 +3,24 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
+## [Unreleased] — Terminal-Bench 4.0 independent run publication
+### Added
+- A lightweight, read-only publication pipeline for run
+  `tb4-66-verified-p2005-20261103-203323`, starting from completed Harbor
+  trials only.
+- Initial sanitized reports for `atrx-vep-crispr` and `batched-eval-parity`:
+  reward, timings, verifier pass/fail names, failure analysis, Hermes token and
+  call counts where the session export is available.
+- Cumulative JSON/Markdown summaries and a README link to the experiment page.
+- Explicit scope boundary: the Claryel Autonomous Harness `0.0.2.8` repository
+  version is not invoked by the Terminal-Bench solver. The run uses
+  `VerifiedHermes` plus the `task-discipline` skill; Hermes self-learning was not
+  active during the completed trials.
+### Measurement note
+- This is a one-pass independent run (66 tasks × 1 attempt), not an official
+  Terminal-Bench 4.0 leaderboard result. Continuous GPU power/energy telemetry
+  was not enabled for the run.
+
 ## [Unreleased] — 0.0.2.8 (engine-stall guard, measurement validity)
 ### Added
 - `harness/gate_engine_guard.py`: an answer-less response with no HTTP error and no
@@ -20,16 +38,21 @@ Contour (harness) generations. Rejected generations are listed under
   0.0.2.8 leaves contour behavior at 2.7).
 ### Diagnosis behind it
 - The full `0.0.2.1 -> 0.0.2.2` pair on P2005 appeared to show a regression of
-  -0.109 with 62 regressions against 33 improvements. The ledger said the serve was
-  refusing requests: 140 of 645 rows on the first side and 157 of 298 on the second
-  had `ptok = 0`, wall time exactly 20 s and no completion at all. Median successful
-  call time was 2.2 s on the healthy side and 14.8 s on the degraded side.
+  -0.1319 over the 298 joined keys. The ledger said the serve was handing back empty
+  responses: 86 of 298 keys on the first side and 134 of 298 on the second produced no
+  answer bytes with no engine error (29 % and 45 %), pinned at the 20 s client timeout
+  while healthy calls on the same box took 2-3 s.
 - Cause on that box: parked conversation snapshots up to 2.6 GiB
-  (`K/V trimmed to 8192 cells`, 717 RAM-admission refusals) on a 60 GiB host already
+  (`conversation cache: parked 107235 tokens ... bytes=2643951576 evictions=28`,
+  `K/V trimmed to 8192 cells`, 717 RAM-admission refusals) on a 60 GiB host already
   at ~58 GiB used — over-parking, the failure mode measured before. Raised
   `--conversation-cache-min-free-mib` from 1536 to 3072 and restarted the node.
-- With stalled pairs excluded, the same partial pair measured 0.9961 (2.1) against
-  0.9820 (2.2) over 82 clean keys — no regression claim, and no acceptance either.
+- With stalled pairs excluded, the same partial pair measured 0.9975 (2.1) against
+  0.9886 (2.2) over 130 clean keys, 0 improved and 2 regressed — no regression claim,
+  and no acceptance either.
+- Counting rule: a stall is an empty answer with no engine error. Rows with
+  `model_calls = 0, ptok = 0, ctok = 0, seconds = 0.0` are the contour answering by
+  code and belong in the means — an earlier "zero-token rows" count mixed the two.
 ### Status
 - Built and unit-tested; the pair is being re-measured under the guard. No quality
   number is published from the contaminated run.

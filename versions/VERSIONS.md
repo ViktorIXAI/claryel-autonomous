@@ -365,19 +365,25 @@ Mac pair, plus 158 fewer model calls per 158 rows.
 ## 0.0.2.8 — engine-stall guard *(measurement validity; contour unchanged)*
 
 **What was nearly believed.** The full P2005 pair `0.0.2.1 -> 0.0.2.2` printed
--0.109 overall with 62 regressions against 33 improvements — a headline that would
-have said the accepted contour is a regression on the main brain.
+-0.1319 over the 298 joined keys — a headline that would have said the accepted
+contour is a regression on the main brain.
 
-**What the artifacts actually said.** In the ledger, 140 of 645 rows on the 2.1 side
-and 157 of 298 rows on the 2.2 side had `ptok = 0`, no completion and a wall time of
-exactly 20 s: the serve accepted the connection, held it, and returned nothing. On
-the rows that did run, the median call took 2.2 s on the first side and 14.8 s on
-the second — the second side was measured on a degraded box, not on a worse contour.
-The engine log explains the degradation: parked conversation snapshots of 2.6 GiB
+**What the artifacts actually said.** In that joined subset, 86 of 298 keys on the
+2.1 side and 134 of 298 on the 2.2 side produced **no answer bytes and reported no
+engine error** (29 % and 45 %): the serve accepted the connection, held it for the
+full 20 s client timeout, and returned nothing. Restricted to the **130 keys where
+both sides answered**, the same pair measured **-0.0089** (0 improved, 2 regressed) —
+flat, which is what the accepted contour predicts. The engine log explains the
+degradation: parked conversation snapshots of 2.6 GiB
 (`conversation cache: parked 107235 tokens ... bytes=2643951576 evictions=28`) with
 `K/V trimmed to 8192 cells` and 717 RAM-admission refusals, on a 60 GiB host sitting
 at ~58 GiB used. That is over-parking, the same failure mode measured once before:
-parking a giant snapshot starves live KV, and the next requests are refused.
+parking a giant snapshot starves live KV, and the next requests come back empty.
+
+**Counting rule learned the hard way.** A stall is an empty answer with no engine
+error. Rows with `model_calls = 0, ptok = 0, ctok = 0, seconds = 0.0` are the contour
+answering **by code** — valid rows that belong in the means. An early count of "297
+zero-token rows" conflated the two and was corrected the same day.
 
 **Machine check.** With the node idle, the same request shape returned in 8.0 s for
 14 161 prompt tokens, 31.0 s for 59 837 and 87.3 s for 161 496 — about 1.9k tok/s of

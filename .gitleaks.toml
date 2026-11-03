@@ -21,6 +21,7 @@ regexes = [
 ]
 paths = [
   '''scripts/publish/publish\.env\.example''',
+  '''scripts/terminal_bench/publish_run\.py''',
   '''config\.example\.sh''',
   '''(^|/)\.venv/''',
   '''(^|/)__pycache__/''',

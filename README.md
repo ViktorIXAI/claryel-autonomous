@@ -74,11 +74,15 @@ canonical four-part form.
 | P3032 full 178-task sweep | complete; adjusted mean 0.9867, adjusted perfect 94.9%, F 1.00 |
 | P1005 post-GPU-swap quick sweep | complete; capacity-valid mean 0.9851, F 1.00; full paired A/B still pending |
 | B2003 offline replay | complete; recorded F answers replayed through `0.0.2.2`, n=323 |
-| P2005 full `0.0.2.1 -> 0.0.2.2` paired run | first attempt stopped: the serve stalled (297 of 943 rows returned zero tokens), so its delta of -0.109 was a box condition, not a contour result; node parking floor raised to 3072 MiB and the pair is re-measured under the 0.0.2.8 stall guard |
+| P2005 full `0.0.2.1 -> 0.0.2.2` paired run | first attempt stopped: the serve stalled (86 of 298 joined keys on one side, 134 of 298 on the other returned no answer bytes), so its delta of -0.1319 was a box condition — on the 130 keys where both arms answered it was -0.0089; node parking floor raised to 3072 MiB and the pair is re-measured under the 0.0.2.8 stall guard |
 | `0.0.2.7` K tax-negation contour | built and tested offline (10/10); paired A/B not started, no acceptance claimed |
 | resource telemetry | permanent for full paired gates and hardware-class runs |
 | OS environment records | every gate row, ledger row and telemetry header now records Ubuntu version, codename, Desktop/Server flavor and kernel |
 | documentation freshness | daily policy added; scheduled check added |
+
+<!-- BEGIN TERMINAL-BENCH-2026-11-04-STATUS -->
+| [Terminal-Bench 4.0: independent one-pass run](experiments/terminal-bench/2026-11-04-p2005-tb4-66-verified/index.md) | in progress; 2 / 66 completed, 0 solved, 2 failed; not an official leaderboard run |
+<!-- END TERMINAL-BENCH-2026-11-04-STATUS -->
 
 ## Headline results
 
