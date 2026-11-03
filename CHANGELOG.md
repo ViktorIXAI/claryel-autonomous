@@ -3,6 +3,37 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
+## [Unreleased] — 0.0.2.8 (engine-stall guard, measurement validity)
+### Added
+- `harness/gate_engine_guard.py`: an answer-less response with no HTTP error and no
+  usage block is classified as a serve stall; the identical sample (same seed) is
+  retried once; if it stalls again the row is written with `engine_stalled: true`
+  and the note `engine_stalled` instead of counting as a zero-quality answer.
+- A rolling guard stops a run whose stall rate exceeds 25% of the last 20 rows, so
+  an unfit serve cannot burn hours of gate time (`stop_reason: engine_stall_rate`).
+- Every run writes `run-record-<run_id>.json` at startup: box, model, API host, both
+  version axes, git sha, plan size, `/health` snapshot and the stall policy.
+- `analytics/aggregate.py` and `experiments/ab/compare_ab.py` exclude
+  `engine_stalled` rows from quality means and report them separately.
+- `harness/gate_v28_stall_test.py`: 10 contract cases (stall truth table, rolling
+  rate arming, single same-seed retry, recovery path, run-record shape, and that
+  0.0.2.8 leaves contour behavior at 2.7).
+### Diagnosis behind it
+- The full `0.0.2.1 -> 0.0.2.2` pair on P2005 appeared to show a regression of
+  -0.109 with 62 regressions against 33 improvements. The ledger said the serve was
+  refusing requests: 140 of 645 rows on the first side and 157 of 298 on the second
+  had `ptok = 0`, wall time exactly 20 s and no completion at all. Median successful
+  call time was 2.2 s on the healthy side and 14.8 s on the degraded side.
+- Cause on that box: parked conversation snapshots up to 2.6 GiB
+  (`K/V trimmed to 8192 cells`, 717 RAM-admission refusals) on a 60 GiB host already
+  at ~58 GiB used — over-parking, the failure mode measured before. Raised
+  `--conversation-cache-min-free-mib` from 1536 to 3072 and restarted the node.
+- With stalled pairs excluded, the same partial pair measured 0.9961 (2.1) against
+  0.9820 (2.2) over 82 clean keys — no regression claim, and no acceptance either.
+### Status
+- Built and unit-tested; the pair is being re-measured under the guard. No quality
+  number is published from the contaminated run.
+
 ## [Unreleased] — 0.0.2.7 (K tax-negation contour change, candidate)
 ### Added
 - `k_negation_normalize()` in `harness/gate_run.py`: the K tax-negation flag is

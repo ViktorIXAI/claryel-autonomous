@@ -41,10 +41,12 @@ LADDER = [int(x) for x in os.environ.get("PARB_LADDER", "512,1024,2048").split("
 # contour track and D is the contour revision. Legacy v1.x/v2.x names are
 # accepted and normalized to the current release line.
 sys.path.insert(0, ROOT)
+from gate_engine_guard import (STALL_RATE, STALL_S, STALL_WINDOW, StallTracker,
+                               health_url, is_stalled, run_record)
 try:
     import gate_versioning as _GV
 
-    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION", "v2.6"))
+    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION") or _GV.CURRENT_STAMP)
     CONTOUR_SUMMARY = _GV.summary(CONTOUR_VERSION)
     CONTOUR_BEHAVIOR = _GV.format_behavior(CONTOUR_VERSION)
 
@@ -289,7 +291,10 @@ def call(msgs, mt, seed):
     except Exception as e:
         err = "%s: %s" % (type(e).__name__, str(e)[:120])
     return {"text": txt, "ptok": ptok, "ctok": ctok, "ttft": ttft, "finish": finish,
-            "el": time.time() - t0, "err": err}
+            "el": time.time() - t0, "err": err, "stalled": is_stalled(txt, err, ptok, ctok)}
+
+
+STALLS = StallTracker(STALL_RATE, STALL_WINDOW)
 
 
 class Acct:
@@ -412,6 +417,13 @@ def ask_ladder(acct, msgs, seed, mt=512):
         mt = LADDER[i + 1]
         i += 1
         r = call(msgs, mt, seed)
+    if r.get("stalled"):
+        # A stalled response measures the box, not the answer. Retry the identical
+        # sample once (same seed, so the distribution is unchanged), then leave the
+        # row flagged instead of letting it count as a zero-quality answer.
+        acct.ev("engine", "stalled_retry")
+        r = call(msgs, mt, seed)
+        acct.ev("engine", "stalled" if r.get("stalled") else "stalled_recovered")
     acct.add(r, useful=True)
     return r
 
@@ -1597,6 +1609,11 @@ def run_one(t, pos, done, st):
         rec["content"], rec["format_ok"], rec["notes"] = None, None, ["scorer_error"]
         rec["scorer_error"] = ("%s: %s" % (type(e).__name__, e))[:200]
     rec["os"] = OS_RECORD
+    rec["engine_stalled"] = bool(r.get("stalled")) and not (r["text"] or "").strip()
+    if rec["engine_stalled"]:
+        # Keep the raw number for the audit trail, but the aggregators treat such a
+        # row as missing rather than as a failed answer.
+        rec["notes"] = (rec.get("notes") or []) + ["engine_stalled"]
     with open(RESULTS, "a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         f.flush()
@@ -1605,6 +1622,7 @@ def run_one(t, pos, done, st):
     row["contour"] = rec["contour"]
     row["content"] = rec["content"]
     row["format_ok"] = rec["format_ok"]
+    row["engine_stalled"] = rec["engine_stalled"]
     row["os"] = OS_RECORD
     with open(LEDGER, "a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -1634,6 +1652,26 @@ def main():
         "" if CONTOUR_BEHAVIOR == CONTOUR_SUMMARY.get("contour_version")
         else " (this release changed measurement or reporting only, not the contour)"))
     log("PGR: planned tasks %d, previously done %d, limit %d s" % (len(tasks), len(done), LIMIT))
+    sha = ""
+    try:
+        sha = subprocess.run(["git", "-C", ROOT, "rev-parse", "--short", "HEAD"],
+                             capture_output=True, text=True, timeout=6).stdout.strip()
+    except Exception:
+        pass
+    try:
+        health = json.loads(urllib.request.urlopen(health_url(API), timeout=8).read().decode())
+    except Exception:
+        health = None
+    record = run_record(BOX, MODEL, API, CONTOUR_SUMMARY, CONTOUR_BEHAVIOR, health=health,
+                        git_sha=sha, plan_tasks=len(tasks),
+                        notes=os.environ.get("PARB_RUN_NOTES", ""))
+    record_path = os.path.join(ROOT, "run-record-%s.json"
+                               % (os.environ.get("PARB_RUN_ID") or "gate"))
+    with open(record_path, "w", encoding="utf-8") as f:
+        json.dump(record, f, ensure_ascii=False, indent=2)
+    log("PGR: run record %s; serve health %s; stall policy retry=1 rate=%.0f%% window=%d" % (
+        os.path.basename(record_path), "ok" if health else "UNREACHABLE",
+        100 * STALL_RATE, STALL_WINDOW))
     n = 0
     for pos in tasks:
         if time.time() - st["start_wall"] > LIMIT:
@@ -1641,8 +1679,16 @@ def main():
             break
         t = bank[pos["task"]]
         try:
-            if run_one(t, pos, done, st):
+            out = run_one(t, pos, done, st)
+            if out:
                 n += 1
+                STALLS.add(bool(out.get("engine_stalled")))
+                if STALLS.unfit():
+                    st["stop_reason"] = "engine_stall_rate"
+                    log("PGR: serve unfit for measurement — %s over the last %d rows; "
+                        "stopping so a box problem is never recorded as a contour result" % (
+                            STALLS.verdict(), STALL_WINDOW))
+                    break
         except SystemExit:
             raise
         except Exception as e:

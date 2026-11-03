@@ -17,6 +17,9 @@ from collections import defaultdict, Counter
 
 BASE = os.environ.get("PARB_ARTIFACTS", "./artifacts")
 
+stalled = {}
+
+
 def load(path):
     d = {}
     if not os.path.exists(path):
@@ -31,8 +34,16 @@ def load(path):
         k = (r.get("task"), r.get("rep"))
         if None in k:
             continue
+        if r.get("engine_stalled"):
+            # The serve returned nothing: this row measures the box, not the answer,
+            # so it must not enter quality means as a zero.
+            stalled[path] = stalled.get(path, 0) + 1
+            continue
         if k not in d or float(r.get("content") or 0) > float(d[k].get("content") or 0):
             d[k] = r
+    if stalled.get(path):
+        import sys
+        sys.stderr.write("engine-stalled rows excluded from %s: %d\n" % (path, stalled[path]))
     return d
 
 def load_ledger(path):

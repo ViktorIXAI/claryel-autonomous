@@ -57,13 +57,16 @@ CONTOUR_FEATURES = (
 # measurement/reporting revisions with contour behavior 2.2. A new contour
 # feature may never be registered inside that band, because historical rows
 # stamped 0.0.2.3-0.0.2.6 must keep resolving to behavior 2.2 forever.
-RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6)
+RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 
-# Artifact identifier of the current release: 0.0.2.6 separated the two axes and
-# 0.0.2.7 adds the K tax-negation contour change. Bump this for any audited
-# release; move the contour axis only by adding a gate tuple to
-# CONTOUR_FEATURES.
-CURRENT_REVISION = (2, 7)
+# Artifact identifier of the current release: 0.0.2.6 separated the two axes,
+# 0.0.2.7 adds the K tax-negation contour change, 0.0.2.8 adds the engine-stall
+# guard (measurement validity: stalled responses are no longer scored as wrong
+# answers, and every run records the conditions it was measured under). Bump this
+# for any audited release; move the contour axis only by adding a gate tuple to
+# CONTOUR_FEATURES — never inside the reserved tooling band.
+CURRENT_REVISION = (2, 8)
+CURRENT_STAMP = "0.0.2.8"
 
 
 def _digits(value: str) -> list[int]:

@@ -58,6 +58,7 @@ Current mapping:
 | `0.0.2.5` | — | `0.0.2.2` | OS environment records and deterministic docs pass | reporting release, contour unchanged |
 | `0.0.2.6` | — | `0.0.2.2` | contour behavior recorded next to the stamped revision in every artifact | measurement release, contour unchanged |
 | `0.0.2.7` | — | `0.0.2.7` | K tax-negation flag grounded in the task's own text | candidate contour change; contract tests 10/10, paired A/B pending |
+| `0.0.2.8` | — | `0.0.2.7` | engine-stall guard, per-run condition record | measurement release, contour unchanged |
 
 Legacy `v1.x` and `v2.x` names still work as inputs. New reports should use the
 canonical four-part form.
@@ -73,7 +74,7 @@ canonical four-part form.
 | P3032 full 178-task sweep | complete; adjusted mean 0.9867, adjusted perfect 94.9%, F 1.00 |
 | P1005 post-GPU-swap quick sweep | complete; capacity-valid mean 0.9851, F 1.00; full paired A/B still pending |
 | B2003 offline replay | complete; recorded F answers replayed through `0.0.2.2`, n=323 |
-| P2005 full `0.0.2.1 -> 0.0.2.2` paired run | running 2026-11-03; 681 paired keys per side, 1 Hz resource telemetry, OS record in every row |
+| P2005 full `0.0.2.1 -> 0.0.2.2` paired run | first attempt stopped: the serve stalled (297 of 943 rows returned zero tokens), so its delta of -0.109 was a box condition, not a contour result; node parking floor raised to 3072 MiB and the pair is re-measured under the 0.0.2.8 stall guard |
 | `0.0.2.7` K tax-negation contour | built and tested offline (10/10); paired A/B not started, no acceptance claimed |
 | resource telemetry | permanent for full paired gates and hardware-class runs |
 | OS environment records | every gate row, ledger row and telemetry header now records Ubuntu version, codename, Desktop/Server flavor and kernel |

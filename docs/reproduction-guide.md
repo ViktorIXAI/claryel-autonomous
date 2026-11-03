@@ -82,7 +82,12 @@ one of them runs contour behavior `0.0.2.2`, and each artifact carries a
 the stamped revision alone (see `versions/VERSIONS.md`). `0.0.2.7` is a contour
 change again: `K_NEGATION` grounds the K tax-negation flag in the task's own
 visible text (explicit exclusion sentence means yes, silence about taxes means
-no); it is a candidate until a paired run proves it.
+no); it is a candidate until a paired run proves it. `0.0.2.8` is measurement-only:
+an answer-less response with no HTTP error is recorded as `engine_stalled` (after one
+same-seed retry) and is excluded from quality means, a run stops at a >25% stall rate
+over 20 rows, and every startup writes `run-record-<run_id>.json` with the serve
+`/health`, both version axes and the git sha. **Always read the run record before
+comparing two arms**: a stalled serve produces rows that look like wrong answers.
 `PARB_CHEAP=1` re-enables
 the *rejected* cheap-model-repair path for experiments only — beware, it is
 rejected for a reason.

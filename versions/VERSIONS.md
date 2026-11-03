@@ -34,6 +34,7 @@ Compatibility mapping:
 | `0.0.2.5` | — | `0.0.2.2` | OS environment records, contour behavior unchanged |
 | `0.0.2.6` | — | `0.0.2.2` | two-axis version record in every artifact, contour behavior unchanged |
 | `0.0.2.7` | — | `0.0.2.7` | K tax-negation flag grounded in the task's own text |
+| `0.0.2.8` | — | `0.0.2.7` | engine-stall guard and per-run condition record, contour behavior unchanged |
 
 Legacy names remain valid as inputs and appear in historical records. New
 artifacts should record the canonical four-part form.
@@ -360,6 +361,47 @@ quality number is claimed yet**: adoption requires a paired run over the
 `(task, rep)` keys that contour `0.0.2.2` already covered on the same box.
 Expected effect if it holds: K 0.7888 → 1.0000 and overall 0.9833 → ~0.999 on the
 Mac pair, plus 158 fewer model calls per 158 rows.
+
+## 0.0.2.8 — engine-stall guard *(measurement validity; contour unchanged)*
+
+**What was nearly believed.** The full P2005 pair `0.0.2.1 -> 0.0.2.2` printed
+-0.109 overall with 62 regressions against 33 improvements — a headline that would
+have said the accepted contour is a regression on the main brain.
+
+**What the artifacts actually said.** In the ledger, 140 of 645 rows on the 2.1 side
+and 157 of 298 rows on the 2.2 side had `ptok = 0`, no completion and a wall time of
+exactly 20 s: the serve accepted the connection, held it, and returned nothing. On
+the rows that did run, the median call took 2.2 s on the first side and 14.8 s on
+the second — the second side was measured on a degraded box, not on a worse contour.
+The engine log explains the degradation: parked conversation snapshots of 2.6 GiB
+(`conversation cache: parked 107235 tokens ... bytes=2643951576 evictions=28`) with
+`K/V trimmed to 8192 cells` and 717 RAM-admission refusals, on a 60 GiB host sitting
+at ~58 GiB used. That is over-parking, the same failure mode measured once before:
+parking a giant snapshot starves live KV, and the next requests are refused.
+
+**Machine check.** With the node idle, the same request shape returned in 8.0 s for
+14 161 prompt tokens, 31.0 s for 59 837 and 87.3 s for 161 496 — about 1.9k tok/s of
+prefill, no empty completions. Context length was never the problem; the parked
+snapshots were. `--conversation-cache-min-free-mib` was raised from 1536 to 3072 on
+that box (parking is now refused while the host is under memory pressure) and the
+node was restarted.
+
+**Harness rule added.** An answer-less response with no HTTP error and no usage
+block is a **stall**, not a wrong answer. The identical sample (same seed, so the
+measured distribution is untouched) is retried once; if it stalls again the row is
+flagged `engine_stalled` and excluded from quality means by both aggregators, and a
+run whose last 20 rows exceed a 25% stall rate stops with
+`stop_reason: engine_stall_rate`. Each run now also writes
+`run-record-<run_id>.json` (box, model, API host, both version axes, git sha, plan
+size, `/health`, stall policy) so the conditions of a measurement are auditable
+afterwards — the missing piece that made this diagnosis take hours.
+
+**Read on the contaminated data, for the record.** Restricting the partial pair to
+the 82 keys where neither side stalled: 0.9961 (2.1) against 0.9820 (2.2), 0
+improvements, 2 regressions, both in E. That is not an acceptance and not a
+regression: it is a small sample whose `F` category — the one contour 2.2 targets —
+was 100% stalled on both sides, which is why the pair is being re-measured under the
+guard instead of being reported.
 
 ## Cross-cutting rules the chain produced
 
