@@ -203,3 +203,4 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 | artifact | records | sha256/16 |
 |---|---:|---|
 | p100-thermal.csv (15 s sampler, incl. two synthetic load passes) | 80 | `d1af44f78bda17cb` |
+| p100-thermal-full.csv (governor log, full session, peak 82 °C) | 244 | `8b945f32a29748b9` |
