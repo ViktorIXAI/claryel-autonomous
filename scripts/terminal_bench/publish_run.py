@@ -487,6 +487,19 @@ def run(args: list[str], cwd: pathlib.Path) -> str:
     return result.stdout
 
 
+def benchmark_run_active(job_name: str) -> bool:
+    """Return True while the Harbor job process is still running."""
+    needle = job_name.encode()
+    for proc in pathlib.Path("/proc").glob("[0-9]*/cmdline"):
+        try:
+            cmdline = proc.read_bytes()
+        except OSError:
+            continue
+        if needle in cmdline and b"harbor" in cmdline:
+            return True
+    return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=pathlib.Path, required=True)
@@ -550,7 +563,7 @@ def main() -> int:
             args.state.write_text(json.dumps(sorted(seen_value), indent=2))
         if not args.loop:
             return 0
-        if (job_dir / "result.json").exists():
+        if not benchmark_run_active(job_dir.name):
             print("WATCH_COMPLETE")
             return 0
         time.sleep(args.interval)
