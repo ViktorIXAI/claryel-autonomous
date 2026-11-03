@@ -70,5 +70,19 @@
   "max_tokens": 300,
   "threads": 14
  },
- "host": "0.0.0.0"
+ "host": "0.0.0.0",
+ "environment": {
+  "checked_utc": "2026-11-03T10:00:00Z",
+  "needs_live_recheck": true,
+  "os": {
+   "id": "ubuntu",
+   "pretty": "Ubuntu 24.04.5 LTS",
+   "version": "24.04",
+   "codename": "noble",
+   "flavor": "server",
+   "flavor_evidence": "ubuntu-server metapackage",
+   "kernel": "6.8.0-147-generic",
+   "architecture": "x86_64"
+  }
+ }
 }

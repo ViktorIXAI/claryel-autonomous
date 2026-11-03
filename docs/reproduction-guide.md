@@ -29,6 +29,19 @@ For a full run, leave `PARB_TELEM` non-empty in `config.sh`. `run_gate.sh`
 starts the 1 Hz resource collector automatically, runs the gate, then stops the
 collector when the gate exits.
 
+Every gate result and ledger row carries an `os` object: distribution, exact
+version, Ubuntu codename, Desktop or Server flavor, flavor evidence, kernel and
+architecture. Refresh fleet OS facts before comparing a machine after a system
+migration:
+
+```bash
+python3 scripts/fleet/os_fleet_audit.py
+```
+
+The script reads local fleet access data from `~/.hermes/fleet-os.json` or
+`PARB_FLEET_OS_CONFIG`. That file remains local-only; commit only sanitized
+launch environments and the date-stamped snapshot summary, never access data.
+
 The runner is **resumable**: `state*.json` tracks completed `(task, rep, series)`
 positions; Ctrl-C / `harness/stop_series.sh <state-substring>` and re-run to
 continue. A wall-clock deadline (`PARB_LIMIT`, default 4 h) and resource
@@ -63,7 +76,8 @@ Canonical values are four-part, such as `0.0.1.9`, `0.0.2.0`, `0.0.2.1` and
 `0.0.2.2`; legacy `v1.x`/`v2.x` names are accepted and normalized.
 `0.0.2.2` adds targeted F diagnostic grounding; `0.0.2.3` adds resource
 telemetry methodology; `0.0.2.4` records the full-Mac resource/economic verdict
-without changing contour behavior (see `versions/VERSIONS.md`).
+and `0.0.2.5` adds OS environment records without changing contour behavior
+(see `versions/VERSIONS.md`).
 `PARB_CHEAP=1` re-enables
 the *rejected* cheap-model-repair path for experiments only — beware, it is
 rejected for a reason.

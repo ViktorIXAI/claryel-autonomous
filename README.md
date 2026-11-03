@@ -30,7 +30,7 @@ The version scheme is four digits: `A.B.C.D`.
 |---|---|---|
 | `A.B` | operator release line; the operator changes these first two digits | `0.0` |
 | `C` | contour track; `1` is the first contour family, `2` is the second | `2` |
-| `D` | contour revision inside that track | `4` for the full-Mac resource decision and current tooling release |
+| `D` | contour revision inside that track | `5` for OS environment records and deterministic docs tooling |
 
 Current mapping:
 
@@ -41,7 +41,8 @@ Current mapping:
 | `0.0.2.1` | `v2.1` | H safety normalization | full Mac pair used as baseline; full P3001 complete |
 | `0.0.2.2` | `v2.2` | F diagnostic grounding | full Mac paired run accepted: +0.0438 overall, +0.3259 F, 0 regressions |
 | `0.0.2.3` | — | resource telemetry and documentation policy | current measurement release |
-| `0.0.2.4` | — | full-Mac resource/economic verdict | current release line |
+| `0.0.2.4` | — | full-Mac resource/economic verdict | full release line |
+| `0.0.2.5` | — | OS environment records and deterministic docs pass | current release line |
 
 Legacy `v1.x` and `v2.x` names still work as inputs. New reports should use the
 canonical four-part form.
@@ -58,6 +59,7 @@ canonical four-part form.
 | P1005 post-GPU-swap quick sweep | complete; capacity-valid mean 0.9851, F 1.00; full paired A/B still pending |
 | B2003 offline replay | complete; recorded F answers replayed through `0.0.2.2`, n=323 |
 | resource telemetry | permanent for full paired gates and hardware-class runs |
+| OS environment records | every gate row, ledger row and telemetry header now records Ubuntu version, codename, Desktop/Server flavor and kernel |
 | documentation freshness | daily policy added; scheduled check added |
 
 ## Headline results

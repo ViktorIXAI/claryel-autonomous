@@ -55,5 +55,19 @@
   "backend": "cuda13",
   "host": "0.0.0.0",
   "max_queue": 3,
-  "queue_timeout": 20
+  "queue_timeout": 20,
+  "environment": {
+    "checked_utc": "2026-11-03T10:16:00Z",
+    "needs_live_recheck": true,
+    "os": {
+      "id": "ubuntu",
+      "pretty": "Ubuntu 24.04.4 LTS",
+      "version": "24.04",
+      "codename": "noble",
+      "flavor": "requires_live_recheck",
+      "flavor_evidence": "host offline during fleet audit",
+      "kernel": "6.8",
+      "architecture": "x86_64"
+    }
+  }
 }

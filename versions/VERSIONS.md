@@ -21,6 +21,7 @@ Compatibility mapping:
 | `0.0.2.2` | `v2.2` | F diagnostic grounding |
 | `0.0.2.3` | — | resource telemetry methodology, contour behavior unchanged |
 | `0.0.2.4` | — | full-Mac resource/economic verdict, contour behavior unchanged |
+| `0.0.2.5` | — | OS environment records, contour behavior unchanged |
 
 Legacy names remain valid as inputs and appear in historical records. New
 artifacts should record the canonical four-part form.
@@ -250,6 +251,30 @@ idle and the objective is a simple endpoint check.
 
 See [`results/parb-v22-mac-full-resource.md`](../results/parb-v22-mac-full-resource.md)
 for the full report and cost/benefit estimate.
+
+## 0.0.2.5 — OS environment records and deterministic docs pass *(current release line)*
+
+This revision does not change model-facing contour behavior. It closes a
+reproducibility gap: Ubuntu version alone did not say whether the machine ran a
+Desktop or Server image, and a future migration would otherwise look like a
+kernel change only.
+
+Added:
+
+- `harness/os_record.py`: records OS distribution, Ubuntu codename, Desktop or
+  Server flavor, evidence used for that classification, kernel and architecture.
+- `scripts/fleet/os_fleet_audit.py`: collects the same record from localhost and
+  each configured remote machine, writing a dated JSON snapshot.
+- `hardware/inventory/OS-FLEET.md`: current human-readable fleet OS table.
+- `hardware/os-snapshots/`: date-stamped machine OS snapshots.
+- Gate results, gate ledgers and telemetry headers now carry the same `os` record.
+- Daily local docs refresh uses deterministic offline link validation; strict
+  online link checking remains in CI and pre-push with transport retries.
+
+Current fleet facts are recorded in [`OS-FLEET.md`](../hardware/inventory/OS-FLEET.md):
+P2005 and B2003 are Ubuntu 24.04.5 Desktop; P1005 is Ubuntu 24.04.5 Server;
+Mac Studio, MacBook and Mac mini are macOS desktop systems. P3001 and P3032
+were offline during the audit and require a live flavor recheck after power-on.
 
 ## Cross-cutting rules the chain produced
 

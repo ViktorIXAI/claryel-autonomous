@@ -33,6 +33,28 @@ UNITS = {"cpu_pct": "%", "load1": "procs", "cpu_ghz": "GHz", "cpu_temp_c": "C",
          "vram_used_mb": "MB", "vram_total_mb": "MB", "gpu_util_pct": "%",
          "gpu_power_w": "W", "gpu_temp_c": "C", "gpu_clk_mhz": "MHz",
          "gpu_throttle": "flags", "disk_rd_kbps": "kB/s", "disk_wr_kbps": "kB/s"}
+
+
+# The exact OS record must be bound into the telemetry header, not inferred
+# from hostname or a kernel version alone. Ubuntu Desktop and Ubuntu Server
+# can share the same 24.04 version but have different installed packages.
+try:
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "harness"))
+    import os_record as _OS
+
+    OS_METADATA = _OS.safe_for_log(_OS.detect())
+except Exception:
+    OS_METADATA = {
+        "id": platform.system().lower(),
+        "pretty": "%s %s" % (platform.system(), platform.release()),
+        "version": "",
+        "codename": "",
+        "flavor": "unknown",
+        "flavor_evidence": "os_record unavailable",
+        "kernel": platform.release(),
+        "architecture": platform.machine(),
+        "hostname": platform.node(),
+    }
 Nvidia = ["utilization.gpu,power.draw,temperature.gpu,clocks.current.graphics,"
           "clocks_event_reasons.active,memory.used,memory.total",
           "--format=csv,noheader,nounits"]
@@ -248,7 +270,8 @@ _PREV_DISK = None
 def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     hdr = {"kind": "telemetry-header", "run_id": RUN_ID, "machine": MACHINE,
-           "os": platform.system() + " " + platform.release(),
+           "os": OS_METADATA,
+           "os_line": "%s %s" % (platform.system(), platform.release()),
            "interval_s": INTERVAL, "units": UNITS, "started_utc": time.strftime("%FT%TZ", time.gmtime())}
     with open(OUT, "a") as f:
         f.write(json.dumps(hdr, ensure_ascii=False) + "\n")

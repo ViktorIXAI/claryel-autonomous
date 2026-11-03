@@ -20,7 +20,7 @@ import os
 import re
 
 DEFAULT_RELEASE_LINE = (0, 0)
-CURRENT_CONTOUR = (2, 4)
+CURRENT_CONTOUR = (2, 5)
 
 
 def _digits(value: str) -> list[int]:

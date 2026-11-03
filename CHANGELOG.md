@@ -3,7 +3,14 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
-## [Unreleased] — 0.0.2.5 (deterministic local docs pass)
+## [Unreleased] — 0.0.2.5 (deterministic docs and OS environment records)
+### Added
+- `harness/os_record.py` records OS distribution, Ubuntu codename, Desktop or
+  Server image, image evidence, kernel and architecture.
+- Gate results, gate ledgers and telemetry headers now carry the same OS record.
+- `hardware/inventory/OS-FLEET.md` is the current human-readable OS table.
+- `scripts/fleet/os_fleet_audit.py` collects the record from every reachable
+  machine using identical local and remote detection code.
 ### Changed
 - The local daily docs refresh now checks repository links offline, so a
   temporary public-internet timeout cannot block the status-date pass.

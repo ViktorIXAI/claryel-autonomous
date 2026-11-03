@@ -44,7 +44,7 @@ sys.path.insert(0, ROOT)
 try:
     import gate_versioning as _GV
 
-    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION", "v2.4"))
+    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION", "v2.5"))
     CONTOUR_SUMMARY = _GV.summary(CONTOUR_VERSION)
 
     def contour_at_least(track: int, revision: int) -> bool:
@@ -53,7 +53,7 @@ try:
 except Exception:
     # Fallback keeps old standalone snapshots usable until the versioning
     # module is deployed next to the harness.
-    CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "2.4")
+    CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "2.5")
     parts = [int(x) for x in CONTOUR_VERSION.replace("v", "").split(".") if x.isdigit()]
     if len(parts) >= 4:
         CONTOUR_SUMMARY = {
@@ -80,6 +80,28 @@ except Exception:
         if len(parts) == 2:
             return tuple(parts) >= (track, revision)
         return False
+
+
+# The exact OS and Ubuntu image type must travel with every gate artifact.
+# A future 24.04 Desktop -> 24.04 Server or 26.04 migration cannot be audited
+# from the kernel alone.
+try:
+    import os_record as _OS
+
+    OS_RECORD = _OS.safe_for_log(_OS.detect())
+except Exception:
+    OS_RECORD = {
+        "id": os.uname().sysname.lower() if hasattr(os, "uname") else "unknown",
+        "pretty": os.uname().sysname if hasattr(os, "uname") else "unknown",
+        "version": "",
+        "codename": "",
+        "flavor": "unknown",
+        "flavor_evidence": "os_record unavailable",
+        "kernel": os.uname().release if hasattr(os, "uname") else "",
+        "architecture": os.uname().machine if hasattr(os, "uname") else "",
+        "hostname": os.uname().nodename if hasattr(os, "uname") else "",
+    }
+
 
 CONTOUR_NOTES = ("0.0.1.0=base contour (gate+re-ask); 0.0.1.1=chunked extraction for invoices >8 lines "
                  "and regex fallback, invoices >16 lines go straight to blocks, completeness gate for logic, "
@@ -1472,6 +1494,7 @@ def run_one(t, pos, done, st):
     except Exception as e:
         rec["content"], rec["format_ok"], rec["notes"] = None, None, ["scorer_error"]
         rec["scorer_error"] = ("%s: %s" % (type(e).__name__, e))[:200]
+    rec["os"] = OS_RECORD
     with open(RESULTS, "a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         f.flush()
@@ -1480,6 +1503,7 @@ def run_one(t, pos, done, st):
     row["contour"] = rec["contour"]
     row["content"] = rec["content"]
     row["format_ok"] = rec["format_ok"]
+    row["os"] = OS_RECORD
     with open(LEDGER, "a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
         f.flush()

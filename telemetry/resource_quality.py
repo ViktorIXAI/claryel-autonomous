@@ -136,8 +136,19 @@ def main():
             f.write(text + "\n")
     if args.out_md:
         md = ["# Resource, latency and quality report", ""]
+
         def fmt(x):
             return "-" if x is None else x
+
+        if header:
+            osr = header.get("os")
+            if isinstance(osr, dict):
+                md.append("**OS:** %s %s (%s), %s, kernel %s" % (
+                    osr.get("id", "-"), osr.get("pretty", "-"), osr.get("codename", "-"),
+                    osr.get("flavor", "-"), osr.get("kernel", "-")))
+            else:
+                md.append("**OS:** %s" % fmt(osr))
+            md.append("")
         for label, agg in [("All attempts", run)] + sorted(per_contour.items()):
             md += ["## " + label, "", "| Metric | value |", "|---|---:|"]
             md.append("| attempts | %s |" % agg["n"])

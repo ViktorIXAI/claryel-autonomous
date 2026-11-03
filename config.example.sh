@@ -3,7 +3,7 @@
 export PARB_API="http://127.0.0.1:8080/v1/chat/completions"   # any OpenAI-compatible endpoint
 export PARB_MODEL="qwen3.8-flash-next-iq3_s"                  # model name your endpoint expects
 export PARB_BOX="box1"                                        # free-form machine label
-export PARB_GATE_VERSION="0.0.2.4"                            # current contour/tooling release
+export PARB_GATE_VERSION="0.0.2.5"                            # current contour/tooling release
 export PARB_ROOT="$HOME/parb"                                 # run dir (state/results written here)
 export PARB_STATE="state-run.json"
 export PARB_RESULTS="results-run.jsonl"

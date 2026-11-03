@@ -37,6 +37,10 @@
   (useful vs overhead), end-to-end seconds, peak host RAM, peak/min available
   memory, peak VRAM and headroom, peak GPU utilization/power, estimated GPU
   energy, and per-correct-answer economics for finance categories.
+- Environment identity is recorded, not inferred: OS distribution, Ubuntu
+  codename, Desktop or Server image, image evidence, kernel and architecture.
+  Ubuntu Desktop and Ubuntu Server may share a release number, so `flavor`
+  must be present in every gate result, ledger row and telemetry header.
 - Dedup rule everywhere: `(task, rep[, box])` keeping the best `content`;
   raw logs are never edited.
 
