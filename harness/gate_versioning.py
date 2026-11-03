@@ -50,13 +50,20 @@ CONTOUR_FEATURES = (
     (2, 0),  # G/H post-normalization
     (2, 1),  # H safety normalization
     (2, 2),  # F diagnostic grounding
+    (2, 7),  # K tax-negation flag grounded in the task's own text
 )
 
-# Artifact identifier of the current release. The newest contour change is 2.2;
-# 2.3-2.5 were measurement/reporting releases and 2.6 separates the two axes in
-# every artifact. Bump this for any audited release; move the contour axis only
-# by adding a gate tuple to CONTOUR_FEATURES.
-CURRENT_REVISION = (2, 6)
+# Revisions 2.3-2.6 are permanently reserved: they were released as
+# measurement/reporting revisions with contour behavior 2.2. A new contour
+# feature may never be registered inside that band, because historical rows
+# stamped 0.0.2.3-0.0.2.6 must keep resolving to behavior 2.2 forever.
+RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6)
+
+# Artifact identifier of the current release: 0.0.2.6 separated the two axes and
+# 0.0.2.7 adds the K tax-negation contour change. Bump this for any audited
+# release; move the contour axis only by adding a gate tuple to
+# CONTOUR_FEATURES.
+CURRENT_REVISION = (2, 7)
 
 
 def _digits(value: str) -> list[int]:

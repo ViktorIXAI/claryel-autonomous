@@ -32,7 +32,9 @@ UNITS = {"cpu_pct": "%", "load1": "procs", "cpu_ghz": "GHz", "cpu_temp_c": "C",
          "ram_compressor_mb": "MB", "swap_used_mb": "MB",
          "vram_used_mb": "MB", "vram_total_mb": "MB", "gpu_util_pct": "%",
          "gpu_power_w": "W", "gpu_temp_c": "C", "gpu_clk_mhz": "MHz",
-         "gpu_throttle": "flags", "disk_rd_kbps": "kB/s", "disk_wr_kbps": "kB/s"}
+         "gpu_throttle": "flags", "disk_rd_kbps": "kB/s", "disk_wr_kbps": "kB/s",
+         "rapl_pkg_mj": "mJ", "rapl_pkg_w": "W",
+         "rapl_core_mj": "mJ", "rapl_core_w": "W"}
 
 
 # The exact OS record must be bound into the telemetry header, not inferred
@@ -55,6 +57,10 @@ except Exception:
         "architecture": platform.machine(),
         "hostname": platform.node(),
     }
+_PREV_CPU = None
+_PREV_DISK = None
+_PREV_RAPL = None
+
 Nvidia = ["utilization.gpu,power.draw,temperature.gpu,clocks.current.graphics,"
           "clocks_event_reasons.active,memory.used,memory.total",
           "--format=csv,noheader,nounits"]
@@ -78,6 +84,54 @@ def meminfo():
         except ValueError:
             pass
     return d
+
+
+RAPL_NODES = {
+    "rapl_pkg": "/sys/devices/virtual/powercap/intel-rapl/intel-rapl:0",
+    "rapl_core": "/sys/devices/virtual/powercap/intel-rapl/intel-rapl:0:0",
+}
+
+
+def rapl(now):
+    """Measure CPU-package and core-domain energy through Intel RAPL.
+
+    RAPL is not a wall meter. It is included as a measured lower-bound component
+    so Terminal-Bench economic claims never rely on an unmeasured average.
+    """
+    global _PREV_RAPL
+    out, sources = {}, {}
+    prev_ts, prev = _PREV_RAPL or (None, {})
+    dt = now - prev_ts if prev_ts else 0.0
+    current = {}
+    for name, base in RAPL_NODES.items():
+        energy_key = name + "_mj"
+        power_key = name + "_w"
+        try:
+            value_uj = int(open(base + "/energy_uj").read().strip())
+            max_uj = int(open(base + "/max_energy_range_uj").read().strip())
+            current[name] = value_uj
+            current[name + "_max"] = max_uj
+            out[energy_key] = round(value_uj / 1000.0, 1)
+            sources[energy_key] = "sysfs(intel-rapl cumulative)"
+            raw = prev.get(name)
+            raw_max = prev.get(name + "_max")
+            if raw is not None and raw_max is not None and dt > 0:
+                delta_uj = value_uj - raw
+                if delta_uj < 0:
+                    delta_uj += max_uj
+                out[power_key] = round(delta_uj / 1_000_000.0 / dt, 2)
+                sources[power_key] = "sysfs(intel-rapl delta)"
+            else:
+                out[power_key] = None
+                sources[power_key] = "not_available(first sample)"
+        except Exception:
+            out[energy_key] = None
+            out[power_key] = None
+            sources[energy_key] = "not_available(RAPL permission or hardware)"
+            sources[power_key] = "not_available(RAPL permission or hardware)"
+    if current:
+        _PREV_RAPL = (now, current)
+    return out, sources
 
 
 def diskstats():
@@ -213,9 +267,12 @@ def sample():
             s["swap_used_mb"] = None; src["swap_used_mb"] = "not_available"
         for k in ("cpu_ghz", "vram_used_mb", "vram_total_mb",
                   "gpu_util_pct", "gpu_power_w", "gpu_temp_c",
-                  "gpu_clk_mhz", "gpu_throttle", "disk_rd_kbps", "disk_wr_kbps"):
+                  "gpu_clk_mhz", "gpu_throttle", "disk_rd_kbps", "disk_wr_kbps",
+                  "rapl_pkg_mj", "rapl_pkg_w", "rapl_core_mj", "rapl_core_w"):
             s[k] = None
-            src[k] = "not_available(root-required on macOS)" if k in ("gpu_power_w", "gpu_temp_c", "gpu_util_pct") else "not_available"
+            src[k] = ("not_available(root-required on macOS)"
+                      if k in ("gpu_power_w", "gpu_temp_c", "gpu_util_pct")
+                      else "not_available")
         if s.get("ram_avail_mb") is None:
             s["ram_avail_mb"] = None; src["ram_avail_mb"] = "not_available(macOS vm_stat could not expose reclaimable memory)"
         return s, src
@@ -248,6 +305,10 @@ def sample():
               "gpu_temp_c", "gpu_clk_mhz", "gpu_throttle"):
         s[k] = g.get(k)
         src[k] = "nvidia-smi" if k in g else "not_available"
+    e, e_src = rapl(now)
+    for k in ("rapl_pkg_mj", "rapl_pkg_w", "rapl_core_mj", "rapl_core_w"):
+        s[k] = e.get(k)
+        src[k] = e_src.get(k, "not_available")
     nowr = diskstats()
     if _PREV_DISK:
         dt = now - _PREV_DISK[2]
@@ -262,9 +323,6 @@ def sample():
     _PREV_DISK = (nowr[0], nowr[1], now)
     return s, src
 
-
-_PREV_CPU = None
-_PREV_DISK = None
 
 
 def main():

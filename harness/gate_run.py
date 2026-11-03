@@ -142,7 +142,9 @@ CONTOUR_NOTES = ("0.0.1.0=base contour (gate+re-ask); 0.0.1.1=chunked extraction
                  "0.0.2.4=full-Mac resource/economic verdict (no contour change); "
                  "0.0.2.5=OS environment records (no contour change); "
                  "0.0.2.6=contour-behavior axis recorded next to the stamped revision "
-                 "(no contour change: behavior stays 0.0.2.2)")
+                 "(no contour change: behavior stays 0.0.2.2); "
+                 "0.0.2.7=K tax-negation flag grounded in the task's own text: an explicit "
+                 "exclusion sentence means yes, silence about taxes means no")
 import parb_check as CK
 try:
     import gate_fixers as GF          # 0.0.1.7: form repair by code (zero model tokens)
@@ -156,6 +158,10 @@ SLOT_NORMALIZE = contour_at_least(1, 9)
 POST_NORMALIZE = contour_at_least(2, 0)
 H_SAFETY = contour_at_least(2, 1)
 F_GROUND = contour_at_least(2, 2)
+# 0.0.2.7: K tax-negation flag is grounded in the task's own visible text.
+# Revision numbers 2.3-2.6 are reserved by history as measurement/reporting
+# stamps, so the next contour change had to land above that band.
+K_NEGATION = contour_at_least(2, 7)
 NUDGE = {
     "no_final_answer": "Заверши ответ отдельной финальной строкой: ОТВЕТ: <итог>.",
     "too_few_safe_steps": "Перечисли нумерованными шагами (1., 2., 3., ...) безопасную последовательность: сначала чтение/проверка состояния, потом изменения.",
@@ -1365,6 +1371,60 @@ def f_diagnostic_normalize(t, text):
     return answer, (changed or None)
 
 
+# 0.0.2.7: the K tax-negation flag must be grounded in the task's own visible
+# text. The bank convention across all 13 K items: an explicit exclusion
+# sentence ("This quote excludes all taxes", "не включает НДС", "IVA esclusa")
+# means yes; when the source text says nothing about taxes the flag must be no,
+# because an unsupported exclusion claim is not a grounded answer. A payment
+# term such as "net 45 days" is never a tax statement.
+K_EXCLUSION_STATEMENT = (
+    r"excludes? (?:all )?taxes", r"excluding (?:all )?taxes",
+    r"(?:amount|price|total)\w* excludes? (?:all )?taxes",
+    r"plus vat", r"vat (?:is )?(?:not included|excluded|extra|additional)",
+    r"net of vat", r"before tax", r"taxes (?:are )?(?:extra|additional|not included)",
+    r"не включает\s+ндс", r"ндс не включ", r"без ндс",
+    r"ндс (?:дополнительно|сверх|оплачивается отдельно)",
+    r"esclude (?:tutte )?(?:le )?imposte", r"iva esclusa", r"imposte non incluse",
+    r"ohne (?:die )?mehrwertsteuer", r"ohne mwst",
+    r"zzgl(?:\.|üglich)?\s+(?:der\s+)?(?:mehrwertsteuer|mwst)",
+    r"hors tva", r"tva non incluse", r"iva no incluida", r"impuestos no incluidos",
+)
+K_FLAG_LINE = re.compile(
+    r"^[^\n:]*?(?P<key>excludes[_ ]taxes|excludes taxes|no[_ ]vat|ндс|iva)"
+    r"[^\n:]*?:\s*(?P<val>yes|no|да|нет)[\s.]*$", re.I)
+
+
+def k_negation_normalize(t, text):
+    """Set the K tax-negation flag to what the task text itself supports.
+
+    Only the flag value is rewritten; the key, the answer language and the line
+    count stay as the model wrote them. A missing flag line is added only when
+    the task prompt asked for it and the scorer's line budget still holds.
+    """
+    if not K_NEGATION or not text or not str(t.get("id", "")).startswith("K"):
+        return text, None
+    source = (t.get("free_text") or t.get("prompt") or "")
+    want_yes = any(re.search(rx, source, re.I) for rx in K_EXCLUSION_STATEMENT)
+    want = "yes" if want_yes else "no"
+    lines = text.splitlines()
+    hit = next((i for i, s in enumerate(lines) if K_FLAG_LINE.match(s)), None)
+    if hit is None:
+        if not re.search(r"(?i)excludes_taxes\s*:", t.get("prompt") or ""):
+            return text, None
+        if len(lines) >= 6:
+            return text, None
+        lines.append("EXCLUDES_TAXES: " + want)
+        return "\n".join(lines), ["k_negation_line_added_" + want]
+    match = K_FLAG_LINE.match(lines[hit])
+    assert match is not None
+    value = match.group("val")
+    if (value.lower() in ("yes", "да")) == want_yes:
+        return text, None
+    replacement = want if value.lower() in ("yes", "no") else ("да" if want_yes else "нет")
+    lines[hit] = lines[hit][:match.start("val")] + replacement + lines[hit][match.end("val"):]
+    return "\n".join(lines), ["k_negation_flag_" + want]
+
+
 def run_one(t, pos, done, st):
     key = (t["id"], pos["rep"], pos["series"])
     if key in done:
@@ -1461,6 +1521,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v22_" + "_".join(ev))
+    if K_NEGATION and cat == "K" and r["text"]:
+        norm, ev = k_negation_normalize(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v27_" + "_".join(ev))
     if VERIFY_RETRY and r["text"] and not r["err"] and cat not in ("A", "E", "C") \
             and not (cat == "D" and t.get("kind") == "loop"):
         def _score(txt):
@@ -1512,6 +1579,13 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v22_" + "_".join(ev))
+                    if K_NEGATION and cat == "K" and r["text"]:
+                        norm, ev = k_negation_normalize(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v27_" + "_".join(ev))
 
     try:
         if cat == "D":

@@ -64,13 +64,24 @@ for legacy_stamp, legacy_behavior in (("0.0.2.3", "2.2"), ("0.0.2.4", "2.2"),
           GV.format_behavior(), legacy_behavior)
 os.environ["PARB_GATE_VERSION"] = "0.0.2.2"
 check("contour stamp reports itself as behavior", GV.format_behavior(), "2.2")
+os.environ["PARB_GATE_VERSION"] = "0.0.2.7"
+check("new contour stamp reports itself as behavior", GV.format_behavior(), "2.7")
+check("contour release flags contour change at 2.7",
+      GV.summary()["contour_changed_at_this_release"], True)
 os.environ["PARB_GATE_VERSION"] = "0.0.2.6"
-check("default release stamp", GV.format_version(), "0.0.2.6")
 check("tooling release summary flags no contour change",
       GV.summary()["contour_changed_at_this_release"], False)
+os.environ.pop("PARB_GATE_VERSION", None)
+check("default release stamp is at or above the newest feature",
+      GV.parse_version()[2:] >= max(GV.CONTOUR_FEATURES), True)
 os.environ["PARB_GATE_VERSION"] = "0.0.2.2"
 check("contour release summary flags contour change",
       GV.summary()["contour_changed_at_this_release"], True)
+
+# Historical tooling stamps are reserved: a contour feature registered inside
+# 2.3-2.6 would silently switch on for archived 0.0.2.3-0.0.2.6 rows.
+check("no contour feature inside the reserved tooling band",
+      any(f in GV.RESERVED_TOOLING_REVISIONS for f in GV.CONTOUR_FEATURES), False)
 
 # Feature table invariants: strictly increasing, never ahead of the stamp, and
 # behavior tops out at the newest implemented contour change.

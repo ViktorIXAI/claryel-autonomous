@@ -1,4 +1,4 @@
-# Contour version chronology (`0.0.1.0 → 0.0.2.6`)
+# Contour version chronology (`0.0.1.0 → 0.0.2.7`)
 
 The current public version format is four digits: `A.B.C.D`.
 
@@ -33,6 +33,7 @@ Compatibility mapping:
 | `0.0.2.4` | — | `0.0.2.2` | full-Mac resource/economic verdict, contour behavior unchanged |
 | `0.0.2.5` | — | `0.0.2.2` | OS environment records, contour behavior unchanged |
 | `0.0.2.6` | — | `0.0.2.2` | two-axis version record in every artifact, contour behavior unchanged |
+| `0.0.2.7` | — | `0.0.2.7` | K tax-negation flag grounded in the task's own text |
 
 Legacy names remain valid as inputs and appear in historical records. New
 artifacts should record the canonical four-part form.
@@ -313,6 +314,52 @@ Consequence for reports: the contour is named by its behavior axis
 (`0.0.2.2`, the last real contour change) and the tooling by the release line
 (`0.0.2.6`). A number for a contour change that has not been built is never
 quoted as if it existed.
+
+## 0.0.2.7 — K tax-negation grounding *(candidate; paired A/B pending)*
+
+**Diagnosis from the accepted contour.** Re-running the full Mac pair
+(`0.0.2.1` → `0.0.2.2`, 2513 paired rows) leaves every category at 1.0000 except
+K, which did not move at all: 0.7888 before and 0.7888 after, perfect share
+15.5%. Per-task breakdown shows the whole loss sits in one item, `K-ha-04-0`:
+158 reps, every one exactly 0.75, note `bad_negation_kept`, score spread 0.00.
+Zero spread with a constant shortfall is the deterministic signature seen before
+in `v1.9` (D action order) and `v2.2` (F diagnostics): the contour is blind to
+the class, so seed variance and more nudges cannot help. The decision log already
+recorded that the `v1.8` nudge fired 158 times on this item and was adopted 0
+times — pure extra model calls.
+
+**Bank rule the contour now implements.** An audit of all 13 K items found one
+consistent convention: an explicit tax-exclusion sentence in the task text
+("This quote excludes all taxes", "не включает НДС", "IVA esclusa") means
+`EXCLUDES_TAXES: yes`; when the text says nothing about taxes the reference is
+always `no`, because an unsupported exclusion claim is not a grounded answer. A
+payment term such as "net 45 days" is never a tax statement — that wording is
+what pushed the model toward an unsupported `yes`.
+
+**Change.** `k_negation_normalize()` rewrites only the value token of the flag
+line, in the language the model used, from the task's own visible text; a missing
+flag line is added only when the prompt asked for it and the scorer's line budget
+still holds. The prompt, the scorer and the hidden reference are untouched. Event
+tags: `contour:v27_k_negation_flag_yes`, `contour:v27_k_negation_flag_no`,
+`contour:v27_k_negation_line_added_*`. Because the correction runs before the
+`v1.8` nudge step, the note disappears and the wasted nudge retry disappears with
+it.
+
+**Revision band.** Revisions 2.3–2.6 are permanently measurement stamps, so this
+contour change could not take one of those numbers: registering a feature inside
+that band would silently switch it on for archived `0.0.2.3`–`0.0.2.6` rows. A
+contract test now forbids any contour feature in the reserved band, and contour
+gates start at `contour_at_least(2, 7)`.
+
+**Evidence so far.** Contract tests 10/10 offline (`harness/gate_v27_k_test.py`):
+silent-quote correction (the published failure), correct answers untouched in both
+directions, Russian value token corrected in Russian, Italian silent quote
+untouched, missing-line add inside the line budget, non-K tasks untouched, and
+the feature off at `0.0.2.2` / on at `0.0.2.7`. Static QA suite green. **No
+quality number is claimed yet**: adoption requires a paired run over the
+`(task, rep)` keys that contour `0.0.2.2` already covered on the same box.
+Expected effect if it holds: K 0.7888 → 1.0000 and overall 0.9833 → ~0.999 on the
+Mac pair, plus 158 fewer model calls per 158 rows.
 
 ## Cross-cutting rules the chain produced
 

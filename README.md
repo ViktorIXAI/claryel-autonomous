@@ -30,7 +30,7 @@ The version scheme is four digits: `A.B.C.D`.
 |---|---|---|
 | `A.B` | operator release line; the operator changes these first two digits | `0.0` |
 | `C` | contour track; `1` is the first contour family, `2` is the second | `2` |
-| `D` | revision inside that track: a contour change or a measurement/reporting change | `6` for the two-axis version record |
+| `D` | revision inside that track: a contour change or a measurement/reporting change | `7` for the K tax-negation contour change |
 
 Every release carries two axes, and every artifact records both:
 
@@ -40,9 +40,10 @@ Every release carries two axes, and every artifact records both:
   exists in the code. It moves only when the contour itself changed.
 
 `0.0.2.3`, `0.0.2.4`, `0.0.2.5` and `0.0.2.6` changed measurement or reporting,
-not the contour, so their contour behavior stays `0.0.2.2`. A revision number
-that has not been built does not exist: nothing beyond `0.0.2.2` has changed
-what the model is asked or given.
+not the contour, so their contour behavior stays `0.0.2.2`. `0.0.2.7` is a real
+contour change again. A revision number that has not been built does not exist:
+nothing between `0.0.2.2` and `0.0.2.7` changed what the model was asked or
+given.
 
 Current mapping:
 
@@ -55,7 +56,8 @@ Current mapping:
 | `0.0.2.3` | — | `0.0.2.2` | resource telemetry and documentation policy | measurement release, contour unchanged |
 | `0.0.2.4` | — | `0.0.2.2` | full-Mac resource/economic verdict | reporting release, contour unchanged |
 | `0.0.2.5` | — | `0.0.2.2` | OS environment records and deterministic docs pass | reporting release, contour unchanged |
-| `0.0.2.6` | — | `0.0.2.2` | contour behavior recorded next to the stamped revision in every artifact | current release line, contour unchanged |
+| `0.0.2.6` | — | `0.0.2.2` | contour behavior recorded next to the stamped revision in every artifact | measurement release, contour unchanged |
+| `0.0.2.7` | — | `0.0.2.7` | K tax-negation flag grounded in the task's own text | candidate contour change; contract tests 10/10, paired A/B pending |
 
 Legacy `v1.x` and `v2.x` names still work as inputs. New reports should use the
 canonical four-part form.
@@ -71,6 +73,8 @@ canonical four-part form.
 | P3032 full 178-task sweep | complete; adjusted mean 0.9867, adjusted perfect 94.9%, F 1.00 |
 | P1005 post-GPU-swap quick sweep | complete; capacity-valid mean 0.9851, F 1.00; full paired A/B still pending |
 | B2003 offline replay | complete; recorded F answers replayed through `0.0.2.2`, n=323 |
+| P2005 full `0.0.2.1 -> 0.0.2.2` paired run | running 2026-11-03; 681 paired keys per side, 1 Hz resource telemetry, OS record in every row |
+| `0.0.2.7` K tax-negation contour | built and tested offline (10/10); paired A/B not started, no acceptance claimed |
 | resource telemetry | permanent for full paired gates and hardware-class runs |
 | OS environment records | every gate row, ledger row and telemetry header now records Ubuntu version, codename, Desktop/Server flavor and kernel |
 | documentation freshness | daily policy added; scheduled check added |

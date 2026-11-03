@@ -79,7 +79,10 @@ Canonical values are four-part, such as `0.0.1.9`, `0.0.2.0`, `0.0.2.1` and
 `0.0.2.6` (two-axis version record) changed measurement or reporting only: every
 one of them runs contour behavior `0.0.2.2`, and each artifact carries a
 `contour_behavior` field that states this, so never infer a contour change from
-the stamped revision alone (see `versions/VERSIONS.md`).
+the stamped revision alone (see `versions/VERSIONS.md`). `0.0.2.7` is a contour
+change again: `K_NEGATION` grounds the K tax-negation flag in the task's own
+visible text (explicit exclusion sentence means yes, silence about taxes means
+no); it is a candidate until a paired run proves it.
 `PARB_CHEAP=1` re-enables
 the *rejected* cheap-model-repair path for experiments only — beware, it is
 rejected for a reason.

@@ -3,6 +3,27 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
+## [Unreleased] — 0.0.2.7 (K tax-negation contour change, candidate)
+### Added
+- `k_negation_normalize()` in `harness/gate_run.py`: the K tax-negation flag is
+  rewritten from the task's own visible text — an explicit exclusion sentence
+  means yes, silence about taxes means no. Only the flag value token changes, in
+  the language the model used. Gated at `contour_at_least(2, 7)`.
+- `harness/gate_v27_k_test.py`: 10 contract cases, including the published
+  failure shape, both untouched-correct directions, a Russian value token, the
+  line-budget limit, and the feature being off at `0.0.2.2`.
+- `harness/gate_versioning.py`: revisions `2.3`–`2.6` are declared a reserved
+  tooling band, and a test forbids registering any contour feature inside it.
+### Diagnosis behind it
+- Full Mac pair `0.0.2.1 -> 0.0.2.2` (2513 rows): every category 1.0000 except K,
+  unchanged at 0.7888; the loss is one item, `K-ha-04-0`, 158 reps all exactly
+  0.75 with `bad_negation_kept` and zero spread — deterministic, not seed noise.
+- All 13 K bank items follow one convention: explicit exclusion sentence → yes,
+  no tax statement → no.
+### Status
+- Built and unit-tested; paired A/B over the previous contour's `(task, rep)`
+  keys has not run yet, so no quality claim is published.
+
 ## [Unreleased] — 0.0.2.6 (two-axis version record, contour unchanged)
 ### Added
 - `harness/gate_versioning.py` keeps a contour feature table
