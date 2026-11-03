@@ -7,6 +7,9 @@ This is an **independent one-pass run**, not an official Terminal-Bench 4.0 lead
 - Solved: 0
 - Failed: 2
 - Success rate among completed trials: 0.0%
+- Tokens (available trials): input `1831946`, output `125447`
+- Infrastructure failures: `1` recorded
+- Forecast: `105.2 h remaining (low confidence)`
 - Model: `openai/qwen3.8-flash-next-iq3_s`
 - Quantization: `IQ3_S GSQ RCO`
 - Inference host label: `P2005`

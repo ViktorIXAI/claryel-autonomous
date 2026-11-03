@@ -1,11 +1,37 @@
 {
   "completed": 2,
   "failed": 2,
-  "generated_at": "2026-11-03T23:35:10.619961+00:00",
-  "metrics_source": "Harbor result.json and final Hermes session export",
+  "forecast": {
+    "available": true,
+    "confidence": "low; early sample and three H100-dependent tasks remain",
+    "elapsed_hours": 3.29,
+    "estimated_finish_utc": "2026-11-08T09:01:16.934374+00:00",
+    "estimated_remaining_hours": 105.2,
+    "hours_per_completed_trial": 1.64,
+    "method": "observed wall-clock rate at the current completion count; difficulty not weighted",
+    "started_at": "2026-11-03T20:33:26.633560"
+  },
+  "generated_at": "2026-11-03T23:50:39.066878+00:00",
+  "infrastructure_failures": [
+    {
+      "issue": "empty session export",
+      "trial": "batched-eval-parity__cfCTWrn"
+    }
+  ],
+  "metrics_source": "Harbor result.json and Hermes session exports",
+  "resource_consumption": {
+    "continuous_gpu_power_energy_sampling": false,
+    "gpu_peak_and_energy": null
+  },
   "run": "tb4-66-verified-p2005-20261103-203323",
   "solved": 0,
   "success_percent": 0.0,
+  "tokens": {
+    "cache_read": 6150290,
+    "input": 1831946,
+    "note": "Unavailable token data from a trial is not imputed.",
+    "output": 125447
+  },
   "total": 66,
   "trials": [
     {

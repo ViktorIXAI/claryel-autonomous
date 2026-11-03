@@ -5,6 +5,10 @@
 - Solved: 0
 - Failed: 2
 - Success rate among completed trials: 0.0%
+- Available input tokens: 1831946
+- Available output tokens: 125447
+- Infrastructure failures: 1
+- Forecast: 105.2 h remaining (low; early sample and three H100-dependent tasks remain)
 
 | task | reward | total time | agent time | model calls | tool calls | input tokens | output tokens | verifier |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|

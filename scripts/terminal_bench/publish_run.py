@@ -256,15 +256,51 @@ def scan_published_tree(path: pathlib.Path) -> list[str]:
     return findings
 
 
+def forecast(job_dir: pathlib.Path, cumulative: dict[str, Any]) -> dict[str, Any]:
+    """Compute a deliberately conservative observed-rate estimate from wall time."""
+    started = None
+    result = job_dir / "result.json"
+    if result.exists():
+        try:
+            started = json.loads(result.read_text(errors="ignore")).get("started_at")
+        except Exception:
+            started = None
+    if not started:
+        return {"available": False, "reason": "job start time unavailable"}
+    start_dt = dt.datetime.fromisoformat(started.replace("Z", "+00:00"))
+    if start_dt.tzinfo is None:
+        start_dt = start_dt.replace(tzinfo=dt.timezone.utc)
+    now = dt.datetime.now(dt.timezone.utc)
+    completed = cumulative["completed"]
+    elapsed_h = (now - start_dt).total_seconds() / 3600
+    if completed == 0:
+        return {"available": False, "reason": "no completed trial yet", "started_at": started}
+    rate_h = elapsed_h / completed
+    remaining_h = rate_h * (66 - completed)
+    eta = now + dt.timedelta(hours=remaining_h)
+    return {
+        "available": True,
+        "method": "observed wall-clock rate at the current completion count; difficulty not weighted",
+        "started_at": started,
+        "elapsed_hours": round(elapsed_h, 2),
+        "hours_per_completed_trial": round(rate_h, 2),
+        "estimated_remaining_hours": round(remaining_h, 1),
+        "estimated_finish_utc": eta.isoformat(),
+        "confidence": "low; early sample and three H100-dependent tasks remain",
+    }
+
+
 def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathlib.Path, config: dict[str, Any], trials: list[pathlib.Path]) -> dict[str, Any]:
     run_dir.mkdir(parents=True, exist_ok=True)
     for sub in ("config", "tasks", "data"):
         (run_dir / sub).mkdir(exist_ok=True)
+    shutil.rmtree(run_dir / "config" / "__pycache__", ignore_errors=True)
+    shutil.rmtree(run_dir / "__pycache__", ignore_errors=True)
 
     sanitized_config = redact_json(config)
     (run_dir / "config" / "run.json").write_text(json.dumps(sanitized_config, indent=2, sort_keys=True))
     for name, source in (
-        ("hermes_verified.py", pathlib.Path("/srv/claryel/hot/tbench/harness/src/terminal_bench_hermes_harness/hermes_verified.py")),
+        ("hermes_verified.py.txt", pathlib.Path("/srv/claryel/hot/tbench/harness/src/terminal_bench_hermes_harness/hermes_verified.py")),
         ("task-discipline-SKILL.md", pathlib.Path("/srv/claryel/hot/tbench/skills/task-discipline/SKILL.md")),
         ("runner.sh", pathlib.Path("/srv/claryel/hot/tbench/scripts/run_full66_verified_p2005.sh")),
     ):
@@ -280,6 +316,20 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
     completed = len(all_metrics)
     solved = sum(1 for x in all_metrics if x.get("reward") == 1)
     failed = sum(1 for x in all_metrics if x.get("reward") == 0)
+
+    def sum_available(name: str) -> int | None:
+        vals = []
+        for x in all_metrics:
+            v = x.get("token_usage_exact_if_present", {}).get(name)
+            if isinstance(v, (int, float)):
+                vals.append(v)
+        return sum(vals) if vals else None
+
+    infra = []
+    for x in all_metrics:
+        for export in x.get("session_exports", []):
+            if export.get("available") is False:
+                infra.append({"trial": x["trial"], "issue": export.get("reason", "session export unavailable")})
     cumulative = {
         "run": job_dir.name,
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -288,7 +338,19 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         "solved": solved,
         "failed": failed,
         "success_percent": round(100.0 * solved / completed, 2) if completed else 0,
-        "metrics_source": "Harbor result.json and final Hermes session export",
+        "metrics_source": "Harbor result.json and Hermes session exports",
+        "tokens": {
+            "input": sum_available("input_tokens"),
+            "output": sum_available("output_tokens"),
+            "cache_read": sum_available("cache_read_tokens"),
+            "note": "Unavailable token data from a trial is not imputed.",
+        },
+        "resource_consumption": {
+            "continuous_gpu_power_energy_sampling": False,
+            "gpu_peak_and_energy": None,
+        },
+        "infrastructure_failures": infra,
+        "forecast": forecast(job_dir, {"completed": completed}) if (job_dir / "result.json").exists() else None,
         "trials": all_metrics,
     }
     (run_dir / "data" / "cumulative-summary.json").write_text(json.dumps(cumulative, indent=2, sort_keys=True))
@@ -300,6 +362,10 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         f"- Solved: {solved}",
         f"- Failed: {failed}",
         f"- Success rate among completed trials: {cumulative['success_percent']}%",
+        f"- Available input tokens: {cumulative['tokens']['input']}",
+        f"- Available output tokens: {cumulative['tokens']['output']}",
+        f"- Infrastructure failures: {len(cumulative['infrastructure_failures'])}",
+        f"- Forecast: {cumulative['forecast'].get('estimated_remaining_hours', 'no data')} h remaining ({cumulative['forecast'].get('confidence', 'no confidence')})",
         "",
         "| task | reward | total time | agent time | model calls | tool calls | input tokens | output tokens | verifier |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
@@ -416,6 +482,9 @@ def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: di
         f"- Solved: {cumulative['solved']}",
         f"- Failed: {cumulative['failed']}",
         f"- Success rate among completed trials: {cumulative['success_percent']}%",
+        f"- Tokens (available trials): input `{cumulative['tokens']['input']}`, output `{cumulative['tokens']['output']}`",
+        f"- Infrastructure failures: `{len(cumulative['infrastructure_failures'])}` recorded",
+        f"- Forecast: `{cumulative['forecast'].get('estimated_remaining_hours', 'no data')} h remaining (low confidence)`",
         f"- Model: `{run_config.get('model', {}).get('requested_model', 'no data')}`",
         f"- Quantization: `{run_config.get('model', {}).get('quantization', 'no data')}`",
         f"- Inference host label: `{run_config.get('model', {}).get('endpoint_host_label', 'no data')}`",
