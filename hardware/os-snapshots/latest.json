@@ -1,6 +1,6 @@
 {
  "kind": "fleet-os-snapshot",
- "checked_utc": "2026-11-03T12:25:05.045732+00:00",
+ "checked_utc": "2026-11-03T12:34:12.268785+00:00",
  "policy": "Every benchmark, telemetry and hardware record must carry os.id, os.pretty, os.codename, os.flavor and os.kernel.",
  "machines": [
   {
@@ -65,18 +65,9 @@
   },
   {
    "label": "P1005",
-   "reachable": true,
-   "os": {
-    "id": "ubuntu",
-    "pretty": "Ubuntu 24.04.5 LTS",
-    "version": "24.04",
-    "codename": "noble",
-    "flavor": "server",
-    "flavor_evidence": "ubuntu-server metapackage",
-    "kernel": "6.8.0-147-generic",
-    "architecture": "x86_64",
-    "hostname": "P1005"
-   }
+   "reachable": false,
+   "error": "ssh_unreachable",
+   "ssh_rc": 255
   },
   {
    "label": "P3001",
