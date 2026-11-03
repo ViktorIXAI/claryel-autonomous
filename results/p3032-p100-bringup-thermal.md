@@ -49,8 +49,12 @@ or a P100 with active cooler removes the ceiling entirely.
   GPU of compute capability 7.5 or newer ... A Pascal sm_60 or Volta sm_70
   build is -DSTRATA_EXPERIMENTAL_SM60=ON` (published as finding);
 * reconfigured with `-DSTRATA_EXPERIMENTAL_SM60=ON` + `sm_60` +
-  `STRATA_ISA_FLOOR=avx` + CUDA 12.6 nvcc; build in progress at publish
-  time; results/verdict appended to this file in a follow-up commit.
+  `STRATA_ISA_FLOOR=avx` + CUDA 12.6 nvcc; build then SUCCEEDED:
+  `BUILD_DONE: strata 0.1.55`, staged as engine `engines-0.1.55-avx60`
+  (CPU kernels `kq_avx1/q2_avx1` observed in the ninja log — correct for
+  this AVX2-less Xeon). Serve came up on the P100: expert cache 8.66 GiB
+  resident in VRAM, 1023 MiB free, first calls 13.5 tok/s cold /
+  27.6 tok/s warm before tests were paused for the thermal verdict.
 
 ## Final verdict (same day, tests paused by maintainer)
 
