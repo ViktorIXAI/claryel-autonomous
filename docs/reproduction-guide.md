@@ -71,13 +71,15 @@ PARB_TELEM=telemetry-smoke.jsonl PARB_TELEM_INTERVAL=1.0 \
    pairing keys are machine-independent; extension seeds come from
    `sha256(f"{task}|{rep}")` so every box draws identical samples).
 
-`PARB_GATE_VERSION` selects the contour generation inside one codebase.
+`PARB_GATE_VERSION` selects the stamped revision inside one codebase.
 Canonical values are four-part, such as `0.0.1.9`, `0.0.2.0`, `0.0.2.1` and
 `0.0.2.2`; legacy `v1.x`/`v2.x` names are accepted and normalized.
-`0.0.2.2` adds targeted F diagnostic grounding; `0.0.2.3` adds resource
-telemetry methodology; `0.0.2.4` records the full-Mac resource/economic verdict
-and `0.0.2.5` adds OS environment records without changing contour behavior
-(see `versions/VERSIONS.md`).
+`0.0.2.2` adds targeted F diagnostic grounding. `0.0.2.3` (resource telemetry),
+`0.0.2.4` (full-Mac resource verdict), `0.0.2.5` (OS environment records) and
+`0.0.2.6` (two-axis version record) changed measurement or reporting only: every
+one of them runs contour behavior `0.0.2.2`, and each artifact carries a
+`contour_behavior` field that states this, so never infer a contour change from
+the stamped revision alone (see `versions/VERSIONS.md`).
 `PARB_CHEAP=1` re-enables
 the *rejected* cheap-model-repair path for experiments only — beware, it is
 rejected for a reason.

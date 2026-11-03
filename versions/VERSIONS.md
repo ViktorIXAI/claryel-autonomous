@@ -1,4 +1,4 @@
-# Contour version chronology (`0.0.1.0 → 0.0.2.3`)
+# Contour version chronology (`0.0.1.0 → 0.0.2.6`)
 
 The current public version format is four digits: `A.B.C.D`.
 
@@ -10,18 +10,29 @@ The current public version format is four digits: `A.B.C.D`.
   change or measurement/reporting change must be distinguishable in paired
   results.
 
+Because the `D` digit covers both kinds of change, each release also records a
+**contour behavior** axis: the newest model-facing contour change that exists
+in the code. Measurement and reporting releases move the stamped revision only;
+contour behavior stays where it last genuinely changed — `0.0.2.2`, the F
+diagnostic grounding. Both axes are written into every result row, ledger row
+and version summary. The behavior axis is derived from the contour feature
+table instead of being typed by hand, so it cannot drift ahead of the code, and
+a revision that has not been built cannot be quoted as if it had changed the
+contour.
+
 Compatibility mapping:
 
-| canonical | legacy name | meaning |
-|---|---|---|
-| `0.0.1.0` | `v1.0` | baseline contour |
-| `0.0.1.9` | `v1.9` | D action-order normalization |
-| `0.0.2.0` | `v2.0` | G/H post-normalization |
-| `0.0.2.1` | `v2.1` | H safety normalization |
-| `0.0.2.2` | `v2.2` | F diagnostic grounding |
-| `0.0.2.3` | — | resource telemetry methodology, contour behavior unchanged |
-| `0.0.2.4` | — | full-Mac resource/economic verdict, contour behavior unchanged |
-| `0.0.2.5` | — | OS environment records, contour behavior unchanged |
+| canonical | legacy name | contour behavior | meaning |
+|---|---|---|---|
+| `0.0.1.0` | `v1.0` | `0.0.1.0` | baseline contour |
+| `0.0.1.9` | `v1.9` | `0.0.1.9` | D action-order normalization |
+| `0.0.2.0` | `v2.0` | `0.0.2.0` | G/H post-normalization |
+| `0.0.2.1` | `v2.1` | `0.0.2.1` | H safety normalization |
+| `0.0.2.2` | `v2.2` | `0.0.2.2` | F diagnostic grounding |
+| `0.0.2.3` | — | `0.0.2.2` | resource telemetry methodology, contour behavior unchanged |
+| `0.0.2.4` | — | `0.0.2.2` | full-Mac resource/economic verdict, contour behavior unchanged |
+| `0.0.2.5` | — | `0.0.2.2` | OS environment records, contour behavior unchanged |
+| `0.0.2.6` | — | `0.0.2.2` | two-axis version record in every artifact, contour behavior unchanged |
 
 Legacy names remain valid as inputs and appear in historical records. New
 artifacts should record the canonical four-part form.
@@ -276,6 +287,33 @@ P2005 and B2003 are Ubuntu 24.04.5 Desktop; P1005 is Ubuntu 24.04.5 Server;
 Mac Studio, MacBook and Mac mini are macOS desktop systems. P3001 and P3032
 were offline during the audit and require a live flavor recheck after power-on.
 
+## 0.0.2.6 — two-axis version record *(current release line, contour unchanged)*
+
+This revision does not change model-facing contour behavior. It closes a naming
+gap that made reports ambiguous: the fourth digit named both contour changes and
+measurement/reporting changes, so `0.0.2.3`–`0.0.2.5` read as if they were three
+new contour generations, and a run file named for one revision could hold rows
+stamped with another.
+
+Added:
+
+- `harness/gate_versioning.py` records the contour feature table
+  (`CONTOUR_FEATURES`) and derives **contour behavior** from it, instead of
+  trusting the stamped revision alone;
+- every gate result row, ledger row and version summary now carries
+  `contour_behavior` plus a `contour_changed_at_this_release` flag;
+- the runner prints both axes at start, so a log alone answers which contour the
+  model actually faced;
+- contract tests: tooling stamps `0.0.2.3`–`0.0.2.6` must all report contour
+  behavior `0.0.2.2`; the feature table must stay strictly increasing and never
+  run ahead of the stamp; behavior must top out at the newest implemented
+  contour change.
+
+Consequence for reports: the contour is named by its behavior axis
+(`0.0.2.2`, the last real contour change) and the tooling by the release line
+(`0.0.2.6`). A number for a contour change that has not been built is never
+quoted as if it existed.
+
 ## Cross-cutting rules the chain produced
 
 1. One substantive change per version; bundle violations get logged against
@@ -287,3 +325,6 @@ were offline during the audit and require a live flavor recheck after power-on.
 5. Token savings are audited per *correct answer*, not per answer (v1.6).
 6. CHRONIC failures are suspected harness bugs before being blamed on the
    model (v1.9).
+7. A version number names a change that exists in the code and has been paired-
+   tested. A planned change gets no number until it is built, and a tooling
+   revision never borrows the contour axis (0.0.2.6).

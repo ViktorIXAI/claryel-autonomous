@@ -3,6 +3,24 @@
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
+## [Unreleased] — 0.0.2.6 (two-axis version record, contour unchanged)
+### Added
+- `harness/gate_versioning.py` keeps a contour feature table
+  (`CONTOUR_FEATURES`) and derives **contour behavior** from it, so a stamped
+  revision can no longer be mistaken for a new contour generation.
+- Gate result rows, gate ledger rows and the version summary now carry
+  `contour_behavior` and `contour_changed_at_this_release`; the runner prints
+  both axes at start.
+- `gate_versioning_test.py` pins the invariants: tooling stamps `0.0.2.3`
+  through `0.0.2.6` report contour behavior `0.0.2.2`; the feature table is
+  strictly increasing and never ahead of the stamp; behavior tops out at the
+  newest implemented contour change.
+### Why
+- The fourth digit served two purposes, so `0.0.2.3`–`0.0.2.5` read as three new
+  contour generations when they changed only measurement and reporting, and a
+  run file named `v22` legitimately held rows stamped `0.0.2.4`. Reports must
+  name the contour by behavior (`0.0.2.2`) and the tooling by release line.
+
 ## [Unreleased] — 0.0.2.5 (deterministic docs and OS environment records)
 ### Added
 - `harness/os_record.py` records OS distribution, Ubuntu codename, Desktop or

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Four-part version scheme for contour/harness releases.
+"""Four-part version scheme for contour/harness releases, carrying two axes.
 
 Canonical form: ``A.B.C.D``
 
@@ -7,12 +7,31 @@ Canonical form: ``A.B.C.D``
   first two digits without changing contour behaviour.
 * ``C``     — contour track. ``1`` is the v1 contour family; ``2`` is the
   v2 contour family.
-* ``D``     — contour revision inside that track. It changes whenever an
-  audited contour/tooling release must be distinguishable in paired results:
-  contour logic, measurement methodology, or gate reporting output.
+* ``D``     — revision inside that track. It changes whenever an audited
+  release must be distinguishable in paired results: contour logic,
+  measurement methodology, or gate reporting output.
 
-Legacy names are accepted: ``v2.2`` and ``2.2`` become the current release
-line plus contour tuple ``2.2``.
+``D`` serves two purposes at once, so the stamped revision alone cannot say
+whether the model faced different behavior. The scheme therefore carries both:
+
+* stamped revision (``CURRENT_REVISION``) — artifact identifier used by paired
+  comparisons and by the ``at_least`` feature gates.
+* contour behavior (``behavior_tuple``) — derived from ``CONTOUR_FEATURES``,
+  the model-facing contour changes that actually exist in ``gate_run.py``. It
+  moves only when a contour change is implemented, never when only measurement
+  or reporting code changed.
+
+History this records: revisions ``2.3`` (resource telemetry), ``2.4`` (full-Mac
+resource verdict) and ``2.5`` (OS environment records) changed measurement and
+reporting only. Their rows carry contour behavior ``2.2`` because nothing after
+the F diagnostic grounding changed what the model is asked or given. A file
+named for one revision can legitimately hold rows stamped with another;
+``behavior_tuple`` re-derives the real behavior from the feature table, so old
+rows stay interpretable and a planned-but-unbuilt revision can never be quoted
+as if it changed the contour.
+
+Legacy names are accepted: ``v2.2`` and ``2.2`` become the current release line
+plus stamped revision ``2.2``.
 """
 from __future__ import annotations
 
@@ -20,7 +39,24 @@ import os
 import re
 
 DEFAULT_RELEASE_LINE = (0, 0)
-CURRENT_CONTOUR = (2, 5)
+
+# Model-facing contour changes implemented in gate_run.py, oldest first. A new
+# contour change adds its gate tuple here in the same commit that adds the
+# gate; gate_versioning_test.py asserts the two stay in step.
+CONTOUR_FEATURES = (
+    (1, 7),  # form repaired by code, no extra model call
+    (1, 8),  # one targeted nudge per scorer-note kind
+    (1, 9),  # D action-order normalized into parser-required slots
+    (2, 0),  # G/H post-normalization
+    (2, 1),  # H safety normalization
+    (2, 2),  # F diagnostic grounding
+)
+
+# Artifact identifier of the current release. The newest contour change is 2.2;
+# 2.3-2.5 were measurement/reporting releases and 2.6 separates the two axes in
+# every artifact. Bump this for any audited release; move the contour axis only
+# by adding a gate tuple to CONTOUR_FEATURES.
+CURRENT_REVISION = (2, 6)
 
 
 def _digits(value: str) -> list[int]:
@@ -39,7 +75,7 @@ def parse_version(value: str | None = None) -> tuple[int, int, int, int]:
     raw = os.environ.get("PARB_GATE_VERSION") if value is None else value
     s = str(raw or "").strip().lower()
     if not s:
-        return parse_release_line() + CURRENT_CONTOUR
+        return parse_release_line() + CURRENT_REVISION
     s = s.replace("contour", "").replace("v", "", 1).strip()
     parts = _digits(s)
 
@@ -52,21 +88,42 @@ def parse_version(value: str | None = None) -> tuple[int, int, int, int]:
 
 
 def contour_tuple(value: str | None = None) -> tuple[int, int]:
+    """Stamped revision: what feature gates and paired comparisons select."""
     return parse_version(value)[2:]
+
+
+def behavior_tuple(value: str | None = None) -> tuple[int, int]:
+    """Contour behavior actually implemented at that stamp.
+
+    A stamp newer than the newest implemented contour feature is a measurement
+    or reporting release, so it reports that newest feature. Tooling revisions
+    can never be read as a new contour generation.
+    """
+    stamp = contour_tuple(value)
+    enabled = [feature for feature in CONTOUR_FEATURES if feature <= stamp]
+    return max(enabled) if enabled else (0, 0)
 
 
 def format_version(value: str | None = None) -> str:
     return ".".join(str(x) for x in parse_version(value))
 
 
+def format_behavior(value: str | None = None) -> str:
+    return ".".join(str(x) for x in behavior_tuple(value))
+
+
 def at_least(track: int, revision: int, value: str | None = None) -> bool:
     return contour_tuple(value) >= (track, revision)
 
 
-def summary(value: str | None = None) -> dict[str, str]:
+def summary(value: str | None = None) -> dict[str, object]:
     version = parse_version(value)
+    stamped = ".".join(str(x) for x in version[2:])
+    behavior = ".".join(str(x) for x in behavior_tuple(value))
     return {
         "canonical_version": ".".join(str(x) for x in version),
         "release_line": ".".join(str(x) for x in version[:2]),
-        "contour_version": ".".join(str(x) for x in version[2:]),
+        "contour_version": stamped,
+        "contour_behavior": behavior,
+        "contour_changed_at_this_release": behavior == stamped,
     }

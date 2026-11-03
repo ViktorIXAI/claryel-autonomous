@@ -102,3 +102,17 @@ forward any P1005 component swap follows the same shape: CHG entry before the
 box goes down, state re-numbering in the passport, same-suite before/after
 table. No new secrets: rates, watts, degrees, PCI ids only; launch config
 stays `$HOME`-sanitized.
+
+## 2026-11-03 — 0.0.2.6 two-axis version record
+
+The operator asked where contour releases 2.3/2.4/2.5 had gone, after reports
+mixed "contour 2.2" (what was under test) with "release 2.6" (a number that had
+never been built). Root cause was in the published scheme itself: the fourth
+digit named both contour changes and measurement/reporting changes. Public
+documents now state both axes for every release, `versions/VERSIONS.md` gained a
+`contour behavior` column and a 0.0.2.6 section, the reproduction guide warns not
+to infer a contour change from a stamped revision, and `CHANGELOG.md` records the
+change plus the reason. No measurement was re-interpreted: no published number
+moved, only the labels that identify which axis each number belongs to. Old rows
+stamped `0.0.2.3`–`0.0.2.5` remain valid and now derive behavior `0.0.2.2`
+automatically from the contour feature table.

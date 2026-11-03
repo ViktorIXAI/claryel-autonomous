@@ -44,8 +44,9 @@ sys.path.insert(0, ROOT)
 try:
     import gate_versioning as _GV
 
-    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION", "v2.5"))
+    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION", "v2.6"))
     CONTOUR_SUMMARY = _GV.summary(CONTOUR_VERSION)
+    CONTOUR_BEHAVIOR = _GV.format_behavior(CONTOUR_VERSION)
 
     def contour_at_least(track: int, revision: int) -> bool:
         return _GV.at_least(track, revision, CONTOUR_VERSION)
@@ -53,33 +54,54 @@ try:
 except Exception:
     # Fallback keeps old standalone snapshots usable until the versioning
     # module is deployed next to the harness.
-    CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "2.5")
+    CONTOUR_VERSION = os.environ.get("PARB_GATE_VERSION", "2.6")
     parts = [int(x) for x in CONTOUR_VERSION.replace("v", "").split(".") if x.isdigit()]
+    # Model-facing contour features; a stamp above the newest one is a
+    # measurement/reporting release and keeps the newest behavior.
+    _FEATURES = ((1, 7), (1, 8), (1, 9), (2, 0), (2, 1), (2, 2))
+
+    def _fallback_stamp():
+        if len(parts) >= 4:
+            return tuple(parts[2:4])
+        if len(parts) == 2:
+            return tuple(parts)
+        return (0, 0)
+
+    def _fallback_behavior():
+        stamp = _fallback_stamp()
+        enabled = [f for f in _FEATURES if f <= stamp]
+        return max(enabled) if enabled else (0, 0)
+
+    CONTOUR_BEHAVIOR = ".".join(str(x) for x in _fallback_behavior())
     if len(parts) >= 4:
         CONTOUR_SUMMARY = {
             "canonical_version": ".".join(map(str, parts[:4])),
             "release_line": ".".join(map(str, parts[:2])),
             "contour_version": ".".join(map(str, parts[2:4])),
+            "contour_behavior": CONTOUR_BEHAVIOR,
+            "contour_changed_at_this_release": CONTOUR_BEHAVIOR
+            == ".".join(map(str, parts[2:4])),
         }
     elif len(parts) == 2:
         CONTOUR_SUMMARY = {
             "canonical_version": "0.0." + ".".join(map(str, parts)),
             "release_line": "0.0",
             "contour_version": ".".join(map(str, parts)),
+            "contour_behavior": CONTOUR_BEHAVIOR,
+            "contour_changed_at_this_release": CONTOUR_BEHAVIOR
+            == ".".join(map(str, parts)),
         }
     else:
         CONTOUR_SUMMARY = {
             "canonical_version": CONTOUR_VERSION,
             "release_line": "not_available",
             "contour_version": CONTOUR_VERSION,
+            "contour_behavior": "not_available",
+            "contour_changed_at_this_release": "not_available",
         }
 
     def contour_at_least(track: int, revision: int) -> bool:
-        if len(parts) >= 4:
-            return tuple(parts[-2:]) >= (track, revision)
-        if len(parts) == 2:
-            return tuple(parts) >= (track, revision)
-        return False
+        return _fallback_stamp() >= (track, revision)
 
 
 # The exact OS and Ubuntu image type must travel with every gate artifact.
@@ -116,7 +138,11 @@ CONTOUR_NOTES = ("0.0.1.0=base contour (gate+re-ask); 0.0.1.1=chunked extraction
                  "add explicit uncertainty marker; "
                  "0.0.2.2=F diagnostic grounding: append evidence-backed component/cause/safe-step tokens, "
                  "suppress unsupported thermal claims and decoy blame; "
-                 "0.0.2.3=resource telemetry methodology: bind answer quality to latency, RAM/VRAM and power")
+                 "0.0.2.3=resource telemetry methodology: bind answer quality to latency, RAM/VRAM and power; "
+                 "0.0.2.4=full-Mac resource/economic verdict (no contour change); "
+                 "0.0.2.5=OS environment records (no contour change); "
+                 "0.0.2.6=contour-behavior axis recorded next to the stamped revision "
+                 "(no contour change: behavior stays 0.0.2.2)")
 import parb_check as CK
 try:
     import gate_fixers as GF          # 0.0.1.7: form repair by code (zero model tokens)
@@ -292,6 +318,7 @@ class Acct:
         raw = sum(self.raw) / len(self.raw) if self.raw else None
         eff = (self.useful / self.secs) if self.secs else None
         return {"task": task, "rep": rep, "box": BOX, "contour_version": CONTOUR_VERSION,
+                "contour_behavior": CONTOUR_BEHAVIOR,
                 "model_calls": self.calls, "gate_fixes": self.fixes,
                 "gate_blocks": self.blocks, "ladder_steps": self.ladder, "code_ms": round(self.code_ms, 2),
                 "ptok": self.ptok, "ctok": self.ctok, "useful_tokens": self.useful,
@@ -1364,7 +1391,8 @@ def run_one(t, pos, done, st):
            "run_tag": "gate", "stage": pos["stage"],
            "gen": {"temperature": 0.7, "thinking": False, "max_tokens": LADDER[0],
                    "request_seed": seed, "fresh_context": True, "ladder": LADDER},
-           "box": BOX, "contour_version": CONTOUR_VERSION, "contour_notes": CONTOUR_NOTES,
+           "box": BOX, "contour_version": CONTOUR_VERSION, "contour_behavior": CONTOUR_BEHAVIOR,
+           "contour_notes": CONTOUR_NOTES,
            "versioning": CONTOUR_SUMMARY,
            "contour": ("money+code" if cat == "A" else "strict_json" if cat in ("B", "J")
                        else "quote_check" if cat == "H" else "code_exec_fix" if cat == "E"
@@ -1527,6 +1555,10 @@ def main():
     if SUBSET:
         tasks = [p for p in tasks if p["task"] in SUBSET]
     done = set(tuple(k) for k in st.get("done", []))
+    log("PGR: release %s, contour behavior %s%s" % (
+        CONTOUR_SUMMARY.get("canonical_version", CONTOUR_VERSION), CONTOUR_BEHAVIOR,
+        "" if CONTOUR_BEHAVIOR == CONTOUR_SUMMARY.get("contour_version")
+        else " (this release changed measurement or reporting only, not the contour)"))
     log("PGR: planned tasks %d, previously done %d, limit %d s" % (len(tasks), len(done), LIMIT))
     n = 0
     for pos in tasks:
