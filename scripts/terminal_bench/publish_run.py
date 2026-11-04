@@ -425,7 +425,7 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         )
     lines += ["", "Official leaderboard status: this is an independent one-pass run, not an official Terminal-Bench 4.0 leaderboard run."]
     (run_dir / "data" / "cumulative-summary.md").write_text("\n".join(lines) + "\n")
-    (run_dir / "index.md").write_text(index_page(job_dir, cumulative, sanitized_config))
+    (run_dir / "index.md").write_text(index_page(job_dir, cumulative, sanitized_config, run_dir))
     return cumulative
 
 
@@ -517,7 +517,7 @@ def write_trial_dir(trial: pathlib.Path, target: pathlib.Path, metrics: dict[str
     write_redacted_text(trial / "trial.log", target / "trial-redacted.log")
 
 
-def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: dict[str, Any]) -> str:
+def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: dict[str, Any], run_dir: pathlib.Path) -> str:
     title = run_config.get("index_title") or "Terminal-Bench 4.0 run"
     energy = cumulative["resource_consumption"].get("gpu_energy_observed_so_far", {})
     lines = [
@@ -560,6 +560,10 @@ def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: di
         "See `data/cumulative-summary.json` for machine-readable totals.",
         "Raw private paths and network endpoints are redacted. Raw hidden-test stdout is not published.",
     ]
+    if (run_dir / "notes" / "prior-infrastructure-attempts.md").exists():
+        lines += ["", "Prior infrastructure attempts: [notes/prior-infrastructure-attempts.md](notes/prior-infrastructure-attempts.md)."]
+    if (run_dir / "notes" / "next-brain-plan.md").exists():
+        lines += ["", "Next experiment plan: [notes/next-brain-plan.md](notes/next-brain-plan.md)."]
     return "\n".join(lines) + "\n"
 
 
