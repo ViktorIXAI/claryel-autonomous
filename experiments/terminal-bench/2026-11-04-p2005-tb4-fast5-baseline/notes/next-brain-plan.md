@@ -21,7 +21,7 @@ Energy for the whole run: 351.2 Wh of active GPU energy, 376.0 Wh including idle
 Three run-quality defects were found and must be fixed before the next arm:
 
 1. **Session exports are empty on long trials.** Only the 10-minute trial produced a usable Hermes session export; the 1 h, 3 h and 2 h 41 min trials all wrote 0-byte session files, so token and call counts are missing for them. Token comparisons between arms are therefore not yet possible.
-2. **The inference queue deadline can end a trial.** `shadow-relay` was killed by "inference queue wait deadline expired" after three retries. Before run B the Strata queue/priority settings on the inference host must be reviewed, otherwise arm timings will mix model speed with server queue policy.
+2. **The inference queue deadline can end a trial.** `shadow-relay` was killed by "inference queue wait deadline expired" after three retries. The cause is confirmed in the serving config on P2005: `max_queue = 3` with `queue_timeout = 20` seconds, so any request that waits more than 20 s behind the three queued slots is rejected by the server, Hermes retries three times and exits. A 20 s queue budget is far below the prefill time of long agent contexts. Raising it (the server accepts 0.1–600 s) requires restarting the inference service, which briefly interrupts the production brain, so it is pending an owner decision.
 3. **`risk-scorer-replay` cannot install Hermes.** Reproduced twice: `hermes pm repair` exits 1 with `pm install failed` inside that task image. It needs a pre-seeded Hermes package or a repaired pm bootstrap before it can be scored at all.
 
 ## Baseline snapshot used for the plan above (superseded by the final table)
