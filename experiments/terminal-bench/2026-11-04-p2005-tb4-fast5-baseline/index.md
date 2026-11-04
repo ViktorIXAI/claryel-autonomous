@@ -9,8 +9,8 @@ This is an **independent run**, not an official Terminal-Bench 4.0 leaderboard s
 - Success rate among completed trials: 100.0%
 - Tokens (available trials): input `26044`, output `22351`
 - Infrastructure failures: `0` recorded
-- Forecast: `2.7 h remaining (low confidence)`
-- GPU energy observed: `34.37 Wh active, mean `70.29 W`
+- Forecast: `3.0 h remaining (low confidence)`
+- GPU energy observed: `39.94 Wh active, mean `70.83 W`
 - Model: `openai/qwen3.8-flash-next-iq3_s`
 - Quantization: `IQ3_S GSQ RCO`
 - Inference host label: `P2005`
@@ -27,3 +27,7 @@ This is an **independent run**, not an official Terminal-Bench 4.0 leaderboard s
 
 See `data/cumulative-summary.json` for machine-readable totals.
 Raw private paths and network endpoints are redacted. Raw hidden-test stdout is not published.
+
+Prior infrastructure attempts: [notes/prior-infrastructure-attempts.md](notes/prior-infrastructure-attempts.md).
+
+Next experiment plan: [notes/next-brain-plan.md](notes/next-brain-plan.md).

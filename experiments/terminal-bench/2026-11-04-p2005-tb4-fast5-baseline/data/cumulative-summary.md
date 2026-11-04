@@ -8,7 +8,7 @@
 - Available input tokens: 26044
 - Available output tokens: 22351
 - Infrastructure failures: 0
-- Forecast: 2.7 h remaining (low; early sample and three H100-dependent tasks remain)
+- Forecast: 3.0 h remaining (low; early sample and three H100-dependent tasks remain)
 
 | task | reward | total time | agent time | model calls | tool calls | input tokens | output tokens | verifier |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
