@@ -9,14 +9,14 @@
   "forecast": {
     "available": true,
     "confidence": "low; early sample and three H100-dependent tasks remain",
-    "elapsed_hours": 7.16,
-    "estimated_finish_utc": "2026-11-04T15:05:21.041631+00:00",
+    "elapsed_hours": 7.26,
+    "estimated_finish_utc": "2026-11-04T15:13:27.325345+00:00",
     "estimated_remaining_hours": 1.8,
-    "hours_per_completed_trial": 1.79,
+    "hours_per_completed_trial": 1.82,
     "method": "observed wall-clock rate at the current completion count; difficulty not weighted",
     "started_at": "2026-11-04T07:08:41.426059"
   },
-  "generated_at": "2026-11-04T13:18:01.118447+00:00",
+  "generated_at": "2026-11-04T13:24:30.145432+00:00",
   "infrastructure_failures": [
     {
       "issue": "empty session export",
@@ -54,14 +54,14 @@
     "continuous_gpu_power_energy_sampling": true,
     "gpu_energy_observed_so_far": {
       "available": true,
-      "gpu_active_energy_wh_estimate": 351.41,
+      "gpu_active_energy_wh_estimate": 352.19,
       "gpu_active_power_max_w": 80.41,
-      "gpu_active_power_mean_w": 70.17,
-      "gpu_active_samples": 1803,
+      "gpu_active_power_mean_w": 70.16,
+      "gpu_active_samples": 1807,
       "gpu_power_max_w": 80.41,
-      "gpu_power_mean_w": 52.96,
-      "gpu_total_energy_wh_estimate": 376.04,
-      "samples": 2556,
+      "gpu_power_mean_w": 52.99,
+      "gpu_total_energy_wh_estimate": 376.81,
+      "samples": 2560,
       "sampling_interval_sec": 10
     },
     "sampling_interval_sec": 10,

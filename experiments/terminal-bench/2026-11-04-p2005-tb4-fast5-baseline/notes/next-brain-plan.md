@@ -2,7 +2,29 @@
 
 Date: 2026-11-04
 
-## Current baseline
+## Run A final result (2026-11-04, completed)
+
+Job finished after 7 h 09 min 13 s over five tasks, one attempt each:
+
+| task | outcome | trial wall time | active GPU energy |
+|---|---|---:|---:|
+| `embedding-drift-monitor` | solved, 11/11 tests | 10 min 34 s | 6.57 Wh |
+| `fin-saccr-rwa` | failed, 22/24 tests | 1 h 09 min | 73.25 Wh |
+| `mp-checkpoint-consolidation` | failed, 3 h agent timeout, 0/4 tests | 3 h 03 min | 102.44 Wh |
+| `risk-scorer-replay` | infrastructure abort, no inference | 4 min 30 s | 0 Wh |
+| `shadow-relay` | failed, 0/4 tests after 2 h 38 min | 2 h 41 min | 168.97 Wh |
+
+Scored: 1 solved of 4 scored attempts (25%), mean reward 0.200. One trial is excluded from the percentage as an infrastructure failure.
+
+Energy for the whole run: 351.2 Wh of active GPU energy, 376.0 Wh including idle samples, average active power 70.2 W, peak 80.4 W, GPU temperature never above 60 °C.
+
+Three run-quality defects were found and must be fixed before the next arm:
+
+1. **Session exports are empty on long trials.** Only the 10-minute trial produced a usable Hermes session export; the 1 h, 3 h and 2 h 41 min trials all wrote 0-byte session files, so token and call counts are missing for them. Token comparisons between arms are therefore not yet possible.
+2. **The inference queue deadline can end a trial.** `shadow-relay` was killed by "inference queue wait deadline expired" after three retries. Before run B the Strata queue/priority settings on the inference host must be reviewed, otherwise arm timings will mix model speed with server queue policy.
+3. **`risk-scorer-replay` cannot install Hermes.** Reproduced twice: `hermes pm repair` exits 1 with `pm install failed` inside that task image. It needs a pre-seeded Hermes package or a repaired pm bootstrap before it can be scored at all.
+
+## Baseline snapshot used for the plan above (superseded by the final table)
 
 Fast five-task baseline, no Claryel Autonomous Harness:
 

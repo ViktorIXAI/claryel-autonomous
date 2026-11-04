@@ -11,7 +11,7 @@ This is an **independent run**, not an official Terminal-Bench 4.0 leaderboard s
 - Infrastructure failures: `6` recorded
 - Attempt exceptions: `3` total, `1` without a reward
 - Forecast: `1.8 h remaining (low confidence)`
-- GPU energy observed: `351.41 Wh active, mean `70.17 W`
+- GPU energy observed: `352.19 Wh active, mean `70.16 W`
 - Model: `openai/qwen3.8-flash-next-iq3_s`
 - Quantization: `IQ3_S GSQ RCO`
 - Inference host label: `P2005`
