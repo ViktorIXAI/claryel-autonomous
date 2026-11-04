@@ -8,15 +8,16 @@
   "failed": 3,
   "forecast": {
     "available": true,
-    "confidence": "low; early sample and three H100-dependent tasks remain",
-    "elapsed_hours": 7.26,
-    "estimated_finish_utc": "2026-11-04T15:13:27.325345+00:00",
-    "estimated_remaining_hours": 1.8,
-    "hours_per_completed_trial": 1.82,
-    "method": "observed wall-clock rate at the current completion count; difficulty not weighted",
-    "started_at": "2026-11-04T07:08:41.426059"
+    "confidence": "actual",
+    "elapsed_hours": 7.15,
+    "estimated_finish_utc": "2026-11-04T14:17:55.184884+01:00",
+    "estimated_remaining_hours": 0.0,
+    "hours_per_completed_trial": 1.79,
+    "method": "actual job duration; no estimate needed",
+    "started_at": "2026-11-04T07:08:41.426059",
+    "status": "completed"
   },
-  "generated_at": "2026-11-04T13:24:30.145432+00:00",
+  "generated_at": "2026-11-04T13:25:54.657353+00:00",
   "infrastructure_failures": [
     {
       "issue": "empty session export",

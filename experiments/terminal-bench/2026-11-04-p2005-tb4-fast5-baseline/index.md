@@ -10,7 +10,7 @@ This is an **independent run**, not an official Terminal-Bench 4.0 leaderboard s
 - Tokens (available trials): input `26044`, output `22351`
 - Infrastructure failures: `6` recorded
 - Attempt exceptions: `3` total, `1` without a reward
-- Forecast: `1.8 h remaining (low confidence)`
+- Duration: `7.15 h total (job finished at 2026-11-04T14:17:55.184884+01:00)`
 - GPU energy observed: `352.19 Wh active, mean `70.16 W`
 - Model: `openai/qwen3.8-flash-next-iq3_s`
 - Quantization: `IQ3_S GSQ RCO`
