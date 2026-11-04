@@ -1,17 +1,17 @@
 {
-  "completed": 3,
+  "completed": 4,
   "failed": 2,
   "forecast": {
     "available": true,
     "confidence": "low; early sample and three H100-dependent tasks remain",
-    "elapsed_hours": 4.4,
-    "estimated_finish_utc": "2026-11-04T13:28:39.547727+00:00",
-    "estimated_remaining_hours": 2.9,
-    "hours_per_completed_trial": 1.47,
+    "elapsed_hours": 4.47,
+    "estimated_finish_utc": "2026-11-04T11:44:00.160588+00:00",
+    "estimated_remaining_hours": 1.1,
+    "hours_per_completed_trial": 1.12,
     "method": "observed wall-clock rate at the current completion count; difficulty not weighted",
     "started_at": "2026-11-04T07:08:41.426059"
   },
-  "generated_at": "2026-11-04T10:32:40.299005+00:00",
+  "generated_at": "2026-11-04T10:36:56.413628+00:00",
   "infrastructure_failures": [
     {
       "issue": "empty session export",
@@ -32,9 +32,9 @@
       "gpu_active_power_mean_w": 70.47,
       "gpu_active_samples": 931,
       "gpu_power_max_w": 80.12,
-      "gpu_power_mean_w": 46.3,
-      "gpu_total_energy_wh_estimate": 202.03,
-      "samples": 1571,
+      "gpu_power_mean_w": 45.67,
+      "gpu_total_energy_wh_estimate": 202.61,
+      "samples": 1597,
       "sampling_interval_sec": 10
     },
     "sampling_interval_sec": 10,
@@ -42,7 +42,7 @@
   },
   "run": "tb4-fast5-baseline-20261104-070835",
   "solved": 1,
-  "success_percent": 33.33,
+  "success_percent": 25.0,
   "tokens": {
     "cache_read": 620650,
     "input": 26044,
@@ -383,6 +383,37 @@
           }
         ],
         "total": 4
+      }
+    },
+    {
+      "finished_at": "2026-11-04T10:36:46.025731Z",
+      "reward": null,
+      "seconds": {
+        "agent_execution": null,
+        "setup": 258.051667,
+        "trial_total": 270.120898,
+        "verifier": null
+      },
+      "session_exports": [],
+      "started_at": "2026-11-04T10:32:15.904833Z",
+      "task": "risk-scorer-replay",
+      "token_usage_exact_if_present": {
+        "api_call_count": null,
+        "available": false,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "input_tokens": null,
+        "note": "Terminal-Bench trial metrics do not expose a reliable prefill/decode split.",
+        "output_tokens": null,
+        "prefill_decode_split": null,
+        "reasoning_tokens": null,
+        "source": "Hermes session exports; cumulative maxima for per-session counters, summed per-phase tool calls where applicable",
+        "tool_call_count": null
+      },
+      "trial": "risk-scorer-replay__MVYQn2T",
+      "verifier": {
+        "available": false,
+        "reason": "ctrf.json not found"
       }
     }
   ]
