@@ -275,12 +275,14 @@ def scan_published_tree(path: pathlib.Path) -> list[str]:
 def forecast(job_dir: pathlib.Path, cumulative: dict[str, Any], expected_total: int = 66) -> dict[str, Any]:
     """Compute a deliberately conservative observed-rate estimate from wall time."""
     started = None
+    job_result: dict[str, Any] = {}
     result = job_dir / "result.json"
     if result.exists():
         try:
-            started = json.loads(result.read_text(errors="ignore")).get("started_at")
+            job_result = json.loads(result.read_text(errors="ignore"))
+            started = job_result.get("started_at")
         except Exception:
-            started = None
+            job_result, started = {}, None
     if not started:
         return {"available": False, "reason": "job start time unavailable"}
     start_dt = dt.datetime.fromisoformat(started.replace("Z", "+00:00"))
@@ -288,9 +290,28 @@ def forecast(job_dir: pathlib.Path, cumulative: dict[str, Any], expected_total: 
         start_dt = start_dt.astimezone()
     now = dt.datetime.now(dt.timezone.utc)
     completed = cumulative["completed"]
-    elapsed_h = (now - start_dt).total_seconds() / 3600
+
+    stats = job_result.get("stats") or {}
+    still_active = stats.get("n_running_trials", 0) or stats.get("n_pending_trials", 0)
+    if job_result.get("finished_at") and not still_active:
+        finish_dt = dt.datetime.fromisoformat(job_result["finished_at"].replace("Z", "+00:00"))
+        if finish_dt.tzinfo is None:
+            finish_dt = finish_dt.astimezone()
+        return {
+            "available": True,
+            "status": "completed",
+            "method": "actual job duration; no estimate needed",
+            "started_at": started,
+            "elapsed_hours": round((finish_dt - start_dt).total_seconds() / 3600, 2),
+            "hours_per_completed_trial": round((finish_dt - start_dt).total_seconds() / 3600 / completed, 2) if completed else None,
+            "estimated_remaining_hours": 0.0,
+            "estimated_finish_utc": finish_dt.isoformat(),
+            "confidence": "actual",
+        }
+
     if completed == 0:
         return {"available": False, "reason": "no completed trial yet", "started_at": started}
+    elapsed_h = (now - start_dt).total_seconds() / 3600
     rate_h = elapsed_h / completed
     remaining_h = rate_h * (expected_total - completed)
     eta = now + dt.timedelta(hours=remaining_h)
@@ -434,7 +455,9 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         f"- Available input tokens: {cumulative['tokens']['input']}",
         f"- Available output tokens: {cumulative['tokens']['output']}",
         f"- Infrastructure failures: {len(cumulative['infrastructure_failures'])}",
-        f"- Forecast: {cumulative['forecast'].get('estimated_remaining_hours', 'no data')} h remaining ({cumulative['forecast'].get('confidence', 'no confidence')})",
+        (f"- Duration: {cumulative['forecast'].get('elapsed_hours', 'no data')} h total (completed)"
+         if cumulative["forecast"].get("status") == "completed" else
+         f"- Forecast: {cumulative['forecast'].get('estimated_remaining_hours', 'no data')} h remaining ({cumulative['forecast'].get('confidence', 'no confidence')})"),
         "",
         "| task | reward | total time | agent time | model calls | tool calls | input tokens | output tokens | verifier |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
@@ -563,6 +586,11 @@ def write_trial_dir(trial: pathlib.Path, target: pathlib.Path, metrics: dict[str
 def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: dict[str, Any], run_dir: pathlib.Path) -> str:
     title = run_config.get("index_title") or "Terminal-Bench 4.0 run"
     energy = cumulative["resource_consumption"].get("gpu_energy_observed_so_far", {})
+    forecast = cumulative["forecast"] or {}
+    if forecast.get("status") == "completed":
+        forecast_line = f"- Duration: `{forecast.get('elapsed_hours', 'no data')} h total (job finished at {forecast.get('estimated_finish_utc', 'no data')})`"
+    else:
+        forecast_line = f"- Forecast: `{forecast.get('estimated_remaining_hours', 'no data')} h remaining ({forecast.get('confidence', 'no confidence')})`"
     lines = [
         f"# {title}",
         "",
@@ -576,7 +604,7 @@ def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: di
         f"- Tokens (available trials): input `{cumulative['tokens']['input']}`, output `{cumulative['tokens']['output']}`",
         f"- Infrastructure failures: `{len(cumulative['infrastructure_failures'])}` recorded",
         f"- Attempt exceptions: `{len(cumulative['exception_trials'])}` total, `{len(cumulative['no_reward_exception_trials'])}` without a reward",
-        f"- Forecast: `{cumulative['forecast'].get('estimated_remaining_hours', 'no data')} h remaining (low confidence)`",
+        forecast_line,
         f"- GPU energy observed: `{energy.get('gpu_active_energy_wh_estimate', 'no data')} Wh active, mean `{energy.get('gpu_active_power_mean_w', 'no data')} W`",
         f"- Model: `{run_config.get('model', {}).get('requested_model', 'no data')}`",
         f"- Quantization: `{run_config.get('model', {}).get('quantization', 'no data')}`",
