@@ -9,9 +9,9 @@ This is an **independent run**, not an official Terminal-Bench 4.0 leaderboard s
 - Success rate among completed trials: 33.33%
 - Tokens (available trials): input `26044`, output `22351`
 - Infrastructure failures: `4` recorded
-- Trials aborted by infrastructure errors (no reward): `2`
+- Attempt exceptions: `2` total, `1` without a reward
 - Forecast: `3.0 h remaining (low confidence)`
-- GPU energy observed: `183.66 Wh active, mean `70.41 W`
+- GPU energy observed: `184.99 Wh active, mean `70.4 W`
 - Model: `openai/qwen3.8-flash-next-iq3_s`
 - Quantization: `IQ3_S GSQ RCO`
 - Inference host label: `P2005`

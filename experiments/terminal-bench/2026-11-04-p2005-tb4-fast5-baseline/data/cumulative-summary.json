@@ -8,14 +8,14 @@
   "forecast": {
     "available": true,
     "confidence": "low; early sample and three H100-dependent tasks remain",
-    "elapsed_hours": 4.53,
-    "estimated_finish_utc": "2026-11-04T13:41:52.478129+00:00",
+    "elapsed_hours": 4.55,
+    "estimated_finish_utc": "2026-11-04T13:43:46.834606+00:00",
     "estimated_remaining_hours": 3.0,
-    "hours_per_completed_trial": 1.51,
+    "hours_per_completed_trial": 1.52,
     "method": "observed wall-clock rate at the current completion count; difficulty not weighted",
     "started_at": "2026-11-04T07:08:41.426059"
   },
-  "generated_at": "2026-11-04T10:40:36.057245+00:00",
+  "generated_at": "2026-11-04T10:41:44.671129+00:00",
   "infrastructure_failures": [
     {
       "issue": "empty session export",
@@ -26,7 +26,7 @@
       "trial": "mp-checkpoint-consolidation__WdEavAw"
     },
     {
-      "issue": "trial aborted before a reward was produced: AgentTimeoutError",
+      "issue": "attempt failed with an aborted-run exception and was scored 0: AgentTimeoutError",
       "stage": "2026-11-04T10:31:30.955082Z",
       "trial": "mp-checkpoint-consolidation__WdEavAw"
     },
@@ -37,18 +37,21 @@
     }
   ],
   "metrics_source": "Harbor result.json and Hermes session exports",
+  "no_reward_exception_trials": [
+    "risk-scorer-replay__MVYQn2T"
+  ],
   "resource_consumption": {
     "continuous_gpu_power_energy_sampling": true,
     "gpu_energy_observed_so_far": {
       "available": true,
-      "gpu_active_energy_wh_estimate": 183.66,
+      "gpu_active_energy_wh_estimate": 184.99,
       "gpu_active_power_max_w": 80.12,
-      "gpu_active_power_mean_w": 70.41,
-      "gpu_active_samples": 939,
+      "gpu_active_power_mean_w": 70.4,
+      "gpu_active_samples": 946,
       "gpu_power_max_w": 80.12,
-      "gpu_power_mean_w": 45.46,
-      "gpu_total_energy_wh_estimate": 204.31,
-      "samples": 1618,
+      "gpu_power_mean_w": 45.56,
+      "gpu_total_energy_wh_estimate": 205.63,
+      "samples": 1625,
       "sampling_interval_sec": 10
     },
     "sampling_interval_sec": 10,
