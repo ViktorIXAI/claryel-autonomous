@@ -256,7 +256,7 @@ def scan_published_tree(path: pathlib.Path) -> list[str]:
     return findings
 
 
-def forecast(job_dir: pathlib.Path, cumulative: dict[str, Any]) -> dict[str, Any]:
+def forecast(job_dir: pathlib.Path, cumulative: dict[str, Any], expected_total: int = 66) -> dict[str, Any]:
     """Compute a deliberately conservative observed-rate estimate from wall time."""
     started = None
     result = job_dir / "result.json"
@@ -276,7 +276,7 @@ def forecast(job_dir: pathlib.Path, cumulative: dict[str, Any]) -> dict[str, Any
     if completed == 0:
         return {"available": False, "reason": "no completed trial yet", "started_at": started}
     rate_h = elapsed_h / completed
-    remaining_h = rate_h * (66 - completed)
+    remaining_h = rate_h * (expected_total - completed)
     eta = now + dt.timedelta(hours=remaining_h)
     return {
         "available": True,
@@ -299,12 +299,13 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
 
     sanitized_config = redact_json(config)
     (run_dir / "config" / "run.json").write_text(json.dumps(sanitized_config, indent=2, sort_keys=True))
-    for name, source in (
-        ("hermes_verified.py.txt", pathlib.Path("/srv/claryel/hot/tbench/harness/src/terminal_bench_hermes_harness/hermes_verified.py")),
-        ("task-discipline-SKILL.md", pathlib.Path("/srv/claryel/hot/tbench/skills/task-discipline/SKILL.md")),
-        ("runner.sh", pathlib.Path("/srv/claryel/hot/tbench/scripts/run_full66_verified_p2005.sh")),
-    ):
-        write_redacted_text(source, run_dir / "config" / name)
+    copy_files = config.get("copy_files", [
+        {"name": "hermes_verified.py.txt", "source": "/srv/claryel/hot/tbench/harness/src/terminal_bench_hermes_harness/hermes_verified.py"},
+        {"name": "task-discipline-SKILL.md", "source": "/srv/claryel/hot/tbench/skills/task-discipline/SKILL.md"},
+        {"name": "runner.sh", "source": "/srv/claryel/hot/tbench/scripts/run_full66_verified_p2005.sh"},
+    ])
+    for item in copy_files:
+        write_redacted_text(pathlib.Path(item["source"]), run_dir / "config" / item["name"])
 
     all_metrics = []
     for trial in trials:
@@ -330,11 +331,13 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         for export in x.get("session_exports", []):
             if export.get("available") is False:
                 infra.append({"trial": x["trial"], "issue": export.get("reason", "session export unavailable")})
+    expected_total = int(config.get("dataset", {}).get("tasks", 66))
+    telemetry = config.get("resource_telemetry", {})
     cumulative = {
         "run": job_dir.name,
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "completed": completed,
-        "total": 66,
+        "total": expected_total,
         "solved": solved,
         "failed": failed,
         "success_percent": round(100.0 * solved / completed, 2) if completed else 0,
@@ -346,11 +349,11 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
             "note": "Unavailable token data from a trial is not imputed.",
         },
         "resource_consumption": {
-            "continuous_gpu_power_energy_sampling": False,
-            "gpu_peak_and_energy": None,
+            "continuous_gpu_power_energy_sampling": telemetry.get("continuous_gpu_power_energy_sampling", False),
+            "gpu_peak_and_energy": telemetry.get("gpu_peak_and_energy"),
         },
         "infrastructure_failures": infra,
-        "forecast": forecast(job_dir, {"completed": completed}) if (job_dir / "result.json").exists() else None,
+        "forecast": forecast(job_dir, {"completed": completed}, expected_total) if (job_dir / "result.json").exists() else None,
         "trials": all_metrics,
     }
     (run_dir / "data" / "cumulative-summary.json").write_text(json.dumps(cumulative, indent=2, sort_keys=True))
@@ -358,7 +361,7 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         "# Cumulative summary",
         "",
         f"- Run: `{job_dir.name}`",
-        f"- Completed: {completed} / 66",
+        f"- Completed: {completed} / {cumulative['total']}",
         f"- Solved: {solved}",
         f"- Failed: {failed}",
         f"- Success rate among completed trials: {cumulative['success_percent']}%",
@@ -478,7 +481,7 @@ def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: di
         "This is an **independent one-pass run**, not an official Terminal-Bench 4.0 leaderboard submission. Official leaderboard evaluation uses five attempts per task.",
         "",
         f"- Run: `{job_dir.name}`",
-        f"- Completed: {cumulative['completed']} / 66",
+        f"- Completed: {cumulative['completed']} / {cumulative['total']}",
         f"- Solved: {cumulative['solved']}",
         f"- Failed: {cumulative['failed']}",
         f"- Success rate among completed trials: {cumulative['success_percent']}%",
@@ -514,23 +517,21 @@ def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: di
     return "\n".join(lines) + "\n"
 
 
-README_START = "<!-- BEGIN TERMINAL-BENCH-2026-11-04-STATUS -->"
-README_END = "<!-- END TERMINAL-BENCH-2026-11-04-STATUS -->"
-
-
 def update_readme(repo: pathlib.Path, publication_dir: pathlib.Path, cumulative: dict[str, Any]) -> None:
     readme = repo / "README.md"
     text = readme.read_text()
+    start = f"<!-- BEGIN {publication_dir.name.upper()} -->"
+    end = f"<!-- END {publication_dir.name.upper()} -->"
     row = (
-        f"| [Terminal-Bench 4.0: independent one-pass run]({publication_dir.as_posix()}/index.md) | "
-        f"in progress; {cumulative['completed']} / 66 completed, {cumulative['solved']} solved, "
+        f"| [{cumulative['run']}]({publication_dir.as_posix()}/index.md) | "
+        f"{cumulative['total']}-task sample; {cumulative['completed']} / {cumulative['total']} completed, {cumulative['solved']} solved, "
         f"{cumulative['failed']} failed; not an official leaderboard run |"
     )
-    block = f"{README_START}\n{row}\n{README_END}"
-    if README_START in text:
-        start = text.index(README_START)
-        end = text.index(README_END, start) + len(README_END)
-        text = text[:start] + block + text[end:]
+    block = f"{start}\n{row}\n{end}"
+    if start in text:
+        start_idx = text.index(start)
+        end_idx = text.index(end, start_idx) + len(end)
+        text = text[:start_idx] + block + text[end_idx:]
     else:
         marker = "\n## Headline results"
         if marker not in text:
@@ -611,7 +612,7 @@ def main() -> int:
                 run(["git", "add", "--", str(run_dir.relative_to(repo)), "README.md", "logs/INDEX.md", "CHANGELOG.md"], repo)
                 message = (
                     f"Terminal-Bench: add {len(new)} completed trial(s)\n\n"
-                    f"Run: {job_dir.name}\nCompleted: {cumulative['completed']} / 66\n"
+                    f"Run: {job_dir.name}\nCompleted: {cumulative['completed']} / {cumulative['total']}\n"
                     f"Solved: {cumulative['solved']}\nSanitization: generated locally and scanned before commit."
                 )
                 run(["git", "commit", "-m", message], repo)
