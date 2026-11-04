@@ -1,14 +1,14 @@
 # Cumulative summary
 
 - Run: `tb4-fast5-baseline-20261104-070835`
-- Completed: 4 / 5
+- Completed: 3 / 5
 - Solved: 1
 - Failed: 2
-- Success rate among completed trials: 25.0%
+- Success rate among completed trials: 33.33%
 - Available input tokens: 26044
 - Available output tokens: 22351
-- Infrastructure failures: 2
-- Forecast: 1.1 h remaining (low; early sample and three H100-dependent tasks remain)
+- Infrastructure failures: 4
+- Forecast: 3.0 h remaining (low; early sample and three H100-dependent tasks remain)
 
 | task | reward | total time | agent time | model calls | tool calls | input tokens | output tokens | verifier |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|

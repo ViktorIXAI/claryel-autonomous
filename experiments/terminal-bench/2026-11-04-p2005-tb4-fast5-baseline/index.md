@@ -3,14 +3,15 @@
 This is an **independent run**, not an official Terminal-Bench 4.0 leaderboard submission. Official leaderboard evaluation uses five attempts per task.
 
 - Run: `tb4-fast5-baseline-20261104-070835`
-- Completed: 4 / 5
+- Completed: 3 / 5
 - Solved: 1
 - Failed: 2
-- Success rate among completed trials: 25.0%
+- Success rate among completed trials: 33.33%
 - Tokens (available trials): input `26044`, output `22351`
-- Infrastructure failures: `2` recorded
-- Forecast: `1.1 h remaining (low confidence)`
-- GPU energy observed: `182.25 Wh active, mean `70.47 W`
+- Infrastructure failures: `4` recorded
+- Trials aborted by infrastructure errors (no reward): `2`
+- Forecast: `3.0 h remaining (low confidence)`
+- GPU energy observed: `183.66 Wh active, mean `70.41 W`
 - Model: `openai/qwen3.8-flash-next-iq3_s`
 - Quantization: `IQ3_S GSQ RCO`
 - Inference host label: `P2005`

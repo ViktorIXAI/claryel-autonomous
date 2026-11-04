@@ -85,7 +85,7 @@ canonical four-part form.
 <!-- END TERMINAL-BENCH-2026-11-04-STATUS -->
 
 <!-- BEGIN 2026-11-04-P2005-TB4-FAST5-BASELINE -->
-| [tb4-fast5-baseline-20261104-070835](experiments/terminal-bench/2026-11-04-p2005-tb4-fast5-baseline/index.md) | 5-task sample; 4 / 5 completed, 1 solved, 2 failed; not an official leaderboard run |
+| [tb4-fast5-baseline-20261104-070835](experiments/terminal-bench/2026-11-04-p2005-tb4-fast5-baseline/index.md) | 5-task sample; 3 / 5 completed, 1 solved, 2 failed; not an official leaderboard run |
 <!-- END 2026-11-04-P2005-TB4-FAST5-BASELINE -->
 
 ## Headline results

@@ -1,17 +1,21 @@
 {
-  "completed": 4,
+  "completed": 3,
+  "exception_trials": [
+    "mp-checkpoint-consolidation__WdEavAw",
+    "risk-scorer-replay__MVYQn2T"
+  ],
   "failed": 2,
   "forecast": {
     "available": true,
     "confidence": "low; early sample and three H100-dependent tasks remain",
-    "elapsed_hours": 4.47,
-    "estimated_finish_utc": "2026-11-04T11:44:00.160588+00:00",
-    "estimated_remaining_hours": 1.1,
-    "hours_per_completed_trial": 1.12,
+    "elapsed_hours": 4.53,
+    "estimated_finish_utc": "2026-11-04T13:41:52.478129+00:00",
+    "estimated_remaining_hours": 3.0,
+    "hours_per_completed_trial": 1.51,
     "method": "observed wall-clock rate at the current completion count; difficulty not weighted",
     "started_at": "2026-11-04T07:08:41.426059"
   },
-  "generated_at": "2026-11-04T10:36:56.413628+00:00",
+  "generated_at": "2026-11-04T10:40:36.057245+00:00",
   "infrastructure_failures": [
     {
       "issue": "empty session export",
@@ -20,6 +24,16 @@
     {
       "issue": "empty session export",
       "trial": "mp-checkpoint-consolidation__WdEavAw"
+    },
+    {
+      "issue": "trial aborted before a reward was produced: AgentTimeoutError",
+      "stage": "2026-11-04T10:31:30.955082Z",
+      "trial": "mp-checkpoint-consolidation__WdEavAw"
+    },
+    {
+      "issue": "trial aborted before a reward was produced: NonZeroAgentExitCodeError",
+      "stage": "2026-11-04T10:36:34.945392Z",
+      "trial": "risk-scorer-replay__MVYQn2T"
     }
   ],
   "metrics_source": "Harbor result.json and Hermes session exports",
@@ -27,14 +41,14 @@
     "continuous_gpu_power_energy_sampling": true,
     "gpu_energy_observed_so_far": {
       "available": true,
-      "gpu_active_energy_wh_estimate": 182.25,
+      "gpu_active_energy_wh_estimate": 183.66,
       "gpu_active_power_max_w": 80.12,
-      "gpu_active_power_mean_w": 70.47,
-      "gpu_active_samples": 931,
+      "gpu_active_power_mean_w": 70.41,
+      "gpu_active_samples": 939,
       "gpu_power_max_w": 80.12,
-      "gpu_power_mean_w": 45.67,
-      "gpu_total_energy_wh_estimate": 202.61,
-      "samples": 1597,
+      "gpu_power_mean_w": 45.46,
+      "gpu_total_energy_wh_estimate": 204.31,
+      "samples": 1618,
       "sampling_interval_sec": 10
     },
     "sampling_interval_sec": 10,
@@ -42,7 +56,7 @@
   },
   "run": "tb4-fast5-baseline-20261104-070835",
   "solved": 1,
-  "success_percent": 25.0,
+  "success_percent": 33.33,
   "tokens": {
     "cache_read": 620650,
     "input": 26044,
@@ -52,6 +66,7 @@
   "total": 5,
   "trials": [
     {
+      "exception": null,
       "finished_at": "2026-11-04T06:19:15.151447Z",
       "reward": 1.0,
       "seconds": {
@@ -162,6 +177,7 @@
       }
     },
     {
+      "exception": null,
       "finished_at": "2026-11-04T07:28:37.326604Z",
       "reward": 0.0,
       "seconds": {
@@ -324,6 +340,11 @@
       }
     },
     {
+      "exception": {
+        "exception_message": "Agent execution timed out after 10800.0 seconds",
+        "exception_type": "AgentTimeoutError",
+        "occurred_at": "2026-11-04T10:31:30.955082Z"
+      },
       "finished_at": "2026-11-04T10:32:15.891045Z",
       "reward": 0.0,
       "seconds": {
@@ -386,6 +407,11 @@
       }
     },
     {
+      "exception": {
+        "exception_message": "Command failed (exit 1): set -euo pipefail; curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup --branch v0.22.6 && export PATH=\"$HOME/.local/bin:$PATH\" && export HERMES_HOME=\"${HERMES_HOME:-/tmp/hermes}\" && mkdir -p \"$HERMES_HOME\" \"$HERMES_HOME/sessions\" \"$HERMES_HOME/skills\" \"$HERMES_HOME/memories\" && hermes pm repair && hermes",
+        "exception_type": "NonZeroAgentExitCodeError",
+        "occurred_at": "2026-11-04T10:36:34.945392Z"
+      },
       "finished_at": "2026-11-04T10:36:46.025731Z",
       "reward": null,
       "seconds": {
