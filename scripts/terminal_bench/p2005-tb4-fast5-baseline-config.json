@@ -1,5 +1,6 @@
 {
   "run_id": "tb4-fast5-baseline-20261104-070835",
+  "index_title": "Terminal-Bench 4.0 fast baseline: bare Hermes on P2005",
   "measurement_class": "independent fast five-task baseline sample; not an official Terminal-Bench 4.0 leaderboard submission",
   "dataset": {
     "name": "Terminal-Bench 4.0 subset",
@@ -73,6 +74,7 @@
   "resource_telemetry": {
     "continuous_gpu_power_energy_sampling": true,
     "sampling_interval_sec": 10,
+    "file": "/srv/claryel/hot/tbench/logs/energy/p2005-baseline-fast5-20261104.csv",
     "gpu_peak_and_energy": null,
     "note": "Energy is sampled from P2005 GPU power.draw. Local host and total P2005 wall-power consumption are unavailable without a power meter."
   },

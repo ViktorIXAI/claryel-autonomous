@@ -7,12 +7,14 @@ commit unpushed for a later retry.
 """
 
 import argparse
+import csv
 import datetime as dt
 import hashlib
 import json
 import pathlib
 import re
 import shutil
+import statistics
 import subprocess
 import sys
 import time
@@ -179,6 +181,10 @@ def trial_metrics(job_dir: pathlib.Path, trial: pathlib.Path) -> dict[str, Any]:
         return (finish_dt - start_dt).total_seconds()
 
     sessions = sorted((trial / "agent").glob("hermes-phase-*/session.jsonl"))
+    if not sessions:
+        root_session = trial / "agent" / "hermes-session.jsonl"
+        if root_session.exists():
+            sessions = [root_session]
     metadata = []
     for path in sessions:
         if path.stat().st_size == 0:
@@ -269,7 +275,7 @@ def forecast(job_dir: pathlib.Path, cumulative: dict[str, Any], expected_total: 
         return {"available": False, "reason": "job start time unavailable"}
     start_dt = dt.datetime.fromisoformat(started.replace("Z", "+00:00"))
     if start_dt.tzinfo is None:
-        start_dt = start_dt.replace(tzinfo=dt.timezone.utc)
+        start_dt = start_dt.astimezone()
     now = dt.datetime.now(dt.timezone.utc)
     completed = cumulative["completed"]
     elapsed_h = (now - start_dt).total_seconds() / 3600
@@ -287,6 +293,34 @@ def forecast(job_dir: pathlib.Path, cumulative: dict[str, Any], expected_total: 
         "estimated_remaining_hours": round(remaining_h, 1),
         "estimated_finish_utc": eta.isoformat(),
         "confidence": "low; early sample and three H100-dependent tasks remain",
+    }
+
+
+def gpu_energy_summary(path: pathlib.Path, interval_sec: int = 10) -> dict[str, Any]:
+    if not path.is_file():
+        return {"available": False, "reason": "energy CSV not found"}
+    rows = []
+    with path.open(newline="") as handle:
+        for row in csv.DictReader(handle):
+            try:
+                rows.append((float(row["power_w"]), int(row["util_gpu_pct"])))
+            except (KeyError, ValueError):
+                continue
+    if not rows:
+        return {"available": False, "reason": "energy CSV is empty"}
+    total_power = [x[0] for x in rows]
+    active_power = [x[0] for x in rows if x[1] > 0]
+    return {
+        "available": True,
+        "samples": len(rows),
+        "sampling_interval_sec": interval_sec,
+        "gpu_power_mean_w": round(statistics.mean(total_power), 2),
+        "gpu_power_max_w": round(max(total_power), 2),
+        "gpu_active_samples": len(active_power),
+        "gpu_active_power_mean_w": round(statistics.mean(active_power), 2) if active_power else None,
+        "gpu_active_power_max_w": round(max(active_power), 2) if active_power else None,
+        "gpu_active_energy_wh_estimate": round(sum(active_power) * interval_sec / 3600, 2) if active_power else 0.0,
+        "gpu_total_energy_wh_estimate": round(sum(total_power) * interval_sec / 3600, 2),
     }
 
 
@@ -333,6 +367,14 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
                 infra.append({"trial": x["trial"], "issue": export.get("reason", "session export unavailable")})
     expected_total = int(config.get("dataset", {}).get("tasks", 66))
     telemetry = config.get("resource_telemetry", {})
+    telemetry_file = telemetry.get("file")
+    gpu_energy = gpu_energy_summary(pathlib.Path(telemetry_file), int(telemetry.get("sampling_interval_sec", 10))) if telemetry_file else {"available": False, "reason": "telemetry file not configured"}
+    resource = {
+        "continuous_gpu_power_energy_sampling": telemetry.get("continuous_gpu_power_energy_sampling", False),
+        "sampling_interval_sec": telemetry.get("sampling_interval_sec"),
+        "gpu_energy_observed_so_far": gpu_energy,
+        "scope": "GPU telemetry only; whole-system wall power requires a power meter",
+    }
     cumulative = {
         "run": job_dir.name,
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -348,10 +390,7 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
             "cache_read": sum_available("cache_read_tokens"),
             "note": "Unavailable token data from a trial is not imputed.",
         },
-        "resource_consumption": {
-            "continuous_gpu_power_energy_sampling": telemetry.get("continuous_gpu_power_energy_sampling", False),
-            "gpu_peak_and_energy": telemetry.get("gpu_peak_and_energy"),
-        },
+        "resource_consumption": resource,
         "infrastructure_failures": infra,
         "forecast": forecast(job_dir, {"completed": completed}, expected_total) if (job_dir / "result.json").exists() else None,
         "trials": all_metrics,
@@ -470,15 +509,21 @@ def write_trial_dir(trial: pathlib.Path, target: pathlib.Path, metrics: dict[str
         (target / "agent" / f"{phase}-session-stats.json").parent.mkdir(parents=True, exist_ok=True)
         (target / "agent" / f"{phase}-session-stats.json").write_text(json.dumps(stats, indent=2))
         write_redacted_text(phase_dir / "stdout.txt", target / "agent" / f"{phase}-stdout.txt")
+    root_session = trial / "agent" / "hermes-session.jsonl"
+    if root_session.exists():
+        stats = write_session(root_session, target / "agent" / "session.jsonl")
+        (target / "agent" / "session-stats.json").write_text(json.dumps(stats, indent=2))
     write_redacted_text(trial / "agent" / "hermes.txt", target / "agent" / "hermes.txt")
     write_redacted_text(trial / "trial.log", target / "trial-redacted.log")
 
 
 def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: dict[str, Any]) -> str:
+    title = run_config.get("index_title") or "Terminal-Bench 4.0 run"
+    energy = cumulative["resource_consumption"].get("gpu_energy_observed_so_far", {})
     lines = [
-        "# Terminal-Bench 4.0: VerifiedHermes on P2005",
+        f"# {title}",
         "",
-        "This is an **independent one-pass run**, not an official Terminal-Bench 4.0 leaderboard submission. Official leaderboard evaluation uses five attempts per task.",
+        "This is an **independent run**, not an official Terminal-Bench 4.0 leaderboard submission. Official leaderboard evaluation uses five attempts per task.",
         "",
         f"- Run: `{job_dir.name}`",
         f"- Completed: {cumulative['completed']} / {cumulative['total']}",
@@ -488,6 +533,7 @@ def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: di
         f"- Tokens (available trials): input `{cumulative['tokens']['input']}`, output `{cumulative['tokens']['output']}`",
         f"- Infrastructure failures: `{len(cumulative['infrastructure_failures'])}` recorded",
         f"- Forecast: `{cumulative['forecast'].get('estimated_remaining_hours', 'no data')} h remaining (low confidence)`",
+        f"- GPU energy observed: `{energy.get('gpu_active_energy_wh_estimate', 'no data')} Wh active, mean `{energy.get('gpu_active_power_mean_w', 'no data')} W`",
         f"- Model: `{run_config.get('model', {}).get('requested_model', 'no data')}`",
         f"- Quantization: `{run_config.get('model', {}).get('quantization', 'no data')}`",
         f"- Inference host label: `{run_config.get('model', {}).get('endpoint_host_label', 'no data')}`",
