@@ -1,0 +1,104 @@
+{
+  "claryel_autonomous_harness": {
+    "active_contour_in_this_benchmark": null,
+    "contour_used_in_task_solving": false,
+    "evidence": [
+      "The runner uses HermesBenchmark with no --skill argument.",
+      "VerifiedHermes is not invoked.",
+      "No Claryel autonomous-harness contour invocation was present in the benchmark process tree."
+    ],
+    "hermes_self_learning_used_in_trial": false,
+    "repository_version_at_run_start": "0.0.2.8",
+    "skill_or_memory_changes_during_trial": false
+  },
+  "copy_files": [
+    {
+      "name": "hermes_verified.py.txt",
+      "source": "/srv/claryel/hot/tbench/harness/src/terminal_bench_hermes_harness/hermes_verified.py"
+    },
+    {
+      "name": "runner.sh",
+      "source": "/srv/claryel/hot/tbench/scripts/run_fast5_hermes_baseline.sh"
+    }
+  ],
+  "dataset": {
+    "attempted_tasks": [
+      "embedding-drift-monitor",
+      "fin-saccr-rwa",
+      "mp-checkpoint-consolidation",
+      "risk-scorer-replay",
+      "shadow-relay"
+    ],
+    "attempts_per_task": 1,
+    "name": "Terminal-Bench 4.0 subset",
+    "official_leaderboard_attempts_per_task": 5,
+    "tasks": 5
+  },
+  "hardware": {
+    "cpu_model": "AMD Ryzen 9 9955HX 16-Core Processor",
+    "driver_version": "615.71.09",
+    "gpu_memory_mib": 24463,
+    "gpu_model": "NVIDIA GeForce RTX 5090 Laptop GPU",
+    "host": "P2005",
+    "logical_cpus": 32,
+    "memory_gib": 60,
+    "os_kernel": "7.0.0-38-generic"
+  },
+  "inference_server": {
+    "application_version": "0.2.10",
+    "conversation_cache_mib": 2560,
+    "engine_version": "0.1.56",
+    "kv_quantization": "int8",
+    "max_context": 262144,
+    "product": "Strata",
+    "speculative_decoding": "4, min probability 0.5"
+  },
+  "measurement_class": "independent fast five-task baseline sample; not an official Terminal-Bench 4.0 leaderboard submission",
+  "model": {
+    "api_key_name": "STRATA_API_KEY",
+    "api_key_value": "[REDACTED]",
+    "base_model": "Qwen3.8 Flash Next",
+    "endpoint_host_label": "P2005",
+    "endpoint_scheme": "openai_chat_completions",
+    "parameters_visible_in_package": "83.6 GB across two GGUF parts",
+    "quantization": "IQ3_S GSQ RCO",
+    "requested_model": "openai/qwen3.8-flash-next-iq3_s"
+  },
+  "prior_aborted_fast6_repair": {
+    "gpu_active_energy_wh_estimate": 70.9,
+    "gpu_active_power_max_w": 80.05,
+    "gpu_active_power_mean_w": 73.56,
+    "gpu_active_samples": 347,
+    "model_attempt_counted": false,
+    "reason": "A Coq trial ran for 1h08m29s before Harbor aborted while collecting logs."
+  },
+  "resource_telemetry": {
+    "continuous_gpu_power_energy_sampling": true,
+    "gpu_peak_and_energy": null,
+    "note": "Energy is sampled from P2005 GPU power.draw. Local host and total P2005 wall-power consumption are unavailable without a power meter.",
+    "sampling_interval_sec": 10
+  },
+  "run_id": "tb4-fast5-baseline-20261104-070835",
+  "runner": {
+    "agent": "terminal_bench_hermes_harness.hermes_verified:HermesBenchmark",
+    "agent_adapter_sha256": "92652f3dfd5a5ae5c631ff7a7d6d055a0f4d152f80cb1aa7cb883f46d089eee8",
+    "agent_timeout_sec": 10800,
+    "command_sha256": "c2c78e78f914a7d7e8d5fef606c3034c90533161584c9fe2f9b66a75fa54e313",
+    "environment": "docker",
+    "harbor_version": "0.25.0",
+    "hermes_version": "v0.22.6",
+    "max_turns": 1000,
+    "network_policy": "official task network policy; local inference endpoint allowlisted at runtime",
+    "parallelism": 1,
+    "retries": 0,
+    "web_search": "disabled by runner; HermesBenchmark exposes no native Harbor-managed web tool"
+  },
+  "sanitization": {
+    "credentials": "replaced with [REDACTED]",
+    "hidden_verifier_stdout": "not published; only redacted test names, statuses and short messages are published",
+    "local_account_paths": "replaced with [LOCAL_PATH]",
+    "private_ips": "replaced with [PRIVATE_IP]",
+    "system_prompts": "removed from session exports"
+  },
+  "skills": []
+}
