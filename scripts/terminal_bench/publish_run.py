@@ -217,10 +217,20 @@ def trial_metrics(job_dir: pathlib.Path, trial: pathlib.Path) -> dict[str, Any]:
         # Some Hermes exports report cumulative tool-call counts rather than per-phase counts.
         total_tool_calls = max_numeric("tool_call_count")
 
+    exception_info = result.get("exception_info") or {}
+    exception = None
+    if exception_info.get("exception_type"):
+        exception = {
+            "exception_type": exception_info.get("exception_type"),
+            "exception_message": redact_text(str(exception_info.get("exception_message", "")))[:400],
+            "occurred_at": exception_info.get("occurred_at"),
+        }
+
     return {
         "trial": trial.name,
         "task": trial.name.split("__", 1)[0],
         "reward": reward,
+        "exception": exception,
         "started_at": result.get("started_at"),
         "finished_at": result.get("finished_at"),
         "seconds": {
@@ -348,9 +358,11 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         notes = load_trial_notes(run_dir, trial.name)
         write_trial_dir(trial, run_dir / "tasks" / trial.name, metrics, notes)
 
-    completed = len(all_metrics)
-    solved = sum(1 for x in all_metrics if x.get("reward") == 1)
-    failed = sum(1 for x in all_metrics if x.get("reward") == 0)
+    scored = [x for x in all_metrics if x.get("reward") is not None]
+    exception_trials = [x for x in all_metrics if x.get("exception")]
+    completed = len(scored)
+    solved = sum(1 for x in scored if x.get("reward") == 1)
+    failed = sum(1 for x in scored if x.get("reward") == 0)
 
     def sum_available(name: str) -> int | None:
         vals = []
@@ -365,6 +377,19 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         for export in x.get("session_exports", []):
             if export.get("available") is False:
                 infra.append({"trial": x["trial"], "issue": export.get("reason", "session export unavailable")})
+        if x.get("exception"):
+            if x.get("reward") is None:
+                infra.append({
+                    "trial": x["trial"],
+                    "issue": f"trial aborted before a reward was produced: {x['exception']['exception_type']}",
+                    "stage": x["exception"].get("occurred_at"),
+                })
+            else:
+                infra.append({
+                    "trial": x["trial"],
+                    "issue": f"attempt failed with an aborted-run exception and was scored 0: {x['exception']['exception_type']}",
+                    "stage": x["exception"].get("occurred_at"),
+                })
     expected_total = int(config.get("dataset", {}).get("tasks", 66))
     telemetry = config.get("resource_telemetry", {})
     telemetry_file = telemetry.get("file")
@@ -383,6 +408,8 @@ def build_publication(repo: pathlib.Path, job_dir: pathlib.Path, run_dir: pathli
         "solved": solved,
         "failed": failed,
         "success_percent": round(100.0 * solved / completed, 2) if completed else 0,
+        "exception_trials": [x["trial"] for x in exception_trials],
+        "no_reward_exception_trials": [x["trial"] for x in exception_trials if x.get("reward") is None],
         "metrics_source": "Harbor result.json and Hermes session exports",
         "tokens": {
             "input": sum_available("input_tokens"),
@@ -463,6 +490,7 @@ def trial_page(metrics: dict[str, Any], notes: dict[str, Any]) -> str:
     sec = metrics["seconds"]
     tok = metrics["token_usage_exact_if_present"]
     verifier = metrics["verifier"]
+    exception = metrics.get("exception")
     lines = [
         f"# {metrics['task']}",
         "",
@@ -471,6 +499,21 @@ def trial_page(metrics: dict[str, Any], notes: dict[str, Any]) -> str:
         f"**Agent execution:** {value(sec.get('agent_execution'))} s  ",
         f"**Setup:** {value(sec.get('setup'))} s  ",
         f"**Verifier:** {value(verifier.get('passed'))} passed / {value(verifier.get('failed'))} failed of {value(verifier.get('total'))}",
+    ]
+    if exception:
+        if exception.get("exception_type") == "AgentTimeoutError" and metrics.get("reward") is not None:
+            wording = "The agent phase hit the run time limit; the verifier still ran, so this is counted as a failed attempt (time limit reached), not an infrastructure crash."
+        elif metrics.get("reward") is None:
+            wording = "The trial was aborted before the verifier produced a reward, so it is reported as an infrastructure failure rather than a model failure."
+        else:
+            wording = "The attempt ended with an exception but still received a verifier reward; the reward is authoritative."
+        lines += [
+            "",
+            f"**Attempt exception:** `{exception['exception_type']}` at {value(exception.get('occurred_at'))}",
+            "",
+            f"{wording} Redacted message: {exception['exception_message']}",
+        ]
+    lines += [
         "",
         "## Machine-readable metrics",
         "",
@@ -532,6 +575,7 @@ def index_page(job_dir: pathlib.Path, cumulative: dict[str, Any], run_config: di
         f"- Success rate among completed trials: {cumulative['success_percent']}%",
         f"- Tokens (available trials): input `{cumulative['tokens']['input']}`, output `{cumulative['tokens']['output']}`",
         f"- Infrastructure failures: `{len(cumulative['infrastructure_failures'])}` recorded",
+        f"- Attempt exceptions: `{len(cumulative['exception_trials'])}` total, `{len(cumulative['no_reward_exception_trials'])}` without a reward",
         f"- Forecast: `{cumulative['forecast'].get('estimated_remaining_hours', 'no data')} h remaining (low confidence)`",
         f"- GPU energy observed: `{energy.get('gpu_active_energy_wh_estimate', 'no data')} Wh active, mean `{energy.get('gpu_active_power_mean_w', 'no data')} W`",
         f"- Model: `{run_config.get('model', {}).get('requested_model', 'no data')}`",
