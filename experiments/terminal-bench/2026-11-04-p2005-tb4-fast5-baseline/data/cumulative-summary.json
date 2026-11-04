@@ -4,28 +4,41 @@
   "forecast": {
     "available": true,
     "confidence": "low; early sample and three H100-dependent tasks remain",
-    "elapsed_hours": -0.52,
-    "estimated_finish_utc": "2026-11-04T04:31:19.260364+00:00",
-    "estimated_remaining_hours": -2.1,
-    "hours_per_completed_trial": -0.52,
+    "elapsed_hours": 0.67,
+    "estimated_finish_utc": "2026-11-04T09:30:42.877494+00:00",
+    "estimated_remaining_hours": 2.7,
+    "hours_per_completed_trial": 0.67,
     "method": "observed wall-clock rate at the current completion count; difficulty not weighted",
     "started_at": "2026-11-04T07:08:41.426059"
   },
-  "generated_at": "2026-11-04T06:37:12.992885+00:00",
+  "generated_at": "2026-11-04T06:49:05.716299+00:00",
   "infrastructure_failures": [],
   "metrics_source": "Harbor result.json and Hermes session exports",
   "resource_consumption": {
     "continuous_gpu_power_energy_sampling": true,
-    "gpu_peak_and_energy": null
+    "gpu_energy_observed_so_far": {
+      "available": true,
+      "gpu_active_energy_wh_estimate": 34.37,
+      "gpu_active_power_max_w": 78.21,
+      "gpu_active_power_mean_w": 70.29,
+      "gpu_active_samples": 176,
+      "gpu_power_max_w": 78.21,
+      "gpu_power_mean_w": 54.71,
+      "gpu_total_energy_wh_estimate": 36.93,
+      "samples": 243,
+      "sampling_interval_sec": 10
+    },
+    "sampling_interval_sec": 10,
+    "scope": "GPU telemetry only; whole-system wall power requires a power meter"
   },
   "run": "tb4-fast5-baseline-20261104-070835",
   "solved": 1,
   "success_percent": 100.0,
   "tokens": {
-    "cache_read": null,
-    "input": null,
+    "cache_read": 620650,
+    "input": 26044,
     "note": "Unavailable token data from a trial is not imputed.",
-    "output": null
+    "output": 22351
   },
   "total": 5,
   "trials": [
@@ -38,21 +51,40 @@
         "trial_total": 633.621694,
         "verifier": 63.088735
       },
-      "session_exports": [],
+      "session_exports": [
+        {
+          "actual_cost_usd": null,
+          "api_call_count": 22,
+          "cache_read_tokens": 620650,
+          "cache_write_tokens": 0,
+          "compression_count": null,
+          "cost_status": "unknown",
+          "end_reason": "cli_close",
+          "ended_at": 1793773079.321047,
+          "estimated_cost_usd": 0.0,
+          "input_tokens": 26044,
+          "message_count": 48,
+          "model": "qwen3.8-flash-next-iq3_s",
+          "output_tokens": 22351,
+          "reasoning_tokens": 0,
+          "started_at": 1793772686.040408,
+          "tool_call_count": 25
+        }
+      ],
       "started_at": "2026-11-04T06:08:41.529753Z",
       "task": "embedding-drift-monitor",
       "token_usage_exact_if_present": {
-        "api_call_count": null,
-        "available": false,
-        "cache_read_tokens": null,
-        "cache_write_tokens": null,
-        "input_tokens": null,
+        "api_call_count": 22,
+        "available": true,
+        "cache_read_tokens": 620650,
+        "cache_write_tokens": 0,
+        "input_tokens": 26044,
         "note": "Terminal-Bench trial metrics do not expose a reliable prefill/decode split.",
-        "output_tokens": null,
+        "output_tokens": 22351,
         "prefill_decode_split": null,
-        "reasoning_tokens": null,
+        "reasoning_tokens": 0,
         "source": "Hermes session exports; cumulative maxima for per-session counters, summed per-phase tool calls where applicable",
-        "tool_call_count": null
+        "tool_call_count": 25
       },
       "trial": "embedding-drift-monitor__4adgop9",
       "verifier": {

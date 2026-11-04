@@ -44,6 +44,7 @@
     "memory_gib": 60,
     "os_kernel": "7.0.0-38-generic"
   },
+  "index_title": "Terminal-Bench 4.0 fast baseline: bare Hermes on P2005",
   "inference_server": {
     "application_version": "0.2.10",
     "conversation_cache_mib": 2560,
@@ -74,6 +75,7 @@
   },
   "resource_telemetry": {
     "continuous_gpu_power_energy_sampling": true,
+    "file": "/srv/claryel/hot/tbench/logs/energy/p2005-baseline-fast5-20261104.csv",
     "gpu_peak_and_energy": null,
     "note": "Energy is sampled from P2005 GPU power.draw. Local host and total P2005 wall-power consumption are unavailable without a power meter.",
     "sampling_interval_sec": 10
