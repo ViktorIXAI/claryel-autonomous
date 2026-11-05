@@ -1148,18 +1148,38 @@ def plan_loop(acct, t, seed, rec):
     steps, final = [], None
     reads = set()
     early_blocked = False
+    reasks = 0
+    rejected_answers = []
     for i in range(t.get("max_steps", 6)):
         r = call(msgs, 512, seed + i)
         acct.add(r, useful=True)
         act = LP.parse_action(r["text"])
-        steps.append({"step": i, "raw": (r["text"] or "")[:300], "parsed": act})
+        step = {"step": i, "raw": (r["text"] or "")[:300], "parsed": act}
+        steps.append(step)
         if act is None:
+            # 2.16: one off-protocol turn used to abort the whole loop (the hard-v6 arm
+            # lost three loop tasks with stored rows == ["null"]). The turn is re-asked
+            # once as a protocol reminder; the bad row keeps a HARNESS marker so the
+            # trajectory scorer does not count it twice. Nothing is invented here.
+            if contour_at_least(2, 16) and reasks < 2:
+                reasks += 1
+                step["gate_rejected"] = True
+                acct.fixes += 1
+                acct.ev("fix", "loop_protocol_reask")
+                msgs.append({"role": "user", "content": PROTOCOL_REASK})
+                continue
             break
         if "answer" in act:
             if VERIFY_RETRY and not early_blocked and (not reads or i < 2):
                 early_blocked = True
                 acct.blocks += 1
-                if contour_at_least(2, 15):
+                if contour_at_least(2, 16):
+                    # mark the step we already recorded: 2.15 appended a second copy of
+                    # the same turn, which made the SAME answer two terminal answers and
+                    # failed the scorer's "exactly one terminal answer" rule by construction.
+                    step["gate_rejected"] = True
+                    rejected_answers.append(str(act.get("answer") or ""))
+                elif contour_at_least(2, 15):
                     steps.append({"step": i, "raw": (r["text"] or "")[:300],
                                   "parsed": act, "gate_rejected": True})
                 acct.ev("gate", "blocked_early_answer")
@@ -1184,9 +1204,24 @@ def plan_loop(acct, t, seed, rec):
             obs = LP.mock_exec(t, tool, arg)
         msgs.append({"role": "assistant", "content": json.dumps(act, ensure_ascii=False)})
         msgs.append({"role": "user", "content": "РЕЗУЛЬТАТ ИНСТРУМЕНТА: " + obs})
+    if final is None and contour_at_least(2, 16) and rejected_answers:
+        # 2.16: the early-answer gate threw the model's own final answer away and the loop
+        # then ran out of steps (three of six hard-v6 loop tasks died exactly this way).
+        # Re-admit the last answer the MODEL produced — never a synthesized one.
+        final = rejected_answers[-1]
+        ans_act = {"answer": final}
+        steps.append({"step": len(steps), "raw": json.dumps(ans_act, ensure_ascii=False),
+                      "parsed": ans_act, "salvaged": True})
+        acct.fixes += 1
+        acct.ev("fix", "loop_final_salvage")
     rec["agent_steps"] = steps
     rec["agent_final"] = final
     return {"text": final or "", "ptok": 0, "ctok": 0, "ttft": None, "finish": None, "err": None, "el": 0.0}
+
+
+PROTOCOL_REASK = ("РЕЗУЛЬТАТ ИНСТРУМЕНТА: ШАГ НЕ ПРИНЯТ — нужен ОДИН JSON-объект вида "
+                  "{\"tool\": \"read_file|search\", \"arg\": \"...\"} или {\"answer\": \"...\"}, "
+                  "без пояснений и без текста вне JSON.")
 
 
 def code_gate(acct, t, seed, msgs0):

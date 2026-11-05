@@ -119,8 +119,10 @@ loop_ad = ('"""loop driver adapter: mechanics from copied v5 module; scoring is 
            "        if p is None and 'gate_block' in s:\n"
            "            rows.append({'tool': s['gate_block'], 'arg': None})\n"
            "            continue\n"
-           "        if s.get('gate_rejected') and isinstance(p, dict):\n"
-           "            p = dict(p, gate_rejected=True)\n"
+           "        if s.get('gate_rejected'):\n"
+           "            rows.append(dict(p, gate_rejected=True) if isinstance(p, dict)\n"
+           "                        else {'gate_rejected': True})\n"
+           "            continue\n"
            "        rows.append(p if isinstance(p, str) else json.dumps(p, ensure_ascii=False))\n"
            "    return V6.check_D_loop_v6(t, rows)\n")
 open(os.path.join(OUT, "parb_loop.py"), "w", encoding="utf-8").write(loop_ad)
