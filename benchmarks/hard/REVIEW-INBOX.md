@@ -52,3 +52,5 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 | S3 | grok raw transport (`hermes -z @file`) exposes file tools; one H answer disclosed the transport path; no bank/gold leak traces (grepped) | LOGGED + disclosed in v6-results README; future raw arms: stdin-only transports |
 | S4 | contour early-answer rejection creates a second answer row -> strict format fails on loop tasks (own guard hurts own format) | LOGGED — gate must tag rejected turns so trajectory scoring ignores them |
 | S5 | score_v6/4-arm scripts require e_sandbox beside parb_check_v6 (raw dirs) | FIXED (deployed copies) |
+| S2b | contour 2.15: deterministic format repair (B/D obj-unwrap, J id-seq), zero model tokens, inert at 2.14 | FIXED @ r6+ (contract gate_v36) |
+| S4b | loop gate-refused turns marked (trusted harness marker) and excluded; gate-blocked attempts mapped to attempted tools and penalized | FIXED @ r6 (suite controls, 66/0) |
