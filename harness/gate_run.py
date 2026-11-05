@@ -200,6 +200,10 @@ def post_normalize_allowed() -> bool:
 # Mis-routing produced chronic read_first_missing/final_answer_wrong on D-ex6-p*
 # even when the refused/next_ok JSON already matched gold.
 D_PLAIN_SCORE = contour_at_least(2, 21)
+# 0.0.2.22: F JSON — normalize next to N# and backfill empty avoid with the
+# other N-options parsed from the task prompt (scorer needs forbidden ⊆ avoid;
+# models often leave avoid=[]). Keyword-free; no gold peek.
+F_AVOID_CANON = contour_at_least(2, 22)
 
 
 def _d_is_loop(t):
@@ -1473,6 +1477,63 @@ F_DIAG_RULES = (
 )
 
 
+def f_avoid_canonicalize(t, text):
+    """v2.22: F next id short-form + empty-avoid backfill from prompt N-options."""
+    if not F_AVOID_CANON or not text:
+        return text, None
+    if not str(t.get("id", "")).startswith("F") and t.get("cat") != "F":
+        pass
+    obj = _fmt_parse(text)
+    if not isinstance(obj, dict):
+        return text, None
+    prompt = t.get("prompt") or t.get("free_text") or ""
+    n_ids = sorted(set(re.findall(r"\bN(\d+)\b", prompt)), key=lambda x: int(x))
+    n_ids = ["N" + x for x in n_ids]
+    if not n_ids:
+        return text, None
+    changed = []
+    out = dict(obj)
+    nxt = out.get("next")
+    if isinstance(nxt, str):
+        m = re.match(r"\s*(N\d+)\b", nxt.strip(), re.I)
+        if m and m.group(1).upper() != nxt.strip():
+            out["next"] = m.group(1).upper()
+            changed.append("f_next_short")
+        elif m:
+            short = m.group(1).upper()
+            if nxt.strip() != short:
+                out["next"] = short
+                changed.append("f_next_short")
+    avoid = out.get("avoid")
+    if not isinstance(avoid, list):
+        avoid = []
+    # Normalize avoid entries to N# where possible.
+    norm_avoid = []
+    for a in avoid:
+        if not isinstance(a, str):
+            continue
+        m = re.match(r"\s*(N\d+)\b", a.strip(), re.I)
+        norm_avoid.append(m.group(1).upper() if m else a)
+    chosen = None
+    if isinstance(out.get("next"), str):
+        m = re.match(r"\s*(N\d+)\b", str(out.get("next")).strip(), re.I)
+        if m:
+            chosen = m.group(1).upper()
+    if not norm_avoid:
+        # Backfill: every prompt N-option except the chosen next.
+        fill = [n for n in n_ids if n != chosen]
+        if fill:
+            out["avoid"] = fill
+            changed.append("f_avoid_fill")
+    else:
+        if norm_avoid != avoid:
+            out["avoid"] = norm_avoid
+            changed.append("f_avoid_norm")
+    if not changed:
+        return text, None
+    return json.dumps(out, ensure_ascii=False), changed
+
+
 def f_diagnostic_normalize(t, text):
     """Ground F answers in safe diagnostic terms inferred from visible logs."""
     if not F_GROUND or not text or not str(t.get("id", "")).startswith("F"):
@@ -1786,6 +1847,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v21_" + "_".join(ev))
+    if F_AVOID_CANON and cat == "F" and r["text"]:
+        norm, ev = f_avoid_canonicalize(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v222_" + "_".join(ev))
     if F_GROUND and cat == "F" and r["text"]:
         norm, ev = f_diagnostic_normalize(t, r["text"])
         if ev:
@@ -1860,6 +1928,13 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v21_" + "_".join(ev))
+                    if F_AVOID_CANON and cat == "F" and r["text"]:
+                        norm, ev = f_avoid_canonicalize(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v222_" + "_".join(ev))
                     if F_GROUND and cat == "F" and r["text"]:
                         norm, ev = f_diagnostic_normalize(t, r["text"])
                         if ev:

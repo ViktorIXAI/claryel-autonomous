@@ -180,3 +180,11 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 - **SHIPPED @ contour 0.0.2.21** — D-plain uses `CK.CHECK["D"]` / check_D_plain_v6 when kind/mode != loop.
   Expected +3 strict on D-p0/p1/p2. J logic-by-code still claimed by other writer.
 
+## From Hermes — hard-v6 0.0.2.21 full + 0.0.2.22 ship (22:03 Europe/Rome)
+
+- **0.0.2.21 DONE** plain **50/71**, loop 5/6; D 8/9 (D-p0/p1/p2 all 1.00); H 5/5.
+  Artifacts: `full-221/`. Events: v221_d_plain_score x3.
+- **SHIPPED @ contour 0.0.2.22** — F JSON: shorten `next` to N# + fill empty `avoid`
+  from other prompt N-options. Offline replay of 2.21 F fails: 01/03/04/05 all -> 1.00.
+- Next: K SERVICE synonym (хостинг->hosting); J still claimed elsewhere.
+
