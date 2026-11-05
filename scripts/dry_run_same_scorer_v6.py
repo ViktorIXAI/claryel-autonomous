@@ -93,6 +93,30 @@ def main() -> int:
         c, f, notes = v6b.check(a, ans)
         print("  smoke_A content=%.2f format=%s notes=%s" % (c, f, notes))
 
+    # E entrypoint integration: score the gold E answer THROUGH the scorer,
+    # which executes the battery in docker (verdict protocol v2). One task is
+    # enough to prove the docker entrypoint resolves from the same module.
+    gold_path = (ROOT / "benchmarks" / "hard" / "gold-answers-v6.jsonl").resolve()
+    e_task = next(t for t in bank if t["cat"] == "E")
+    e_gold = None
+    for ln in gold_path.read_text(encoding="utf-8").splitlines():
+        row = json.loads(ln)
+        if row.get("task") == e_task["id"] or row.get("id") == e_task["id"]:
+            e_gold = row.get("answer") or row.get("ans") or row.get("code")
+            break
+    if e_gold is None:
+        print("E_DOCKER_SMOKE SKIPPED (no gold row)")
+    else:
+        ec, ef, en = v6b.check(e_task, "```python\n" + e_gold + "\n```")
+        print("E_DOCKER_SMOKE id=%s content=%.2f format=%s notes=%s" % (e_task["id"], ec, ef, en))
+        if ec < 1.0:
+            rc = 1
+
+    # ws adapter presence (contour arm entrypoint): hash it if built
+    ws = Path("~").expanduser() / "parb-2005-hardv6" / "parb_check.py"
+    if ws.exists():
+        print("WS_ADAPTER_SHA256", sha256(ws))
+
     print("DRY_RUN_SAME_SCORER", "PASS" if rc == 0 else "FAIL")
     return rc
 

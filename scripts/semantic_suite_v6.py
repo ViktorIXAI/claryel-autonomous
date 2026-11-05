@@ -215,5 +215,17 @@ run("E sandbox: no secret env vars inside", _sb,
     "    return 1 if leak else 0", 0.0, 0.999)
 
 
+# ---- docker timeout leaves NO orphan container (GPT-6 blocker 2 demo;
+# safe infinite loop, force host-side wall timeout with a long CPU allowance)
+import subprocess as _sp
+import e_sandbox as _es
+_r = _es.run_docker("while True:\n    pass", cpu_sec=30, wall_sec=1.0)
+assert _r.timed_out, "timeout not observed"
+_left = _sp.run(["docker", "ps", "-a", "--filter", "label=e-sbx",
+                 "--format", "{{.Names}}"], capture_output=True, text=True).stdout.strip()
+assert _left == "", "orphan containers left: %s" % _left
+CONTROLS[0] += 1
+print("control OK: docker wall-timeout leaves no orphan container")
+
 print("\nSEMANTIC SUITE v6: %d controls, %d violations" % (CONTROLS[0], len(FAILS)))
 sys.exit(0 if not FAILS else 1)
