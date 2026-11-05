@@ -76,18 +76,36 @@ def main():
            "`content`/`format_ok`) \u2014 not copied from run writeups. Every row also has its per-task",
            "answer bytes in the same directory (`results-*.jsonl`), so any cell can be re-scored.",
            "",
-           "| stamp | plain strict /71 | loop strict /6 | rows | per-category strict (77 incl. loop) | what the stamp changed |",
-           "|---|---|---|---|---|---|"]
+           "| stamp | plain strict /71 | plain corrected /71 | loop strict /6 | rows | per-category strict (77 incl. loop) | what the stamp changed |",
+           "|---|---|---|---|---|---|---|"]
+    corr = {}
+    rp = os.path.join(RES, "RESCORE-PLAIN-D.json")
+    if os.path.exists(rp):
+        for e in json.load(open(rp, encoding="utf-8")):
+            corr[e["stamp"]] = e["plain_corrected"]
     for s, n, ps, pn, ls, ln, cats in rows:
-        out.append(f"| {s} | **{ps}/{pn}** | {ls}/{ln} | {n} | {cats} | {CHANGES.get(s, '')} |")
+        c = corr.get(s)
+        cell = f"**{c}/{pn}**" if c is not None and c != ps else ("=" if c == ps else "-")
+        out.append(f"| {s} | **{ps}/{pn}** | {cell} | {ls}/{ln} | {n} | {cats} | {CHANGES.get(s, '')} |")
     last = rows[-1] if rows else None
     out += ["", f"Reference single-shot arms on the same bank (`FOUR-ARM-SCOREBOARD.md`, no contour): {REF}.",
             "",
             "## Verdict"]
     if last:
-        out.append(f"- Contour line reaches **{last[2]}/{last[3]}** plain at {last[0]}"
-                   f" (loop {last[4]}/{last[5]}); it started at 43/71 (0.0.2.14).")
-    out += ["- Nearly every step is measurement validity in the contour/scorer plumbing, not a model",
+        best = max((corr.get(r[0], r[2]) for r in rows), default=0)
+        best_stamp = max((r[0] for r in rows if corr.get(r[0], r[2]) == best), default=last[0])
+        out.append(f"- Contour line reaches **{best}/{last[3]}** plain (corrected) at {best_stamp};"
+                   f" the last measured stamp {last[0]} sits at {corr.get(last[0], last[2])}/{last[3]}"
+                   f" (loop {last[4]}/{last[5]}). Corrected ladder: "
+                   + " -> ".join(str(corr.get(r[0], r[2])) for r in rows) + ".")
+    out += ["- `plain corrected` re-scores the same published answer bytes with the frozen checker",
+            "  (`scripts/rescore_v6_cells.py` -> `RESCORE-PLAIN-D.json`). Stamps before 0.0.2.21 routed",
+            "  the three plain-D tasks (`D-ex6-p0/p1/p2`) through the loop trajectory scorer and scored",
+            "  0/3 on all of them, so their as-run totals are understated by exactly 3 cells; 0.0.2.21",
+            "  fixed the routing, which is why its as-run +3 disappears under correction. Cross-check:",
+            "  the corrected 0.0.2.17 total 44/71 equals the independent external rescore in",
+            "  `CROSSCHECK-217.md` — two scorers, same bytes, same number.",
+            "- Nearly every step is measurement validity in the contour/scorer plumbing, not a model",
             "  change (K yes/no synonyms, H claim clearing, plain-D scorer routing, F option",
             "  backfill, keyword-free format repair).",
             "- J sat at 3/7 for every stamp on bank v6: 2 of the 4 lost cells were bank defects",
@@ -103,6 +121,9 @@ def main():
             "  trend + mechanism, not an effect size. Only 2.16->2.17 (full bank) and the loop-only",
             "  2.15->2.16 pair were measured back-to-back with the endpoint otherwise idle.",
             "- A per-pair flip list for each step lives in the newest directory (`pair-2NN-2MM.txt`).",
+            "- The per-category column is **as-run**: in every row up to 0.0.2.20 the three plain-D",
+            "  tasks are mis-scored there too, so D in those rows reads 3 cells low; `RESCORE-PLAIN-D.json`",
+            "  carries the corrected per-cell detail.",
             ]
     open(os.path.join(RES, "LADDER.md"), "w", encoding="utf-8").write("\n".join(out) + "\n")
     print("\n".join(out))

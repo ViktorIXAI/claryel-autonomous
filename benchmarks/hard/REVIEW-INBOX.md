@@ -195,3 +195,41 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 - **SHIPPED @ contour 0.0.2.23** — K SERVICE alias: prompt Cyrillic hosting forms -> Latin `hosting`.
   Offline: K-ex6-01 0.75 -> 1.00. J still claimed by other writer; A arithmetic still open.
 
+
+## From Hermes — consolidation onto main (22:40-22:45 CET, operator directive in chat)
+
+Operator directive, in effect: «вся шоб эта история отразилась в гитхабе… чтобы я больше не
+слышал оправданий мол я не вижу чего-то там из-за того что там… какая-то ветка отвертилась и
+я сказал её не делать». Translation into process: `main` is the only delivery surface; side
+branches are scratch and are not a place results may hide in.
+
+- `main` now carries the whole hard-v6 story: contour 0.0.2.15-0.0.2.25 code, arms
+  `full-216`..`full-223` (answer bytes + ledgers + logs + run-records + pair flip lists),
+  `LADDER.md` + `scripts/ladder_v6.py`, `FOUR-ARM-SCOREBOARD.md`, decision records, this inbox.
+  Merges: `hard-v6-loopd-hermes` (477b70d) and `hard-v6-draft` (f43ea26). No work was dropped:
+  every previously published side ref was 0 commits ahead of `main` before any cleanup.
+- Pre-push guard honoured, not removed: pushing `main` needs `ALLOW_HARD_V6_PUSH=1`. The
+  `.hermes-single-writer-STOP` note says «Жди BOSS» — the operator issued this GO in chat on
+  2026-11-05 for exactly this consolidation, so the flag was set for this push only and the hook
+  stays in place for every future one. `hard-v6-p0-fix` was NOT pushed and not deleted, per that
+  note.
+- Deleted only my own merged scratch refs: `hard-v6-p0-fix-hermes`, `hard-v6-loopd-hermes`.
+  `hard-v6-draft` and `hard-v6-p0-fix` are fully contained in `main`; their owner may delete them.
+- Gates on the merged tree before push: contract tests v36/v37/v38/v39/v40 + versioning + fixers
+  (12/12) green; `verify_manifest --v5` and `--v6` PASS; `docs_policy --push` PASS; `gitleaks
+  detect --no-git` on the merged tree: no leaks (19.66 MB).
+- 0.0.2.24 / 0.0.2.25 are published as code with offline replay evidence only: no paired arm,
+  no contract test. Marked unmeasured in `LADDER.md`; no number, no verdict.
+
+## From Hermes — plain-D mis-scoring found in published arms, corrected by rescore (22:50-23:00 CET)
+
+Started from the delta between my ledger numbers (2.17 = 41/71) and the external
+`CROSSCHECK-217.md` (44/71) on the same artifacts. Cell-by-cell diff: exactly three cells,
+all `D-ex6-p0/p1/p2` — the plain-D tasks that stamps before 0.0.2.21 sent through the loop
+trajectory scorer. Published answer bytes score 3/3 under `check_D_plain_v6`.
+- Added `scripts/rescore_v6_cells.py` (deterministic rescore, no model calls) and
+  `v6-results/RESCORE-PLAIN-D.json`; `LADDER.md` now carries both `plain strict` (as-run) and
+  `plain corrected`. Corrected ladder: 42 -> 44 -> 48 -> 50 -> 50 -> 50 -> 54 -> 52.
+- The +3 that 0.0.2.21 appeared to buy is measurement validity, not model gain (delta 0).
+- Per-category columns in old rows stay as-run and are labelled as such; do not read D in
+  pre-0.0.2.20 rows as a model result.

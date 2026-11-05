@@ -1,0 +1,314 @@
+[
+ {
+  "arm": "full-216",
+  "stamp": "0.0.2.16",
+  "plain_rows": 71,
+  "plain_as_run": 39,
+  "plain_corrected": 42,
+  "d_plain_as_run": 0,
+  "d_plain_rescored": 3,
+  "delta": 3,
+  "cells": [
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   }
+  ]
+ },
+ {
+  "arm": "full-217",
+  "stamp": "0.0.2.17",
+  "plain_rows": 71,
+  "plain_as_run": 41,
+  "plain_corrected": 44,
+  "d_plain_as_run": 0,
+  "d_plain_rescored": 3,
+  "delta": 3,
+  "cells": [
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   }
+  ]
+ },
+ {
+  "arm": "full-218",
+  "stamp": "0.0.2.18",
+  "plain_rows": 71,
+  "plain_as_run": 45,
+  "plain_corrected": 48,
+  "d_plain_as_run": 0,
+  "d_plain_rescored": 3,
+  "delta": 3,
+  "cells": [
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   }
+  ]
+ },
+ {
+  "arm": "full-219",
+  "stamp": "0.0.2.19",
+  "plain_rows": 71,
+  "plain_as_run": 47,
+  "plain_corrected": 50,
+  "d_plain_as_run": 0,
+  "d_plain_rescored": 3,
+  "delta": 3,
+  "cells": [
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   }
+  ]
+ },
+ {
+  "arm": "full-220",
+  "stamp": "0.0.2.20",
+  "plain_rows": 71,
+  "plain_as_run": 47,
+  "plain_corrected": 50,
+  "d_plain_as_run": 0,
+  "d_plain_rescored": 3,
+  "delta": 3,
+  "cells": [
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "as_run_strict": 0,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   }
+  ]
+ },
+ {
+  "arm": "full-221",
+  "stamp": "0.0.2.21",
+  "plain_rows": 71,
+  "plain_as_run": 50,
+  "plain_corrected": 50,
+  "d_plain_as_run": 3,
+  "d_plain_rescored": 3,
+  "delta": 0,
+  "cells": [
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   }
+  ]
+ },
+ {
+  "arm": "full-222",
+  "stamp": "0.0.2.22",
+  "plain_rows": 71,
+  "plain_as_run": 54,
+  "plain_corrected": 54,
+  "d_plain_as_run": 3,
+  "d_plain_rescored": 3,
+  "delta": 0,
+  "cells": [
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   }
+  ]
+ },
+ {
+  "arm": "full-223",
+  "stamp": "0.0.2.23",
+  "plain_rows": 71,
+  "plain_as_run": 52,
+  "plain_corrected": 52,
+  "d_plain_as_run": 3,
+  "d_plain_rescored": 3,
+  "delta": 0,
+  "cells": [
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "as_run_strict": 1,
+    "rescored_score": 1.0,
+    "rescored_fmt": true,
+    "rescored_strict": 1,
+    "notes": []
+   }
+  ]
+ }
+]

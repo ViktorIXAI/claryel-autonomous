@@ -10,21 +10,28 @@ Recomputed by `scripts/ladder_v6.py` from the **published ledgers** (ledger rows
 `content`/`format_ok`) — not copied from run writeups. Every row also has its per-task
 answer bytes in the same directory (`results-*.jsonl`), so any cell can be re-scored.
 
-| stamp | plain strict /71 | loop strict /6 | rows | per-category strict (77 incl. loop) | what the stamp changed |
-|---|---|---|---|---|---|
-| 0.0.2.16 | **39/71** | 4/6 | 77 | A5/9 B2/7 C6/8 D4/9 E10/10 F3/6 G5/6 H2/5 I5/6 J0/7 K1/4 | loop-v2 drive: protocol re-ask, in-place gate_rejected, salvage the model's own answer |
-| 0.0.2.17 | **41/71** | 4/6 | 77 | A4/9 B5/7 C5/8 D4/9 E10/10 F2/6 G5/6 H1/5 I5/6 J3/7 K1/4 | deterministic format repair unbundled from CHECKER_INJECT (reaches the official score) |
-| 0.0.2.18 | **45/71** | 4/6 | 77 | A5/9 B5/7 C5/8 D4/9 E10/10 F2/6 G5/6 H2/5 I5/6 J3/7 K3/4 | K boolean true/false -> yes/no |
-| 0.0.2.19 | **47/71** | 4/6 | 77 | A5/9 B5/7 C5/8 D4/9 E10/10 F3/6 G5/6 H4/5 I5/6 J3/7 K2/4 | H JSON: clear fabricated claims / empty actions_done (scorer fail-hard notes) |
-| 0.0.2.20 | **47/71** | 6/6 | 77 | A5/9 B5/7 C4/8 D6/9 E10/10 F3/6 G5/6 H4/5 I5/6 J3/7 K3/4 | K Cyrillic да/нет -> yes/no |
-| 0.0.2.21 | **50/71** | 5/6 | 77 | A4/9 B5/7 C5/8 D8/9 E10/10 F2/6 G5/6 H5/5 I5/6 J3/7 K3/4 | D-plain scored by check_D_plain_v6 (plain D was mis-routed through the loop scorer) |
-| 0.0.2.22 | **54/71** | 4/6 | 77 | A5/9 B5/7 C5/8 D7/9 E10/10 F6/6 G5/6 H4/5 I5/6 J3/7 K3/4 | F JSON: next short-id + empty avoid backfilled from the prompt's own options |
-| 0.0.2.23 | **52/71** | 3/6 | 77 | A4/9 B5/7 C5/8 D6/9 E10/10 F6/6 G5/6 H2/5 I5/6 J3/7 K4/4 | K SERVICE alias: Cyrillic hosting forms -> Latin 'hosting' |
+| stamp | plain strict /71 | plain corrected /71 | loop strict /6 | rows | per-category strict (77 incl. loop) | what the stamp changed |
+|---|---|---|---|---|---|---|
+| 0.0.2.16 | **39/71** | **42/71** | 4/6 | 77 | A5/9 B2/7 C6/8 D4/9 E10/10 F3/6 G5/6 H2/5 I5/6 J0/7 K1/4 | loop-v2 drive: protocol re-ask, in-place gate_rejected, salvage the model's own answer |
+| 0.0.2.17 | **41/71** | **44/71** | 4/6 | 77 | A4/9 B5/7 C5/8 D4/9 E10/10 F2/6 G5/6 H1/5 I5/6 J3/7 K1/4 | deterministic format repair unbundled from CHECKER_INJECT (reaches the official score) |
+| 0.0.2.18 | **45/71** | **48/71** | 4/6 | 77 | A5/9 B5/7 C5/8 D4/9 E10/10 F2/6 G5/6 H2/5 I5/6 J3/7 K3/4 | K boolean true/false -> yes/no |
+| 0.0.2.19 | **47/71** | **50/71** | 4/6 | 77 | A5/9 B5/7 C5/8 D4/9 E10/10 F3/6 G5/6 H4/5 I5/6 J3/7 K2/4 | H JSON: clear fabricated claims / empty actions_done (scorer fail-hard notes) |
+| 0.0.2.20 | **47/71** | **50/71** | 6/6 | 77 | A5/9 B5/7 C4/8 D6/9 E10/10 F3/6 G5/6 H4/5 I5/6 J3/7 K3/4 | K Cyrillic да/нет -> yes/no |
+| 0.0.2.21 | **50/71** | = | 5/6 | 77 | A4/9 B5/7 C5/8 D8/9 E10/10 F2/6 G5/6 H5/5 I5/6 J3/7 K3/4 | D-plain scored by check_D_plain_v6 (plain D was mis-routed through the loop scorer) |
+| 0.0.2.22 | **54/71** | = | 4/6 | 77 | A5/9 B5/7 C5/8 D7/9 E10/10 F6/6 G5/6 H4/5 I5/6 J3/7 K3/4 | F JSON: next short-id + empty avoid backfilled from the prompt's own options |
+| 0.0.2.23 | **52/71** | = | 3/6 | 77 | A4/9 B5/7 C5/8 D6/9 E10/10 F6/6 G5/6 H2/5 I5/6 J3/7 K4/4 | K SERVICE alias: Cyrillic hosting forms -> Latin 'hosting' |
 
 Reference single-shot arms on the same bank (`FOUR-ARM-SCOREBOARD.md`, no contour): grok raw **59/71**, codex raw **49/71**, basalt bare **49/71**; the original contour 0.0.2.14 arm was **43/71** with loop 1/6.
 
 ## Verdict
-- Contour line reaches **52/71** plain at 0.0.2.23 (loop 3/6); it started at 43/71 (0.0.2.14).
+- Contour line reaches **54/71** plain (corrected) at 0.0.2.22; the last measured stamp 0.0.2.23 sits at 52/71 (loop 3/6). Corrected ladder: 42 -> 44 -> 48 -> 50 -> 50 -> 50 -> 54 -> 52.
+- `plain corrected` re-scores the same published answer bytes with the frozen checker
+  (`scripts/rescore_v6_cells.py` -> `RESCORE-PLAIN-D.json`). Stamps before 0.0.2.21 routed
+  the three plain-D tasks (`D-ex6-p0/p1/p2`) through the loop trajectory scorer and scored
+  0/3 on all of them, so their as-run totals are understated by exactly 3 cells; 0.0.2.21
+  fixed the routing, which is why its as-run +3 disappears under correction. Cross-check:
+  the corrected 0.0.2.17 total 44/71 equals the independent external rescore in
+  `CROSSCHECK-217.md` — two scorers, same bytes, same number.
 - Nearly every step is measurement validity in the contour/scorer plumbing, not a model
   change (K yes/no synonyms, H claim clearing, plain-D scorer routing, F option
   backfill, keyword-free format repair).
@@ -39,3 +46,6 @@ Reference single-shot arms on the same bank (`FOUR-ARM-SCOREBOARD.md`, no contou
   trend + mechanism, not an effect size. Only 2.16->2.17 (full bank) and the loop-only
   2.15->2.16 pair were measured back-to-back with the endpoint otherwise idle.
 - A per-pair flip list for each step lives in the newest directory (`pair-2NN-2MM.txt`).
+- The per-category column is **as-run**: in every row up to 0.0.2.20 the three plain-D
+  tasks are mis-scored there too, so D in those rows reads 3 cells low; `RESCORE-PLAIN-D.json`
+  carries the corrected per-cell detail.

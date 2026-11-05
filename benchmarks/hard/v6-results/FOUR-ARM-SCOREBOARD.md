@@ -55,3 +55,24 @@ Evidence, not verdict: the two fixes above are deterministic driver fixes with m
 proof (contour events in ledgers, 6/6 targeted flips), not a claim that the contour now
 beats the raw arms.
 
+
+## 2026-11-05 corrected rescore (same answer bytes, frozen checker)
+
+`scripts/rescore_v6_cells.py` re-scored every published contour arm on its stored answer
+bytes. Contour stamps before 0.0.2.21 scored the three plain-D tasks (`D-ex6-p0/p1/p2`)
+through the loop trajectory scorer: all three were scored 0 in every one of those arms, all
+three pass under `check_D_plain_v6`. Corrected plain totals:
+
+| stamp | 0.0.2.16 | 0.0.2.17 | 0.0.2.18 | 0.0.2.19 | 0.0.2.20 | 0.0.2.21 | 0.0.2.22 | 0.0.2.23 |
+|---|---|---|---|---|---|---|---|---|
+| as-run | 39 | 41 | 45 | 47 | 47 | 50 | 54 | 52 |
+| corrected | 42 | 44 | 48 | 50 | 50 | 50 | 54 | 52 |
+
+Consequences, stated carefully:
+- The as-run +3 at 0.0.2.21 was scoring validity, not a model gain (corrected delta 0).
+- The corrected independent check agrees: corrected 0.0.2.17 = 44/71 matches the external
+  rescore in `CROSSCHECK-217.md` (their scorer, our published bytes).
+- On this bank at rep1 the contour line's best corrected draw is **54/71** (0.0.2.22) against
+  raw arms grok 59, codex 49, basalt 49. Single rep each, contention documented in each
+  writeup: contour is above the two basalt-class raw arms and below grok, and a fresh
+  four-arm comparison at the current stamp is still owed before that becomes a verdict.
