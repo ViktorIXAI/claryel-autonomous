@@ -2,6 +2,9 @@
 
 Pins: bank 32953591ba2a6c51, parb_check 1c032ef022607d7b, parb_loop f5f5b78ab46a0f0c, artifacts 91ccc27a3248b9b5. Contour re-scored from archived answers + D step traces; raw arms re-scored from published answers.
 
+
+> **WATERMARK (owner retraction 2026-11-05):** these totals are historical outputs of the flawed v5 checkers — **INVALID FOR RANKING** (issue #15 adjudication contract, point 6i). No comparative-superiority claim may be drawn from them.
+
 ## 1) Strict contract (77 rows; contour=loop accounting for D, raw arms=strict_plain)
 
 | arm | perfect/77 | pct |

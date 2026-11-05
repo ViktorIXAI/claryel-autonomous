@@ -8,6 +8,9 @@ Current authoritative table lives in `audit-20261105/README.md`
 
 ## Hard v5, rep0 (FINAL, 2026-11-05 audit)
 
+
+> **WATERMARK (owner retraction 2026-11-05):** these totals are historical outputs of the flawed v5 checkers — **INVALID FOR RANKING** (issue #15 adjudication contract, point 6i). No comparative-superiority claim may be drawn from them.
+
 | arm | strict (official) |
 |---|---|
 | contour 0.0.2.12 + Basalt (local) | 70/77 = 90.9% |
