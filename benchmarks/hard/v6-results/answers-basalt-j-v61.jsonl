@@ -1,0 +1,7 @@
+{"task": "J-ex6-00", "rep": 0, "cat": "J", "answer": "[\n  \"v2\",\n  \"v3\",\n  \"v5\"\n]", "finish": "stop", "seconds": 3.1, "arm": "basalt", "mode": "strict_plain"}
+{"task": "J-ex6-01", "rep": 0, "cat": "J", "answer": "[\"skuC\", \"skuA\"]", "finish": "stop", "seconds": 2.4, "arm": "basalt", "mode": "strict_plain"}
+{"task": "J-ex6-02", "rep": 0, "cat": "J", "answer": "[\n  \"r3\",\n  \"r2\",\n  \"r4\",\n  \"r1\",\n  \"r5\"\n]", "finish": "stop", "seconds": 4.3, "arm": "basalt", "mode": "strict_plain"}
+{"task": "J-ex6-03", "rep": 0, "cat": "J", "answer": "[\"c1\", \"c3\"]", "finish": "stop", "seconds": 3.5, "arm": "basalt", "mode": "strict_plain"}
+{"task": "J-ex6-04", "rep": 0, "cat": "J", "answer": "[\"m4\", \"m1\", \"m3\"]", "finish": "stop", "seconds": 2.2, "arm": "basalt", "mode": "strict_plain"}
+{"task": "J-ex6-05", "rep": 0, "cat": "J", "answer": "[\"beta\", \"alpha\", \"gamma\", \"zeta\"]", "finish": "stop", "seconds": 1.7, "arm": "basalt", "mode": "strict_plain"}
+{"task": "J-ex6-06", "rep": 0, "cat": "J", "answer": "[\"t4\", \"t1\", \"t3\"]", "finish": "stop", "seconds": 3.1, "arm": "basalt", "mode": "strict_plain"}

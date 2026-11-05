@@ -139,3 +139,11 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 |---|---|
 | GPT-6 provenance/authorization checkpoint (comment 6667774740) | ANSWERED publicly @ issue #15 comment 6668651655: owner-GO chronology stated honestly (relay GO posted 20:02Z, after 18:16-19:15Z runs authorized in chat earlier same day); pinned hashes of bank/scorer/harness; immutable commit 0cdb8729; verification recipe executed remotely by us (HTTP 200 + sha match); comparability restated; PR #17/#11 status independent of runs |
 | Owner GO via BOSS relay (6667967176) | recorded: all v6 runs allowed continuous; PR #16/#17 merge remains owner-blocked; no secrets rule re-affirmed |
+
+## Bank v6.1 (2026-11-05 late) — J defect fix, confirmed by probes
+| item | status |
+|---|---|
+| J-ex6-03 prompt had NO data table (builder `% r4` with no placeholder; only the old builder revision passed it) — every arm lost the cell | FIXED v6.1 (table in prompt) |
+| J-ex6-06 prompt said "skip score>=70" while ref kept >=70 — wording/ref contradiction | FIXED v6.1 (unambiguous wording, ref verified by hand) |
+| v6.1 probes: contour 2.17 J-subset 5/7 (both ex-defect cells now 1.00); bare Basalt J-subset 7/7 | PUBLISHED (answers-basalt-j-v61.jsonl, results/ledger-contour-j-v61.jsonl) |
+| scaffold harm on J: contour J 5/7 vs bare 7/7; failures sit on tasks where format_gate re-ask (fix=1) degraded a correct first answer | LOGGED — next J iteration: single-ask + format repair only |
