@@ -65,6 +65,7 @@ CONTOUR_FEATURES = (
     (2, 20),  # K bool Cyrillic: да/нет -> yes/no on yes/no fields (extends 2.18 true/false)
     (2, 21),  # D-plain uses check_D_plain_v6 (stop mis-routing plain D through loop scorer)
     (2, 22),  # F JSON: next short-id + empty avoid backfill from prompt N-options
+    (2, 23),  # K SERVICE alias: prompt Cyrillic hosting forms -> Latin hosting
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -79,8 +80,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 22)
-CURRENT_STAMP = "0.0.2.22"
+CURRENT_REVISION = (2, 23)
+CURRENT_STAMP = "0.0.2.23"
 
 
 def _digits(value: str) -> list[int]:

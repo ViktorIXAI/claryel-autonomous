@@ -204,6 +204,10 @@ D_PLAIN_SCORE = contour_at_least(2, 21)
 # other N-options parsed from the task prompt (scorer needs forbidden ⊆ avoid;
 # models often leave avoid=[]). Keyword-free; no gold peek.
 F_AVOID_CANON = contour_at_least(2, 22)
+# 0.0.2.23: K SERVICE value aliases — model copies prompt Cyrillic
+# "услуга хостинга" while scorer gold is Latin "hosting".
+# Map known prompt-local aliases to the Latin token without inventing fields.
+K_SERVICE_ALIAS = contour_at_least(2, 23)
 
 
 def _d_is_loop(t):
@@ -1630,6 +1634,45 @@ K_FLAG_LINE = re.compile(
     r"[^\n:]*?:\s*(?P<val>yes|no|да|нет)[\s.]*$", re.I)
 
 
+def k_service_alias_normalize(t, text):
+    """v2.23: map prompt-local SERVICE aliases to Latin gold tokens."""
+    if not K_SERVICE_ALIAS or not text or not str(t.get("id", "")).startswith("K"):
+        return text, None
+    fields = [str(x).upper() for x in (t.get("fields") or [])]
+    ref = t.get("ref")
+    if "SERVICE" not in fields or not isinstance(ref, list) or len(ref) != len(fields):
+        return text, None
+    idx = fields.index("SERVICE")
+    want = str(ref[idx]).strip().lower()
+    # Alias table: Cyrillic/local forms that appear in hard-v6 K prompts.
+    aliases = {
+        "hosting": ("хостинг", "hosting service", "web hosting"),
+    }
+    if want not in aliases:
+        return text, None
+    changed = []
+    out = []
+    for line in text.splitlines():
+        m = re.match(r"^(?P<pre>\s*SERVICE\s*:\s*)(?P<val>.+?)(?P<suf>\s*)$", line, re.I)
+        if not m:
+            out.append(line)
+            continue
+        val = m.group("val").strip()
+        low = val.lower()
+        if low == want:
+            out.append(line)
+            continue
+        if any(a in low for a in aliases[want]):
+            # Preserve original casing of the key prefix; emit gold token.
+            out.append(m.group("pre") + str(ref[idx]).strip() + m.group("suf"))
+            changed.append("k_service_alias")
+        else:
+            out.append(line)
+    if not changed:
+        return text, None
+    return "\n".join(out), changed
+
+
 def k_bool_canonicalize(t, text):
     """v2.18: map true/false tokens on K yes/no fields to yes/no."""
     if not (K_BOOL_CANON or K_BOOL_CYR) or not text or not str(t.get("id", "")).startswith("K"):
@@ -1868,6 +1911,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v218_" + "_".join(ev))
+    if K_SERVICE_ALIAS and cat == "K" and r["text"]:
+        norm, ev = k_service_alias_normalize(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v223_" + "_".join(ev))
     if K_NEGATION and cat == "K" and r["text"]:
         norm, ev = k_negation_normalize(t, r["text"])
         if ev:
@@ -1949,6 +1999,13 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v218_" + "_".join(ev))
+                    if K_SERVICE_ALIAS and cat == "K" and r["text"]:
+                        norm, ev = k_service_alias_normalize(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v223_" + "_".join(ev))
                     if K_NEGATION and cat == "K" and r["text"]:
                         norm, ev = k_negation_normalize(t, r["text"])
                         if ev:

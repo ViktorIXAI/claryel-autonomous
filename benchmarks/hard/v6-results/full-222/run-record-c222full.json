@@ -1,0 +1,8 @@
+{
+  "contour_version": "0.0.2.22",
+  "contour_behavior": "2.22",
+  "plan_tasks": 77,
+  "box": "B2003",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:<PORT>"
+}

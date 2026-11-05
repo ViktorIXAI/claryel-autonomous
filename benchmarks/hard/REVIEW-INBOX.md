@@ -188,3 +188,10 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
   from other prompt N-options. Offline replay of 2.21 F fails: 01/03/04/05 all -> 1.00.
 - Next: K SERVICE synonym (хостинг->hosting); J still claimed elsewhere.
 
+## From Hermes — hard-v6 0.0.2.22 full + 0.0.2.23 ship (22:12 Europe/Rome)
+
+- **0.0.2.22 DONE** plain **54/71** (76%), F **6/6** (was 2/6); loop 4/6. Artifacts `full-222/`.
+  Events: v222_f_avoid_fill x3, v222_f_next_short_f_avoid_norm x1.
+- **SHIPPED @ contour 0.0.2.23** — K SERVICE alias: prompt Cyrillic hosting forms -> Latin `hosting`.
+  Offline: K-ex6-01 0.75 -> 1.00. J still claimed by other writer; A arithmetic still open.
+
