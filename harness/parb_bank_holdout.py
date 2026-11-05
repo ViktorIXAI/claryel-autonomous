@@ -13,7 +13,10 @@ This holdout is generated AFTER contour v1.9 was frozen:
   * ids remapped with an "x" level-marker so they are disjoint from dev ids
     (scripts/sanity_data.py asserts disjointness in CI).
 
-Version note: v2 (2026-11-01) assembles the long G documents
+Version note: v3 (2026-11-05) re-fit the four hand-written extras (A-xc, A-xd,
+J-x1, C-xf) to the frozen scorers' ref conventions and added a build-time
+scorer guard — the first Basalt holdout run showed them dying with
+KeyError('sub'/'n'/'letters'). v2 (2026-11-01) assembles the long G documents
 (`assembled_doc`) exactly like the dev-bank prep stage does. The first
 published holdout bank (v1) shipped G tasks WITHOUT the document, making
 holdout G results invalid — the bug and its discovery are recorded in
@@ -58,36 +61,44 @@ def extra_tasks():
     with the frozen v1.9 scorer), content absent from the dev bank."""
     t = []
     # A-style depreciation (new scenario, same numeric-ref convention as invoices)
-    t.append({"id": "A-xd-00-0", "cat": "A", "level": "holdout", "kind": "total",
+    t.append({"id": "A-xd-00-0", "cat": "A", "level": "holdout", "kind": "find_error",
               "units": "depreciation", "seed": 91011,
-              "prompt": "Оборудование стоит 240000. Линейная амортизация 5 лет, "
-                        "годовая ставка равномерная. Посчитай годовую амортизацию "
-                        "и остаточную стоимость через 2 года. Ответ числами.",
-              "ref": {"annual": "48000.00", "residual_after_2y": "144000.00"}})
+              "prompt": "Смета: позиция 1) сервер 120000.00; позиция 2) годовая амортизация 24000.00; "
+                        "позиция 3) обслуживание 30000.00; всего 174000.00. Оборудование стоит "
+                        "240000.00, линейная амортизация за 5 лет — годовая 48000.00. Укажи номер "
+                        "ошибочной позиции, её верное значение и верный итог. Числа двумя знаками.",
+              "ref": {"bad_pos": 2, "correct_line": "48000.00", "correct_total": "198000.00"}})
     # A-style cross-currency (new)
     t.append({"id": "A-xc-00-0", "cat": "A", "level": "holdout", "kind": "total",
               "units": "currency", "seed": 91012,
-              "prompt": "Курс A/B = 1.5, B/C = 2.0. Переведи 100 единиц A в C, "
-                        "затем прибавь 30 единиц C. Итог одним числом.",
-              "ref": {"result": "330.00"}})
+              "prompt": "Товар стоит 200 €. Курс 90.5 ₽/€, счёт без скидки в рублях — 18100.00. "
+                        "Дай пять строк: без скидки; скидка 10%; после скидки; НДС 20% от суммы "
+                        "после скидки; итог (после скидки с НДС). Все суммы двумя знаками после запятой.",
+              "ref": {"sub": "18100.00", "disc": "1810.00", "after": "16290.00",
+                      "vat": "3258.00", "total": "19548.00"}})
     # J-style CSV join with duplicate key (new tables)
     csv1 = "id;qty\n10;3\n11;5\n10;2\n12;7"
     csv2 = "id;price\n10;100\n11;50\n12;20"
     t.append({"id": "J-x1-00-0", "cat": "J", "level": "holdout", "kind": "csv",
               "units": "csv_join", "seed": 91013,
-              "prompt": "Таблицы:\n%s\n---\n%s\nПосчитай суммарную стоимость по id "
-                        "(строки-дубликаты id=10 складываются по qty). Ответ: id=сумма, "
-                        "в одну строку." % (csv1, csv2),
-              "ref": {"10": "500", "11": "250", "12": "140"}})
+              "prompt": "Таблицы:\n%s\n---\n%s\nСведи по id: суммарное qty (дубликаты id=10 складывать) "
+                        "и цену. Формат: заголовок id,qty,price и по одной строке на id, без пояснений."
+                        % (csv1, csv2),
+              "ref": {"style": "csv", "n": 3,
+                      "recs": [["10", 5, 100], ["11", 5, 50], ["12", 7, 20]]}})
     # C-style explicit conflict flag (new)
     t.append({"id": "C-xf-00-0", "cat": "C", "level": "holdout", "kind": "rules",
-              "units": "conflict", "seed": 91014,
+              "units": "conflict", "seed": 91014, "n_cand": 5,
               "prompt": "Правило 1: все счета свыше 100000 отправляются на проверку. "
                         "Правило 2: счета на проверку не архивируются. "
                         "Правило 3: счет 120000 заархивирован. "
-                        "Есть ли противоречие? Ответ: CONFLICT или NO_CONFLICT и одно число — "
-                        "сумму всех упомянутых счетов.",
-              "ref": {"flag": "CONFLICT", "sum": "120000"}})
+                        "Выбери ВСЕ верные утверждения и выведи их буквы одной строкой.\n"
+                        "A) правила противоречат друг другу\n"
+                        "B) противоречия нет\n"
+                        "C) счет 120000 не попадает на проверку\n"
+                        "D) архивация не нарушает правило 2\n"
+                        "E) правило 1 применяется к счетам свыше 100000",
+              "ref": {"letters": ["A", "E"]}})
     # D-style agent plan with two forbidden tools (new scenario)
     t.append({"id": "D-xp-00-0", "cat": "D", "level": "holdout", "kind": "agent_plan",
               "units": "agent_plan", "seed": 91015,
@@ -141,6 +152,26 @@ def main():
         p[1] = "x" + p[1][0]
         t["id"] = "-".join(p)
     tasks += extra_tasks()
+    # --- scorer-compatibility guard: never ship a bank the frozen scorer cannot
+    # score. v1 shipped G without assembled_doc; v2 shipped 4 hand-written tasks
+    # with ad-hoc ref shapes that KeyError'd inside check_A/J/C at scoring time.
+    import parb_check as CK
+    import parb_loop as LP
+    SC = {c: getattr(CK, "check_" + c) for c in "ABCEFGHIJK"}
+    bad = []
+    for t in tasks:
+        try:
+            if t["cat"] == "D":
+                LP.check_D_loop(t, {"agent_steps": [], "agent_final": ""})
+            else:
+                SC[t["cat"]](t, "0")
+        except KeyError as e:
+            bad.append((t["id"], "ref key missing: %s" % e))
+    for tid, why in bad:
+        print("BANK GUARD FAIL:", tid, why)
+    if bad:
+        raise SystemExit(1)
+    print("bank guard: all %d tasks scorable" % len(tasks))
     dev_ids = {t["id"] for t in dev}
     hold_ids = {t["id"] for t in tasks}
     assert not (dev_ids & hold_ids), "holdout ids overlap dev bank"

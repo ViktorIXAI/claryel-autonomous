@@ -149,3 +149,17 @@ misleading message. Content and hashes were unaffected, and the intended
 commit (`0d28de5`) later restates the same work with a proper message —
 but commit hygiene matters for an audit trail. Fix queued for the watchdog:
 stage only pipeline-generated paths, never `-A`.
+
+## Holdout bank v2 shipped hand-written tasks the frozen scorer cannot score (2026-11-05)
+
+The first holdout run on the Basalt engine died with `KeyError: 'sub'` /
+`'n'` / `'letters'` on four hand-written extras (A-xc, A-xd, J-x1, C-xf):
+the builder gave them ad-hoc `ref` shapes while the scorers are frozen and
+expect the invoice/csv/rules conventions of the dev bank. Same class as the
+holdout-v1 missing-`assembled_doc` bug: a bank that was never dry-scored at
+build time. Detected ONLY because the new engine re-ran the whole holdout.
+Fixed in bank v3: the four tasks were re-fit to scorer ref conventions
+(prompts rewritten to the standard answer forms, ids unchanged), and the
+builder now dry-runs every scorer against every task — if any raises
+KeyError the bank refuses to build. Corrected holdout numbers restated in
+the gate-versions log; 93.2% -> 95.1% on both arms.
