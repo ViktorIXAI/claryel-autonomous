@@ -68,6 +68,9 @@ CONTOUR_FEATURES = (
     (2, 23),  # K SERVICE alias: prompt Cyrillic hosting forms -> Latin hosting
     (2, 24),  # I duration list: re-sort [label, seconds] pairs by seconds ascending
     (2, 25),  # G short-context: discount no-stack conflict JSON by code
+    (2, 26),  # G conflict overwrite when clauses/values disagree with prompt pair
+    (2, 27),  # A arithmetic by code from prompt numbers (invoice/FX/proration/trim)
+    (2, 28),  # H requires/unknown filled from explicit prompt signature constraint
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -82,8 +85,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 25)
-CURRENT_STAMP = "0.0.2.25"
+CURRENT_REVISION = (2, 28)
+CURRENT_STAMP = "0.0.2.28"
 
 
 def _digits(value: str) -> list[int]:

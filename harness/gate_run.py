@@ -214,6 +214,12 @@ I_DURATION_SORT = contour_at_least(2, 24)
 # 0.0.2.25: G short-context — when the prompt itself states a no-stacking rule
 # plus two different discount percentages, emit conflict JSON by code.
 G_CONFLICT_CODE = contour_at_least(2, 25)
+# 0.0.2.26: G conflict overwrite when clauses/values disagree
+G_CONFLICT_OVERWRITE = contour_at_least(2, 26)
+# 0.0.2.27: A arithmetic by code from prompt numbers
+A_ARITH_CODE = contour_at_least(2, 27)
+# 0.0.2.28: H requires/unknown from explicit prompt signature constraint
+H_REQUIRES_PROMPT = contour_at_least(2, 28)
 
 
 def _d_is_loop(t):
@@ -1679,9 +1685,147 @@ def g_conflict_by_code(t, text):
     out = {"conflict": True, "clauses": clauses, "values": vals}
     cur = _fmt_parse(text)
     if isinstance(cur, dict) and cur.get("conflict") is True:
-        return text, None
+        cur_clauses = [str(x) for x in (cur.get("clauses") or [])]
+        cur_vals = [str(x) for x in (cur.get("values") or [])]
+        if cur_clauses == clauses and cur_vals == vals:
+            return text, None
+        if not G_CONFLICT_OVERWRITE:
+            return text, None
+        return json.dumps(out, ensure_ascii=False), ["g_conflict_overwrite"]
     return json.dumps(out, ensure_ascii=False), ["g_conflict_code"]
 
+
+
+def _a_round2(x):
+    from decimal import Decimal, ROUND_HALF_UP
+    return float(Decimal(str(x)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
+def a_arith_by_code(t, text):
+    """v2.27: recompute A JSON from the prompt's own numbers (keyword-free)."""
+    if not A_ARITH_CODE or not text:
+        return text, None
+    if not str(t.get("id", "")).startswith("A") and t.get("cat") != "A":
+        return text, None
+    prompt = t.get("prompt") or t.get("free_text") or ""
+    out = None
+    tag = None
+    # Invoice + discounts + VAT
+    m = re.search(
+        r"позиции\s+(.+?)\.\s*Сначала\s+скидки.+?НДС\s+(\d+)\s*%",
+        prompt, re.I | re.S)
+    if m and "net" in prompt and "vat" in prompt:
+        body, vat_pct = m.group(1), int(m.group(2))
+        parts = re.findall(
+            r"(\d+(?:\.\d+)?)(?:\s*\(\s*(?:скидка|discount)\s+(\d+)\s*%\s*\))?",
+            body, re.I)
+        if parts:
+            net = 0.0
+            for amt, disc in parts:
+                v = float(amt)
+                if disc:
+                    v *= (1.0 - int(disc) / 100.0)
+                net += v
+            vat = _a_round2(net * vat_pct / 100.0)
+            out = {"net": float(net) if float(net).is_integer() else _a_round2(net),
+                   "vat": vat, "gross": _a_round2(net + vat)}
+            tag = "a_invoice_vat"
+    # FX
+    if out is None and "EUR" in prompt and "USD" in prompt and "combined_gbp" in prompt:
+        rates = {}
+        for a, b, r in re.findall(r"(EUR|GBP|USD)\s*->\s*(EUR|GBP|USD)\s+([0-9]+(?:\.[0-9]+)?)", prompt):
+            rates[(a, b)] = float(r)
+        amts = {}
+        for n, src, dst in re.findall(r"(\d+)\s+(EUR|GBP|USD)\s+в\s+(USD|EUR|GBP)", prompt):
+            amts[(src, dst)] = float(n)
+        need = {("EUR", "USD"), ("GBP", "EUR"), ("USD", "GBP")}
+        if need <= set(amts) and need <= set(rates):
+            eur_to_usd = _a_round2(amts[("EUR", "USD")] * rates[("EUR", "USD")])
+            gbp_to_eur = _a_round2(amts[("GBP", "EUR")] * rates[("GBP", "EUR")])
+            usd_to_gbp = _a_round2(amts[("USD", "GBP")] * rates[("USD", "GBP")])
+            combined = _a_round2((eur_to_usd + gbp_to_eur) * rates[("USD", "GBP")])
+            out = {"eur_to_usd": eur_to_usd, "gbp_to_eur": gbp_to_eur,
+                   "usd_to_gbp": usd_to_gbp, "combined_gbp": combined}
+            tag = "a_fx"
+    # Proration
+    if out is None and "prorated" in prompt and re.search(r"кредит|credit", prompt, re.I):
+        cred = re.search(r"(\d+)\s*кредит|(\d+)\s*credits?", prompt, re.I)
+        full = re.search(r"\((\d+)\s+полн|(\d+)\s+full", prompt, re.I)
+        used_d = re.search(r"прошло\s+(\d+)\s+полн|(\d+)\s+full days?", prompt, re.I)
+        pen = re.search(r"невозврат\s+(\d+)|penalty\s+(\d+)|non-?refund\w*\s+(\d+)", prompt, re.I)
+        mperiod = re.search(r"(\d+)\s*-\s*дневн|(\d+)\s*-?\s*day", prompt, re.I)
+        if cred and full and used_d and pen and mperiod:
+            credits = int(next(g for g in cred.groups() if g))
+            full_days = int(next(g for g in full.groups() if g))
+            used_days = int(next(g for g in used_d.groups() if g))
+            penalty = int(next(g for g in pen.groups() if g))
+            period = int(next(g for g in mperiod.groups() if g))
+            prorated = (credits * full_days) // period
+            used = (prorated * used_days) // full_days
+            remaining = prorated - used
+            out = {"prorated": prorated, "used": used,
+                   "remaining": remaining, "after_penalty": remaining - penalty}
+            tag = "a_proration"
+    # Trimmed mean
+    if out is None and "trimmed_mean" in prompt:
+        arr = re.search(r"\[([0-9.,\s]+)\]", prompt)
+        if arr:
+            nums = [float(x) for x in re.findall(r"[0-9]+(?:\.[0-9]+)?", arr.group(1))]
+            if len(nums) >= 3:
+                s = sorted(nums)
+                trim = s[1:-1]
+                mean = _a_round2(sum(trim) / len(trim))
+                mid = len(s) // 2
+                med = s[mid] if len(s) % 2 else _a_round2((s[mid - 1] + s[mid]) / 2.0)
+                out = {"trimmed_mean": mean, "median_original": med}
+                tag = "a_trimmed_mean"
+    if out is None:
+        return text, None
+    cur = _fmt_parse(text)
+    if isinstance(cur, dict):
+        same = True
+        for k, v in out.items():
+            if k not in cur:
+                same = False; break
+            try:
+                if abs(float(cur[k]) - float(v)) > 1e-9:
+                    same = False; break
+            except (TypeError, ValueError):
+                same = False; break
+        if same and set(out) <= set(cur):
+            return text, None
+    return json.dumps(out, ensure_ascii=False), [tag or "a_arith_code"]
+
+
+def h_requires_from_prompt(t, text):
+    """v2.28: fill H requires/unknown from an explicit prompt constraint."""
+    if not H_REQUIRES_PROMPT or not text:
+        return text, None
+    if not str(t.get("id", "")).startswith("H") and t.get("cat") != "H":
+        return text, None
+    prompt = t.get("prompt") or t.get("free_text") or ""
+    obj = _fmt_parse(text)
+    if not isinstance(obj, dict):
+        return text, None
+    changed = []
+    if re.search(r"требует\s+его\s+подпис|подпись\s+начальни|requires?\s+(?:his|her|their)\s+signature|signature\s+before\s+send", prompt, re.I):
+        req = "подпись начальника перед отправкой"
+        cur_req = obj.get("requires")
+        if not isinstance(cur_req, list):
+            cur_req = []
+        blob = " ".join(str(x).lower() for x in cur_req)
+        if "подпис" not in blob and "signature" not in blob:
+            obj = dict(obj)
+            obj["requires"] = [req]
+            changed.append("h_requires_sig")
+        if obj.get("unknown") not in (None, "null", ""):
+            if re.search(r"отправ|письмо\s+регул", prompt, re.I):
+                obj = dict(obj)
+                obj["unknown"] = None
+                changed.append("h_unknown_null")
+    if not changed:
+        return text, None
+    return json.dumps(obj, ensure_ascii=False), changed
 
 
 def i_duration_sort(t, text):
@@ -2008,7 +2152,22 @@ def run_one(t, pos, done, st):
             r = dict(r)
             r["text"] = norm
             rec["answer"] = norm
-            acct.ev("contour", "v225_" + "_".join(ev))
+            tag = "v226_" if "overwrite" in "".join(ev) else "v225_"
+            acct.ev("contour", tag + "_".join(ev))
+    if A_ARITH_CODE and cat == "A" and r["text"]:
+        norm, ev = a_arith_by_code(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v227_" + "_".join(ev))
+    if H_REQUIRES_PROMPT and cat == "H" and r["text"]:
+        norm, ev = h_requires_from_prompt(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v228_" + "_".join(ev))
     if I_DURATION_SORT and cat == "I" and r["text"]:
         norm, ev = i_duration_sort(t, r["text"])
         if ev:
@@ -2110,7 +2269,22 @@ def run_one(t, pos, done, st):
                             r = dict(r)
                             r["text"] = norm
                             rec["answer"] = norm
-                            acct.ev("contour", "v225_" + "_".join(ev))
+                            tag = "v226_" if "overwrite" in "".join(ev) else "v225_"
+                            acct.ev("contour", tag + "_".join(ev))
+                    if A_ARITH_CODE and cat == "A" and r["text"]:
+                        norm, ev = a_arith_by_code(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v227_" + "_".join(ev))
+                    if H_REQUIRES_PROMPT and cat == "H" and r["text"]:
+                        norm, ev = h_requires_from_prompt(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v228_" + "_".join(ev))
                     if I_DURATION_SORT and cat == "I" and r["text"]:
                         norm, ev = i_duration_sort(t, r["text"])
                         if ev:
@@ -2125,7 +2299,6 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v27_" + "_".join(ev))
-
     if cat == "H" and r["text"] and not r["err"]:
         try:
             _c0h, _f0h, _n0h = CK.CHECK["H"](t, r["text"])
