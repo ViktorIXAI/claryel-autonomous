@@ -6,7 +6,7 @@ import hashlib, random
 from decimal import Decimal, ROUND_HALF_UP
 
 LEVELS = ["easy", "medium", "hard", "veryhard"]
-MIX = {"easy": 0.10, "medium": 0.30, "hard": 0.40, "veryhard": 0.20}
+MIX = {"easy": 0.10, "medium": 0.30, "hard": 0.40, "veryhard": 0.20, "extreme": 0.0}
 CATS = "A B C D E F G H I J K L".split()
 STAGE_OF = {"A": 2, "B": 2, "C": 2, "E": 3, "F": 3, "D": 4, "H": 4, "I": 4,
             "G": 5, "J": 5, "K": 5}
@@ -54,7 +54,7 @@ def money_line(p, q):
 # ---------------------------------------------------------------- A finance
 def gen_A(seed, level):
     rng = random.Random(seed)
-    n = {"easy": 3, "medium": 8, "hard": 15, "veryhard": 28}[level]
+    n = {"easy": 3, "medium": 8, "hard": 15, "veryhard": 28, "extreme": 60}[level]
     kind = rng.choice(["invoice", "margin", "find_error", "chain_discount"])
     if kind == "margin":
         cost = mny(rng.randint(120, 900) + rng.choice([0, 0.5]))
@@ -128,7 +128,7 @@ def gen_A(seed, level):
 # ---------------------------------------------------------------- B extraction
 def gen_B(seed, level):
     rng = random.Random(seed)
-    n = {"easy": 10, "medium": 25, "hard": 50, "veryhard": 100}[level]
+    n = {"easy": 10, "medium": 25, "hard": 50, "veryhard": 100, "extreme": 200}[level]
     style = rng.choice(["orders_text", "csv", "email", "spec"])
     fmt_out = "json" if style != "csv" else "json"
     recs = []
@@ -164,8 +164,8 @@ def gen_B(seed, level):
 # ---------------------------------------------------------------- C logic
 def gen_C(seed, level):
     rng = random.Random(seed + 17)
-    ncand = {"easy": 5, "medium": 6, "hard": 8, "veryhard": 9}[level]
-    k = {"easy": 4, "medium": 5, "hard": 6, "veryhard": 8}[level]
+    ncand = {"easy": 5, "medium": 6, "hard": 8, "veryhard": 9, "extreme": 14}[level]
+    k = {"easy": 4, "medium": 5, "hard": 6, "veryhard": 8, "extreme": 9}[level]
     pool = [("RAM не менее {v} GB", "RAM", ">=", [32, 64]),
             ("RAM более {v} GB", "RAM", ">", [32, 64]),
             ("RAM не более {v} GB", "RAM", "<=", [64, 128]),
@@ -320,9 +320,10 @@ AGENT_LOOP_SYS = (
 def gen_D_loop(seed, level, kind=None):
     rng = random.Random(seed)
     kinds = {"easy": ["sum"], "medium": ["sum", "filter"],
-             "hard": ["sum", "filter", "missing"], "veryhard": ["filter", "missing", "danger"]}[level]
+             "hard": ["sum", "filter", "missing"], "veryhard": ["filter", "missing", "danger"],
+             "extreme": ["filter", "missing", "danger"]}[level]
     kind = kind or kinds[0]
-    n = {"easy": 3, "medium": 6, "hard": 10, "veryhard": 18}[level]
+    n = {"easy": 3, "medium": 6, "hard": 10, "veryhard": 18, "extreme": 30}[level]
     clients = ["Alfa", "Baltic", "Nord", "Terra", "Vira", "Ordo"]
     if kind in ("sum", "filter"):
         rows = [(clients[i % len(clients)], rng.randint(50, 900), rng.choice(["paid", "new", "unpaid"]))
@@ -382,9 +383,9 @@ def gen_E(seed, level, ntests=None, k=None):
         ("find_dup", "Напиши Python-функцию `f(nums)`, которая возвращает список значений, встречающихся "
                      "в списке больше одного раза, без повторов в ответе, в порядке первого появления."),
     ]
-    k = k or {"easy": 1, "medium": 1, "hard": 2, "veryhard": 3}[level]
+    k = k or {"easy": 1, "medium": 1, "hard": 2, "veryhard": 3, "extreme": 5}[level]
     picks = rng.sample(tasks, k)
-    ntests = ntests or {"easy": 15, "medium": 25, "hard": 50, "veryhard": 50}[level]
+    ntests = ntests or {"easy": 15, "medium": 25, "hard": 50, "veryhard": 50, "extreme": 100}[level]
     out = []
     for name, spec in picks:
         base_tests, code = E_TESTS[name]
@@ -545,7 +546,7 @@ CONTRA_TPL = ("Филиал {c}, пункт {n}: в разделе А лимит
 
 def gen_G(seed, level, size=None):
     rng = random.Random(seed)
-    target = size or {"easy": 1000, "medium": 4000, "hard": 8000, "veryhard": 16000}[level]
+    target = size or {"easy": 1000, "medium": 4000, "hard": 8000, "veryhard": 16000, "extreme": 32000}[level]
     cities = rng.sample(CITIES, 4)
     facts = []
     n = 1
@@ -666,7 +667,7 @@ SCHEMA_JSON = {"type": "array", "min_items": 1, "item": {"id": "str", "qty": "in
 
 def gen_J(seed, level):
     rng = random.Random(seed)
-    n = {"easy": 6, "medium": 12, "hard": 25, "veryhard": 45}[level]
+    n = {"easy": 6, "medium": 12, "hard": 25, "veryhard": 45, "extreme": 90}[level]
     style = rng.choice(["json", "csv"])
     recs = []
     for i in range(n):
@@ -759,7 +760,7 @@ def build(seed0, counts):
                 elif cat == "D":
                     g = gen_D(sd, level)
                     kl = {"easy": ["sum"], "medium": ["sum", "filter"], "hard": ["filter", "missing"],
-                          "veryhard": ["missing", "danger"]}[level]
+                          "veryhard": ["missing", "danger"], "extreme": ["missing", "danger"]}[level]
                     for li, kk in enumerate(kl):
                         g = g + gen_D_loop(sd + 7919 * (li + 1), level, kk)
                 elif cat == "E":
