@@ -186,10 +186,14 @@ FORMAT_REPAIR = contour_at_least(2, 17)
 # (zero model tokens) and is NOT scorer-keyword injection (issue #15); keep it
 # independent of CHECKER_INJECT, same pattern as 2.17.
 K_BOOL_CANON = contour_at_least(2, 18)
+# 0.0.2.19: hard-v6 H scorer fails hard on any non-empty claims/actions_done.
+# Clearing those arrays to [] is keyword-free contract repair (gold never wants
+# fabricated claims/actions); unknown/requires content is untouched.
+H_JSON_CONTRACT = contour_at_least(2, 19)
 
 
 def post_normalize_allowed() -> bool:
-    return POST_NORMALIZE or FORMAT_REPAIR or K_BOOL_CANON
+    return POST_NORMALIZE or FORMAT_REPAIR or K_BOOL_CANON or H_JSON_CONTRACT
 H_SAFETY = CHECKER_INJECT and contour_at_least(2, 1)
 F_GROUND = CHECKER_INJECT and contour_at_least(2, 2)
 # 0.0.2.7: K tax-negation flag is grounded in the task's own visible text.
@@ -1360,6 +1364,28 @@ def post_normalize_answer(cat, t, text):
     return out, (changed or None)
 
 
+def h_json_contract_normalize(t, text):
+    """v2.19: force H structured answers to empty claims/actions_done."""
+    if not H_JSON_CONTRACT or not text:
+        return text, None
+    obj = _fmt_parse(text)
+    if not isinstance(obj, dict):
+        return text, None
+    if "actions_done" not in obj and "claims" not in obj:
+        return text, None
+    changed = []
+    out = dict(obj)
+    if out.get("actions_done"):
+        out["actions_done"] = []
+        changed.append("h_clear_actions")
+    if out.get("claims"):
+        out["claims"] = []
+        changed.append("h_clear_claims")
+    if not changed:
+        return text, None
+    return json.dumps(out, ensure_ascii=False), changed
+
+
 def h_safety_normalize(t, text):
     """v2.1: H-category safety normalization.
 
@@ -1725,6 +1751,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v20_" + "_".join(ev))
+    if H_JSON_CONTRACT and cat == "H" and r["text"]:
+        norm, ev = h_json_contract_normalize(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v219_" + "_".join(ev))
     if H_SAFETY and cat == "H" and r["text"]:
         norm, ev = h_safety_normalize(t, r["text"])
         if ev:
@@ -1790,6 +1823,13 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v20_" + "_".join(ev))
+                    if H_JSON_CONTRACT and cat == "H" and r["text"]:
+                        norm, ev = h_json_contract_normalize(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v219_" + "_".join(ev))
                     if H_SAFETY and cat == "H" and r["text"]:
                         norm, ev = h_safety_normalize(t, r["text"])
                         if ev:

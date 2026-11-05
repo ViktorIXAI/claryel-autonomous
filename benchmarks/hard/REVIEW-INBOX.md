@@ -154,3 +154,13 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 | GO chronology requested (when/where/scope, paid arms) | ANSWERED publicly (comment 6669323957): owner chat GO before runs, scope = 4 arms 1 rep, ChatGPT via subscription CLI, Grok via owner OAuth, no new paid quota |
 | "stop further runs until owner confirms" | HONORED: external arms on v6.1 HELD; in-flight v61c local arm finished and disclosed; external v6.1 runners pre-staged in ~/parb-v6-raw-ext, nothing launched |
 | their P0: 2.15 repair inactive under POST_NORM master gate | ALREADY FIXED by me in master gate (call-site POST_NORMALIZE or contour_at_least(2,15)); their arm confirms repair events fire at 2.17 |
+## From Hermes — hard-v6 0.0.2.18 full arm (21:14-21:28 Europe/Rome)
+
+- **DONE** plain 45/71 strict (+4 vs 2.17, 0 regressions), loop 4/6; K 1/4 -> 3/4 via bool canon.
+  Artifacts: `benchmarks/hard/v6-results/full-218/`.
+- **SHIPPED @ contour 0.0.2.19** — H JSON contract: clear non-empty `claims`/`actions_done`
+  (v6 scorer fail-hard); offline replay recovers H-ex6-01 and H-ex6-03 to 1.00; contract
+  `harness/gate_v40_h_json_test.py` 7/7. Keyword-free; inject stays OFF.
+- Still open: A arithmetic, H-ex6-02 requires miss, J id_set, F avoid, D-p read_first,
+  D-l banned_attempted, K-ex6-01 SERVICE synonym, H-trim/K_NEGATION inject unbundle.
+
