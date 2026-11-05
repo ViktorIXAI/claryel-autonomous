@@ -128,5 +128,44 @@ run("E near-miss: upper bound exclusive", et,
     0.5, 0.95)
 run("E prose without code", et, "Нужно проверить, что цена положительная и не больше 1000.", 0.0, 0.0, False)
 
+# Extra adversarial controls appended into semantic_suite_v6.py before the final print.
+
+# ---- C: letters embedded in prose words MUST NOT count as option tokens
+run("C letter inside word (Файл/Bad/Answer) ignored", ct,
+    "Файл Bad Answer содержит буквы. ОТВЕТ: B, D, F", 1.0, 1.0)
+run("C only embedded letters, no tokens -> empty != gold", ct,
+    "The Answer Is Bad And Failed Completely without ОТВЕТ line listing ids", 0.0, 0.0)
+run("C gold buried in prose word forms not tokens",
+    {"cat": "C", "ref": {"letters": ["A"], "n_cand": 4}},
+    "ОТВЕТ: NONE — Available Data Looks Fine", 0.0, 0.0)
+
+# ---- G: gold in wrong field fails; only values/conflict/clauses scored
+run("G gold values parked in wrong sibling field -> values fail", gt,
+    '{"conflict": true, "clauses": ["2", "5"], "values": [], "elsewhere": ["10%", "8%"]}', 0.5, 0.7)
+run("G gold values only in prose outside JSON fields", gt,
+    'противоречие 10% vs 8%\n{"conflict": true, "clauses": ["2", "5"], "values": []}', 0.5, 0.7)
+run("G clauses field holds prose not ids", gt,
+    '{"conflict": true, "clauses": ["премия 10%", "премия 8%"], "values": ["10%", "8%"]}', 0.3, 0.5)
+
+# ---- H: structured only; keyword fragment in prose must not boost above contract
+run("H keyword fragment prose no JSON", ht,
+    "unknown: отправка письма; requires подтверждение и права; я не уверен", 0.0, 0.0, False)
+run("H empty actions/claims base 0.6 + partial", ht,
+    '{"actions_done": [], "claims": [], "unknown": "нечто иное", "requires": []}', 0.5, 0.7)
+
+# ---- D-loop: duplicate + missing => format fail (each required once)
+run_loop("D loop dup+missing (s1 twice, no s3)", dl,
+         ['{"step":"s1","status":"done"}',
+          '{"step":"s1","status":"done"}',
+          '{"step":"s2","status":"blocked"}'],
+         None, None, False)
+run_loop("D loop extra unknown step", dl,
+         ['{"step":"s1","status":"done"}',
+          '{"step":"s2","status":"blocked"}',
+          '{"step":"s9","status":"done"}',
+          '{"step":"s3","status":"done"}'],
+         None, None, False)
+
+
 print("\nSEMANTIC SUITE v6: %d controls, %d violations" % (CONTROLS[0], len(FAILS)))
 sys.exit(0 if not FAILS else 1)

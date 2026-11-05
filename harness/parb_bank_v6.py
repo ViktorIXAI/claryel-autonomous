@@ -420,73 +420,165 @@ print("PART2 tasks:", len(TASKS))
 
 
 # ---------- E: 10 unique function contracts, executable hidden battery -------
+# v6 note: each contract states accepted input/output types explicitly;
+# battery has 25-30 cases (issue #15 P0 E strength). Exec only via e_sandbox.
 def E_tasks():
-    import textwrap
     specs = [
         ("E-ex6-00", "merge_deep",
-         "merge_deep(a,b): глубокое слияние словарей; словари мержатся рекурсивно, скалярные значения b перезаписывают a.",
+         "merge_deep(a,b): глубокое слияние словарей; словари мержатся рекурсивно, "
+         "скалярные значения b перезаписывают a. "
+         "Типы входа: a:dict, b:dict (значения — dict/list/скаляр). Тип выхода: dict.",
          "def merge_deep(a, b):\n    out = dict(a)\n    for k, v in b.items():\n        out[k] = v\n    return out",
          "def merge_deep(a, b):\n    out = dict(a)\n    for k, v in b.items():\n        if k in out and isinstance(out[k], dict) and isinstance(v, dict):\n            out[k] = merge_deep(out[k], v)\n        else:\n            out[k] = v\n    return out",
          [[{"x": 1, "d": {"p": 1, "q": 2}}, {"d": {"q": 3, "r": 4}, "y": 5}],
           [{}, {"a": 1}], [{"a": {"b": {"c": 1}}}, {"a": {"b": 2}}],
-          [{"z": [1]}, {"z": [2]}], [{"m": {"n": 1}}, {}]]),
+          [{"z": [1]}, {"z": [2]}], [{"m": {"n": 1}}, {}],
+          [{"k": 1}, {"k": {"nested": True}}], [{"a": {"b": 1}}, {"a": {"b": {"c": 2}}}],
+          [{"u": {"v": {"w": 1}}}, {"u": {"v": {"x": 2}}}],
+          [{"p": {"q": 1, "r": 2}}, {"p": {"r": 9}}],
+          [{}, {}], [{"a": 1, "b": 2}, {"c": 3}],
+          [{"a": {"b": {"c": {"d": 1}}}}, {"a": {"b": {"c": {"e": 2}}}}],
+          [{"lst": [1, 2]}, {"lst": [3]}], [{"ok": True}, {"ok": False}],
+          [{"n": None}, {"n": 0}], [{"s": "x"}, {"s": "y"}],
+          [{"a": {"b": 1}, "c": 2}, {"a": {"d": 3}, "c": 4}],
+          [{"deep": {"x": {"y": 1}}}, {"deep": {"x": 5}}],
+          [{"a": {}}, {"a": {"b": 1}}], [{"x": {"y": {}}}, {"x": {"y": {"z": 1}}}],
+          [{"a": 1}, {}], [{"meta": {"v": 1}}, {"meta": {"v": 1, "w": 2}}],
+          [{"a": {"b": [1]}}, {"a": {"b": [2]}}],
+          [{"k1": {"a": 1}, "k2": 2}, {"k1": {"b": 2}}],
+          [{"root": {"left": 1, "right": {"v": 2}}}, {"root": {"right": {"w": 3}}}],
+          [{"a": {"b": {"c": 1, "d": 2}}}, {"a": {"b": {"d": 9, "e": 3}}}],
+          [{"i": 1}, {"j": {"k": 2}}], [{"z": {"a": 1}}, {"z": {"a": {"b": 2}}}],
+          [{"t": {"u": 1}}, {"t": 2}]]),
         ("E-ex6-01", "parse_ranges",
-         "parse_ranges(s): строка вида '1-3,7,10-12' -> отсортированный список уникальных int; пробелы допустимы; пустые сегменты игнорируются; диапазон включает границу ('1-3' -> 1,2,3).",
+         "parse_ranges(s): строка вида '1-3,7,10-12' -> отсортированный список уникальных int; "
+         "пробелы допустимы; пустые сегменты игнорируются; диапазон включает границу ('1-3' -> 1,2,3). "
+         "Тип входа: s:str. Тип выхода: list[int].",
          "def parse_ranges(s):\n    out = []\n    for part in s.split(','):\n        part = part.strip()\n        if '-' in part:\n            lo, hi = part.split('-')\n            out.extend(range(int(lo), int(hi)))\n        elif part:\n            out.append(int(part))\n    return sorted(set(out))",
          "def parse_ranges(s):\n    out = []\n    for part in s.split(','):\n        part = part.strip()\n        if not part:\n            continue\n        if '-' in part:\n            lo, hi = part.split('-', 1)\n            out.extend(range(int(lo), int(hi) + 1))\n        else:\n            out.append(int(part))\n    return sorted(set(out))",
          [["1-3,7,10-12"], ["5"], ["1-1,2-2"], [" 8 , 3-5 "], ["0-2,,4"],
-          ["9,9,9"], ["10-11,1"], ["12-15"]]),
+          ["9,9,9"], ["10-11,1"], ["12-15"], ["100-102"], ["7-7"],
+          ["1-5,3-4"], ["20,21,22"], ["0"], ["4-6,8-8,10"], ["15-15,14"],
+          ["1-2,2-3,3-4"], ["99"], ["50-52,1"], ["3-5,  7 ,9-10"],
+          ["11-13,,,"], ["6-8,6-8"], ["2-4,10-12,1"], ["0-0,1-1"],
+          ["30-32"], ["8-10,12"], ["5-9"], ["1-3"], ["9-11,13"]]),
         ("E-ex6-02", "top_k",
-         "top_k(nums, k): k наибольших значений по убыванию; при равных значениях раньше тот, кто в исходном списке раньше (стабильно).",
+         "top_k(nums, k): k наибольших значений по убыванию; при равных значениях раньше тот, "
+         "кто в исходном списке раньше (стабильно). "
+         "Типы входа: nums:list[int|float], k:int (>=0). Тип выхода: list[int|float] длины min(k,len(nums)).",
          "def top_k(nums, k):\n    return sorted(nums, reverse=True)[:k]",
          "def top_k(nums, k):\n    idx = sorted(range(len(nums)), key=lambda i: (-nums[i], i))\n    return [nums[i] for i in idx[:k]]",
          [[[5, 5, 2, 9, 9], 3], [[], 0], [[1], 1], [[3, 3, 3], 2],
-          [[-2, -2, -5], 2], [[4, 1, 4, 1], 4]]),
+          [[-2, -2, -5], 2], [[4, 1, 4, 1], 4], [[10, 9, 8], 2],
+          [[1, 2, 3, 4, 5], 5], [[7, 7, 7, 7], 3], [[0, 0, 1], 2],
+          [[-1, 0, 1], 3], [[9], 0], [[2, 2, 1, 1], 3],
+          [[100, 50, 100], 2], [[5, 4, 3, 2, 1], 1],
+          [[1, 1, 1, 2], 2], [[8, 8, 7, 7, 6], 4],
+          [[3, 1, 2], 0], [[42], 1], [[-9, -8, -7], 1],
+          [[5, 5, 5, 4, 4], 5], [[1, 3, 2, 3, 1], 3],
+          [[0], 1], [[11, 10, 11, 10], 3], [[6, 5, 6], 2],
+          [[9, 1, 9, 1, 9], 4], [[2], 2], [[4, 4], 1]]),
         ("E-ex6-03", "money_round",
-         "money_round(x): округление до 2 знаков HALF_UP (2.345 -> 2.35), вход float/str/int; вернуть float.",
+         "money_round(x): округление до 2 знаков HALF_UP (2.345 -> 2.35). "
+         "Типы входа: x:float|str|int (не bool). Тип выхода: float.",
          "def money_round(x):\n    return round(float(x), 2)",
          "from decimal import Decimal, ROUND_HALF_UP\n\ndef money_round(x):\n    return float(Decimal(str(x)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))",
-         [[2.345], ["2.345"], [2.675], [0], [-2.345], ["0.005"], [1.005], [12345.6789]]),
+         [[2.345], ["2.345"], [2.675], [0], [-2.345], ["0.005"], [1.005], [12345.6789],
+          [1.994], [1.995], [1.996], ["10"], [10], [-0.005], ["-1.005"],
+          [0.015], [0.025], [99.994], [99.995], ["3.14159"],
+          [2.5], ["2.5"], [0.001], [0.004], [0.006],
+          [-2.675], ["100.005"], [7]]),
         ("E-ex6-04", "slugify",
-         "slugify(s): lower; последовательность не-bukvenno-cifrovyh -> один '-'; обрезать ведущие/хвостовые '-'. Буквы/цифры латиницы сохраняются, прочие символы — разделители.",
+         "slugify(s): lower; последовательность не-буквенно-цифровых -> один '-'; "
+         "обрезать ведущие/хвостовые '-'. Буквы/цифры латиницы сохраняются, прочие символы — разделители. "
+         "Тип входа: s:str. Тип выхода: str.",
          "def slugify(s):\n    import re\n    s = s.lower()\n    s = re.sub(r'[^a-z0-9]+', '-', s)\n    return s",
          "def slugify(s):\n    import re\n    s = s.lower()\n    s = re.sub(r'[^a-z0-9]+', '-', s)\n    return s.strip('-')",
          [["Hello World!"], ["--a--b--"], ["2024 Model T"], ["!!!"], ["a1 b2"],
-          ["  lead"], ["trail  "], ["MiXeD CaSe 123"]]),
+          ["  lead"], ["trail  "], ["MiXeD CaSe 123"], ["foo--bar"], ["---"],
+          ["a"], ["Z"], ["123"], ["a_b_c"], ["hello@world.com"],
+          ["  spaced  out  "], ["multi---dash"], ["end-"], ["-start"],
+          ["x y z"], ["FooBar"], ["test...ok"], ["one/two/three"],
+          ["a+b=c"], [""], ["ok_"], ["x--y--z"], ["AbC-123-"]]),
         ("E-ex6-05", "parse_duration",
-         "parse_duration(s): формат 'NhNmNs' (любые части опциональны, порядок h,m,s) -> секунды int. Пример '1h20m'->4800.",
+         "parse_duration(s): формат 'NhNmNs' (любые части опциональны, порядок h,m,s) -> секунды int. "
+         "Пример '1h20m'->4800. "
+         "Тип входа: s:str. Тип выхода: int (секунды, >=0).",
          "def parse_duration(s):\n    import re\n    h = re.search(r'(\\d+)h', s)\n    m = re.search(r'(\\d+)m', s)\n    return int(h.group(1)) * 3600 + int(m.group(1)) * 60 if h and m else 0",
          "def parse_duration(s):\n    import re\n    h = re.search(r'(\\d+)h', s)\n    m = re.search(r'(\\d+)m(?!s)', s)\n    sec = re.search(r'(\\d+)s', s)\n    return (int(h.group(1)) * 3600 if h else 0) + (int(m.group(1)) * 60 if m else 0) + (int(sec.group(1)) if sec else 0)",
-         [["1h20m"], ["90m"], ["2h"], ["45m"], ["1h30m15s"], ["10s"], ["0m"], ["2h5s"], ["1h2m3s"]]),
+         [["1h20m"], ["90m"], ["2h"], ["45m"], ["1h30m15s"], ["10s"], ["0m"], ["2h5s"], ["1h2m3s"],
+          ["0s"], ["3h"], ["15s"], ["1h0m0s"], ["2h0m"], ["0h5m"],
+          ["120s"], ["1h1s"], ["59m"], ["61m"], ["24h"],
+          ["0h0m0s"], ["7m30s"], ["4h15m"], ["9s"], ["3h3m3s"],
+          ["11h"], ["6m"], ["2h30m1s"]]),
         ("E-ex6-06", "chunk_even",
-         "chunk_even(lst, n): n частей (последние могут быть короче), размеры отличаются максимум на 1, большие части в начале.",
+         "chunk_even(lst, n): n частей (последние могут быть короче), размеры отличаются максимум на 1, "
+         "большие части в начале. "
+         "Типы входа: lst:list, n:int. Тип выхода: list[list] длины n (пусто при n<=0).",
          "def chunk_even(lst, n):\n    k = len(lst) // n\n    return [lst[i * k:(i + 1) * k] for i in range(n)]",
-         "def chunk_even(lst, n):\n    import math\n    if n <= 0:\n        return []\n    base, extra = divmod(len(lst), n)\n    out, pos = [], 0\n    for i in range(n):\n        sz = base + (1 if i < extra else 0)\n        out.append(lst[pos:pos + sz])\n        pos += sz\n    return out",
+         "def chunk_even(lst, n):\n    if n <= 0:\n        return []\n    base, extra = divmod(len(lst), n)\n    out, pos = [], 0\n    for i in range(n):\n        sz = base + (1 if i < extra else 0)\n        out.append(lst[pos:pos + sz])\n        pos += sz\n    return out",
          [[list(range(10)), 3], [[1, 2, 3], 2], [[], 4], [[1, 2], 5],
-          [list(range(7)), 1], [list(range(9)), 3]]),
+          [list(range(7)), 1], [list(range(9)), 3], [list(range(5)), 2],
+          [list(range(8)), 4], [[1], 1], [[1], 3],
+          [list(range(11)), 3], [list(range(6)), 6], [list(range(6)), 5],
+          [["a", "b", "c", "d"], 2], [[0], 2], [list(range(15)), 4],
+          [list(range(4)), 3], [[10, 20, 30], 1], [list(range(12)), 5],
+          [[], 1], [[1, 2, 3, 4, 5, 6], 4], [list(range(3)), 3],
+          [list(range(20)), 7], [[7, 8], 1], [list(range(1)), 1],
+          [list(range(9)), 2], [list(range(9)), 4], [[1, 2], 2]]),
         ("E-ex6-07", "norm_phone",
-         "norm_phone(s): только цифры; ведущий 8 -> 7; если 10 цифр -> добавить ведущую 7; иначе вернуть None.",
+         "norm_phone(s): только цифры; ведущий 8 -> 7; если 10 цифр -> добавить ведущую 7; "
+         "иначе (не 11 цифр после нормализации) вернуть None. "
+         "Тип входа: s:str. Тип выхода: str из 11 цифр или None.",
          "def norm_phone(s):\n    d = ''.join(c for c in s if c.isdigit())\n    if d.startswith('8'):\n        d = '7' + d[1:]\n    return d",
          "def norm_phone(s):\n    d = ''.join(c for c in s if c.isdigit())\n    if d.startswith('8'):\n        d = '7' + d[1:]\n    if len(d) == 10:\n        d = '7' + d\n    return d if len(d) == 11 else None",
          [["+7 (912) 345-67-89"], ["89123456789"], ["9123456789"], ["123"],
-          ["8 912 345 67 89"], ["77777777777"], [""]]),
+          ["8 912 345 67 89"], ["77777777777"], [""], ["7-912-345-67-89"],
+          ["8912345678"], ["+79123456789"], ["912 345 67 89"],
+          ["8(495)123-45-67"], ["4951234567"], ["84951234567"],
+          ["12345678901"], ["7912345678"], ["791234567890"],
+          ["abc"], ["8"], ["7"], ["+8 912 000-00-00"],
+          [" 9123456789 "], ["8-900-111-22-33"], ["9001112233"],
+          ["79001112233"], ["++7 900 111 22 33"], ["0000000000"],
+          ["89991112233"]]),
         ("E-ex6-08", "find_gaps",
-         "find_gaps(sorted_ints): список недостающих целых между min и max включительно; пустой вход -> [].",
+         "find_gaps(sorted_ints): список недостающих целых между min и max включительно; пустой вход -> []. "
+         "Тип входа: sorted_ints:list[int] (неубывающий). Тип выхода: list[int].",
          "def find_gaps(a):\n    if not a:\n        return []\n    return [x for x in range(a[0], a[-1]) if x not in a]",
          "def find_gaps(a):\n    if not a:\n        return []\n    s = set(a)\n    return [x for x in range(a[0], a[-1] + 1) if x not in s]",
-         [[[1, 2, 5]], [[3]], [[1, 3, 5, 7]], [[], ], [[4, 4, 5, 8]]]),
+         [[[1, 2, 5]], [[3]], [[1, 3, 5, 7]], [[], ], [[4, 4, 5, 8]],
+          [[1, 2, 3]], [[10, 12]], [[0, 2, 4]], [[-2, 0, 2]],
+          [[5, 5, 5]], [[1, 10]], [[2, 3, 4, 7]], [[9, 11, 13]],
+          [[0]], [[100, 101, 103]], [[-5, -3, -1]],
+          [[1, 1, 2, 4]], [[7, 8, 10, 12]], [[4, 6]],
+          [[20, 21, 22]], [[1, 2, 3, 4, 6]], [[8, 10, 11, 14]],
+          [[15]], [[0, 1, 3]], [[2, 5]], [[9, 10, 12, 15]],
+          [[3, 6, 9]], [[1, 4, 5, 8]]]),
         ("E-ex6-09", "intersect_sorted",
-         "intersect_sorted(a, b): общие элементы без дублей, отсортированно.",
-         "def intersect_sorted(a, b):\n    return sorted(set(a) & set(b))\n".replace("& set(b)", "& set(a)"),
+         "intersect_sorted(a, b): общие элементы без дублей, отсортированно. "
+         "Типы входа: a:list[int], b:list[int] (порядок входа не важен). Тип выхода: list[int].",
+         "def intersect_sorted(a, b):\n    return sorted(set(a) & set(a))",
          "def intersect_sorted(a, b):\n    return sorted(set(a) & set(b))",
          [[[1, 2, 2, 3], [3, 2, 9]], [[1], []], [[5, 5], [5]], [[], []],
-          [[-1, 0, 1], [0, 1, 2, 1]]]),
+          [[-1, 0, 1], [0, 1, 2, 1]], [[1, 2, 3], [4, 5, 6]],
+          [[1, 2, 3], [1, 2, 3]], [[7, 8, 9], [9, 8]],
+          [[0], [0, 0, 0]], [[10, 20], [15, 20, 25]],
+          [[1, 1, 1], [1]], [[2, 4, 6, 8], [1, 2, 3, 4]],
+          [[], [1, 2]], [[9], [9]], [[3, 3, 4], [3, 4, 4]],
+          [[-5, -1, 0], [-1]], [[100], [99, 100, 101]],
+          [[1, 3, 5, 7], [2, 3, 5, 7]], [[8, 8, 8], [8, 9]],
+          [[4], [1, 2, 3]], [[0, 0, 1, 1], [0, 1]],
+          [[12, 14, 16], [14]], [[5, 6, 7], [5, 7]],
+          [[2], [2, 2, 3]], [[11, 13], [11, 12, 13]],
+          [[1, 2], [2, 1]], [[9, 1, 5], [5, 9]],
+          [[0, 2, 4, 6], [1, 2, 3, 4]]]),
     ]
     for tid, name, spec, buggy, refsrc, cases in specs:
         ns = {}
         exec(refsrc, ns)
         f = ns[name]
         battery = [[args, f(*args)] for args in cases]
+        assert 25 <= len(battery) <= 30, (tid, len(battery))
         add("E", tid,
             "Функция ниже содержит ровно один баг. Верни ПОЛНЫЙ исправленный код функции (только код).\n"
             "Контракт: %s\n\nКод с багом:\n```python\n%s\n```" % (spec, buggy),
@@ -566,9 +658,9 @@ def G_tasks():
     for tid, clauses, conflict, pairs, values in docs:
         text = "\n".join("Пункт %s: %s" % (n, c) for n, c in clauses)
         add("G", tid,
-            "Найди противоречие в документе (два пункта, которые нельзя выполнить одновременно), или ответь, что его нет.\n"
+            "[SHORT-CONTEXT] Найди противоречие в КОРОТКОМ документе ниже (два пункта, которые нельзя выполнить одновременно), или ответь, что его нет.\n"
             + text + "\nФормат JSON: {\"conflict\": true|false, \"clauses\": [\"<n>\",\"<n>\"], \"values\": [\"<формулировка A>\",\"<формулировка B>\"]}. "
-            "Если противоречия нет — conflict:false, пустые списки.",
+            "Если противоречия нет — conflict:false, пустые списки. Оцениваются ТОЛЬКО поля conflict/clauses/values.",
             {"conflict": conflict, "clauses": pairs, "values": values},
             content=" ".join(c for _, c in clauses))
 

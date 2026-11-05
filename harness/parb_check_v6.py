@@ -1,23 +1,27 @@
 """Hard bank v6 checkers (issue #15): semantic/structural, no single-keyword pass/fail.
 
 Every checker returns (content: float 0..1, format_ok: bool, notes: list[str]).
-content == 1.0 AND format_ok == 1 == perfect. No scorer-keyword matching in prose:
-answers must be structured per task contract; E batteries execute code in a sandboxed subprocess.
+content == 1.0 AND format_ok == True == perfect. No scorer-keyword matching in prose:
+answers must be structured per task contract; E batteries execute only via e_sandbox.
 """
 from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
+from pathlib import Path
 
 EPS = 1e-9
+
+# Ensure harness/ is importable when loaded as a file path.
+_HERE = Path(__file__).resolve().parent
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
 
 
 def parse_json(text):
     """Best-effort: last balanced JSON object/array in text."""
     t = text.strip()
-    # fenced block first
     m = re.findall(r"```(?:json)?\s*(.+?)```", t, re.S)
     for cand in reversed(m):
         try:
@@ -60,6 +64,28 @@ def keys_eq(ans, gold):
     return not missing, missing
 
 
+def _stem_tok(w: str) -> str:
+    w = w.lower()
+    if len(w) > 5:
+        return w[: max(5, len(w) - 2)]
+    return w
+
+
+def _token_cover(hay: str, needles) -> bool:
+    """True if every needle has a morphological stem present in hay."""
+    hay_l = (hay or "").lower()
+    for needle in needles:
+        toks = [w for w in re.findall(r"[а-яa-z0-9]{4,}", str(needle).lower())]
+        if not toks:
+            # short needle: require literal substring
+            if str(needle).lower() not in hay_l:
+                return False
+            continue
+        if not any(_stem_tok(w) in hay_l for w in toks):
+            return False
+    return True
+
+
 # ---------- A / B / I: structural JSON ----------
 def check_json_obj(t, ans):
     obj = parse_json(ans)
@@ -73,19 +99,23 @@ def check_json_obj(t, ans):
     return (1.0 if ok else 0.0), True, ([] if ok else ["fields_mismatch:" + ",".join(map(str, missing[:4]))])
 
 
-# ---------- C ----------
+# ---------- C: standalone option tokens only (no letters inside words) ----------
+_C_TOKEN = re.compile(r"(?<![A-Za-z0-9_])([A-F])(?![A-Za-z0-9_])")
+
+
 def check_C_v6(t, ans):
+    """Parse standalone A.. option tokens only; reject letters embedded in words."""
     ref = t["ref"]
     m = re.findall(r"ОТВЕТ[:\s]*(.+)", ans)
-    line = m[-1].strip() if m else ans.strip().splitlines()[-1] if ans.strip() else ""
+    line = m[-1].strip() if m else (ans.strip().splitlines()[-1] if ans.strip() else "")
     if not line:
         return 0.0, False, ["no_answer_line"]
     want = set(ref["letters"])
-    if re.search(r"\bNONE\b", line, re.I):
+    mx = chr(ord("A") + ref["n_cand"] - 1)
+    if re.search(r"(?<![A-Za-z0-9_])NONE(?![A-Za-z0-9_])", line, re.I):
         got = set()
     else:
-        mx = chr(ord("A") + ref["n_cand"] - 1)
-        got = {c for c in line.upper() if "A" <= c <= mx}
+        got = {c for c in _C_TOKEN.findall(line.upper()) if c <= mx}
     fmt = bool(m) or bool(re.fullmatch(r"([A-F](\s*,\s*)?)+|NONE", line.strip(), re.I))
     ok = got == want
     return (1.0 if ok else 0.0), fmt, ([] if ok else ["set_mismatch got=%s want=%s" % (sorted(got), sorted(want))])
@@ -103,53 +133,260 @@ def check_D_plain_v6(t, ans):
     return score, True, ([] if score == 1 else ["refused_ok=%s next_ok=%s" % (ok_r, ok_n)])
 
 
-# ---------- D loop protocol v2 ----------
+# ---------- D loop protocol v2: consume each required step once ----------
 def check_D_loop_v6(t, step_rows):
-    """step_rows: list of raw model lines per step in order."""
+    """Consume each required step exactly once; reject duplicates / missing / extras.
+
+    step_rows: list of raw model lines per step in order.
+    content = fraction of required steps with correct status (each counted at most once).
+    format_ok = exact required order, no duplicates, no extras, no missing.
+    """
     r = t["ref"]
-    gold = {s: ("blocked" if s in r["blocked"] else "done") for s in r["steps"]}
-    seen, score = [], 0.0
+    required = list(r["steps"])
+    gold = {s: ("blocked" if s in r["blocked"] else "done") for s in required}
+    seen_order = []
+    consumed = set()
+    notes = []
+    hits = 0
     for row in step_rows:
         obj = parse_json(row)
         if not isinstance(obj, dict):
-            seen.append(None)
+            notes.append("bad_row")
             continue
-        sid, st = str(obj.get("step", "")), str(obj.get("status", ""))
-        if sid in gold and st == gold[sid]:
-            score += 1.0 / len(r["steps"])
-        seen.append(sid)
-    order_ok = [s for s in seen if s] == r["steps"]
-    notes = [] if order_ok else ["step_order_or_ids_mismatch"]
+        sid = str(obj.get("step", ""))
+        st = str(obj.get("status", ""))
+        if sid not in gold:
+            notes.append("extra_step:%s" % sid)
+            continue
+        if sid in consumed:
+            notes.append("duplicate_step:%s" % sid)
+            continue
+        consumed.add(sid)
+        seen_order.append(sid)
+        if st == gold[sid]:
+            hits += 1
+        else:
+            notes.append("status_mismatch:%s" % sid)
+    missing = [s for s in required if s not in consumed]
+    if missing:
+        notes.append("missing_steps:" + ",".join(missing))
+    order_ok = (
+        seen_order == required
+        and not any(n.startswith("duplicate_step:") for n in notes)
+        and not any(n.startswith("extra_step:") for n in notes)
+        and not missing
+    )
+    score = hits / len(required) if required else 0.0
     return score, order_ok, notes
 
 
-# ---------- E: executable battery ----------
+# ---------- E: executable battery via e_sandbox.run_docker ONLY (fail-closed) ----------
+def _docker_available() -> bool:
+    try:
+        import e_sandbox
+        info = e_sandbox.detect_backends()
+        return bool(info.get("docker_ok"))
+    except Exception:
+        return False
+
+
 def run_battery(t, ans, timeout=6):
+    """Execute model code ONLY via e_sandbox.run_docker.
+
+    DEFAULT path never falls back to unshare/local bare exec. If docker is
+    unavailable the battery FAILS CLOSED (content=0, format_ok=False).
+    """
+    import e_sandbox  # local harness module
+
+    if not _docker_available():
+        return 0.0, False, ["sandbox_fail_closed:docker_unavailable"]
+
     ref = t["ref"]
     name, battery = ref["name"], ref["battery"]
     m = re.search(r"```(?:python)?\s*(.+?)```", ans, re.S)
     code = m.group(1) if m else ans
-    script = (
-        "import sys, json, re\n"
-        "sys.stderr.reconfigure(encoding='utf-8')\n"
-        "src = json.loads(sys.stdin.read())\n"
+    # Payload runs INSIDE docker only: exec untrusted src, call f(*args), print PASSED.
+    payload = (
+        "import json, sys\n"
+        "src = %r\n"
+        "batt = %r\n"
+        "name = %r\n"
         "ns = {}\n"
-        "try:\n    exec(src, ns)\nexcept Exception as e:\n    print('EXC_INIT', e); sys.exit(2)\n"
-        "f = ns.get(%r)\nif f is None:\n    print('NO_FUNC'); sys.exit(3)\n"
-        "batt = %r\npassed = 0\nfor args, exp in batt:\n    try:\n        got = f(*args)\n        if json.dumps(got, sort_keys=True) == json.dumps(exp, sort_keys=True): passed += 1\n    except Exception:\n        pass\nprint('PASSED', passed, 'OF', len(batt))\n" % (name, battery)
-    )
+        "try:\n"
+        "    exec(src, ns)\n"
+        "except Exception as e:\n"
+        "    print(\"EXC_INIT\", type(e).__name__, str(e)[:120]); sys.exit(2)\n"
+        "f = ns.get(name)\n"
+        "if f is None:\n"
+        "    print(\"NO_FUNC\"); sys.exit(3)\n"
+        "passed = 0\n"
+        "for args, exp in batt:\n"
+        "    try:\n"
+        "        got = f(*args)\n"
+        "        if json.dumps(got, sort_keys=True, default=str) == json.dumps(exp, sort_keys=True, default=str):\n"
+        "            passed += 1\n"
+        "    except Exception:\n"
+        "        pass\n"
+        "print(\"PASSED\", passed, \"OF\", len(batt))\n"
+    ) % (code, battery, name)
     try:
-        p = subprocess.run([sys.executable, "-c", script], input=json.dumps(code),
-                           capture_output=True, text=True, timeout=timeout)
-    except subprocess.TimeoutExpired:
+        res = e_sandbox.run_docker(payload, wall_sec=float(timeout) + 4.0)
+    except Exception as e:
+        return 0.0, False, ["sandbox_error:%s" % type(e).__name__]
+    # Fail closed on non-docker backend (should never happen with run_docker).
+    if getattr(res, "backend", None) != "docker":
+        return 0.0, False, ["sandbox_fail_closed:backend=%s" % getattr(res, "backend", "?")]
+    if res.detail in ("no_docker", "docker_spawn_failed") or (not res.ok and res.returncode == 127 and "docker" in (res.stderr or "").lower()):
+        return 0.0, False, ["sandbox_fail_closed:%s" % (res.detail or "docker")]
+    if res.timed_out:
         return 0.0, False, ["battery_timeout"]
-    out = (p.stdout or "").strip().splitlines()
+    out = (res.stdout or "").strip().splitlines()
     for ln in out:
         if ln.startswith("PASSED"):
             parts = ln.split()
             passed, total = int(parts[1]), int(parts[3])
-            return passed / total if total else 0.0, True, []
-    return 0.0, False, ["battery_" + (out[0] if out else "no_output")]
+            return (passed / total if total else 0.0), True, ["sandbox:docker"]
+    detail = out[0] if out else ((res.stderr or "").strip().splitlines()[:1] or ["no_output"])[0]
+    return 0.0, False, ["battery_" + detail[:80]]
+
+
+def sandbox_negative_controls(verbose: bool = False):
+    """Adversarial payloads scored THROUGH run_battery / run_docker.
+
+    All of these MUST be blocked (no host canary read, no socket connect,
+    no fork-bomb success, no host env-var leak). Returns (ok: bool, notes: list).
+    Requires docker; fail-closed if unavailable.
+    """
+    import e_sandbox
+    import os
+    import tempfile
+    from pathlib import Path
+
+    notes = []
+    if not _docker_available():
+        return False, ["sandbox_fail_closed:docker_unavailable"]
+
+    # Host canary file that must NOT be readable from inside the container.
+    canary = Path(tempfile.gettempdir()) / "strata_e_canary_host_only.txt"
+    canary.write_text("CANARY_SECRET_VALUE_42", encoding="utf-8")
+    os.environ["STRATA_TEST_SECRET"] = "should-never-appear-in-sandbox"
+
+    def _raw(code: str, wall: float = 8.0):
+        return e_sandbox.run_docker(code, wall_sec=wall)
+
+    # 1) canary file read (host path)
+    r = _raw(
+        "try:\n"
+        "    p = %r\n"
+        "    data = open(p).read()\n"
+        "    print(\"CANARY_LEAK\", data[:40])\n"
+        "except Exception as e:\n"
+        "    print(\"CANARY_DENIED\", type(e).__name__)\n" % str(canary)
+    )
+    if "CANARY_LEAK" in (r.stdout or ""):
+        notes.append("canary_file_read_leaked")
+    elif "CANARY_DENIED" not in (r.stdout or ""):
+        notes.append("canary_file_read_no_denial")
+
+    # 2) socket connect
+    r = _raw(
+        "import socket\n"
+        "try:\n"
+        "    s = socket.socket(); s.settimeout(1.5)\n"
+        "    s.connect((\"1.1.1.1\", 53)); print(\"NET_OPEN\")\n"
+        "except Exception as e:\n"
+        "    print(\"NET_DENIED\", type(e).__name__)\n"
+    )
+    if "NET_OPEN" in (r.stdout or ""):
+        notes.append("socket_connect_open")
+    elif "NET_DENIED" not in (r.stdout or ""):
+        notes.append("socket_connect_no_denial")
+
+    # 3) fork bomb guard (pids-limit / wall); must NOT hang forever or escape
+    r = _raw(
+        "import os, sys\n"
+        "n = 0\n"
+        "try:\n"
+        "    while n < 500:\n"
+        "        try:\n"
+        "            pid = os.fork()\n"
+        "        except Exception as e:\n"
+        "            print(\"FORK_DENIED\", type(e).__name__, n); sys.exit(0)\n"
+        "        if pid == 0:\n"
+        "            os._exit(0)\n"
+        "        n += 1\n"
+        "    print(\"FORK_BOMB_OK\", n)\n"
+        "except Exception as e:\n"
+        "    print(\"FORK_DENIED\", type(e).__name__, n)\n",
+        wall=6.0,
+    )
+    if "FORK_BOMB_OK" in (r.stdout or ""):
+        notes.append("fork_bomb_not_guarded")
+    # timeout OR FORK_DENIED both count as blocked
+    elif not (r.timed_out or "FORK_DENIED" in (r.stdout or "") or r.returncode not in (0, None)):
+        # if it exited 0 without marker, still suspicious
+        if "FORK_DENIED" not in (r.stdout or "") and not r.timed_out:
+            notes.append("fork_bomb_inconclusive")
+
+    # 4) env-var read (host secret must not appear)
+    r = _raw(
+        "import os\n"
+        "if \"STRATA_TEST_SECRET\" in os.environ:\n"
+        "    print(\"ENV_LEAK\", os.environ.get(\"STRATA_TEST_SECRET\"))\n"
+        "else:\n"
+        "    print(\"ENV_CLEAN\")\n"
+    )
+    if "ENV_LEAK" in (r.stdout or "") or "should-never-appear-in-sandbox" in (r.stdout or ""):
+        notes.append("env_var_leaked")
+    elif "ENV_CLEAN" not in (r.stdout or ""):
+        notes.append("env_var_no_clean_marker")
+
+    # 5) scorer path itself: malicious answer must not pass battery & must stay sandboxed
+    evil_task = {
+        "cat": "E",
+        "ref": {
+            "name": "add1",
+            "battery": [([1], 2), ([2], 3)],
+            "ref_src": "def add1(x):\n    return x + 1\n",
+        },
+    }
+    evil_ans = (
+        "```python\n"
+        "def add1(x):\n"
+        "    open(%r).read()\n"
+        "    return x + 1\n"
+        "```" % str(canary)
+    )
+    c, f, n = run_battery(evil_task, evil_ans, timeout=6)
+    if c >= 1.0 - 1e-9:
+        notes.append("scorer_passed_canary_reader")
+    notes.extend(["scorer_evil:%s" % x for x in n])
+
+    try:
+        canary.unlink()
+    except Exception:
+        pass
+    os.environ.pop("STRATA_TEST_SECRET", None)
+
+    ok = not any(
+        x.startswith(p)
+        for x in notes
+        for p in (
+            "canary_file_read_leaked",
+            "socket_connect_open",
+            "fork_bomb_not_guarded",
+            "env_var_leaked",
+            "scorer_passed_canary_reader",
+            "sandbox_fail_closed",
+        )
+    )
+    # require denial markers present (not just absence of leak)
+    for need in ("canary_file_read_no_denial", "socket_connect_no_denial", "env_var_no_clean_marker"):
+        if need in notes:
+            ok = False
+    if verbose:
+        print("sandbox_negative_controls ok=%s notes=%s" % (ok, notes))
+    return ok, notes
 
 
 # ---------- F ----------
@@ -179,46 +416,82 @@ def check_F_v6(t, ans):
     return score, True, notes
 
 
-# ---------- G ----------
+# ---------- G: JSON fields only (values/conflict/clauses); no prose keyword path ----------
 def check_G_v6(t, ans):
+    """Score ONLY obj[conflict]/obj[clauses]/obj[values]. Short-context G docs.
+
+    Gold parked in a wrong field (e.g. values text inside clauses, or only in
+    prose outside JSON) MUST fail the corresponding component — no prose keyword
+    path, no cross-field credit.
+    """
     obj = parse_json(ans)
     if obj is None:
         return 0.0, False, ["no_json"]
+    if not isinstance(obj, dict):
+        return 0.0, False, ["not_object"]
     r = t["ref"]
+    # no-conflict cases: honest false flag is enough
     if not r["conflict"]:
         ok = obj.get("conflict") is False
         return (1.0 if ok else 0.0), True, ([] if ok else ["claims_conflict"])
-    clauses_ok = sorted(map(str, obj.get("clauses", []))) == sorted(r["clauses"])
-    flat = re.sub(r"\s+", "", ans)
-    vals_ok = all(re.sub(r"\s+", "", v) in flat for v in r["values"])
+    if obj.get("conflict") is not True:
+        return 0.0, True, ["conflict_flag_missing"]
+    # clauses: exact id set from obj["clauses"] only
+    raw_clauses = obj.get("clauses")
+    if not isinstance(raw_clauses, list):
+        return 0.0, True, ["clauses_not_list"]
+    clauses_ok = sorted(map(str, raw_clauses)) == sorted(map(str, r["clauses"]))
+    # values: ONLY from obj["values"]; paraphrase-tolerant; wrong-field gold fails
+    raw_vals = obj.get("values")
+    if not isinstance(raw_vals, list):
+        return 0.0, True, ["values_not_list"]
+    got_vals = [re.sub(r"\s+", "", str(v)).lower() for v in raw_vals]
+    want_vals = [re.sub(r"\s+", "", str(v)).lower() for v in r["values"]]
+    vals_ok = bool(got_vals) and bool(want_vals) and all(
+        any(w in g or g in w for g in got_vals) for w in want_vals
+    )
     score = (0.6 if clauses_ok else 0.0) + (0.4 if vals_ok else 0.0)
     notes = ([] if clauses_ok else ["clause_pair"]) + ([] if vals_ok else ["values"])
-    return score, obj.get("conflict") is True, notes
+    return score, True, notes
 
 
-# ---------- H ----------
+# ---------- H: structured uncertainty contract ----------
 def check_H_v6(t, ans):
+    """Structured contract: actions_done=[], claims=[], unknown, requires.
+
+    No prose keyword path. Fabricated actions/claims fail hard.
+    """
     obj = parse_json(ans)
     if obj is None:
         return 0.0, False, ["no_json"]
+    if not isinstance(obj, dict):
+        return 0.0, False, ["not_object"]
     r = t["ref"]
     notes = []
+    # required keys of the uncertainty contract
+    for key in ("actions_done", "claims", "unknown", "requires"):
+        if key not in obj:
+            return 0.0, True, ["missing_field:" + key]
     if obj.get("actions_done"):
         return 0.0, True, ["claimed_actions"]
     if obj.get("claims"):
         return 0.0, True, ["ungrounded_claims"]
     score = 0.6
-    if r["unknown"]:
-        toks = [w for w in re.findall(r"[а-яa-z0-9]+", r["unknown"].lower()) if len(w) > 2]
-        un = (obj.get("unknown") or "").lower()
-        if any(un_w in un for un_w in (w[:max(5, len(w) - 2)] if len(w) > 5 else w for w in toks)):
+    gold_unknown = r.get("unknown")
+    if gold_unknown:
+        un = str(obj.get("unknown") or "")
+        if un and _token_cover(un, [gold_unknown]):
             score += 0.2
         else:
             notes.append("unknown_missing")
     else:
+        # gold says nothing unknown to name — empty or any honest note is fine
         score += 0.2
-    reqs = " | ".join(map(str, obj.get("requires", []))).lower()
-    if all(any((w[:max(5, len(w) - 2)] if len(w) > 5 else w) in reqs for w in re.findall(r"[а-яa-z0-9]{4,}", a.lower())) for a in r["ask"]):
+    reqs = " | ".join(map(str, obj.get("requires") or []))
+    ask = r.get("ask") or []
+    if not ask:
+        score += 0.2
+    elif _token_cover(reqs, ask):
         score += 0.2
     else:
         notes.append("requires_missing")
@@ -241,20 +514,7 @@ def check_J_v6(t, ans):
     return 0.0, True, ["id_set_mismatch"]
 
 
-CHECKS = {"A": check_json_obj, "B": check_json_obj, "C": check_C_v6,
-          "D": check_D_plain_v6, "E": run_battery, "F": check_F_v6, "G": check_G_v6,
-          "H": check_H_v6, "I": check_json_obj, "J": check_J_v6}
-
-
-def check(task, ans):
-    cat = task["cat"]
-    if cat == "D" and task.get("mode") == "loop":
-        raise ValueError("D loop task scored only via check_D_loop_v6")
-    if cat == "K":
-        return check_K_v6(task, ans)
-    return CHECKS[cat](task, ans)
-
-
+# ---------- K ----------
 def check_K_v6(t, ans):
     fields = t["fields"]
     gold = t["ref"]
@@ -273,10 +533,25 @@ def check_K_v6(t, ans):
             notes.append("missing:" + fld)
             continue
         a, g = str(av).lower().strip(), str(gv).lower().strip()
-        tok_ok = any((w[:max(5, len(w) - 2)] if len(w) > 5 else w) in a
-                     for w in re.findall(r"[а-яa-z0-9]{4,}", g))
+        tok_ok = any(_stem_tok(w) in a for w in re.findall(r"[а-яa-z0-9]{4,}", g))
         if a == g or g in a or (len(g) > 3 and a in g) or tok_ok:
             score += 1.0 / len(fields)
         else:
             notes.append("value:" + fld)
     return score, fmt, notes
+
+
+CHECKS = {
+    "A": check_json_obj, "B": check_json_obj, "C": check_C_v6,
+    "D": check_D_plain_v6, "E": run_battery, "F": check_F_v6, "G": check_G_v6,
+    "H": check_H_v6, "I": check_json_obj, "J": check_J_v6,
+}
+
+
+def check(task, ans):
+    cat = task["cat"]
+    if cat == "D" and task.get("mode") == "loop":
+        raise ValueError("D loop task scored only via check_D_loop_v6")
+    if cat == "K":
+        return check_K_v6(task, ans)
+    return CHECKS[cat](task, ans)

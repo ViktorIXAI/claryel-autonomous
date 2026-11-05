@@ -57,7 +57,7 @@ for f in ("parb_check_v6.py", "parb_bank_v6.py"):
 readme = """# Hard-v6 run workspace
 
 Inputs are hash-pinned in benchmarks/hard/MANIFEST.sha256 of the repo
-(bank-hard-v6.json d61131a5..., parb_check_v6 061cc6ce...).
+(see benchmarks/hard/MANIFEST.v6.sha256 for current bank/scorer/sandbox pins).
 Scoring goes through check_v6_shim.py -> parb_check_v6 (semantic; D loop via
 check_D_loop_v6). Injection flags must stay OFF (contour >= 0.0.2.14 default).
 

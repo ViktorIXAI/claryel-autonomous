@@ -6,8 +6,8 @@ requires a new bank/scorer version plus a migration note.
 
 | mode | format required? | category D judged by | applies to |
 |---|---|---|---|
-| `strict_loop` | yes | agent-loop scorer (`parb_loop.check_D_loop`): requires structured tool-call step traces | contour arm (its answers ARE agent loops); NOT fair for single-shot chat arms |
-| `strict_plain` | yes | plain plan scorer (`parb_check.check_D`) on final text | OFFICIAL mode for single-shot (raw) arms |
+| `strict_loop` | yes | agent-loop scorer (`parb_loop.check_D_loop` for v5; `parb_check_v6.check_D_loop_v6` for v6): requires structured step traces | contour arm (its answers ARE agent loops); NOT fair for single-shot chat arms |
+| `strict_plain` | yes | plain plan scorer (`parb_check.check_D` / `parb_check_v6.check_D_plain_v6`) on final text | OFFICIAL mode for single-shot (raw) arms |
 | `content_only` | no | plain | auditor variant only; surfaced to reconcile external recounts, never used for our own claims |
 
 Bank and scorer revisions:
@@ -27,24 +27,21 @@ re-scorable unless a step-trace archive exists.
 
 | bank | file | note |
 |---|---|---|
-| v5 | `bank-hard-v5.json` (archive) and historical `bank-hard.json` at commit of v5 audit | Contour **70/77** and the raw-arm scores in `SCOREBOARD.md` / `audit-20261105/` are **score under v5 checkers only**. Not evidence of contour-vs-bare superiority (see issue #15 / #5 comment 6661106383). |
-| v6 | `bank-hard.json` (official gate path; draft, pre-run) + parallel `bank-hard-v6.json` | 77 unique tasks, one per template; dedup guard max pairwise ratio 0.575 on task content; C correct sets at varied positions (`c_position_dist_v6.json`, no leading-prefix leak, asserted at build); K lines==fields; semantic checkers in `harness/parb_check_v6.py` (no single-keyword pass/fail; E batteries executed in sandboxed subprocess); gold self-test 77/77 perfect via `scripts/gold_selftest_v6.py`; checker-keyword injection OFF by default (`STRATA_CHECKER_INJECT` opt-in reproduces v5 behaviour). Builder `harness/parb_bank_v6.py` computes every reference deterministically. No arm has run against v6 yet — refs/checkers/hashes first (issue #15). |
+| v5 | `bank-hard-v5.json` (archive) and historical `bank-hard.json` at commit of v5 audit | **IMMUTABLE.** Contour **70/77** and the raw-arm scores in `SCOREBOARD.md` / `audit-20261105/` are **score under v5 checkers only**. Pins: `MANIFEST.v5.sha256` (`bank-hard.json` / `bank-hard-v5.json` sha16 `32953591ba2a6c51`, `parb_check.py` `1c032ef022607d7b`, `parb_loop.py` `f5f5b78ab46a0f0c`). Not evidence of contour-vs-bare superiority (issue #15 / #5 comment 6661106383). |
+| v6 | **`bank-hard-v6.json` only** + **`harness/parb_check_v6.py`** | Official v6 gate artifacts. 77 unique tasks (A9 B7 C8 D9 E10 F6 G6 H5 I6 J7 K4). Semantic/structural checkers (no single-keyword pass/fail). Category **G is short-context** (`[SHORT-CONTEXT]` docs; score only `conflict`/`clauses`/`values`). Category **E** batteries execute **only** via `e_sandbox.run_docker` (fail-closed if docker unavailable; never bare subprocess). Gold self-test 77/77 via `scripts/gold_selftest_v6.py`. Builder `harness/parb_bank_v6.py`. Pins: `MANIFEST.v6.sha256` (bank + scorer + builder + shim + gold + suites + sandbox). No arm has run against v6 yet — refs/checkers/hashes first (issue #15). |
 
-Dedup guard and position/line-count assertions run inside the builder (must exit 0); `MANIFEST.sha256` pins all v6 inputs.
+Dedup guard and position/line-count assertions run inside the builder (must exit 0); `MANIFEST.v6.sha256` pins all v6 inputs. `harness/verify_manifest.py` must PASS; a deliberately altered pinned file must FAIL (negative test).
 
-### v6 dual artifacts (draft)
-- Official gate path: `bank-hard.json` (cats A4 B4 C6 D9 E30 F3 G6 H4 I3 J4 K4) scored by `harness/parb_check.py` / `parb_loop.py`.
-- Parallel redesign (not wired into gate_run): `bank-hard-v6.json` + `harness/parb_check_v6.py` + gold self-test; different cat mix.
+### v6 artifacts (issue #15 P0)
+- Gate path: `benchmarks/hard/bank-hard-v6.json` scored by `harness/parb_check_v6.py`.
+- Sandbox: `harness/e_sandbox.py` (`run_docker` default for E; `--network=none`, pids-limit, read-only).
+- Workspace shim: `scripts/build_hard_v6_ws.py` writes `check_v6_shim.py` → `parb_check_v6`.
 - Keyword injection: `STRATA_CHECKER_INJECT` default OFF (`gate_v35_inject_off_test.py`).
-- Dedup: `scripts/dedup_hard_bank.py` on `bank-hard.json`.
+- Adversarial suite: `scripts/semantic_suite_v6.py` (C tokenized IDs; G field-only; H structured uncertainty; D-loop consume-once; E sandbox negatives).
+- Dry-run (no models): `scripts/dry_run_same_scorer_v6.py` — one v6 scorer import across 4 arms; path+sha256 per arm per category (11 + D plain/D loop).
 
+## Freeze rule enforcement (issue #15)
 
-## Freeze rule enforcement (issue #15, Hermes)
+The official hard-**v5** gate remains immutable: `bank-hard.json` (sha16 `32953591ba2a6c51`) + `parb_check.py` (`1c032ef022607d7b`) + `parb_loop.py` (`f5f5b78ab46a0f0c`), byte-identical to the v5 audit tree. Do not mutate these files in place.
 
-The official hard-v5 gate remains: bank-hard.json (sha16 32953591ba2a6c51) + parb_check.py
-(1c032ef022607d7b) + parb_loop.py (f5f5b78ab46a0f0c), byte-identical to the v5 audit tree.
-A parallel draft redesigned these files in place (v5 rewording + reworked G/H/F/D checkers);
-that work is preserved as `harness/parb_check_draft.py` for discussion, NOT as the frozen
-gate: issue #15 requires v5 unchanged as history and v6 as a new bank. v6 = `bank-hard-v6.json`
-+ `harness/parb_check_v6.py` (77 unique templates, gold self-test 77/77, MANIFEST.sha256).
-Reviewers: dispute this split on issue #15 rather than by in-place edits.
+**v6** is a new bank: `bank-hard-v6.json` + `parb_check_v6.py` only. Reviewers: dispute this split on issue #15 rather than by in-place edits of v5.
