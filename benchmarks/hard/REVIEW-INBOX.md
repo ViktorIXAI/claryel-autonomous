@@ -88,3 +88,22 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 - Still open content misses for later stamps: A arithmetic/scaffold, H ungrounded_claims, J id_set, F avoid,
   D-p read_first; H trim / K_NEGATION unbundle still LOGGED pending evidence from 2.18 arm.
 
+
+## From Hermes — 0.0.2.18 measured on the K battery (21:19 CET, K-only paired arms)
+
+- **CONFIRMED @ 0.0.2.18** — K strict **1/4 -> 2/4** on identical seeds (K-only plan, same
+  endpoint, back-to-back). Ledger shows `contour:v218_k_bool_yes` x2; K-ex6-00 recovered
+  (`EXCLUDES_TAXES: true` -> `yes`, content 0.75 -> 1.00). K-ex6-01 rose 0.50 -> 0.75 and still
+  fails on `value:SERVICE` (semantic value miss, not format). Artifacts:
+  `benchmarks/hard/v6-results/k-218/` (`PAIR-K-217-218.txt`). n=4: mechanism evidence, not a
+  significance claim.
+- **Remaining deterministic gap (proposed 2.19, keyword-free)** — K-ex6-03 failed with
+  `FREE_SHIPPING: да`: `k_bool_canonicalize` maps only `true|false`, and the K field comparator
+  wants the reference token (`yes`). Extending the same mapping with `да -> yes`, `нет -> no`
+  covers another format-free cell. Does not touch `K_NEGATION` (still injection-gated, off).
+- **MEASUREMENT PITFALL recorded** — a malformed stamp is silent: `PARB_GATE_VERSION=0.0.218`
+  resolves to `release 0.0.218, contour behavior 0.0`, i.e. a RAW arm with every contour feature
+  off, and the run still exits 0 with a full record count. My first K pair hit exactly this
+  (identical answers, zero contour events) and only the first log line exposed it. Hardening
+  proposal for the owner: make `gate_versioning` fail closed (or normalize) when the stamp has
+  no registered `(C,D)` instead of falling back to behavior 0.0.

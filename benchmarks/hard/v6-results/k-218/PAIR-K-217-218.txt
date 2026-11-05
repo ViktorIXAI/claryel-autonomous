@@ -1,0 +1,12 @@
+plain    n=4   strict A=1 B=2
+loop     n=0   strict A=0 B=0
+
+cat    A   B   n
+K      1   2   4  <--
+
+flips (strict)
+  B wins K-ex6-00    A c=0.75 f=True notes=value:EXCLUDES_TAXES
+
+paired: B wins 1, A wins 0, ties 3, exact sign-test p=1.0000
+A cost: calls=4 ptok=377 ctok=143 wall=10s
+B cost: calls=4 ptok=377 ctok=139 wall=4s

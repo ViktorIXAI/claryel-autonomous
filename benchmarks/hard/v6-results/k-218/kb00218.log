@@ -1,0 +1,8 @@
+21:19:33 PGR: release 0.0.2.18, contour behavior 2.18
+21:19:33 PGR: planned tasks 4, previously done 0, limit 900 s
+21:19:33 PGR: run record run-record-gate.json; serve health ok; stall policy retry=1 rate=25% window=20
+21:19:35 K K-ex6-00       rep0    c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.6s tok=105  /40   c=0    tps_eff=24.8 
+21:19:35 K K-ex6-01       rep0    c=0.75 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=97   /38   c=0    tps_eff=61.5 value:SERVICE
+21:19:36 K K-ex6-02       rep0    c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.5s tok=86   /28   c=0    tps_eff=59.8 
+21:19:37 K K-ex6-03       rep0    c=0.75 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.0s tok=89   /33   c=0    tps_eff=31.8 value:FREE_SHIPPING
+21:19:37 PGR finished: records 4, duration 4 s, stop reason: none
