@@ -178,3 +178,17 @@ the fix (prompt+ref equality verified), so no dev comparability was lost.
 Every derived bank must pass both build guards from now on: scorer-shape guard
 (no KeyError at scoring) and C-ref semantic guard (truth recomputed from the
 prompt equals the ref).
+
+## 2026-11-05 — scoreboard bookkeeping errors (found by external audit)
+- Claimed the H guard moved codex +1 / grok +2 perfect **without an A/B
+  rescore**; direct old-vs-new scorer comparison on the 231 published raw
+  answers: zero difference. The guard is right (14/14 contract tests) but
+  changed nothing in those rows.
+- The provisional raw-arm table applied the contour agent-loop D scorer to
+  single-shot chat text; that interface requirement cost basalt/grok 2 D
+  cells each. Official single-shot mode is the plain plan scorer:
+  45/54/56 (strict). Auditor variant (ignore format) reproduces external
+  recount 45/58/56 exactly.
+- Lesson: scoreboards live in the repo as reproducible tables
+  (`scripts/audit_hard_v5.py`), never only in commit messages; any claimed
+  score delta needs an old-vs-new rescore artifact before it is stated.
