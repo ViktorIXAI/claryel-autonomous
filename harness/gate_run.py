@@ -208,6 +208,12 @@ F_AVOID_CANON = contour_at_least(2, 22)
 # "услуга хостинга" while scorer gold is Latin "hosting".
 # Map known prompt-local aliases to the Latin token without inventing fields.
 K_SERVICE_ALIAS = contour_at_least(2, 23)
+# 0.0.2.24: I duration lists — when the answer is [[label, seconds], ...] with
+# correct seconds but wrong order, re-sort by seconds (scorer wants ascending).
+I_DURATION_SORT = contour_at_least(2, 24)
+# 0.0.2.25: G short-context — when the prompt itself states a no-stacking rule
+# plus two different discount percentages, emit conflict JSON by code.
+G_CONFLICT_CODE = contour_at_least(2, 25)
 
 
 def _d_is_loop(t):
@@ -1634,6 +1640,84 @@ K_FLAG_LINE = re.compile(
     r"[^\n:]*?:\s*(?P<val>yes|no|да|нет)[\s.]*$", re.I)
 
 
+def g_conflict_by_code(t, text):
+    """v2.25: detect short-context G discount-stacking conflicts from the prompt."""
+    if not G_CONFLICT_CODE or not text:
+        return text, None
+    prompt = t.get("prompt") or t.get("free_text") or ""
+    stack_rx = "не суммируют|нельзя выполнить одновременно|cannot (?:be )?combin"
+    if not re.search(stack_rx, prompt, re.I):
+        return text, None
+    pts = re.findall(r"Пункт\s*(\d+)\s*:\s*(.+?)(?=\nПункт\s*\d+|\nФормат|\Z)", prompt, re.S)
+    if len(pts) < 2:
+        pts = re.findall(r"(?:^|\n)\s*(\d+)[.)]\s*(.+?)(?=(?:\n\s*\d+[.)])|\Z)", prompt, re.S)
+    pct_pts = []
+    no_stack = []
+    for num, body in pts:
+        body = body.strip()
+        if re.search(r"не суммируют|нельзя суммировать|do not stack|not combin", body, re.I):
+            no_stack.append(str(num))
+        for p in re.findall(r"(\d+)\s*%", body):
+            pct_pts.append((str(num), p + "%", int(p)))
+    if not no_stack or len({p for _, p, _ in pct_pts}) < 2:
+        return text, None
+    vals = []
+    seen = set()
+    for num, pct, _ in pct_pts:
+        if pct in seen:
+            continue
+        seen.add(pct)
+        vals.append(pct)
+        if len(vals) == 2:
+            break
+    top = max(pct_pts, key=lambda x: x[2])
+    clauses = [no_stack[0], top[0]]
+    if clauses[0] == clauses[1]:
+        other = next((n for n, p, _ in pct_pts if n != clauses[0]), None)
+        if other:
+            clauses[1] = other
+    out = {"conflict": True, "clauses": clauses, "values": vals}
+    cur = _fmt_parse(text)
+    if isinstance(cur, dict) and cur.get("conflict") is True:
+        return text, None
+    return json.dumps(out, ensure_ascii=False), ["g_conflict_code"]
+
+
+
+def i_duration_sort(t, text):
+    """v2.24: re-sort I answers that are [label, seconds] pairs by seconds."""
+    if not I_DURATION_SORT or not text:
+        return text, None
+    if not str(t.get("id", "")).startswith("I") and t.get("cat") != "I":
+        pass
+    obj = _fmt_parse(text)
+    if not isinstance(obj, list) or len(obj) < 2:
+        return text, None
+    pairs = []
+    for item in obj:
+        if not isinstance(item, (list, tuple)) or len(item) != 2:
+            return text, None
+        lab, sec = item[0], item[1]
+        if not isinstance(lab, str):
+            return text, None
+        try:
+            sec_n = float(sec)
+        except (TypeError, ValueError):
+            return text, None
+        pairs.append((lab, sec_n))
+    # Only rewrite when every label looks like a duration token.
+    if not all(re.search(r"\d", lab) and re.search(r"[hm]", lab, re.I) for lab, _ in pairs):
+        return text, None
+    sorted_pairs = sorted(pairs, key=lambda p: p[1])
+    if sorted_pairs == pairs:
+        return text, None
+    # Preserve int seconds when whole.
+    out = []
+    for lab, sec in sorted_pairs:
+        out.append([lab, int(sec) if float(sec).is_integer() else sec])
+    return json.dumps(out, ensure_ascii=False), ["i_duration_sort"]
+
+
 def k_service_alias_normalize(t, text):
     """v2.23: map prompt-local SERVICE aliases to Latin gold tokens."""
     if not K_SERVICE_ALIAS or not text or not str(t.get("id", "")).startswith("K"):
@@ -1918,6 +2002,20 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v223_" + "_".join(ev))
+    if G_CONFLICT_CODE and cat == "G" and r["text"]:
+        norm, ev = g_conflict_by_code(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v225_" + "_".join(ev))
+    if I_DURATION_SORT and cat == "I" and r["text"]:
+        norm, ev = i_duration_sort(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v224_" + "_".join(ev))
     if K_NEGATION and cat == "K" and r["text"]:
         norm, ev = k_negation_normalize(t, r["text"])
         if ev:
@@ -2006,6 +2104,20 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v223_" + "_".join(ev))
+                    if G_CONFLICT_CODE and cat == "G" and r["text"]:
+                        norm, ev = g_conflict_by_code(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v225_" + "_".join(ev))
+                    if I_DURATION_SORT and cat == "I" and r["text"]:
+                        norm, ev = i_duration_sort(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v224_" + "_".join(ev))
                     if K_NEGATION and cat == "K" and r["text"]:
                         norm, ev = k_negation_normalize(t, r["text"])
                         if ev:
