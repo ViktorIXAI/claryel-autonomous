@@ -1,5 +1,9 @@
 # Hard bank v6 — four-arm series (2026-11-05)
 
+**Contour version ladder 0.0.2.16 -> 0.0.2.23 (recomputed from the published arms):
+`LADDER.md`.** Paired flip lists live in each `full-2NN/pair-*.txt`; regenerate with
+`scripts/ladder_v6.py` and `scripts/full_pair_report.py`.
+
 Bank: `benchmarks/hard/bank-hard-v6.json`, sha16 `f52acbd15b3271e7` (loop-v2 revision).
 Scorers: `harness/parb_check_v6.py` **v6.1** (parse_json span fix, semantic J id-order,
 list-wrapped object unwrap, loop-v2 trajectory scorer). Scorer sha256 in
