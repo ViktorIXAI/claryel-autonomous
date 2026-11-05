@@ -57,6 +57,17 @@ CONTOUR_FEATURES = (
     (2, 12),  # truncation budget: ladder ceiling raised to 8192 after a real finish=length at 2048
     (2, 13),  # C format normalization (letters-only contract kept) + C best-of-2 for missed_options lotteries
     (2, 14),  # checker-keyword post-normalization OFF by default (issue #15: no scorer-keyword injection in official score; STRATA_CHECKER_INJECT=1 reproduces historical 2.0-2.13 behaviour)
+    (2, 15),  # deterministic format repair: B/D object unwrap, J id-sequence (zero model tokens)
+    (2, 16),  # loop-v2 drive: protocol re-ask on an off-protocol turn, in-place gate_rejected marker (no duplicate terminal row), and re-admission of the model's own answer when the early-answer gate left the loop answerless
+    (2, 17),  # the 2.15 deterministic format repair reaches the official pipeline: keyword-free repair unbundled from CHECKER_INJECT (issue #15 keeps injection itself OFF)
+    (2, 18),  # K boolean synonym canonicalize: true/false -> yes/no on yes/no fields; keyword-free, independent of CHECKER_INJECT
+    (2, 19),  # H JSON contract: clear fabricated claims/actions_done arrays (v6 scorer fail-hard); keyword-free
+    (2, 20),  # K bool Cyrillic: да/нет -> yes/no on yes/no fields (extends 2.18 true/false)
+    (2, 21),  # D-plain uses check_D_plain_v6 (stop mis-routing plain D through loop scorer)
+    (2, 22),  # F JSON: next short-id + empty avoid backfill from prompt N-options
+    (2, 23),  # K SERVICE alias: prompt Cyrillic hosting forms -> Latin hosting
+    (2, 24),  # I duration list: re-sort [label, seconds] pairs by seconds ascending
+    (2, 25),  # G short-context: discount no-stack conflict JSON by code
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -71,8 +82,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 14)
-CURRENT_STAMP = "0.0.2.14"
+CURRENT_REVISION = (2, 25)
+CURRENT_STAMP = "0.0.2.25"
 
 
 def _digits(value: str) -> list[int]:

@@ -1,0 +1,80 @@
+SCORER_PATH <repo>/harness/parb_check_v6.py
+SCORER_SHA256 5dfe6d8ffa79ea15475bbc02a332b38986627c7484a3a29cc6e67ee83cdd3cda
+BANK_PATH <repo>/benchmarks/hard/bank-hard-v6.json
+BANK_SHA256 fe927654b70425ce7e5b90eb47402ef3486b846c7ee7bbb0d910e162a69d016e
+SANDBOX_PATH <repo>/harness/e_sandbox.py
+SANDBOX_SHA256 d40475aa0a0600c6a3d519dc8c55bba021490c401d3333c778dfc2661d62e31a
+IMPORT parb_check_v6 OK
+SYMBOL check id=138969403656848 file=<repo>/harness/parb_check_v6.py
+SYMBOL check_D_loop_v6 id=138969403654912
+SYMBOL run_battery id=138969403655440
+DEFAULT_PATH run_docker+fail_closed OK
+ARM contour
+  scorer_path <repo>/harness/parb_check_v6.py
+  scorer_sha256 5dfe6d8ffa79ea15475bbc02a332b38986627c7484a3a29cc6e67ee83cdd3cda
+  cat A tasks 9
+  cat B tasks 7
+  cat C tasks 8
+  cat D tasks 9
+  cat E tasks 10
+  cat F tasks 6
+  cat G tasks 6
+  cat H tasks 5
+  cat I tasks 6
+  cat J tasks 7
+  cat K tasks 4
+  cat D_plain tasks 3
+  cat D_loop tasks 6
+  smoke_A content=1.00 format=True notes=[]
+ARM basalt_raw
+  scorer_path <repo>/harness/parb_check_v6.py
+  scorer_sha256 5dfe6d8ffa79ea15475bbc02a332b38986627c7484a3a29cc6e67ee83cdd3cda
+  cat A tasks 9
+  cat B tasks 7
+  cat C tasks 8
+  cat D tasks 9
+  cat E tasks 10
+  cat F tasks 6
+  cat G tasks 6
+  cat H tasks 5
+  cat I tasks 6
+  cat J tasks 7
+  cat K tasks 4
+  cat D_plain tasks 3
+  cat D_loop tasks 6
+  smoke_A content=1.00 format=True notes=[]
+ARM codex_raw
+  scorer_path <repo>/harness/parb_check_v6.py
+  scorer_sha256 5dfe6d8ffa79ea15475bbc02a332b38986627c7484a3a29cc6e67ee83cdd3cda
+  cat A tasks 9
+  cat B tasks 7
+  cat C tasks 8
+  cat D tasks 9
+  cat E tasks 10
+  cat F tasks 6
+  cat G tasks 6
+  cat H tasks 5
+  cat I tasks 6
+  cat J tasks 7
+  cat K tasks 4
+  cat D_plain tasks 3
+  cat D_loop tasks 6
+  smoke_A content=1.00 format=True notes=[]
+ARM grok_raw
+  scorer_path <repo>/harness/parb_check_v6.py
+  scorer_sha256 5dfe6d8ffa79ea15475bbc02a332b38986627c7484a3a29cc6e67ee83cdd3cda
+  cat A tasks 9
+  cat B tasks 7
+  cat C tasks 8
+  cat D tasks 9
+  cat E tasks 10
+  cat F tasks 6
+  cat G tasks 6
+  cat H tasks 5
+  cat I tasks 6
+  cat J tasks 7
+  cat K tasks 4
+  cat D_plain tasks 3
+  cat D_loop tasks 6
+  smoke_A content=1.00 format=True notes=[]
+DRY_RUN_SAME_SCORER PASS

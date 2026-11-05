@@ -1,0 +1,19 @@
+# hard bank official v6 freeze line (issue #15 P0)
+# format: sha256  relative/path
+# Pins bank + semantic checkers + builder + shim workspace script + gold + suites + sandbox.
+# v5 pins live in MANIFEST.v5.sha256 and must stay immutable.
+9ec86dfca4a6f85f0cbccd8d39cb0c7ac6cedb35823aa7d47e24ca49b932c4cc  benchmarks/hard/bank-hard-v6.json
+c1d346a57a60d14416203a93096d0379f5b2686b8da951b32cde7fbeb2e367ae  benchmarks/hard/gold-answers-v6.jsonl
+faea1730dce5fd48b4e98001d4e6a5e28621727371f0ef64f2cbdcc8203c9813  benchmarks/hard/c_position_dist_v6.json
+13d0f942834ac5214ae4ea41a6a680ddcfab3dac25dc75d39cc3ef4f5f640853  benchmarks/hard/PROTOCOL.md
+89437d8cfe1fc6c8eaf02f5016308cc967333171d8eff80f971b2c628308e453  harness/parb_check_v6.py
+9ba53ff61c15e9b3418d8a72ba6c268d3805f631b0f8d9dd74776969b02eadd2  harness/parb_bank_v6.py
+424c04126e9b6c1ecc5b34c35268b8dc20c84f95e8a9b9367651bfb329a169f5  harness/e_sandbox.py
+6003258c9b80bf997d1cebec1fdcac2236470e2bb2a252cd6d1251778770ebf3  harness/verify_manifest.py
+27e95cfb77cafab22c124dcf05a494dfe45e3f4b07a6230926236adfd1e8d49c  scripts/gold_selftest_v6.py
+7794a8a0a0c6a37f6e16c9296665f8ccfba17cf1ed292076a35f6a3094d10823  scripts/semantic_suite_v6.py
+b0cfd3d7459f8ebddd438a68bfab3233bc084a74dc6b05035b49f1acc1382063  scripts/dry_run_same_scorer_v6.py
+80cb9a681414da41c60bc2553a66a5f4c3fc29240794aceb72bcb32749079651  scripts/build_hard_v6_ws.py
+c3fcf0aec88ce11ad849ba31c5e54086132432a82f03102848cb85fba65819e8  scripts/dedup_hard_bank.py
+d759056c9e22053bfad31ed97362008bc8676ef5f7d07c2f8b1c06c10ee578c6  scripts/leakage_scan_v6.py
+eed434929b7b73b38b0d146b32426c81e22e64e1337583bc8746a2454e217d78  benchmarks/hard/WS-GENERATED.v6.sha256

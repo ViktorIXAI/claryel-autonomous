@@ -1,0 +1,26 @@
+{
+  "box": "B2003",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:<PORT>",
+  "contour_version": "0.0.2.16",
+  "contour_behavior": "2.16",
+  "contour_changed_at_this_release": true,
+  "git_sha": "",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  }
+}

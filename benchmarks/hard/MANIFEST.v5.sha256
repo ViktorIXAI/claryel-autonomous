@@ -1,0 +1,7 @@
+# hard bank v5 immutable gate pins (issue #15 / audit-20261105)
+# format: sha256  relative/path
+# Do not mutate these files in place; v6 lives in separate artifacts.
+32953591ba2a6c51aeab303275f8d5354498c12024a6c9ad3ae7d04b05e02fc3  benchmarks/hard/bank-hard.json
+32953591ba2a6c51aeab303275f8d5354498c12024a6c9ad3ae7d04b05e02fc3  benchmarks/hard/bank-hard-v5.json
+1c032ef022607d7ba9ccd37fbbc374fc0d8313b550d1704784b489497bda3b2f  harness/parb_check.py
+f5f5b78ab46a0f0c0531d1f56ac253769174e015fadae2c79ad24d305c2acdf0  harness/parb_loop.py

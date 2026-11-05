@@ -26,4 +26,16 @@ security-report*.md
 # hard-v6: keep raw arm dumps reviewable — prefer names outside results*.jsonl
 # e.g. benchmarks/hard/audit-YYYYMMDD/artifacts/ or runs/<stamp>/raw-answers.jsonl
 # (results*.jsonl remains ignored unless explicitly negated like audit-20261105)
+!benchmarks/hard/v6-results/
 !benchmarks/hard/v6-results/*.jsonl
+!benchmarks/hard/v6-results/*.csv
+!benchmarks/hard/v6-results/*.log
+!benchmarks/hard/v6-results/*.md
+# 2026-11-05: the single-star rules above never matched the per-arm subdirectories
+# (full-2NN/, k-218/, j-probe-218/), so `results*.jsonl` answer rows were silently
+# unpublished for contour arms 0.0.2.18-0.0.2.23 while their ledgers shipped. Ship
+# every sanitized artifact at any depth under v6-results/.
+!benchmarks/hard/v6-results/**/*.jsonl
+!benchmarks/hard/v6-results/**/*.csv
+!benchmarks/hard/v6-results/**/*.log
+!benchmarks/hard/v6-results/**/*.md

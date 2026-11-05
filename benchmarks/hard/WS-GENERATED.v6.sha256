@@ -1,0 +1,12 @@
+# generated v6 workspace shim/adapter pins (issue #15 review item 3)
+# format: sha256  ws-relative/path; regenerate: build_hard_v6_ws.py <tmp> --write-pins
+5d9b02ed089699121efc5379f864cc0de2f70ac3527168c842c69f89bc45ea64  parb_check.py
+ddc4bee1b5feedf331cd371f06f898165017a5772dc4b46300dcc3728f124dd0  parb_loop.py
+89437d8cfe1fc6c8eaf02f5016308cc967333171d8eff80f971b2c628308e453  parb_check_v6.py
+424c04126e9b6c1ecc5b34c35268b8dc20c84f95e8a9b9367651bfb329a169f5  e_sandbox.py
+f914f44edc43ee661e00c7891b11942cd1929e6efff317cc018d411e05ec109e  gate_run.py
+db955bf178c2a93a98967896f166ba2c8e75dd56fb5a6422fb572f0c8f67f0ad  gate_versioning.py
+9ba53ff61c15e9b3418d8a72ba6c268d3805f631b0f8d9dd74776969b02eadd2  parb_bank_v6.py
+f5f5b78ab46a0f0c0531d1f56ac253769174e015fadae2c79ad24d305c2acdf0  parb_loop_mech.py
+f4553aab304f60d7b7c6a688666f43c146dbb59c30b873033be4ed8e787d5c52  bank.json
+d110e35bea142faa33f9b724ee115f0285cfcf5807ca71833bb759b5791ca09a  plan.json

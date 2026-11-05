@@ -1,0 +1,26 @@
+plain    n=71  strict A=54 B=52
+loop     n=6   strict A=4 B=3
+
+cat    A   B   n
+A      5   4   9  <--
+B      5   5   7
+C      5   5   8
+D      7   6   9  <--
+E     10  10  10
+F      6   6   6
+G      5   5   6
+H      4   2   5  <--
+I      5   5   6
+J      3   3   7
+K      3   4   4  <--
+
+flips (strict)
+  A wins A-ex6-05    B c=0.00 f=True notes=fields_mismatch:trimmed_mean,median_original
+  A wins D-ex6-l2    B c=0.70 f=False notes=banned_attempted:EXECUTE_COMMAND
+  A wins H-ex6-03    B c=0.00 f=True notes=unknown_missing
+  A wins H-ex6-04    B c=0.50 f=True notes=unknown_missing
+  B wins K-ex6-01    A c=0.75 f=True notes=value:SERVICE
+
+paired: B wins 1, A wins 4, ties 72, exact sign-test p=0.3750
+A cost: calls=129 ptok=23297 ctok=13225 wall=227s
+B cost: calls=133 ptok=24979 ctok=12859 wall=455s

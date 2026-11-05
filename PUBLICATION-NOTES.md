@@ -116,3 +116,9 @@ change plus the reason. No measurement was re-interpreted: no published number
 moved, only the labels that identify which axis each number belongs to. Old rows
 stamped `0.0.2.3`–`0.0.2.5` remain valid and now derive behavior `0.0.2.2`
 automatically from the contour feature table.
+- 2026-11-05 — **publication hole found**: `.gitignore` pattern `results*.jsonl` was negated only for
+  `benchmarks/hard/v6-results/*.jsonl` (one level), so the per-arm answer rows under
+  `full-2NN/` were never committed for contour arms 0.0.2.18-0.0.2.23 even though they were copied
+  into the tree — an outside auditor could not re-score those arms from answer bytes (the ledgers
+  carried scores, not answers). Fixed by deep negations (`v6-results/**/*.jsonl|csv|log|md`) and all
+  sanitized answer rows backfilled: full-218 .. full-223 plus the k-218 / j-probe-218 probe sets.
