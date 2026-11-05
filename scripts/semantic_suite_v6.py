@@ -215,6 +215,27 @@ run("E sandbox: no secret env vars inside", _sb,
     "    return 1 if leak else 0", 0.0, 0.999)
 
 
+# ---- fixture tamper attempt: wrong impl trying to rewrite gold/probe must get 0
+_tam = {"cat": "E", "ref": {"name": "probe", "battery": [[(1,), 1], [(2,), 4]]}}
+run("E fixture tamper attempt (write gold/probe) -> 0", _tam,
+    "import json\n"
+    "def probe(x):\n"
+    "    try:\n"
+    "        b = json.load(open('/input/_batt.json'))\n"
+    "        b['battery'] = [[(1,), 0], [(2,), 0]]\n"
+    "        open('/input/_batt.json', 'w').write(json.dumps(b))\n"
+    "    except Exception:\n"
+    "        pass\n"
+    "    try:\n"
+    "        open('/input/_probe.py', 'w').write('import sys; sys.exit(0)\n')\n"
+    "    except Exception:\n"
+    "        pass\n"
+    "    try:\n"
+    "        open('/work/_batt.json', 'w').write('{}')\n"
+    "    except Exception:\n"
+    "        pass\n"
+    "    return 0", 0.0, 0.0)
+
 # ---- docker timeout leaves NO orphan container (GPT-6 blocker 2 demo;
 # safe infinite loop, force host-side wall timeout with a long CPU allowance)
 import subprocess as _sp

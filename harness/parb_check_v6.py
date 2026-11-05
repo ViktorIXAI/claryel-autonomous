@@ -6,6 +6,7 @@ answers must be structured per task contract; E batteries execute only via e_san
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import secrets
@@ -222,26 +223,36 @@ def run_battery(t, ans, timeout=6):
     # the host reads. Host additionally requires: exactly one VERDICT line, it is
     # the last line, it carries the per-run random id, and total == len(battery).
     runid = secrets.token_hex(8)
+    batt_json = json.dumps({"name": name, "battery": battery}, ensure_ascii=False)
     files = {
         "_user_src.py": code,
-        "_batt.json": json.dumps({"name": name, "battery": battery}, ensure_ascii=False),
+        "_batt.json": batt_json,
     }
+    # Fixtures (gold battery + probe + user src) live on the READ-ONLY bind /input;
+    # /work is scratch only. The supervisor attests fixture hashes inside the
+    # verdict; the host compares them with its own bytes — mid-run tampering from
+    # inside the container is impossible (ro bind) and any mismatch fails closed.
     payload = (
-        "import json, subprocess, sys\n"
-        "b = json.load(open('/work/_batt.json'))\n"
+        "import hashlib, json, subprocess, sys\n"
+        "b_raw = open('/input/_batt.json', 'rb').read()\n"
+        "b = json.loads(b_raw.decode('utf-8'))\n"
         "batt = b['battery']\n"
         "runid = %r\n"
+        "sha = hashlib.sha256(b_raw).hexdigest()[:16]\n"
+        "probe_raw = open('/input/_probe.py', 'rb').read()\n"
+        "sha = hashlib.sha256(b_raw + probe_raw).hexdigest()[:16]\n"
         "passed = 0\n"
         "for idx in range(len(batt)):\n"
         "    try:\n"
-        "        r = subprocess.run([sys.executable, '/work/_probe.py', str(idx)],\n"
+        "        r = subprocess.run([sys.executable, '/input/_probe.py', str(idx)],\n"
         "                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,\n"
-        "                           timeout=3, start_new_session=True)\n"
+        "                           cwd='/work', timeout=3, start_new_session=True)\n"
         "        if r.returncode == 0:\n"
         "            passed += 1\n"
         "    except subprocess.TimeoutExpired:\n"
         "        pass\n"
-        "print('VERDICT', runid, passed, 'OF', len(batt))\n"
+        "sha2 = hashlib.sha256(open('/input/_batt.json','rb').read() + open('/input/_probe.py','rb').read()).hexdigest()[:16]\n"
+        "print('VERDICT', runid, passed, 'OF', len(batt), 'A', sha if sha == sha2 else 'DRIFT')\n"
     ) % runid
     probe = (
         "import json, os, resource, sys\n"
@@ -262,10 +273,10 @@ def run_battery(t, ans, timeout=6):
         "        if '/.ssh' in p or p.endswith('.env') or p.endswith('shadow'):\n"
         "            raise RuntimeError('blocked secret ' + p)\n"
         "sys.addaudithook(_audit)\n"
-        "b = json.load(open('/work/_batt.json'))\n"
+        "b = json.load(open('/input/_batt.json'))\n"
         "args, exp = b['battery'][int(sys.argv[1])]\n"
         "ns = {}\n"
-        "exec(open('/work/_user_src.py').read(), ns)\n"
+        "exec(open('/input/_user_src.py').read(), ns)\n"
         "f = ns.get(b['name'])\n"
         "if f is None:\n"
         "    sys.exit(3)\n"
@@ -273,6 +284,7 @@ def run_battery(t, ans, timeout=6):
         "sys.exit(0 if json.dumps(got, sort_keys=True, default=str) == json.dumps(exp, sort_keys=True, default=str) else 1)\n"
     )
     files["_probe.py"] = probe
+    fixture_sha = hashlib.sha256(batt_json.encode("utf-8") + probe.encode("utf-8")).hexdigest()[:16]
     try:
         res = e_sandbox.run_docker(payload, files=files, audit=False,
                                cpu_sec=int(timeout) + 20, wall_sec=float(timeout) + 30.0)
@@ -299,8 +311,10 @@ def run_battery(t, ans, timeout=6):
         passed, total = int(parts[2]), int(parts[4])
     except (IndexError, ValueError):
         return 0.0, False, ["verdict_protocol_violation"]
-    if len(parts) != 5 or parts[1] != runid or parts[3] != "OF":
+    if len(parts) != 7 or parts[1] != runid or parts[3] != "OF" or parts[5] != "A":
         return 0.0, False, ["verdict_protocol_violation"]
+    if parts[6] != fixture_sha:
+        return 0.0, False, ["verdict_fixture_drift"]
     if total != len(battery) or passed > total:
         return 0.0, False, ["verdict_total_mismatch"]
     return (passed / total if total else 0.0), True, ["sandbox:docker:verdictv2"]

@@ -236,7 +236,7 @@ def run_docker(
         work = Path(td)
         payload = _write_payload(work, code)
         wrapper = work / "_wrap.py"
-        wrapper.write_text(_local_wrapper(payload.name, cpu_sec, as_bytes, audit=audit), encoding="utf-8")
+        wrapper.write_text(_local_wrapper("/input/" + payload.name, cpu_sec, as_bytes, audit=audit), encoding="utf-8")
         extra = []
         if files:
             for fname, ftext in files.items():
@@ -245,7 +245,7 @@ def run_docker(
                 fp = work / fname
                 fp.write_text(ftext, encoding="utf-8")
                 os.chmod(fp, 0o644)
-                extra.append(fname)
+                extra.append(fname)  # readable via /input (ro bind); never copied to /work
         # Container runs as uid 65534; host mkdtemp is 0700 — open it up read-only for others.
         os.chmod(work, 0o755)
         os.chmod(payload, 0o644)
@@ -275,12 +275,15 @@ def run_docker(
                 hp = Path(host).resolve()
                 _assert_safe_mount(hp)
                 cmd.extend(["-v", f"{hp}:{guest}:ro"])
+        # Trust boundary (issue #15 GPT-6 P0: shared writable grading fixtures):
+        # payload, gold battery, probe and user src stay on the READ-ONLY bind
+        # /input; only the wrapper enters the writable scratch /work. Untrusted
+        # code cannot rewrite gold/probes/supervisor mid-run.
         boot = (
             "import shutil,sys,os;\n"
-            "for _f in ['_wrap.py','%s'%s]:\n"
-            "    shutil.copy('/input/'+_f,'/work/'+_f);\n"
+            "shutil.copy('/input/_wrap.py','/work/_wrap.py');\n"
             "os.execv(sys.executable,[sys.executable,'/work/_wrap.py'])\n"
-        ) % (payload.name, "".join(",'%s'" % f for f in extra))
+        )
         cmd.extend([
             image,
             "env", "-i",
@@ -293,40 +296,44 @@ def run_docker(
         ])
         t0 = time.monotonic()
         timed_out = False
+        p = None
         try:
-            p = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                start_new_session=True,
-            )
             try:
-                out, err = p.communicate(timeout=wall_sec + 5)
-            except subprocess.TimeoutExpired:
-                timed_out = True
-                # killpg on the docker CLI does NOT guarantee daemon-side teardown;
-                # address the container by name as well (issue #15 GPT-6 blocker 2).
-                for act in ((docker, "kill", cid), (docker, "rm", "-f", cid)):
+                p = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    start_new_session=True,
+                )
+                try:
+                    out, err = p.communicate(timeout=wall_sec + 5)
+                except subprocess.TimeoutExpired:
+                    timed_out = True
+                    # killpg on the docker CLI does NOT guarantee daemon-side teardown;
+                    # address the container by name as well (issue #15 GPT-6 blocker 2).
+                    for act in ((docker, "kill", cid), (docker, "rm", "-f", cid)):
+                        try:
+                            subprocess.run(act, capture_output=True, timeout=5)
+                        except Exception:
+                            pass
                     try:
-                        subprocess.run(act, capture_output=True, timeout=5)
+                        os.killpg(p.pid, signal.SIGKILL)
                     except Exception:
-                        pass
-                try:
-                    os.killpg(p.pid, signal.SIGKILL)
-                except Exception:
-                    p.kill()
-                try:
-                    out, err = p.communicate(timeout=3)
-                except Exception:
-                    out, err = "", "docker_wall_timeout"
-        except Exception as e:
-            return SandboxResult(False, "docker", 127, "", str(e), False, 0.0, "docker_spawn_failed")
-        # Best-effort daemon-side teardown even on non-timeout oddities.
-        try:
-            subprocess.run([docker, "rm", "-f", cid], capture_output=True, timeout=5)
-        except Exception:
-            pass
+                        p.kill()
+                    try:
+                        out, err = p.communicate(timeout=3)
+                    except Exception:
+                        out, err = "", "docker_wall_timeout"
+            except Exception as e:
+                return SandboxResult(False, "docker", 127, "", str(e), False, 0.0, "docker_spawn_failed")
+        finally:
+            # Guaranteed daemon-side teardown on EVERY control flow, including
+            # timeouts and unexpected exceptions (issue #15 GPT-6 teardown ask).
+            try:
+                subprocess.run([docker, "rm", "-f", cid], capture_output=True, timeout=5)
+            except Exception:
+                pass
         wall = time.monotonic() - t0
         rc = p.returncode if p.returncode is not None else -9
         return SandboxResult(
@@ -365,7 +372,7 @@ def run_unshare(
         work = Path(td)
         payload = _write_payload(work, code)
         wrapper = work / "_wrap.py"
-        wrapper.write_text(_local_wrapper(payload.name, cpu_sec, as_bytes, audit=audit), encoding="utf-8")
+        wrapper.write_text(_local_wrapper(payload.name, cpu_sec, as_bytes), encoding="utf-8")
         env = _scrubbed_env(home=str(work))
         cmd = [unshare, *flags, sys.executable, str(wrapper)]
         return _run_popen_killable(cmd, cwd=str(work), env=env, wall_sec=wall_sec, backend="unshare")
@@ -383,7 +390,7 @@ def run_local(
         work = Path(td)
         payload = _write_payload(work, code)
         wrapper = work / "_wrap.py"
-        wrapper.write_text(_local_wrapper(payload.name, cpu_sec, as_bytes, audit=audit), encoding="utf-8")
+        wrapper.write_text(_local_wrapper(payload.name, cpu_sec, as_bytes), encoding="utf-8")
         env = _scrubbed_env(home=str(work))
         res = _run_popen_killable(
             [sys.executable, str(wrapper)],
