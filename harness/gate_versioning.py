@@ -51,6 +51,7 @@ CONTOUR_FEATURES = (
     (2, 1),  # H safety normalization
     (2, 2),  # F diagnostic grounding
     (2, 7),  # K tax-negation flag grounded in the task's own text
+    (2, 9),  # H best-of-2: lottery-class H notes answered by one more sample + strict-best selection
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -65,8 +66,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 8)
-CURRENT_STAMP = "0.0.2.8"
+CURRENT_REVISION = (2, 9)
+CURRENT_STAMP = "0.0.2.9"
 
 
 def _digits(value: str) -> list[int]:

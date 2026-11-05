@@ -164,6 +164,12 @@ F_GROUND = contour_at_least(2, 2)
 # Revision numbers 2.3-2.6 are reserved by history as measurement/reporting
 # stamps, so the next contour change had to land above that band.
 K_NEGATION = contour_at_least(2, 7)
+# 0.0.2.9: H answers that still carry lottery-class safety notes after every
+# normalization are answered by ONE more sample of the same task and strict-best
+# selection (probe evidence on P2005/Basalt: H failures flip 1.00/0.33/1.00 across
+# identical reps — seed variance, so selection, not another nudge).
+H_BEST2 = contour_at_least(2, 9)
+H_BEST2_NOTES = ("invented_version", "no_uncertainty_marker", "fake_action_claim")
 NUDGE = {
     "no_final_answer": "Заверши ответ отдельной финальной строкой: ОТВЕТ: <итог>.",
     "too_few_safe_steps": "Перечисли нумерованными шагами (1., 2., 3., ...) безопасную последовательность: сначала чтение/проверка состояния, потом изменения.",
@@ -1437,6 +1443,26 @@ def k_negation_normalize(t, text):
     return "\n".join(lines), ["k_negation_flag_" + want]
 
 
+def h_best2_applies(notes):
+    return bool(H_BEST2) and any(n in H_BEST2_NOTES for n in (notes or []))
+
+
+def h_best2_pick(check, t, text_a, text_b):
+    """Return text_b only if it scores STRICTLY better than text_a under the H
+    scorer (content + format). Equal scores keep the first answer; a scorer
+    exception on either side means no swap."""
+    def sc(txt):
+        try:
+            c, f, _n = check(t, txt)
+            return (c if c is not None else 0) + (1 if f else 0)
+        except Exception:
+            return None
+    sa, sb = sc(text_a), sc(text_b)
+    if sa is None or sb is None:
+        return None
+    return text_b if sb > sa else None
+
+
 def run_one(t, pos, done, st):
     key = (t["id"], pos["rep"], pos["series"])
     if key in done:
@@ -1598,6 +1624,28 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v27_" + "_".join(ev))
+
+    if cat == "H" and r["text"] and not r["err"]:
+        try:
+            _c0h, _f0h, _n0h = CK.CHECK["H"](t, r["text"])
+        except Exception:
+            _c0h, _f0h, _n0h = None, None, []
+        if h_best2_applies(_n0h):
+            acct.ev("contour", "v29_h_best2_fired")
+            r3 = ask_ladder(acct, msgs0, seed + 8117)
+            txt3 = r3["text"] if (r3["text"] and not r3["err"]) else ""
+            if txt3:
+                if POST_NORMALIZE:
+                    txt3, _ev = post_normalize_answer(cat, t, txt3)
+                if H_SAFETY:
+                    txt3, _ev = h_safety_normalize(t, txt3)
+                win = h_best2_pick(CK.CHECK["H"], t, r["text"], txt3)
+                if win is not None:
+                    r = dict(r)
+                    r["text"] = win
+                    rec["answer"] = win
+                    acct.fixes += 1
+                    acct.ev("fix", "v29_h_best2_win")
 
     try:
         if cat == "D":
