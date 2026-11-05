@@ -147,3 +147,10 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 | J-ex6-06 prompt said "skip score>=70" while ref kept >=70 — wording/ref contradiction | FIXED v6.1 (unambiguous wording, ref verified by hand) |
 | v6.1 probes: contour 2.17 J-subset 5/7 (both ex-defect cells now 1.00); bare Basalt J-subset 7/7 | PUBLISHED (answers-basalt-j-v61.jsonl, results/ledger-contour-j-v61.jsonl) |
 | J: contour 5/7 vs bare 7/7 on v6.1 probe — inspected both discordants: model arithmetic/order errors in the FIRST answer; nudge is best-of-two (takes second only if strictly better), no degradation mechanism found; 2/7 is inside noise band | CORRECTED: earlier "scaffold harm" wording withdrawn, no evidence |
+
+## Hourly control 6667894164 — processed
+| item | status |
+|---|---|
+| GO chronology requested (when/where/scope, paid arms) | ANSWERED publicly (comment 6669323957): owner chat GO before runs, scope = 4 arms 1 rep, ChatGPT via subscription CLI, Grok via owner OAuth, no new paid quota |
+| "stop further runs until owner confirms" | HONORED: external arms on v6.1 HELD; in-flight v61c local arm finished and disclosed; external v6.1 runners pre-staged in ~/parb-v6-raw-ext, nothing launched |
+| their P0: 2.15 repair inactive under POST_NORM master gate | ALREADY FIXED by me in master gate (call-site POST_NORMALIZE or contour_at_least(2,15)); their arm confirms repair events fire at 2.17 |
