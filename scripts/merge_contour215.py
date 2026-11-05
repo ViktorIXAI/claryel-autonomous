@@ -11,19 +11,23 @@ def conv(r, loop_src=False):
            "answer": r.get("answer") or ""}
     if r["task"].startswith("D-ex6-l"):
         steps = r.get("agent_steps") or []
-        row["answer"] = json.dumps({"_loop_rows": [
-            (s.get("parsed") if s.get("parsed") is not None
-             else {"gate_block": s.get("gate_block")})
-            for s in steps]}, ensure_ascii=False)
+        rows = []
+        for s in steps:
+            r0 = (s.get("parsed") if s.get("parsed") is not None
+                  else {"gate_block": s.get("gate_block")})
+            if s.get("gate_rejected") and isinstance(r0, dict):
+                r0 = dict(r0, gate_rejected=True)
+            rows.append(r0)
+        row["answer"] = json.dumps({"_loop_rows": rows}, ensure_ascii=False)
     return row
 
 
 base = {}
-for l in open(BASE + "/results-hardv6-215.jsonl", encoding="utf-8"):
+for l in open(BASE + "/results-hardv6-215f.jsonl", encoding="utf-8"):
     r = json.loads(l)
     base[(r["task"], r["rep"])] = r  # keep-last on resume duplicates
 loops = {}
-for l in open(BASE + "/results-hardv6-215e.jsonl", encoding="utf-8"):
+for l in open(BASE + "/results-hardv6-215f.jsonl", encoding="utf-8"):
     r = json.loads(l)
     loops[(r["task"], r["rep"])] = r
 n = 0
