@@ -43,3 +43,12 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 ## Process constraints acknowledged
 - Single writer on `hard-v6-p0-fix` (flag `.hermes-single-writer-STOP`); my work lands on `hard-v6-p0-fix-hermes` for the writer line to FF.
 - Reviewers demand no merge/no inference without owner GO; owner issued 4-arm run GO on 2026-11-05 (Viktor, chat).
+
+## Self-found findings during 4-arm v6 series (2026-11-05)
+| # | finding | status |
+|---|---|---|
+| S1 | v6 loop-D tasks were plan-replay, not drivable by the agent loop (kind-bug rerun exposed: 0/6 role-play) | FIXED @ 80999648 (loop-v2 agent tasks + trajectory scorer) |
+| S2 | contour 2.14 net-negative vs bare basalt on v6: B/J format regressions (`[{...}]` wraps, decorated J items), A arithmetic worse under scaffold | LOGGED — next contour version (format canonicalization for B/J, scaffold harm probe on A) |
+| S3 | grok raw transport (`hermes -z @file`) exposes file tools; one H answer disclosed the transport path; no bank/gold leak traces (grepped) | LOGGED + disclosed in v6-results README; future raw arms: stdin-only transports |
+| S4 | contour early-answer rejection creates a second answer row -> strict format fails on loop tasks (own guard hurts own format) | LOGGED — gate must tag rejected turns so trajectory scoring ignores them |
+| S5 | score_v6/4-arm scripts require e_sandbox beside parb_check_v6 (raw dirs) | FIXED (deployed copies) |

@@ -208,6 +208,15 @@ def check_D_loop_v6(t, step_rows):
     attempts.
     """
     r = t["ref"]
+    if isinstance(step_rows, dict):
+        step_rows = step_rows.get("step_rows", [])
+    # turns refused by the contour gate carry a trusted harness marker and are
+    # excluded (the protocol re-asked); policy-blocked attempts (gate_block) are
+    # mapped to attempted tools because the attempt really happened
+    step_rows = [x for x in step_rows if not (isinstance(x, dict) and x.get("gate_rejected") is True)]
+    step_rows = [({"tool": x.get("gate_block"), "arg": None}
+                  if isinstance(x, dict) and "gate_block" in x and "tool" not in x and "answer" not in x
+                  else x) for x in step_rows]
     acts, answ, bad = [], [], 0
     for row in step_rows:
         obj = parse_json(row) if isinstance(row, str) else row

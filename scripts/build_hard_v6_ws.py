@@ -26,6 +26,7 @@ OUT = _args[0] if _args else os.path.expanduser("~/parb-2005-hardv6")
 # Generated shim/adapter files are hash-pinned here (itself pinned in MANIFEST.v6).
 WS_PINS = os.path.join(ROOT, "benchmarks", "hard", "WS-GENERATED.v6.sha256")
 WS_PINNED = ("parb_check.py", "parb_loop.py", "parb_check_v6.py", "e_sandbox.py",
+               "gate_run.py", "gate_versioning.py",
              "parb_bank_v6.py", "parb_loop_mech.py", "bank.json", "plan.json")
 
 bank_src = os.path.join(ROOT, "benchmarks", "hard", "bank-hard-v6.json")
@@ -115,12 +116,30 @@ loop_ad = ('"""loop driver adapter: mechanics from copied v5 module; scoring is 
            "    rows = []\n"
            "    for s in (rec.get('agent_steps') or []):\n"
            "        p = s.get('parsed')\n"
+           "        if p is None and 'gate_block' in s:\n"
+           "            rows.append({'tool': s['gate_block'], 'arg': None})\n"
+           "            continue\n"
+           "        if s.get('gate_rejected') and isinstance(p, dict):\n"
+           "            p = dict(p, gate_rejected=True)\n"
            "        rows.append(p if isinstance(p, str) else json.dumps(p, ensure_ascii=False))\n"
            "    return V6.check_D_loop_v6(t, rows)\n")
 open(os.path.join(OUT, "parb_loop.py"), "w", encoding="utf-8").write(loop_ad)
 
+# generated-adapter integrity pins (issue #15 review item: shim must be pinned):
+# MANIFEST.v6 carries "# generated: <file> sha256=<h>" lines; build fails closed on drift.
+man = open(os.path.join(ROOT, "benchmarks/hard", "MANIFEST.v6.sha256"), encoding="utf-8").read()
+for fname in ("parb_check.py", "parb_loop.py"):
+    got = hashlib.sha256(open(os.path.join(OUT, fname), "rb").read()).hexdigest()
+    m = re.search(r"# generated: %s sha256=([0-9a-f]{64})" % re.escape(fname), man)
+    if m:
+        assert m.group(1) == got, ("generated adapter drift vs MANIFEST.v6 pin", fname, got[:16], m.group(1)[:16])
+    print("generated", fname, "sha256", got)
+
 for f in ("parb_check_v6.py", "e_sandbox.py", "parb_bank_v6.py"):
     shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
+for f in ("gate_run.py", "gate_versioning.py"):
+    shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
+assert "def plan_loop" in open(os.path.join(OUT, "gate_run.py"), encoding="utf-8").read(), "loop driver missing"
 shutil.copy2(os.path.join(ROOT, "harness", "parb_loop.py"), os.path.join(OUT, "parb_loop_mech.py"))
 
 readme = """# Hard-v6 run workspace

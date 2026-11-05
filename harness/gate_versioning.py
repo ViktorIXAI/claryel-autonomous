@@ -71,8 +71,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 14)
-CURRENT_STAMP = "0.0.2.14"
+CURRENT_REVISION = (2, 15)
+CURRENT_STAMP = "0.0.2.15"
 
 
 def _digits(value: str) -> list[int]:

@@ -1159,6 +1159,9 @@ def plan_loop(acct, t, seed, rec):
             if VERIFY_RETRY and not early_blocked and (not reads or i < 2):
                 early_blocked = True
                 acct.blocks += 1
+                if contour_at_least(2, 15):
+                    steps.append({"step": i, "raw": (r["text"] or "")[:300],
+                                  "parsed": act, "gate_rejected": True})
                 acct.ev("gate", "blocked_early_answer")
                 obs = ("КОНТУР ОТКЛОНИЛ ОТВЕТ: недостаточно проверенных шагов. Сначала READ_FILE "
                        "(чтение состояния) и безопасный план по шагам, затем action=answer.")
@@ -1217,6 +1220,17 @@ def code_gate(acct, t, seed, msgs0):
     return r
 
 
+def _fmt_parse(text):
+    """Strict-ish JSON sniff for format repair; None when not clean JSON."""
+    for s0 in (text.strip(),
+               text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()):
+        try:
+            return json.loads(s0)
+        except Exception:
+            continue
+    return None
+
+
 def post_normalize_answer(cat, t, text):
     """v2.0: only post-process material the model already produced.
 
@@ -1226,6 +1240,27 @@ def post_normalize_answer(cat, t, text):
     format, keep a deterministic short window preserving uncertainty and
     numeric claims instead of asking the model for more tokens.
     """
+
+    # v2.15: deterministic format repair, zero model tokens, content preserved:
+    # B/D-plain single object wrapped in a one-element list -> plain object;
+    # J decorated items -> bare id sequence (same extraction contract as scorer).
+    if contour_at_least(2, 15) and cat in ("B", "D") and t.get("mode") != "loop":
+        j2 = _fmt_parse(text)
+        if isinstance(j2, list) and len(j2) == 1 and isinstance(j2[0], dict):
+            return json.dumps(j2[0], ensure_ascii=False), ["obj_unwrap"]
+    if contour_at_least(2, 15) and cat == "J":
+        j2 = _fmt_parse(text)
+        if isinstance(j2, list) and j2:
+            ids = []
+            for x in j2:
+                if isinstance(x, str):
+                    ids.append(x)
+                elif isinstance(x, dict):
+                    v = x.get("id") or x.get("item") or x.get("name") or x.get("rule")
+                    if v is not None:
+                        ids.append(str(v))
+            if ids and all(isinstance(x, dict) for x in j2):
+                return json.dumps(ids, ensure_ascii=False), ["j_id_norm"]
     if not POST_NORMALIZE or not text:
         return text, None
     changed = []
