@@ -1,6 +1,6 @@
 {
  "kind": "fleet-os-snapshot",
- "checked_utc": "2026-11-03T12:34:12.268785+00:00",
+ "checked_utc": "2026-11-05T03:30:12.812624+00:00",
  "policy": "Every benchmark, telemetry and hardware record must carry os.id, os.pretty, os.codename, os.flavor and os.kernel.",
  "machines": [
   {

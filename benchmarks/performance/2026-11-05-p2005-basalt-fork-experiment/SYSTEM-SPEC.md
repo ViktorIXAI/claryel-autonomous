@@ -76,3 +76,35 @@ Bench environment for the max run: endpoint fully idle (Hermes brain parked on M
 Studio), 2 warmup rounds of 3 conversations before the ladder, RAM at contracted floor,
 GPU 145 W / 67 °C at measurement time. When the brain shares the endpoint (production
 case), expect ~15% below these numbers.
+
+## CPU frequency limit experiment + whole-system thermals (2026-11-05)
+
+The box ships with an OS-level CPU cap: `scaling_max_freq = 4.5 GHz` (hardware max
+5.46 GHz), governor performance, boost on, platform profile performance. We tested
+whether the cap costs inference speed: uncapped all cores to 5.46 GHz, re-ran the 6×
+ladder + a 1200-token generation, then restored 4.5 GHz (verified back).
+
+Result: **no measurable gain** — 16k median 194 (vs 196 capped), 32k 188 (vs 201),
+64k 157 (vs 166) — all within run scatter; the long 1200-token run hit **175.9 tok/s**
+(best sustained figure of the day) but that tracks drafter luck, not CPU clocks.
+Inference here is GPU-bound; CPU mostly feeds the expert stream. Since uncapped CPU
+pushed Tctl to 97 °C against a 100 °C ceiling, the 4.5 GHz cap is kept (it buys
+thermals for nothing).
+
+Whole-system temperatures logged every ~2 s through the whole test (CPU k10temp Tctl,
+both DDR5 DIMMs via spd5118, both NVMe controllers, GPU via NVML):
+
+| Sensor | min | median | max | verdict |
+|---|---:|---:|---:|---|
+| CPU (Tctl) | 63 °C | 79 °C | **97 °C** | hot under bench bursts, 3 °C from ceiling |
+| DIMM1 / DIMM2 (DDR5) | 50 / 46 °C | 51 / 47 °C | 52 / 48 °C | normal (throttle at 85+) |
+| NVMe MSI M461 | 39 °C | 39 °C | 39 °C | cool |
+| NVMe Lexar NM1090 | 33 °C | 33 °C | 33 °C | cool |
+| GPU (RTX 5090 Laptop) | 49 °C | 57 °C | 63 °C | far from limit (87+) |
+| GPU power | 26 W | 37 W | 142 W | within the 175 W dynamic envelope |
+
+GPU throttle-event flags during the run: `0x400` HW-power-brake (the chassis'
+nvidia-powerd regime — normal on this machine) and `0x4` idle-clocks; **no** HW/SW
+thermal slowdown and **no** HW slowdown at any sample. Memory and SSDs never move.
+Conclusion: thermal headroom everywhere except the CPU during burst load, and the CPU
+is not the speed-limiting subsystem for this workload.
