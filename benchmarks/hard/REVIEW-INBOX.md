@@ -54,3 +54,26 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 | S5 | score_v6/4-arm scripts require e_sandbox beside parb_check_v6 (raw dirs) | FIXED (deployed copies) |
 | S2b | contour 2.15: deterministic format repair (B/D obj-unwrap, J id-seq), zero model tokens, inert at 2.14 | FIXED @ r6+ (contract gate_v36) |
 | S4b | loop gate-refused turns marked (trusted harness marker) and excluded; gate-blocked attempts mapped to attempted tools and penalized | FIXED @ r6 (suite controls, 66/0) |
+
+## From Hermes — hard-v6 0.0.2.16 full arm diagnostics (20:33-20:46 CET)
+
+- **P0 FIXED @ 8c9f762 (contour 0.0.2.17)** — the deterministic format repair added in 0.0.2.15
+  never ran in the official score: all three call sites were gated by
+  `POST_NORMALIZE = CHECKER_INJECT and contour_at_least(2,0)`, and issue #15 keeps
+  `CHECKER_INJECT` off. Evidence in the published 0.0.2.16 arm (`full-216/`): 7/7 J rows still
+  carried `items_not_bare_ids` and 5 rows `object_wrapped_in_list` with content already 1.00;
+  no `contour:v20_*` event anywhere in the ledger. Six strict cells were format-only losses
+  (B-ex6-00/01/03, J-ex6-00/04/05). 2.17 opens the gate for the keyword-free repair only;
+  contract `harness/gate_v38_repair_pipeline_test.py` (9 checks) pins both directions: the
+  repair runs at 2.17 with injection OFF, and the G/K keyword injectors stay OFF there.
+- **LOGGED, owner call** — the same single `CHECKER_INJECT` switch also disables the H answer
+  length trim (cut to the scorer's own 600-char ceiling, keeping uncertainty and numeric
+  sentences; it inserts no checker keyword) and the K tax-negation note. If issue #15 is about
+  scorer-keyword injection specifically, the H trim is the next candidate to unbundle; if it is
+  about any answer post-processing, it must stay off. Not changed without an owner command.
+- **LOGGED** — `gitleaks detect` over repo history reports 9 hits. The current tree is clean:
+  the only remaining matches are two `gitleaks:allow`-annotated synthetic fixtures
+  (`benchmarks/privacy-boundary/test_gateway.py` RFC1918 fixture, `scripts/security/secret_scan.py`
+  scanner canary). No credential or real SSH target is exposed; old commits of the published
+  contour scripts carried LAN material and were already sanitized in the current tree.
+  Rewriting published history is not proposed.
