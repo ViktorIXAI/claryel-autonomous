@@ -183,7 +183,7 @@ _sb = {"cat": "E", "ref": {"name": "probe", "battery": [[[], 1]]}}  # exp=1 mean
 run("E sandbox: host file read blocked (probe returns 1 only if readable)", _sb,
     "def probe():\n"
     "    try:\n"
-    "        open('/home/viktor/.ssh/id_ed25519')\n"
+    "        open(__import__('os').path.expanduser('~') + '/.ssh/id_ed25519')\n"
     "        return 1\n"
     "    except Exception:\n"
     "        return 0", 0.0, 0.999)
