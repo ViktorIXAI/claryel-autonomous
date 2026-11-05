@@ -57,6 +57,7 @@ CONTOUR_FEATURES = (
     (2, 12),  # truncation budget: ladder ceiling raised to 8192 after a real finish=length at 2048
     (2, 13),  # C format normalization (letters-only contract kept) + C best-of-2 for missed_options lotteries
     (2, 14),  # checker-keyword post-normalization OFF by default (issue #15: no scorer-keyword injection in official score; STRATA_CHECKER_INJECT=1 reproduces historical 2.0-2.13 behaviour)
+    (2, 15),  # deterministic format repair: B/D object unwrap, J id-sequence (zero model tokens)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
