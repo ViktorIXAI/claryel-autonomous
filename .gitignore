@@ -22,3 +22,7 @@ security-report*.md
 # keep published samples
 !logs/samples/**
 !logs/samples/**/*.jsonl
+
+# hard-v6: keep raw arm dumps reviewable — prefer names outside results*.jsonl
+# e.g. benchmarks/hard/audit-YYYYMMDD/artifacts/ or runs/<stamp>/raw-answers.jsonl
+# (results*.jsonl remains ignored unless explicitly negated like audit-20261105)
