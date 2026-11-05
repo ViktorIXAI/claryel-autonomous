@@ -196,6 +196,16 @@ H_JSON_CONTRACT = contour_at_least(2, 19)
 
 def post_normalize_allowed() -> bool:
     return POST_NORMALIZE or FORMAT_REPAIR or K_BOOL_CANON or H_JSON_CONTRACT
+# 0.0.2.21: D-plain hard-v6 tasks must use check_D_plain_v6, not the loop scorer.
+# Mis-routing produced chronic read_first_missing/final_answer_wrong on D-ex6-p*
+# even when the refused/next_ok JSON already matched gold.
+D_PLAIN_SCORE = contour_at_least(2, 21)
+
+
+def _d_is_loop(t):
+    return t.get("kind") == "loop" or t.get("mode") == "loop"
+
+
 H_SAFETY = CHECKER_INJECT and contour_at_least(2, 1)
 F_GROUND = CHECKER_INJECT and contour_at_least(2, 2)
 # 0.0.2.7: K tax-negation flag is grounded in the task's own visible text.
@@ -1800,9 +1810,11 @@ def run_one(t, pos, done, st):
     if VERIFY_RETRY and r["text"] and not r["err"] and cat not in ("A", "E", "C") \
             and not (cat == "D" and t.get("kind") == "loop"):
         def _score(txt):
-            if cat == "D":
+            if cat == "D" and (not D_PLAIN_SCORE or _d_is_loop(t)):
                 _r = dict(rec); _r["answer"] = txt; _r["agent_final"] = txt
                 return LP.check_D_loop(t, _r)
+            if cat == "D":
+                return CK.CHECK["D"](t, txt)
             return CK.CHECK[cat](t, txt)
         try:
             c0, f0, n0 = _score(r["text"])
@@ -1963,8 +1975,12 @@ def run_one(t, pos, done, st):
                         acct.ev("fix", "v31_d_best2_win")
 
     try:
-        if cat == "D":
+        if cat == "D" and (not D_PLAIN_SCORE or _d_is_loop(t)):
             frac, fok, notes = LP.check_D_loop(t, rec)
+        elif cat == "D":
+            frac, fok, notes = CK.CHECK["D"](t, r["text"])
+            if frac is not None:
+                acct.ev("contour", "v221_d_plain_score")
         else:
             frac, fok, notes = CK.CHECK[cat](t, r["text"])
         rec["content"], rec["format_ok"], rec["notes"] = frac, fok, notes

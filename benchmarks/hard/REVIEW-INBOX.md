@@ -172,3 +172,11 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 - **SHIPPED @ contour 0.0.2.20** — K bool Cyrillic `да`/`нет` -> yes/no (extends 2.18 true/false).
   Motivated by K-ex6-03 regression on 2.19 (`FREE_SHIPPING: да`). J logic-by-code left to claimed owner.
 
+## From Hermes — hard-v6 0.0.2.20/21 (21:38-21:46 Europe/Rome + next)
+
+- **0.0.2.20 DONE** plain 47/71, loop **6/6**, K 3/4 (Cyrillic bool recovered K-ex6-03). Artifacts full-220/.
+- **P0 FOUND**: D-ex6-p* answers already matched gold JSON but scored 0.4 via `LP.check_D_loop`
+  (`read_first_missing`) — plain D mis-routed through the loop scorer.
+- **SHIPPED @ contour 0.0.2.21** — D-plain uses `CK.CHECK["D"]` / check_D_plain_v6 when kind/mode != loop.
+  Expected +3 strict on D-p0/p1/p2. J logic-by-code still claimed by other writer.
+
