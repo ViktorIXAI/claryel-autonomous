@@ -146,4 +146,4 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 | J-ex6-03 prompt had NO data table (builder `% r4` with no placeholder; only the old builder revision passed it) — every arm lost the cell | FIXED v6.1 (table in prompt) |
 | J-ex6-06 prompt said "skip score>=70" while ref kept >=70 — wording/ref contradiction | FIXED v6.1 (unambiguous wording, ref verified by hand) |
 | v6.1 probes: contour 2.17 J-subset 5/7 (both ex-defect cells now 1.00); bare Basalt J-subset 7/7 | PUBLISHED (answers-basalt-j-v61.jsonl, results/ledger-contour-j-v61.jsonl) |
-| scaffold harm on J: contour J 5/7 vs bare 7/7; failures sit on tasks where format_gate re-ask (fix=1) degraded a correct first answer | LOGGED — next J iteration: single-ask + format repair only |
+| J: contour 5/7 vs bare 7/7 on v6.1 probe — inspected both discordants: model arithmetic/order errors in the FIRST answer; nudge is best-of-two (takes second only if strictly better), no degradation mechanism found; 2/7 is inside noise band | CORRECTED: earlier "scaffold harm" wording withdrawn, no evidence |
