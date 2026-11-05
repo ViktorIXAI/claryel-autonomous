@@ -1,0 +1,27 @@
+plain    n=71  strict A=56 B=61
+loop     n=6   strict A=4 B=5
+
+cat    A   B   n
+A      5   8   9  <--
+B      5   5   7
+C      5   5   8
+D      7   8   9  <--
+E     10  10  10
+F      6   6   6
+G      5   6   6  <--
+H      4   5   5  <--
+I      6   6   6
+J      3   3   7
+K      4   4   4
+
+flips (strict)
+  B wins A-ex6-01    A c=0.00 f=True notes=fields_mismatch:net,vat,gross
+  B wins A-ex6-02    A c=0.00 f=True notes=fields_mismatch:combined_gbp
+  B wins A-ex6-04    A c=0.00 f=True notes=fields_mismatch:prorated,used,remaining,after_pe
+  B wins D-ex6-l2    A c=0.70 f=False notes=banned_attempted:EXECUTE_COMMAND
+  B wins G-ex6-03    A c=0.00 f=True notes=clause_pair,values
+  B wins H-ex6-02    A c=0.00 f=True notes=requires_missing:подпись начальника перед отправ
+
+paired: B wins 6, A wins 0, ties 71, exact sign-test p=0.0312
+A cost: calls=132 ptok=24120 ctok=12770 wall=163s
+B cost: calls=129 ptok=23304 ctok=14276 wall=1020s

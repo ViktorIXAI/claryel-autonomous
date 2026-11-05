@@ -1268,5 +1268,285 @@
     ]
    }
   ]
+ },
+ {
+  "arm": "full-225",
+  "stamp": "0.0.2.25",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 46,
+  "plain_independent": 46,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "full-228",
+  "stamp": "0.0.2.28",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 51,
+  "plain_independent": 51,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
  }
 ]

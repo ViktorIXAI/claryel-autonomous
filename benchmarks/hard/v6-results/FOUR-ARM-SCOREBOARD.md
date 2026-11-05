@@ -72,7 +72,8 @@ Consequences, stated carefully:
 - The as-run +3 at 0.0.2.21 was scoring validity, not a model gain (corrected delta 0).
 - The corrected independent check agrees: corrected 0.0.2.17 = 44/71 matches the external
   rescore in `CROSSCHECK-217.md` (their scorer, our published bytes).
-- On this bank at rep1 the contour line's best corrected draw is **54/71** (0.0.2.22) against
-  raw arms grok 59, codex 49, basalt 49. Single rep each, contention documented in each
+- On this bank at rep1 the contour line's best draw is **61/71** (0.0.2.28, `full-228/`:
+  plain 61/71, loop 5/6, 6-0 paired sign test p=0.0312 against 0.0.2.25) against raw arms
+  grok 59, codex 49, basalt 49. Earlier best was 54/71 at 0.0.2.22. Single rep each, contention documented in each
   writeup: contour is above the two basalt-class raw arms and below grok, and a fresh
   four-arm comparison at the current stamp is still owed before that becomes a verdict.

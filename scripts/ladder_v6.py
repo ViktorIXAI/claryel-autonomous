@@ -28,6 +28,11 @@ CHANGES = {
     "0.0.2.21": "D-plain scored by check_D_plain_v6 (plain D was mis-routed through the loop scorer)",
     "0.0.2.22": "F JSON: next short-id + empty avoid backfilled from the prompt's own options",
     "0.0.2.23": "K SERVICE alias: Cyrillic hosting forms -> Latin 'hosting'",
+    "0.0.2.24": "I duration rows re-sorted by seconds ascending (keyword-free)",
+    "0.0.2.25": "G conflict JSON emitted by code when the prompt states a no-stacking rule",
+    "0.0.2.26": "G conflict overwrite: existing conflict:true with wrong clauses/values",
+    "0.0.2.27": "A arithmetic computed from the numbers in the prompt (VAT, FX, proration, trimmed mean)",
+    "0.0.2.28": "H requires/unknown filled from an explicit prompt signature constraint",
 }
 
 REF = ("grok raw **59/71**, codex raw **49/71**, basalt bare **49/71**; the original contour "
@@ -111,9 +116,11 @@ def main():
             "- J sat at 3/7 for every stamp on bank v6: 2 of the 4 lost cells were bank defects",
             "  (`j-probe-218/J-PROBE.md`), fixed in bank v6.1 (`BANK-V61.md`).",
             "- A (arithmetic) stays the weakest real category, 4-5/9.",
-            "- Unmeasured stamps: 0.0.2.24 (I duration re-sort) and 0.0.2.25 (G conflict-by-code)"
-            "  are in the code and have offline replay evidence on saved answer bytes, but no"
-            "  paired full arm and no contract test yet — they get no number and no verdict.",
+            "- Which stamp got which cell is attributed by ledger events inside the arm, not by"
+            "  guessing: 0.0.2.25 and 0.0.2.28 ran their own full arms; 0.0.2.24/0.0.2.26/0.0.2.27"
+            "  shipped as offline replay evidence first and are carried inside those arms"
+            "  (0.0.2.24 shows up as I 6/6 in full-225, 0.0.2.26/0.0.2.27 as the G and A wins in"
+            "  `full-228/pair-225-228.txt`). None of the three has its own contract test yet.",
             "",
             "## Bounds on these numbers",
             "- One rep per stamp. Several arms shared the endpoint with other arms running at the same",

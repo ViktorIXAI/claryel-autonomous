@@ -20,11 +20,13 @@ answer bytes in the same directory (`results-*.jsonl`), so any cell can be re-sc
 | 0.0.2.21 | **50/71** | = | 5/6 | 77 | A4/9 B5/7 C5/8 D8/9 E10/10 F2/6 G5/6 H5/5 I5/6 J3/7 K3/4 | D-plain scored by check_D_plain_v6 (plain D was mis-routed through the loop scorer) |
 | 0.0.2.22 | **54/71** | = | 4/6 | 77 | A5/9 B5/7 C5/8 D7/9 E10/10 F6/6 G5/6 H4/5 I5/6 J3/7 K3/4 | F JSON: next short-id + empty avoid backfilled from the prompt's own options |
 | 0.0.2.23 | **52/71** | = | 3/6 | 77 | A4/9 B5/7 C5/8 D6/9 E10/10 F6/6 G5/6 H2/5 I5/6 J3/7 K4/4 | K SERVICE alias: Cyrillic hosting forms -> Latin 'hosting' |
+| 0.0.2.25 | **56/71** | = | 4/6 | 77 | A5/9 B5/7 C5/8 D7/9 E10/10 F6/6 G5/6 H4/5 I6/6 J3/7 K4/4 | G conflict JSON emitted by code when the prompt states a no-stacking rule |
+| 0.0.2.28 | **61/71** | = | 5/6 | 77 | A8/9 B5/7 C5/8 D8/9 E10/10 F6/6 G6/6 H5/5 I6/6 J3/7 K4/4 | H requires/unknown filled from an explicit prompt signature constraint |
 
 Reference single-shot arms on the same bank (`FOUR-ARM-SCOREBOARD.md`, no contour): grok raw **59/71**, codex raw **49/71**, basalt bare **49/71**; the original contour 0.0.2.14 arm was **43/71** with loop 1/6.
 
 ## Verdict
-- Contour line reaches **54/71** plain (corrected) at 0.0.2.22; the last measured stamp 0.0.2.23 sits at 52/71 (loop 3/6). Corrected ladder: 42 -> 44 -> 48 -> 50 -> 50 -> 50 -> 54 -> 52.
+- Contour line reaches **61/71** plain (corrected) at 0.0.2.28; the last measured stamp 0.0.2.28 sits at 61/71 (loop 5/6). Corrected ladder: 42 -> 44 -> 48 -> 50 -> 50 -> 50 -> 54 -> 52 -> 56 -> 61.
 - `plain corrected` re-scores the same published answer bytes with the frozen checker
   (`scripts/rescore_v6_cells.py` -> `RESCORE-PLAIN-D.json`). Stamps before 0.0.2.21 routed
   the three plain-D tasks (`D-ex6-p0/p1/p2`) through the loop trajectory scorer and scored
@@ -38,7 +40,7 @@ Reference single-shot arms on the same bank (`FOUR-ARM-SCOREBOARD.md`, no contou
 - J sat at 3/7 for every stamp on bank v6: 2 of the 4 lost cells were bank defects
   (`j-probe-218/J-PROBE.md`), fixed in bank v6.1 (`BANK-V61.md`).
 - A (arithmetic) stays the weakest real category, 4-5/9.
-- Unmeasured stamps: 0.0.2.24 (I duration re-sort) and 0.0.2.25 (G conflict-by-code)  are in the code and have offline replay evidence on saved answer bytes, but no  paired full arm and no contract test yet — they get no number and no verdict.
+- Which stamp got which cell is attributed by ledger events inside the arm, not by  guessing: 0.0.2.25 and 0.0.2.28 ran their own full arms; 0.0.2.24/0.0.2.26/0.0.2.27  shipped as offline replay evidence first and are carried inside those arms  (0.0.2.24 shows up as I 6/6 in full-225, 0.0.2.26/0.0.2.27 as the G and A wins in  `full-228/pair-225-228.txt`). None of the three has its own contract test yet.
 
 ## Bounds on these numbers
 - One rep per stamp. Several arms shared the endpoint with other arms running at the same

@@ -22,6 +22,8 @@ below). Loop-D cells were not replayable from the stored rows (prose without
 | 0.0.2.21 | 40/61 | **40/61** | not replayed | 0 |
 | 0.0.2.22 | 44/61 | **44/61** | not replayed | 0 |
 | 0.0.2.23 | 42/61 | **42/61** | not replayed | 0 |
+| 0.0.2.25 | 46/61 | **46/61** | not replayed | 0 |
+| 0.0.2.28 | 51/61 | **51/61** | not replayed | 0 |
 
 ## Disagreements between stored scores and independent scoring
 
@@ -53,6 +55,8 @@ below). Loop-D cells were not replayable from the stored rows (prose without
   - `0.0.2.21`: not re-scored offline: needs_sandbox x10, trajectory_not_stored x6
   - `0.0.2.22`: not re-scored offline: needs_sandbox x10, trajectory_not_stored x6
   - `0.0.2.23`: not re-scored offline: needs_sandbox x10, trajectory_not_stored x6
+  - `0.0.2.25`: not re-scored offline: needs_sandbox x10, trajectory_not_stored x6
+  - `0.0.2.28`: not re-scored offline: needs_sandbox x10, trajectory_not_stored x6
 
 ## What this shows
 
@@ -70,7 +74,7 @@ below). Loop-D cells were not replayable from the stored rows (prose without
 - Cross-check of totals: these corrected totals match `RESCORE-PLAIN-D.json` and the
   external `CROSSCHECK-217.md` rescore of the 0.0.2.17 arm (44/71).
 
-Counters: {"trajectory_not_stored": 48, "cell_mismatch": 15, "needs_sandbox": 80}
+Counters: {"trajectory_not_stored": 60, "cell_mismatch": 15, "needs_sandbox": 100}
 
 Reproduce: `python3 scripts/rescore_all_arms.py` (add `--include-exec` on an idle
 host to also re-execute the category-E sandbox battery).
