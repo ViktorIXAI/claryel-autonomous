@@ -1,0 +1,11 @@
+# hard bank official v6 freeze line (d940070 descendants; issue #15)
+# format: sha256  relative/path
+# Pins bank + semantic checkers + gold/self-test + builders. No arm run yet.
+53f464c986ca0d2a912565ad70e7fd2792dc48bd641834ea1ce5c8e575190d94  benchmarks/hard/bank-hard-v6.json
+c6788dc10b655999028107edab19f60c9590c51726224f8d95f4e05865547236  harness/parb_check_v6.py
+e443feb8300fafeaa793fb6f82b2da5e794ebb548da986b062f3fd6772f277ef  harness/parb_bank_v6.py
+98fed6a7cff932e2912d1869b2a010cb5fb63f4627b746e6ab7d13944cdd4f9e  benchmarks/hard/gold-answers-v6.jsonl
+a2d22cfe901a68052d314f7e2c0953257efa1ccfc835f3bff48ec211cfa60954  benchmarks/hard/c_position_dist_v6.json
+d7f579f7b5367d8a12f6bbb25f6a6f23802af3d41493b0ab63912f09d150f807  scripts/gold_selftest_v6.py
+5d4f6fb3944f22e2f5c8c81e7600aa196e03d9b7516600a64df8a30777320ca9  scripts/build_hard_v6.py
+c3fcf0aec88ce11ad849ba31c5e54086132432a82f03102848cb85fba65819e8  scripts/dedup_hard_bank.py
