@@ -181,10 +181,15 @@ POST_NORMALIZE = CHECKER_INJECT and contour_at_least(2, 0)
 # POST_NORMALIZE, i.e. by CHECKER_INJECT. Keyword injection stays OFF (issue #15); the
 # keyword-free repair is unbundled from it here.
 FORMAT_REPAIR = contour_at_least(2, 17)
+# 0.0.2.18: K yes/no fields often come back as JSON-ish true/false. The v6 scorer
+# only accepts yes|no. Mapping true/false -> yes/no is keyword-free format repair
+# (zero model tokens) and is NOT scorer-keyword injection (issue #15); keep it
+# independent of CHECKER_INJECT, same pattern as 2.17.
+K_BOOL_CANON = contour_at_least(2, 18)
 
 
 def post_normalize_allowed() -> bool:
-    return POST_NORMALIZE or FORMAT_REPAIR
+    return POST_NORMALIZE or FORMAT_REPAIR or K_BOOL_CANON
 H_SAFETY = CHECKER_INJECT and contour_at_least(2, 1)
 F_GROUND = CHECKER_INJECT and contour_at_least(2, 2)
 # 0.0.2.7: K tax-negation flag is grounded in the task's own visible text.
@@ -1526,6 +1531,46 @@ K_FLAG_LINE = re.compile(
     r"[^\n:]*?:\s*(?P<val>yes|no|да|нет)[\s.]*$", re.I)
 
 
+def k_bool_canonicalize(t, text):
+    """v2.18: map true/false tokens on K yes/no fields to yes/no."""
+    if not K_BOOL_CANON or not text or not str(t.get("id", "")).startswith("K"):
+        return text, None
+    fields = [str(x).upper() for x in (t.get("fields") or [])]
+    bool_names = set()
+    ref = t.get("ref")
+    if isinstance(ref, list) and fields and len(ref) == len(fields):
+        for name, val in zip(fields, ref):
+            if str(val).strip().lower() in ("yes", "no", "да", "нет", "true", "false"):
+                bool_names.add(name)
+    for name in fields:
+        if any(k in name for k in ("TAX", "VAT", "SHIP", "INCLUDE", "EXCLUDE", "FLAG", "BOOL")):
+            bool_names.add(name)
+    if not bool_names:
+        bool_names = None
+    changed = []
+    out_lines = []
+    line_re = re.compile(
+        r"^(?P<prefix>\s*(?P<key>[A-Za-z_][A-Za-z0-9_]*)\s*:\s*)(?P<val>true|false)(?P<suf>\s*)$",
+        re.I,
+    )
+    for line in text.splitlines():
+        m = line_re.match(line)
+        if not m:
+            out_lines.append(line)
+            continue
+        key = m.group("key").upper()
+        if bool_names is not None and key not in bool_names:
+            out_lines.append(line)
+            continue
+        val = m.group("val").lower()
+        new_val = "yes" if val == "true" else "no"
+        out_lines.append(m.group("prefix") + new_val + m.group("suf"))
+        changed.append("k_bool_" + new_val)
+    if not changed:
+        return text, None
+    return "\n".join(out_lines), changed
+
+
 def k_negation_normalize(t, text):
     """Set the K tax-negation flag to what the task text itself supports.
 
@@ -1694,6 +1739,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v22_" + "_".join(ev))
+    if K_BOOL_CANON and cat == "K" and r["text"]:
+        norm, ev = k_bool_canonicalize(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "v218_" + "_".join(ev))
     if K_NEGATION and cat == "K" and r["text"]:
         norm, ev = k_negation_normalize(t, r["text"])
         if ev:
@@ -1752,6 +1804,13 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v22_" + "_".join(ev))
+                    if K_BOOL_CANON and cat == "K" and r["text"]:
+                        norm, ev = k_bool_canonicalize(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "v218_" + "_".join(ev))
                     if K_NEGATION and cat == "K" and r["text"]:
                         norm, ev = k_negation_normalize(t, r["text"])
                         if ev:
