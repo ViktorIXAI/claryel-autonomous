@@ -43,6 +43,8 @@ Reference single-shot arms on the same bank (`FOUR-ARM-SCOREBOARD.md`, no contou
 - Which stamp got which cell is attributed by ledger events inside the arm, not by  guessing: 0.0.2.25 and 0.0.2.28 ran their own full arms; 0.0.2.24/0.0.2.26/0.0.2.27  shipped as offline replay evidence first and are carried inside those arms  (0.0.2.24 shows up as I 6/6 in full-225, 0.0.2.26/0.0.2.27 as the G and A wins in  `full-228/pair-225-228.txt`). None of the three has its own contract test yet.
 
 ## Bounds on these numbers
+
+Bank v6.1 baseline for this line: `four-arm-v61/FOUR-ARM-V61.md` (contour 0.0.2.28 = 61/71, bare basalt 56/71, Grok 54/71, ChatGPT 50/71 on generated bank `f4553aab304f60d7`); the cross-bank reading is `four-arm-v61/VS-V6.md`. These ladder rows were measured on the pre-v6.1 generated bank, so compare trends only.
 - One rep per stamp. Several arms shared the endpoint with other arms running at the same
   time (each writeup says so); contention moves +-2-4 discordant cells, so the ladder is
   trend + mechanism, not an effect size. Only 2.16->2.17 (full bank) and the loop-only

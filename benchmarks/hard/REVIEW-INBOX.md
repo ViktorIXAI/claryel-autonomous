@@ -262,3 +262,22 @@ codex (xhigh), grok (toolsets off, inline). Contamination scan on the three raw 
 references to bank/gold/expected/эталон, 0 local paths or LAN addresses. Category E re-execution
 through the docker battery is running now (`scripts/e_exec_v61.py` -> `four-arm-v61/E-EXEC.json`);
 the scoreboard is generated only after it lands, so no half-cached table is published.
+
+## Four-arm v6.1 scoreboard published (06.11 00:45 CET)
+
+`v6-results/four-arm-v61/FOUR-ARM-V61.md` + `VS-V6.md` + `E-EXEC.json` (category E re-executed in
+docker: 40/40 arm-by-task cells). Common set 71 single-shot cells, one rep, bank v6.1:
+
+    contour 0.0.2.28  61/71   loop-D 5/6 (contour only)
+    bare basalt       56/71   11W/6L vs contour  p=0.33
+    Grok 4.7          54/71   11W/4L             p=0.12
+    ChatGPT (codex)   50/71   15W/4L             p=0.019
+
+Effect of the bank clarification (same contour stamp 0.0.2.28 re-paired v6 -> v6.1): J 3/7 -> 5/7,
+exactly the two bank-defective cells `J-ex6-03`/`J-ex6-06` flip to pass, unrelated noise loses
+`A-ex6-07` and `H-ex6-04`; totals 61/71 -> 61/71, 2W/2L/73 ties, p=1.00. Across the raw arms the
+operator's test gives: bare basalt +7 (49 -> 56), ChatGPT +1 (49 -> 50), Grok -5 (59 -> 54).
+Bare models now score J 7/7, so the bank fix is real; Grok's drop is not attributable to the bank.
+Provenance gap found and closed: raw rows carried no model identity, so raw-arm score changes were
+ambiguous. `scripts/raw_v6.py` is published now and each row records `model`, `cli` and `bank_sha16`;
+re-run Grok once with the new runner before interpreting that line further.

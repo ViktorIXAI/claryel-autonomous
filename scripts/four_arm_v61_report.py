@@ -122,11 +122,17 @@ def main():
         sys.exit("no arm answer files found yet")
     scored = {k: {t: v for t, v in d.items() if v[0] is not None} for k, d in present.items()}
     common = sorted(set.intersection(*[set(d) for d in scored.values()])) if scored else []
+    _bank = bank_rows()
+    _E_TASKS = len([t for t in _bank if _bank[t]["cat"] == "E"])
+    _E_DONE = len([h for v in _ec.values() for h in v.values()])
     md = ["# Four-arm on bank v6.1 (contour 0.0.2.28)", "",
           "Bank `benchmarks/hard/bank-hard-v6.json` (v6.1), scorer `harness/parb_check_v6.py`, one rep.",
-          "Common set = %d single-shot tasks scored in every listed arm; loop-D is N/A for raw arms"
-          " (single-shot chat cannot emit the loop trajectory), category E = %s."
-          % (len(common), "scored" if INCLUDE_EXEC else "exec pending, excluded"), "",
+          "Common set = %d single-shot tasks scored in every listed arm; loop-D is N/A for raw "
+          "arms (single-shot chat cannot emit the loop trajectory). Category E is scored by "
+          "re-running the fixture battery in docker (`scripts/e_exec_v61.py`, cached in "
+          "`E-EXEC.json`): %d E tasks, %d of %d arm-by-task cells executed."
+          % (len(common), _E_TASKS, _E_DONE, 4 * _E_TASKS),
+          "",
           "| arm | answers scored | strict on common set /%d | wins vs contour | losses vs contour | exact sign-test p |" % len(common),
           "|---|---|---|---|---|---|"]
     c = scored.get("contour", {})

@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Raw (bare-model) arm runner for HARD v6 bank. One shot per task, no contour,
+no fixers, one transport retry. Loop-protocol D tasks are NOT applicable to
+single-shot arms: skipped and scored N/A (documented in run-record).
+Arms: basalt (direct HTTP, temp 0.7, seeded), codex (subscription CLI, xhigh),
+grok (xai-oauth via hermes -z). Scorers applied afterwards by score_v6.py.
+"""
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+import urllib.request
+
+ROOT = os.path.expanduser(os.environ.get("PARB_RAW_WS", "~/parb-v61-raw"))
+bank = json.load(open(os.path.join(ROOT, "bank.json")))
+brain = sys.argv[1]
+REPS = [int(x) for x in (sys.argv[2].split(",") if len(sys.argv) > 2 else ["0"])]
+out = os.path.join(ROOT, "answers-%s.jsonl" % brain)
+done = set()
+if os.path.exists(out):
+    for l in open(out):
+        r = json.loads(l)
+        done.add((r["task"], r.get("rep", 0)))
+
+def one(task, rep):
+    p = task["prompt"]
+    if brain == "basalt":
+        key = json.load(open(os.path.join(ROOT, "p2005-profile.json")))["api_key"]
+        body = {"model": "qwen3.8-flash-next-iq3_s-basalt",
+                "messages": [{"role": "user", "content": p}],
+                "temperature": 0.7, "max_tokens": 4096, "seed": 1000 + rep}
+        req = urllib.request.Request("http://192.168.1.186:8080/v1/chat/completions",
+            data=json.dumps(body).encode(),
+            headers={"Content-Type": "application/json", "Authorization": "Bearer" + " " + key})
+        d = json.loads(urllib.request.urlopen(req, timeout=600).read().decode())
+        ch = d["choices"][0]
+        u = d.get("usage", {})
+        return ch["message"].get("content") or "", ch.get("finish_reason", "?"), u.get("completion_tokens", 0)
+    if brain == "codex":
+        f = os.path.join(ROOT, ".last-%s.txt" % brain)
+        cmd = ["codex", "exec", "--skip-git-repo-check", "-s", "read-only",
+               "-c", "model_reasoning_effort=xhigh", "-m", "gpt-6.1-sol",
+               "--output-last-message", f, "-"]
+        r = subprocess.run(cmd, input=p, capture_output=True, text=True, timeout=900, cwd=ROOT)
+        txt = open(f).read() if os.path.exists(f) else ""
+        return txt.strip(), ("ok" if r.returncode == 0 and txt else "rc%d" % r.returncode), 0
+    if brain == "grok":
+        # finding S3 from the v6 series: the @file transport left the model able to reach
+        # file tools. Raw arms run with toolsets disabled and the prompt inline, so the
+        # transport cannot touch the workspace at all.
+        r = subprocess.run(["hermes", "-z", p, "-m", "grok-4.7",
+                            "--provider", "xai-oauth", "-t", ""],
+                           capture_output=True, text=True, timeout=900, cwd=ROOT)
+        return r.stdout.strip(), ("ok" if r.returncode == 0 else "rc%d" % r.returncode), 0
+    raise SystemExit("unknown brain")
+
+# Provenance gap found on the v6.1 four-arm: raw answer rows carried no model identity, so a
+# score change between bank versions could not be attributed to the bank or to a model update.
+# Every row now records the model id (and CLI version where the transport exposes it).
+PROV = {"basalt": {"model": "qwen3.8-flash-next-iq3_s-basalt", "cli": "direct HTTP temp 0.7"},
+        "codex": {"model": "gpt-6.1-sol", "cli": "codex " + (subprocess.run(
+            ["codex", "--version"], capture_output=True, text=True).stdout.strip() or "unknown")},
+        "grok": {"model": "grok-4.7", "cli": "hermes " + (subprocess.run(
+            ["hermes", "--version"], capture_output=True, text=True).stdout.strip() or "unknown")
+            + " toolsets off"}}
+
+
+BANK_SHA = hashlib.sha256(open(os.path.join(ROOT, "bank.json"), "rb").read()).hexdigest()[:16]
+
+
+skipped = 0
+for t in bank:
+    if t["cat"] == "D" and t.get("mode") == "loop":
+        skipped += 1
+        continue
+    for rep in REPS:
+        if (t["id"], rep) in done:
+            continue
+        t0 = time.time()
+        ans, fin, toks = "", "err", 0
+        for attempt in range(2):
+            try:
+                ans, fin, toks = one(t, rep)
+                if ans:
+                    break
+            except Exception as e:
+                fin = type(e).__name__
+                time.sleep(5)
+        row = {"task": t["id"], "rep": rep, "cat": t["cat"], "answer": ans,
+               "finish": fin, "seconds": round(time.time() - t0, 1),
+               "arm": brain, "mode": "strict_plain",
+               "model": PROV[brain]["model"], "cli": PROV[brain]["cli"],
+               "bank_sha16": BANK_SHA}
+        with open(out, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+        print(t["id"], fin, row["seconds"], "s", flush=True)
+print("done; loop tasks skipped:", skipped)

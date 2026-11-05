@@ -1,14 +1,14 @@
 # Four-arm on bank v6.1 (contour 0.0.2.28)
 
 Bank `benchmarks/hard/bank-hard-v6.json` (v6.1), scorer `harness/parb_check_v6.py`, one rep.
-Common set = 61 single-shot tasks scored in every listed arm; loop-D is N/A for raw arms (single-shot chat cannot emit the loop trajectory), category E = exec pending, excluded.
+Common set = 71 single-shot tasks scored in every listed arm; loop-D is N/A for raw arms (single-shot chat cannot emit the loop trajectory). Category E is scored by re-running the fixture battery in docker (`scripts/e_exec_v61.py`, cached in `E-EXEC.json`): 10 E tasks, 40 of 40 arm-by-task cells executed.
 
-| arm | answers scored | strict on common set /61 | wins vs contour | losses vs contour | exact sign-test p |
+| arm | answers scored | strict on common set /71 | wins vs contour | losses vs contour | exact sign-test p |
 |---|---|---|---|---|---|
-| contour | 61 | **51/61** | - | - | - |
-| codex | 61 | **40/61** | 15 | 4 | 0.0192 |
-| grok | 61 | **44/61** | 11 | 4 | 0.1185 |
-| basalt | 61 | **46/61** | 11 | 6 | 0.3323 |
+| contour | 71 | **61/71** | - | - | - |
+| codex | 71 | **50/71** | 15 | 4 | 0.0192 |
+| grok | 71 | **54/71** | 11 | 4 | 0.1185 |
+| basalt | 71 | **56/71** | 11 | 6 | 0.3323 |
 
 ## Per category (strict / n on the common set)
 
@@ -18,6 +18,7 @@ Common set = 61 single-shot tasks scored in every listed arm; loop-D is N/A for 
 | B | 5/7 | 7/7 | 6/7 | 6/7 | 7 |
 | C | 5/8 | 5/8 | 5/8 | 4/8 | 8 |
 | D | 3/3 | 3/3 | 3/3 | 3/3 | 3 |
+| E | 10/10 | 10/10 | 10/10 | 10/10 | 10 |
 | F | 6/6 | 4/6 | 0/6 | 4/6 | 6 |
 | G | 6/6 | 5/6 | 5/6 | 5/6 | 6 |
 | H | 4/5 | 1/5 | 0/5 | 1/5 | 5 |

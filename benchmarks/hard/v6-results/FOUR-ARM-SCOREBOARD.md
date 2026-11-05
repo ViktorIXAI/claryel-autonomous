@@ -1,3 +1,7 @@
+Bank note: this scoreboard is the **v6** bank line (`f52acbd1...`). The four-arm re-run on bank
+**v6.1** is in `four-arm-v61/FOUR-ARM-V61.md` (contour 0.0.2.28 61/71, bare basalt 56, Grok 54,
+ChatGPT 50) with the cross-bank reading in `four-arm-v61/VS-V6.md`. Do not mix the tables.
+
 COMMON SET (single-shot): 71 tasks
 arm        strict  content
 contour     43/71     48/71 
