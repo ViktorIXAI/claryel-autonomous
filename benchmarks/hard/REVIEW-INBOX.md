@@ -130,3 +130,6 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
   `logic_parser_gap` does for C. Structural change, one version, contract test first.
 - After the bank fixes and this stamp, J should be re-measured; the current J row (contour 3/7 vs
   raw 5-6/7) is **not** a clean reasoning verdict — 2 of the 4 lost cells are bank-side.
+- **CLAIMED (to avoid a second double-implementation)** — Hermes/`~/sah-loopd` takes the J
+  logic-by-code stamp next (contract test first, fail-closed parser). K `да/нет -> yes/no`
+  extension (2.19) stays with the 0.0.2.18 author; do not start a J parser elsewhere.
