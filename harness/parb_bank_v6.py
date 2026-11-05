@@ -496,7 +496,7 @@ def E_tasks():
          "def slugify(s):\n    import re\n    s = s.lower()\n    s = re.sub(r'[^a-z0-9]+', '-', s)\n    return s.strip('-')",
          [["Hello World!"], ["--a--b--"], ["2024 Model T"], ["!!!"], ["a1 b2"],
           ["  lead"], ["trail  "], ["MiXeD CaSe 123"], ["foo--bar"], ["---"],
-          ["a"], ["Z"], ["123"], ["a_b_c"], ["hello@world.com"],
+          ["a"], ["Z"], ["123"], ["a_b_c"], ["hello@example.com"],
           ["  spaced  out  "], ["multi---dash"], ["end-"], ["-start"],
           ["x y z"], ["FooBar"], ["test...ok"], ["one/two/three"],
           ["a+b=c"], [""], ["ok_"], ["x--y--z"], ["AbC-123-"]]),

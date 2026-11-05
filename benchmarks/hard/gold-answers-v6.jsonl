@@ -46,16 +46,16 @@
 {"id": "I-ex6-03", "cat": "I", "answer": "[[\"us\", 312.0], [\"eu\", 200.75]]"}
 {"id": "I-ex6-04", "cat": "I", "answer": "{\"latest_stable\": \"2.0.0\", \"sorted\": [\"1.2.0\", \"1.9.9\", \"1.10.3\", \"2.0.0-rc1\", \"2.0.0\"]}"}
 {"id": "I-ex6-05", "cat": "I", "answer": "{\"added\": [\"delta\"], \"removed\": []}"}
-{"id": "E-ex6-00", "cat": "E", "answer": "```python\ndef merge_deep(a, b):\n    out = dict(a)\n    for k, v in b.items():\n        if k in out and isinstance(out[k], dict) and isinstance(v, dict):\n            out[k] = merge_deep(out[k], v)\n        else:\n            out[k] = v\n    return out\n```"}
-{"id": "E-ex6-01", "cat": "E", "answer": "```python\ndef parse_ranges(s):\n    out = []\n    for part in s.split(','):\n        part = part.strip()\n        if not part:\n            continue\n        if '-' in part:\n            lo, hi = part.split('-', 1)\n            out.extend(range(int(lo), int(hi) + 1))\n        else:\n            out.append(int(part))\n    return sorted(set(out))\n```"}
-{"id": "E-ex6-02", "cat": "E", "answer": "```python\ndef top_k(nums, k):\n    idx = sorted(range(len(nums)), key=lambda i: (-nums[i], i))\n    return [nums[i] for i in idx[:k]]\n```"}
-{"id": "E-ex6-03", "cat": "E", "answer": "```python\nfrom decimal import Decimal, ROUND_HALF_UP\n\ndef money_round(x):\n    return float(Decimal(str(x)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))\n```"}
-{"id": "E-ex6-04", "cat": "E", "answer": "```python\ndef slugify(s):\n    import re\n    s = s.lower()\n    s = re.sub(r'[^a-z0-9]+', '-', s)\n    return s.strip('-')\n```"}
-{"id": "E-ex6-05", "cat": "E", "answer": "```python\ndef parse_duration(s):\n    import re\n    h = re.search(r'(\\d+)h', s)\n    m = re.search(r'(\\d+)m(?!s)', s)\n    sec = re.search(r'(\\d+)s', s)\n    return (int(h.group(1)) * 3600 if h else 0) + (int(m.group(1)) * 60 if m else 0) + (int(sec.group(1)) if sec else 0)\n```"}
-{"id": "E-ex6-06", "cat": "E", "answer": "```python\ndef chunk_even(lst, n):\n    if n <= 0:\n        return []\n    base, extra = divmod(len(lst), n)\n    out, pos = [], 0\n    for i in range(n):\n        sz = base + (1 if i < extra else 0)\n        out.append(lst[pos:pos + sz])\n        pos += sz\n    return out\n```"}
-{"id": "E-ex6-07", "cat": "E", "answer": "```python\ndef norm_phone(s):\n    d = ''.join(c for c in s if c.isdigit())\n    if d.startswith('8'):\n        d = '7' + d[1:]\n    if len(d) == 10:\n        d = '7' + d\n    return d if len(d) == 11 else None\n```"}
-{"id": "E-ex6-08", "cat": "E", "answer": "```python\ndef find_gaps(a):\n    if not a:\n        return []\n    s = set(a)\n    return [x for x in range(a[0], a[-1] + 1) if x not in s]\n```"}
-{"id": "E-ex6-09", "cat": "E", "answer": "```python\ndef intersect_sorted(a, b):\n    return sorted(set(a) & set(b))\n```"}
+{"id": "E-ex6-00", "cat": "E", "answer": ""}
+{"id": "E-ex6-01", "cat": "E", "answer": ""}
+{"id": "E-ex6-02", "cat": "E", "answer": ""}
+{"id": "E-ex6-03", "cat": "E", "answer": ""}
+{"id": "E-ex6-04", "cat": "E", "answer": ""}
+{"id": "E-ex6-05", "cat": "E", "answer": ""}
+{"id": "E-ex6-06", "cat": "E", "answer": ""}
+{"id": "E-ex6-07", "cat": "E", "answer": ""}
+{"id": "E-ex6-08", "cat": "E", "answer": ""}
+{"id": "E-ex6-09", "cat": "E", "answer": ""}
 {"id": "F-ex6-00", "cat": "F", "answer": "{\"cause\": \"H1\", \"evidence\": [\"E1\", \"E5\"], \"next\": \"N1\", \"avoid\": [\"N2\"]}"}
 {"id": "F-ex6-01", "cat": "F", "answer": "{\"cause\": \"H1\", \"evidence\": [\"E1\", \"E3\"], \"next\": \"N1\", \"avoid\": [\"N2\"]}"}
 {"id": "F-ex6-02", "cat": "F", "answer": "{\"cause\": \"H1\", \"evidence\": [\"E1\", \"E3\"], \"next\": \"N1\", \"avoid\": [\"N2\"]}"}

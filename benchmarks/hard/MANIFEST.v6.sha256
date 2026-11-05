@@ -2,12 +2,12 @@
 # format: sha256  relative/path
 # Pins bank + semantic checkers + builder + shim workspace script + gold + suites + sandbox.
 # v5 pins live in MANIFEST.v5.sha256 and must stay immutable.
-f0a49f4f310da75a93a8573361d35d2a96153b6dccf4723c51b208ec7e546d6c  benchmarks/hard/bank-hard-v6.json
-ea9b04f98d86ef9f4c230ca76fd51fb47c6ea0291410fb68ce1cacaea5945c02  benchmarks/hard/gold-answers-v6.jsonl
+36e497d3bb759af2612e8fa02abeb391bdcd858f3f8a2c9db5655ffbb3585708  benchmarks/hard/bank-hard-v6.json
+12117f6c0b435b9dd09d356e9ebfa17bdefa2397b380e308a3a08492c008c3c9  benchmarks/hard/gold-answers-v6.jsonl
 faea1730dce5fd48b4e98001d4e6a5e28621727371f0ef64f2cbdcc8203c9813  benchmarks/hard/c_position_dist_v6.json
 13d0f942834ac5214ae4ea41a6a680ddcfab3dac25dc75d39cc3ef4f5f640853  benchmarks/hard/PROTOCOL.md
 60559f9a443e9b6d15e294cc9c05cdf01dcfee5da25c8a762d8bcc8bc4a906f6  harness/parb_check_v6.py
-d64c33a5026963df9f25e51eac74cb548096e9465901c4ef85eb1f633d1f53af  harness/parb_bank_v6.py
+5b25ab1458c5032c21cea1582ee1f259dc49c3abef38a0c1652df581eb1fb657  harness/parb_bank_v6.py
 d40475aa0a0600c6a3d519dc8c55bba021490c401d3333c778dfc2661d62e31a  harness/e_sandbox.py
 6003258c9b80bf997d1cebec1fdcac2236470e2bb2a252cd6d1251778770ebf3  harness/verify_manifest.py
 d7f579f7b5367d8a12f6bbb25f6a6f23802af3d41493b0ab63912f09d150f807  scripts/gold_selftest_v6.py
