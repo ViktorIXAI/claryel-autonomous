@@ -1,0 +1,25 @@
+task        | A content/fmt          | B content/fmt          | delta
+D-ex6-l0    |  0.95 False bad_rows:1  |  1.00 True              | B
+D-ex6-l1    |  1.00 True              |  1.00 True              | =
+D-ex6-l2    |  1.00 False             |  1.00 True              | B
+D-ex6-l3    |  0.70 False banned_atte |  0.70 False banned_atte | =
+D-ex6-l4    |  1.00 False             |  1.00 True              | B
+D-ex6-l5    |  0.55 False bad_rows:1, |  1.00 True              | B
+
+A: strict 1/6  calls=21 ptok=6684 ctok=785 secs=64.9
+B: strict 5/6  calls=20 ptok=5978 ctok=982 secs=106.5
+paired: B wins 4, A wins 0, ties 2  exact sign-test p=0.1250
+
+per-task drive events
+ D-ex6-l0 A: gate:blocked_early_answer
+ D-ex6-l0 B: gate:blocked_early_answer
+ D-ex6-l1 A: gate:blocked_early_answer
+ D-ex6-l1 B: gate:blocked_early_answer
+ D-ex6-l2 A: gate:blocked_early_answer
+ D-ex6-l2 B: gate:blocked_early_answer
+ D-ex6-l3 A: 
+ D-ex6-l3 B: 
+ D-ex6-l4 A: gate:blocked_early_answer
+ D-ex6-l4 B: gate:blocked_early_answer
+ D-ex6-l5 A: 
+ D-ex6-l5 B: fix:loop_protocol_reask

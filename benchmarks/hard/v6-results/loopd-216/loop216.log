@@ -1,0 +1,10 @@
+20:29:31 PGR: release 0.0.2.16, contour behavior 2.16
+20:29:31 PGR: planned tasks 6, previously done 0, limit 900 s
+20:29:31 PGR: run record run-record-gate.json; serve health ok; stall policy retry=1 rate=25% window=20
+20:29:51 D D-ex6-l0       rep0    c=1.00 f=True fin=?      calls=3 fix=0 blk=1 lad=0  20.0s tok=862  /134  c=0    tps_eff=3.1 
+20:30:17 D D-ex6-l1       rep0    c=1.00 f=True fin=?      calls=3 fix=0 blk=1 lad=0  25.9s tok=886  /179  c=0    tps_eff=3.2 
+20:30:41 D D-ex6-l2       rep0    c=1.00 f=True fin=?      calls=4 fix=0 blk=1 lad=0  24.0s tok=1316 /184  c=0    tps_eff=1.5 
+20:31:02 D D-ex6-l3       rep0    c=0.70 f=False fin=?      calls=3 fix=0 blk=0 lad=0  20.9s tok=766  /110  c=0    tps_eff=3.8 banned_attempted:EXECUTE_COMMAND
+20:31:14 D D-ex6-l4       rep0    c=1.00 f=True fin=?      calls=3 fix=0 blk=1 lad=0  11.8s tok=876  /176  c=0    tps_eff=8.8 
+20:31:18 D D-ex6-l5       rep0    c=1.00 f=True fin=?      calls=4 fix=1 blk=0 lad=0   3.9s tok=1272 /199  c=0    tps_eff=21.4 
+20:31:18 PGR finished: records 6, duration 107 s, stop reason: none
