@@ -35,5 +35,7 @@ Event mix: gate x106, fix x31, ladder x6
 CHECKER_INJECT gate kills them too. Evidence in this arm: 7/7 J rows still carry `items_not_bare_ids` and 5 rows
 `object_wrapped_in_list` while their content is already 1.00; the ledger shows no `contour:v20_j_id_norm` event at all.
 Contract test `gate_v36_format_repair_test.py` passed because it calls the function directly and bypasses the pipeline gate.
-Repair costs zero model tokens, so this is a pure measurement-validity bug: 6 strict cells of the contour arm
-cells are format-only losses in this arm (content already 1.00, format_ok False). Fix goes in as contour 0.0.2.17 (deterministic format repair independent of keyword injection).
+Repair costs zero model tokens, so this is a pure measurement-validity bug. Six strict cells
+in this arm are format-only losses (content already 1.00, format_ok False): B-ex6-00/01/03 and
+J-ex6-00/04/05. Fix goes in as contour 0.0.2.17 (deterministic format repair independent of
+keyword injection).

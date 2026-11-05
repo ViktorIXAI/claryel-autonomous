@@ -175,6 +175,16 @@ SLOT_NORMALIZE = contour_at_least(1, 9)
 # Opt-in: STRATA_CHECKER_INJECT=1|true|yes|on
 CHECKER_INJECT = os.environ.get("STRATA_CHECKER_INJECT", "").strip().lower() in ("1", "true", "yes", "on")
 POST_NORMALIZE = CHECKER_INJECT and contour_at_least(2, 0)
+# 0.0.2.17: the 0.0.2.15 deterministic format repair (B/D one-element-list unwrap, J
+# decorated items -> bare ids) carries no checker keyword and costs zero model tokens, yet
+# it was unreachable in the official score because the only call sites were gated by
+# POST_NORMALIZE, i.e. by CHECKER_INJECT. Keyword injection stays OFF (issue #15); the
+# keyword-free repair is unbundled from it here.
+FORMAT_REPAIR = contour_at_least(2, 17)
+
+
+def post_normalize_allowed() -> bool:
+    return POST_NORMALIZE or FORMAT_REPAIR
 H_SAFETY = CHECKER_INJECT and contour_at_least(2, 1)
 F_GROUND = CHECKER_INJECT and contour_at_least(2, 2)
 # 0.0.2.7: K tax-negation flag is grounded in the task's own visible text.
@@ -1663,7 +1673,7 @@ def run_one(t, pos, done, st):
         if steps:
             rec["agent_steps"] = steps
             acct.ev("contour", "v19_d_order_to_steps")
-    if POST_NORMALIZE and r["text"]:
+    if post_normalize_allowed() and r["text"]:
         norm, ev = post_normalize_answer(cat, t, r["text"])
         if ev:
             r = dict(r)
@@ -1721,7 +1731,7 @@ def run_one(t, pos, done, st):
                     rec["truncated"] = r["finish"] == "length"
                     rec["finish"] = r["finish"]
                     rec["engine_error"] = r["err"]
-                    if POST_NORMALIZE and r["text"]:
+                    if post_normalize_allowed() and r["text"]:
                         norm, ev = post_normalize_answer(cat, t, r["text"])
                         if ev:
                             r = dict(r)
@@ -1760,7 +1770,7 @@ def run_one(t, pos, done, st):
             r3 = ask_ladder(acct, msgs0, seed + 8117)
             txt3 = r3["text"] if (r3["text"] and not r3["err"]) else ""
             if txt3:
-                if POST_NORMALIZE:
+                if post_normalize_allowed():
                     txt3, _ev = post_normalize_answer(cat, t, txt3)
                 if H_SAFETY:
                     txt3, _ev = h_safety_normalize(t, txt3)

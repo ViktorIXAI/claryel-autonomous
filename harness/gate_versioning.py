@@ -59,6 +59,7 @@ CONTOUR_FEATURES = (
     (2, 14),  # checker-keyword post-normalization OFF by default (issue #15: no scorer-keyword injection in official score; STRATA_CHECKER_INJECT=1 reproduces historical 2.0-2.13 behaviour)
     (2, 15),  # deterministic format repair: B/D object unwrap, J id-sequence (zero model tokens)
     (2, 16),  # loop-v2 drive: protocol re-ask on an off-protocol turn, in-place gate_rejected marker (no duplicate terminal row), and re-admission of the model's own answer when the early-answer gate left the loop answerless
+    (2, 17),  # the 2.15 deterministic format repair reaches the official pipeline: keyword-free repair unbundled from CHECKER_INJECT (issue #15 keeps injection itself OFF)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -73,8 +74,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 16)
-CURRENT_STAMP = "0.0.2.16"
+CURRENT_REVISION = (2, 17)
+CURRENT_STAMP = "0.0.2.17"
 
 
 def _digits(value: str) -> list[int]:
