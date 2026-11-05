@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Merge contour 2.15 arm: 71 single-shot rows from hardv6-215 + loop rows from hardv6-215e."""
-import json, sys
+import json
+import os
+import sys
 
-BASE = "/home/viktor/parb-2005-hardv6"
-out = open("/home/viktor/parb-v6-raw/answers-contour215.jsonl", "w", encoding="utf-8")
+# Local paths are masked per publication policy; point these at your own run dir.
+BASE = os.environ.get("PARB_V6_BASE", "<LOCAL_PATH>/parb-2005-hardv6")
+OUT = os.environ.get("PARB_V6_OUT", "<LOCAL_PATH>/parb-v6-raw/answers-contour215.jsonl")
+out = open(OUT, "w", encoding="utf-8")
 
 
 def conv(r, loop_src=False):
