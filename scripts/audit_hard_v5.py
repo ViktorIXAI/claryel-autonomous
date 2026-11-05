@@ -86,24 +86,59 @@ def main():
     hdr = ["task", "cat", "contour(c,f)",
            "basalt:loop", "basalt:plain", "basalt:co",
            "grok:loop", "grok:plain", "grok:co",
-           "codex:loop", "codex:plain", "codex:co"]
+           "codex:loop", "codex:plain", "codex:co",
+           "contour_rescored"]
     print(",".join(hdr))
     tot = {m: {a: 0 for a in ARMS} for m in ("strict_loop", "strict_plain", "content_only")}
     ctot = 0
+    cres = {"agree": 0, "mismatch": 0, "not_rescorable": 0}
+    cres_pass = {"agree": 0, "mismatch": 0, "not_rescorable": 0}
+    mismatches = []
     for tid in ids:
         c = contour[tid]
         cp = "1,1" if (c.get("content") == 1.0 and c.get("format_ok") == 1) else \
              "%s,%s" % (c.get("content"), c.get("format_ok"))
         cp_pass = c.get("content") == 1.0 and c.get("format_ok") == 1
         ctot += cp_pass
+        # independent re-score of the contour arm from archived answer text.
+        # Category D needs the recorded agent-step trace; contour per-task
+        # archives store only the final text, so D cells are explicitly
+        # NOT independently re-scorable (issue #6 rule), not silently trusted.
+        if bank[tid]["cat"] == "D":
+            tag = "NR"
+            cres["not_rescorable"] += 1
+            cres_pass["not_rescorable"] += cp_pass
+        else:
+            x = None
+            try:
+                x = getattr(CK, "check_" + bank[tid]["cat"])(bank[tid], c.get("answer") or "")
+                rp = x[0] == 1.0 and x[1] == 1
+            except Exception:
+                rp = False
+            if rp == cp_pass:
+                tag = "agree"
+                cres["agree"] += 1
+                cres_pass["agree"] += rp
+            else:
+                tag = "MISMATCH"
+                cres["mismatch"] += 1
+                mismatches.append((tid, "stored=%s,%s" % (c.get("content"), c.get("format_ok")),
+                                   "rescored=%s,%s" % ((x[0], x[1]) if x else "scorer_error")))
         row = [tid, bank[tid]["cat"], cp]
         for a in ARMS:
             for m in ("strict_loop", "strict_plain", "content_only"):
                 p = raw_pass(a, tid, m)
                 tot[m][a] += p
                 row.append("PASS" if p else "")
+        row.append(tag)
         print(",".join(row))
-    print("# CONTOUR 0.0.2.12 %d/77" % ctot)
+    print("# CONTOUR 0.0.2.12 recorded %d/77" % ctot)
+    print("# CONTOUR rescored: agree %d, mismatch %d, not-rescorable(D) %d"
+          % (cres["agree"], cres["mismatch"], cres["not_rescorable"]))
+    print("# CONTOUR pass among agreed-rescored %d, among D-recorded %d"
+          % (cres_pass["agree"], cres_pass["not_rescorable"]))
+    for m in mismatches:
+        print("# MISMATCH", *m)
     for m in ("strict_loop", "strict_plain", "content_only"):
         print("# %-13s %s" % (m, " ".join("%s %d/77" % (a, tot[m][a]) for a in ARMS)))
 
