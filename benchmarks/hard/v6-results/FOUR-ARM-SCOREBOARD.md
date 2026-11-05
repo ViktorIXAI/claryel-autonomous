@@ -28,3 +28,30 @@ H        3/5       0/5       1/5       3/5
 I        5/6       6/6       6/6       6/6  
 J        1/7       5/7       5/7       6/7  
 K        1/4       1/4       1/4       2/4  
+
+---
+
+## contour 0.0.2.17 re-draw (2026-11-05 20:49-21:04 CET), hard bank v6
+
+The `contour` row above is the published **0.0.2.14** arm. Since then two contour fixes
+landed, both measurement-validity bugs in the contour's own driver, each with a paired
+same-seed measurement:
+
+| change | paired arms (identical seeds, one rep) | effect |
+|---|---|---|
+| 0.0.2.16 loop-v2 drive (re-ask instead of abort, in-place `gate_rejected`, salvage the model's own answer) | loop-only 2.15 vs 2.16 | loop-D strict **1/6 -> 5/6** (4W/0L/2T, exact sign p=0.125, directional) |
+| 0.0.2.17 format repair unbundled from `CHECKER_INJECT` | full bank 2.16 vs 2.17 | plain strict **39/71 -> 41/71**; B **2->5**, J **0->3**; 6/6 targeted format-only cells recovered, 0 broken by the repair |
+
+Latest contour full-bank arm (0.0.2.17, rep0): plain **41/71**, loop **4/6**. Per-category
+strict incl. loop: A 4/9, B 5/7, C 5/8, D 4/9, E 10/10, F 2/6, G 5/6, H 1/5, I 5/6, J 3/7,
+K 1/4. Artifacts: `full-217/` (results, ledgers, log, `PAIR-217.md`, `pair-216-217.txt`),
+loop artifacts in `loopd-216/`.
+
+Cross-arm comparability note: the 43/71 (0.0.2.14) and 41/71 (0.0.2.17) contour rows are
+different arms on the same seeds; the local serve is seeded but not bit-reproducible, so a
++-4 cell spread on 71 tasks is within resample noise. A fresh four-arm comparison at 2.17
+(neighbours unchanged) is needed before restating the contour-vs-raw verdict.
+Evidence, not verdict: the two fixes above are deterministic driver fixes with mechanism-level
+proof (contour events in ledgers, 6/6 targeted flips), not a claim that the contour now
+beats the raw arms.
+

@@ -1,0 +1,31 @@
+plain    n=71  strict A=39 B=41
+loop     n=6   strict A=4 B=4
+
+cat    A   B   n
+A      5   4   9  <--
+B      2   5   7  <--
+C      6   5   8  <--
+D      4   4   9
+E     10  10  10
+F      3   2   6  <--
+G      5   5   6
+H      2   1   5  <--
+I      5   5   6
+J      0   3   7  <--
+K      1   1   4
+
+flips (strict)
+  A wins A-ex6-05    B c=0.00 f=True notes=fields_mismatch:trimmed_mean,median_original
+  B wins B-ex6-00    A c=1.00 f=False notes=object_wrapped_in_list
+  B wins B-ex6-01    A c=1.00 f=False notes=object_wrapped_in_list
+  B wins B-ex6-03    A c=1.00 f=False notes=object_wrapped_in_list
+  A wins C-ex6-01    B c=0.00 f=True notes=set_mismatch got=['C', 'F'] want=['B', 'C', 'F']
+  A wins F-ex6-01    B c=0.80 f=True notes=avoid
+  A wins H-ex6-02    B c=0.00 f=True notes=ungrounded_claims
+  B wins J-ex6-00    A c=1.00 f=False notes=items_not_bare_ids
+  B wins J-ex6-04    A c=1.00 f=False notes=items_not_bare_ids
+  B wins J-ex6-05    A c=1.00 f=False notes=items_not_bare_ids
+
+paired: B wins 6, A wins 4, ties 67, exact sign-test p=0.7539
+A cost: calls=128 ptok=22833 ctok=12004 wall=571s
+B cost: calls=131 ptok=24565 ctok=11732 wall=926s
