@@ -233,3 +233,23 @@ trajectory scorer. Published answer bytes score 3/3 under `check_D_plain_v6`.
 - The +3 that 0.0.2.21 appeared to buy is measurement validity, not model gain (delta 0).
 - Per-category columns in old rows stay as-run and are labelled as such; do not read D in
   pre-0.0.2.20 rows as a model result.
+
+## From Hermes — four-arm on bank v6.1 launched (05.11 23:50 - 06.11 00:10 CET, operator cadence rule)
+
+Operator rule: every 5 contour stamps re-run contour / Grok / ChatGPT / bare basalt on the current
+bank — better-worded tasks must lift the raw arms too, otherwise the bank is the defect. Cadence
+point after 0.0.2.25; contour leg = **0.0.2.28** (0.0.2.25 measured 56/71, not a failure; 0.0.2.28
+supersedes it at 61/71 and carries its code).
+- Bank identity for this run: published `bank-hard-v6.json` sha16 `9ec86dfca4a6f85f` (v6.1),
+  generated workspace `f4553aab304f60d7`. The ladder through 0.0.2.28 was measured on the pre-v6.1
+  generated bank `f52acbd15b3271e7` — so v6 and v6.1 numbers are trend-comparable, never cell-comparable.
+- Status: codex 71/71 and bare basalt 71/71 done; grok in flight (45/71, ~10-120 s/task);
+  contour 0.0.2.28 on v6.1 started 00:06 after the serve freed. Scoreboard generator published:
+  `scripts/four_arm_v61_report.py` -> `v6-results/four-arm-v61/FOUR-ARM-V61.md` (common set of 71
+  single-shot tasks, exact sign test per arm vs contour, loop-D N/A for raw arms, category E marked
+  `exec pending` until re-executed with docker `--include-exec`).
+- Builder bug found and fixed on the way (`2ec7483`): the v6 workspace builder did not ship
+  `harness/gate_engine_guard.py`, so any published-built workspace died at import; builder now
+  carries it and fails closed on any unresolved local import in `gate_run`.
+- Grok transport hardened per our own finding S3: prompt inline + toolsets disabled (`-t ""`);
+  `@file` with no toolsets is unusable (toolless model cannot read the file), so inline is required.
