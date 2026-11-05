@@ -20,6 +20,8 @@ FILES = [
     "scripts/dry_run_same_scorer_v6.py",
     "scripts/build_hard_v6_ws.py",
     "scripts/dedup_hard_bank.py",
+    "scripts/leakage_scan_v6.py",
+    "benchmarks/hard/WS-GENERATED.v6.sha256",
 ]
 
 

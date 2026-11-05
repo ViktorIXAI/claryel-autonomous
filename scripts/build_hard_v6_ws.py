@@ -20,7 +20,13 @@ import shutil
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/parb-2005-hardv6")
+WRITE_PINS = "--write-pins" in sys.argv
+_args = [x for x in sys.argv[1:] if x != "--write-pins"]
+OUT = _args[0] if _args else os.path.expanduser("~/parb-2005-hardv6")
+# Generated shim/adapter files are hash-pinned here (itself pinned in MANIFEST.v6).
+WS_PINS = os.path.join(ROOT, "benchmarks", "hard", "WS-GENERATED.v6.sha256")
+WS_PINNED = ("parb_check.py", "parb_loop.py", "parb_check_v6.py", "e_sandbox.py",
+             "parb_bank_v6.py", "parb_loop_mech.py", "bank.json", "plan.json")
 
 bank_src = os.path.join(ROOT, "benchmarks", "hard", "bank-hard-v6.json")
 bank = json.load(open(bank_src, encoding="utf-8"))
@@ -133,6 +139,31 @@ LAUNCH ONLY AFTER THE OWNER'S EXPLICIT GO (issue #15). Planned arms:
 Results: results-<arm>-v6.jsonl under benchmarks/hard/v6-results/ (not ignored).
 """
 open(os.path.join(OUT, "RUN-README.md"), "w").write(readme)
+
+
+def _ws_sha(name):
+    return hashlib.sha256(open(os.path.join(OUT, name), "rb").read()).hexdigest()
+
+
+if WRITE_PINS:
+    with open(WS_PINS, "w", encoding="utf-8") as fh:
+        fh.write("# generated v6 workspace shim/adapter pins (issue #15 review item 3)\n")
+        fh.write("# format: sha256  ws-relative/path; regenerate: build_hard_v6_ws.py <tmp> --write-pins\n")
+        for n in WS_PINNED:
+            fh.write("%s  %s\n" % (_ws_sha(n), n))
+    print("wrote", WS_PINS)
+else:
+    want = {}
+    for ln in open(WS_PINS, encoding="utf-8"):
+        parts = ln.split()
+        if len(parts) >= 2 and not ln.startswith("#"):
+            want[parts[1]] = parts[0]
+    drift = [n for n in WS_PINNED if want.get(n) != _ws_sha(n)]
+    if drift:
+        for n in drift:
+            print("WS DRIFT", n, "want", (want.get(n) or "MISSING")[:16], "got", _ws_sha(n)[:16])
+        raise SystemExit("generated workspace shim drift vs WS-GENERATED.v6.sha256 (fail closed)")
+    print("ws shim pins OK:", len(WS_PINNED), "files; parb_check.py", want["parb_check.py"])
 print("workspace:", OUT)
 print("bank sha16:", hashlib.sha256(open(os.path.join(OUT, "bank.json"), "rb").read()).hexdigest()[:16])
 print("plan rows:", len(plan), "loop:", sum(1 for p in plan if p["mode"] == "loop"))
