@@ -44,13 +44,22 @@ def strict(c, f):
     return 1 if float(c) == 1.0 and bool(f) else 0
 
 
-def score_answer(task, ans):
-    if task["cat"] in EXEC_CATS and not INCLUDE_EXEC:
+ECACHE = os.path.join(ROOT, "benchmarks", "hard", "v6-results", "four-arm-v61", "E-EXEC.json")
+_ec = json.load(open(ECACHE, encoding="utf-8")) if os.path.exists(ECACHE) else {}
+
+
+def score_answer(task, ans, arm=""):
+    if task["cat"] in EXEC_CATS:
+        hit = _ec.get(arm, {}).get(task["id"])
+        if hit is not None:
+            return hit[0], hit[1], hit[2] + ["exec_cached"]
+        if INCLUDE_EXEC:
+            return CK.check(task, ans or "")
         return None, None, ["exec_pending"]
     return CK.check(task, ans or "")
 
 
-def load_raw(path, bank):
+def load_raw(path, bank, arm):
     out = {}
     if not os.path.exists(path):
         return out
@@ -59,7 +68,7 @@ def load_raw(path, bank):
         t = bank.get(r["task"])
         if t is None or (t["cat"] == "D" and t.get("mode") == "loop"):
             continue
-        c, f, n = score_answer(t, r.get("answer"))
+        c, f, n = score_answer(t, r.get("answer"), arm)
         out[r["task"]] = (c, f, n)
     return out
 
@@ -81,7 +90,7 @@ def load_contour(ws, bank):
             lr = led.get((tid, rep))
             loop_cells[tid] = strict(lr["content"], lr.get("format_ok")) if lr else 0
             continue
-        c, f, n = score_answer(t, r.get("answer"))
+        c, f, n = score_answer(t, r.get("answer"), "contour")
         out[tid] = (c, f, n)
     return out, loop_cells
 
@@ -103,9 +112,9 @@ def main():
     bank = bank_rows()
     arms = {
         "contour": load_contour(CONTOUR_WS, bank)[0],
-        "basalt": load_raw(os.path.join(RAW, "answers-basalt.jsonl"), bank),
-        "codex": load_raw(os.path.join(RAW, "answers-codex.jsonl"), bank),
-        "grok": load_raw(os.path.join(RAW, "answers-grok.jsonl"), bank),
+        "basalt": load_raw(os.path.join(RAW, "answers-basalt.jsonl"), bank, "basalt"),
+        "codex": load_raw(os.path.join(RAW, "answers-codex.jsonl"), bank, "codex"),
+        "grok": load_raw(os.path.join(RAW, "answers-grok.jsonl"), bank, "grok"),
     }
     _, loop_cells = load_contour(CONTOUR_WS, bank)
     present = {k: v for k, v in arms.items() if v}

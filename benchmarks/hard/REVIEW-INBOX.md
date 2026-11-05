@@ -253,3 +253,12 @@ supersedes it at 61/71 and carries its code).
   carries it and fails closed on any unresolved local import in `gate_run`.
 - Grok transport hardened per our own finding S3: prompt inline + toolsets disabled (`-t ""`);
   `@file` with no toolsets is unusable (toolless model cannot read the file), so inline is required.
+
+## Four-arm v6.1 — legs complete, artifacts published (06.11 00:20 CET)
+
+All four legs done on bank v6.1 (generated workspace `f4553aab304f60d7`), one rep each:
+contour 0.0.2.28 (`results-c228v61.jsonl`, 77 records, 724 s on a free serve), bare basalt,
+codex (xhigh), grok (toolsets off, inline). Contamination scan on the three raw arms: 0
+references to bank/gold/expected/эталон, 0 local paths or LAN addresses. Category E re-execution
+through the docker battery is running now (`scripts/e_exec_v61.py` -> `four-arm-v61/E-EXEC.json`);
+the scoreboard is generated only after it lands, so no half-cached table is published.

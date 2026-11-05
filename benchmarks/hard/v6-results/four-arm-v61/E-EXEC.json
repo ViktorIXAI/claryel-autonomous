@@ -1,0 +1,53 @@
+{
+ "contour": {
+  "E-ex6-00": [
+   1.0,
+   true,
+   [
+    "sandbox:docker:oracle_isolated_v3"
+   ]
+  ],
+  "E-ex6-01": [
+   1.0,
+   true,
+   [
+    "sandbox:docker:oracle_isolated_v3"
+   ]
+  ],
+  "E-ex6-02": [
+   1.0,
+   true,
+   [
+    "sandbox:docker:oracle_isolated_v3"
+   ]
+  ],
+  "E-ex6-03": [
+   1.0,
+   true,
+   [
+    "sandbox:docker:oracle_isolated_v3"
+   ]
+  ],
+  "E-ex6-04": [
+   1.0,
+   true,
+   [
+    "sandbox:docker:oracle_isolated_v3"
+   ]
+  ],
+  "E-ex6-05": [
+   1.0,
+   true,
+   [
+    "sandbox:docker:oracle_isolated_v3"
+   ]
+  ],
+  "E-ex6-06": [
+   1.0,
+   true,
+   [
+    "sandbox:docker:oracle_isolated_v3"
+   ]
+  ]
+ }
+}
