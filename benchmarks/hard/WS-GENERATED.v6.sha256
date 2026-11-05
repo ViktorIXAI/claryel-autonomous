@@ -2,7 +2,7 @@
 # format: sha256  ws-relative/path; regenerate: build_hard_v6_ws.py <tmp> --write-pins
 5d9b02ed089699121efc5379f864cc0de2f70ac3527168c842c69f89bc45ea64  parb_check.py
 ddc4bee1b5feedf331cd371f06f898165017a5772dc4b46300dcc3728f124dd0  parb_loop.py
-af2144a755a5d3827bb4f8dd22fd2bae62380d6188ae5d86cc8b0bbe7c7d0dda  parb_check_v6.py
+89437d8cfe1fc6c8eaf02f5016308cc967333171d8eff80f971b2c628308e453  parb_check_v6.py
 424c04126e9b6c1ecc5b34c35268b8dc20c84f95e8a9b9367651bfb329a169f5  e_sandbox.py
 813c766103ed4a5809b097f178193fac6ffc3f7faf3f4a00142be76b865459ae  gate_run.py
 bbafb7cc200e251de3d08257e1df74e3a0913782706c7753ea63ccc2c931554e  gate_versioning.py

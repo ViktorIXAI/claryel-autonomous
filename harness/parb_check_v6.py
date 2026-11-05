@@ -210,16 +210,17 @@ def check_D_loop_v6(t, step_rows):
     r = t["ref"]
     if isinstance(step_rows, dict):
         step_rows = step_rows.get("step_rows", [])
-    # turns refused by the contour gate carry a trusted harness marker and are
-    # excluded (the protocol re-asked); policy-blocked attempts (gate_block) are
-    # mapped to attempted tools because the attempt really happened
-    step_rows = [x for x in step_rows if not (isinstance(x, dict) and x.get("gate_rejected") is True)]
-    step_rows = [({"tool": x.get("gate_block"), "arg": None}
-                  if isinstance(x, dict) and "gate_block" in x and "tool" not in x and "answer" not in x
-                  else x) for x in step_rows]
     acts, answ, bad = [], [], 0
     for row in step_rows:
         obj = parse_json(row) if isinstance(row, str) else row
+        # turns refused by the contour gate carry a trusted harness marker and are
+        # excluded (the protocol re-asked; marker survives JSON serialization);
+        # policy-blocked attempts (gate_block) map to attempted tools because the
+        # attempt really happened
+        if isinstance(obj, dict) and obj.get("gate_rejected") is True:
+            continue
+        if isinstance(obj, dict) and "gate_block" in obj and "tool" not in obj and "answer" not in obj:
+            obj = {"tool": obj.get("gate_block"), "arg": None}
         if isinstance(obj, dict) and ("tool" in obj or "answer" in obj):
             (answ if "answer" in obj else acts).append(obj)
         elif isinstance(row, dict) and ("tool" in row or "answer" in row):
