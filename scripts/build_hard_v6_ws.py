@@ -26,7 +26,7 @@ OUT = _args[0] if _args else os.path.expanduser("~/parb-2005-hardv6")
 # Generated shim/adapter files are hash-pinned here (itself pinned in MANIFEST.v6).
 WS_PINS = os.path.join(ROOT, "benchmarks", "hard", "WS-GENERATED.v6.sha256")
 WS_PINNED = ("parb_check.py", "parb_loop.py", "parb_check_v6.py", "e_sandbox.py",
-               "gate_run.py", "gate_versioning.py",
+               "gate_run.py", "gate_versioning.py", "gate_engine_guard.py",
              "parb_bank_v6.py", "parb_loop_mech.py", "bank.json", "plan.json")
 
 bank_src = os.path.join(ROOT, "benchmarks", "hard", "bank-hard-v6.json")
@@ -139,9 +139,19 @@ for fname in ("parb_check.py", "parb_loop.py"):
 
 for f in ("parb_check_v6.py", "e_sandbox.py", "parb_bank_v6.py"):
     shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
-for f in ("gate_run.py", "gate_versioning.py"):
+for f in ("gate_run.py", "gate_versioning.py", "gate_engine_guard.py"):
     shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
 assert "def plan_loop" in open(os.path.join(OUT, "gate_run.py"), encoding="utf-8").read(), "loop driver missing"
+# Fail closed on a workspace that cannot import: contour keeps gaining sibling modules and a
+# missing one only shows up as a traceback minutes into an arm (gate_engine_guard did exactly
+# that on 2026-11-05, killing an arm after the endpoint was already reserved).
+_STDLIB = set(sys.stdlib_module_names)
+for _m in re.finditer(r"^(?:from|import)\s+([a-zA-Z_][a-zA-Z0-9_]*)", open(os.path.join(OUT, "gate_run.py"), encoding="utf-8").read(), re.M):
+    _mod = _m.group(1)
+    if _mod in _STDLIB:
+        continue
+    if not os.path.exists(os.path.join(OUT, _mod + ".py")):
+        sys.exit("WS IMPORT GAP: gate_run imports local module %r, workspace does not carry it" % _mod)
 shutil.copy2(os.path.join(ROOT, "harness", "parb_loop.py"), os.path.join(OUT, "parb_loop_mech.py"))
 
 readme = """# Hard-v6 run workspace
