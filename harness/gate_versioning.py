@@ -54,6 +54,7 @@ CONTOUR_FEATURES = (
     (2, 9),  # H best-of-2: lottery-class H notes answered by one more sample + strict-best selection
     (2, 10),  # E multi-failure repair feedback (up to 4 failing tests with their source lines)
     (2, 11),  # D-loop best-of-2: status-filter / dangerous-action lotteries answered by one more loop run + strict-best
+    (2, 12),  # truncation budget: ladder ceiling raised to 8192 after a real finish=length at 2048
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -68,8 +69,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 11)
-CURRENT_STAMP = "0.0.2.11"
+CURRENT_REVISION = (2, 12)
+CURRENT_STAMP = "0.0.2.12"
 
 
 def _digits(value: str) -> list[int]:

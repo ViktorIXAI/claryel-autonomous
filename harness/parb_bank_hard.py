@@ -21,7 +21,25 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from parb_bank import build  # same deterministic generators, new level
+from parb_bank import build, FILLER, CITIES  # same deterministic generators, new level
+
+
+def assemble_G(t):
+    """G tasks need the document materialized (dev-bank prep stage does this;
+    the first hard bank shipped bare questions, invalidating G for EVERY brain
+    — contour and external — found by the external comparison on 2026-11-05)."""
+    known = "\n".join(t["head_units"] + t["mid_units"] + t["tail_units"] + [t["prompt"]])
+    target_chars = int(t["target_tokens"] * 3.5)
+    need = max(0, int((target_chars - len(known)) // 150))
+    fillers = [FILLER % (CITIES[j % len(CITIES)], 1000 + j, (j % 7) + 1, (j % 11) + 6)
+               if "%s" in FILLER else
+               FILLER.format(c=CITIES[j % len(CITIES)], n=1000 + j, d=(j % 7) + 1, y=(j % 11) + 6)
+               for j in range(need)]
+    half = need // 2
+    t["assembled_doc"] = "\n".join(t["head_units"] + fillers[:half] + t["mid_units"] +
+                                   fillers[half:] + t["tail_units"])
+    t["filler_units"] = need
+    return t
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "benchmarks", "hard", "bank-hard.json")
@@ -52,6 +70,9 @@ def main():
         print("BANK GUARD FAIL:", tid, why)
     if bad:
         raise SystemExit(1)
+    for t in tasks:
+        if t["cat"] == "G":
+            assemble_G(t)
     print("bank guard: all %d tasks scorable" % len(tasks))
     ids = [t["id"] for t in tasks]
     assert len(set(ids)) == len(ids), "duplicate hard ids"

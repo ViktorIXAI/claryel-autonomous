@@ -34,7 +34,15 @@ STATEF = os.environ.get("PARB_STATE", "state-gate.json")
 RESULTS = os.path.join(ROOT, os.environ.get("PARB_RESULTS", "results-gate.jsonl"))
 LEDGER = os.path.join(ROOT, os.environ.get("PARB_LEDGER", "gate-ledger.jsonl"))
 SUBSET = [x for x in os.environ.get("PARB_SUBSET", "").split(",") if x.strip()]
-LADDER = [int(x) for x in os.environ.get("PARB_LADDER", "512,1024,2048").split(",")]
+_LADDER_DEFAULT = "512,1024,2048"
+_LADDER_ENV = os.environ.get("PARB_LADDER")
+LADDER = [int(x) for x in (_LADDER_ENV or _LADDER_DEFAULT).split(",")]
+# contour 2.12: on the HARD tier the old ceiling of 2048 still truncated
+# 200-field JSON and 90-row CSV answers (finish=length in 5/77 tasks). A
+# truncation is a missing budget, not a wrong answer, so the top rung rises
+# to 8192 as soon as the stamp reaches 2.12. Cost stays bounded: the rung is
+# only ever reached after a real finish=length at 2048.
+LADDER_TOP_212 = 8192
 # Contour version is stamped into every result and ledger row so series
 # from different gate generations never mix in one statistic.
 # Canonical scheme is A.B.C.D: A.B is the operator release line, C is the
@@ -52,6 +60,12 @@ try:
 
     def contour_at_least(track: int, revision: int) -> bool:
         return _GV.at_least(track, revision, CONTOUR_VERSION)
+
+    # contour 2.12 feature gate: applied only after the stamp is parsed from
+    # PARB_GATE_VERSION, so a 2.11 arm keeps the old ceiling of 2048.
+    if (contour_at_least(2, 12) and not _LADDER_ENV
+            and LADDER[-1] < LADDER_TOP_212):
+        LADDER = LADDER + [LADDER_TOP_212]
 
 except Exception:
     # Fallback keeps old standalone snapshots usable until the versioning
