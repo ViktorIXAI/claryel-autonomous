@@ -288,19 +288,21 @@ sys.addaudithook(_audit)
 """
 
 
-def run_py(code, tests, env):
+def run_py(code, tests, env, fails=1, detail=False):
     d = tempfile.mkdtemp(prefix="parbE_", dir="/tmp")
     with open(os.path.join(d, "sol.py"), "w") as f:
         f.write(code)
     body = PRELUDE + "\nexec(open(\"sol.py\").read())\n" + (
-        "\nok = tot = 0\nerr = ''\n"
+        "MAXF = %d\n" % max(1, int(fails)) +
+        "DET = %s\n" % ("True" if detail else "False") +
+        "\nok = tot = 0\nerrs = []\n"
         "for _ln in open('tests.txt'):\n"
         "    if not _ln.strip(): continue\n"
         "    tot += 1\n"
         "    try:\n        exec(compile(_ln, '<t>', 'exec'), globals())\n        ok += 1\n"
         "    except Exception as _e:\n"
-        "        if not err: err = (type(_e).__name__ + ': ' + str(_e))[:120]\n"
-        "print('RESULT %d/%d %s' % (ok, tot, err))\n")
+        "        if len(errs) < MAXF: errs.append(('тест %d: %s -> %s: %s' % (tot, _ln.strip()[:90], type(_e).__name__, str(_e)[:60])) if DET else (type(_e).__name__ + ': ' + str(_e))[:120])\n"
+        "print('RESULT %d/%d %s' % (ok, tot, ' | '.join(errs) or 'нет вывода'))\n")
     with open(os.path.join(d, "t.py"), "w") as f:
         f.write(body)
     with open(os.path.join(d, "tests.txt"), "w") as f:

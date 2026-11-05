@@ -170,6 +170,12 @@ K_NEGATION = contour_at_least(2, 7)
 # identical reps — seed variance, so selection, not another nudge).
 H_BEST2 = contour_at_least(2, 9)
 H_BEST2_NOTES = ("invented_version", "no_uncertainty_marker", "fake_action_claim")
+# 0.0.2.10: the E repair loop used to see only the FIRST failing test
+# (`if not err`). On P2005/Basalt E-ha-01-1 is CHRONIC at 44/50 across every
+# rep and attempt — the fixer is blind to the other five failures. From 2.10 the
+# code gate asks the runner for up to four distinct failures with the offending
+# test line; scoring and scorer notes stay byte-compatible (detail=False there).
+E_MULTIERR = contour_at_least(2, 10)
 NUDGE = {
     "no_final_answer": "Заверши ответ отдельной финальной строкой: ОТВЕТ: <итог>.",
     "too_few_safe_steps": "Перечисли нумерованными шагами (1., 2., 3., ...) безопасную последовательность: сначала чтение/проверка состояния, потом изменения.",
@@ -1171,7 +1177,8 @@ def code_gate(acct, t, seed, msgs0):
                 acct.ev("fix", "compile_attempt_%d" % (i + 1))
             continue
         t0 = time.time()
-        okc, totc, errtxt = CK.run_py(code, t["ref"]["tests"], t.get("env", {}))
+        okc, totc, errtxt = CK.run_py(code, t["ref"]["tests"], t.get("env", {}),
+                                      fails=(4 if E_MULTIERR else 1), detail=E_MULTIERR)
         acct.code_ms += (time.time() - t0) * 1000
         acct.ev("gate", "tests_%d_of_%d" % (okc, totc))
         if totc and okc == totc:
