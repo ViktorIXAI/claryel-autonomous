@@ -216,108 +216,54 @@ def run_battery(t, ans, timeout=6):
         # no candidate implementation in the answer at all: format violation,
         # distinct from an executed-but-wrong implementation (verdict 0/total).
         return 0.0, False, ["no_code"]
-    # Verdict protocol v2 (issue #15 GPT-6 blocker 1): the model-produced source is
-    # data on a separate file and is executed ONLY inside per-test child processes.
-    # The trusted supervisor (this fixed template) counts child exit codes itself;
-    # untrusted stdout is discarded, so it can never forge a verdict on the channel
-    # the host reads. Host additionally requires: exactly one VERDICT line, it is
-    # the last line, it carries the per-run random id, and total == len(battery).
-    runid = secrets.token_hex(8)
-    batt_json = json.dumps({"name": name, "battery": battery}, ensure_ascii=False)
-    files = {
-        "_user_src.py": code,
-        "_batt.json": batt_json,
-    }
-    # Fixtures (gold battery + probe + user src) live on the READ-ONLY bind /input;
-    # /work is scratch only. The supervisor attests fixture hashes inside the
-    # verdict; the host compares them with its own bytes — mid-run tampering from
-    # inside the container is impossible (ro bind) and any mismatch fails closed.
-    payload = (
-        "import hashlib, json, subprocess, sys\n"
-        "b_raw = open('/input/_batt.json', 'rb').read()\n"
-        "b = json.loads(b_raw.decode('utf-8'))\n"
-        "batt = b['battery']\n"
-        "runid = %r\n"
-        "sha = hashlib.sha256(b_raw).hexdigest()[:16]\n"
-        "probe_raw = open('/input/_probe.py', 'rb').read()\n"
-        "sha = hashlib.sha256(b_raw + probe_raw).hexdigest()[:16]\n"
-        "passed = 0\n"
-        "for idx in range(len(batt)):\n"
-        "    try:\n"
-        "        r = subprocess.run([sys.executable, '/input/_probe.py', str(idx)],\n"
-        "                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,\n"
-        "                           cwd='/work', timeout=3, start_new_session=True)\n"
-        "        if r.returncode == 0:\n"
-        "            passed += 1\n"
-        "    except subprocess.TimeoutExpired:\n"
-        "        pass\n"
-        "sha2 = hashlib.sha256(open('/input/_batt.json','rb').read() + open('/input/_probe.py','rb').read()).hexdigest()[:16]\n"
-        "print('VERDICT', runid, passed, 'OF', len(batt), 'A', sha if sha == sha2 else 'DRIFT')\n"
-    ) % runid
-    probe = (
-        "import json, os, resource, sys\n"
-        "resource.setrlimit(resource.RLIMIT_CPU, (2, 3))\n"
-        "resource.setrlimit(resource.RLIMIT_AS, (300 * 1024 * 1024,) * 2)\n"
-        "resource.setrlimit(resource.RLIMIT_NPROC, (16, 16))\n"
-        "resource.setrlimit(resource.RLIMIT_FSIZE, (4 * 1024 * 1024,) * 2)\n"
-        "def _audit(ev, args):\n"
-        "    if ev in ('subprocess.Popen', 'os.system', 'os.exec', 'os.execv',\n"
-        "                'os.spawn', 'os.spawnv', 'os.execle', 'os.putenv',\n"
-        "                'os.unsetenv', 'os.kill', 'shutil.rmtree'):\n"
-        "        raise RuntimeError('blocked ' + ev)\n"
-        "    if ev == 'open':\n"
-        "        p = os.path.realpath(str(args[0]))\n"
-        "        m = args[1] if len(args) > 1 else 'r'\n"
-        "        if isinstance(m, str) and any(c in m for c in 'wxa+') and not p.startswith('/work/'):\n"
-        "            raise RuntimeError('blocked write ' + p)\n"
-        "        if '/.ssh' in p or p.endswith('.env') or p.endswith('shadow'):\n"
-        "            raise RuntimeError('blocked secret ' + p)\n"
-        "sys.addaudithook(_audit)\n"
-        "b = json.load(open('/input/_batt.json'))\n"
-        "args, exp = b['battery'][int(sys.argv[1])]\n"
-        "ns = {}\n"
-        "exec(open('/input/_user_src.py').read(), ns)\n"
-        "f = ns.get(b['name'])\n"
-        "if f is None:\n"
-        "    sys.exit(3)\n"
-        "got = f(*args)\n"
-        "sys.exit(0 if json.dumps(got, sort_keys=True, default=str) == json.dumps(exp, sort_keys=True, default=str) else 1)\n"
-    )
-    files["_probe.py"] = probe
-    fixture_sha = hashlib.sha256(batt_json.encode("utf-8") + probe.encode("utf-8")).hexdigest()[:16]
-    try:
-        res = e_sandbox.run_docker(payload, files=files, audit=False,
-                               cpu_sec=int(timeout) + 20, wall_sec=float(timeout) + 30.0)
-    except Exception as e:
-        return 0.0, False, ["sandbox_error:%s" % type(e).__name__]
-    # Fail closed on non-docker backend (should never happen with run_docker).
-    if getattr(res, "backend", None) != "docker":
-        return 0.0, False, ["sandbox_fail_closed:backend=%s" % getattr(res, "backend", "?")]
-    if res.detail in ("no_docker", "docker_spawn_failed") or (not res.ok and res.returncode == 127 and "docker" in (res.stderr or "").lower()):
-        return 0.0, False, ["sandbox_fail_closed:%s" % (res.detail or "docker")]
-    if res.timed_out:
-        return 0.0, False, ["battery_timeout"]
-    out = [ln for ln in (res.stdout or "").splitlines() if ln.strip()]
-    vd = [ln for ln in out if ln.startswith("VERDICT ")]
-    if not res.ok:
-        detail = out[-1] if out else ((res.stderr or "").strip().splitlines()[:1] or ["no_output"])[0]
-        return 0.0, False, ["battery_rc%s_%s" % (res.returncode, str(detail)[:60])]
-    # strict verdict authenticity: exactly one line, last, carries the run id,
-    # total must equal the bank battery size. Any forgery attempt fails closed.
-    if len(vd) != 1 or not out or vd[0] != out[-1]:
-        return 0.0, False, ["verdict_protocol_violation"]
-    parts = vd[0].split()
-    try:
-        passed, total = int(parts[2]), int(parts[4])
-    except (IndexError, ValueError):
-        return 0.0, False, ["verdict_protocol_violation"]
-    if len(parts) != 7 or parts[1] != runid or parts[3] != "OF" or parts[5] != "A":
-        return 0.0, False, ["verdict_protocol_violation"]
-    if parts[6] != fixture_sha:
-        return 0.0, False, ["verdict_fixture_drift"]
-    if total != len(battery) or passed > total:
-        return 0.0, False, ["verdict_total_mismatch"]
-    return (passed / total if total else 0.0), True, ["sandbox:docker:verdictv2"]
+    # Oracle isolation v3 (issue #15 GPT-6 P0: docker read-only mounts protect
+    # integrity, NOT confidentiality of gold).
+    # Architecture: ONE ephemeral container per battery test. The container
+    # receives ONLY the user source and the current INPUT args (no expected
+    # outputs, no battery, no probe script anywhere in its namespace), computes
+    # f(*args) and emits one RESULT line; the trusted HOST compares the emitted
+    # value against gold. The gold never crosses into the untrusted principal,
+    # so reading the filesystem/env cannot manufacture a correct answer.
+    passed = 0
+    total = len(battery)
+    notes = []
+    for idx, (args, exp) in enumerate(battery):
+        payload = (
+            "import json, sys\n"
+            "ns = {}\n"
+            "exec(open('/input/_user_src.py').read(), ns)\n"
+            "f = ns.get(%r)\n"
+            "if f is None:\n"
+            "    sys.exit(3)\n"
+            "got = f(*%r)\n"
+            "sys.stdout.write('RESULT ' + json.dumps(got, sort_keys=True, default=str) + '\\n')\n"
+        ) % (name, list(args))
+        try:
+            res = e_sandbox.run_docker(payload, files={"_user_src.py": code},
+                                       cpu_sec=int(timeout) + 2,
+                                       wall_sec=float(timeout) + 6.0)
+        except Exception as e:
+            return 0.0, False, ["sandbox_error:%s" % type(e).__name__]
+        if getattr(res, "backend", None) != "docker":
+            return 0.0, False, ["sandbox_fail_closed:backend=%s" % getattr(res, "backend", "?")]
+        if res.detail in ("no_docker", "docker_spawn_failed"):
+            return 0.0, False, ["sandbox_fail_closed:%s" % (res.detail or "docker")]
+        if res.timed_out:
+            notes.append("battery_timeout:%d" % idx)
+            continue
+        lines = [ln for ln in (res.stdout or "").splitlines() if ln.startswith("RESULT ")]
+        if res.returncode == 3 or not lines:
+            notes.append("battery_no_result:%d" % idx)
+            continue
+        got = lines[-1][len("RESULT "):]
+        try:
+            json.loads(got)
+        except Exception:
+            notes.append("battery_unencodable:%d" % idx)
+            continue
+        if got == json.dumps(exp, sort_keys=True, default=str):
+            passed += 1
+    return (passed / total if total else 0.0), True, (["sandbox:docker:oracle_isolated_v3"] + notes)
 
 
 def sandbox_negative_controls(verbose: bool = False):

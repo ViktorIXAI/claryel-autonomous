@@ -37,7 +37,7 @@ json.dump(bank, open(os.path.join(OUT, "bank.json"), "w", encoding="utf-8"), ens
 plan = []
 for t in bank:
     g = int(hashlib.sha256(t["id"].encode()).hexdigest()[:6], 16)
-    plan.append({"task": t["id"], "cat": t["cat"], "rep": 0, "rep_group": "hardv6",
+    plan.append({"task": t["id"], "cat": t["cat"], "rep": 0, "rep_group": "hardv6", "series": "main", "stage": "main",
                  "level": "ex6", "gseed": g,
                  "mode": "loop" if (t["cat"] == "D" and t.get("mode") == "loop") else "plain"})
 json.dump(plan, open(os.path.join(OUT, "plan.json"), "w", encoding="utf-8"))

@@ -13,6 +13,7 @@ Composition: A9 B7 C8 D9 E10 F6 G6 H5 I6 J7 K4 = 77.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 import re
@@ -43,7 +44,11 @@ TASKS = []
 
 
 def add(cat, tid, prompt, ref, **extra):
-    t = {"cat": cat, "id": tid, "prompt": prompt, "ref": ref, "level": "ex6"}
+    # gate_run (contour arm) contract: every task carries level/seed/stage.
+    # seed is derived from the task id -> fully deterministic, no RNG anywhere.
+    sd = int(hashlib.sha256(tid.encode("utf-8")).hexdigest()[:6], 16)
+    t = {"cat": cat, "id": tid, "prompt": prompt, "ref": ref, "level": "ex6",
+         "seed": sd, "stage": "main", "kind": cat.lower()}
     t.update(extra)
     TASKS.append(t)
 
