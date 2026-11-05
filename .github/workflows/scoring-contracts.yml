@@ -1,0 +1,31 @@
+name: hard-v6 scoring contracts
+# Issue #7: scoring modes must not drift silently. Every contour gate contract, the
+# frozen bank/scorer pins, and an independent re-score of the published hard-v6 arms run
+# on every push and PR. Category-E sandbox re-execution is deliberately not here: it needs
+# a docker sandbox and is run locally on an idle host (`--include-exec`).
+on: [push, pull_request]
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: contour gate contracts (repair pipeline, loop drive, K bool, H json)
+        run: |
+          for f in harness/gate_v36_format_repair_test.py harness/gate_v37_loop_drive_test.py \
+                   harness/gate_v38_repair_pipeline_test.py harness/gate_v39_k_bool_test.py \
+                   harness/gate_v40_h_json_test.py harness/gate_versioning_test.py; do
+            echo "=== $f"; python3 "$f"
+          done
+      - name: frozen bank/scorer pins
+        run: |
+          python3 harness/verify_manifest.py --v5
+          python3 harness/verify_manifest.py --v6
+      - name: independent re-score of published arms (issue #6)
+        run: python3 scripts/rescore_all_arms.py
+      - name: corrected plain-D column is reproducible
+        run: python3 scripts/rescore_v6_cells.py
+      - name: link integrity
+        run: python3 scripts/check_links.py

@@ -1,0 +1,1272 @@
+[
+ {
+  "arm": "full-216",
+  "stamp": "0.0.2.16",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 29,
+  "plain_independent": 32,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "full-217",
+  "stamp": "0.0.2.17",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 31,
+  "plain_independent": 34,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "full-218",
+  "stamp": "0.0.2.18",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 35,
+  "plain_independent": 38,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "full-219",
+  "stamp": "0.0.2.19",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 37,
+  "plain_independent": 40,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "full-220",
+  "stamp": "0.0.2.20",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 37,
+  "plain_independent": 40,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-p0",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p1",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "D-ex6-p2",
+    "rep": 0,
+    "kind": "cell",
+    "as_run_strict": 0,
+    "independent_strict": 1,
+    "content": 1.0,
+    "format_ok": true,
+    "notes": []
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "full-221",
+  "stamp": "0.0.2.21",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 40,
+  "plain_independent": 40,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "full-222",
+  "stamp": "0.0.2.22",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 44,
+  "plain_independent": 44,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ },
+ {
+  "arm": "full-223",
+  "stamp": "0.0.2.23",
+  "plain_rows": 61,
+  "loop_rows": 0,
+  "plain_as_run": 42,
+  "plain_independent": 42,
+  "loop_as_run": 0,
+  "loop_independent": 0,
+  "cells": [
+   {
+    "task": "D-ex6-l0",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l1",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l2",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l3",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l4",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "D-ex6-l5",
+    "rep": 0,
+    "kind": "trajectory_not_stored",
+    "notes": [
+     "trajectory_not_stored"
+    ]
+   },
+   {
+    "task": "E-ex6-00",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-01",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-02",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-03",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-04",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-05",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-06",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-07",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-08",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   },
+   {
+    "task": "E-ex6-09",
+    "rep": 0,
+    "kind": "needs_sandbox",
+    "notes": [
+     "needs_sandbox"
+    ]
+   }
+  ]
+ }
+]
