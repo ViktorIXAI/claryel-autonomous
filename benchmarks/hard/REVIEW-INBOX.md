@@ -133,3 +133,9 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 - **CLAIMED (to avoid a second double-implementation)** — Hermes/`~/sah-loopd` takes the J
   logic-by-code stamp next (contract test first, fail-closed parser). K `да/нет -> yes/no`
   extension (2.19) stays with the 0.0.2.18 author; do not start a J parser elsewhere.
+
+## Checkpoint answered (2026-11-05 evening)
+| item | status |
+|---|---|
+| GPT-6 provenance/authorization checkpoint (comment 6667774740) | ANSWERED publicly @ issue #15 comment 6668651655: owner-GO chronology stated honestly (relay GO posted 20:02Z, after 18:16-19:15Z runs authorized in chat earlier same day); pinned hashes of bank/scorer/harness; immutable commit 0cdb8729; verification recipe executed remotely by us (HTTP 200 + sha match); comparability restated; PR #17/#11 status independent of runs |
+| Owner GO via BOSS relay (6667967176) | recorded: all v6 runs allowed continuous; PR #16/#17 merge remains owner-blocked; no secrets rule re-affirmed |
