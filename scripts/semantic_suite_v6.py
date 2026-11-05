@@ -287,5 +287,17 @@ assert _left == "", "orphan containers left: %s" % _left
 CONTROLS[0] += 1
 print("control OK: docker wall-timeout leaves no orphan container")
 
+# ---- J semantic: decorated items keep content, strict contract on format_ok
+_jt = {"cat": "J", "ref": ["b", "a", "c"]}
+run("J objects with correct id order keep content, format flagged", _jt,
+    '[{"id":"b","score":9},{"id":"a","score":5},{"id":"c","score":3}]', 1.0, 1.0, False)
+run("J tuples with correct id order keep content", _jt,
+    '[["b",9],["a",5],["c",3]]', 1.0, 1.0, False)
+run("J wrong set decorated still fails", _jt,
+    '[{"id":"x"},{"id":"a"},{"id":"c"}]', 0.0, 0.0)
+run("J bare-id strict contract still perfect", _jt,
+    '["b","a","c"]', 1.0, 1.0, True)
+
+
 print("\nSEMANTIC SUITE v6: %d controls, %d violations" % (CONTROLS[0], len(FAILS)))
 sys.exit(0 if not FAILS else 1)

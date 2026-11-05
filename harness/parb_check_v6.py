@@ -21,29 +21,56 @@ if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
 
 
+def _top_level_spans(text):
+    """(start, end) of every balanced top-level {...}/[...] span,
+    string literals skipped so quoted brackets never unbalance the scan."""
+    spans, stack, start = [], [], None
+    in_str, esc = False, False
+    for i, ch in enumerate(text):
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch in "{[":
+            if not stack:
+                start = i
+            stack.append(ch)
+        elif ch in "}]":
+            if stack and ((ch == "}" and stack[-1] == "{") or (ch == "]" and stack[-1] == "[")):
+                stack.pop()
+                if not stack and start is not None:
+                    spans.append((start, i + 1))
+                    start = None
+            else:
+                stack, start = [], None
+    return spans
+
+
 def parse_json(text):
-    """Best-effort: last balanced JSON object/array in text."""
+    """Best-effort: LAST balanced top-level JSON object/array in text
+    (answers usually end with the final answer); fenced blocks first."""
     t = text.strip()
+    try:
+        return json.loads(t)
+    except Exception:
+        pass
     m = re.findall(r"```(?:json)?\s*(.+?)```", t, re.S)
     for cand in reversed(m):
         try:
             return json.loads(cand.strip())
         except Exception:
             pass
-    for opener, closer in (("{", "}"), ("[", "]")):
-        depth, start = 0, -1
-        for i, ch in enumerate(t):
-            if ch == opener:
-                if depth == 0:
-                    start = i
-                depth += 1
-            elif ch == closer and depth:
-                depth -= 1
-                if depth == 0 and start >= 0:
-                    try:
-                        return json.loads(t[start:i + 1])
-                    except Exception:
-                        start = -1
+    for s, e in sorted(_top_level_spans(t), key=lambda sp: sp[1] - sp[0], reverse=True):
+        try:
+            return json.loads(t[s:e])
+        except Exception:
+            pass
     return None
 
 
@@ -94,11 +121,19 @@ def check_json_obj(t, ans):
     if obj is None:
         return 0.0, False, ["no_json"]
     gold = t["ref"]
+    # A single object wrapped in a one-element list keeps its content score;
+    # the wrapper is recorded on format_ok (contract wants a bare object).
+    wrapped = False
+    if isinstance(gold, dict) and isinstance(obj, list) and len(obj) == 1 and isinstance(obj[0], dict):
+        obj, wrapped = obj[0], True
     if not isinstance(gold, dict):
         ok = deep_eq(obj, gold)
-        return (1.0 if ok else 0.0), True, ([] if ok else ["value_mismatch"])
+        return (1.0 if ok else 0.0), (not wrapped), ([] if ok else ["value_mismatch"])
     ok, missing = keys_eq(obj, gold)
-    return (1.0 if ok else 0.0), True, ([] if ok else ["fields_mismatch:" + ",".join(map(str, missing[:4]))])
+    notes = [] if ok else ["fields_mismatch:" + ",".join(map(str, missing[:4]))]
+    if wrapped:
+        notes.append("object_wrapped_in_list")
+    return (1.0 if ok else 0.0), (not wrapped), notes
 
 
 # ---------- C: standalone option tokens only (no letters inside words) ----------
@@ -542,15 +577,35 @@ def check_J_v6(t, ans):
     obj = parse_json(ans)
     if not isinstance(obj, list):
         return 0.0, False, ["no_list"]
-    got = list(map(str, obj))
-    want = list(map(str, t["ref"]))
-    if got == want:
-        return 1.0, True, []
-    if sorted(got) == sorted(want):
-        adj = sum(1 for i in range(len(want) - 1) if got[i:i + 2] == want[i:i + 2])
+    # Content = the ORDERED id sequence. Items may be bare strings (the strict
+    # contract) or objects carrying the id under "id"/"name"/"task"/"sku" or a
+    # (id, ...) tuple; a model that sorts correctly but decorates items keeps
+    # its content score, and only format_ok records the strict contract.
+    def ident(x):
+        if isinstance(x, str):
+            return x
+        if isinstance(x, dict):
+            for k in ("id", "ID", "Id", "name", "task", "sku", "vendor"):
+                if k in x:
+                    return str(x[k])
+            return None
+        if isinstance(x, (list, tuple)) and x:
+            return str(x[0])
+        return str(x)
+    got = [ident(x) for x in obj]
+    if any(g is None for g in got):
+        return 0.0, False, ["unidentifiable_items"]
+    got_s: list = [str(g) for g in got]
+    want = [str(x) for x in t["ref"]]
+    strict_format = all(isinstance(x, str) for x in obj)
+    fmt_note = [] if strict_format else ["items_not_bare_ids"]
+    if got_s == want:
+        return 1.0, strict_format, fmt_note
+    if sorted(got_s) == sorted(want):
+        adj = sum(1 for i in range(len(want) - 1) if got_s[i:i + 2] == want[i:i + 2])
         frac = adj / max(1, len(want) - 1)
-        return round(0.5 * frac, 4), True, ["order_partial"]
-    return 0.0, True, ["id_set_mismatch"]
+        return round(0.5 * frac, 4), strict_format, ["order_partial"] + fmt_note
+    return 0.0, strict_format, ["id_set_mismatch"] + fmt_note
 
 
 # ---------- K ----------

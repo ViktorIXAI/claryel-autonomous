@@ -50,6 +50,9 @@ def add(cat, tid, prompt, ref, **extra):
     t = {"cat": cat, "id": tid, "prompt": prompt, "ref": ref, "level": "ex6",
          "seed": sd, "stage": "main", "kind": cat.lower()}
     t.update(extra)
+    # gate_run drives loop tasks only when kind == "loop" (v5 contract).
+    if t.get("mode") == "loop":
+        t["kind"] = "loop"
     TASKS.append(t)
 
 

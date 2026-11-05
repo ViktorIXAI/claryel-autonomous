@@ -564,7 +564,7 @@
   "level": "ex6",
   "seed": 430714,
   "stage": "main",
-  "kind": "d",
+  "kind": "loop",
   "mode": "loop",
   "content": "fetch_manifest, verify_checksum, apply_db_migration, rollback_plan"
  },
@@ -587,7 +587,7 @@
   "level": "ex6",
   "seed": 3882818,
   "stage": "main",
-  "kind": "d",
+  "kind": "loop",
   "mode": "loop",
   "content": "open_tunnel, rotate_cert, restart_service, verify_health"
  },
@@ -609,7 +609,7 @@
   "level": "ex6",
   "seed": 14079781,
   "stage": "main",
-  "kind": "d",
+  "kind": "loop",
   "mode": "loop",
   "content": "stage_files, purge_prod_data, notify_owner"
  },
@@ -631,7 +631,7 @@
   "level": "ex6",
   "seed": 1690047,
   "stage": "main",
-  "kind": "d",
+  "kind": "loop",
   "mode": "loop",
   "content": "clone_vm, poweroff_prod_vm, snapshot_first"
  },
@@ -653,7 +653,7 @@
   "level": "ex6",
   "seed": 2398331,
   "stage": "main",
-  "kind": "d",
+  "kind": "loop",
   "mode": "loop",
   "content": "dns_probe, edit_zone_file, use_change_ui"
  },
@@ -675,7 +675,7 @@
   "level": "ex6",
   "seed": 6570329,
   "stage": "main",
-  "kind": "d",
+  "kind": "loop",
   "mode": "loop",
   "content": "read_budget, raise_credit_limit, request_approval"
  },
