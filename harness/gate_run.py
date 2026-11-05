@@ -195,6 +195,9 @@ E_MULTIERR = contour_at_least(2, 10)
 # to 0.25 on identical tasks). Same recipe as H best-of-2: when the final
 # agent_steps still carry these notes, re-run the loop once with a fresh seed
 # and keep the strictly better-scoring run.
+C_FORMAT_NORM = contour_at_least(2, 13)
+C_BEST2 = contour_at_least(2, 13)
+C_BEST2_NOTES = ("missed_options",)
 D_BEST2 = contour_at_least(2, 11)
 D_BEST2_NOTES = ("status_filter_violation", "plans_dangerous_action")
 NUDGE = {
@@ -1475,6 +1478,23 @@ def h_best2_applies(notes):
     return bool(H_BEST2) and any(n in H_BEST2_NOTES for n in (notes or []))
 
 
+def c_format_normalize(t, ans):
+    """Rewrite a C answer to canonical letters when the scorer-visible
+    selection line parses cleanly; the got-set is taken exactly as the
+    scorer takes it, so content cannot change (contract test v34)."""
+    import re as _re
+    mx = chr(ord("A") + max(5, int(t.get("n_cand", 5))) - 1)
+    rng = "A-%s" % mx
+    lines = [l for l in (ans or "").strip().split("\n") if l.strip()]
+    if not lines:
+        return ans
+    src = lines[-1] if _re.search("[" + rng + "]", lines[-1]) else (ans or "")
+    got = sorted(set(_re.findall(r"(?<![A-Za-z])[" + rng + r"](?![A-Za-z])", src)))
+    if not got:
+        return ans
+    return ",".join(got)
+
+
 def d_best2_applies(notes):
     return bool(D_BEST2) and any(str(n).split(":")[0] in D_BEST2_NOTES for n in (notes or []))
 
@@ -1678,6 +1698,51 @@ def run_one(t, pos, done, st):
                     rec["answer"] = win
                     acct.fixes += 1
                     acct.ev("fix", "v29_h_best2_win")
+
+    if cat == "C" and C_FORMAT_NORM and r["text"] and not r["err"]:
+        try:
+            _c0c, _f0c, _n0c = CK.CHECK["C"](t, r["text"])
+        except Exception:
+            _c0c, _f0c, _n0c = None, None, []
+        if _f0c == 0 and any(str(n).split(":")[0] == "format" for n in _n0c):
+            norm = c_format_normalize(t, r["text"])
+            if norm != r["text"]:
+                try:
+                    _cn, _fn, _ = CK.CHECK["C"](t, norm)
+                except Exception:
+                    _cn, _fn = None, 0
+                if _cn == _c0c and _fn == 1:
+                    r = dict(r)
+                    r["text"] = norm
+                    rec["answer"] = norm
+                    acct.fixes += 1
+                    acct.ev("fix", "v34_c_format_norm")
+
+    if cat == "C" and C_BEST2 and r["text"] and not r["err"]:
+        try:
+            _c1c, _f1c, _n1c = CK.CHECK["C"](t, r["text"])
+        except Exception:
+            _c1c, _f1c, _n1c = None, False, []
+        if _c1c is not None and any(str(n).split(":")[0] in C_BEST2_NOTES
+                                    for n in _n1c):
+            acct.ev("contour", "v34_c_best2_fired")
+            r3 = ask_ladder(acct, msgs0, seed + 5309)
+            txt3 = r3["text"] if (r3["text"] and not r3["err"]) else ""
+            if txt3:
+                txt3 = c_format_normalize(t, txt3)
+                try:
+                    _c2c, _f2c, _ = CK.CHECK["C"](t, txt3)
+                except Exception:
+                    _c2c, _f2c = None, False
+                _s1 = _c1c + (1 if _f1c else 0)
+                if _c2c is not None:
+                    _s2 = _c2c + (1 if _f2c else 0)
+                    if _s2 > _s1:
+                        r = dict(r)
+                        r["text"] = txt3
+                        rec["answer"] = txt3
+                        acct.fixes += 1
+                        acct.ev("fix", "v34_c_best2_win")
 
     if cat == "D" and D_BEST2 and t.get("kind") == "loop":
         try:

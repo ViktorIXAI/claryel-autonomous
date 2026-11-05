@@ -7,6 +7,11 @@ state*.json
 results*.jsonl
 gate-ledger*.jsonl
 artifacts/
+# Pinned audit artifacts demanded by external audit issue #10 (redacted traces)
+!benchmarks/hard/audit-20261105/artifacts/
+!benchmarks/hard/audit-20261105/artifacts/results-v5fix.jsonl
+!benchmarks/hard/audit-20261105/artifacts/run-record-v5fix.json
+!benchmarks/hard/audit-20261105/artifacts/v5fix.log
 
 # Local-only publication and security state
 *.env
