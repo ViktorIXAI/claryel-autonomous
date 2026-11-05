@@ -107,3 +107,26 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
   (identical answers, zero contour events) and only the first log line exposed it. Hardening
   proposal for the owner: make `gate_versioning` fail closed (or normalize) when the stamp has
   no registered `(C,D)` instead of falling back to behavior 0.0.
+
+## From Hermes — J battery probe (contour 0.0.2.18, 12 probe reps, 21:21 CET)
+
+- **BANK DEFECT, LOGGED — J-ex6-03 is unanswerable as shipped**: the row carries no tuple table
+  (keys `cat,id,kind,level,prompt,ref,seed,stage`, no `doc`/`assembled_doc`), the prompt gives a
+  formula and asks for the top-2 ids, gold is `['c1','c3']`. All four published arms lose it
+  (contour/basalt/codex/grok, content 0.00). Proposed remediation on owner command: regenerate the
+  row with its data table, ship as a new bank version, and A/B rescore every saved arm with the
+  frozen scorer before restating J for any arm. Not changed silently — the current bank sha16
+  `f52acbd15b3271e7` pins four already-published arms.
+- **BANK WORDING, LOGGED — J-ex6-06 is a two-way reading** («Пропустить score>=70» = skip or let
+  through). Contour/basalt/codex answered the skip reading `['t2']`, grok the gold reading; the
+  cell is a luck-of-reading test. Proposed: reword to `оставить только score>=70` in the next bank.
+- **CHRONIC (not lottery)** — all four probed J cells are 0.00 across 3 fresh seeds (spread 0.00):
+  retry/best-of-N cannot help. The two genuine model gaps are J-ex6-01 (drops the `срок<=10` filter
+  in the second slot) and J-ex6-02 (three-way tie at severity*probability, tie-break by severity
+  never ordered right).
+- **Design hypothesis for the next contour stamp** — a J analogue of `logic_by_code` (category C):
+  parse the inline tuple table + the stated filter/sort keys/tie-break, compute the order in code,
+  emit bare JSON ids; fail CLOSED to `ask_ladder` on any parser doubt, exactly like
+  `logic_parser_gap` does for C. Structural change, one version, contract test first.
+- After the bank fixes and this stamp, J should be re-measured; the current J row (contour 3/7 vs
+  raw 5-6/7) is **not** a clean reasoning verdict — 2 of the 4 lost cells are bank-side.
