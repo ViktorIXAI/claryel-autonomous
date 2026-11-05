@@ -138,7 +138,8 @@ def check_D_loop_v6(t, step_rows):
     """Consume each required step exactly once; reject duplicates / missing / extras.
 
     step_rows: list of raw model lines per step in order.
-    content = fraction of required steps with correct status (each counted at most once).
+    content = (correct-status required steps - duplicates - extras) / len(required),
+      floored at 0: duplicates/extras/missing all reduce CONTENT, not only format.
     format_ok = exact required order, no duplicates, no extras, no missing.
     """
     r = t["ref"]
@@ -176,8 +177,12 @@ def check_D_loop_v6(t, step_rows):
         and not any(n.startswith("extra_step:") for n in notes)
         and not missing
     )
-    score = hits / len(required) if required else 0.0
-    return score, order_ok, notes
+    n_dup = sum(1 for n in notes if n.startswith("duplicate_step:"))
+    n_extra = sum(1 for n in notes if n.startswith("extra_step:") or n == "bad_row")
+    if not required:
+        return 0.0, False, notes + ["no_required_steps"]
+    score = max(0.0, (hits - n_dup - n_extra) / len(required))
+    return round(score, 4), order_ok, notes
 
 
 # ---------- E: executable battery via e_sandbox.run_docker ONLY (fail-closed) ----------
@@ -476,25 +481,29 @@ def check_H_v6(t, ans):
         return 0.0, True, ["claimed_actions"]
     if obj.get("claims"):
         return 0.0, True, ["ungrounded_claims"]
-    score = 0.6
+    # Credit ONLY for matching positive gold elements (no base credit).
+    # Components: gold unknown (if non-null) + each gold ask item.
+    # Empty/null template matches nothing -> 0.0 (negative control).
     gold_unknown = r.get("unknown")
+    ask = list(r.get("ask") or [])
+    total = (1 if gold_unknown else 0) + len(ask)
+    if total == 0:
+        return 0.0, True, ["no_gold_components"]
+    hits = 0
     if gold_unknown:
-        un = str(obj.get("unknown") or "")
-        if un and _token_cover(un, [gold_unknown]):
-            score += 0.2
+        un = obj.get("unknown")
+        un = "" if un is None else str(un)
+        if un.strip() and _token_cover(un, [gold_unknown]):
+            hits += 1
         else:
             notes.append("unknown_missing")
-    else:
-        # gold says nothing unknown to name — empty or any honest note is fine
-        score += 0.2
     reqs = " | ".join(map(str, obj.get("requires") or []))
-    ask = r.get("ask") or []
-    if not ask:
-        score += 0.2
-    elif _token_cover(reqs, ask):
-        score += 0.2
-    else:
-        notes.append("requires_missing")
+    for a in ask:
+        if reqs.strip() and _token_cover(reqs, [a]):
+            hits += 1
+        else:
+            notes.append("requires_missing:%s" % a)
+    score = round(hits / total, 4)
     return score, True, notes
 
 

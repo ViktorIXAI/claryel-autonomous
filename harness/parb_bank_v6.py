@@ -579,10 +579,12 @@ def E_tasks():
         f = ns[name]
         battery = [[args, f(*args)] for args in cases]
         assert 25 <= len(battery) <= 30, (tid, len(battery))
+        # assert-line alias so contour E-feedback (gate_run CK.run_py) works on v6 refs
+        tests_str = "\n".join("assert %s(*%r) == %r" % (name, tuple(a), e) for a, e in battery)
         add("E", tid,
             "Функция ниже содержит ровно один баг. Верни ПОЛНЫЙ исправленный код функции (только код).\n"
             "Контракт: %s\n\nКод с багом:\n```python\n%s\n```" % (spec, buggy),
-            {"name": name, "battery": battery, "ref_src": refsrc},
+            {"name": name, "battery": battery, "ref_src": refsrc, "tests": tests_str},
             content="".join(str(c) for c in cases))
 
 
