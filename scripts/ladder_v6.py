@@ -93,6 +93,9 @@ def main():
             "- J sat at 3/7 for every stamp on bank v6: 2 of the 4 lost cells were bank defects",
             "  (`j-probe-218/J-PROBE.md`), fixed in bank v6.1 (`BANK-V61.md`).",
             "- A (arithmetic) stays the weakest real category, 4-5/9.",
+            "- Unmeasured stamps: 0.0.2.24 (I duration re-sort) and 0.0.2.25 (G conflict-by-code)"
+            "  are in the code and have offline replay evidence on saved answer bytes, but no"
+            "  paired full arm and no contract test yet — they get no number and no verdict.",
             "",
             "## Bounds on these numbers",
             "- One rep per stamp. Several arms shared the endpoint with other arms running at the same",

@@ -20,7 +20,7 @@ The operator set objectives, constraints, publication scope and final adoption
 decisions. The agent's own work is itemized in [`docs/autonomy.md`](docs/autonomy.md);
 its limits are in [`docs/limitations.md`](docs/limitations.md).
 
-Status checked: 2026-11-03
+Status checked: 2026-11-05
 
 ## Current version
 
@@ -173,6 +173,18 @@ See [`docs/source-policy.md`](docs/source-policy.md) and
 [`sources/reading-list.md`](sources/reading-list.md).
 
 ## Where the evidence lives
+## Where the evidence lives
+
+**Everything is published on `main`** — code versions, every benchmark arm, scoreboards,
+pair reports and decision records. No results live on side branches; if a branch other
+than `main` is mentioned anywhere, it is scratch work and is not the record.
+
+For the current hard-bank series (bank v6, 77 tasks): [`benchmarks/hard/v6-results/LADDER.md`](benchmarks/hard/v6-results/LADDER.md)
+is the version-by-version ladder (contour 0.0.2.16 -> 0.0.2.23 measured arms, per-category
+strict, verdict against the raw arms), `benchmarks/hard/v6-results/full-2NN/` holds each
+arm's answers, ledgers, log and run-record, and `scripts/ladder_v6.py` regenerates the
+ladder from those artifacts so no number in it is prose.
+
 
 | area | location |
 |---|---|
