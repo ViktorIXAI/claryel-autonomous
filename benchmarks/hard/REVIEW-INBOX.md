@@ -164,3 +164,11 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
 - Still open: A arithmetic, H-ex6-02 requires miss, J id_set, F avoid, D-p read_first,
   D-l banned_attempted, K-ex6-01 SERVICE synonym, H-trim/K_NEGATION inject unbundle.
 
+## From Hermes — hard-v6 0.0.2.19 full arm (21:30-21:36 Europe/Rome)
+
+- **DONE** plain 47/71 (+2 vs 2.18 net), H 2/5 -> 4/5 via JSON contract clear; loop 4/6.
+  First 219 attempt aborted (plan.json overwritten by jprobe to 12 rows); restored plan-full.json.
+  Artifacts: `benchmarks/hard/v6-results/full-219/`.
+- **SHIPPED @ contour 0.0.2.20** — K bool Cyrillic `да`/`нет` -> yes/no (extends 2.18 true/false).
+  Motivated by K-ex6-03 regression on 2.19 (`FREE_SHIPPING: да`). J logic-by-code left to claimed owner.
+

@@ -186,6 +186,8 @@ FORMAT_REPAIR = contour_at_least(2, 17)
 # (zero model tokens) and is NOT scorer-keyword injection (issue #15); keep it
 # independent of CHECKER_INJECT, same pattern as 2.17.
 K_BOOL_CANON = contour_at_least(2, 18)
+# 0.0.2.20: also map Cyrillic да/нет on K yes/no fields to yes/no.
+K_BOOL_CYR = contour_at_least(2, 20)
 # 0.0.2.19: hard-v6 H scorer fails hard on any non-empty claims/actions_done.
 # Clearing those arrays to [] is keyword-free contract repair (gold never wants
 # fabricated claims/actions); unknown/requires content is untouched.
@@ -1559,7 +1561,7 @@ K_FLAG_LINE = re.compile(
 
 def k_bool_canonicalize(t, text):
     """v2.18: map true/false tokens on K yes/no fields to yes/no."""
-    if not K_BOOL_CANON or not text or not str(t.get("id", "")).startswith("K"):
+    if not (K_BOOL_CANON or K_BOOL_CYR) or not text or not str(t.get("id", "")).startswith("K"):
         return text, None
     fields = [str(x).upper() for x in (t.get("fields") or [])]
     bool_names = set()
@@ -1575,10 +1577,12 @@ def k_bool_canonicalize(t, text):
         bool_names = None
     changed = []
     out_lines = []
+    # 2.18: true/false; 2.20+: also да/нет (scorer vocabulary is yes|no only).
     line_re = re.compile(
-        r"^(?P<prefix>\s*(?P<key>[A-Za-z_][A-Za-z0-9_]*)\s*:\s*)(?P<val>true|false)(?P<suf>\s*)$",
+        r"^(?P<prefix>\s*(?P<key>[A-Za-z_][A-Za-z0-9_]*)\s*:\s*)(?P<val>true|false|да|нет)(?P<suf>\s*)$",
         re.I,
     )
+    yes_vals = {"true", "да"}
     for line in text.splitlines():
         m = line_re.match(line)
         if not m:
@@ -1588,8 +1592,15 @@ def k_bool_canonicalize(t, text):
         if bool_names is not None and key not in bool_names:
             out_lines.append(line)
             continue
-        val = m.group("val").lower()
-        new_val = "yes" if val == "true" else "no"
+        raw = m.group("val")
+        val = raw.lower()
+        if val in ("да", "нет") and not K_BOOL_CYR:
+            out_lines.append(line)
+            continue
+        if val not in ("true", "false", "да", "нет"):
+            out_lines.append(line)
+            continue
+        new_val = "yes" if val in yes_vals else "no"
         out_lines.append(m.group("prefix") + new_val + m.group("suf"))
         changed.append("k_bool_" + new_val)
     if not changed:
@@ -1772,7 +1783,7 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v22_" + "_".join(ev))
-    if K_BOOL_CANON and cat == "K" and r["text"]:
+    if (K_BOOL_CANON or K_BOOL_CYR) and cat == "K" and r["text"]:
         norm, ev = k_bool_canonicalize(t, r["text"])
         if ev:
             r = dict(r)
@@ -1844,7 +1855,7 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v22_" + "_".join(ev))
-                    if K_BOOL_CANON and cat == "K" and r["text"]:
+                    if (K_BOOL_CANON or K_BOOL_CYR) and cat == "K" and r["text"]:
                         norm, ev = k_bool_canonicalize(t, r["text"])
                         if ev:
                             r = dict(r)
