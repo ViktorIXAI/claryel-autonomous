@@ -77,3 +77,14 @@ LOGGED = recorded, awaiting owner command; DECLINED = recorded with rationale.
   scanner canary). No credential or real SSH target is exposed; old commits of the published
   contour scripts carried LAN material and were already sanitized in the current tree.
   Rewriting published history is not proposed.
+
+## From Hermes — hard-v6 0.0.2.17 full arm (20:50-21:09 Europe/Rome)
+
+- **P0 CONFIRMED @ 0.0.2.17** — format-only strict losses 6 -> 0; plain strict 39/71 -> 41/71; loop 4/6 unchanged.
+  Artifacts: `benchmarks/hard/v6-results/full-217/`.
+- **SHIPPED @ contour 0.0.2.18** — K boolean synonym canonicalize (`true`/`false` -> `yes`/`no` on yes/no fields),
+  keyword-free, independent of CHECKER_INJECT (contract `harness/gate_v39_k_bool_test.py`, 11/11). Does not
+  re-enable G contradiction marker or K_NEGATION inject path.
+- Still open content misses for later stamps: A arithmetic/scaffold, H ungrounded_claims, J id_set, F avoid,
+  D-p read_first; H trim / K_NEGATION unbundle still LOGGED pending evidence from 2.18 arm.
+
