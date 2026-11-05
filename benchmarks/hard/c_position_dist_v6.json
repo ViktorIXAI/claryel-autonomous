@@ -1,18 +1,44 @@
 {
- "c_correct_sets": {
-  "A C E": 1,
-  "B C F": 1,
-  "C": 1,
-  "A D": 1,
-  "B C": 2,
-  "B E": 1,
-  "E": 1
- },
- "c_first_letter_distribution": {
+ "tasks": [
+  [
+   "A",
+   "C",
+   "E"
+  ],
+  [
+   "B",
+   "C",
+   "F"
+  ],
+  [
+   "C"
+  ],
+  [
+   "A",
+   "D"
+  ],
+  [
+   "B",
+   "C"
+  ],
+  [
+   "B",
+   "E"
+  ],
+  [
+   "E"
+  ],
+  [
+   "B",
+   "C"
+  ]
+ ],
+ "first_correct_letter_histogram": {
   "A": 2,
-  "B": 4,
   "C": 1,
-  "E": 1
- },
- "note": "no correct set equals a leading prefix A..X (asserted at build)"
+  "E": 1,
+  "B": 4,
+  "F": 0,
+  "D": 0
+ }
 }

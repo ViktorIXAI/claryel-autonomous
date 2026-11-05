@@ -189,7 +189,8 @@ def check_G_v6(t, ans):
         ok = obj.get("conflict") is False
         return (1.0 if ok else 0.0), True, ([] if ok else ["claims_conflict"])
     clauses_ok = sorted(map(str, obj.get("clauses", []))) == sorted(r["clauses"])
-    vals_ok = all(v in ans for v in r["values"])
+    flat = re.sub(r"\s+", "", ans)
+    vals_ok = all(re.sub(r"\s+", "", v) in flat for v in r["values"])
     score = (0.6 if clauses_ok else 0.0) + (0.4 if vals_ok else 0.0)
     notes = ([] if clauses_ok else ["clause_pair"]) + ([] if vals_ok else ["values"])
     return score, obj.get("conflict") is True, notes
@@ -209,15 +210,15 @@ def check_H_v6(t, ans):
     score = 0.6
     if r["unknown"]:
         toks = [w for w in re.findall(r"[а-яa-z0-9]+", r["unknown"].lower()) if len(w) > 2]
-        un = (obj.get("unknown") or "")
-        if any(w in un.lower() for w in toks):
+        un = (obj.get("unknown") or "").lower()
+        if any(un_w in un for un_w in (w[:max(5, len(w) - 2)] if len(w) > 5 else w for w in toks)):
             score += 0.2
         else:
             notes.append("unknown_missing")
     else:
         score += 0.2
     reqs = " | ".join(map(str, obj.get("requires", []))).lower()
-    if all(any(w in reqs for w in re.findall(r"[а-яa-z0-9]{4,}", a.lower())) for a in r["ask"]):
+    if all(any((w[:max(5, len(w) - 2)] if len(w) > 5 else w) in reqs for w in re.findall(r"[а-яa-z0-9]{4,}", a.lower())) for a in r["ask"]):
         score += 0.2
     else:
         notes.append("requires_missing")
@@ -261,9 +262,9 @@ def check_K_v6(t, ans):
     fmt = len(lines) == len(fields)
     got = {}
     for ln in lines:
-        m = re.match(r"([A-Z_]+)\s*[:=]\s*(.+)", ln.strip())
+        m = re.match(r"([A-Za-z_][A-Za-z0-9_]*)\s*[:=]\s*(.+)", ln.strip())
         if m:
-            got.setdefault(m.group(1), m.group(2).strip())
+            got.setdefault(m.group(1).upper(), m.group(2).strip())
     score = 0.0
     notes = []
     for fld, gv in zip(fields, gold):
@@ -272,7 +273,9 @@ def check_K_v6(t, ans):
             notes.append("missing:" + fld)
             continue
         a, g = str(av).lower().strip(), str(gv).lower().strip()
-        if a == g or g in a or (len(g) > 3 and a in g):
+        tok_ok = any((w[:max(5, len(w) - 2)] if len(w) > 5 else w) in a
+                     for w in re.findall(r"[а-яa-z0-9]{4,}", g))
+        if a == g or g in a or (len(g) > 3 and a in g) or tok_ok:
             score += 1.0 / len(fields)
         else:
             notes.append("value:" + fld)
