@@ -20,3 +20,9 @@ Attribution, separated:
 - 0 cells broken. Loop unchanged at 5/6 (consistent with the three-sample loop band 4-5/6).
 - External arms (bare/ChatGPT/Grok) on v6.1 are HELD pending owner confirmation per the
   hourly-control request; v6-era external tables remain byte-identical.
+
+Update 2026-11-05 23:20: external arms on v6.1 are **unheld** by operator GO in chat (four-arm
+cadence, see `history/agent-decisions/2026-11-05-four-arm-cadence-and-v61-rerun.md`). Launched:
+grok (toolsets off, prompt inline — closes finding S3) and codex (xhigh) in `~/parb-v61-raw`
+against the published v6.1 bank; contour 0.0.2.28 and bare basalt queued behind the 0.0.2.29
+arm running on the same serve. Artifacts will land in `benchmarks/hard/v6-results/four-arm-v61/`.
