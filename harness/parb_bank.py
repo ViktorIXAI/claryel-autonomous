@@ -176,9 +176,25 @@ def gen_C(seed, level):
             ("Энергопотребление не более {v} W", "tdp_w", "<=", [170, 220]),
             ("Накопитель не менее {v} GB", "ssd_gb", ">=", [1000, 2000]),
             ("Уровень шума менее {v} dB", "noise_db", "<", [34, 41])]
+    def _feasible(cs):
+        # every field's constraints must admit at least one domain value, or no
+        # candidate can satisfy the set (old code then forced letter A into ref
+        # as a fake answer — 3 holdout tasks scored correct "none" answers as 0)
+        for fld in {f for _, f, _, _ in cs}:
+            con = [(op, v) for _, f, op, v in cs if f == fld]
+            pv = [x for f, x in SPEC_FIELDS if f == fld][0]
+            if not [x for x in pv if all(eval_op(x, op, v) for op, v in con)]:
+                return False
+        return True
+
     conds = []
-    for tpl, fld, op, vals in rng.sample(pool, k):
-        conds.append((tpl, fld, op, rng.choice(vals)))
+    for _draw in range(500):
+        conds = [(tpl, fld, op, rng.choice(vals))
+                 for tpl, fld, op, vals in rng.sample(pool, k)]
+        if _feasible(conds):
+            break
+    else:
+        raise SystemExit("C generator: no feasible condition draw in 500 tries (k=%d)" % k)
 
     def ok(row):
         return all(eval_op(row[fld], op, v) for _, fld, op, v in conds)

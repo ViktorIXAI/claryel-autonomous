@@ -163,3 +163,18 @@ Fixed in bank v3: the four tasks were re-fit to scorer ref conventions
 builder now dry-runs every scorer against every task — if any raises
 KeyError the bank refuses to build. Corrected holdout numbers restated in
 the gate-versions log; 93.2% -> 95.1% on both arms.
+
+## C-generator could make tasks with no possible answer (2026-11-05)
+
+On dense condition counts the sampler drew mutually exclusive constraints on one
+field (e.g. RAM более 64 AND не более 64), no candidate could satisfy the set,
+and the generator then forced letter A into the ref as a fake answer (`if not
+good: good=[0]`). Three holdout tasks were affected; the model answered
+correctly ("no suitable options") and scored 0.0 for nine consecutive attempts
+before the validator `scripts/validate_c_refs.py` (kept as a skill tool) caught
+it. Fixed in the generator: the condition draw is resampled until every field
+admits at least one domain value. The dev bank regenerates bit-identical under
+the fix (prompt+ref equality verified), so no dev comparability was lost.
+Every derived bank must pass both build guards from now on: scorer-shape guard
+(no KeyError at scoring) and C-ref semantic guard (truth recomputed from the
+prompt equals the ref).
