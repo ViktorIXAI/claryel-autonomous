@@ -15,15 +15,15 @@ C-ex-02-0,C,1.0,0,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
 C-ex-03-0,C,1.0,0,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
 C-ex-04-0,C,0.6,0,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
 C-ex-05-0,C,1.0,0,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
-D-ex-00-0,D,1,1,,,,,PASS,PASS,,,,NR
-D-ex-00-1,D,1,1,,,,,,,,,,NR
-D-ex-00-2,D,1,1,,,,,,,,,,NR
-D-ex-01-0,D,1,1,,PASS,PASS,,,,,,,NR
-D-ex-01-1,D,1,1,,,,,,,,,,NR
-D-ex-01-2,D,1,1,,,,,,,,,,NR
-D-ex-02-0,D,1,1,,PASS,PASS,,PASS,PASS,,,,NR
-D-ex-02-1,D,1,1,,,,,,,,,,NR
-D-ex-02-2,D,1,1,,,,,,,,,,NR
+D-ex-00-0,D,1,1,,,,,PASS,PASS,,,,agree
+D-ex-00-1,D,1,1,,,,,,,,,,agree
+D-ex-00-2,D,1,1,,,,,,,,,,agree
+D-ex-01-0,D,1,1,,PASS,PASS,,,,,,,agree
+D-ex-01-1,D,1,1,,,,,,,,,,agree
+D-ex-01-2,D,1,1,,,,,,,,,,agree
+D-ex-02-0,D,1,1,,PASS,PASS,,PASS,PASS,,,,agree
+D-ex-02-1,D,1,1,,,,,,,,,,agree
+D-ex-02-2,D,1,1,,,,,,,,,,agree
 E-ex-00-0,E,1,1,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
 E-ex-00-1,E,1,1,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
 E-ex-00-2,E,1,1,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
@@ -79,8 +79,9 @@ K-ex-01-0,K,1,1,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
 K-ex-02-0,K,1,1,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,agree
 K-ex-03-0,K,1,1,PASS,PASS,PASS,,,,PASS,PASS,PASS,agree
 # CONTOUR 0.0.2.12 recorded 70/77
-# CONTOUR rescored: agree 68, mismatch 0, not-rescorable(D) 9
-# CONTOUR pass among agreed-rescored 61, among D-recorded 9
+# CONTOUR rescored: agree 77, mismatch 0, not-rescorable(D-no-steps) 0
+# CONTOUR pass among agreed-rescored 70, among not-rescorable 0
+# CONTOUR D-plain variant 64/77 (official D-loop figure above)
 # strict_loop   basalt 43/77 grok 52/77 codex 56/77
 # strict_plain  basalt 45/77 grok 54/77 codex 56/77
 # content_only  basalt 45/77 grok 58/77 codex 56/77
