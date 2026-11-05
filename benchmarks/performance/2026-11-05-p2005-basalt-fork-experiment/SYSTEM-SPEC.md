@@ -50,10 +50,27 @@ protocol and changes the number materially:
 
 So the 206.7 tok/s headline at 16k is real but describes a ~0.3-second burst; a long
 answer runs at ~130–150 tok/s end-to-end. Both numbers are published side by side in
-MAX-BENCH-ADDENDUM.md; the honest summary is: *burst 160–210, sustained 130–165, on an
+MAX-BENCH-ADDENDUM.md; the honest summary is: *burst 160–220, sustained 130–165, on an
 idle endpoint with warm caches and 512 MiB VRAM reserve.* Draft acceptance stayed
 68–79% across all windows — the settle comes from KV attention cost and expert churn,
 not speculation failure.
+
+## Run-to-run scatter (6× repeated ladder, idle endpoint, same day)
+
+Single-shot ladder rows vary; publishing only one sample understates or overstates the
+box. Measured distributions of 64-token decode, same context each time:
+
+| Context | min / median / max, tok/s | draft acc range |
+|---:|---|---|
+| 16 448 | 175 / 196 / **219** | 0.73–0.82 |
+| 32 832 | 178 / 201 / 202 | 0.72–0.78 |
+| 65 600 | 56* / 166 / 200 | 0.66–0.81 |
+
+\*first call after a large context jump pays a KV/expert reallocation hitch (56);
+subsequent calls at the same context sit at 166–200. The 218.2 tok/s recorded at 64k
+in the first published ladder sits at the top of this distribution — it is the
+reproducible ceiling band (~200–220 at 16k–64k), not a fluke, and not the typical
+value either. Median is the number to quote for "normal speed"; max for "ceiling".
 
 Bench environment for the max run: endpoint fully idle (Hermes brain parked on Mac
 Studio), 2 warmup rounds of 3 conversations before the ladder, RAM at contracted floor,
