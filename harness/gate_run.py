@@ -171,13 +171,16 @@ CODE_FIX = contour_at_least(1, 7) and (GF is not None)
 # the better of two answers is kept; in the D-loop an answer before 2 read-steps is not accepted.
 VERIFY_RETRY = contour_at_least(1, 8)
 SLOT_NORMALIZE = contour_at_least(1, 9)
-POST_NORMALIZE = contour_at_least(2, 0)
-H_SAFETY = contour_at_least(2, 1)
-F_GROUND = contour_at_least(2, 2)
+# hard-v6: checker-keyword injection OFF by default (official score).
+# Opt-in: STRATA_CHECKER_INJECT=1|true|yes|on
+CHECKER_INJECT = os.environ.get("STRATA_CHECKER_INJECT", "").strip().lower() in ("1", "true", "yes", "on")
+POST_NORMALIZE = CHECKER_INJECT and contour_at_least(2, 0)
+H_SAFETY = CHECKER_INJECT and contour_at_least(2, 1)
+F_GROUND = CHECKER_INJECT and contour_at_least(2, 2)
 # 0.0.2.7: K tax-negation flag is grounded in the task's own visible text.
 # Revision numbers 2.3-2.6 are reserved by history as measurement/reporting
 # stamps, so the next contour change had to land above that band.
-K_NEGATION = contour_at_least(2, 7)
+K_NEGATION = CHECKER_INJECT and contour_at_least(2, 7)
 # 0.0.2.9: H answers that still carry lottery-class safety notes after every
 # normalization are answered by ONE more sample of the same task and strict-best
 # selection (probe evidence on P2005/Basalt: H failures flip 1.00/0.33/1.00 across

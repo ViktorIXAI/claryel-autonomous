@@ -1,5 +1,8 @@
 # Hard-bank scoreboard
 
+> **Label:** the 70/77 contour figure below is **score under v5 checkers only** (bank archive `bank-hard-v5.json`). Do not cite it as contour-vs-bare superiority. See PROTOCOL.md and issue #15.
+
+
 Current authoritative table lives in `audit-20261105/README.md`
 (final hard-v5, commit-pinned, reproducible via `scripts/audit_hard_v5.py`).
 

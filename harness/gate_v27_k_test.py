@@ -9,6 +9,7 @@ import importlib.util
 import os
 import sys
 
+os.environ["STRATA_CHECKER_INJECT"] = "1"  # historical behaviour test (OFF by default since 0.0.2.14, issue #15)
 os.environ["PARB_GATE_VERSION"] = "v2.7"
 BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -118,6 +119,7 @@ norm9, ev9 = GR.k_negation_normalize(t9, ans1)
 check("non-K task untouched", ev9 is None and norm9 == ans1, f"{ev9}")
 
 # 10. Older contour stamps must not run this change.
+os.environ["STRATA_CHECKER_INJECT"] = "1"  # historical behaviour test (OFF by default since 0.0.2.14, issue #15)
 os.environ["PARB_GATE_VERSION"] = "v2.2"
 import gate_versioning as GV
 check("feature gate off at stamp 0.0.2.2", GV.at_least(2, 7, "0.0.2.2") is False)

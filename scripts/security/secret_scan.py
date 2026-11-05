@@ -37,7 +37,7 @@ INFRA_PATTERNS = {
     "absolute_local_path": re.compile(r"/home/[A-Za-z0-9_.-]+|/Users/[A-Za-z0-9_.-]+"),
     "ssh_material": re.compile(r"ssh\s+-i\s+\S+|\.ssh/[A-Za-z0-9_.-]+\.key|[A-Za-z0-9_.-]+@(?:[0-9]{1,3}\.){3}[0-9]{1,3}"),
     "credential_assignment": re.compile(r"(?i)(api[_-]?key|access[_-]?token|secret[_-]?key|password|authorization)\s*[:=]\s*[A-Za-z0-9._~+/-]{12,}"),
-    "email_like": re.compile(r"\b[A-Za-z0-9._%+-]+@(?!example\.(?:com|org|net|invalid)|[A-Za-z0-9.-]+\.(?:example|invalid|test))[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
+    "email_like": re.compile(r"\b[A-Za-z0-9._%+-]+@(?i:(?!example\.(?:com|org|net|invalid)|[A-Za-z0-9.-]+\.(?:example|invalid|test)))[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
 }
 
 CREDENTIAL_RULES = {

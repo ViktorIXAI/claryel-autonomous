@@ -4,6 +4,7 @@ import importlib.util
 import os
 import sys
 
+os.environ["STRATA_CHECKER_INJECT"] = "1"  # historical behaviour test (OFF by default since 0.0.2.14, issue #15)
 os.environ["PARB_GATE_VERSION"] = "v2.2"
 BASE = os.path.dirname(os.path.abspath(__file__))
 
