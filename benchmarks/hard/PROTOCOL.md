@@ -38,3 +38,13 @@ Dedup guard and position/line-count assertions run inside the builder (must exit
 - Keyword injection: `STRATA_CHECKER_INJECT` default OFF (`gate_v35_inject_off_test.py`).
 - Dedup: `scripts/dedup_hard_bank.py` on `bank-hard.json`.
 
+
+## Freeze rule enforcement (issue #15, Hermes)
+
+The official hard-v5 gate remains: bank-hard.json (sha16 32953591ba2a6c51) + parb_check.py
+(1c032ef022607d7b) + parb_loop.py (f5f5b78ab46a0f0c), byte-identical to the v5 audit tree.
+A parallel draft redesigned these files in place (v5 rewording + reworked G/H/F/D checkers);
+that work is preserved as `harness/parb_check_draft.py` for discussion, NOT as the frozen
+gate: issue #15 requires v5 unchanged as history and v6 as a new bank. v6 = `bank-hard-v6.json`
++ `harness/parb_check_v6.py` (77 unique templates, gold self-test 77/77, MANIFEST.sha256).
+Reviewers: dispute this split on issue #15 rather than by in-place edits.

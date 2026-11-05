@@ -1,0 +1,77 @@
+{"id": "A-ex-00-0", "cat": "A", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "A-ex-01-0", "cat": "A", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "A-ex-02-0", "cat": "A", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "A-ex-03-0", "cat": "A", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "B-ex-00-0", "cat": "B", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "B-ex-01-0", "cat": "B", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "B-ex-02-0", "cat": "B", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "B-ex-03-0", "cat": "B", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "C-ex-00-0", "cat": "C", "verdict": "VALID", "rationale": "", "flags": ["position_leak_leading_letters"]}
+{"id": "C-ex-01-0", "cat": "C", "verdict": "VALID", "rationale": "", "flags": ["position_leak_leading_letters"]}
+{"id": "C-ex-02-0", "cat": "C", "verdict": "VALID", "rationale": "", "flags": ["position_leak_leading_letters"]}
+{"id": "C-ex-03-0", "cat": "C", "verdict": "VALID", "rationale": "", "flags": ["position_leak_leading_letters"]}
+{"id": "C-ex-04-0", "cat": "C", "verdict": "VALID", "rationale": "", "flags": ["position_leak_leading_letters"]}
+{"id": "C-ex-05-0", "cat": "C", "verdict": "VALID", "rationale": "", "flags": ["position_leak_leading_letters"]}
+{"id": "D-ex-00-0", "cat": "D", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "D-ex-00-1", "cat": "D", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "D-ex-00-2", "cat": "D", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "D-ex-01-0", "cat": "D", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 2 ids", "flags": []}
+{"id": "D-ex-01-1", "cat": "D", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "D-ex-01-2", "cat": "D", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "D-ex-02-0", "cat": "D", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 2 ids", "flags": []}
+{"id": "D-ex-02-1", "cat": "D", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "D-ex-02-2", "cat": "D", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "E-ex-00-0", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-00-1", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 2 ids", "flags": []}
+{"id": "E-ex-00-2", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "E-ex-00-3", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-00-4", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "E-ex-01-0", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-01-1", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-01-2", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-01-3", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-01-4", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-02-0", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 2 ids", "flags": []}
+{"id": "E-ex-02-1", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "E-ex-02-2", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "E-ex-02-3", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-02-4", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-03-0", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-03-1", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-03-2", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-03-3", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-03-4", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-04-0", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-04-1", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-04-2", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-04-3", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "E-ex-04-4", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-05-0", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "E-ex-05-1", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "E-ex-05-2", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-05-3", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 5 ids", "flags": []}
+{"id": "E-ex-05-4", "cat": "E", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 4 ids", "flags": []}
+{"id": "F-ex-00-0", "cat": "F", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "F-ex-01-0", "cat": "F", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "F-ex-02-0", "cat": "F", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "G-ex-00-0", "cat": "G", "verdict": "VALID", "rationale": "", "flags": ["raw_arm_input_parity_unproven_assembled_doc_not_archived"]}
+{"id": "G-ex-01-0", "cat": "G", "verdict": "VALID", "rationale": "", "flags": ["raw_arm_input_parity_unproven_assembled_doc_not_archived"]}
+{"id": "G-ex-02-0", "cat": "G", "verdict": "VALID", "rationale": "", "flags": ["raw_arm_input_parity_unproven_assembled_doc_not_archived"]}
+{"id": "G-ex-03-0", "cat": "G", "verdict": "VALID", "rationale": "", "flags": ["raw_arm_input_parity_unproven_assembled_doc_not_archived"]}
+{"id": "G-ex-04-0", "cat": "G", "verdict": "VALID", "rationale": "", "flags": ["raw_arm_input_parity_unproven_assembled_doc_not_archived"]}
+{"id": "G-ex-05-0", "cat": "G", "verdict": "VALID", "rationale": "", "flags": ["raw_arm_input_parity_unproven_assembled_doc_not_archived"]}
+{"id": "H-ex-00-0", "cat": "H", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "H-ex-01-0", "cat": "H", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "H-ex-02-0", "cat": "H", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "H-ex-03-0", "cat": "H", "verdict": "REPEATED_TEMPLATE", "rationale": "byte-identical prompt shared by 3 ids", "flags": []}
+{"id": "I-ex-00-0", "cat": "I", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "I-ex-01-0", "cat": "I", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "I-ex-02-0", "cat": "I", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "J-ex-00-0", "cat": "J", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "J-ex-01-0", "cat": "J", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "J-ex-02-0", "cat": "J", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "J-ex-03-0", "cat": "J", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "K-ex-00-0", "cat": "K", "verdict": "AMBIGUOUS", "rationale": "instruction says three lines but lists four fields", "flags": ["tax_field_not_stated_in_text"]}
+{"id": "K-ex-01-0", "cat": "K", "verdict": "AMBIGUOUS", "rationale": "instruction says three lines but lists four fields", "flags": []}
+{"id": "K-ex-02-0", "cat": "K", "verdict": "VALID", "rationale": "", "flags": []}
+{"id": "K-ex-03-0", "cat": "K", "verdict": "AMBIGUOUS", "rationale": "instruction says three lines but lists four fields", "flags": ["tax_field_not_stated_in_text"]}
