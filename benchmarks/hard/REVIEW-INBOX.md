@@ -830,3 +830,20 @@ every published pair-239 J row converts the six failing rows (4 × `skuB`-inclus
 with zero regressions. Pre-registered rule verbatim in `PAIR-239-V61.md` (chronic-target (a),
 evented-conversion + mis-derivation guard + inheritance-parity + no-A-fire (b), −2-cell bound (c));
 arms `m39r*` vs `m40r*` via `run_pair240.sh` under `parb-pair240.service`, same plans/seeds.
+
+CLOSED (20:10 CET): pair-240 measured 2.40 and the pre-registered rule held exactly. Chronic target
+live (`J-ex6-01` control `..P` — the same byte-identical `skuB`-violation draws as pair-239); 4
+v240 fires, all on strict-pass conversions (seeds 0/1 + the empty `J-ex6-06` draw + seed 2 where the
+model was already right and the rule restatement changed nothing), identical `ptok` 312/312/307/354
+and `calls=2` on every converted row. Mis-derivation guard: zero strict-pass regressions carry a
+2.40 event; the candidate's `J-ex6-03` loss carries `j_id_norm` only (formula — membership refused,
+never attempted). Inherited parity: `J-ex6-02` re-rank ×3 same conversions both sides,
+`v235_b_table_total` ×3 both sides, zero `v233_a_tariff_table` fires in six ledgers. Arm means
+64.3/64.3 (+0.0 — sub-floor, not the reason; per-seed 3W/1L, 2W/4L, 1W/1L lottery moves both ways).
+Energy matched-inside-noise (6.20/5.35/5.13 vs 4.86/4.71/5.61 Wh); rescore from published sanitized
+bytes: 30 joins, 0 blanks, 0 mismatches; loop rows ship `_loop_rows`. **ADOPTED as the control
+line** (`PAIR-240-V61.md`, decision record of the same date). Nothing was fixed for `C-ex6-02` or
+`K-ex6-03` — bank defects, unchanged. Next candidate (pair-241) is gated by a dry-run: A-table
+grammar v2 over chronic `A-ex6-03` (0/6 in both arms) — register only if published-bytes replay
+converts every loss with zero other A-row verdict changes; otherwise the class is grammar-capped
+and no pair launches.

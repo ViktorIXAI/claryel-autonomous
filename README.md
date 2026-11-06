@@ -24,7 +24,7 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.39` — ADOPTED on 2026-11-06 after pair-239 (harness stamps are `0.0.2.x`; full
+Contour gate line: `0.0.2.40` — ADOPTED on 2026-11-06 after pair-240 (harness stamps are `0.0.2.x`; full
 history in `versions/VERSIONS.md` and `benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31`
 measured **negative** against the former adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured
 **+1.3 cells — below the ~2-cell noise floor, NOT adopted** (`PAIR-232-V61.md`; `PAIR-233-V61.md` — 2.33
@@ -61,8 +61,16 @@ carrying the event, B repair identical, A pin intact: `0.0.2.39` is ADOPTED as t
 (arm mean +1.0, published below the ~2-cell floor by construction; `PAIR-239-V61.md`; decision record
 `history/agent-decisions/2026-11-06-pair239-j-grammar-v2-adopted-line-moves-to-239-and-240-launch.md`).
 `0.0.2.40` (J **membership** re-derivation from the prompt's own filter/top-K rule, the chronic
-`J-ex6-01`/`J-ex6-06` `id_set_mismatch` class this pair surfaced) is pre-registered in
-`PAIR-239-V61.md` and measured by pair-240 (`m39r*` vs `m40r*`). The same pair logged `C-ex6-02` as a
+`J-ex6-01`/`J-ex6-06` `id_set_mismatch` class that pair surfaced) was pre-registered in
+`PAIR-239-V61.md` and measured by pair-240 (`m39r*` vs `m40r*`), which **passed its pre-registered
+rule exactly — chronic `J-ex6-01` strict-failed 2/3 control seeds and the candidate passed all three
+with `contour:...v240_j_membership_from_prompt` at identical `ptok`/`calls`, `J-ex6-06` converted
+from an empty draw, zero strict-pass regressions anywhere carry a 2.40 event (the mis-derivation
+guard), the inherited re-rank and B repair fired identically, the A pin held — so `0.0.2.40` is
+ADOPTED as the new control line** (arm means 64.3 vs 64.3, +0.0 and never the reason;
+`PAIR-240-V61.md`; decision record
+`history/agent-decisions/2026-11-06-pair240-j-membership-adopted-line-moves-to-240.md`). The J pair
+logged `C-ex6-02` as a
 **bank defect** — its gold `want=['C']` contradicts the task text (three of the four bank snippets
 deterministically print `[1, 2, 3]`), so no contour mechanism chases that cell. Published arms
 on the current hard bank v6.1: `full-229` (contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs
@@ -106,7 +114,12 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   3/7 → 6/7, mis-sorts 0, published-bytes replay converting seven losses with zero regressions), is the
   one that **resolved**: pair-239's chronic target was live, the conversion was fully evented at zero
   added tokens, and it was ADOPTED (`PAIR-239-V61.md`) — while its arm mean, +1.0, is still reported as
-  below the floor and is not quoted as the reason. Resolution floor measured directly: the same
+  below the floor and is not quoted as the reason; a tenth candidate, 0.0.2.40 (J **membership**
+  re-derivation, coverage derives-gold 4/7 refuses 3/7, published-bytes replay converting 6 membership
+  + 3 re-rank rows with zero regressions), also **resolved**: its chronic target was live, the conversion
+  was fully evented at zero added tokens and the mis-derivation guard passed on all 231 paired cells, so
+  it was ADOPTED (`PAIR-240-V61.md`) on an arm mean of +0.0 that is explicitly not the reason. Resolution
+  floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per

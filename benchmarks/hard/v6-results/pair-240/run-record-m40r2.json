@@ -1,0 +1,27 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "[REDACTED]",
+  "contour_version": "0.0.2.40",
+  "contour_behavior": "2.40",
+  "contour_changed_at_this_release": true,
+  "git_sha": "",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "paired contour 0.0.2.40 seed 2 on bank v6.1 (2.40 re-derives J membership from the prompt rule when the full rule parses; control 0.0.2.39, the adopted line; 2.30-2.34/2.36/2.38 frozen, A arithmetic pinned out) "
+}

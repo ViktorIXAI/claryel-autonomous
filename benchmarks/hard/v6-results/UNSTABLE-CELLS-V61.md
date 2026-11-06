@@ -155,3 +155,30 @@ Two class changes come out of this pair:
   chain; `Отбрось score<70`) — `0.0.2.40` re-derives the id set from those segments (same fail-closed
   grammar discipline as v2, membership changed ONLY when every segment parses), pre-registered in
   `PAIR-239-V61.md` before any `m*` row.
+
+## Addendum (20:10 CET): pair-240 adopts 0.0.2.40; group 2 (J) is fully closed on the line; what stays open
+
+`pair-240/` (`m39r*` vs `m40r*`, three matched seeds, control = the adopted `0.0.2.39`): the membership
+re-derivation passed its pre-registered rule exactly — chronic `J-ex6-01` failed seeds 0-1 in the
+control with the published `["skuC","skuB"]` draw and passed 3/3 in the candidate, every conversion
+carrying `contour:...v240_j_membership_from_prompt` at identical `ptok`/`calls` (4 fires, zero added
+tokens); `J-ex6-06` converted from the empty seed-0 draw; zero strict-pass regressions carry a 2.40
+event across all 231 paired cells (the losing `J-ex6-03` seed carries `j_id_norm` only — the formula
+rule was never re-derived); inherited re-rank ×3 and B repair ×3 identical, A pin intact —
+**`0.0.2.40` ADOPTED** (`PAIR-240-V61.md`). Map deltas:
+
+- `J-ex6-01` 1/3 → 3/3 and `J-ex6-06` 2/3 → 3/3 on the line: **group 2 fully closed** (order 2.39,
+  membership 2.40). `J-ex6-03` stays a content lottery outside the grammar (formula rule refuses) —
+  no action, and the map's own ban on re-measuring frozen classes applies to any J re-landing.
+- Group 1 (`C-ex6-00/01/03`) remains the only live content class: per-option set lotteries, no
+  deterministic grammar proven; a future mechanism must ground per-option against the task text —
+  selection voting (frozen 2.31) must not be re-chased.
+- The chronic stable fails after this pair: `A-ex6-03` 0/6 again in both arms
+  (`fields_mismatch:net,social,tax`) and `B-ex6-04` 0/6 (`fields_mismatch:start_date,...`), both
+  outside the proven grammars (A arithmetic coverage reproduces only `A-ex6-00`; the 2.34 B-field
+  mechanism measured negative and stays frozen at its stamp). The pair-241 dry-run gate: extend the
+  A tariff-table grammar to `A-ex6-03` ONLY if a published-bytes replay converts every `A-ex6-03`
+  loss and changes no other published A-row verdict; otherwise the class is reported grammar-capped
+  and no pair launches.
+- `C-ex6-02` and `K-ex6-03` stay bank defects (owner-commanded clarification pending), never a
+  contour target.
