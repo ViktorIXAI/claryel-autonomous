@@ -24,8 +24,10 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.29` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
-`benchmarks/hard/v6-results/LADDER.md`). Published arms on the current hard bank v6.1: `full-229`
+Contour gate line: `0.0.2.30` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
+`benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` was measured against `0.0.2.29` on three paired seeds and
+came out **negative** (mean 60.3 → 59.0, unstable cells 8 → 12; see `PAIR-230-V61.md`), so every headline
+number below is from `0.0.2.29`, the adopted stamp. Published arms on the current hard bank v6.1: `full-229`
 (contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs the same local model without contour).
 
 ## Headline results

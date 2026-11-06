@@ -497,3 +497,29 @@ Running now: paired contour arms on bank v6.1 (`parb-pair230`) — 0.0.2.29 vs 0
 seeds each, arms alternating per seed. The claim under test is per-cell stability (coin flips -> stable
 pass), not just the mean. Energy windows are recorded per run (`<rid>-start.epoch`/`-end.epoch`) with the
 GPU sampler still active.
+
+## 06.11 06:45 CET — correction and a published negative result
+
+Two things that had to be said out loud.
+
+**The stability map's cause column was wrong.** The first version of `scripts/unstable_cells_v61.py` read
+answer bytes from the ledger, which does not carry them (they live in the sibling `results-*.jsonl`, and the
+event column is `events`, not `contour_events`). It therefore re-scored empty strings and produced
+`no_json`/`no_list`/`no_answer_line` for 12 of 14 unstable cells. Re-run against the real bytes: **zero**
+parse collapses. The real losing-seed reasons are `set_mismatch`/`id_set_mismatch` (4 cells),
+`order_partial` (2), `fields_mismatch`/`missing:` (4), `unknown_missing`/`requires_missing`/`avoid` (4). The
+pass/fail pattern (52 stable pass, 5 stable fail, 14 coin flips) stands, because it came from the ledger's
+own score columns. `UNSTABLE-CELLS-V61.md` now carries both the corrected table and the correction section;
+the script refuses to run at all if the results join is missing or >5% of answers are blank.
+
+**Contour 0.0.2.30 does not work and is recorded as such.** Paired arms on three identical seeds
+(`pair-230/`, six runs, ledgers + answer rows + logs + run records + energy windows published): mean
+60.3 → 59.0, sign tests 0W/1L, 3W/4L, 2W/4L, unstable cells 8 → 12. The gate is live (fired on 9/231 rows)
+but its category heuristic asked category A for a JSON object when the contract is `FIELD: value` lines, so
+it replaced a passing answer with a fresh sample: `A-ex6-07` 3/3 → 0/3. Not adopted. Any retry must read the
+required shape from the task text and never replace an answer the frozen scorer can already parse.
+
+Headline contour numbers are unchanged: 0.0.2.29, six seeds 53/52/50/55/53/51 (mean 52.3 on 61 common
+cells), +12.0 cells vs ChatGPT (CI +4.3..+19.8), +8.3 vs Grok (CI +1.8..+15.0), +5.9 vs bare basalt
+(CI −0.5..+12.5 — still unresolved). Decision record:
+`history/agent-decisions/2026-11-06-contract-guarantee-negative-result.md`.

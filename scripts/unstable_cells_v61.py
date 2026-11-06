@@ -47,20 +47,40 @@ def main() -> int:
     answers = {}
     events = {}
     per = collections.defaultdict(dict)   # task -> rep -> bool
+    missing_answers = []
     for p in ledgers:
+        # The ledger row does not carry the answer text: the answer bytes live in the sibling results
+        # file, keyed by task+rep. A ledger-only reason string would score an empty string and invent a
+        # parse-collapse diagnosis out of nothing (this script did exactly that in its first version).
+        rp = p.replace("ledger-", "results-")
+        if not os.path.exists(rp):
+            missing_answers.append(os.path.basename(p))
+            continue
+        raw = {}
+        for line in open(rp, encoding="utf-8"):
+            q = json.loads(line)
+            raw[(q["task"], str(q.get("rep")))] = q.get("answer") or q.get("text") or ""
         for line in open(p, encoding="utf-8"):
             r = json.loads(line)
             if "_loop_rows" in r or r["task"] in loop:
                 continue
             rep = str(r.get("rep"))
             per[r["task"]][rep] = strict(r.get("content") or 0, r.get("format_ok"))
-            answers[(r["task"], rep)] = r.get("answer") or ""
-            events[(r["task"], rep)] = r.get("contour_events") or []
+            answers[(r["task"], rep)] = raw.get((r["task"], rep), "")
+            events[(r["task"], rep)] = r.get("events") or []
+    if missing_answers:
+        raise SystemExit("refusing to analyse: no sibling results file for %s — an empty answer string "
+                         "would fabricate a parse-collapse diagnosis (this happened once; see the "
+                         "correction section it produced)" % ", ".join(missing_answers))
+    blank = sum(1 for v in answers.values() if not v.strip())
+    if blank > 0.05 * len(answers):
+        raise SystemExit("refusing to analyse: %d/%d answers came back blank from the results file; the "
+                         "join key (task, rep) or the file layout changed" % (blank, len(answers)))
     reps = sorted({rep for d in per.values() for rep in d})
     print("# Contour cell stability across %d seeds (stamp 0.0.2.29, bank v6.1)" % len(reps))
     print()
-    print("Ledgers: %s. Reason strings are recomputed from the published answer bytes with the frozen "
-          "scorer; contour events come from the same ledger rows." % ", ".join(
+    print("Ledgers: %s. Reason strings are recomputed with the frozen scorer from the answer bytes in the"
+          " sibling results file; contour events are read from the ledger `events` column." % ", ".join(
               os.path.basename(p) for p in ledgers))
     print()
     stable_pass, stable_fail, unstable = [], [], []
