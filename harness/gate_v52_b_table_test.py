@@ -233,5 +233,17 @@ got, ev = g234b.b_table_aggregate(bank["B-ex6-06"], '{"available_total": 30, "w2
 ck(ev is None and got == '{"available_total": 30, "w2_available": 30}',
    "0.0.2.34 must not run the 2.35 table repair")
 
+# 0.0.2.37 re-lands the repair (PAIR-236 decision): the gate must be ON at 2.37 and produce the exact
+# same evented transformation as at 2.35, and the 2.36 lottery must stay frozen OUT at 2.37.
+g237 = load("0.0.2.37")
+ck(g237.B_TABLE_AGGREGATE and not g237.G4_LOTTERY and not g237.B_FIELD_COMPLETE,
+   "2.37 re-adopts the table repair only; the measured-negative 2.36 lottery stays frozen to 2.36")
+new37, ev37 = g237.b_table_aggregate(SYN, '{"crates_total": 25, "d2_ok": 11}')
+ck(ev37 == ["v235_b_table_total:crates_total"] and json.loads(new37)["crates_total"] == 36,
+   "the re-landed grammar must repair the synthetic total identically at 2.37: %r %r" % (new37, ev37))
+got37, ev37 = g237.b_table_aggregate(bank["B-ex6-06"], '{"available_total": 30, "w2_available": 30}')
+ck(ev37 and "v235_b_table_total" in "".join(ev37),
+   "the bank target cell must be repaired at 2.37 with its mechanism event: %r" % (ev37,))
+
 print("gate_v52_b_table_test: ALL PASS (%d checks) | B table coverage %d/%d B tasks (fires on B-ex6-06 only)"
       % (CHECKS, 1, len([k for k in bank if bank[k]["cat"] == "B"])))

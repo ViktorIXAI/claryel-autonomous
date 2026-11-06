@@ -15,6 +15,10 @@ behaviour stays available only at the exact stamp where it was measured, so that
 REJECTED_FEATURES = {
     "contract_shape_guarantee": (2, 30),
     "selfconsistency_vote": (2, 31),
+    # 0.0.2.36 group-4 lottery selection measured pair-236 (PAIR-236-V61.md): 6 fires across three paired
+    # seeds, ZERO converted scoreboard cells; the H class turned out content-BIASED (every strict re-sample
+    # omits the same component — the 2.31 failure mode), and the arm mean was −1.0. Frozen to its own stamp.
+    "g4_lottery_selection": (2, 36),
 }
 
 # 0.0.2.32 / 0.0.2.33 measured UNRESOLVABLE on bank v6.1 (+1.3 cells each, below the ~2-cell floor of the
@@ -39,5 +43,9 @@ UNADOPTED_FEATURES = {
     # arm-level claim did not resolve above noise, and the pre-registered decision rule freezes the
     # stamp. Adoption is withheld as a LINE decision, not a mechanism verdict: the repair stays
     # reproducible at stamp 0.0.2.35 and re-adoption is a one-flag owner call (`PAIR-235-V61.md`).
+    # RE-LANDED from 0.0.2.37 as that stamp's single candidate change (PAIR-236 decision): the entry above
+    # still freezes the 2.35 measurement to 2.35; 2.37 re-enables the gate explicitly (gate_run
+    # `B_TABLE_AGGREGATE = CONTOUR_REVISION == (2, 35) or contour_at_least(2, 37)`) under the pre-registered
+    # pair-237 rule. If pair-237 does not hold the clean pattern, the flag freezes again at 2.37.
     "b_table_aggregate": (2, 35),
 }

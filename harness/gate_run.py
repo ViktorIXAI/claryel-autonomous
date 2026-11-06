@@ -1406,7 +1406,13 @@ B_FIELD_COMPLETE = CONTOUR_REVISION == (2, 34)
 # ~2-cell resolution floor of this comparison, and four off-target cells flipped with no 2.35 event on
 # them, so the pre-registered clean pattern (exactly one cell flips, carrying its event) did NOT hold.
 # NOT adopted; frozen to its own stamp like 2.32-2.34 so no later candidate silently inherits it.
-B_TABLE_AGGREGATE = CONTOUR_REVISION == (2, 35)
+# UPDATE 0.0.2.37 (PAIR-236 decision): the MECHANISM is the only one in the series with a deterministic,
+# fully evented cell conversion (B-ex6-06 chronic 0/9 -> 3/3, zero model tokens); the 2.35 LINE freeze came
+# from event-less neighbours flipping at the mean floor. pair-236 then measured the competing group-4
+# lottery at −1.0 with zero conversions, so 2.37 re-lands the table repair as the candidate change under a
+# stricter all-or-nothing attribution rule (every converted row must carry the mechanism event, no other
+# mechanism event may appear). The 2.35 arm keeps its own measurement byte-identically.
+B_TABLE_AGGREGATE = CONTOUR_REVISION == (2, 35) or contour_at_least(2, 37)
 # 0.0.2.36: group-4 lottery selection. UNSTABLE-CELLS-V61 group 4 — `unknown_missing`,
 # `requires_missing:<field>` on H and `avoid` on F — is the newest live failure class, and every cell
 # in it is a seed lottery (4/6-5/6 pass at identical seeds), the class this project's probe doctrine
@@ -1416,7 +1422,13 @@ B_TABLE_AGGREGATE = CONTOUR_REVISION == (2, 35)
 # is never read. Parameterized note names (`requires_missing:<field>`) are prefix-matched — the 2.11
 # lesson: a parameterized note never equals its bare name. Stamps below 2.36 keep the exact pre-2.36
 # H predicate, so the adopted 2.29 line is byte-identical.
-G4_LOTTERY = contour_at_least(2, 36)
+# MEASURED (PAIR-236-V61.md, three paired seeds vs 0.0.2.29): fired 6 times (H-ex6-01 x3, H-ex6-03 x1,
+# F-ex6-00 x2), converted ZERO scoreboard cells. The F strict-best wins raised only an already-3/3-passing
+# cell; on the H class the re-sample never beat the first draw — the extra sample omits the same component,
+# i.e. these are content-BIASED draws (the 0.0.2.31 failure mode), not variance, so selection cannot fix
+# them. Arm mean −1.0 (62.0 vs 63.0), inside the noise band and negative. NOT adopted: frozen to exactly
+# this stamp — contour_at_least would smuggle a measured-negative lottery into every future arm.
+G4_LOTTERY = CONTOUR_REVISION == (2, 36)
 G4_H_NOTES = ("unknown_missing", "requires_missing")
 G4_F_NOTES = ("avoid",)
 G4_F_SEED_OFFSET = 5501

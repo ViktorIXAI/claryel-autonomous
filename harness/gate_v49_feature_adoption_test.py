@@ -84,6 +84,14 @@ ck(not g236.CONTRACT_GUARANTEE and not g236.SELFCONSIST and not g236.J_RERANK an
    and not g236.B_FIELD_COMPLETE and not g236.B_TABLE_AGGREGATE and g236.G4_LOTTERY,
    "2.36 does NOT inherit the pair-235-unadopted 2.35 table repair and adds only the group-4 "
    "lottery selection: confirmed-on-target but arm-unresolved stays frozen to its own stamp")
+g237 = load("0.0.2.37")
+ck(not g237.CONTRACT_GUARANTEE and not g237.SELFCONSIST and not g237.J_RERANK and not g237.A_TABLE_ARITH
+   and not g237.B_FIELD_COMPLETE and not g237.G4_LOTTERY and g237.B_TABLE_AGGREGATE,
+   "2.37 inherits adopted behaviour plus the RE-LANDED B table repair only: the pair-236-measured-negative "
+   "group-4 lottery is frozen to exactly 2.36 and must not ride into 2.37 or any later stamp")
+g236b = load("0.0.2.36")
+ck(not g236b.B_TABLE_AGGREGATE and g236b.G4_LOTTERY,
+   "the 2.37 re-adoption must not rewrite history: 2.36 still runs the lottery and NOT the table repair")
 
 bank = json.load(open(str(HERE.parent / "benchmarks" / "hard" / "bank-hard-v6.json"), encoding="utf-8"))
 import gate_j_rerank as JR
