@@ -65,3 +65,15 @@ H-ex6-01/H-ex6-04 flipped again — group 3 (`fields_mismatch`/`missing`) and gr
 states a threshold table (1 of 9 A prompts); group 3's B cells are taken by 0.0.2.34 (B field
 completeness, `gate_v51_b_fields_test.py`), and K stays open until the bank states its value shapes.
 No group's diagnosis changed.
+
+## Addendum (15:25 CET): pair-235 adds three more 0.0.2.29 seeds and three of 0.0.2.35
+
+`pair-235/` control arms (`h29r*`) add seeds 0-2 of the adopted stamp: `B-ex6-06` fails all three
+(note `fields_mismatch:available_total`), now 0/9 across both maps — chronic, and the 2.35 grammar
+converts it 3/3 with its own event at stamp `0.0.2.35` (see `PAIR-235-V61.md`; the stamp itself is not
+adopted because the arm mean stayed at the noise floor). Group 4 stays live: `F-ex6-00` flips again
+(1/3 vs 2/3) with the `avoid` note on every failing seed **in both arms**, while H-ex6-00/01/03
+stable-passed all six pair-235 seeds — the 6-seed map keeps them at 5/6, so H lottery draws are rarer
+than F's. Group 3's A cells flipped again in this pair (`A-ex6-00` 2/3→3/3, `A-ex6-08` 1/3→3/3, both
+event-less — pure resampling, no mechanism credited). 0.0.2.36 (group-4 selection) is launched against
+`0.0.2.29` on exactly this class.
