@@ -1371,7 +1371,14 @@ CONTOUR_REVISION = tuple(int(x) for x in CONTOUR_BEHAVIOR.split("."))
 CONTRACT_GUARANTEE = CONTOUR_REVISION == (2, 30)
 SELFCONSIST = CONTOUR_REVISION == (2, 31)
 SELFCONSIST_CATS = ("C", "J")
-J_RERANK = contour_at_least(2, 32)
+# 0.0.2.32 (J re-rank from the prompt table) measured +1.3 cells mean at three seeds — BELOW the measured
+# noise floor (~2 cells; 12 of 231 same-stamp cells flip, PAIR-232-V61.md). The mechanism is on-target
+# (fired once, fixed exactly its class, zero extra model calls, zero mis-sorts) but the headline delta is
+# unresolvable, so it is NOT adopted: it stays enabled only at its own stamp and must not ride into 2.33+.
+J_RERANK = CONTOUR_REVISION == (2, 32)
+# 0.0.2.33: A threshold-table arithmetic (tariff chains), the adopted 2.27 family extended to the
+# fields_mismatch cluster that the corrected stability map names for A (PAIR UNSTABLE-CELLS group 3).
+A_TABLE_ARITH = contour_at_least(2, 33)
 _SC_CONST = 20261106
 
 
@@ -1918,6 +1925,92 @@ def _a_round2(x):
     return float(Decimal(str(x)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
+_A_TARIFF_HEAD = re.compile(r"(?:[ТтTт]ариф)\s*:")
+_A_TARIFF_COND = re.compile(
+    r"\s*([A-Za-zА-Яа-яЁё_]+)\s*(>=|<=|>|<)\s*([0-9]+(?:\.[0-9]+)?)\s*([A-Za-zА-Яа-яЁё]*)\s*$")
+
+
+def _a_attr_match(var, attrs):
+    """Chain variable 'габарит' for row attribute 'габариты': prefix match, unique or refuse."""
+    if var in attrs:
+        return var
+    cands = [a for a in attrs if len(var) >= 3 and a.startswith(var)]
+    return cands[0] if len(cands) == 1 else None
+
+
+def _a_tariff_table(prompt):
+    """Parse (map_key, total_key, rows, chain, tail) from the task's own text; None = refuse.
+
+    Grammar: a rule line «Тариф: N if var OP number[unit] [и cond], ..., иначе T.» plus data rows
+    «id=X var=Nunit ...» plus an output skeleton «{"m": {id: word}}, {"t": word}». Every number comes
+    from the prompt; the reference is never read. Anything outside this grammar returns None.
+    """
+    if not _A_TARIFF_HEAD.search(prompt):
+        return None
+    sk = re.search(r'\{\s*"(\w+)"\s*:\s*\{\s*id\s*:\s*[^{}]+\}\s*\}\s*,\s*\{\s*"(\w+)"\s*:', prompt)
+    if not sk:
+        return None
+    mapkey, totalkey = sk.group(1), sk.group(2)
+    rest = _A_TARIFF_HEAD.split(prompt, 1)[1]
+    pos = rest.find("id=")
+    rule_line = rest if pos < 0 else rest[:pos]
+    parts = re.split(r",\s*(?:иначе|else)\s*", rule_line)
+    if len(parts) < 2:
+        return None
+    tail = re.match(r"\s*([0-9]+(?:\.[0-9]+)?)\s*(?:\.(?:\s|$)|$)", parts[-1])
+    if not tail:
+        return None
+    chain = []
+    for p in parts[:-1]:
+        m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*(?:если|if)\s+(.+?)\s*$", p)
+        if not m:
+            return None
+        conds = []
+        for c in re.split(r"\s+и\s+", m.group(2)):
+            pc = _A_TARIFF_COND.match(c)
+            if not pc:
+                return None
+            conds.append(pc.groups())
+        chain.append((float(m.group(1)), conds))
+    rows = {}
+    for rm in re.finditer(
+            r"id\s*=\s*([A-Za-z0-9._-]+)((?:\s+[A-Za-zА-Яа-яЁё_]+\s*=\s*[0-9.]+\s*[A-Za-zА-Яа-яЁё]*)+)",
+            prompt):
+        attrs = {}
+        for nm, num, unit in re.findall(
+                r"([A-Za-zА-Яа-яЁё_]+)\s*=\s*([0-9]+(?:\.[0-9]+)?)\s*([A-Za-zА-Яа-яЁё]*)", rm.group(2)):
+            if nm in attrs:
+                return None
+            attrs[nm] = (float(num), unit)
+        if not attrs or rm.group(1) in rows:
+            return None
+        rows[rm.group(1)] = attrs
+    if not rows:
+        return None
+    return mapkey, totalkey, rows, chain, float(tail.group(1))
+
+
+def _a_tariff_eval(chain, tail, attrs):
+    """First matching segment of the chain wins; None when a condition variable is ambiguous."""
+    for value, conds in chain:
+        holds = True
+        for var, op, num, unit in conds:
+            a = _a_attr_match(var, attrs)
+            if a is None:
+                return None
+            av, aunit = attrs[a]
+            if unit and aunit and unit != aunit:
+                return None
+            nv = float(num)
+            holds = holds and ((av >= nv) if op == ">=" else (av > nv) if op == ">"
+                               else (av <= nv) if op == "<=" else (av < nv))
+            if not holds:
+                break
+        if holds:
+            return value
+    return tail
+
+
 def a_arith_by_code(t, text):
     """v2.27: recompute A JSON from the prompt's own numbers (keyword-free)."""
     if not A_ARITH_CODE or not text:
@@ -1996,6 +2089,40 @@ def a_arith_by_code(t, text):
                 med = s[mid] if len(s) % 2 else _a_round2((s[mid - 1] + s[mid]) / 2.0)
                 out = {"trimmed_mean": mean, "median_original": med}
                 tag = "a_trimmed_mean"
+    # 0.0.2.33: threshold-table tariff chain (A-ex6-00 class). The model's own map keys must be exactly the
+    # prompt's row ids; only then are the map values and the total recomputed by code from the prompt's
+    # table. Ambiguous grammar, extra/missing keys, unknown units or variables: refuse, touch nothing.
+    if out is None and A_TABLE_ARITH:
+        parsed = _a_tariff_table(prompt)
+        if parsed:
+            mapkey, totalkey, rows_by_id, chain, tail = parsed
+            cur = _fmt_parse(text)
+            if (isinstance(cur, dict) and set(cur) == {mapkey, totalkey}
+                    and isinstance(cur[mapkey], dict)
+                    and set(cur[mapkey]) == set(rows_by_id)):
+                vals, ok = {}, True
+                for rid in rows_by_id:
+                    v = _a_tariff_eval(chain, tail, rows_by_id[rid])
+                    if v is None:
+                        ok = False
+                        break
+                    vals[rid] = v
+                if ok:
+                    total = sum(vals.values())
+
+                    def _num_eq(a, b):
+                        try:
+                            return abs(float(a) - float(b)) < 1e-9
+                        except (TypeError, ValueError):
+                            return False
+
+                    if (all(_num_eq(cur[mapkey][rid], vals[rid]) for rid in cur[mapkey])
+                            and _num_eq(cur[totalkey], total)):
+                        return text, None
+                    out = {mapkey: {rid: (int(vals[rid]) if float(vals[rid]).is_integer() else vals[rid])
+                                    for rid in cur[mapkey]},
+                           totalkey: int(total) if float(total).is_integer() else total}
+                    tag = "a_tariff_table"
     if out is None:
         return text, None
     cur = _fmt_parse(text)
@@ -2011,7 +2138,9 @@ def a_arith_by_code(t, text):
                 same = False; break
         if same and set(out) <= set(cur):
             return text, None
-    return json.dumps(out, ensure_ascii=False), [tag or "a_arith_code"]
+    _stamps = {"a_tariff_table": "v233_"}  # per-tag stamp: legacy 2.27 branches keep the v227 event
+    return (json.dumps(out, ensure_ascii=False),
+            [_stamps.get(tag or "", "v227_") + (tag or "a_arith_code")])
 
 
 def h_requires_from_prompt(t, text):
@@ -2377,7 +2506,7 @@ def run_one(t, pos, done, st):
             r = dict(r)
             r["text"] = norm
             rec["answer"] = norm
-            acct.ev("contour", "v227_" + "_".join(ev))
+            acct.ev("contour", "_".join(ev))
     if H_REQUIRES_PROMPT and cat == "H" and r["text"]:
         norm, ev = h_requires_from_prompt(t, r["text"])
         if ev:
@@ -2511,7 +2640,7 @@ def run_one(t, pos, done, st):
                             r = dict(r)
                             r["text"] = norm
                             rec["answer"] = norm
-                            acct.ev("contour", "v227_" + "_".join(ev))
+                            acct.ev("contour", "_".join(ev))
                     if H_REQUIRES_PROMPT and cat == "H" and r["text"]:
                         norm, ev = h_requires_from_prompt(t, r["text"])
                         if ev:

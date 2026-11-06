@@ -16,3 +16,11 @@ REJECTED_FEATURES = {
     "contract_shape_guarantee": (2, 30),
     "selfconsistency_vote": (2, 31),
 }
+
+# Measured UNRESOLVABLE (not negative, but not proven): 0.0.2.32 J re-rank moved the mean +1.3 cells over
+# three seeds — below the ~2-cell noise floor of the same comparison (PAIR-232-V61.md). The rule is that a
+# behaviour only inherits into later stamps if its measurement resolved it. Not adopted means not inherited:
+# the re-rank stays enabled at stamp 2.32 alone, exactly like a rejected feature.
+UNADOPTED_FEATURES = {
+    "j_prompt_rerank": (2, 32),
+}

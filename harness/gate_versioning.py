@@ -74,7 +74,8 @@ CONTOUR_FEATURES = (
     (2, 29),  # C coverage_choice contract: option letters read from the task text, answer line built from the model's own verdicts
     (2, 30),  # contract guarantee: an answer with no parseable artifact gets one shape-only re-ask, then deterministic salvage of the model's own text (MEASURED NEGATIVE on bank v6.1, see PAIR-230-V61.md)
     (2, 31),  # self-consistency vote for set/order answers (C letters, J id lists): two extra samples of the same task, the plurality answer wins, no scorer and no reference consulted (MEASURED NEGATIVE on bank v6.1, see PAIR-231-V61.md: the model is biased on these cells, so voting amplifies its own mistake; frozen to this stamp)
-    (2, 32),  # J ranking repair: the answer's id order re-derived from the (id, value) table and direction phrase already in the prompt; deterministic, zero model tokens, no reference read, permutation-only over the ids the model listed, refused whenever the rule grammar is unsure
+    (2, 32),  # J ranking repair: the answer's id order re-derived from the (id, value) table and direction phrase already in the prompt; deterministic, zero model tokens, no reference read, permutation-only over the ids the model listed, refused whenever the rule grammar is unsure (MEASURED +1.3 cells at three seeds, BELOW the ~2-cell noise floor: on-target but unresolvable, NOT adopted, frozen to this stamp, see PAIR-232-V61.md)
+    (2, 33),  # A threshold-table arithmetic: a tariff chain «N if var>=T [и var>=T], иначе X» plus «id=... var=Nunit» rows — the map values and the total are recomputed by code from the prompt's own table (the adopted 2.27 family); refuses on any ambiguity, membership of the model's own map keys must equal the prompt rows, reference never read
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -89,8 +90,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 32)
-CURRENT_STAMP = "0.0.2.32"
+CURRENT_REVISION = (2, 33)
+CURRENT_STAMP = "0.0.2.33"
 
 
 def _digits(value: str) -> list[int]:

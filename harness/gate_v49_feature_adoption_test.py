@@ -63,8 +63,11 @@ g231 = load("0.0.2.31")
 ck(not g231.CONTRACT_GUARANTEE and g231.SELFCONSIST and not g231.J_RERANK,
    "2.31 does not inherit the rejected 2.30 feature")
 g232 = load("0.0.2.32")
-ck(not g232.CONTRACT_GUARANTEE and not g232.SELFCONSIST and g232.J_RERANK,
+ck(not g232.CONTRACT_GUARANTEE and not g232.SELFCONSIST and g232.J_RERANK and not g232.A_TABLE_ARITH,
    "2.32 builds on adopted behaviour plus the J re-rank only")
+g233 = load("0.0.2.33")
+ck(not g233.CONTRACT_GUARANTEE and not g233.SELFCONSIST and not g233.J_RERANK and g233.A_TABLE_ARITH,
+   "2.33 does NOT inherit the unadopted 2.32 re-rank and adds only the threshold-table arithmetic")
 
 bank = json.load(open(str(HERE.parent / "benchmarks" / "hard" / "bank-hard-v6.json"), encoding="utf-8"))
 import gate_j_rerank as JR
@@ -93,5 +96,5 @@ loop = dict(t, mode="loop")
 out, ev = g232.post_normalize_answer("J", loop, "1. v5 2. v3")
 ck(out == "1. v5 2. v3" and not any("v232" in e for e in (ev or [])), "loop-D J answers are not re-ranked")
 
-print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank active from 2.32, covers %d/%d J tasks"
+print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank ONLY at 2.32 (not adopted), covers %d/%d J tasks"
       % (CHECKS, len(covered), len([x for x in bank if x["cat"] == "J"])))
