@@ -90,3 +90,23 @@ six pair-236 arms (the 2.35 grammar is frozen out of both) — now 0/12 across t
 confirmed, re-landed at `0.0.2.37` under the pre-registered rule in `PAIR-236-V61.md`. The event-less
 flip background of a bank pair (4 of 5 flips here: identical contour path and calls, different bytes)
 should be quoted with every arm-mean delta.
+
+## Addendum (16:55 CET): pair-237 adopts 0.0.2.37; group 3 now has live on-target cells and moves to 2.38
+
+`pair-237/` (`j29r*` vs `j37r*`, three matched seeds): the re-landed B table repair passed its
+pre-registered all-or-nothing rule exactly (`B-ex6-06` 0/3 -> 3/3, `contour:v235_b_table_total` on
+every converted row, no other 2.37-gated event anywhere, arm +2.4 not below control) — **`0.0.2.37`
+is ADOPTED as the new control line** (`PAIR-237-V61.md`). B is closed. The group-3 class struck live
+this pair: `A-ex6-00` failed seeds 1-2 **in the adopted control line** with
+`fields_mismatch:surcharges,total`, and the frozen 2.33 grammar replays over exactly those published
+bytes to 1.00 strict with its `v233_a_tariff_table` event (`gate_v50`, 25 checks) — the zero-fire
+condition that froze 2.33 at pair-233 is gone, so `0.0.2.38` re-lands it under a pre-registered rule
+that treats another zero-fire pair as UNMEASURED, not a pass. Other flips in this pair, all event-less:
+`K-ex6-03` lost a seed on `value:FREE_SHIPPING` — again the documented K value-shape bank defect, not a
+contour target; `J-ex6-06` flipped on `order_partial` (the 2.32 grammar reproduces 3/7 J tasks but
+converted exactly one cell in its own pair — left frozen; a future J grammar must first raise coverage,
+not re-measure this one); `F-ex6-00`/`H-ex6-03` kept their group-4 lottery notes — class closed, no
+action. Group 1 (`C` set_mismatch, `C-ex6-00` flipped again) stays live but has no deterministic
+grammar proven: `set_mismatch` there is the model's per-option verdict flipping, which neither
+selection (2.31) nor a form contract can reach; the next group-1 candidate needs a
+per-option-grounded mechanism, not another vote.
