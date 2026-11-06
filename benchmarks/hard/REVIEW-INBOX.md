@@ -650,3 +650,26 @@ fixers 12/12), and a live endpoint smoke `smk35` (14:17:55) where `B-ex6-06` car
 no 2.35 event. Pre-registered hypothesis (before any `h*` row): exactly one cell flips — `B-ex6-06` — in
 all three candidate seeds with its own event, expected +1.0 cells, i.e. a cell-level claim, not a headline
 win against the ~2-cell mean floor.
+
+## pair-235 CLOSED / pair-236 launched (15:23 CET, 2026-11-06)
+
+pair-235 (`h29r*` vs `h35r*`, three paired seeds, 77/77 rows each): verdict and full numbers in
+`PAIR-235-V61.md`. Headline `0.0.2.35` = **+2.0 cells, exactly AT the ~2-cell resolution floor**
+(pooled 9W/3L, p=0.146) — NOT adopted. The mechanism itself is the strongest confirmed in the series:
+3 fires, all on `B-ex6-06`, 0/3→3/3, the v235 event on every converted row, zero extra model calls,
+30/30 independent rescore joins clean. Frozen to `CONTOUR_REVISION == (2, 35)` and pinned in the v49
+adoption matrix; re-adoption is a one-flag owner call, decision record
+`history/agent-decisions/2026-11-06-pair235-b-table-confirmed-subfloor-and-236-launch.md`.
+
+pair-236 launch verification (before any `i*` row): endpoint auth-checked with the exact key file
+(`GET /v1/models` returns the served alias), `/health` ok, endpoint idle (no foreign runner). Live
+smoke `smk36c` 15:22:44 (H-ex6-00/01/03 + F-ex6-00): first log line `PGR: release 0.0.2.36, contour
+behavior 2.36`, 4/4 scored 1.00 with real durations — no v236 event needed here since every first
+sample passed; live firing is note-conditional and the call-site proof is contract-pinned
+(`gate_v53_g4_lottery_test.py`, 38 checks: scripted fire/win at 2.36, equal-score no-adopt, 2.29
+zero-extra-call no-op on the same shapes). Contracts before push: v36/v37/v38/v39/v40/v44/v45/v49(17)/
+v51(21)/v52(37)/v53(38)/versioning all green, fixers 12/12. Pair began **15:23:15 CET** as
+`parb-pair236.service` (`run_pair236.sh`, arms alternating, sampler `parb-gpu-samp2.service` active).
+Pre-registered rule (full text in `PAIR-235-V61.md`): attribution claim only, expected +0.5..+1.5 by
+construction; zero fires across three seeds or any event-less flip credited to the mechanism freezes
+2.36 like 2.33/2.34.
