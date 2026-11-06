@@ -702,3 +702,42 @@ on every converted row, no other 2.37-gated event appears anywhere, and the cand
 >2 cells below control; otherwise the flag freezes again at 2.37 and the line stays 0.0.2.29. The +1.0
 on-target mean from a clean pass is BY CONSTRUCTION below the ~2-cell floor and will still be published
 as sub-floor; the adoption rests on deterministic full attribution, stated plainly.
+
+## pair-237 CLOSED / pair-238 launched (2026-11-06, ~16:55 CET)
+
+pair-237 (`j29r*` vs `j37r*`, three paired seeds, 77/77 results AND ledger rows each): verdict and full
+numbers in `PAIR-237-V61.md`. Headline `0.0.2.37` = **62/63/66 (63.7) vs 62/59/63 (61.3), +2.4 cells;
+pooled 10W/3L p=0.0923 — but the adoption is cell-attributed, not mean-based**: the pre-registered
+all-or-nothing rule held EXACTLY — `B-ex6-06` strict-failed 0/3 in control, strict-passed 3/3 in
+candidate, `contour:v235_b_table_total:available_total` on every converted row at identical
+`ptok=260/model_calls=2` (zero extra tokens, zero extra calls), the candidate-only contour-event set
+contains nothing else of the 2.37 kind (one `v19_d_order_to_steps` on a loop-D task is an inherited
+2.19 feature preceded by its own gate event — model resample), candidate not below control.
+**`0.0.2.37` ADOPTED as the new control line**; the +1.0/seed attributable to the mechanism is stated
+separately from the event-less off-target flips (A-ex6-00 +2, C/H/I/J +1 each; losses K-ex6-03
+value-shape bank defect, F/H group-4 lotteries). Only +1.0/seed of the +2.4 is credited; the headline
+number is published WITH that split. Rescore 26/26 joins clean; energy 4.36–10.38 Wh per window
+(72.8–102.8 W mean), matched seed-2 pair 4.89 vs 5.00 Wh — the zero-token repair costs nothing
+measurable; decision record
+`history/agent-decisions/2026-11-06-pair237-b-table-adopted-line-moves-to-237-and-238-launch.md`.
+
+pair-238 launch verification (written before any `k*` row): `0.0.2.38` = adopted line (2.29 behaviour +
+the now-adopted B table repair) + the re-landed 2.33 A threshold arithmetic + nothing else; rejected
+behaviours re-verified frozen: workspace subprocess at 2.37 shows `A_TABLE False/B_TABLE True/G4
+False/JRR False`, at 2.38 `A_TABLE True`, behaviors 2.37/2.38 (stamp == behavior). Endpoint auth-checked
+again with the exact key file (`/v1/models` returns `qwen3.8-flash-next-iq3_s-basalt`, loaded), no
+foreign `gate_run.py` on the host, sampler `parb-gpu-samp2.service` active. Live smoke `smk38a`
+16:52:09 (A-ex6-00/A-ex6-01/B-ex6-06/B-ex6-03): first log line `PGR: release 0.0.2.38, contour behavior
+2.38`, `contour:v235_b_table_total` on B-ex6-06 ONLY (4/4 scored 1.00; A grammar no-op by design when the
+model answer is already prompt-equal — the live-firing path is pinned by `gate_v50`'s replay on the
+pair-237 bytes). Contracts before push: v36-v53 suite all green with CI list extended to enroll
+v46/v47/v48/v50 (they existed unenrolled since 2.30), v49 now 21 checks (2.38 flag matrix + 2.37 history
+unchanged), v50 now 25 checks (pair-237 replay: 2 repaired, 2 untouched), fixers 12/12,
+`verify_manifest.py --v6` PASS. Pair begins as `parb-pair238.service` (`run_pair238.sh`, arms `k37r*` vs
+`k38r*` alternating, same three rep seeds and plans as pair-237) immediately after this commit lands on
+`main`. Pre-registered rule (full text in `PAIR-237-V61.md`): adopt iff `A-ex6-00` strict-fails in ≥1
+control seed (no on-target cell = UNMEASURED, flag freezes at 2.38 — zero-fire is not a pass), the
+candidate passes every control-failed seed with `contour:v233_a_tariff_table` on each converted row and
+nothing else anywhere carries a 2.38-gated event while the adopted B repair fires identically in both
+arms, and the candidate is not >2 cells below control. The on-target mean is at most +1.0 by
+construction and will be published as sub-floor; the adoption rests on deterministic full attribution.
