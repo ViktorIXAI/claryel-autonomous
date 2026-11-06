@@ -1362,6 +1362,71 @@ def _fmt_parse(text):
     return None
 
 
+SELFCONSIST = contour_at_least(2, 31)
+SELFCONSIST_CATS = ("C", "J")
+_SC_CONST = 20261106
+
+
+def _answer_set(cat, text):
+    """The choice set this answer expresses, read only from the model's own text; None if it says none.
+
+    Category C selects option letters, category J selects a list of bare ids. Both are sets the model
+    states explicitly, which is what makes a plurality vote possible without ever consulting the scorer
+    or the reference — the whole point of the mechanism is that it cannot peek.
+    """
+    if not text:
+        return None
+    if cat == "C":
+        m = re.search(r"^\s*ОТВЕТ\s*:(.*)$", text, re.M)
+        src = m.group(1) if m else (text.strip().splitlines()[-1] if text.strip() else "")
+        letters = sorted(set(re.findall(r"(?<![A-Za-z])([A-F])(?![A-Za-z])", src)))
+        return tuple(letters) if letters else None
+    j = _fmt_parse(text)
+    if isinstance(j, list) and j and all(isinstance(x, str) for x in j):
+        return tuple(j)
+    return None
+
+
+def selfconsistency_vote(acct, cat, r, msgs0, seed):
+    """v2.31: seed instability on set/order tasks is the model picking a different set, so ask twice more
+    and let the plurality answer win. Selection only: every candidate is a real model answer, no answer is
+    edited, no scorer note is used, and a tie or a singleton leaves the first answer alone."""
+    if not SELFCONSIST or cat not in SELFCONSIST_CATS:
+        return r
+    base = _answer_set(cat, r.get("text") or "")
+    extra = []
+    for k in (1, 2):
+        rr = ask_ladder(acct, list(msgs0), seed + k * _SC_CONST)
+        if rr.get("err") or not rr.get("text"):
+            continue
+        s = _answer_set(cat, rr.get("text") or "")
+        if s is not None:
+            extra.append((s, rr))
+    counts = {}
+    if base is not None:
+        counts[base] = counts.get(base, 0) + 1
+    for s, _ in extra:
+        counts[s] = counts.get(s, 0) + 1
+    if not counts:
+        acct.ev("contour", "v231_selfconsist_" + cat + "_no_expressible_set")
+        return r
+    top = max(counts, key=lambda k: counts[k])
+    if len(counts) == 1:
+        acct.ev("contour", "v231_selfconsist_" + cat + "_unanimous")
+        return r
+    if counts[top] < 2:
+        acct.ev("contour", "v231_selfconsist_" + cat + "_no_majority")
+        return r
+    if base == top:
+        acct.ev("contour", "v231_selfconsist_" + cat + "_plurality_is_original")
+        return r
+    for s, rr in extra:
+        if s == top:
+            acct.ev("contour", "v231_selfconsist_" + cat + "_vote_taken")
+            return rr
+    return r
+
+
 CONTRACT_GUARANTEE = contour_at_least(2, 30)
 
 # Shape-only hints. They echo the format the task itself already demands; they never quote a scorer
@@ -2315,6 +2380,14 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v27_" + "_".join(ev))
+    if SELFCONSIST and cat in SELFCONSIST_CATS and r["text"] and not r["err"]:
+        before = r["text"]
+        r = selfconsistency_vote(acct, cat, r, msgs0, seed)
+        if r["text"] != before:
+            rec["answer"] = r["text"]
+            rec["truncated"] = r["finish"] == "length"
+            rec["finish"] = r["finish"]
+            rec["engine_error"] = r["err"]
     if CONTRACT_GUARANTEE and r["text"] and not r["err"] and cat != "E" \
             and not (cat == "D" and t.get("kind") == "loop"):
         before = r["text"]
