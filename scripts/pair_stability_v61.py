@@ -121,10 +121,19 @@ def main() -> int:
     for s in stamps:
         # Show every contour event of the CANDIDATE stamp (the one under test), not a hardcoded tag: a
         # previous version filtered on "v230" and hid the fact that 0.0.2.31 had fired 8 votes.
-        # contour events are tagged with the stamp that shipped them (stamp 0.0.2.31 -> v231_*).
-        tag = "v2" + s.split(".")[-1]
-        hits = {k: v for k, v in ev_hist[s].items() if tag in k}
-        print("- %s: %s" % (s, ", ".join("%s x%d" % (k, v) for k, v in sorted(hits.items())) or "none"))
+        # Events are tagged by the stamp that FIRST shipped the mechanism (0.0.2.31 -> v231_*), so a
+        # RE-LANDED mechanism keeps its original name — filtering only on the candidate tag hid the single
+        # v233_a_tariff_table fire in pair-238 and printed "none". Own-tag and other-tag events are listed
+        # separately so a re-land stays visible instead of looking like a no-op stamp.
+        tag = "v2" + s.split(".")[-1] + "_"
+        mech = {k: v for k, v in ev_hist[s].items() if "v2" in k and "_" in k}
+        own = {k: v for k, v in mech.items() if tag in k}
+        other = {k: v for k, v in mech.items() if tag not in k}
+        line = ", ".join("%s x%d" % (k, v) for k, v in sorted(own.items())) or "none"
+        if other:
+            line += ("  |  other-tag contour events (inherited or RE-LANDED mechanism, event keeps its "
+                     "origin name): " + ", ".join("%s x%d" % (k, v) for k, v in sorted(other.items())))
+        print("- %s: %s" % (s, line))
     print()
     print("## Paired sign test per matched seed (strict pass, single-shot cells)")
     for r in reps:
