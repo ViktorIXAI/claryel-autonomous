@@ -640,3 +640,13 @@ synthetic invented-name tables and the call-site wiring through `run_one`. Pre-l
 on exactly 1 of 7 bank B tasks (B-ex6-06), refuses 6, and on the 42 stored pair-234 B answers it
 would fire 6 times (all six B-ex6-06 rows, 30→60) with zero touches on stable cells.
 Decision record: `history/agent-decisions/2026-11-06-pair234-unfired-b-fields-and-235-launch.md`.
+
+Launch verification (next automated run): the pair began **14:18:32 CET** as `parb-pair235.service`
+(`run_pair235.sh`, arms alternating, sampler `parb-gpu-samp2.service` active) — the 14:13 entry claimed
+the arms were launched when no `h*` artifact existed yet, so the timestamp is recorded here. Before the
+arms: manifest `verify_manifest.py --v6` PASS, contracts green (v52 37 / v49 16 / v51 21 / versioning /
+fixers 12/12), and a live endpoint smoke `smk35` (14:17:55) where `B-ex6-06` carries
+`contour:v235_b_table_total:available_total` (30→60, scored 1.00/True) while `B-ex6-03`/`B-ex6-04` carry
+no 2.35 event. Pre-registered hypothesis (before any `h*` row): exactly one cell flips — `B-ex6-06` — in
+all three candidate seeds with its own event, expected +1.0 cells, i.e. a cell-level claim, not a headline
+win against the ~2-cell mean floor.
