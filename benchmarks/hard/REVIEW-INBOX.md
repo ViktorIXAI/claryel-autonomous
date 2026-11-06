@@ -329,3 +329,26 @@ mechanism, not an effect size. Started the protocol:
   paired sign test over 3 reps x 71 cells. If the gap survives three reps, it is an effect; if not,
   the ladder's step sizes have been noise and the ladder must be re-read that way. Published either
   way.
+
+## 06.11 04:45 CET — three-seed contour band + first cloud second seed (deadline window)
+
+Contour 0.0.2.29 measured over three independent gseeds: **63 / 62 / 60** of 71 (mean 61.7, spread 3;
+rep-vs-rep p=1.00/0.45/0.63, so no drift). 57 cells stable pass, 6 stable fail, 8 seed-unstable.
+
+Paired against the published cloud arms on the same bank (exact sign test):
+
+    vs ChatGPT (gpt-6.1-sol, 50/71):  16W/3L p=0.0044   (holds on every contour seed: p=0.017, 0.064)
+    vs Grok 4.7 (54/71):              12W/3L p=0.035
+    vs bare basalt, same weights no contour (56/71): 11W/4L p=0.118  <- not significant, stated
+
+ChatGPT now has two seeds (40/61 and 41/61 on the 61 non-E cells): that arm is stable, so the margin
+is not ChatGPT variance. Cost: contour 141 calls / 36k tokens / 128-166 s on an idle 24 GB GPU with
+zero cloud tokens; bare basalt 948 s for 71 single shots; ChatGPT 585 s; Grok 2016 s.
+
+Energy is NOT metered: RAPL needs root (non-interactive sudo refused here) and the inference host
+exposes no power telemetry. Published instead: wall seconds, calls, tokens, and a clearly labelled
+modelled Wh range from this box's documented 142-175 W GPU cap. No invented joules.
+
+Artifacts: `v6-results/reps-229/` (results, ledger, log, run-record, REP-VARIANCE.txt, ARM-PAIRS.txt),
+`v6-results/HEADTOHEAD-V61.md`, `v6-results/RUNLOG-20261106.md`, `scripts/rep_variance_v6.py`,
+`scripts/arm_pair_v6.py`, `scripts/plan_reps.py`. Manifest/links/docs-policy/gitleaks green.

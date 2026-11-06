@@ -9,6 +9,7 @@ grok (xai-oauth via hermes -z). Scorers applied afterwards by score_v6.py.
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -65,12 +66,22 @@ def one(task, rep):
 # Provenance gap found on the v6.1 four-arm: raw answer rows carried no model identity, so a
 # score change between bank versions could not be attributed to the bank or to a model update.
 # Every row now records the model id (and CLI version where the transport exposes it).
+def _cli_version(prog: str) -> str:
+    """Transport version for provenance. Must never be fatal: a bare `import raw_v6` (or a
+    basalt-only run on a host where the codex CLI is not on PATH) used to die here."""
+    path = shutil.which(prog)
+    if not path:
+        return "not installed"
+    try:
+        out = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=30)
+        return (out.stdout or out.stderr or "").strip().splitlines()[0] if (out.stdout or out.stderr) else "unknown"
+    except Exception as exc:
+        return "unknown (%s)" % type(exc).__name__
+
+
 PROV = {"basalt": {"model": "qwen3.8-flash-next-iq3_s-basalt", "cli": "direct HTTP temp 0.7"},
-        "codex": {"model": "gpt-6.1-sol", "cli": "codex " + (subprocess.run(
-            ["codex", "--version"], capture_output=True, text=True).stdout.strip() or "unknown")},
-        "grok": {"model": "grok-4.7", "cli": "hermes " + (subprocess.run(
-            ["hermes", "--version"], capture_output=True, text=True).stdout.strip() or "unknown")
-            + " toolsets off"}}
+        "codex": {"model": "gpt-6.1-sol", "cli": "codex " + _cli_version("codex")},
+        "grok": {"model": "grok-4.7", "cli": "hermes " + _cli_version("hermes") + " toolsets off"}}
 
 
 BANK_SHA = hashlib.sha256(open(os.path.join(ROOT, "bank.json"), "rb").read()).hexdigest()[:16]

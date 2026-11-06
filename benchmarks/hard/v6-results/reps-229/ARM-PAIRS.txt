@@ -1,0 +1,20 @@
+Paired on the 71 single-shot cells of bank v6.1 (category E from the docker E-EXEC cache):
+basalt  raw 56/71 | contour(2.29 rep0) 63/71 | contour wins 11 losses  4 | exact sign-test p=0.11847
+codex   raw 50/71 | contour(2.29 rep0) 63/71 | contour wins 16 losses  3 | exact sign-test p=0.00443
+grok    raw 54/71 | contour(2.29 rep0) 63/71 | contour wins 12 losses  3 | exact sign-test p=0.03516
+
+Same test against each contour repetition (the contour's own noise band):
+contour rep0 63/71 vs basalt  56/71  W11 L04  p=0.11847
+contour rep0 63/71 vs codex   50/71  W16 L03  p=0.00443
+contour rep0 63/71 vs grok    54/71  W12 L03  p=0.03516
+contour rep1 62/71 vs basalt  56/71  W13 L07  p=0.26318
+contour rep1 62/71 vs codex   50/71  W17 L05  p=0.01690
+contour rep1 62/71 vs grok    54/71  W13 L05  p=0.09625
+contour rep2 60/71 vs basalt  56/71  W13 L09  p=0.52347
+contour rep2 60/71 vs codex   50/71  W17 L07  p=0.06391
+contour rep2 60/71 vs grok    54/71  W13 L07  p=0.26318
+
+Arm cost from the published answer rows:
+basalt  rows=71 total_answer_seconds=948 model=not recorded at rep0 (fixed by scripts/raw_v6.py today)
+codex   rows=71 total_answer_seconds=585 model=not recorded at rep0 (fixed by scripts/raw_v6.py today)
+grok    rows=71 total_answer_seconds=2016 model=not recorded at rep0 (fixed by scripts/raw_v6.py today)

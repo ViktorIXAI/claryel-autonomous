@@ -1,0 +1,15 @@
+repetitions of the same stamp (different gseeds):
+  rep0   plain 63/71  loop 5/6  calls 141  ptok  26298  ctok  9786  wall  544.8s
+  rep1   plain 62/71  loop 4/6  calls 143  ptok  26455  ctok  8656  wall  165.6s
+  rep2   plain 60/71  loop 5/6  calls 142  ptok  26696  ctok  9246  wall  128.1s
+plain strict across reps: [63, 62, 60]  spread=3  mean=61.67
+
+over 71 cells: stable pass 57, stable fail 6, seed-unstable 8
+seed-unstable cells: A-ex6-00, B-ex6-03, C-ex6-00, C-ex6-01, F-ex6-00, H-ex6-01, J-ex6-03, J-ex6-06
+
+paired sign tests between repetitions (same stamp, different seeds):
+  rep1 vs rep0: 2 wins / 3 losses  exact p=1.0000
+  rep2 vs rep0: 2 wins / 5 losses  exact p=0.4531
+  rep2 vs rep1: 1 wins / 3 losses  exact p=0.6250
+
+Bound: the rep-to-rep spread is the noise floor. A stamp-to-stamp or arm-to-arm delta inside that band cannot be attributed to the stamp or the contour.
