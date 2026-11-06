@@ -609,3 +609,34 @@ separate future candidate together with prose-letter (B-ex6-04) and markdown-tab
 grammars. Coverage before launch: 2/7 B tasks reproduce, 5 refuse, 0 changes on 42 stored B answers
 from pair-233 (`gate_v51_b_fields_test.py`, 19 checks). Decision record:
 `history/agent-decisions/2026-11-06-pair233-unfired-threshold-table-and-234-launch.md`.
+
+---
+
+## 2026-11-06 14:13 CET — pair-234 measured: 0.0.2.34 unfired again, −1.0 under the floor; NOT adopted
+
+Paired `g29r*`/`g34r*` (control 0.0.2.29 vs candidate 0.0.2.34 B field completeness, three matched
+seeds, all six arms 77/77 rows, stamps registered, independent rescore 36 comparisons 0 mismatches,
+endpoint idle before launch). Means 63.3 → 62.3 (−1.0); pooled sign test 3W/6L p=0.508; flip count
+6 → 8. Verdict and cell-by-cell flips: `PAIR-234-V61.md`, artifacts in `pair-234/`.
+
+The stronger finding repeats pair-233: the 2.34 mechanism **fired zero times in all three candidate
+seeds**, and this time the reason is directly visible — **both target cells (B-ex6-03, B-ex6-05)
+passed 6/6 in both arms**, the model stopped making the fields_mismatch mistake on them. Offline
+replay of the grammar over all 42 stored B answers of the pair: 0 fires, 0 changes, 42 refuses.
+Two consecutive no-op arms (2.33 +1.3, 2.34 −1.0) now bracket pure resampling at roughly ±1.3 cells
+around this scoreboard — any future stamp must show on-target fires in the candidate ledger before
+its arm delta is discussed at all. Energy: candidate lower in every window (5.16/4.46/4.77 vs
+15.44/7.70/5.04 Wh), but the control seed-0 window caught endpoint warm-up (524 s vs 212–299 s);
+with zero fires and 325 vs 327 calls there is no mechanism cost to measure.
+
+Adoption state: `B_FIELD_COMPLETE` frozen to stamp 2.34 alone; adopted line stays `0.0.2.29`.
+
+Next: `0.0.2.35` — the markdown-table grammar, the one B failure class that is neither bank defect
+nor already-passing: B-ex6-06 fails 0/3 in both arms, and `bank-defect-b04.md` itself certifies it
+"computable from the shipped text" (rows + footnote + reserve give 60; the model answers 30). The
+repair recomputes extraction fields from the prompt's own markdown table, footnote and spec formula,
+fail-closed on every ambiguity; contract test `gate_v52_b_table_test.py` proves the grammar on
+synthetic invented-name tables and the call-site wiring through `run_one`. Pre-launch coverage: fires
+on exactly 1 of 7 bank B tasks (B-ex6-06), refuses 6, and on the 42 stored pair-234 B answers it
+would fire 6 times (all six B-ex6-06 rows, 30→60) with zero touches on stable cells.
+Decision record: `history/agent-decisions/2026-11-06-pair234-unfired-b-fields-and-235-launch.md`.
