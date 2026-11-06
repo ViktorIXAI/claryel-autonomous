@@ -928,3 +928,20 @@ family, with proposed in-prompt rule wording should the owner choose to open it.
 unchanged: published file `9ec86dfca4a6f85f`, run workspace `f4553aab304f60d7`. Status stays:
 contour line `0.0.2.40`, `C_RULE_GROUND` frozen to `(2,41)`, no pair launches until the owner
 ships the clarified bank; post-clarification protocol = rescore both sides + four-arm re-run.
+
+## four-arm cadence re-run launched + first two legs measured (2026-11-06 23:42 CET): contour 0.0.2.40 vs bare basalt on fresh matched seeds — pooled 162/183 vs 135/183, 33W/6L, p=1.4e-5
+
+Owner rule (cadence every 5 stamps) was 12 stamps overdue; `cadence-240/run-band240.sh` ran FRESH
+seed-matched reps 6,7,8 (gseed `sha256(task|rep)`) for contour 0.0.2.40 on the adopted line and bare
+basalt, bank verified unchanged (`9ec86dfca4a6f85f` / ws `f4553aab304f60d7`), endpoint serial, no
+shared-serve contention. Contour plain strict 66/65/61 per 71, loop 6/4/6; 61-cell seed-matched pairs
+vs bare basalt: 56v46 p=0.0064, 55v44 p=0.0074, 51v45 p=0.146; pooled 33W/6L exact p=0.000014. Win
+structure unchanged: F/H/K carry it (18/10/12 vs 7/1/4), zero losses on F/H/K, six losses all on
+published defect/lottery cells (B-ex6-04 x2, B-ex6-05, C-ex6-00, I-ex6-01, J-ex6-03). Energy: 231
+contour answers in 585 s / 21.6 Wh vs 213 raw answers in 1722 s / 66.1 Wh serve windows. Artifacts:
+`v6-results/CADENCE-240-V61.md`, `v6-results/cadence-240/`, basalt reps 6-8 appended to
+`raw-reps-v61/answers-basalt-v61-reps.jsonl`. Grok + ChatGPT legs on the same seeds started 23:40
+(unit `parb-band240-cloud`, subscription CLIs, not the serve; ETA ~00:30 / ~01:45); ARM-BANDS and the
+four-arm table regenerate on the completion tick — no cloud numbers claimed for these seeds until then.
+Line status unchanged: 0.0.2.40 adopted; bank-ceiling decision (no pair-243 without owner bank
+clarification) unchanged.

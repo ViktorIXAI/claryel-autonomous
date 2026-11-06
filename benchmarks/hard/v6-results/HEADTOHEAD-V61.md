@@ -21,6 +21,18 @@ the exact paired sign test.**
 Loop protocol D (6 tasks): contour 5/6. No single-shot chat arm can attempt it, so it is reported
 as N/A for the cloud arms rather than scored 0 — see `four-arm-v61/FOUR-ARM-V61.md`.
 
+## Cadence re-run 2026-11-06 (fresh matched seeds, contour 0.0.2.40): the margin over the same local model without contour holds
+
+Twelve measured stamps after the rep0 four-arm, the owner-rule cadence re-ran contour and bare
+basalt on FRESH seed-matched reps 6, 7, 8 (`cadence-240/run-band240.sh`). Per-rep 61-cell pairs:
+56 vs 46 (11W/1L, p=0.0064), 55 vs 44 (13W/2L, p=0.0074), 51 vs 45 (9W/3L, p=0.146); pooled
+**162/183 vs 135/183, 33W/6L, exact p=0.000014**, with zero contour losses on the 26
+contract-sensitive F/H/K cells and two of the six losses sitting on the published `B-ex6-04`
+bank-defect cell. Same-stamp contour spread for these seeds is 5 cells, so the pooled arm margin
+is quotable while rep8's per-rep p alone is not. Grok and ChatGPT arms on the same seeds run the
+same evening; the four-arm table regenerates in `ARM-BANDS-V61.md` when they land. Full numbers,
+all 39 discordant cells, cost and energy: `CADENCE-240-V61.md`.
+
 ## Robustness: three independent seeds of the contour, one seed per cloud arm
 
 `reps-229/REP-VARIANCE.txt` (gseeds re-derived by `scripts/plan_reps.py` from `sha256(task|rep)`):
