@@ -50,3 +50,17 @@ every A-ex6-03 loss AND change zero other published A-row verdicts (the gate_v50
 extended), coverage restated honestly BEFORE any n* row; the flag re-lands only from 2.41 and stays
 pinned out of every earlier stamp. If the dry-run refuses, no pair is launched and the class is
 reported as grammar-capped, not re-chased.
+
+GATE RESULT (same session, after publication): the dry-run never reached grammar work — the target
+itself is defective. `A-ex6-03`'s printed rules (`22% от базы (gross), но не более 6100`, `19% от
+(gross − соцвзнос − вычет 1200), не менее 0`) execute deterministically to `social=2090.0,
+tax=1179.9, net=6230.1`; the bank gold is `social=1254.0, tax=616.74, net=7629.26`, and 1254.0
+implies a 13.2% rate the prompt never states — no reading of the printed rule reaches the gold.
+Five of the six published arms answered the faithful `social=2090.0` and scored 0. **A-ex6-03 is
+a bank defect** (third in the queue after `C-ex6-02` and `K-ex6-03`); a no-contour arm executing
+the task text would score 0 too, so it is unmeasurable by construction and no contour mechanism
+may chase it. **pair-241 does not launch**: with A-ex6-03/C-ex6-02/K-ex6-03 bank-capped, B-ex6-04
+owned by the frozen-negative 2.34 class, and group-1 `C` lotteries lacking any proven per-option
+grammar, line `0.0.2.40` is at the bank's ceiling. Next actions, in order: owner-commanded bank
+clarification (A-ex6-03 re-gold, same queue as C-ex6-02), and design + dry-run of a
+per-option-grounded group-1 mechanism over published bytes before any stamp is spent.

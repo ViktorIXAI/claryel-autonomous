@@ -173,12 +173,21 @@ rule was never re-derived); inherited re-rank ×3 and B repair ×3 identical, A 
 - Group 1 (`C-ex6-00/01/03`) remains the only live content class: per-option set lotteries, no
   deterministic grammar proven; a future mechanism must ground per-option against the task text —
   selection voting (frozen 2.31) must not be re-chased.
-- The chronic stable fails after this pair: `A-ex6-03` 0/6 again in both arms
-  (`fields_mismatch:net,social,tax`) and `B-ex6-04` 0/6 (`fields_mismatch:start_date,...`), both
-  outside the proven grammars (A arithmetic coverage reproduces only `A-ex6-00`; the 2.34 B-field
-  mechanism measured negative and stays frozen at its stamp). The pair-241 dry-run gate: extend the
-  A tariff-table grammar to `A-ex6-03` ONLY if a published-bytes replay converts every `A-ex6-03`
-  loss and changes no other published A-row verdict; otherwise the class is reported grammar-capped
-  and no pair launches.
+- The chronic stable fails after this pair: `B-ex6-04` 0/6 (`fields_mismatch:start_date,...`),
+  outside the proven grammars (the 2.34 B-field mechanism measured negative and stays frozen at
+  its stamp; re-chasing it is banned by this map's own rule). `A-ex6-03` 0/6
+  (`fields_mismatch:net,social,tax`) looked like the pair-241 candidate (A tariff-table grammar
+  v2) — the dry-run gate CLOSED it: `A-ex6-03` is a **bank defect**, proven by execution. Its
+  printed rules (`22% от базы (gross), но не более 6100`; `19% от (gross - соцвзнос - вычет 1200),
+  не менее 0`) deterministically give `social=2090.0, tax=1179.9, net=6230.1`, while the gold is
+  `social=1254.0, tax=616.74, net=7629.26` — the gold's own social implies a 13.2% rate the prompt
+  never states, and no reading of the printed rule reaches it. Five of the six published arms
+  answered the faithful `social=2090.0` and were scored 0 — a correctly-executing model loses
+  this cell under every policy. `pair-241` therefore does NOT launch: with `A-ex6-03` bank-capped,
+  `C-ex6-02` bank-capped, `K-ex6-03` bank-capped, `B-ex6-04` frozen-negative-class, and group 1
+  `C` lotteries lacking any proven per-option grammar, the contour is at the bank's ceiling on
+  this line — the honest next moves are owner-commanded bank clarification (A-ex6-03 re-gold,
+  same queue as C-ex6-02) and a per-option-grounded group-1 mechanism designed and dry-run before
+  any stamp is spent.
 - `C-ex6-02` and `K-ex6-03` stay bank defects (owner-commanded clarification pending), never a
   contour target.

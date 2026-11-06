@@ -847,3 +847,14 @@ line** (`PAIR-240-V61.md`, decision record of the same date). Nothing was fixed 
 grammar v2 over chronic `A-ex6-03` (0/6 in both arms) — register only if published-bytes replay
 converts every loss with zero other A-row verdict changes; otherwise the class is grammar-capped
 and no pair launches.
+
+DRY-RUN RESULT (same evening): pair-241 does NOT launch — `A-ex6-03` is a **bank defect**, not
+grammar-capped. Executing the task's own printed rules (`22% от базы (gross), но не более 6100`,
+`19% от (gross − соцвзнос − вычет 1200), не менее 0`) gives `social=2090.0, tax=1179.9,
+net=6230.1`; the gold is `social=1254.0, tax=616.74, net=7629.26`, whose social implies a 13.2%
+rate the prompt never states. Five of six published arms answered the faithful 2090.0 and scored
+0: any correctly-executing model loses this cell under every contour policy. Bank-defect queue
+for owner decision now: `A-ex6-03` (this), `C-ex6-02`, `K-ex6-03`. Contour-side remaining headroom
+on line `0.0.2.40`: only group 1 (`C-ex6-00/01/03`) with a per-option-grounded mechanism that does
+not exist yet — it will be designed and dry-run over published bytes before any stamp is spent;
+no pair is launched on an unproven mechanism.
