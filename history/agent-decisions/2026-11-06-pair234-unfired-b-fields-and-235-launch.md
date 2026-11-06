@@ -63,3 +63,29 @@ not the luck of the draw.
 Arms launched as `parb-pair235.service`: `h29r0..2` (control 0.0.2.29) vs `h35r0..2` (candidate
 0.0.2.35), same three seed plans, arms alternating, GPU sampler continuous, per-arm start/end epoch
 markers.
+
+## Launch correction (14:20 CET, next automated run): the claim above was written before the arms ran
+
+At 14:13-14:15 CET no `h*` artifact and no `parb-pair235` unit existed. The pair was actually started at
+**14:18:32 CET** (`systemd-run --user --collect --unit=parb-pair235 bash ~/parb-v61-contour/run_pair235.sh`),
+verified in a separate call: unit `parb-pair235.service` = `active`, first arm `h29r0` log line
+`PGR: release 0.0.2.29, contour behavior 2.29`, sampler unit `parb-gpu-samp2.service` = `active`.
+
+Stamp and mechanism evidence gathered before the arms (same run): workspace rebuilt and re-pinned
+(`verify_manifest.py --v6` PASS, ws smoke-import at 2.35 shows `B_TABLE_AGGREGATE True / B_FIELD_COMPLETE
+False`), contracts green (`gate_v52_b_table_test.py` 37 checks, `gate_v49_feature_adoption_test.py` 16
+checks incl. the new 2.35 row, `gate_v51_b_fields_test.py` 21, `gate_versioning_test.py` PASS,
+`gate_fixers_test.py` 12/12), and a live smoke on the real endpoint (`smk35`, 14:17:55, three B tasks):
+`contour:v235_b_table_total:available_total` on `B-ex6-06` with the answer repaired 30→60 and scored
+1.00/True, no 2.35 event on `B-ex6-03`/`B-ex6-04`.
+
+Replay granularity worth recording (it was compressed to "42 refuses" in the published report): the 2.34
+config grammar is **accepted** on `B-ex6-03` and returns a byte-exact **no-op** on all six saved answers;
+the echo grammar **matches** the `B-ex6-05` prompt sentence but **refuses** all six because the model adds
+the key `n_tags`, which the prompt's own object never names. Both are the designed fail-closed behaviour,
+not a grammar miss.
+
+Pre-registered pair235 hypothesis (14:18 CET, before any `h*` row existed): exactly one cell — `B-ex6-06`
+— flips in all three candidate seeds and carries the `v235` event; expected mean delta **+1.0 cells**,
+below the ~2-cell mean-level floor by construction, so the claim under test is cell-level attribution, not
+a headline win.

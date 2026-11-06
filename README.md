@@ -24,13 +24,19 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.34` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
+Contour gate line: `0.0.2.35` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
 `benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31` measured **negative** against the
 adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured **+1.3 cells — below the ~2-cell noise floor,
 NOT adopted** (`PAIR-232-V61.md`; `PAIR-233-V61.md` — 2.33 additionally fired **zero times live**, so its
-arm delta contained no on-target cells at all, a direct empirical lower bound on pure resampling); all
-four are frozen to their own stamps and inherit into nothing. Every headline number below is from
-`0.0.2.29`, the adopted stamp. Published arms
+arm delta contained no on-target cells at all, a direct empirical lower bound on pure resampling);
+`0.0.2.34` measured **−1.0 cells with zero live fires in either B grammar** — the model answered both of
+its target cells 6/6 in that pair, so the stamp had no surface to act on (`PAIR-234-V61.md`). All five
+are frozen to their own stamps and inherit into nothing. Every headline number below is from
+`0.0.2.29`, the adopted stamp. `0.0.2.35` (B markdown-table totals recomputed by code from the prompt's
+own table, footnote included) is registered and under paired measurement against `0.0.2.29` on three
+seeds; its grammar covers 1 of 7 bank B tasks, replays to 6/42 fires on the stored pair-234 answers
+(all six the failing `B-ex6-06` rows, 30→60, each then scorer-pass) and touches no stable cell
+(`harness/gate_v52_b_table_test.py`, 37 checks). Published arms
 on the current hard bank v6.1: `full-229` (contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs
 the same local model without contour).
 
@@ -58,7 +64,9 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   floor, unresolvable and not adopted** (`PAIR-232-V61.md`); a fourth, 0.0.2.33 A threshold-table
   arithmetic, also **+1.3 with zero live fires** — the candidate model answered its target cell correctly
   in every seed, so the pair measured nothing and +1.3 is a direct lower bound on pure resampling
-  (`PAIR-233-V61.md`). Resolution floor measured directly: the same
+  (`PAIR-233-V61.md`); and a fifth, 0.0.2.34 B field completeness, **−1.0 with zero live fires** for the
+  same reason (target cells 6/6 in both arms, `PAIR-234-V61.md`) — pairs 233/234 together bracket pure
+  resampling at roughly ±1.3 cells around this scoreboard. Resolution floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
