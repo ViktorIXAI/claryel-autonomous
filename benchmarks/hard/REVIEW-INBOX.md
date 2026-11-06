@@ -460,3 +460,15 @@ finished; the same trap earlier made bare basalt look like 46/39/36 while its fi
 Second measured energy window: contour reps 4-5 = **13.02 Wh over 154 tasks = 0.085 Wh/task** (rep3 was
 0.089 Wh/task), against **0.468 Wh/task** for the same model answering raw — ~5.4x cheaper at a lower score.
 README headline and `PROOF-V61.md` now carry the six-seed bands, the CIs and these energy rates.
+
+## 06.11 05:55 CET — cell stability map: the seed spread is mostly an unenforced contract
+
+`scripts/unstable_cells_v61.py` -> `UNSTABLE-CELLS-V61.md`: across six seeds of contour 0.0.2.29 on bank
+v6.1, 52 cells pass every seed, 5 fail every seed, 14 are coin flips. Twelve of those fourteen fail with a
+parse collapse (`no_json`, `no_list`, `no_answer_line`) and no contour repair event in the losing seed.
+
+Consequence: the variance of this stamp is dominated by the artifact shape sometimes not being enforced,
+not by the model changing its mind. The next stamp (0.0.2.30) targets exactly that — bounded re-ask plus
+deterministic salvage for the required artifact shape — with per-cell proof (x/6 becomes 6/6) against the
+frozen scorer. Stable content fails (A-ex6-03, B-ex6-04, B-ex6-06, C-ex6-02, J-ex6-02) stay as they are;
+two of them are documented bank defects.
