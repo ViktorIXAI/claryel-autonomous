@@ -47,3 +47,18 @@ This checkpoint is a **bounded inspection**, not an exhaustive audit or an appro
 | FRESH100 v1 benchmark and stop authority | Issue #13 says owner STOP, v1 INVALID / DIAGNOSTIC ONLY; issue state is closed but issue body contains the STOP instruction | Critical operational boundary | **No execution authorized**: issue closure alone is not owner GO; do not launch v1 or v2 work as part of documentation audit |
 
 This checkpoint made no changes to benchmark data, model settings, security policy, GitHub repository metadata, or the frozen task banks. Exact run timestamps, release provenance and CI results remain **not independently verified**. Subsequent passes must inspect all relevant files and workflows and run the required policy/link checks before claiming completion.
+
+
+## Documentation freshness mechanism inspection — 2026-11-06 (date only; exact review time not recorded)
+
+**Read-only source inspection:** `.github/workflows/docs-freshness.yml`, `scripts/qa/docs_policy.py`, `docs/documentation-policy.md`, `README.md`, `CITATION.cff`, `versions/VERSIONS.md`, and `benchmarks/hard/v6-results/PROOF-V61.md`. This is not a claim of running CI, validating links, or independently reproducing any benchmark. GitHub issue #25 remained open at inspection.
+
+| Claim / location | Source observation | Risk / disposition |
+|---|---|---|
+| Daily docs freshness job | Workflow schedules `20 3 * * *` and invokes `python scripts/qa/docs_policy.py --daily`; no CI execution outcome was inspected in this pass | **Open:** source configuration exists; actual run success, scheduler operation and coverage remain unverified |
+| README freshness enforcement | `check_readme(fresh=True)` extracts the first `Status checked: YYYY-MM-DD` and fails only when its age exceeds one day; README currently says `2026-11-05 (historical snapshot; version and run status require fresh verification)` | **Open:** a historical snapshot date can mechanically satisfy the checker despite not verifying live version/claims; absent updates it will fail once more than one day old. Avoid blind date bumps. Owner review needed for current-evidence index semantics |
+| Link checking scope | `check_markdown_links` examines Markdown links only in README and two policy files, skips HTTP(S), mailto and fragment links, and tests local target existence | **Open:** it does not establish repository-wide link health, external link validity or correctness of fragment anchors. Do not call it exhaustive link validation |
+| Phrase checks | `FORBIDDEN_PUBLIC_PHRASES` is applied to a fixed `PUBLIC_DOCS` list, and README is checked separately | **Open:** scoped policy lint, not exhaustive inventory of all 723 tree entries; can flag historical phrasing without assessing provenance |
+| Benchmark one-page evidence | `PROOF-V61.md` reports the comparison and explicitly says it is a single 77-task bank with no external holdout and cloud energy not measurable locally | **Open:** document assertions were read, not independently recalculated; avoid generalized model superiority or cross-environment energy claims |
+
+**No implementation or policy files were modified in this checkpoint.** Proposed next step is a non-destructive, separately reviewed QA enhancement that validates a dated, evidence-linked current status index and explicitly labels limited link/phrase coverage, with tests before adoption. The existing daily job must not be disabled as a shortcut. This append-only finding preserves earlier statements and their timestamps as originally recorded.
