@@ -62,3 +62,15 @@ This checkpoint made no changes to benchmark data, model settings, security poli
 | Benchmark one-page evidence | `PROOF-V61.md` reports the comparison and explicitly says it is a single 77-task bank with no external holdout and cloud energy not measurable locally | **Open:** document assertions were read, not independently recalculated; avoid generalized model superiority or cross-environment energy claims |
 
 **No implementation or policy files were modified in this checkpoint.** Proposed next step is a non-destructive, separately reviewed QA enhancement that validates a dated, evidence-linked current status index and explicitly labels limited link/phrase coverage, with tests before adoption. The existing daily job must not be disabled as a shortcut. This append-only finding preserves earlier statements and their timestamps as originally recorded.
+
+
+## Additional QA edge-case inspection — 2026-11-06 (review date only; exact UTC review time not independently recorded)
+
+**Directly inspected at this checkpoint:** `scripts/qa/docs_policy.py` (blob `ecb93153f259dc288fb61e3427729275f4860122`), `.github/workflows/docs-freshness.yml` (blob `02151783f2c9e3331548022aa43de985ae0d2b81`), default-branch README, `docs/EVIDENCE-PRESERVATION.md`, issue #25 comments, and latest commit search (first returned `cfdfbee0bf8502595c47168ba6ad333b5e8fc77f`, authored/recorded 2026-11-06T09:15:28Z). This is static source inspection, **not** a test execution or CI result.
+
+| Path / claim | Direct source evidence | Severity | Disposition |
+|---|---|---|---|
+| `scripts/qa/docs_policy.py`: daily freshness date cannot be in the future | `check_readme` computes `(dt.date.today() - checked).days` and rejects only `age > 1`; negative ages (future dates) are accepted by this branch | Medium: a mistakenly future-dated README could pass freshness without an actual review | **Open:** propose a separate reviewed test for future-date rejection and historical-snapshot semantics; do not alter production CI, invent a check result or bump dates without evidence |
+| README current-version heading versus latest contour commit | README labels its 2026-11-05 status historical and 0.0.2.29 adopted; latest commit message introduces 0.0.2.31 but does not itself prove adoption | Medium: users may confuse code revision, tested candidate and accepted stamp | **Open:** link actual paired results and decision record before changing current-facing claims; preserve 0.0.2.30 negative result |
+
+No frozen evidence, code, workflow, security policy, permissions or historical text was changed. The earlier 723-entry inventory was structural, not 723 individually reviewed file contents. Required CI execution evidence, exhaustive current-facing coverage and independently reproduced results remain unresolved. This checkpoint does not satisfy issue #25 acceptance criteria.
