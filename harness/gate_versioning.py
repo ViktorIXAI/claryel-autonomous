@@ -73,7 +73,8 @@ CONTOUR_FEATURES = (
     (2, 28),  # H requires/unknown filled from explicit prompt signature constraint
     (2, 29),  # C coverage_choice contract: option letters read from the task text, answer line built from the model's own verdicts
     (2, 30),  # contract guarantee: an answer with no parseable artifact gets one shape-only re-ask, then deterministic salvage of the model's own text (MEASURED NEGATIVE on bank v6.1, see PAIR-230-V61.md)
-    (2, 31),  # self-consistency vote for set/order answers (C letters, J id lists): two extra samples of the same task, the plurality answer wins, no scorer and no reference consulted
+    (2, 31),  # self-consistency vote for set/order answers (C letters, J id lists): two extra samples of the same task, the plurality answer wins, no scorer and no reference consulted (MEASURED NEGATIVE on bank v6.1, see PAIR-231-V61.md: the model is biased on these cells, so voting amplifies its own mistake; frozen to this stamp)
+    (2, 32),  # J ranking repair: the answer's id order re-derived from the (id, value) table and direction phrase already in the prompt; deterministic, zero model tokens, no reference read, permutation-only over the ids the model listed, refused whenever the rule grammar is unsure
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -88,8 +89,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 31)
-CURRENT_STAMP = "0.0.2.31"
+CURRENT_REVISION = (2, 32)
+CURRENT_STAMP = "0.0.2.32"
 
 
 def _digits(value: str) -> list[int]:

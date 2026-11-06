@@ -141,6 +141,11 @@ for f in ("parb_check_v6.py", "e_sandbox.py", "parb_bank_v6.py"):
     shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
 for f in ("gate_run.py", "gate_versioning.py", "gate_engine_guard.py"):
     shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
+# Copy every harness module the contour imports, not a hand-kept list: the contour grows siblings
+# (gate_format_repair, gate_loop_drive, gate_j_rerank, ...) and a forgotten one burns an arm.
+for _f in sorted(os.listdir(os.path.join(ROOT, "harness"))):
+    if _f.startswith("gate_") and _f.endswith(".py") and "test" not in _f:
+        shutil.copy2(os.path.join(ROOT, "harness", _f), os.path.join(OUT, _f))
 assert "def plan_loop" in open(os.path.join(OUT, "gate_run.py"), encoding="utf-8").read(), "loop driver missing"
 # Fail closed on a workspace that cannot import: contour keeps gaining sibling modules and a
 # missing one only shows up as a traceback minutes into an arm (gate_engine_guard did exactly

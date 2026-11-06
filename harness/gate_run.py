@@ -51,6 +51,7 @@ LADDER_TOP_212 = 8192
 sys.path.insert(0, ROOT)
 from gate_engine_guard import (STALL_RATE, STALL_S, STALL_WINDOW, StallTracker,
                                health_url, is_stalled, run_record)
+import gate_j_rerank as JR
 _GV = None
 try:
     import gate_versioning as _GV
@@ -1362,8 +1363,15 @@ def _fmt_parse(text):
     return None
 
 
-SELFCONSIST = contour_at_least(2, 31)
+CONTOUR_REVISION = tuple(int(x) for x in CONTOUR_BEHAVIOR.split("."))
+
+# Measured-negative behaviours are frozen to the stamp where they were measured (see
+# gate_feature_adoption.py): 2.30 shape guarantee -1.3 cells, 2.31 plurality vote -2.7 cells and 2.5x energy.
+# contour_at_least would smuggle both into every future arm.
+CONTRACT_GUARANTEE = CONTOUR_REVISION == (2, 30)
+SELFCONSIST = CONTOUR_REVISION == (2, 31)
 SELFCONSIST_CATS = ("C", "J")
+J_RERANK = contour_at_least(2, 32)
 _SC_CONST = 20261106
 
 
@@ -1426,8 +1434,6 @@ def selfconsistency_vote(acct, cat, r, msgs0, seed):
             return rr
     return r
 
-
-CONTRACT_GUARANTEE = contour_at_least(2, 30)
 
 # Shape-only hints. They echo the format the task itself already demands; they never quote a scorer
 # keyword or reference answer (issue #15 keeps the official run keyword-free).
@@ -1545,6 +1551,19 @@ def post_normalize_answer(cat, t, text):
                         ids.append(str(v))
             if ids and all(isinstance(x, dict) for x in j2):
                 return json.dumps(ids, ensure_ascii=False), ["j_id_norm"]
+    # 0.0.2.32: J ordering re-derived from the prompt's own table (see gate_j_rerank.py). Applied only when
+    # the result is a pure permutation of what the model wrote: the contour fixes the ORDER, it does not
+    # decide membership, and it never reads the reference. Unsupported rules return None and touch nothing.
+    if J_RERANK and cat == "J" and t.get("mode") != "loop":
+        j2 = _fmt_parse(text)
+        ids = [x for x in j2] if isinstance(j2, list) and j2 and all(isinstance(x, str) for x in j2) else None
+        if ids:
+            doc = ((t.get("assembled_doc") or "") + "\n" + (t.get("prompt") or "")).strip()
+            ranked = JR.rank_from_prompt(t.get("prompt") or "", ids) or JR.rank_from_prompt(doc, ids)
+            if ranked and set(ranked) == set(ids) and ranked != ids:
+                return json.dumps(ranked, ensure_ascii=False), ["v232_j_rerank_by_prompt"]
+            if ranked and set(ranked) != set(ids):
+                return text, ["v232_j_membership_untouched"]
     if not POST_NORMALIZE or not text:
         return text, None
     changed = []
