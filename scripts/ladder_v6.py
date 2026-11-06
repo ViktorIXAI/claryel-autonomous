@@ -33,6 +33,8 @@ CHANGES = {
     "0.0.2.26": "G conflict overwrite: existing conflict:true with wrong clauses/values",
     "0.0.2.27": "A arithmetic computed from the numbers in the prompt (VAT, FX, proration, trimmed mean)",
     "0.0.2.28": "H requires/unknown filled from an explicit prompt signature constraint",
+    "0.0.2.29": "C coverage gate reads the option letters from the task text (bank v6.1 ships C "
+                "without n_cand) and emits the contract answer line; stamp validation fails closed",
 }
 
 REF = ("grok raw **59/71**, codex raw **49/71**, basalt bare **49/71**; the original contour "
@@ -43,11 +45,15 @@ def strict(r):
     return (r.get("content") or 0) == 1.0 and bool(r.get("format_ok"))
 
 
-def main():
-    bank = {t["id"]: t for t in json.load(open(BANK, encoding="utf-8"))}
-    loop = {k for k in bank if bank[k].get("mode") == "loop"}
+# Arms measured on bank v6.1 (J fixes, re-pinned workspace `f4553aab304f60d7`). They must never
+# share a table row with the v6-era arms: same task ids, different task text.
+V61_DIRS = {"full-229"}
+V61_EXTRA = ["four-arm-v61"]
+
+
+def collect(paths, bank, loop):
     rows = []
-    for d in sorted(glob.glob(os.path.join(RES, "full-2*"))):
+    for d in paths:
         lf = sorted(glob.glob(os.path.join(d, "ledger-*.jsonl")))
         if not lf:
             continue
@@ -65,10 +71,22 @@ def main():
             c = k[0][0]
             cat[c][1] += 1
             cat[c][0] += strict(r)
-        rows.append((led[0].get("contour_version"), len(best),
+        rows.append((led[0].get("contour_version"), os.path.basename(d), len(best),
                      sum(strict(r) for r in pl), len(pl),
                      sum(strict(r) for r in lp), len(lp),
                      " ".join(f"{c}{cat[c][0]}/{cat[c][1]}" for c in sorted(cat))))
+    return rows
+
+
+def main():
+    bank = {t["id"]: t for t in json.load(open(BANK, encoding="utf-8"))}
+    loop = {k for k in bank if bank[k].get("mode") == "loop"}
+    dirs = sorted(glob.glob(os.path.join(RES, "full-2*")))
+    v6 = [d for d in dirs if os.path.basename(d) not in V61_DIRS]
+    v61 = [d for d in dirs if os.path.basename(d) in V61_DIRS]
+    v61 += [os.path.join(RES, n) for n in V61_EXTRA if os.path.isdir(os.path.join(RES, n))]
+    rows = collect(v6, bank, loop)
+    rows61 = collect(v61, bank, loop)
     out = [f"# contour ladder on hard bank v6 (rep0, identical gseeds)",
            "",
            f"Bank source of truth `benchmarks/hard/bank-hard-v6.json` sha16 `{sha16(BANK)}`. Every arm in",
@@ -88,10 +106,22 @@ def main():
     if os.path.exists(rp):
         for e in json.load(open(rp, encoding="utf-8")):
             corr[e["stamp"]] = e["plain_corrected"]
-    for s, n, ps, pn, ls, ln, cats in rows:
+    for s, _d, n, ps, pn, ls, ln, cats in rows:
         c = corr.get(s)
         cell = f"**{c}/{pn}**" if c is not None and c != ps else ("=" if c == ps else "-")
         out.append(f"| {s} | **{ps}/{pn}** | {cell} | {ls}/{ln} | {n} | {cats} | {CHANGES.get(s, '')} |")
+    out += ["",
+            "## Arms measured on bank v6.1 (generated workspace `f4553aab304f60d7`)",
+            "",
+            "Same task ids, corrected task text (the J data table, K wording). These rows are NOT",
+            "cell-comparable with the v6 rows above — the bank changed under them. Raw arms on this",
+            "bank score bare basalt **56/71**, Grok **54/71**, ChatGPT **50/71**",
+            "(`four-arm-v61/FOUR-ARM-V61.md`, cross-bank reading in `four-arm-v61/VS-V6.md`).",
+            "",
+            "| stamp | arm dir | plain strict /71 | loop strict /6 | rows | per-category strict (77 incl. loop) | what the stamp changed |",
+            "|---|---|---|---|---|---|---|"]
+    for s, d, n, ps, pn, ls, ln, cats in sorted(rows61, key=lambda r: (r[0], r[1])):
+        out.append(f"| {s} | `{d}` | **{ps}/{pn}** | {ls}/{ln} | {n} | {cats} | {CHANGES.get(s, '')} |")
     last = rows[-1] if rows else None
     out += ["", f"Reference single-shot arms on the same bank (`FOUR-ARM-SCOREBOARD.md`, no contour): {REF}.",
             "",

@@ -1,0 +1,25 @@
+plain    n=71  strict A=61 B=63
+loop     n=6   strict A=5 B=5
+
+cat    A   B   n
+A      7   8   9  <--
+B      5   5   7
+C      5   6   8  <--
+D      8   8   9
+E     10  10  10
+F      6   6   6
+G      6   6   6
+H      4   4   5
+I      6   6   6
+J      5   5   7
+K      4   4   4
+
+flips (strict)
+  B wins A-ex6-07    A c=0.00 f=True notes=fields_mismatch:true,false
+  B wins C-ex6-03    A c=0.00 f=True notes=set_mismatch got=['A'] want=['A', 'D']
+  A wins H-ex6-01    B c=0.50 f=True notes=requires_missing:аудит-лог operations
+  B wins H-ex6-04    A c=0.50 f=True notes=requires_missing:история изменений сервера
+
+paired: B wins 3, A wins 1, ties 73, exact sign-test p=0.6250
+A cost: calls=146 ptok=27301 ctok=12372 wall=567s
+B cost: calls=141 ptok=26298 ctok=9786 wall=545s

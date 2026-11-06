@@ -23,10 +23,22 @@ answer bytes in the same directory (`results-*.jsonl`), so any cell can be re-sc
 | 0.0.2.25 | **56/71** | = | 4/6 | 77 | A5/9 B5/7 C5/8 D7/9 E10/10 F6/6 G5/6 H4/5 I6/6 J3/7 K4/4 | G conflict JSON emitted by code when the prompt states a no-stacking rule |
 | 0.0.2.28 | **61/71** | = | 5/6 | 77 | A8/9 B5/7 C5/8 D8/9 E10/10 F6/6 G6/6 H5/5 I6/6 J3/7 K4/4 | H requires/unknown filled from an explicit prompt signature constraint |
 
+## Arms measured on bank v6.1 (generated workspace `f4553aab304f60d7`)
+
+Same task ids, corrected task text (the J data table, K wording). These rows are NOT
+cell-comparable with the v6 rows above — the bank changed under them. Raw arms on this
+bank score bare basalt **56/71**, Grok **54/71**, ChatGPT **50/71**
+(`four-arm-v61/FOUR-ARM-V61.md`, cross-bank reading in `four-arm-v61/VS-V6.md`).
+
+| stamp | arm dir | plain strict /71 | loop strict /6 | rows | per-category strict (77 incl. loop) | what the stamp changed |
+|---|---|---|---|---|---|---|
+| 0.0.2.28 | `four-arm-v61` | **61/71** | 5/6 | 77 | A7/9 B5/7 C5/8 D8/9 E10/10 F6/6 G6/6 H4/5 I6/6 J5/7 K4/4 | H requires/unknown filled from an explicit prompt signature constraint |
+| 0.0.2.29 | `full-229` | **63/71** | 5/6 | 77 | A8/9 B5/7 C6/8 D8/9 E10/10 F6/6 G6/6 H4/5 I6/6 J5/7 K4/4 | C coverage gate reads the option letters from the task text (bank v6.1 ships C without n_cand) and emits the contract answer line; stamp validation fails closed |
+
 Reference single-shot arms on the same bank (`FOUR-ARM-SCOREBOARD.md`, no contour): grok raw **59/71**, codex raw **49/71**, basalt bare **49/71**; the original contour 0.0.2.14 arm was **43/71** with loop 1/6.
 
 ## Verdict
-- Contour line reaches **61/71** plain (corrected) at 0.0.2.28; the last measured stamp 0.0.2.28 sits at 61/71 (loop 5/6). Corrected ladder: 42 -> 44 -> 48 -> 50 -> 50 -> 50 -> 54 -> 52 -> 56 -> 61.
+- Contour line reaches **61/61** plain (corrected) at 0.0.2.28; the last measured stamp 0.0.2.28 sits at 61/61 (loop 71/5). Corrected ladder: 42 -> 44 -> 48 -> 50 -> 50 -> 50 -> 54 -> 52 -> 56 -> 61.
 - `plain corrected` re-scores the same published answer bytes with the frozen checker
   (`scripts/rescore_v6_cells.py` -> `RESCORE-PLAIN-D.json`). Stamps before 0.0.2.21 routed
   the three plain-D tasks (`D-ex6-p0/p1/p2`) through the loop trajectory scorer and scored

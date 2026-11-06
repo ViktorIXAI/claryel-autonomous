@@ -299,3 +299,15 @@ at the newest feature) is deliberately preserved; that contract is asserted in t
 `harness/gate_v45_stamp_guard_test.py` (12 checks, incl. an integration check that `import
 gate_run` exits non-zero on `0.0.2.228`). The real 2.28-vs-2.29 evidence comes from the two full
 v6.1 arms (`full-228` measured, `c229full` running), not from the void pair.
+
+## contour 0.0.2.29 measured and published on bank v6.1 (06.11 04:25 CET)
+
+Full 77-task arm `full-229/` (bank v6.1 ws `f4553aab304f60d7`, one rep, same gseeds as the 0.0.2.28
+v6.1 arm): **plain 63/71** (was 61/71), loop 5/6, C **5/8 -> 6/8**. Paired flip list in
+`full-229/pair-228v61-229.txt`: 3 wins / 1 loss / 73 ties, exact sign test p=0.625; the C win is
+`C-ex6-03`, recovered by the intended mechanism (ledger shows `contour:v229_coverage_from_prompt:5`
+and `contour:v229_answer_line_contract`), the A and H movements are resample. One rep = mechanism
+proven, effect size not. Decision record:
+`history/agent-decisions/2026-11-06-contour-229-coverage-and-stamp-guard.md`.
+`scripts/ladder_v6.py` now publishes two separate ladder sections (bank v6 / bank v6.1) so the two
+banks can never share a row. Next stamp: 0.0.2.30, and the four-arm cadence point after it.
