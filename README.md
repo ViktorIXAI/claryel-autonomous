@@ -20,7 +20,7 @@ The operator set objectives, constraints, publication scope and final adoption
 decisions. The agent's own work is itemized in [`docs/autonomy.md`](docs/autonomy.md);
 its limits are in [`docs/limitations.md`](docs/limitations.md).
 
-Status checked: 2026-11-05
+Status checked: 2026-11-05 (historical snapshot; version and run status require fresh verification)
 
 ## Research direction and testing philosophy
 
@@ -28,7 +28,10 @@ Claryel Autonomous is an open engineering research project, not a standalone pro
 
 Because models, inference engines, hardware and cloud services change rapidly, we preserve evidence for repeated retrospective analysis and may eventually test uncertainty-aware forecasts and scenarios. These are research questions, not demonstrated capabilities. See [Research Direction and Testing Philosophy](docs/TESTING-PHILOSOPHY.md).
 
-## Current version
+## Versioning and historical release snapshot
+
+The following table documents an earlier release sequence; it is not a live latest-version claim. Consult `versions/VERSIONS.md` and dated experiment records for subsequent versions.
+
 
 The version scheme is four digits: `A.B.C.D`.
 
@@ -69,7 +72,10 @@ Current mapping:
 Legacy `v1.x` and `v2.x` names still work as inputs. New reports should use the
 canonical four-part form.
 
-## Current status
+## Recorded operational status (historical)
+
+The table below is a dated snapshot, not a live inventory of running jobs.
+
 
 | item | status as of 2026-11-03 |
 |---|---|
@@ -94,7 +100,7 @@ canonical four-part form.
 | [tb4-fast5-baseline-20261104-070835](experiments/terminal-bench/2026-11-04-p2005-tb4-fast5-baseline/index.md) | 5-task sample; 4 / 5 completed, 1 solved, 3 failed; not an official leaderboard run |
 <!-- END 2026-11-04-P2005-TB4-FAST5-BASELINE -->
 
-## Headline results
+## Historical measured results
 
 The numbers below are paired where they compare versions. Raw means across
 different plan mixes are not comparable.
@@ -178,7 +184,6 @@ warnings. They are not used as automatic proof of this repository's results.
 See [`docs/source-policy.md`](docs/source-policy.md) and
 [`sources/reading-list.md`](sources/reading-list.md).
 
-## Where the evidence lives
 ## Where the evidence lives
 
 **Everything is published on `main`** — code versions, every benchmark arm, scoreboards,
