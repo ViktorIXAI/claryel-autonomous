@@ -31,4 +31,13 @@ UNADOPTED_FEATURES = {
     # actually lose sit outside both grammars (`PAIR-234-V61.md`). The B cells are bit-identical
     # between arms: the delta is pure resampling and the mechanism reached zero work.
     "b_field_complete": (2, 34),
+    # 0.0.2.35 measured pair-235: the mechanism is confirmed on-target — `contour:v235_b_table_total`
+    # fired in all three candidate seeds, converted its only bank target (B-ex6-06) 0/3 -> 3/3 with the
+    # event on every converted row and zero extra model calls. But the paired arm mean moved +2.0,
+    # exactly AT the ~2-cell resolution floor of this comparison, and four off-target cells flipped with
+    # no 2.35 event, breaking the pre-registered clean pattern. The cell-level claim passed; the
+    # arm-level claim did not resolve above noise, and the pre-registered decision rule freezes the
+    # stamp. Adoption is withheld as a LINE decision, not a mechanism verdict: the repair stays
+    # reproducible at stamp 0.0.2.35 and re-adoption is a one-flag owner call (`PAIR-235-V61.md`).
+    "b_table_aggregate": (2, 35),
 }

@@ -79,6 +79,11 @@ ck(not g235.CONTRACT_GUARANTEE and not g235.SELFCONSIST and not g235.J_RERANK an
    and not g235.B_FIELD_COMPLETE and g235.B_TABLE_AGGREGATE,
    "2.35 inherits adopted behaviour plus the B table aggregation only: the measured -1.0/zero-fire "
    "2.34 grammar is frozen to its own stamp and must not ride into 2.35")
+g236 = load("0.0.2.36")
+ck(not g236.CONTRACT_GUARANTEE and not g236.SELFCONSIST and not g236.J_RERANK and not g236.A_TABLE_ARITH
+   and not g236.B_FIELD_COMPLETE and not g236.B_TABLE_AGGREGATE and g236.G4_LOTTERY,
+   "2.36 does NOT inherit the pair-235-unadopted 2.35 table repair and adds only the group-4 "
+   "lottery selection: confirmed-on-target but arm-unresolved stays frozen to its own stamp")
 
 bank = json.load(open(str(HERE.parent / "benchmarks" / "hard" / "bank-hard-v6.json"), encoding="utf-8"))
 import gate_j_rerank as JR

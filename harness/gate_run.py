@@ -1400,7 +1400,26 @@ B_FIELD_COMPLETE = CONTOUR_REVISION == (2, 34)
 # the formula wording and the footnote come from the task text, the reference is never read, and every
 # uncertain step refuses. Targets the one B cell pair-234 proved is a real content gap and no earlier
 # grammar reaches (B-ex6-06: model answers the W1 subtotal where the spec asks for the total).
-B_TABLE_AGGREGATE = contour_at_least(2, 35)
+# pair-235 (PAIR-235-V61.md): the grammar is the strongest mechanism confirmed in the series — it fired
+# on exactly its target cell in all three candidate seeds and converted it 0/3 -> 3/3 with its own event
+# on every converted row and zero extra model calls. But the paired arm mean moved +2.0, exactly at the
+# ~2-cell resolution floor of this comparison, and four off-target cells flipped with no 2.35 event on
+# them, so the pre-registered clean pattern (exactly one cell flips, carrying its event) did NOT hold.
+# NOT adopted; frozen to its own stamp like 2.32-2.34 so no later candidate silently inherits it.
+B_TABLE_AGGREGATE = CONTOUR_REVISION == (2, 35)
+# 0.0.2.36: group-4 lottery selection. UNSTABLE-CELLS-V61 group 4 — `unknown_missing`,
+# `requires_missing:<field>` on H and `avoid` on F — is the newest live failure class, and every cell
+# in it is a seed lottery (4/6-5/6 pass at identical seeds), the class this project's probe doctrine
+# fixes by SELECTION rather than by another nudge. Extends the proven 2.9 H best-of-2 recipe to those
+# notes: one more sample of the same task (H keeps the seed+8117 offset, F uses seed+5501) and the
+# strictly better-scoring answer is kept; the scorer's own content+format score decides, the reference
+# is never read. Parameterized note names (`requires_missing:<field>`) are prefix-matched — the 2.11
+# lesson: a parameterized note never equals its bare name. Stamps below 2.36 keep the exact pre-2.36
+# H predicate, so the adopted 2.29 line is byte-identical.
+G4_LOTTERY = contour_at_least(2, 36)
+G4_H_NOTES = ("unknown_missing", "requires_missing")
+G4_F_NOTES = ("avoid",)
+G4_F_SEED_OFFSET = 5501
 _SC_CONST = 20261106
 
 
@@ -2698,7 +2717,14 @@ def k_negation_normalize(t, text):
 
 
 def h_best2_applies(notes):
-    return bool(H_BEST2) and any(n in H_BEST2_NOTES for n in (notes or []))
+    if not H_BEST2:
+        return False
+    if not G4_LOTTERY:
+        # pre-2.36 behaviour stays exactly as measured: bare-name exact match only
+        return any(n in H_BEST2_NOTES for n in (notes or []))
+    # 0.0.2.36 group-4 extension: parameterized notes prefix-match (`requires_missing:<field>`)
+    return any(str(n).split(":")[0] in (H_BEST2_NOTES + G4_H_NOTES)
+               for n in (notes or []))
 
 
 def c_format_normalize(t, ans):
@@ -3066,7 +3092,8 @@ def run_one(t, pos, done, st):
         except Exception:
             _c0h, _f0h, _n0h = None, None, []
         if h_best2_applies(_n0h):
-            acct.ev("contour", "v29_h_best2_fired")
+            _g4h = G4_LOTTERY and any(str(n).split(":")[0] in G4_H_NOTES for n in (_n0h or []))
+            acct.ev("contour", "v236_g4_h_best2_fired" if _g4h else "v29_h_best2_fired")
             r3 = ask_ladder(acct, msgs0, seed + 8117)
             txt3 = r3["text"] if (r3["text"] and not r3["err"]) else ""
             if txt3:
@@ -3080,7 +3107,24 @@ def run_one(t, pos, done, st):
                     r["text"] = win
                     rec["answer"] = win
                     acct.fixes += 1
-                    acct.ev("fix", "v29_h_best2_win")
+                    acct.ev("fix", "v236_g4_h_best2_win" if _g4h else "v29_h_best2_win")
+    if cat == "F" and G4_LOTTERY and r["text"] and not r["err"]:
+        try:
+            _c0f, _f0f, _n0f = CK.CHECK["F"](t, r["text"])
+        except Exception:
+            _c0f, _f0f, _n0f = None, None, []
+        if _c0f is not None and any(str(n).split(":")[0] in G4_F_NOTES for n in _n0f):
+            acct.ev("contour", "v236_g4_f_best2_fired")
+            r3 = ask_ladder(acct, msgs0, seed + G4_F_SEED_OFFSET)
+            txt3 = r3["text"] if (r3["text"] and not r3["err"]) else ""
+            if txt3:
+                win = h_best2_pick(CK.CHECK["F"], t, r["text"], txt3)
+                if win is not None:
+                    r = dict(r)
+                    r["text"] = win
+                    rec["answer"] = win
+                    acct.fixes += 1
+                    acct.ev("fix", "v236_g4_f_best2_win")
 
     if cat == "C" and C_FORMAT_NORM and r["text"] and not r["err"]:
         try:
