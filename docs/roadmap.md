@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** The milestone status is dated 2026-11-01. Completion labels are historical and not evidence of present-day readiness. See [preservation policy](EVIDENCE-PRESERVATION.md) and [project direction](TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Roadmap (project-brief stages, honest status)
 
 | # | stage | status (2026-11-01, late) |
