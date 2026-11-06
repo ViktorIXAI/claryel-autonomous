@@ -1,6 +1,6 @@
 # Contributing
 
-This is a research record first and a tool second. The rules below exist to
+This is an open engineering experiment record first and a tool second. It is not an academic study or a standalone commercial product. See [project direction](docs/TESTING-PHILOSOPHY.md). The rules below exist to
 keep the record trustworthy.
 
 ## Non-negotiables
