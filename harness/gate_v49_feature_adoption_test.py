@@ -66,8 +66,13 @@ g232 = load("0.0.2.32")
 ck(not g232.CONTRACT_GUARANTEE and not g232.SELFCONSIST and g232.J_RERANK and not g232.A_TABLE_ARITH,
    "2.32 builds on adopted behaviour plus the J re-rank only")
 g233 = load("0.0.2.33")
-ck(not g233.CONTRACT_GUARANTEE and not g233.SELFCONSIST and not g233.J_RERANK and g233.A_TABLE_ARITH,
+ck(not g233.CONTRACT_GUARANTEE and not g233.SELFCONSIST and not g233.J_RERANK and g233.A_TABLE_ARITH
+   and not g233.B_FIELD_COMPLETE,
    "2.33 does NOT inherit the unadopted 2.32 re-rank and adds only the threshold-table arithmetic")
+g234 = load("0.0.2.34")
+ck(not g234.CONTRACT_GUARANTEE and not g234.SELFCONSIST and not g234.J_RERANK and not g234.A_TABLE_ARITH
+   and g234.B_FIELD_COMPLETE,
+   "2.34 inherits adopted behaviour plus B field completeness only; the unadopted 2.32/2.33 stay frozen")
 
 bank = json.load(open(str(HERE.parent / "benchmarks" / "hard" / "bank-hard-v6.json"), encoding="utf-8"))
 import gate_j_rerank as JR

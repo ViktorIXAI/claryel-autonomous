@@ -1377,8 +1377,16 @@ SELFCONSIST_CATS = ("C", "J")
 # unresolvable, so it is NOT adopted: it stays enabled only at its own stamp and must not ride into 2.33+.
 J_RERANK = CONTOUR_REVISION == (2, 32)
 # 0.0.2.33: A threshold-table arithmetic (tariff chains), the adopted 2.27 family extended to the
-# fields_mismatch cluster that the corrected stability map names for A (PAIR UNSTABLE-CELLS group 3).
-A_TABLE_ARITH = contour_at_least(2, 33)
+# fields_mismatch cluster that the corrected stability map names for A (UNSTABLE-CELLS group 3).
+# MEASURED (PAIR-233-V61.md): +1.3 cells at three seeds, BELOW the ~2-cell noise floor, and the mechanism
+# fired zero times live — the candidate model answered its target cell correctly on all three seeds, so
+# the pair could not measure it. NOT adopted; frozen to its own stamp like the other unadopted features.
+A_TABLE_ARITH = CONTOUR_REVISION == (2, 33)
+# 0.0.2.34: B field completeness — extraction fields recomputed by code from the prompt's own data block.
+# Two narrow grammars (config key:value block; embedded-JSON echo-with-count), required names read from
+# the prompt's own JSON spec, any ambiguity or extra model key refuses. K excluded: value SHAPES the
+# prompt never states are a bank clarification, not a contour guess (the 2.30 lesson).
+B_FIELD_COMPLETE = contour_at_least(2, 34)
 _SC_CONST = 20261106
 
 
@@ -2143,6 +2151,163 @@ def a_arith_by_code(t, text):
             [_stamps.get(tag or "", "v227_") + (tag or "a_arith_code")])
 
 
+# 0.0.2.34: B field completeness (the fields_mismatch/missing group of UNSTABLE-CELLS-V61.md).
+# The values are recomputed by code from the prompt's own data block; the hidden reference is never
+# read. Two narrow grammars; every unsure case refuses and touches nothing:
+#  (a) config block  — `key: value` lines plus `- item` lists, required names taken from the prompt's
+#      own JSON spec (B-ex6-03 shape);
+#  (b) echo-with-count — the prompt embeds a complete JSON object and asks to return the SAME object
+#      plus one sum-of-lengths count field and minus one named field (B-ex6-05 shape).
+# Model answers carrying keys the spec does not name are refused outright: we cannot know the gold
+# field set, and guessing it is how 2.30 turned into a regression.
+
+def _b_scalar(v):
+    s = str(v).strip()
+    try:
+        return int(s)
+    except ValueError:
+        try:
+            return float(s)
+        except ValueError:
+            return s
+
+
+def _b_eq(a, b):
+    if isinstance(a, list) or isinstance(b, list):
+        return [str(x) for x in a] == [str(x) for x in b] if isinstance(a, list) and isinstance(b, list) else False
+    try:
+        return abs(float(a) - float(b)) < 1e-9
+    except (TypeError, ValueError):
+        return str(a).strip() == str(b).strip()
+
+
+def _b_spec_names(prompt):
+    m = re.search(r"JSON:\s*\{(.{0,400}?)\}", prompt, re.S)
+    if not m:
+        return []
+    return re.findall(r'"([A-Za-z_][A-Za-z0-9_]*)"', m.group(1))
+
+
+def _b_config_block(prompt):
+    """Flat key map of a `key: value` / `key:` + `- item` block, plus the set of conflicted keys."""
+    kv, amb, last_empty = {}, set(), None
+    for ln in prompt.splitlines():
+        if ln.strip().startswith("JSON"):
+            last_empty = None
+            continue
+        m = re.match(r"^\s*-\s+(.+?)\s*$", ln)
+        if m and last_empty is not None and isinstance(kv.get(last_empty), list):
+            kv[last_empty].append(_b_scalar(m.group(1)))
+            continue
+        km = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$", ln)
+        if not km:
+            continue
+        k, v = km.group(1), km.group(2).strip()
+        if v == "":
+            if k in kv:
+                amb.add(k)
+            kv[k] = []
+            last_empty = k
+        else:
+            val = _b_scalar(v)
+            if k in kv and (isinstance(kv[k], list) or not _b_eq(kv[k], val)):
+                amb.add(k)
+            kv[k] = val
+            last_empty = None
+    return kv, amb
+
+
+def _b_fields_config(t, text, prompt):
+    spec = _b_spec_names(prompt)
+    if not spec:
+        return text, None
+    kv, amb = _b_config_block(prompt)
+    if not kv or amb:
+        return text, None
+    cur = _fmt_parse(text)
+    if not isinstance(cur, dict) or any(k not in spec for k in cur):
+        return text, None
+    out, changed = {}, False
+    for k in spec:
+        if k not in kv or k in amb or (isinstance(kv[k], list) and not kv[k]):
+            return text, None          # a required name unreadable from the block: refuse, touch nothing
+        v = list(kv[k]) if isinstance(kv[k], list) else kv[k]
+        if k in cur and _b_eq(cur[k], v):
+            out[k] = cur[k]
+        else:
+            out[k] = v
+            changed = True
+    if not changed:
+        return text, None
+    return json.dumps(out, ensure_ascii=False), ["v234_b_config_fields"]
+
+
+_B_ECHO_RE = re.compile(
+    r"добавь поле \"([A-Za-z_][A-Za-z0-9_]*)\"\s*[,:]?\s*сумма длин ([A-Za-z_][A-Za-z0-9_]*) по всем ([A-Za-z_][A-Za-z0-9_]*)")
+_B_DROP_RE = re.compile(r"удали \"([A-Za-z_][A-Za-z0-9_]*)\"")
+
+
+def _b_fields_echo(t, text, prompt):
+    m = _B_ECHO_RE.search(prompt)
+    if not m:
+        return text, None
+    cnt_field, len_field, items_key = m.group(1), m.group(2), m.group(3)
+    drops = _B_DROP_RE.findall(prompt)
+    if len(drops) > 1:
+        return text, None
+    i0 = prompt.find("{")
+    if i0 < 0:
+        return text, None
+    depth, blob = 0, None
+    for i in range(i0, len(prompt)):
+        if prompt[i] == "{":
+            depth += 1
+        elif prompt[i] == "}":
+            depth -= 1
+            if depth == 0:
+                blob = prompt[i0:i + 1]
+                break
+    if blob is None:
+        return text, None
+    try:
+        obj = json.loads(blob)
+    except ValueError:
+        return text, None
+    if not isinstance(obj, dict) or not isinstance(obj.get(items_key), list):
+        return text, None
+    total = 0
+    for it in obj[items_key]:
+        if not isinstance(it, dict) or not isinstance(it.get(len_field), list):
+            return text, None
+        total += len(it[len_field])
+    cur = _fmt_parse(text)
+    if not isinstance(cur, dict):
+        return text, None
+    expected_keys = (set(obj) - set(drops)) | {cnt_field}
+    # a kept-but-to-be-dropped field is exactly the failure class this repair removes, so the extra-key
+    # guard allows the drop names; anything ELSE the model invented still refuses the whole repair.
+    if set(cur) - (expected_keys | set(drops)):
+        return text, None
+    out = {k: v for k, v in obj.items() if k not in drops}
+    out[cnt_field] = total
+    if all(k in cur and _b_eq(cur[k], v) for k, v in out.items()):
+        return text, None
+    return json.dumps(out, ensure_ascii=False), ["v234_b_echo_count"]
+
+
+def b_fields_by_code(t, text):
+    """0.0.2.34: recompute B extraction fields from the prompt's own data; refuse whenever unsure."""
+    if not B_FIELD_COMPLETE or not text:
+        return text, None
+    prompt = t.get("prompt") or t.get("free_text") or ""
+    if not prompt:
+        return text, None
+    new, ev = _b_fields_config(t, text, prompt)
+    if ev:
+        return new, ev
+    return _b_fields_echo(t, text, prompt)
+
+
 def h_requires_from_prompt(t, text):
     """v2.28: fill H requires/unknown from an explicit prompt constraint."""
     if not H_REQUIRES_PROMPT or not text:
@@ -2507,6 +2672,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "_".join(ev))
+    if B_FIELD_COMPLETE and cat == "B" and r["text"]:
+        norm, ev = b_fields_by_code(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "_".join(ev))
     if H_REQUIRES_PROMPT and cat == "H" and r["text"]:
         norm, ev = h_requires_from_prompt(t, r["text"])
         if ev:
@@ -2636,6 +2808,13 @@ def run_one(t, pos, done, st):
                             acct.ev("contour", tag + "_".join(ev))
                     if A_ARITH_CODE and cat == "A" and r["text"]:
                         norm, ev = a_arith_by_code(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "_".join(ev))
+                    if B_FIELD_COMPLETE and cat == "B" and r["text"]:
+                        norm, ev = b_fields_by_code(t, r["text"])
                         if ev:
                             r = dict(r)
                             r["text"] = norm

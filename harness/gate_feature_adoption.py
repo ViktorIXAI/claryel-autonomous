@@ -17,10 +17,12 @@ REJECTED_FEATURES = {
     "selfconsistency_vote": (2, 31),
 }
 
-# Measured UNRESOLVABLE (not negative, but not proven): 0.0.2.32 J re-rank moved the mean +1.3 cells over
-# three seeds — below the ~2-cell noise floor of the same comparison (PAIR-232-V61.md). The rule is that a
-# behaviour only inherits into later stamps if its measurement resolved it. Not adopted means not inherited:
-# the re-rank stays enabled at stamp 2.32 alone, exactly like a rejected feature.
+# 0.0.2.32 / 0.0.2.33 measured UNRESOLVABLE on bank v6.1 (+1.3 cells each, below the ~2-cell floor of the
+# same comparison): `j_prompt_rerank` (PAIR-232-V61.md) and `a_table_arith` (PAIR-233-V61.md, zero live
+# fires: the candidate model answered its target cell correctly in every seed, so the arm delta contained
+# no on-target cells). A behaviour inherits only if its measurement resolved it — an unadopted feature
+# stays enabled at its own stamp alone, so it cannot ride into a later candidate's measurement.
 UNADOPTED_FEATURES = {
     "j_prompt_rerank": (2, 32),
+    "a_table_arith": (2, 33),
 }
