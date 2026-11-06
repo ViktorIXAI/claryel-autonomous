@@ -16,8 +16,8 @@ off, but that last margin is not yet resolved at 95% confidence.**
 | arm | 71-cell single-shot total (rep0) | seeds | per-seed scores on the common 61-cell set | mean | CI vs contour |
 |---|---|---|---|---|---|
 | contour 0.0.2.29 | 63 / 62 / 60 | **6** (reps 0-5 published) | 53, 52, 50, 55, 53, 51 | 52.3 | — |
-| bare basalt (same weights, no contour) | 56 | 3 | 46, 48, 46 | 46.7 | +5.7 cells, CI −1.2..+12.7 → **not resolved** |
-| Grok 4.7 | 54 | 2 | 44, 45 | 44.5 | +7.8 cells, CI +1.5..+14.5 → **excludes 0** |
+| bare basalt (same weights, no contour) | 56 | **5** | 46, 48, 46, 46, 46 | 46.4 | +5.9 cells, CI −0.5..+12.5 → **not resolved, narrowly** |
+| Grok 4.7 | 54 | **3** | 44, 45, 43 | 44.0 | +8.3 cells, CI +1.8..+15.0 → **excludes 0** |
 | ChatGPT (`gpt-6.1-sol`) | 50 | 3 | 40, 41, 40 | 40.3 | +12.0 cells, CI +4.3..+19.8 → **excludes 0** |
 
 Loop protocol D (6 tasks): contour 5/6; the chat arms cannot attempt it at all, so it is N/A for them
@@ -59,9 +59,10 @@ RAPL without root, cloud arms outside this machine): `ENERGY-METHOD.md`, `COST-V
 1. One bank, 77 tasks, Russian-language business/ops contracts. No external holdout yet.
 2. The margin is concentrated in contract compliance; on the other 56 cells the contour is at parity with
    all three arms.
-3. Cloud arms have 2 seeds each; contour 4, bare basalt 3. Cloud-vs-cloud differences are inside noise.
-4. The contour-vs-no-contour margin (+5.7 cells, CI includes 0) is **not** established even with six contour
-   seeds against three bare seeds; it is the single most important open number in this repo. A partial Grok
+3. Cloud arms have 3 seeds each; contour 6, bare basalt 5. Cloud-vs-cloud differences are inside noise.
+4. The contour-vs-no-contour margin (+5.9 cells, CI −0.5..+12.5) is **not** established with six contour
+   seeds against five bare seeds — the lower bound sits half a cell below zero. It is the single most
+   important open number in this repo, and 0.0.2.30 (contract guarantee) is the attempt to widen it. A partial Grok
    repetition also had to be dropped: an unfinished arm scores artificially low (it inflated the contour-vs-
    Grok margin from +8 to +17.5 cells before the guard caught it).
 5. Two cells of this bank are not answerable as written (`bank-defect-b04.md`) and one gold ask looks

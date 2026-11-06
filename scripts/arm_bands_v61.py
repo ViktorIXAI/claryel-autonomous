@@ -92,7 +92,10 @@ def main() -> int:
 
     for arm in ("basalt", "codex", "grok"):
         add_raw(os.path.join(V6, "four-arm-v61", "answers-%s-v61.jsonl" % arm), arm)
-        p = os.path.join(WS, "answers-%s.jsonl" % arm)
+        # Published repetitions are the authority; the live workspace copy is only a fallback so a run
+        # in flight can be inspected before publication.
+        pub = os.path.join(V6, "raw-reps-v61", "answers-%s-v61-reps.jsonl" % arm)
+        p = pub if os.path.exists(pub) else os.path.join(WS, "answers-%s.jsonl" % arm)
         if os.path.exists(p):
             add_raw(p, arm)
     # A repetition that is still running has partial rows and scores artificially low; drop any seed

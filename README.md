@@ -33,13 +33,13 @@ Contour gate line: `0.0.2.29` (harness stamps are `0.0.2.x`; full history in `ve
 Hard bank v6.1 — 71 single-shot + 6 loop tasks, frozen scorer, every number recomputed from published
 answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
 
-- contour 0.0.2.29 on one 24 GB local GPU: **63 / 62 / 60 of 71** over three independent seeds (a fourth
-  seed is published in `benchmarks/hard/v6-results/reps-229/`; on the common 61-cell set the contour band
-  is 53/52/50/55, mean 52.5)
+- contour 0.0.2.29 on one 24 GB local GPU: six independent seeds published in
+  `benchmarks/hard/v6-results/reps-229/`; on the common 61-cell set the contour band is
+  53/52/50/55/53/51, mean 52.3
 - ChatGPT (`gpt-6.1-sol`, xhigh) **50**, Grok 4.7 **54**, the same local weights with no contour **56**
 - seed-averaged margins with a bootstrap over cells (`ARM-BANDS-V61.md`; contour 6 seeds, ChatGPT 3,
-  bare basalt 3, Grok 2): vs ChatGPT **+12.0 cells, 95% CI +4.3..+19.8**; vs Grok **+7.8 cells,
-  CI +1.5..+14.5**; vs bare basalt +5.7 cells, CI −1.2..+12.7 — **not resolved**, stated as such
+  bare basalt 5, Grok 3): vs ChatGPT **+12.0 cells, 95% CI +4.3..+19.8**; vs Grok **+8.3 cells,
+  CI +1.8..+15.0**; vs bare basalt +5.9 cells, CI −0.5..+12.5 — **not resolved**, stated as such
 - exact paired sign tests: vs ChatGPT **16W/3L p=0.0044**, vs Grok **12W/3L p=0.035**, vs bare basalt
   11W/4L p=0.118
 - where the margin lives: contract-sensitive categories F/H/K **14 vs 6 / 6 / 1**; on the other 56 cells

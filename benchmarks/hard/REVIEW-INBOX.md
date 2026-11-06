@@ -472,3 +472,28 @@ not by the model changing its mind. The next stamp (0.0.2.30) targets exactly th
 deterministic salvage for the required artifact shape — with per-cell proof (x/6 becomes 6/6) against the
 frozen scorer. Stable content fails (A-ex6-03, B-ex6-04, B-ex6-06, C-ex6-02, J-ex6-02) stay as they are;
 two of them are documented bank defects.
+
+## 06.11 06:15 CET — contour 0.0.2.30 plus five bare-basalt seeds
+
+Two things landed together.
+
+`contour 0.0.2.30` (commit on `main`): the six-seed stability map showed 12 of 14 coin-flip cells were
+parse collapses with no repair event. `contract_guarantee` now takes one shape-only re-ask and otherwise
+salvages the model's own text (first balanced JSON block, or its own field lines); if nothing parses, the
+model's first answer is kept verbatim and `contour:v230_contract_unresolved` is recorded. 32 checks in
+`harness/gate_v46_format_guarantee_test.py`, including end-to-end passes on real bank J and C tasks under
+the unchanged frozen scorer, and the substring property that proves no facts are invented. The test also
+caught a real bug: salvage was being attempted on the original text only, so a prose-with-artifact re-ask
+answer was thrown away.
+
+Raw repetitions published through `scripts/sanitize_raw_reps.py` into
+`benchmarks/hard/v6-results/raw-reps-v61/` (provenance per row: model id, CLI, bank sha16
+`9ec86dfca4a6f85f`). Now 5 bare-basalt seeds (46, 48, 46, 46, 46), 3 Grok seeds (44, 45, 43), 3 ChatGPT
+seeds (40, 41, 40). Bootstrap margins against 6 contour seeds: vs ChatGPT +12.0 cells CI +4.3..+19.8, vs
+Grok +8.3 cells CI +1.8..+15.0, vs bare basalt +5.9 cells CI −0.5..+12.5 — the last one still not
+resolved, now by half a cell rather than 1.2.
+
+Running now: paired contour arms on bank v6.1 (`parb-pair230`) — 0.0.2.29 vs 0.0.2.30, three identical
+seeds each, arms alternating per seed. The claim under test is per-cell stability (coin flips -> stable
+pass), not just the mean. Energy windows are recorded per run (`<rid>-start.epoch`/`-end.epoch`) with the
+GPU sampler still active.
