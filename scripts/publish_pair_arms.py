@@ -12,37 +12,59 @@ Usage: python3 scripts/publish_pair_arms.py c29r0 c29r1 c30r0 ...
 import json
 import os
 import re
-import shutil
 import sys
 
-WS = os.path.expanduser("~/parb-v61-contour")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "scripts", "security"))
+from sanitize_run_record import (  # noqa: E402
+    HOST_PLACEHOLDER,
+    PATH_PLACEHOLDER,
+    PRIVATE_IP,
+    HOME_PATH,
+    write_run_record,
+)
+
+WS = os.path.expanduser("~/parb-v61-contour")
 DST = os.path.join(ROOT, "benchmarks", "hard", "v6-results", "pair-230")
 RULES = [
-    (re.compile(r"192\.168\.\d+\.\d+"), "<LAN_IP>"),
-    (re.compile(r"10\.\d+\.\d+\.\d+"), "<LAN_IP>"),
+    (PRIVATE_IP, HOST_PLACEHOLDER),
     (re.compile(r"claryel0\d"), "<HOST>"),
-    (re.compile(r"/home/viktor[^\s\"]*"), "<LOCAL_PATH>"),
+    (HOME_PATH, PATH_PLACEHOLDER),
 ]
+
+
+def sanitize_text(text: str) -> str:
+    for rx, sub in RULES:
+        text = rx.sub(sub, text)
+    return text
 
 
 def sanitize_copy(src, dst, jsonl=True):
     if not os.path.exists(src):
         return False
     if not jsonl:
-        shutil.copyfile(src, dst)
+        # Plain logs: redact in place, never raw-copy.
+        text = open(src, encoding="utf-8", errors="replace").read()
+        open(dst, "w", encoding="utf-8").write(sanitize_text(text))
         return True
     out = []
     for line in open(src, encoding="utf-8"):
         line = line.strip()
         if not line:
             continue
-        for rx, sub in RULES:
-            line = rx.sub(sub, line)
+        line = sanitize_text(line)
         json.loads(line)
         out.append(line)
     with open(dst, "w", encoding="utf-8") as fh:
-        fh.write("\n".join(out) + "\n")
+        fh.write('\n'.join(out) + '\n')
+    return True
+
+
+def publish_run_record(src, dst) -> bool:
+    if not os.path.exists(src):
+        return False
+    data = json.load(open(src, encoding="utf-8"))
+    write_run_record(dst, data)
     return True
 
 
@@ -57,11 +79,19 @@ def main() -> int:
     os.makedirs(DST, exist_ok=True)
     for rid in ids:
         done = []
-        for pat, js in (("results-%s.jsonl", True), ("ledger-%s.jsonl", True),
-                        ("%s.log", False), ("run-record-%s.json", False)):
+        for pat, kind in (
+            ("results-%s.jsonl", "jsonl"),
+            ("ledger-%s.jsonl", "jsonl"),
+            ("%s.log", "log"),
+            ("run-record-%s.json", "run-record"),
+        ):
             src = os.path.join(WS, pat % rid)
             dst = os.path.join(DST, pat % rid)
-            if sanitize_copy(src, dst, js):
+            if kind == "run-record":
+                ok = publish_run_record(src, dst)
+            else:
+                ok = sanitize_copy(src, dst, jsonl=(kind == "jsonl"))
+            if ok:
                 done.append(os.path.basename(dst))
         prov = {}
         lp = os.path.join(DST, "ledger-%s.jsonl" % rid)
