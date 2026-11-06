@@ -441,3 +441,22 @@ energy numbers instead of single-seed totals.
 Timestamp correction (05:23 CET): the headings above were first written from a planning clock that ran
 3-12 minutes ahead of the host clock; they are corrected to host-clock values here. Exact arm boundaries
 remain file mtimes in `v6-results/RUNLOG-20261106.md`, which is the authoritative timeline.
+
+## 06.11 05:42 CET — six contour seeds, three ChatGPT seeds; guard against scoring unfinished arms
+
+Repetitions 4-5 of contour 0.0.2.29 published (`reps-229/…-c229r45`, 154 rows) and ChatGPT repetition 3
+completed. Bands and margins regenerated:
+
+    contour 6 seeds   53, 52, 50, 55, 53, 51   mean 52.3
+    ChatGPT 3 seeds   40, 41, 40               contour +12.0 cells, CI +4.3..+19.8  -> CI excludes 0
+    Grok 2 seeds      44, 45                   contour +7.8 cells,  CI +1.5..+14.5  -> CI excludes 0
+    bare basalt 3     46, 48, 46               contour +5.7 cells,  CI -1.2..+12.7  -> NOT resolved
+
+Guard added to `arm_bands_v61.py` and `margin_bootstrap_v61.py`: any repetition with fewer than the full
+61 single-shot cells is dropped. This was not theoretical — Grok rep3 was mid-flight (27/61 rows) and was
+pulling the contour-vs-Grok margin from +7.8 up to +17.5 cells. Unfinished arms must never be scored as
+finished; the same trap earlier made bare basalt look like 46/39/36 while its file was half written.
+
+Second measured energy window: contour reps 4-5 = **13.02 Wh over 154 tasks = 0.085 Wh/task** (rep3 was
+0.089 Wh/task), against **0.468 Wh/task** for the same model answering raw — ~5.4x cheaper at a lower score.
+README headline and `PROOF-V61.md` now carry the six-seed bands, the CIs and these energy rates.

@@ -26,6 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BANK = os.path.join(ROOT, "benchmarks", "hard", "bank-hard-v6.json")
 V6 = os.path.join(ROOT, "benchmarks", "hard", "v6-results")
 WS = os.path.expanduser("~/parb-v61-raw-reps")
+MIN_ROWS = 61  # single-shot non-E cells in bank v6.1; fewer rows means the repetition is unfinished
 
 
 def _load(name, path):
@@ -94,6 +95,15 @@ def main() -> int:
         p = os.path.join(WS, "answers-%s.jsonl" % arm)
         if os.path.exists(p):
             add_raw(p, arm)
+    # A repetition that is still running has partial rows and scores artificially low; drop any seed
+    # that did not produce the full single-shot set. This is not cosmetic: a mid-flight Grok rep pulled
+    # the contour-vs-Grok margin from +8 to +17.5 cells.
+    for arm in list(bands):
+        for rep in list(bands[arm]):
+            if len(bands[arm][rep]) < MIN_ROWS:
+                print("dropping unfinished seed: %s rep%s (%d/%d cells)" % (
+                    arm, rep, len(bands[arm][rep]), MIN_ROWS))
+                del bands[arm][rep]
     add_contour(os.path.join(V6, "full-229", "ledger-c229full.jsonl"))
     for p in glob.glob(os.path.join(V6, "reps-229", "ledger-*.jsonl")) + glob.glob(
             os.path.join(V6, "full-229", "ledger-*.jsonl")):

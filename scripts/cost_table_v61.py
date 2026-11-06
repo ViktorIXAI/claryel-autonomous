@@ -90,7 +90,7 @@ def main() -> int:
 
     # contour arms (local GPU)
     for rid, label in (("c229full", "contour 0.0.2.29 rep0"), ("c229r12", "contour 0.0.2.29 reps 1-2"),
-                       ("c229r3", "contour 0.0.2.29 rep3")):
+                       ("c229r3", "contour 0.0.2.29 rep3"), ("c229r45", "contour 0.0.2.29 reps 4-5")):
         led = os.path.join(CWS, "ledger-%s.jsonl" % rid)
         if rid == "c229full":
             led = os.path.join(ROOT, "benchmarks/hard/v6-results/full-229", "ledger-c229full.jsonl")
@@ -111,13 +111,15 @@ def main() -> int:
             ctok += r.get("ctok", 0) or 0
             secs += r.get("seconds", 0) or 0
         energy = ""
-        st = os.path.join(CWS, "rep3-start.epoch")
-        en = os.path.join(CWS, "rep3-end.epoch")
-        if rid == "c229r3" and os.path.exists(st) and os.path.exists(en):
-            ps = power_stats(args.power_csv, float(open(st).read().strip()), float(open(en).read().strip()))
-            if ps:
-                energy = "%.2f Wh measured (%.0f s at %.0f W mean, busy %.2f)" % (
-                    ps["wh"], ps["span_s"], ps["mean_w"], ps["busy"])
+        tag = {"c229r3": "rep3", "c229r45": "rep45"}.get(rid)
+        if tag:
+            st = os.path.join(CWS, "%s-start.epoch" % tag)
+            en = os.path.join(CWS, "%s-end.epoch" % tag)
+            if os.path.exists(st) and os.path.exists(en):
+                ps = power_stats(args.power_csv, float(open(st).read().strip()), float(open(en).read().strip()))
+                if ps:
+                    energy = "%.2f Wh measured over %d tasks (%.0f s at %.0f W mean, busy %.2f) = %.4f Wh/task" % (
+                        ps["wh"], rows, ps["span_s"], ps["mean_w"], ps["busy"], ps["wh"] / max(rows, 1))
         print("| %s | %d | %d | %d / %d | %.0f s | %s |" % (
             label, rows, calls, ptok, ctok, secs, energy or "see window note"))
 

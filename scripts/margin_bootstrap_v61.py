@@ -71,6 +71,14 @@ def main() -> int:
     contour(os.path.join(V6, "reps-229", "ledger-c229r12.jsonl"))
     for p in sorted(glob.glob(os.path.join(V6, "reps-229", "ledger-c229r3.jsonl"))):
         contour(p)
+    for p in sorted(glob.glob(os.path.join(V6, "reps-229", "ledger-c229r45.jsonl"))):
+        contour(p)
+    # unfinished repetitions must never enter a margin: a mid-flight arm has partial rows and scores low
+    for arm in list(per):
+        for rep in list(per[arm]):
+            if len(per[arm][rep]) < 61:
+                print("dropping unfinished seed: %s rep%s (%d/61 cells)" % (arm, rep, len(per[arm][rep])))
+                del per[arm][rep]
 
     def mean_frac(arm, ids):
         seeds = [per[arm][s] for s in per[arm]]

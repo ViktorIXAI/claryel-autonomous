@@ -2,14 +2,29 @@ repetitions of the same stamp (different gseeds):
   rep0   plain 63/71  loop 5/6  calls 141  ptok  26298  ctok  9786  wall  544.8s
   rep1   plain 62/71  loop 4/6  calls 143  ptok  26455  ctok  8656  wall  165.6s
   rep2   plain 60/71  loop 5/6  calls 142  ptok  26696  ctok  9246  wall  128.1s
-plain strict across reps: [63, 62, 60]  spread=3  mean=61.67
+  rep3   plain 65/71  loop 4/6  calls 141  ptok  25641  ctok  9044  wall  150.7s
+  rep4   plain 63/71  loop 3/6  calls 141  ptok  25885  ctok  9333  wall  131.2s
+  rep5   plain 61/71  loop 4/6  calls 138  ptok  25113  ctok  8761  wall  133.6s
+plain strict across reps: [63, 62, 60, 65, 63, 61]  spread=5  mean=62.33
 
-over 71 cells: stable pass 57, stable fail 6, seed-unstable 8
-seed-unstable cells: A-ex6-00, B-ex6-03, C-ex6-00, C-ex6-01, F-ex6-00, H-ex6-01, J-ex6-03, J-ex6-06
+over 71 cells: stable pass 52, stable fail 5, seed-unstable 14
+seed-unstable cells: A-ex6-00, B-ex6-03, B-ex6-05, C-ex6-00, C-ex6-01, C-ex6-03, F-ex6-00, H-ex6-00, H-ex6-01, H-ex6-03, J-ex6-01, J-ex6-03, J-ex6-06, K-ex6-03
 
 paired sign tests between repetitions (same stamp, different seeds):
   rep1 vs rep0: 2 wins / 3 losses  exact p=1.0000
   rep2 vs rep0: 2 wins / 5 losses  exact p=0.4531
+  rep3 vs rep0: 3 wins / 1 losses  exact p=0.6250
+  rep4 vs rep0: 1 wins / 1 losses  exact p=1.0000
+  rep5 vs rep0: 2 wins / 4 losses  exact p=0.6875
   rep2 vs rep1: 1 wins / 3 losses  exact p=0.6250
+  rep3 vs rep1: 4 wins / 1 losses  exact p=0.3750
+  rep4 vs rep1: 3 wins / 2 losses  exact p=1.0000
+  rep5 vs rep1: 2 wins / 3 losses  exact p=1.0000
+  rep3 vs rep2: 6 wins / 1 losses  exact p=0.1250
+  rep4 vs rep2: 5 wins / 2 losses  exact p=0.4531
+  rep5 vs rep2: 4 wins / 3 losses  exact p=1.0000
+  rep4 vs rep3: 1 wins / 3 losses  exact p=0.6250
+  rep5 vs rep3: 1 wins / 5 losses  exact p=0.2188
+  rep5 vs rep4: 2 wins / 4 losses  exact p=0.6875
 
 Bound: the rep-to-rep spread is the noise floor. A stamp-to-stamp or arm-to-arm delta inside that band cannot be attributed to the stamp or the contour.

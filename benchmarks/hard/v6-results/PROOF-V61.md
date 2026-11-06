@@ -13,12 +13,12 @@ off, but that last margin is not yet resolved at 95% confidence.**
 
 ## Scores
 
-| arm | 71-cell single-shot total (rep0) | seeds | mean on the common 61-cell set | CI vs contour |
-|---|---|---|---|---|
-| contour 0.0.2.29 | 63 / 62 / 60 (reps 0-2), rep3 published too | 4 | 52.5 (53, 52, 50, 55) | — |
-| bare basalt (same weights, no contour) | 56 | 3 | 46.7 (46, 48, 46) | contour +5.8 cells, CI −1.2..+13.2 → **not resolved** |
-| Grok 4.7 | 54 | 2 | 44.5 (44, 45) | contour +8.0 cells, CI +1.5..+15.0 → **excludes 0** |
-| ChatGPT (`gpt-6.1-sol`) | 50 | 2 | 40.5 (40, 41) | contour +12.0 cells, CI +4.0..+20.3 → **excludes 0** |
+| arm | 71-cell single-shot total (rep0) | seeds | per-seed scores on the common 61-cell set | mean | CI vs contour |
+|---|---|---|---|---|---|
+| contour 0.0.2.29 | 63 / 62 / 60 | **6** (reps 0-5 published) | 53, 52, 50, 55, 53, 51 | 52.3 | — |
+| bare basalt (same weights, no contour) | 56 | 3 | 46, 48, 46 | 46.7 | +5.7 cells, CI −1.2..+12.7 → **not resolved** |
+| Grok 4.7 | 54 | 2 | 44, 45 | 44.5 | +7.8 cells, CI +1.5..+14.5 → **excludes 0** |
+| ChatGPT (`gpt-6.1-sol`) | 50 | 3 | 40, 41, 40 | 40.3 | +12.0 cells, CI +4.3..+19.8 → **excludes 0** |
 
 Loop protocol D (6 tasks): contour 5/6; the chat arms cannot attempt it at all, so it is N/A for them
 rather than a score of 0.
@@ -42,13 +42,15 @@ stays significant on every seed pair tested, contour-vs-Grok p=0.035-0.14 depend
 
 | arm | tasks | model calls | tokens | wall | GPU energy |
 |---|---|---|---|---|---|
-| contour 0.0.2.29 rep3 | 77 | 141 | 25 641 / 9 044 | 151 s | **6.82 Wh** measured (281 s window, mean 87 W) |
+| contour 0.0.2.29 rep3 | 77 | 141 | 25 641 / 9 044 | 151 s | **6.82 Wh** measured (281 s at 87 W mean) = **0.089 Wh/task** |
+| contour 0.0.2.29 reps 4-5 | 154 | 279 | 50 998 / 18 094 | 265 s | **13.02 Wh** measured (540 s at 87 W mean) = **0.085 Wh/task** |
 | bare basalt reps 1-2 | 142 | 142 | not reported by transport | 2 679 s | **30.45 Wh** measured over 65 tasks in the sampled window → **0.468 Wh/task → ~33 Wh per 71-task arm** |
 | ChatGPT (codex CLI) rep1 | 71 | 71 | not reported | 592 s | not measurable from this machine |
 | Grok rep1 | 71 | 71 | not reported | 1 812 s | not measurable from this machine |
 
-So on the machine where both local arms can be measured: **the contour arm costs about 5× less GPU energy
-per task than the same model answering raw, and scores ~7-9 cells higher on the same bank**. Contour arm
+So on the machine where both local arms can be measured: **the contour arm costs about 5.4× less GPU energy
+per task than the same model answering raw (0.085-0.089 Wh/task vs 0.468 Wh/task), and scores ~7-12 cells
+higher on the same bank**. Two independent contour windows (6.82 Wh and 13.02 Wh) agree on the rate. Contour arm
 wall time on an idle serve: 128-166 s for 77 tasks. Method and its limits (board draw not wall outlet, no
 RAPL without root, cloud arms outside this machine): `ENERGY-METHOD.md`, `COST-V61.md`.
 
@@ -58,8 +60,10 @@ RAPL without root, cloud arms outside this machine): `ENERGY-METHOD.md`, `COST-V
 2. The margin is concentrated in contract compliance; on the other 56 cells the contour is at parity with
    all three arms.
 3. Cloud arms have 2 seeds each; contour 4, bare basalt 3. Cloud-vs-cloud differences are inside noise.
-4. The contour-vs-no-contour margin (+5.8 cells, CI includes 0) is **not** established; it is the single
-   most important open number in this repo.
+4. The contour-vs-no-contour margin (+5.7 cells, CI includes 0) is **not** established even with six contour
+   seeds against three bare seeds; it is the single most important open number in this repo. A partial Grok
+   repetition also had to be dropped: an unfinished arm scores artificially low (it inflated the contour-vs-
+   Grok margin from +8 to +17.5 cells before the guard caught it).
 5. Two cells of this bank are not answerable as written (`bank-defect-b04.md`) and one gold ask looks
    language-mismatched (`BANK-ASK-COVERAGE.md`: K-ex6-01 expects the English token `hosting`); they cost
    every arm the same and were not papered over.
