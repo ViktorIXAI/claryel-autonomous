@@ -523,3 +523,28 @@ Headline contour numbers are unchanged: 0.0.2.29, six seeds 53/52/50/55/53/51 (m
 cells), +12.0 cells vs ChatGPT (CI +4.3..+19.8), +8.3 vs Grok (CI +1.8..+15.0), +5.9 vs bare basalt
 (CI −0.5..+12.5 — still unresolved). Decision record:
 `history/agent-decisions/2026-11-06-contract-guarantee-negative-result.md`.
+
+## 06.11 11:50 CET — contour 0.0.2.31 (plurality vote) measured: second negative result, plus a measured noise floor
+
+Paired arms on bank v6.1, three identical seeds, control `0.0.2.29` vs candidate `0.0.2.31`
+(`pair-231/`, six runs, artifacts published). Control 63/62/60 (mean 61.7), candidate 60/59/58 (mean 59.0);
+sign tests 1W/4L and 2W/5L; energy 5.54 Wh vs 13.96 Wh per 77-task arm (**2.5×** for a worse score).
+
+The mechanism is live — `v231_selfconsist_*` on every C/J row, 8 votes taken (7 C, 1 J), 32 unanimous, 4
+plurality-equals-original, 1 no-majority — and it replaced correct answers with wrong ones:
+`C-ex6-01` 2/3 → 0/3, `C-ex6-00` 2/3 → 1/3, `C-ex6-03` 3/3 → 2/3, `J-ex6-04` 3/3 → 2/3. Not adopted.
+Lesson recorded: these cells are **bias**, not variance — the model's samples agree on the wrong option set,
+so plurality voting amplifies its own mistake. Self-consistency fixes variance, not bias.
+
+Same run pair also measured the resolution limit directly: the control stamp ran twice over the same seeds
+(pair-230 control vs pair-231 control) and **12 of 231 cells (5.2%) differ**, totals 62/59/60 vs 63/62/60.
+So a three-seed contour-vs-contour pair resolves about ±1.5–2 cells and nothing finer; both negative
+stamps sit at that floor. The headline margins are far above it (+12.0 cells vs ChatGPT CI +4.3..+19.8,
++8.3 vs Grok CI +1.8..+15.0), which is why those stand and a −1.3 or −2.7 contour delta does not.
+
+Next: `0.0.2.32` targets `order_partial` in category J — the model lists the right ids in the wrong order,
+and the ordering rule (id/number table plus «по убыванию/по возрастанию») is stated in the task prompt.
+A deterministic re-sort from the prompt's own table is zero-invention, unlike the vote.
+
+Reporting rule going forward: any contour-vs-contour delta under ~2 cells at three seeds is published as
+unresolvable, not as a win.

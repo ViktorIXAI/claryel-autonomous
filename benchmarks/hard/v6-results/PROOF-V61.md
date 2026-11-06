@@ -62,14 +62,20 @@ RAPL without root, cloud arms outside this machine): `ENERGY-METHOD.md`, `COST-V
 3. Cloud arms have 3 seeds each; contour 6, bare basalt 5. Cloud-vs-cloud differences are inside noise.
 4. The contour-vs-no-contour margin (+5.9 cells, CI −0.5..+12.5) is **not** established with six contour
    seeds against five bare seeds — the lower bound sits half a cell below zero. It is the single most
-   important open number in this repo, and 0.0.2.30 (contract guarantee) is the attempt to widen it. A partial Grok
-   repetition also had to be dropped: an unfinished arm scores artificially low (it inflated the contour-vs-
-   Grok margin from +8 to +17.5 cells before the guard caught it).
+   important open number in this repo. Two attempts to widen it have now been measured and both came out
+   negative: 0.0.2.30 (artifact-shape guarantee, −1.3 cells) and 0.0.2.31 (plurality vote on C/J, −2.7 cells
+   and 2.5× the energy); both are published in full (`PAIR-230-V61.md`, `PAIR-231-V61.md`) and neither is
+   adopted. A partial Grok repetition also had to be dropped: an unfinished arm scores artificially low (it
+   inflated the contour-vs-Grok margin from +8 to +17.5 cells before the guard caught it).
 5. Two cells of this bank are not answerable as written (`bank-defect-b04.md`) and one gold ask looks
    language-mismatched (`BANK-ASK-COVERAGE.md`: K-ex6-01 expects the English token `hosting`); they cost
    every arm the same and were not papered over.
 6. Raw arms were never run through the contour loop, so "the loop would lift cloud models too" is a
    hypothesis, listed as work in `audits/2026-11-06-four-arm-v61-review-response.md`, not a result.
+7. Resolution of a contour-vs-contour pair is measured, not assumed: the same stamp over the same three
+   seeds twice differs on **12 of 231 cells (5.2%)** and its mean moves by 1.4 cells
+   (`PAIR-231-V61.md`). A delta under ~2 cells at three seeds is reported as unresolvable. The arm-level
+   margins above are 4–6× that floor, which is why they are quotable and a −1.3 contour tweak is not.
 
 ## Reproduce
 

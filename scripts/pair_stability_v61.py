@@ -46,16 +46,23 @@ def sign_test(w, l):
 
 def main() -> int:
     ws = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/parb-v61-contour")
+    # Two arms are named by their run-id prefix (control, candidate): c29/c30 for the 2.30 pair,
+    # d29/d31 for the 2.31 pair. Keeping the prefixes explicit stops a new pair silently reusing
+    # the previous pair's ledgers.
+    pref_a = sys.argv[2] if len(sys.argv) > 2 else "c29"
+    pref_b = sys.argv[3] if len(sys.argv) > 3 else "c30"
+    label_a = "0.0.2." + pref_a[1:]
+    label_b = "0.0.2." + pref_b[1:]
     bank = {t["id"]: t for t in json.load(open(BANK, encoding="utf-8"))}
     loop = {k for k in bank if bank[k].get("mode") == "loop"}
     arms = collections.defaultdict(dict)   # stamp -> rep -> {task: bool}
     ev_hist = collections.defaultdict(collections.Counter)
     calls = collections.Counter()
     wall = {}
-    for p in sorted(glob.glob(os.path.join(ws, "ledger-c29r*.jsonl"))) + sorted(
-            glob.glob(os.path.join(ws, "ledger-c30r*.jsonl"))):
+    for p in sorted(glob.glob(os.path.join(ws, "ledger-%sr*.jsonl" % pref_a))) + sorted(
+            glob.glob(os.path.join(ws, "ledger-%sr*.jsonl" % pref_b))):
         base = os.path.basename(p)
-        stamp = "0.0.2.29" if "c29" in base else "0.0.2.30"
+        stamp = label_a if pref_a in base else label_b
         rep = base.split("r")[-1].split(".")[0]
         for line in open(p, encoding="utf-8"):
             r = json.loads(line)
@@ -70,7 +77,7 @@ def main() -> int:
         if os.path.exists(rec):
             j = json.load(open(rec, encoding="utf-8"))
             wall[stamp] = wall.get(stamp, 0) + int(j.get("wall_s") or 0)
-    stamps = sorted(arms)
+    stamps = [label_a, label_b] if label_a in arms and label_b in arms else sorted(arms)
     if len(stamps) < 2:
         print("need ledgers for both stamps; found:", stamps)
         return 1
@@ -92,7 +99,7 @@ def main() -> int:
     print()
     print("## Cell by cell (P = passed that seed, . = failed)")
     print()
-    print("| cell | 0.0.2.29 | 0.0.2.30 | change |")
+    print("| cell | %s | %s | change |" % (stamps[0], stamps[1]))
     print("|---|---|---|---|")
     both = []
     for t in sorted(cells):
@@ -112,7 +119,11 @@ def main() -> int:
     print("## What the guarantee touched")
     print()
     for s in stamps:
-        hits = {k: v for k, v in ev_hist[s].items() if "v230" in k}
+        # Show every contour event of the CANDIDATE stamp (the one under test), not a hardcoded tag: a
+        # previous version filtered on "v230" and hid the fact that 0.0.2.31 had fired 8 votes.
+        # contour events are tagged with the stamp that shipped them (stamp 0.0.2.31 -> v231_*).
+        tag = "v2" + s.split(".")[-1]
+        hits = {k: v for k, v in ev_hist[s].items() if tag in k}
         print("- %s: %s" % (s, ", ".join("%s x%d" % (k, v) for k, v in sorted(hits.items())) or "none"))
     print()
     print("## Paired sign test per matched seed (strict pass, single-shot cells)")

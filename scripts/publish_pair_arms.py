@@ -51,6 +51,9 @@ def main() -> int:
     if not ids:
         print("usage: publish_pair_arms.py <run id> ...")
         return 1
+    if os.environ.get("PAIR_OUT_DIR"):
+        globals()["DST"] = os.path.join(ROOT, "benchmarks", "hard", "v6-results",
+                                        os.environ["PAIR_OUT_DIR"])
     os.makedirs(DST, exist_ok=True)
     for rid in ids:
         done = []
