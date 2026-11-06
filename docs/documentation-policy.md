@@ -92,3 +92,9 @@ When something changes:
 The daily check is structural and mechanical. Human judgment still decides
 whether a number is meaningful, whether a status is accepted, and whether a
 statement is honest.
+
+## Evidence retention and correction protocol (added 2026-11-06)
+
+The owner requires maximum preservation of historical material. Apply [Evidence Preservation and Temporal Provenance](EVIDENCE-PRESERVATION.md): **do not delete or silently replace original evidence or historical claims**. When a current-facing statement needs clarification, attach a dated, versioned correction and a link to the prior source. Preserve both earlier and later interpretations. Record exact timestamps and environments when available; never infer missing historical metadata. Third-party titles, quotes and archived language remain intact with appropriate scope notes.
+
+Earlier wording in this policy about moving a claim into `history/` should be read as *adding a historical copy or cross-reference*, never removing its original provenance. Corrections to mutable README summaries remain visible through Git history and must be documented in a dated audit entry.
