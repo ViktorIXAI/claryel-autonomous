@@ -122,3 +122,14 @@ automatically from the contour feature table.
   into the tree — an outside auditor could not re-score those arms from answer bytes (the ledgers
   carried scores, not answers). Fixed by deep negations (`v6-results/**/*.jsonl|csv|log|md`) and all
   sanitized answer rows backfilled: full-218 .. full-223 plus the k-218 / j-probe-218 probe sets.
+- 2026-11-06 — **run-record endpoint leak found and fixed in publication**: `scripts/publish_pair_arms.py`
+  applied the placeholder rules only to JSONL; `run-record-*.json` and logs were copied byte-raw, so the
+  already-published run records of pair-230 and pair-231 carried the real LAN endpoint in `api_host`.
+  Every artifact kind now goes through the rules (JSON re-validated after substitution) and `api_host`
+  values publish as `[REDACTED]`; the 12 affected files under `benchmarks/hard/v6-results/` were
+  backfilled in the same commit. Post-fix grep over `v6-results/`: zero LAN addresses, host labels and
+  local paths. History of pre-existing gitleaks hits (`marks/*`, `scripts/publish/pipeline.py`) stays
+  unmodified and re-reported to the owner (evidence-preservation policy).
+- 2026-11-06 — published pair232 (`benchmarks/hard/v6-results/pair-232/`, six arms: ledgers, answer rows,
+  logs, run records) plus `PAIR-232-V61.md` (verdict: +1.3 cells under the noise floor, not adopted;
+  measured energy windows from `scripts/gpu_energy.py`). Decision record under `history/agent-decisions/`.

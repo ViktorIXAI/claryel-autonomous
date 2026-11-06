@@ -1,7 +1,7 @@
 {
   "box": "P2005",
   "model": "qwen3.8-flash-next-iq3_s-basalt",
-  "api_host": "http://192.168.1.186:8080",
+  "api_host": "[REDACTED]",
   "contour_version": "0.0.2.31",
   "contour_behavior": "2.31",
   "contour_changed_at_this_release": true,

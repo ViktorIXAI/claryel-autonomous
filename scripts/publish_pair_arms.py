@@ -12,13 +12,14 @@ Usage: python3 scripts/publish_pair_arms.py c29r0 c29r1 c30r0 ...
 import json
 import os
 import re
-import shutil
 import sys
 
 WS = os.path.expanduser("~/parb-v61-contour")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DST = os.path.join(ROOT, "benchmarks", "hard", "v6-results", "pair-230")
 RULES = [
+    # endpoint first: an api_host URL is not quotable even masked with a real port pattern kept
+    (re.compile(r'"api_host":\s*"http://[\d.]+:\d+"'), '"api_host": "[REDACTED]"'),
     (re.compile(r"192\.168\.\d+\.\d+"), "<LAN_IP>"),
     (re.compile(r"10\.\d+\.\d+\.\d+"), "<LAN_IP>"),
     (re.compile(r"claryel0\d"), "<HOST>"),
@@ -26,23 +27,35 @@ RULES = [
 ]
 
 
-def sanitize_copy(src, dst, jsonl=True):
+def sanitize_copy(src, dst, kind="jsonl"):
+    """Copy with placeholders applied to EVERY artifact kind, then re-validate.
+
+    The run-record JSONs used to be copied byte-raw and shipped real LAN addresses; that is exactly
+    the leak this function exists to prevent, so a raw kind no longer exists. JSON/JSONL re-validation
+    makes sure a substitution cannot silently corrupt a row.
+    """
     if not os.path.exists(src):
         return False
-    if not jsonl:
-        shutil.copyfile(src, dst)
-        return True
-    out = []
-    for line in open(src, encoding="utf-8"):
-        line = line.strip()
-        if not line:
-            continue
-        for rx, sub in RULES:
-            line = rx.sub(sub, line)
-        json.loads(line)
-        out.append(line)
-    with open(dst, "w", encoding="utf-8") as fh:
-        fh.write("\n".join(out) + "\n")
+    text = open(src, encoding="utf-8").read()
+    for rx, sub in RULES:
+        text = rx.sub(sub, text)
+    if kind == "jsonl":
+        out = []
+        for line in text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            json.loads(line)
+            out.append(line)
+        with open(dst, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(out) + "\n")
+    elif kind == "json":
+        json.loads(text)
+        with open(dst, "w", encoding="utf-8") as fh:
+            fh.write(text)
+    else:
+        with open(dst, "w", encoding="utf-8") as fh:
+            fh.write(text)
     return True
 
 
@@ -57,11 +70,11 @@ def main() -> int:
     os.makedirs(DST, exist_ok=True)
     for rid in ids:
         done = []
-        for pat, js in (("results-%s.jsonl", True), ("ledger-%s.jsonl", True),
-                        ("%s.log", False), ("run-record-%s.json", False)):
+        for pat, kind in (("results-%s.jsonl", "jsonl"), ("ledger-%s.jsonl", "jsonl"),
+                          ("%s.log", "log"), ("run-record-%s.json", "json")):
             src = os.path.join(WS, pat % rid)
             dst = os.path.join(DST, pat % rid)
-            if sanitize_copy(src, dst, js):
+            if sanitize_copy(src, dst, kind):
                 done.append(os.path.basename(dst))
         prov = {}
         lp = os.path.join(DST, "ledger-%s.jsonl" % rid)

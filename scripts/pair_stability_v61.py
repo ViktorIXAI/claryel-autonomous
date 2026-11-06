@@ -130,13 +130,14 @@ def main() -> int:
     for r in reps:
         w = sum(1 for t in cells if arms[stamps[1]][r][t] and not arms[stamps[0]][r][t])
         l = sum(1 for t in cells if arms[stamps[0]][r][t] and not arms[stamps[1]][r][t])
-        print("- seed %s: 0.0.2.30 %d vs 0.0.2.29 %d, W%02d L%02d p=%.4f" % (
-            r, sum(1 for t in cells if arms[stamps[1]][r][t]),
-            sum(1 for t in cells if arms[stamps[0]][r][t]), w, l, sign_test(w, l)))
+        print("- seed %s: %s %d vs %s %d, W%02d L%02d p=%.4f" % (
+            r, stamps[1], sum(1 for t in cells if arms[stamps[1]][r][t]),
+            stamps[0], sum(1 for t in cells if arms[stamps[0]][r][t]),
+            w, l, sign_test(w, l)))
     print()
     print("Reading rule: the flip count is the claim. A stamp with the same mean but fewer flips is a more")
-    print("reliable machine, and per-cell rows above show exactly which cells stopped flipping. If 0.0.2.30")
-    print("also raises the mean, that is the same effect counted twice — report both, do not add them.")
+    print("reliable machine, and per-cell rows above show exactly which cells stopped flipping. If the")
+    print("candidate also raises the mean, that is the same effect counted twice — report both, do not add them.")
     return 0
 
 

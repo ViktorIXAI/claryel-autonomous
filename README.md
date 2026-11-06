@@ -24,11 +24,13 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.30` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
-`benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` was measured against `0.0.2.29` on three paired seeds and
-came out **negative** (mean 60.3 → 59.0, unstable cells 8 → 12; see `PAIR-230-V61.md`), so every headline
-number below is from `0.0.2.29`, the adopted stamp. Published arms on the current hard bank v6.1: `full-229`
-(contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs the same local model without contour).
+Contour gate line: `0.0.2.33` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
+`benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31` measured **negative** against the
+adopted `0.0.2.29`; `0.0.2.32` measured **+1.3 cells — below the ~2-cell noise floor, on-target but
+unresolvable, NOT adopted** (see `PAIR-232-V61.md`); all three are frozen to their own stamps and
+inherit into nothing. Every headline number below is from `0.0.2.29`, the adopted stamp. Published arms
+on the current hard bank v6.1: `full-229` (contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs
+the same local model without contour).
 
 ## Headline results
 
@@ -50,9 +52,10 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   and every cloud failure in F/H/K is content-side (`ABLATION-RAW-FIXERS.md`, `AUDIT-FHK-60.md`)
 - two contour attempts measured **negative** and published as such: 0.0.2.30 artifact-shape guarantee
   (−1.3 cells) and 0.0.2.31 plurality vote on C/J (−2.7 cells, 2.5× energy — the model is biased here, not
-  noisy, so voting amplifies its own mistake). Resolution floor measured directly: the same stamp over the
-  same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is reported as
-  unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`)
+  noisy, so voting amplifies its own mistake); a third, 0.0.2.32 J re-rank, landed **+1.3 — under the
+  floor, unresolvable and not adopted** (`PAIR-232-V61.md`). Resolution floor measured directly: the same
+  stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
+  reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`)
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took
