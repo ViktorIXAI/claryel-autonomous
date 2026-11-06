@@ -56,3 +56,12 @@ Next hypothesis, taken from the corrected table: seed instability here is the mo
 content** under a different seed (different letter sets, different orders, dropped fields). Mechanisms worth
 measuring: self-consistency voting over several samples for set/order tasks, and a grounded field-completeness
 pass for A/B/K. Neither is implemented yet, and neither will be claimed before a paired arm shows it.
+
+## Addendum (13:40 CET): pair233 adds three seeds of 0.0.2.29; the group table stands
+
+`pair-233/` adds seeds 0-2 of the control stamp (`f29r*`): A-ex6-00 and A-ex6-08 passed 3/3 there,
+H-ex6-01/H-ex6-04 flipped again — group 3 (`fields_mismatch`/`missing`) and group 4 (`unknown_missing`/
+`requires_missing`) remain the live classes. The 2.33 attempt covered group 3 only where the prompt
+states a threshold table (1 of 9 A prompts); group 3's B cells are taken by 0.0.2.34 (B field
+completeness, `gate_v51_b_fields_test.py`), and K stays open until the bank states its value shapes.
+No group's diagnosis changed.

@@ -577,3 +577,34 @@ chains recomputed by code from the prompt's own rows; the adopted 2.27 family), 
 `fields_mismatch`/`missing` group of UNSTABLE-CELLS-V61.md. Coverage before launch: 1/9 A tasks
 reproduce, 8 refuse, 0 mis-computes (`gate_v50_a_tariff_test.py`). Decision record:
 `history/agent-decisions/2026-11-06-pair232-unresolved-j-rerank-and-233-launch.md`.
+
+## 06.11 13:40 CET — pair233 measured: 0.0.2.33 never fired; +1.3 again = the floor in action; 0.0.2.34 launched
+
+Paired arms on bank v6.1, three identical seeds, control `0.0.2.29` vs candidate `0.0.2.33`
+(`pair-233/`, six runs, artifacts published). Control 60/61/64 (mean 61.7), candidate 63/62/64
+(mean 63.0): **+1.3 cells again — below the ~2-cell floor**; per-seed sign tests 3W/0L, 1W/0L, 1W/1L
+(pooled 5W/1L p=0.22) resolve nothing. Not adopted, stated plainly.
+
+The stronger finding: the 2.33 mechanism **fired zero times in all three candidate seeds** (zero
+`v233_a_tariff_table` ledger events), so every flipped cell (A-ex6-00, A-ex6-08, H-ex6-01, H-ex6-04)
+carries no mechanism event — the pair could not have measured the change at all, and the recurring
++1.3 on a no-op-like arm is a direct empirical lower bound on what pure resampling moves on this
+scoreboard. Counterfactual replay on the saved bytes (recorded as a replay, not a measurement): the
+grammar parses exactly 1 of 9 A prompts, no-ops on already-correct answers, and would have repaired
+the one failing control seed of A-ex6-00 (`fields_mismatch:surcharges,total`). Independent rescore of
+all flipped cells: 0 mismatches of 24. Energy: candidate lower in every window (4.99/4.24/4.45 vs
+6.49/4.91/5.11 Wh) — with zero fires there is no mechanism cost to measure.
+
+Adoption state: `A_TABLE_ARITH` frozen to stamp 2.33 alone (`UNADOPTED_FEATURES`, flag matrix updated
+in `gate_v49_feature_adoption_test.py`); adopted line stays `0.0.2.29`.
+
+Next (launched ~13:45 CET, runs `g29r*`/`g34r*`): `0.0.2.34` — B field completeness, the untried half
+of the same UNSTABLE-CELLS group: extraction fields recomputed by code from the prompt's own data
+block (config key:value block = B-ex6-03 shape; embedded-JSON echo-with-count = B-ex6-05 shape),
+required names read from the prompt's own JSON spec, any ambiguity or extra model key refuses.
+Category K deliberately excluded: K-ex6-03 failing seeds need value SHAPES the prompt never states
+(FREE_SHIPPING -> ?) — a bank clarification, not a contour guess (the 2.30 lesson); recorded as a
+separate future candidate together with prose-letter (B-ex6-04) and markdown-table (B-ex6-06)
+grammars. Coverage before launch: 2/7 B tasks reproduce, 5 refuse, 0 changes on 42 stored B answers
+from pair-233 (`gate_v51_b_fields_test.py`, 19 checks). Decision record:
+`history/agent-decisions/2026-11-06-pair233-unfired-threshold-table-and-234-launch.md`.
