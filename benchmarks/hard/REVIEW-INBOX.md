@@ -405,3 +405,12 @@ excluded; RAPL is root-gated on this host) go in `ENERGY-METHOD.md` with the num
 ## 06.11 05:12 CET — cost accounting and energy method published (numbers still filling in)
 
 `COST-V61.md` (`scripts/cost_table_v61.py`) now carries tasks / model calls / tokens / wall seconds for every arm, with a GPU-energy column that only fills from measured samples. `ENERGY-METHOD.md` gives the exact sampler command, the integrator, and the four things the measurement cannot see (board draw not wall outlet, no RAPL without root, cloud arms not measurable here, serve idle inside the window). A bug caught while generating it: the ledger lookup silently substituted rep0 for a missing rep3 and printed identical numbers — fixed to skip missing arms instead.
+
+## 06.11 05:15 CET — bank validity probe (issue #22, first pass)
+
+`scripts/bank_ask_coverage.py` -> `BANK-ASK-COVERAGE.md`: 49 gold ask items over 77 tasks tested against
+the prompt with the scorer's own `_token_cover`. Seven flags, adjudicated in the doc: four are derived-
+value false positives (unit conversions, computed totals), one is a confirmed bank defect (H-ex6-01
+names an artifact the prompt never contains), one is a likely language-mismatch scorer defect (K-ex6-01
+expects the English token `hosting` for a Russian prompt that says "услуга хостинга"). Stated fix path:
+a new bank version with a new hash, never an edit of the frozen bank.
