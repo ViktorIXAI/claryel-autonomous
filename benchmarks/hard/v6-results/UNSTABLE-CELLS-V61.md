@@ -77,3 +77,16 @@ stable-passed all six pair-235 seeds — the 6-seed map keeps them at 5/6, so H 
 than F's. Group 3's A cells flipped again in this pair (`A-ex6-00` 2/3→3/3, `A-ex6-08` 1/3→3/3, both
 event-less — pure resampling, no mechanism credited). 0.0.2.36 (group-4 selection) is launched against
 `0.0.2.29` on exactly this class.
+
+## Addendum (16:00 CET): pair-236 measures group-4 SELECTION — zero conversions, class closed
+
+`pair-236/` (`i29r*` vs `i36r*`, three matched seeds): the 2.36 lottery fired 6 times (H-ex6-01 in every
+candidate seed, H-ex6-03 once, F-ex6-00 twice) and converted **zero** scoreboard cells. The F strict-best
+wins raised an already-passing cell; on H, the strict re-sample never beat the first draw — the extra
+sample omits the same component. That is class BIAS, not variance: group 4's H cells sit in the 2.31
+failure mode (selection can filter variance, it cannot beat a systematic omission), so the selection
+doctrine does NOT apply here and group 4 is closed as a contour target. `B-ex6-06` failed again in all
+six pair-236 arms (the 2.35 grammar is frozen out of both) — now 0/12 across the two pairs: chronic
+confirmed, re-landed at `0.0.2.37` under the pre-registered rule in `PAIR-236-V61.md`. The event-less
+flip background of a bank pair (4 of 5 flips here: identical contour path and calls, different bytes)
+should be quoted with every arm-mean delta.

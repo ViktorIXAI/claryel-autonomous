@@ -24,7 +24,7 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.36` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
+Contour gate line: `0.0.2.37` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
 `benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31` measured **negative** against the
 adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured **+1.3 cells — below the ~2-cell noise floor,
 NOT adopted** (`PAIR-232-V61.md`; `PAIR-233-V61.md` — 2.33 additionally fired **zero times live**, so its
@@ -35,13 +35,15 @@ its target cells 6/6 in that pair, so the stamp had no surface to act on (`PAIR-
 target cell in all three candidate seeds and converted `B-ex6-06` 0/3 → 3/3 with its own event on every
 converted row and zero extra model calls — **but the arm mean moved +2.0, exactly at the ~2-cell
 resolution floor, with four off-target flips carrying no 2.35 event: NOT adopted, frozen to its own
-stamp** (`PAIR-235-V61.md`; re-adoption is a one-flag owner call, the repair stays reproducible at
-`0.0.2.35`). All six are frozen to their own stamps and inherit into nothing. Every headline number
-below is from `0.0.2.29`, the adopted stamp. `0.0.2.36` (group-4 lottery selection: the proven best-of-2
-recipe extended to the component-omission lotteries — H `unknown_missing`/`requires_missing`, F `avoid`;
-`harness/gate_v53_g4_lottery_test.py`, 38 checks incl. run_one call-site proof and 2.29 no-op proof) is
-registered and under paired measurement against `0.0.2.29` on three seeds
-(`benchmarks/hard/v6-results/PAIR-235-V61.md` carries its pre-registered hypothesis). Published arms
+stamp** (`PAIR-235-V61.md`); `0.0.2.36` (group-4 best-of-2 selection) measured **−1.0 with SIX fires and
+ZERO converted cells** — the F wins raised an already-passing cell, and on H the extra sample reproduced
+the same omission: the class is content-biased, selection cannot fix it (the 2.31 lesson, `PAIR-236-V61.md`)
+— **NOT adopted, frozen to its own stamp**. All seven are frozen to their own stamps and inherit into
+nothing. Every headline number below is from `0.0.2.29`, the adopted stamp. `0.0.2.37` re-lands the one
+mechanism with a deterministic full-event conversion — the 2.35 B table repair — under a pre-registered
+all-or-nothing attribution rule (`benchmarks/hard/v6-results/PAIR-236-V61.md` carries the rule and the
+`smk37c` smoke verification; `gate_v52`/`gate_v49` pin the re-adoption and the 2.36 freeze), and is under
+paired measurement against `0.0.2.29` on three seeds. Published arms
 on the current hard bank v6.1: `full-229` (contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs
 the same local model without contour).
 
@@ -69,9 +71,14 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   floor, unresolvable and not adopted** (`PAIR-232-V61.md`); a fourth, 0.0.2.33 A threshold-table
   arithmetic, also **+1.3 with zero live fires** — the candidate model answered its target cell correctly
   in every seed, so the pair measured nothing and +1.3 is a direct lower bound on pure resampling
-  (`PAIR-233-V61.md`); and a fifth, 0.0.2.34 B field completeness, **−1.0 with zero live fires** for the
+  (`PAIR-233-V61.md`); a fifth, 0.0.2.34 B field completeness, **−1.0 with zero live fires** for the
   same reason (target cells 6/6 in both arms, `PAIR-234-V61.md`) — pairs 233/234 together bracket pure
-  resampling at roughly ±1.3 cells around this scoreboard. Resolution floor measured directly: the same
+  resampling at roughly ±1.3 cells around this scoreboard; a sixth, 0.0.2.35 B table aggregation, the
+  strongest **cell-level** confirmation of the series (0/3→3/3 on its chronic target with its event, zero
+  tokens) whose arm mean sat exactly at the floor with event-less flips (`PAIR-235-V61.md`); and a
+  seventh, 0.0.2.36 group-4 best-of-2 selection, **−1.0 with six fires and zero converted cells** — the
+  second sample reproduces the same component omission, so selection cannot beat a biased class
+  (`PAIR-236-V61.md`). Resolution floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
