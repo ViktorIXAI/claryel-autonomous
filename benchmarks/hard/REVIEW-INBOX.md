@@ -784,3 +784,49 @@ UNMEASURED and the flag freezes at 2.39), the candidate passes every control-fai
 (mis-sort guard), no `v233_a_tariff_table` event appears in either arm (the A pin failing would mean
 two changes, not one), the adopted B repair fires identically in both arms, and the candidate is not
 >2 cells below control.
+
+## pair-239 closure (19:10 CET, 2026-11-06): 0.0.2.39 ADOPTED — the attribution rule decided the third line move
+
+pair-239 (`l37r*` vs `l39r*`, control = the adopted `0.0.2.37`, three matched seeds, 77/77 rows per
+arm, seed-0 control resumed fresh after one killed first attempt with `*.dead1` aside — 77 unique
+keys, no duplicates): the pre-registered chronic-target rule (`PAIR-238-V61.md`) held exactly —
+chronic `J-ex6-02` strict 0/3 → 3/3, `contour:v20_j_id_norm_v239_j_rerank_by_prompt` on every
+converted row at identical `ptok=304`/`calls=2` (the repair adds zero model tokens), zero strict-pass
+regressions carrying a 2.39 event, `v235_b_table_total` ×3 identical in both arms, zero
+`v233_a_tariff_table` fires (the (2,33)/(2,38) pin intact). The only other 2.39 event string is the
+same gate's `membership_untouched` refusal path, fired twice on rows that fail identically in both
+arms (zero score delta) — disclosed under the clean-pattern clause. Arm 64/62/66 vs 62/63/64 = +1.0,
+published BELOW the ~2-cell floor by construction (+3 attributable conversions, −2 event-less
+lottery flips; pooled 5W/2L p=0.453); rescore from published bytes 18 joins / 0 blanks / 0 mismatches;
+energy 8.14/4.89/4.49 vs 5.41/4.91/5.00 Wh, matched windows inside noise, seed-0 control window
+inflated at queue start. Verdict (`PAIR-239-V61.md`): **ADOPTED, line moves `0.0.2.37 -> 0.0.2.39`**;
+the inherited `J_RERANK_V2` rides future arms, everything measured-negative stays pinned.
+
+**Bank defect logged (owner command needed to fix, per the standing doctrine):** chronic C cell
+`C-ex6-02` (0/12 across the six-seed map and pair-239) has gold `want=['C']` that contradicts its own
+task text — executing the bank's snippets, A (`sorted({3,2,1,1})`), C and D all deterministically
+print `[1, 2, 3]` (B only under CPython's unspecified set order, so excluding B is intentional). The
+model is semantically right; the cell is unmeasurable by any contour mechanism. No contour action;
+bank clarification belongs to the owner (like `K` value-shapes and `B-ex6-04`).
+
+## pair-240 launch verification (2026-11-06, BEFORE any m* row): 0.0.2.40 = J membership grammar v3
+
+The pair itself surfaced the next chronic class: **J membership** — `J-ex6-01` failed seeds 0-1 with
+byte-identical answers in BOTH arms (`["skuC","skuB"]`; `skuB` has `срок=12` and violates the prompt's
+own filter `срок<=10`; top-2 cheapest among `срок<=10` is `skuC, skuA`), 1/6 in the six-seed map;
+`J-ex6-06` failed seed 0 in both arms with an empty JSON list (`Отбрось score<70` stated in the
+prompt). Content bias on tasks whose selection rule the prompt states in full — the reach the v1/v2
+contracts deliberately refuse (membership never touched).
+
+`0.0.2.40` (single change): re-derive the id SET from the prompt's own filter/top-K segments
+(`среди <col><op><num>`, `Отбрось <col><op><num>`, `Топ-K самых дешёвых/дорогих` + fully-stated tie
+chain) over the same `(id, col, value)` table parser as v2; stem-matched column names incl. genitive
+forms (the 2.39 lesson), ambiguity/formula/unknown-tie-column refuses touch-nothing; membership
+replaced ONLY when every stated segment parses, ids only ever from the prompt table, then the
+inherited v2 re-rank orders the set; zero model tokens, reference never read, sub-2.40 stamps
+byte-identical (`gate_v49` flag matrix, `gate_v54` new contract incl. the published-bytes replay).
+Coverage stated before launch: 2 of 6 single-shot J prompts parse, mis-derivations 0 — replay over
+every published pair-239 J row converts the six failing rows (4 × `skuB`-inclusion, 2 × empty draw)
+with zero regressions. Pre-registered rule verbatim in `PAIR-239-V61.md` (chronic-target (a),
+evented-conversion + mis-derivation guard + inheritance-parity + no-A-fire (b), −2-cell bound (c));
+arms `m39r*` vs `m40r*` via `run_pair240.sh` under `parb-pair240.service`, same plans/seeds.

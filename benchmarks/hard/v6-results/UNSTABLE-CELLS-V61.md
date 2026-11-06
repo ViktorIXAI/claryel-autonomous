@@ -130,3 +130,28 @@ pre-registered rule built on the chronic cell. Group 1 (`C` set lotteries) stays
 deterministic grammar proven. Group 3's A cells are demoted to pure lottery (`A-ex6-00` 14/21 across
 the map and four control pairs) — no contour target while it keeps flipping both ways. `K-ex6-03`
 remains the documented value-shape bank defect, not a contour target.
+
+## Addendum (19:10 CET): pair-239 adopts 0.0.2.39; J order losses are closed on the line; J MEMBERSHIP is the newest live class and moves to 2.40
+
+`pair-239/` (`l37r*` vs `l39r*`, three matched seeds, control = the adopted `0.0.2.37`): the re-landed
+J ranking repair with grammar v2 passed its pre-registered rule exactly — chronic `J-ex6-02`
+0/3 -> 3/3, `contour:v20_j_id_norm_v239_j_rerank_by_prompt` on every converted row at identical
+`ptok=304`/`calls=2` (zero added tokens), zero regressions carrying the event, B repair identical,
+A pin intact — **`0.0.2.39` ADOPTED as the new control line** (`PAIR-239-V61.md`). Group 2
+(`order_partial`) is closed as a contour target on this line.
+Arm mean +1.0 (below the ~2-cell floor) = +3 attributable conversions minus 2 event-less lottery
+flips; all other flips (group-1 `C-ex6-00`, group-4 `H`) carry no 2.39 event.
+
+Two class changes come out of this pair:
+
+- `C-ex6-02` (chronic 0/12) is a **bank defect**, not group-1 work: the bank's own snippets A, C, D
+  all deterministically print `[1, 2, 3]` while the gold asks only `C`. Executed proof in
+  `PAIR-239-V61.md`; logged for owner-commanded bank clarification. Group 1's remaining live cells
+  (`C-ex6-00/01/03`) stay content lotteries, still with no deterministic grammar.
+- The newest live class is **J membership (`id_set_mismatch`)**: `J-ex6-01` failed seeds 0-1 identically
+  in BOTH arms (`["skuC","skuB"]` — `skuB` has `срок=12`, violating the prompt's own `срок<=10`
+  filter), 1/6 in the six-seed map; `J-ex6-06` failed seed 0 in both arms with an empty list. Their
+  selection rules are fully stated in the prompt (`среди срок<=10` + `Топ-2 самых дешёвых` + tie
+  chain; `Отбрось score<70`) — `0.0.2.40` re-derives the id set from those segments (same fail-closed
+  grammar discipline as v2, membership changed ONLY when every segment parses), pre-registered in
+  `PAIR-239-V61.md` before any `m*` row.

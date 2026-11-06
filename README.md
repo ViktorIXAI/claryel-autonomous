@@ -24,7 +24,7 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.37` — ADOPTED on 2026-11-06 after pair-237 (harness stamps are `0.0.2.x`; full
+Contour gate line: `0.0.2.39` — ADOPTED on 2026-11-06 after pair-239 (harness stamps are `0.0.2.x`; full
 history in `versions/VERSIONS.md` and `benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31`
 measured **negative** against the former adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured
 **+1.3 cells — below the ~2-cell noise floor, NOT adopted** (`PAIR-232-V61.md`; `PAIR-233-V61.md` — 2.33
@@ -54,8 +54,17 @@ adopted and `A_TABLE_ARITH` is pinned to exactly (2,33)/(2,38) (`PAIR-238-V61.md
 reaching 3 of 7 bank prompts, and the published bytes show exactly why the chronic victim `J-ex6-02`
 (0/12 across the six-seed map and both pair-238 arms, every loss the right ids in the wrong order) was
 never in reach; v2 closes those four named gaps, reproduces 6/7 with mis-sorts 0, and replays over
-pair-238's published J rows converting seven losses with zero regressions; paired arms `l37r*` vs
-`l39r*` on three matched seeds measure it under a chronic-target pre-registered rule. Published arms
+pair-238's published J rows converting seven losses with zero regressions. Paired arms `l37r*` vs
+`l39r*` on three matched seeds **passed the pre-registered chronic-target rule exactly — `J-ex6-02`
+0/3 → 3/3 with the re-rank event on every converted row at identical `ptok`/`calls`, zero regressions
+carrying the event, B repair identical, A pin intact: `0.0.2.39` is ADOPTED as the new control line**
+(arm mean +1.0, published below the ~2-cell floor by construction; `PAIR-239-V61.md`; decision record
+`history/agent-decisions/2026-11-06-pair239-j-grammar-v2-adopted-line-moves-to-239-and-240-launch.md`).
+`0.0.2.40` (J **membership** re-derivation from the prompt's own filter/top-K rule, the chronic
+`J-ex6-01`/`J-ex6-06` `id_set_mismatch` class this pair surfaced) is pre-registered in
+`PAIR-239-V61.md` and measured by pair-240 (`m39r*` vs `m40r*`). The same pair logged `C-ex6-02` as a
+**bank defect** — its gold `want=['C']` contradicts the task text (three of the four bank snippets
+deterministically print `[1, 2, 3]`), so no contour mechanism chases that cell. Published arms
 on the current hard bank v6.1: `full-229` (contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs
 the same local model without contour).
 
@@ -93,9 +102,11 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   (`PAIR-236-V61.md`); an eighth, 0.0.2.38's A-arithmetic re-land, **UNMEASURED — the adopted line
   passed its target cell 3/3 so the pair contained no live target at all**, the second zero-opportunity
   pair in the series and the reason pair hypotheses are now pinned to chronic stable-fail cells
-  (`PAIR-238-V61.md`); a ninth, 0.0.2.39, re-lands the J ranking repair with grammar v2 (bank coverage
-  3/7 → 6/7, mis-sorts 0, published-bytes replay converts seven losses with zero regressions) and is
-  measured by pair-239. Resolution floor measured directly: the same
+  (`PAIR-238-V61.md`); a ninth candidate, 0.0.2.39 (J ranking repair with grammar v2, bank coverage
+  3/7 → 6/7, mis-sorts 0, published-bytes replay converting seven losses with zero regressions), is the
+  one that **resolved**: pair-239's chronic target was live, the conversion was fully evented at zero
+  added tokens, and it was ADOPTED (`PAIR-239-V61.md`) — while its arm mean, +1.0, is still reported as
+  below the floor and is not quoted as the reason. Resolution floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
