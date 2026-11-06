@@ -46,10 +46,16 @@ other 2.37-gated event anywhere, arm 62/63/66 vs 62/59/63 (+2.4 mean, only the +
 conversion attributable, the rest stated as event-less noise; pooled 10W/3L p=0.09): **ADOPTED as the new
 control line** (`PAIR-237-V61.md`; decision record
 `history/agent-decisions/2026-11-06-pair237-b-table-adopted-line-moves-to-237-and-238-launch.md`).
-`0.0.2.38` re-lands the 2.33 A threshold-table arithmetic — pair-237's adopted line supplied the live
-on-target cells pair-233 never had, and the frozen grammar replays over those exact published bytes to
-1.00 strict — under a pre-registered rule that counts another zero-fire pair as UNMEASURED, not a pass;
-paired arms `k37r*` vs `k38r*` on three matched seeds. Published arms
+`0.0.2.38` re-landed the 2.33 A threshold-table arithmetic on that line and came back **UNMEASURED** —
+the line passed `A-ex6-00` in all three control seeds, the pair carried no live on-target cell despite
+one mechanism fire on that task in a candidate seed, so by its own pre-registered rule the stamp is not
+adopted and `A_TABLE_ARITH` is pinned to exactly (2,33)/(2,38) (`PAIR-238-V61.md`; arms `k37r*` vs
+`k38r*`). `0.0.2.39` re-lands the category-J ranking repair with **grammar v2** — v1 froze at 2.32
+reaching 3 of 7 bank prompts, and the published bytes show exactly why the chronic victim `J-ex6-02`
+(0/12 across the six-seed map and both pair-238 arms, every loss the right ids in the wrong order) was
+never in reach; v2 closes those four named gaps, reproduces 6/7 with mis-sorts 0, and replays over
+pair-238's published J rows converting seven losses with zero regressions; paired arms `l37r*` vs
+`l39r*` on three matched seeds measure it under a chronic-target pre-registered rule. Published arms
 on the current hard bank v6.1: `full-229` (contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs
 the same local model without contour).
 
@@ -84,7 +90,12 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   tokens) whose arm mean sat exactly at the floor with event-less flips (`PAIR-235-V61.md`); and a
   seventh, 0.0.2.36 group-4 best-of-2 selection, **−1.0 with six fires and zero converted cells** — the
   second sample reproduces the same component omission, so selection cannot beat a biased class
-  (`PAIR-236-V61.md`). Resolution floor measured directly: the same
+  (`PAIR-236-V61.md`); an eighth, 0.0.2.38's A-arithmetic re-land, **UNMEASURED — the adopted line
+  passed its target cell 3/3 so the pair contained no live target at all**, the second zero-opportunity
+  pair in the series and the reason pair hypotheses are now pinned to chronic stable-fail cells
+  (`PAIR-238-V61.md`); a ninth, 0.0.2.39, re-lands the J ranking repair with grammar v2 (bank coverage
+  3/7 → 6/7, mis-sorts 0, published-bytes replay converts seven losses with zero regressions) and is
+  measured by pair-239. Resolution floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per

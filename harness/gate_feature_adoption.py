@@ -27,6 +27,14 @@ REJECTED_FEATURES = {
 # no on-target cells). A behaviour inherits only if its measurement resolved it — an unadopted feature
 # stays enabled at its own stamp alone, so it cannot ride into a later candidate's measurement.
 UNADOPTED_FEATURES = {
+    # UPDATE 0.0.2.39 (pair-238 decision): the mechanism class IS proven on published bytes — pair-238
+    # shows all six chronic J-ex6-02 losses carry the right id set in the wrong order (product key + tie
+    # chain the prompt states) and v2 of the grammar converts all six, plus one J-ex6-06 order flip, with
+    # zero regressions over the 36 published J rows. What froze 2.32 was the ~2-cell measurement floor,
+    # and pair-238 supplied the missing ingredient 2.32/2.33 never had: a CHRONIC stable-fail target that
+    # cannot vanish between seed draws. RE-LANDED from 0.0.2.39 as that stamp's single candidate change
+    # (gate_run `J_RERANK_V2 = contour_at_least(2, 39)`, grammar v2) under the pre-registered pair-239
+    # rule (PAIR-238-V61.md). If pair-239 does not hold the clean pattern, the flag freezes at 2.39.
     "j_prompt_rerank": (2, 32),
     # 2.33 measured unresolvable ONLY because its arms never produced an on-target cell (zero live
     # fires — the mechanism never saw a failing seed to repair). pair-237's adopted line produced two:
@@ -35,6 +43,12 @@ UNADOPTED_FEATURES = {
     # 0.0.2.38 as that stamp's single candidate change (gate_run
     # `A_TABLE_ARITH = CONTOUR_REVISION == (2, 33) or contour_at_least(2, 38)`) under the pre-registered
     # pair-238 rule. If pair-238 does not hold the clean pattern, the flag freezes again at 2.38.
+    # MEASURED pair-238 (PAIR-238-V61.md): UNMEASURED — rule (a) failed, the adopted line passed
+    # A-ex6-00 in all three control seeds, no live on-target cell existed. The flag is now pinned to
+    # the EXACT revisions (2,33) and (2,38) (`A_TABLE_ARITH = CONTOUR_REVISION in ((2,33),(2,38))`):
+    # an unadopted experiment must not inherit into 2.39+ via a contour_at_least floor. Another
+    # re-land is only legitimate as that stamp's single candidate change with a fresh pre-registered
+    # rule and a CHRONIC target cell, never a lottery loss.
     "a_table_arith": (2, 33),
     # 0.0.2.34 measured -1.0 cells at three seeds with ZERO live fires in either grammar: the config
     # grammar accepts 1 of 7 B prompts (no-op, the model was already prompt-equal), the echo grammar

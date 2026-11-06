@@ -741,3 +741,46 @@ candidate passes every control-failed seed with `contour:v233_a_tariff_table` on
 nothing else anywhere carries a 2.38-gated event while the adopted B repair fires identically in both
 arms, and the candidate is not >2 cells below control. The on-target mean is at most +1.0 by
 construction and will be published as sub-floor; the adoption rests on deterministic full attribution.
+
+## 2026-11-06 17:55 CET (contour-loop): pair-238 CLOSED — 0.0.2.38 UNMEASURED (no live on-target cell), pinned out of the line; 0.0.2.39 J grammar v2 measured NOW (`l37r*` vs `l39r*`)
+
+pair-238 ran as pre-registered: arms `k37r0..2`/`k38r0..2` (stamp == behavior verified in all six log
+first lines), 77/77 results AND ledger rows per arm, 0 empty/engine-error/zero-prompt/stalled rows.
+Headline: 0.0.2.37 62/60/65 (62.3, flips 10/71) vs 0.0.2.38 62/62/66 (63.3, flips 9/71); pooled 4W/1L
+p=0.375 — sub-floor either way, not quoted. **The pre-registered rule (a) failed: `A-ex6-00`
+strict-passed all three control seeds** (prompt tokens identical to the candidate rows — same contour
+path, the model just answered correctly that draw), so the pair had no on-target measurement
+opportunity and by its own text is UNMEASURED, not a pass — pair-237's motivating loss was a lottery
+(cell sits 14/21 across map + four control pairs). The mechanism did fire once, on the target task in
+candidate seed 2 (`v233_a_tariff_table`, ptok/calls identical to control — zero-token repair confirmed)
+with nothing to convert. Adopted-B identity clause held: `v235_b_table_total` ×3 on the same `B-ex6-06`
+rows in both arms; no other 2.38-gated event anywhere; 5 discordant cells rescored 0 mismatches; energy
+windows 4.68–9.27 Wh (seed-0 candidate inflated by two serve-slow B rows, matched windows inside noise).
+Verdict (`PAIR-238-V61.md`): **NOT adopted, line stays `0.0.2.37`**, and `A_TABLE_ARITH` re-pinned from
+`at_least(2,38)` to exact `(2,33)/(2,38)` — an unmeasured experiment must not inherit into 2.39+ (the
+2.30/2.31/2.36 inheritance discipline, `gate_v49` 31 checks pin the 2.38-ON/2.39-OFF matrix). Process
+rule recorded: second zero-opportunity pair (2.33, 2.38) — pair hypotheses must pin to CHRONIC
+stable-fail cells, never one pair's lottery losses.
+
+Next candidate comes from the newest live class the pair itself surfaced (group 2, `order_partial`):
+`0.0.2.39` re-lands the 2.32 ranking-repair mechanism for category J with **grammar v2**, built only
+from published-pair refusal diagnostics — the four gaps v1 refused on real bank prompts (ё adjective,
+genitive/primary-clause column forms + `при равенстве <col>` lead, unique-prefix filter names, explicit
+`A*B` product key with a fully-stated tie chain), every fail-closed refusal kept, membership never
+touched, reference never read, zero model tokens. Coverage stated before launch: 3/7 → 6/7, `J-ex6-03`
+(formula) still refused, **mis-sorts 0**; replay over all 36 published pair-238 J rows converts the six
+chronic `J-ex6-02` order losses plus one `J-ex6-06` flip with **zero regressions** (`gate_v48`, 36
+checks, CI-pinned). The pre-launch smoke earned its keep: it caught the decorated-ids repair
+(`j_id_norm`) early-returning before the re-rank — dict-shaped J answers stored UNREPAIRED (`J-ex6-02
+c=0.00`, no event); from 2.39 the two compose with both events, at 2.32 the early return stays
+byte-identical (`gate_v49` pins both sides), and the resmoke converted `J-ex6-02` live with
+`contour:v20_j_id_norm_v239_j_rerank_by_prompt`. Full contracts before launch: v48 36, v49 31, v50 18,
+v51–v53, v36–v47, fixers, versioning — all green. Pair-239 (`parb-pair239.service`, `run_pair239.sh`,
+arms `l37r*` vs `l39r*`, same plans/seeds as pair-238; first arm line `release 0.0.2.37, contour
+behavior 2.37`) runs under the chronic-target rule pre-registered in `PAIR-238-V61.md`: adopt iff
+`J-ex6-02` strict-fails in ≥1 control seed (chronic 0/12 — if control ever passes it 3/3 the pair is
+UNMEASURED and the flag freezes at 2.39), the candidate passes every control-failed seed with a
+2.39-gated re-rank event on each converted row, NO strict-pass regression anywhere carries one
+(mis-sort guard), no `v233_a_tariff_table` event appears in either arm (the A pin failing would mean
+two changes, not one), the adopted B repair fires identically in both arms, and the candidate is not
+>2 cells below control.

@@ -110,3 +110,23 @@ action. Group 1 (`C` set_mismatch, `C-ex6-00` flipped again) stays live but has 
 grammar proven: `set_mismatch` there is the model's per-option verdict flipping, which neither
 selection (2.31) nor a form contract can reach; the next group-1 candidate needs a
 per-option-grounded mechanism, not another vote.
+
+## Addendum (17:45 CET): pair-238 measures the A retry — UNMEASURED, zero live targets; group 2 (J) is the newest live class and moves to 2.39
+
+`pair-238/` (`k37r*` vs `k38r*`, three matched seeds, control = the adopted `0.0.2.37`): the 2.38
+A-arithmetic re-land hit the pair-233 failure mode a second time — the adopted line passed `A-ex6-00`
+3/3, the pair carried no live on-target cell, so the pre-registered rule reports **UNMEASURED, not a
+pass** (arm +1.0 is below the ~2-cell floor anyway; `PAIR-238-V61.md`). `A_TABLE_ARITH` is pinned to
+exactly (2,33)/(2,38) so an unadopted experiment cannot inherit into 2.39+. Lesson applied: pair
+targets must be CHRONIC cells, never one pair's lottery losses. This pair's live J signal:
+`J-ex6-06` flipped again event-less (`order_partial` losing seed, right set wrong order), and
+`J-ex6-02` is now a confirmed chronic content-order failure — stable fail in the six-seed map AND
+0/6 across both arms of this pair, every loss the full correct id set in the wrong order
+(`order_partial`, content 0.125/0.0). The frozen 2.32 grammar refuses it (product key + tie chain
+outside v1's grammar); grammar v2 closes exactly the four refusal gaps the published bytes expose,
+reproduces 6/7 J prompts with mis-sorts 0, and replays over this pair's published rows converting all
+six `J-ex6-02` losses plus one `J-ex6-06` flip with ZERO regressions — `0.0.2.39` re-lands it under a
+pre-registered rule built on the chronic cell. Group 1 (`C` set lotteries) stays live, still with no
+deterministic grammar proven. Group 3's A cells are demoted to pure lottery (`A-ex6-00` 14/21 across
+the map and four control pairs) — no contour target while it keeps flipping both ways. `K-ex6-03`
+remains the documented value-shape bank defect, not a contour target.

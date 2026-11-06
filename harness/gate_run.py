@@ -1376,6 +1376,15 @@ SELFCONSIST_CATS = ("C", "J")
 # (fired once, fixed exactly its class, zero extra model calls, zero mis-sorts) but the headline delta is
 # unresolvable, so it is NOT adopted: it stays enabled only at its own stamp and must not ride into 2.33+.
 J_RERANK = CONTOUR_REVISION == (2, 32)
+# 0.0.2.39 (pair-239 candidate): the J re-rank RE-LANDED with grammar v2, coverage raised on the four
+# refusal gaps published pair-238 exposed (ё adjective, genitive/primary-clause column forms, unique
+# prefix filter names, explicit product key + full tie chain). Coverage before launch: v1 reproduces
+# 3/7 and refuses 4 (J-ex6-01/02/03/04); v2 reproduces 6/7, still refuses the one formula task
+# (J-ex6-03 `Балл = ...`) and mis-sorts 0; over every published pair-238 J row v2 converts all six
+# chronic J-ex6-02 losses and repairs one J-ex6-06 order flip with ZERO regressions (gate_v48 pins the
+# replay). The v1 grammar itself stays byte-identical at 2.32: 2.39 runs v2, never v1's flags. The
+# pair-238 UNMEASURED A arithmetic is NOT inherited into 2.39: `A_TABLE_ARITH` pins to (2,33)/(2,38).
+J_RERANK_V2 = contour_at_least(2, 39)
 # 0.0.2.33: A threshold-table arithmetic (tariff chains), the adopted 2.27 family extended to the
 # fields_mismatch cluster that the corrected stability map names for A (UNSTABLE-CELLS group 3).
 # MEASURED (PAIR-233-V61.md): +1.3 cells at three seeds, BELOW the ~2-cell noise floor, and the mechanism
@@ -1383,12 +1392,17 @@ J_RERANK = CONTOUR_REVISION == (2, 32)
 # the pair could not measure it. NOT adopted; frozen to its own stamp like the other unadopted features.
 # UPDATE 0.0.2.38 (pair-237 decision): pair-237's adopted control line finally PROVIDED the live
 # opportunity pair-233 never had — it lost A-ex6-00 in two of three seeds with
-# `fields_mismatch:surcharges,total`, and replaying the 2.33 grammar over exactly those published answer
+# fields_mismatch:surcharges,total, and replaying the 2.33 grammar over exactly those published
 # bytes (benchmarks/hard/v6-results/pair-237/) repairs both to 1.00 strict with `v233_a_tariff_table`
 # events and no-ops the two passing candidate bytes (gate_v50 pins the replay). Same playbook as
 # 2.35->2.37: a frozen deterministic zero-token mechanism re-lands as the single candidate change under
 # a pre-registered attribution rule; the 2.33 arm keeps its measurement byte-identically.
-A_TABLE_ARITH = CONTOUR_REVISION == (2, 33) or contour_at_least(2, 38)
+# MEASURED pair-238 (PAIR-238-V61.md): UNMEASURED — the adopted line passed A-ex6-00 in all three
+# control seeds, so the pair carried no live on-target cell and the pre-registered rule (a) failed.
+# NOT adopted; the flag now stays frozen to the EXACT revisions where it was measured, (2,33) and
+# (2,38) — a `contour_at_least` floor would smuggle an unadopted, never-on-target experiment into
+# every later candidate and pollute its attribution (the inheritance rule that froze 2.30/2.31/2.36).
+A_TABLE_ARITH = CONTOUR_REVISION in ((2, 33), (2, 38))
 # 0.0.2.34: B field completeness — extraction fields recomputed by code from the prompt's own data block.
 # Two narrow grammars (config key:value block; embedded-JSON echo-with-count), required names read from
 # the prompt's own JSON spec, any ambiguity or extra model key refuses. K excluded: value SHAPES the
@@ -1588,6 +1602,27 @@ def contract_guarantee(acct, cat, r, msgs0, seed):
     return r
 
 
+def _j_rerank_answer(t, ids):
+    """Shared J ordering repair: returns (new_text, [event_tag]) or (None, None).
+
+    Applied only when the result is a pure permutation of what the model wrote: the contour fixes the
+    ORDER, it never decides membership and never reads the reference. Unsupported rules return None and
+    touch nothing. v1 grammar at stamp 2.32, grammar v2 from 2.39 (`v2g`), byte-identical at each.
+    """
+    if not (J_RERANK or J_RERANK_V2) or t.get("mode") == "loop":
+        return None, None
+    v2g = J_RERANK_V2 and not J_RERANK
+    doc = ((t.get("assembled_doc") or "") + "\n" + (t.get("prompt") or "")).strip()
+    ranked = JR.rank_from_prompt(t.get("prompt") or "", ids, v2=v2g) or JR.rank_from_prompt(doc, ids, v2=v2g)
+    tag_r = "v239_j_rerank_by_prompt" if v2g else "v232_j_rerank_by_prompt"
+    tag_m = "v239_j_membership_untouched" if v2g else "v232_j_membership_untouched"
+    if ranked and set(ranked) == set(ids) and ranked != ids:
+        return json.dumps(ranked, ensure_ascii=False), [tag_r]
+    if ranked and set(ranked) != set(ids):
+        return None, [tag_m]
+    return None, None
+
+
 def post_normalize_answer(cat, t, text):
     """v2.0: only post-process material the model already produced.
 
@@ -1617,20 +1652,31 @@ def post_normalize_answer(cat, t, text):
                     if v is not None:
                         ids.append(str(v))
             if ids and all(isinstance(x, dict) for x in j2):
-                return json.dumps(ids, ensure_ascii=False), ["j_id_norm"]
+                text_norm = json.dumps(ids, ensure_ascii=False)
+                if not J_RERANK_V2:
+                    # 2.32-era byte-identity: the decorated-ids repair early-returned and the
+                    # re-rank never saw that answer. Keep it exactly so at older stamps.
+                    return text_norm, ["j_id_norm"]
+                # 0.0.2.39 (caught by the pre-launch smoke): a model answer whose items are decorated
+                # dicts hit this early return BEFORE the ordering re-rank, so a dict-shaped answer with
+                # the right ids in the wrong order was normalized and stored UNREPAIRED. From 2.39 the
+                # normalized sequence feeds the re-rank and both events are recorded.
+                rer_text, rer_ev = _j_rerank_answer(t, ids)
+                if rer_ev:
+                    return (rer_text if rer_text is not None else text_norm), ["j_id_norm"] + rer_ev
+                return text_norm, ["j_id_norm"]
     # 0.0.2.32: J ordering re-derived from the prompt's own table (see gate_j_rerank.py). Applied only when
     # the result is a pure permutation of what the model wrote: the contour fixes the ORDER, it does not
     # decide membership, and it never reads the reference. Unsupported rules return None and touch nothing.
-    if J_RERANK and cat == "J" and t.get("mode") != "loop":
+    # 0.0.2.39 re-lands the same mechanism with grammar v2 (wider prompt-coverage, same fail-closed
+    # contract); the v1 grammar stays byte-identical at its own stamp 2.32.
+    if (J_RERANK or J_RERANK_V2) and cat == "J" and t.get("mode") != "loop":
         j2 = _fmt_parse(text)
         ids = [x for x in j2] if isinstance(j2, list) and j2 and all(isinstance(x, str) for x in j2) else None
         if ids:
-            doc = ((t.get("assembled_doc") or "") + "\n" + (t.get("prompt") or "")).strip()
-            ranked = JR.rank_from_prompt(t.get("prompt") or "", ids) or JR.rank_from_prompt(doc, ids)
-            if ranked and set(ranked) == set(ids) and ranked != ids:
-                return json.dumps(ranked, ensure_ascii=False), ["v232_j_rerank_by_prompt"]
-            if ranked and set(ranked) != set(ids):
-                return text, ["v232_j_membership_untouched"]
+            rer_text, rer_ev = _j_rerank_answer(t, ids)
+            if rer_ev:
+                return (rer_text if rer_text is not None else text), rer_ev
     if not POST_NORMALIZE or not text:
         return text, None
     changed = []

@@ -101,6 +101,20 @@ ck(not g238.CONTRACT_GUARANTEE and not g238.SELFCONSIST and not g238.J_RERANK an
 g237b = load("0.0.2.37")
 ck(not g237b.A_TABLE_ARITH and g237b.B_TABLE_AGGREGATE,
    "the 2.38 re-adoption must not rewrite history: the 2.37 arms still ran WITHOUT the A arithmetic")
+ck(not g238.J_RERANK_V2, "2.38 does not inherit the 2.39 grammar v2 re-land")
+g239 = load("0.0.2.39")
+ck(not g239.CONTRACT_GUARANTEE and not g239.SELFCONSIST and not g239.J_RERANK and g239.J_RERANK_V2
+   and not g239.A_TABLE_ARITH and g239.B_TABLE_AGGREGATE and not g239.B_FIELD_COMPLETE and not g239.G4_LOTTERY,
+   "2.39 inherits the ADOPTED line (2.29 + B table) plus the J re-rank grammar v2 ONLY: the A arithmetic "
+   "was UNMEASURED at pair-238 and stays pinned to exactly (2,33)/(2,38) — it must NOT ride into 2.39 "
+   "via a contour_at_least floor; the v1 J flag stays frozen to 2.32 and 2.30/2.31/2.34/2.36 stay frozen")
+ck(g238.A_TABLE_ARITH and not g239.A_TABLE_ARITH,
+   "pin matrix: 2.38 still runs the A arithmetic (its own measured stamp), 2.39 does not")
+ck(g232.J_RERANK and not g232.J_RERANK_V2,
+   "history pin: the 2.32 arms ran grammar v1 only; the 2.39 re-land must not rewrite 2.32")
+g238b = load("0.0.2.38")
+ck(not g238b.J_RERANK and not g238b.J_RERANK_V2,
+   "history pin: the 2.38 arms ran NO J re-rank at all")
 
 bank = json.load(open(str(HERE.parent / "benchmarks" / "hard" / "bank-hard-v6.json"), encoding="utf-8"))
 import gate_j_rerank as JR
@@ -129,5 +143,31 @@ loop = dict(t, mode="loop")
 out, ev = g232.post_normalize_answer("J", loop, "1. v5 2. v3")
 ck(out == "1. v5 2. v3" and not any("v232" in e for e in (ev or [])), "loop-D J answers are not re-ranked")
 
-print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank ONLY at 2.32 (not adopted), covers %d/%d J tasks"
+# 2.39 call-site wiring: J-ex6-02 is OUTSIDE the v1 grammar (product primary key + tie chain), so the
+# same bytes prove the v2 path fires at 2.39 with its own event and stays untouched at 2.38.
+tj = next(x for x in bank if x["id"] == "J-ex6-02")
+sh2 = list(tj["ref"])
+sh2.reverse()
+inp = json.dumps(sh2, ensure_ascii=False)
+out9, ev9 = g239.post_normalize_answer("J", {"prompt": tj["prompt"]}, inp)
+ck(json.loads(out9) == list(tj["ref"]), "2.39 repairs the J-ex6-02 product+chain order: %s vs %s" % (out9, tj["ref"]))
+ck(any("v239_j_rerank" in e for e in (ev9 or [])), "the 2.39 repair is evented: %s" % ev9)
+out8, ev8 = g238b.post_normalize_answer("J", {"prompt": tj["prompt"]}, inp)
+ck(out8 == inp and not any("j_rerank" in str(e) for e in (ev8 or [])),
+   "at 2.38 the same bytes stay untouched: %s / %s" % (out8, ev8))
+
+# The smoke-caught composition bug: a model answer that decorates each id in a dict hit the
+# decorated-ids early return and the re-rank never saw it. From 2.39 the two compose; at 2.32 the
+# early return stays byte-identical.
+dicts = [{"id": i} for i in reversed(list(tj["ref"]))]
+outd9, evd9 = g239.post_normalize_answer("J", {"prompt": tj["prompt"]}, json.dumps(dicts, ensure_ascii=False))
+ck(json.loads(outd9) == list(tj["ref"]) and any("j_id_norm" in e for e in evd9)
+   and any("v239_j_rerank" in e for e in evd9),
+   "2.39 composes decorated-ids repair with the re-rank: %s %s" % (outd9, evd9))
+outd2, evd2 = g232.post_normalize_answer("J", {"prompt": tj["prompt"]}, json.dumps(dicts, ensure_ascii=False))
+ck(json.loads(outd2) == list(reversed(list(tj["ref"]))) and evd2 == ["j_id_norm"],
+   "2.32 keeps the early-return composition: re-rank never sees a decorated answer")
+
+print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
+      "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
       % (CHECKS, len(covered), len([x for x in bank if x["cat"] == "J"])))

@@ -1,0 +1,27 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "[REDACTED]",
+  "contour_version": "0.0.2.38",
+  "contour_behavior": "2.38",
+  "contour_changed_at_this_release": true,
+  "git_sha": "",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "paired contour 0.0.2.38 seed 0 on bank v6.1 (2.38 re-lands the A threshold arithmetic; control 0.0.2.37, the adopted line since pair-237; 2.30-2.34 and 2.36 frozen out) "
+}
