@@ -92,6 +92,15 @@ ck(not g237.CONTRACT_GUARANTEE and not g237.SELFCONSIST and not g237.J_RERANK an
 g236b = load("0.0.2.36")
 ck(not g236b.B_TABLE_AGGREGATE and g236b.G4_LOTTERY,
    "the 2.37 re-adoption must not rewrite history: 2.36 still runs the lottery and NOT the table repair")
+g238 = load("0.0.2.38")
+ck(not g238.CONTRACT_GUARANTEE and not g238.SELFCONSIST and not g238.J_RERANK and g238.A_TABLE_ARITH
+   and not g238.B_FIELD_COMPLETE and not g238.G4_LOTTERY and g238.B_TABLE_AGGREGATE,
+   "2.38 inherits the ADOPTED line (2.29 behaviour + the pair-237-adopted B table repair) plus the "
+   "re-landed A threshold arithmetic only: the measured-negative 2.30/2.31/2.36 and the unresolved "
+   "2.32/2.34 grammars stay frozen to their own stamps")
+g237b = load("0.0.2.37")
+ck(not g237b.A_TABLE_ARITH and g237b.B_TABLE_AGGREGATE,
+   "the 2.38 re-adoption must not rewrite history: the 2.37 arms still ran WITHOUT the A arithmetic")
 
 bank = json.load(open(str(HERE.parent / "benchmarks" / "hard" / "bank-hard-v6.json"), encoding="utf-8"))
 import gate_j_rerank as JR

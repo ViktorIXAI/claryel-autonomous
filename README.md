@@ -24,26 +24,32 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.37` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
-`benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31` measured **negative** against the
-adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured **+1.3 cells — below the ~2-cell noise floor,
-NOT adopted** (`PAIR-232-V61.md`; `PAIR-233-V61.md` — 2.33 additionally fired **zero times live**, so its
-arm delta contained no on-target cells at all, a direct empirical lower bound on pure resampling);
-`0.0.2.34` measured **−1.0 cells with zero live fires in either B grammar** — the model answered both of
-its target cells 6/6 in that pair, so the stamp had no surface to act on (`PAIR-234-V61.md`);
-`0.0.2.35` is the **strongest mechanism evidence of the series** — its table repair fired exactly on its
-target cell in all three candidate seeds and converted `B-ex6-06` 0/3 → 3/3 with its own event on every
-converted row and zero extra model calls — **but the arm mean moved +2.0, exactly at the ~2-cell
-resolution floor, with four off-target flips carrying no 2.35 event: NOT adopted, frozen to its own
-stamp** (`PAIR-235-V61.md`); `0.0.2.36` (group-4 best-of-2 selection) measured **−1.0 with SIX fires and
-ZERO converted cells** — the F wins raised an already-passing cell, and on H the extra sample reproduced
-the same omission: the class is content-biased, selection cannot fix it (the 2.31 lesson, `PAIR-236-V61.md`)
-— **NOT adopted, frozen to its own stamp**. All seven are frozen to their own stamps and inherit into
-nothing. Every headline number below is from `0.0.2.29`, the adopted stamp. `0.0.2.37` re-lands the one
-mechanism with a deterministic full-event conversion — the 2.35 B table repair — under a pre-registered
-all-or-nothing attribution rule (`benchmarks/hard/v6-results/PAIR-236-V61.md` carries the rule and the
-`smk37c` smoke verification; `gate_v52`/`gate_v49` pin the re-adoption and the 2.36 freeze), and is under
-paired measurement against `0.0.2.29` on three seeds. Published arms
+Contour gate line: `0.0.2.37` — ADOPTED on 2026-11-06 after pair-237 (harness stamps are `0.0.2.x`; full
+history in `versions/VERSIONS.md` and `benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31`
+measured **negative** against the former adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured
+**+1.3 cells — below the ~2-cell noise floor, NOT adopted** (`PAIR-232-V61.md`; `PAIR-233-V61.md` — 2.33
+additionally fired **zero times live**, so its arm delta contained no on-target cells at all, a direct
+empirical lower bound on pure resampling); `0.0.2.34` measured **−1.0 cells with zero live fires in
+either B grammar** — the model answered both of its target cells 6/6 in that pair, so the stamp had no
+surface to act on (`PAIR-234-V61.md`); `0.0.2.35` is the **strongest mechanism evidence of the series** —
+its table repair fired exactly on its target cell in all three candidate seeds and converted `B-ex6-06`
+0/3 → 3/3 with its own event on every converted row and zero extra model calls — **but the arm mean moved
++2.0, exactly at the ~2-cell resolution floor, with four off-target flips carrying no 2.35 event: NOT
+adopted, frozen to its own stamp** (`PAIR-235-V61.md`); `0.0.2.36` (group-4 best-of-2 selection) measured
+**−1.0 with SIX fires and ZERO converted cells** — the F wins raised an already-passing cell, and on H the
+extra sample reproduced the same omission: the class is content-biased, selection cannot fix it (the 2.31
+lesson, `PAIR-236-V61.md`) — **NOT adopted, frozen to its own stamp**. All of 2.30/2.31/2.36 are frozen as
+measured-negative and 2.32/2.34 as unresolved-without-conversion; none inherits into anything.
+**`0.0.2.37` re-landed the 2.35 B table repair under a pre-registered all-or-nothing attribution rule and
+passed it exactly** — `B-ex6-06` 0/3 → 3/3 with `contour:v235_b_table_total` on every converted row, no
+other 2.37-gated event anywhere, arm 62/63/66 vs 62/59/63 (+2.4 mean, only the +1.0/seed target-cell
+conversion attributable, the rest stated as event-less noise; pooled 10W/3L p=0.09): **ADOPTED as the new
+control line** (`PAIR-237-V61.md`; decision record
+`history/agent-decisions/2026-11-06-pair237-b-table-adopted-line-moves-to-237-and-238-launch.md`).
+`0.0.2.38` re-lands the 2.33 A threshold-table arithmetic — pair-237's adopted line supplied the live
+on-target cells pair-233 never had, and the frozen grammar replays over those exact published bytes to
+1.00 strict — under a pre-registered rule that counts another zero-fire pair as UNMEASURED, not a pass;
+paired arms `k37r*` vs `k38r*` on three matched seeds. Published arms
 on the current hard bank v6.1: `full-229` (contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs
 the same local model without contour).
 

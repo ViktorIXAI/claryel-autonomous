@@ -28,6 +28,13 @@ REJECTED_FEATURES = {
 # stays enabled at its own stamp alone, so it cannot ride into a later candidate's measurement.
 UNADOPTED_FEATURES = {
     "j_prompt_rerank": (2, 32),
+    # 2.33 measured unresolvable ONLY because its arms never produced an on-target cell (zero live
+    # fires — the mechanism never saw a failing seed to repair). pair-237's adopted line produced two:
+    # A-ex6-00 lost seeds 1-2 with fields_mismatch:surcharges,total, and the frozen grammar replays to
+    # 1.00 strict with its event on exactly those published bytes (PAIR-237-V61.md). RE-LANDED from
+    # 0.0.2.38 as that stamp's single candidate change (gate_run
+    # `A_TABLE_ARITH = CONTOUR_REVISION == (2, 33) or contour_at_least(2, 38)`) under the pre-registered
+    # pair-238 rule. If pair-238 does not hold the clean pattern, the flag freezes again at 2.38.
     "a_table_arith": (2, 33),
     # 0.0.2.34 measured -1.0 cells at three seeds with ZERO live fires in either grammar: the config
     # grammar accepts 1 of 7 B prompts (no-op, the model was already prompt-equal), the echo grammar
@@ -46,6 +53,7 @@ UNADOPTED_FEATURES = {
     # RE-LANDED from 0.0.2.37 as that stamp's single candidate change (PAIR-236 decision): the entry above
     # still freezes the 2.35 measurement to 2.35; 2.37 re-enables the gate explicitly (gate_run
     # `B_TABLE_AGGREGATE = CONTOUR_REVISION == (2, 35) or contour_at_least(2, 37)`) under the pre-registered
-    # pair-237 rule. If pair-237 does not hold the clean pattern, the flag freezes again at 2.37.
+    # pair-237 rule. MEASURED pair-237: the all-or-nothing pattern held exactly and 0.0.2.37 is ADOPTED as
+    # the new control line (PAIR-237-V61.md); the 2.35 measurement entry above stays the historical record.
     "b_table_aggregate": (2, 35),
 }

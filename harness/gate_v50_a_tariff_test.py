@@ -101,6 +101,7 @@ ck(out is wrong and ev is None, "non-A category untouched")
 
 # 5. bank coverage: reproduce/refuse, zero mis-computes allowed
 bank = json.load(open(str(HERE.parent / "benchmarks" / "hard" / "bank-hard-v6.json"), encoding="utf-8"))
+bank_by_id = {t["id"]: t for t in bank}
 cov = []
 for t in bank:
     if t["cat"] != "A":
@@ -120,4 +121,44 @@ for t in bank:
     cov.append((t["id"], "reproduces" if ok else "MIS-COMPUTES"))
 ck(not [t for t, s in cov if s.startswith("MIS")], "the grammar must never mis-compute: %s" % cov)
 reproduced = [t for t, s in cov if s == "reproduces"]
-print("gate_v50 PASS: %d checks | A tariff-table coverage: %s" % (CHECKS, dict(cov)))
+
+# 6. 0.0.2.38 re-adoption (pair-237 decision, PAIR-237-V61.md): the flag is OFF at 2.37 (the 2.37 arms
+# ran without it — history unchanged) and ON at 2.38, and it must repair the EXACT bytes that pair-237's
+# adopted control line lost: A-ex6-00 seeds 1-2 carry fields_mismatch:surcharges,total in
+# benchmarks/hard/v6-results/pair-237/results-j29r*.jsonl, and the re-landed grammar must reproduce the
+# bank reference values from those stored answers with its own event. The two passing candidate bytes
+# must come back untouched, eventless.
+g238 = load("0.0.2.38")
+g237c = load("0.0.2.37")
+ck(g238.A_TABLE_ARITH and g238.B_TABLE_AGGREGATE and not g238.G4_LOTTERY,
+   "2.38 runs adopted behaviour + B table repair + A threshold arithmetic, nothing rejected")
+ck(not g237c.A_TABLE_ARITH, "2.37 must still run WITHOUT the A arithmetic (history not rewritten)")
+p237 = HERE.parent / "benchmarks" / "hard" / "v6-results" / "pair-237"
+t_a = bank_by_id["A-ex6-00"]
+lost, passed = 0, 0
+for fn, want_fix in (("results-j29r1.jsonl", True), ("results-j29r2.jsonl", True),
+                     ("results-j37r1.jsonl", False), ("results-j37r2.jsonl", False)):
+    fp = p237 / fn
+    assert fp.exists(), "pair-237 published answers missing: %s" % fp
+    row = next(json.loads(l) for l in open(fp, encoding="utf-8")
+               if json.loads(l).get("task") == "A-ex6-00")
+    out, ev = g238.a_arith_by_code(t_a, row["answer"])
+    got37, ev37 = g237c.a_arith_by_code(t_a, row["answer"])
+    ck(ev37 is None and got37 is row["answer"],
+       "%s: stamp 2.37 must leave these bytes byte-identical: %r" % (fn, ev37))
+    if want_fix:
+        got = json.loads(out)
+        ref = t_a["ref"]
+        mapkey = next(k for k in ref if isinstance(ref[k], dict))
+        ck(ev == ["v233_a_tariff_table"], "%s: the pair-237 loss must fire the grammar: %r" % (fn, ev))
+        ck(all(abs(float(got[mapkey][rid]) - float(ref[mapkey][rid])) < 1e-9 for rid in ref[mapkey])
+           and abs(float(got[next(k for k in ref if k != mapkey)])
+                   - float(ref[next(k for k in ref if k != mapkey)])) < 1e-9,
+           "%s: replay must reproduce the bank reference: %s vs %s" % (fn, out, ref))
+        lost += 1
+    else:
+        ck(ev is None, "%s: a passing answer must fire no event: %r" % (fn, ev))
+        passed += 1
+ck(lost == 2 and passed == 2, "pair-237 replay coverage must be 2 repaired + 2 untouched: %d/%d" % (lost, passed))
+
+print("gate_v50 PASS: %d checks | A tariff-table coverage: %s | pair-237 replay: 2 repaired, 2 untouched" % (CHECKS, dict(cov)))

@@ -1381,7 +1381,14 @@ J_RERANK = CONTOUR_REVISION == (2, 32)
 # MEASURED (PAIR-233-V61.md): +1.3 cells at three seeds, BELOW the ~2-cell noise floor, and the mechanism
 # fired zero times live — the candidate model answered its target cell correctly on all three seeds, so
 # the pair could not measure it. NOT adopted; frozen to its own stamp like the other unadopted features.
-A_TABLE_ARITH = CONTOUR_REVISION == (2, 33)
+# UPDATE 0.0.2.38 (pair-237 decision): pair-237's adopted control line finally PROVIDED the live
+# opportunity pair-233 never had — it lost A-ex6-00 in two of three seeds with
+# `fields_mismatch:surcharges,total`, and replaying the 2.33 grammar over exactly those published answer
+# bytes (benchmarks/hard/v6-results/pair-237/) repairs both to 1.00 strict with `v233_a_tariff_table`
+# events and no-ops the two passing candidate bytes (gate_v50 pins the replay). Same playbook as
+# 2.35->2.37: a frozen deterministic zero-token mechanism re-lands as the single candidate change under
+# a pre-registered attribution rule; the 2.33 arm keeps its measurement byte-identically.
+A_TABLE_ARITH = CONTOUR_REVISION == (2, 33) or contour_at_least(2, 38)
 # 0.0.2.34: B field completeness — extraction fields recomputed by code from the prompt's own data block.
 # Two narrow grammars (config key:value block; embedded-JSON echo-with-count), required names read from
 # the prompt's own JSON spec, any ambiguity or extra model key refuses. K excluded: value SHAPES the
