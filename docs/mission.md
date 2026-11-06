@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** Earlier name 'Strata Autonomous Harness' and local-first mission are historical; current project is Claryel Autonomous, with Mix AI a prospective direction. See [preservation policy](EVIDENCE-PRESERVATION.md) and [project direction](TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Mission
 
 Strata Autonomous Harness is an open research experiment about **how far a
