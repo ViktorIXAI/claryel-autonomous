@@ -913,3 +913,18 @@ proven grammar family can reach them. Until owner clarification lands, no contou
 this line — every other candidate class is frozen-negative or bank-capped, and pair targets must be
 chronic live cells (pair-238 lesson). Owner-commanded bank clarification + four-arm re-run on the
 clarified bank is the next honest move.
+
+## bank-defect queue formalized (2026-11-06 22:26 CET): `v6-results/bank-defect-v61-queue.md`
+
+Record-only change; no measurements, contour code, bank bytes or scorers touched. The queue named
+in the pair-240/241/242 closure now has per-defect records in the `bank-defect-b04.md` form, with
+evidence re-computed from shipped bytes and tallied over ALL 28 published results directories:
+`A-ex6-03` (gold computed from a hidden base 5700 never printed — `1254.0=0.22*5700`, and the
+gold violates its own chain; **0/89 published rows pass across every arm incl. both raw brains**),
+`C-ex6-02` (all four shipped snippets print `[1, 2, 3]` on CPython, gold `want=[C]`; **0/89**),
+`K-ex6-03` (weakest item: `FREE_SHIPPING` value form unstated; 9/91 rows lose 0.25), and
+`C-ex6-00/01` documented as NOT defects — the published reach limit of the prompt-stated-rule
+family, with proposed in-prompt rule wording should the owner choose to open it. Bank identity
+unchanged: published file `9ec86dfca4a6f85f`, run workspace `f4553aab304f60d7`. Status stays:
+contour line `0.0.2.40`, `C_RULE_GROUND` frozen to `(2,41)`, no pair launches until the owner
+ships the clarified bank; post-clarification protocol = rescore both sides + four-arm re-run.
