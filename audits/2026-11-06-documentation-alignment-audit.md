@@ -34,3 +34,16 @@ See [Testing Philosophy](../docs/TESTING-PHILOSOPHY.md). Claryel Autonomous is o
 - Should public GitHub About/topics be changed to emphasize open engineering experiments and Mix AI, while keeping benchmark and local-AI topics? Recommended: yes.
 - Which dated revision is the current verified release? Do not infer from old README.
 - Should old limitations and publication notes remain unchanged as archival documents with a prominent newer addendum? Recommended: yes.
+
+## Follow-up evidence checkpoint — 2026-11-06 (calendar date; exact time not recorded)
+
+This checkpoint is a **bounded inspection**, not an exhaustive audit or an approval to run benchmarks. The following default-branch files were read: `README.md`, `CITATION.cff`, `versions/VERSIONS.md`, `docs/TESTING-PHILOSOPHY.md`, `docs/EVIDENCE-PRESERVATION.md`; issue #13 and issue #25 were also inspected. Latest commit search returned `d3464a3219093adf86a405bb2e77046afc631342` first at inspection; a commit-search ordering alone does not establish a verified release tag or run status.
+
+| Claim / location | Evidence observed | Severity | Disposition |
+|---|---|---|---|
+| `CITATION.cff` software version `0.0.2.5` versus README's contour gate `0.0.2.29` | Direct read of both files; README explicitly labels its status a 2026-11-05 historical snapshot | Medium: potentially misleading current citation | **Open**: preserve CFF historic metadata; confirm actual release/tag/version provenance before a dated citation update |
+| `versions/VERSIONS.md` title ends at `0.0.2.7` but its body already describes `0.0.2.8` and README references `0.0.2.29` | Direct read of ledger header/body and README | Medium: stale title may mislead | **Open**: add an explicit dated scope note or append a later-version index only after tracing version ledger; do not alter historical release rows |
+| README's head-to-head numerical claims and cloud-model identifiers | README describes frozen hard-v6.1 scoring and specific seeds, with links to separate score files | High if represented as independently verified superiority | **Not validated in this pass**: reproduce raw-byte scoring, seed accounting and model identity before making any new assertion |
+| FRESH100 v1 benchmark and stop authority | Issue #13 says owner STOP, v1 INVALID / DIAGNOSTIC ONLY; issue state is closed but issue body contains the STOP instruction | Critical operational boundary | **No execution authorized**: issue closure alone is not owner GO; do not launch v1 or v2 work as part of documentation audit |
+
+This checkpoint made no changes to benchmark data, model settings, security policy, GitHub repository metadata, or the frozen task banks. Exact run timestamps, release provenance and CI results remain **not independently verified**. Subsequent passes must inspect all relevant files and workflows and run the required policy/link checks before claiming completion.
