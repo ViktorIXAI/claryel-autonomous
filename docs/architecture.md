@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** This diagram describes an early contour architecture, not all later hard-v6 or Mix AI work. See [preservation policy](EVIDENCE-PRESERVATION.md) and [project direction](TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Architecture of the lab
 
 ```
