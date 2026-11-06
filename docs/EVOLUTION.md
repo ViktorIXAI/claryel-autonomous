@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** This early protocol does not override current least-privilege and owner-approval requirements. See [preservation policy](EVIDENCE-PRESERVATION.md) and [project direction](TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Autonomous Evolution Mode — the protocol
 
 This is the loop that produced v1.0→v1.9 (and rejected v1.4/v1.6 and the
