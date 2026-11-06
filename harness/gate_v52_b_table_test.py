@@ -204,6 +204,11 @@ def _bad_model(acct, t, seed, msgs):
 
 _orig_fg = g235.format_gate
 _orig_ck = g235.CK
+_orig_res = g235.gate_res
+# `run_one` starts with a host/engine gate (`gate_res` curls /health); a CI runner has no inference
+# endpoint and would pause 90 s then exit 3. That gate is not what this test measures, so it is pinned
+# open for the duration and restored in `finally`.
+g235.gate_res = lambda: None
 g235.Acct = CapAcct
 g235.CK = _V6Adapter
 g235.format_gate = _bad_model
@@ -214,6 +219,7 @@ finally:
     g235.format_gate = _orig_fg
     g235.CK = _orig_ck
     g235.Acct = _orig_acct
+    g235.gate_res = _orig_res
 ck(rec and rec.get("content") == 1.0 and bool(rec.get("format_ok")),
    "run_one with a scripted wrong B total must end up scored-pass after the 2.35 repair: %r"
    % (rec or {}).get("notes"))

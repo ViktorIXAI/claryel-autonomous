@@ -175,6 +175,11 @@ def _bad_model(acct, t, seed, msgs):
 
 _orig_fg = g234.format_gate
 _orig_ck = g234.CK
+_orig_res = g234.gate_res
+# `run_one` starts with a host/engine gate (`gate_res` curls /health). A CI runner has no inference
+# endpoint, so the wiring test would pause 90 s and exit 3 there — that gate is not what this test
+# measures, so it is pinned open for the duration and restored in `finally`.
+g234.gate_res = lambda: None
 g234.Acct = CapAcct
 g234.CK = _V6Adapter
 g234.format_gate = _bad_model
@@ -185,6 +190,7 @@ finally:
     g234.format_gate = _orig_fg
     g234.CK = _orig_ck
     g234.Acct = _orig_acct
+    g234.gate_res = _orig_res
 ck(rec and rec.get("content") == 1.0 and bool(rec.get("format_ok")),
    "run_one with a scripted wrong B answer must end up scored-pass after the 2.34 repair")
 ck(rows and any("contour:v234_b_config_fields" in (r.get("events") or []) for r in rows),
