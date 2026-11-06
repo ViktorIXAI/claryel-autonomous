@@ -1,3 +1,4 @@
+# TEMPORAL-SCOPE-2026-11-06: Version and authorship fields are historical metadata and not verified latest-release claims. See docs/EVIDENCE-PRESERVATION.md.
 cff-version: 1.2.0
 message: "If you use this harness in an evaluation, cite it as a public engineering and benchmark record."
 title: "Claryel Autonomous: open engineering experiments and benchmark records"
