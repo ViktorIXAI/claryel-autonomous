@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** This ledger concerns the original agent-development sequence. Its autonomy and no-cloud statements are not global claims. See [preservation policy](EVIDENCE-PRESERVATION.md) and [project direction](TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Autonomy ledger — who did what
 
 Classifications (from the project brief):
