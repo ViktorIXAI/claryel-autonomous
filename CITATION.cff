@@ -1,13 +1,13 @@
 cff-version: 1.2.0
 message: "If you use this harness in an evaluation, cite it as a public engineering and benchmark record."
-title: "Claryel Autonomous Harness: an open record of an AI agent building, testing and rejecting its own local-AI harness (0.0.1.0-0.0.2.3)"
+title: "Claryel Autonomous: open engineering experiments and benchmark records"
 type: software
 authors:
   - name: "Viktor Khudiakov"
     role: supervisor
   - name: "Hermes (autonomous coding agent, Nous Research)"
     role: author            # wrote the harness, tests, experiments and decision logs
-repository-code: "https://github.com/ViktorIXAI/strata-autonomous-harness"
+repository-code: "https://github.com/ViktorIXAI/claryel-autonomous"
 license: MIT
 date-released: "2026-11-01"
 version: "0.0.2.5"
