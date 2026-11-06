@@ -32,7 +32,12 @@ def one(task, rep):
         body = {"model": "qwen3.8-flash-next-iq3_s-basalt",
                 "messages": [{"role": "user", "content": p}],
                 "temperature": 0.7, "max_tokens": 4096, "seed": 1000 + rep}
-        req = urllib.request.Request("http://192.168.1.186:8080/v1/chat/completions",
+        url = os.environ.get("PARB_BASALT_CHAT_URL")
+        if not url:
+            raise SystemExit(
+                "PARB_BASALT_CHAT_URL is unset; set it to the basalt OpenAI-compatible "
+                "chat completions endpoint URL (scheme://host:port/v1/chat/completions)")
+        req = urllib.request.Request(url,
             data=json.dumps(body).encode(),
             headers={"Content-Type": "application/json", "Authorization": "Bearer" + " " + key})
         d = json.loads(urllib.request.urlopen(req, timeout=600).read().decode())
