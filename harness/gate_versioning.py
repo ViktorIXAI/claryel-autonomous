@@ -71,6 +71,7 @@ CONTOUR_FEATURES = (
     (2, 26),  # G conflict overwrite when clauses/values disagree with prompt pair
     (2, 27),  # A arithmetic by code from prompt numbers (invoice/FX/proration/trim)
     (2, 28),  # H requires/unknown filled from explicit prompt signature constraint
+    (2, 29),  # C coverage_choice contract: option letters read from the task text, answer line built from the model's own verdicts
     (2, 30),  # contract guarantee: an answer with no parseable artifact gets one shape-only re-ask, then deterministic salvage of the model's own text
 )
 
