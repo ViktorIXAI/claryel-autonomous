@@ -35,7 +35,9 @@ whether a local AI system is useful, safe and affordable.
 - How should privacy boundaries be enforced when local and cloud systems are
   mixed?
 
-These questions are answered one decision at a time through paired runs,
+Additional questions concern imperfect human instructions, self-evaluation bias (a hypothesis), independent scorer errors, Mix AI routing and privacy, changing model/engine/hardware conditions, retrospective re-analysis, and the cost of a verified useful outcome. Forecasting and economic scenarios remain distant exploratory possibilities, not demonstrated capabilities. See [project direction](TESTING-PHILOSOPHY.md).
+
+These questions are addressed one decision at a time through paired runs,
 resource telemetry, cost tables and published failures.
 
 ## Recently closed operational decision
