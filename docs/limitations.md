@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** These limits refer to early v1/v2 experiments. Later cloud comparisons and hard-v6 artifacts exist; old no-cloud statements are not global present-day claims. See [preservation policy](EVIDENCE-PRESERVATION.md) and [project direction](TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Limitations — read before quoting any number
 
 ## Evidence & provenance
