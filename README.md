@@ -22,11 +22,34 @@ its limits are in [`docs/limitations.md`](docs/limitations.md).
 
 Status checked: 2026-11-05 (historical snapshot; version and run status require fresh verification)
 
+## Current version
+
+Contour gate line: `0.0.2.29` (harness stamps are `0.0.2.x`; full history in `versions/VERSIONS.md` and
+`benchmarks/hard/v6-results/LADDER.md`). Published arms on the current hard bank v6.1: `full-229`
+(contour) and `four-arm-v61` (contour vs Grok vs ChatGPT vs the same local model without contour).
+
+## Headline results
+
+Hard bank v6.1 — 71 single-shot + 6 loop tasks, frozen scorer, every number recomputed from published
+answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
+
+- contour 0.0.2.29 on one 24 GB local GPU: **63 / 62 / 60 of 71** over three independent seeds (mean 61.7)
+- ChatGPT (`gpt-6.1-sol`, xhigh) **50**, Grok 4.7 **54**, the same local weights with no contour **56**
+- exact paired sign tests: vs ChatGPT **16W/3L p=0.0044**, vs Grok **12W/3L p=0.035**, vs bare basalt
+  11W/4L p=0.118 (not significant — stated, not buried)
+- where the margin lives: contract-sensitive categories F/H/K **14 vs 6 / 6 / 1**; on the other 56 cells
+  it is parity (49 vs 50 / 49 / 48, all p=1.00) — see `CATEGORY-SPLIT-V61.md`
+- not a printing artifact: giving each raw arm the contour's deterministic repairer changes **0 cells**,
+  and every cloud failure in F/H/K is content-side (`ABLATION-RAW-FIXERS.md`, `AUDIT-FHK-60.md`)
+- cost: contour arm = 77 tasks, 141 model calls, ~36k tokens, 128-166 s on an idle local GPU with zero
+  cloud tokens; raw arms 585-2016 s of answer time; measured GPU watt-hours and the method limits in
+  `COST-V61.md` and `ENERGY-METHOD.md`
+
 ## Research direction and testing philosophy
 
 Claryel Autonomous is an open engineering research project, not a standalone product or an academic claim. Beyond controlled local-model benchmarks, we are exploring reliability across imperfect real-world tasks, including errors in instructions, execution, self-evaluation and scoring. Our longer-term direction is **Mix AI**: testing whether local and cloud systems can work together synergistically, with measured quality, safety and cost rather than assumed benefits.
 
-Because models, inference engines, hardware and cloud services change rapidly, we preserve evidence for repeated retrospective analysis and may eventually test uncertainty-aware forecasts and scenarios. These are research questions, not demonstrated capabilities. See [Research Direction and Testing Philosophy](docs/TESTING-PHILOSOPHY.md).
+Because models, inference engines, hardware and cloud services change rapidly, we preserve evidence for repeated retrospective analysis and may eventually test uncertainty-aware forecasts and scenarios. These remain open questions, not demonstrated capabilities. See [Research Direction and Testing Philosophy](docs/TESTING-PHILOSOPHY.md).
 
 ## Versioning and historical release snapshot
 
