@@ -124,6 +124,23 @@ def main() -> int:
     # raw local arm (same GPU, no contour)
     ent, ext, state = unit_window("parb-basalt-r12")
     note = ""
+    blog = os.path.join(WS, "basalt-r12.log")
+    if not ent and os.path.exists(blog):
+        # `systemd-run --collect` garbage-collects the unit, so its timestamps are gone by the time the
+        # report runs. Fall back to: window end = run log mtime, window start = first power sample.
+        import datetime
+        ext = datetime.datetime.fromtimestamp(os.path.getmtime(blog)).strftime("%a %Y-%m-%d %H:%M:%S UTC")
+        first = None
+        for line in open(args.power_csv, encoding="utf-8"):
+            p = [x.strip() for x in line.strip().split(",")]
+            if p and p[0]:
+                try:
+                    first = float(p[0])
+                except ValueError:
+                    continue
+                break
+        if first:
+            ent = datetime.datetime.fromtimestamp(first).strftime("%a %Y-%m-%d %H:%M:%S UTC")
     if ent:
         import datetime
         f = "%a %Y-%m-%d %H:%M:%S %Z"

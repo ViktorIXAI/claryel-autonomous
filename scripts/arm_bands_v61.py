@@ -99,8 +99,11 @@ def main() -> int:
             os.path.join(V6, "full-229", "ledger-*.jsonl")):
         if os.path.basename(p) != "ledger-c229full.jsonl":
             add_contour(p)
-    for p in glob.glob(os.path.join(WS, "ledger-c229r*.jsonl")):
-        add_contour(p)
+    # published repetition ledgers (reps-229) rather than the workspace copies, so the report reads
+    # exactly the bytes a reviewer can download
+    for p in sorted(glob.glob(os.path.join(V6, "reps-229", "ledger-c229r*.jsonl"))):
+        if os.path.basename(p) != "ledger-c229full.jsonl":
+            add_contour(p)
 
     cells = set()
     for arm in bands:

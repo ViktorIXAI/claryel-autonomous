@@ -33,17 +33,24 @@ Contour gate line: `0.0.2.29` (harness stamps are `0.0.2.x`; full history in `ve
 Hard bank v6.1 — 71 single-shot + 6 loop tasks, frozen scorer, every number recomputed from published
 answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
 
-- contour 0.0.2.29 on one 24 GB local GPU: **63 / 62 / 60 of 71** over three independent seeds (mean 61.7)
+- contour 0.0.2.29 on one 24 GB local GPU: **63 / 62 / 60 of 71** over three independent seeds (a fourth
+  seed is published in `benchmarks/hard/v6-results/reps-229/`; on the common 61-cell set the contour band
+  is 53/52/50/55, mean 52.5)
 - ChatGPT (`gpt-6.1-sol`, xhigh) **50**, Grok 4.7 **54**, the same local weights with no contour **56**
+- seed-averaged margins with a bootstrap over cells (`ARM-BANDS-V61.md`): vs ChatGPT **+12.0 cells, 95% CI
+  +4.0..+20.3**; vs Grok **+8.0 cells, CI +1.5..+15.0**; vs bare basalt +5.8 cells, CI −1.2..+13.2 —
+  **not resolved**, and that is stated rather than smoothed over
 - exact paired sign tests: vs ChatGPT **16W/3L p=0.0044**, vs Grok **12W/3L p=0.035**, vs bare basalt
-  11W/4L p=0.118 (not significant — stated, not buried)
+  11W/4L p=0.118
 - where the margin lives: contract-sensitive categories F/H/K **14 vs 6 / 6 / 1**; on the other 56 cells
   it is parity (49 vs 50 / 49 / 48, all p=1.00) — see `CATEGORY-SPLIT-V61.md`
 - not a printing artifact: giving each raw arm the contour's deterministic repairer changes **0 cells**,
   and every cloud failure in F/H/K is content-side (`ABLATION-RAW-FIXERS.md`, `AUDIT-FHK-60.md`)
-- cost: contour arm = 77 tasks, 141 model calls, ~36k tokens, 128-166 s on an idle local GPU with zero
-  cloud tokens; raw arms 585-2016 s of answer time; measured GPU watt-hours and the method limits in
-  `COST-V61.md` and `ENERGY-METHOD.md`
+- measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): one 77-task contour arm = 141 model calls,
+  ~35k tokens, 151 s, **6.82 Wh** of measured GPU energy; the same model answering raw costs **0.47 Wh per
+  task** (~33 Wh per arm) and scores lower; ChatGPT/Grok arms took 592 s / 1 812 s of answer time with
+  their energy outside this machine's reach
+- one-page version: `benchmarks/hard/v6-results/PROOF-V61.md`
 
 ## Research direction and testing philosophy
 

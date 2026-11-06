@@ -414,3 +414,26 @@ value false positives (unit conversions, computed totals), one is a confirmed ba
 names an artifact the prompt never contains), one is a likely language-mismatch scorer defect (K-ex6-01
 expects the English token `hosting` for a Russian prompt that says "услуга хостинга"). Stated fix path:
 a new bank version with a new hash, never an edit of the frozen bank.
+
+## 06.11 05:35 CET — repeated-trial protocol closed for tonight: bands, CIs, measured energy
+
+Fourth contour seed published (`reps-229/…-c229r3`, run on an idle serve as a clean energy window).
+`ARM-BANDS-V61.md` (`scripts/arm_bands_v61.py`, `scripts/margin_bootstrap_v61.py`):
+
+    contour 4 seeds   53, 52, 50, 55  (mean 52.5 on the common 61 cells)
+    bare basalt 3     46, 48, 46      contour +5.8 cells, CI -1.2..+13.2  -> NOT resolved
+    Grok 2            44, 45          contour +8.0 cells, CI +1.5..+15.0  -> CI excludes 0
+    ChatGPT 2         40, 41          contour +12.0 cells, CI +4.0..+20.3 -> CI excludes 0
+
+An earlier read of the partial basalt file showed 46/39/36 and "spread 10"; with the repetitions complete
+it is 46/48/46. Partial-row arms must never be scored as if finished — the interleaved runner writes both
+repetitions task by task, so a half-finished file makes both reps look bad.
+
+Measured energy (`COST-V61.md`): contour rep3 = 77 tasks, 141 calls, 151 s, **6.82 Wh** of GPU energy
+(281 s window at 87 W mean). Bare basalt reps = **30.45 Wh over the 65 tasks inside the sampled window** =
+0.468 Wh/task (~33 Wh per 71-task arm). Cloud arms: 592 s (ChatGPT) / 1 812 s (Grok) of answer time, energy
+not reachable from this machine. So the contoured arm is ~5x cheaper per task on the local GPU *and* scores
+higher.
+
+One-page summary for humans: `v6-results/PROOF-V61.md`. README headline updated to carry the CIs and the
+energy numbers instead of single-seed totals.
