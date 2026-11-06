@@ -117,6 +117,28 @@ def parse_version(value: str | None = None) -> tuple[int, int, int, int]:
     raise ValueError(f"unsupported contour version: {raw!r}")
 
 
+def registered_stamp(value: str | None = None) -> tuple[int, int, int, int]:
+    """Strict stamp check for an official arm run (0.0.2.29 bookkeeping).
+
+    `parse_version` stays tolerant on purpose: a stamp ahead of the newest implemented feature is
+    a reporting release and `behavior_tuple` tops out at the newest feature (contract in
+    gate_versioning_test). That tolerance is wrong at arm-start though: a typo such as
+    PARB_GATE_VERSION=0.0.2.228 parses as contour 2.228, turns on EVERY shipped feature, exits 0
+    and writes healthy-looking ledgers. Two such "arms" under two labels produced a fake paired
+    comparison with zero flips. Official runs therefore call this and die on an unknown stamp.
+    """
+    parsed = parse_version(value)
+    stamp = parsed[2:]
+    if stamp > CURRENT_REVISION and stamp not in RESERVED_TOOLING_REVISIONS:
+        raise ValueError(
+            "unknown contour stamp %r: it selects %d.%d, newer than the newest release "
+            "0.0.%d.%d. Fix the stamp — an unknown one must not silently enable every shipped "
+            "feature (see harness/gate_v45_stamp_guard_test.py)."
+            % (value if value is not None else os.environ.get("PARB_GATE_VERSION"),
+               stamp[0], stamp[1], CURRENT_REVISION[0], CURRENT_REVISION[1]))
+    return parsed
+
+
 def contour_tuple(value: str | None = None) -> tuple[int, int]:
     """Stamped revision: what feature gates and paired comparisons select."""
     return parse_version(value)[2:]

@@ -17,6 +17,7 @@ jobs:
           for f in harness/gate_v36_format_repair_test.py harness/gate_v37_loop_drive_test.py \
                    harness/gate_v38_repair_pipeline_test.py harness/gate_v39_k_bool_test.py \
                    harness/gate_v40_h_json_test.py harness/gate_v44_coverage_choice_test.py \
+                   harness/gate_v45_stamp_guard_test.py \
                    harness/gate_versioning_test.py; do
             echo "=== $f"; python3 "$f"
           done

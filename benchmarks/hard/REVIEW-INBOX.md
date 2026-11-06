@@ -281,3 +281,21 @@ Bare models now score J 7/7, so the bank fix is real; Grok's drop is not attribu
 Provenance gap found and closed: raw rows carried no model identity, so raw-arm score changes were
 ambiguous. `scripts/raw_v6.py` is published now and each row records `model`, `cli` and `bank_sha16`;
 re-run Grok once with the new runner before interpreting that line further.
+
+## Void run + stamp guard (06.11 04:05 CET) — read before trusting any paired arm
+
+The first paired C-only arms were launched as `PARB_GATE_VERSION=0.0.2.$v` with `v=228/229`, i.e.
+stamps `0.0.2.228` and `0.0.2.229`. Both parsed fine — as contour **2.228 / 2.229** — which turned
+on EVERY shipped contour feature in both arms, exited 0 and wrote healthy-looking ledgers. The
+"pair" (`~/parb-v61-contour/results-cpair228/229.jsonl`) is void: two identical behaviours under
+two labels, 6/8 vs 6/8, zero flips. Those files are kept as evidence of the mistake, not as a
+measurement.
+
+Fixed at contour 0.0.2.29 bookkeeping: `gate_versioning.registered_stamp()` rejects any stamp
+newer than the newest release, and `gate_run` calls it at import — outside the legacy fallback
+`try/except`, which used to swallow such errors — so the arm dies before the serve is reserved.
+The tolerant behaviour of `behavior_tuple` (a far-future stamp is a reporting release and tops out
+at the newest feature) is deliberately preserved; that contract is asserted in the same test.
+`harness/gate_v45_stamp_guard_test.py` (12 checks, incl. an integration check that `import
+gate_run` exits non-zero on `0.0.2.228`). The real 2.28-vs-2.29 evidence comes from the two full
+v6.1 arms (`full-228` measured, `c229full` running), not from the void pair.

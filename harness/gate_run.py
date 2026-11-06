@@ -51,20 +51,21 @@ LADDER_TOP_212 = 8192
 sys.path.insert(0, ROOT)
 from gate_engine_guard import (STALL_RATE, STALL_S, STALL_WINDOW, StallTracker,
                                health_url, is_stalled, run_record)
+_GV = None
 try:
     import gate_versioning as _GV
+    _GVm = _GV  # narrowed to the module inside this branch; _GV itself may stay None
 
-    CONTOUR_VERSION = _GV.format_version(os.environ.get("PARB_GATE_VERSION") or _GV.CURRENT_STAMP)
-    CONTOUR_SUMMARY = _GV.summary(CONTOUR_VERSION)
-    CONTOUR_BEHAVIOR = _GV.format_behavior(CONTOUR_VERSION)
+    CONTOUR_VERSION = _GVm.format_version(os.environ.get("PARB_GATE_VERSION") or _GVm.CURRENT_STAMP)
+    CONTOUR_SUMMARY = _GVm.summary(CONTOUR_VERSION)
+    CONTOUR_BEHAVIOR = _GVm.format_behavior(CONTOUR_VERSION)
 
     def contour_at_least(track: int, revision: int) -> bool:
-        return _GV.at_least(track, revision, CONTOUR_VERSION)
+        return _GVm.at_least(track, revision, CONTOUR_VERSION)
 
     # contour 2.12 feature gate: applied only after the stamp is parsed from
     # PARB_GATE_VERSION, so a 2.11 arm keeps the old ceiling of 2048.
-    if (contour_at_least(2, 12) and not _LADDER_ENV
-            and LADDER[-1] < LADDER_TOP_212):
+    if contour_at_least(2, 12) and not _LADDER_ENV and LADDER[-1] < LADDER_TOP_212:
         LADDER = LADDER + [LADDER_TOP_212]
 
 except Exception:
@@ -118,6 +119,15 @@ except Exception:
 
     def contour_at_least(track: int, revision: int) -> bool:
         return _fallback_stamp() >= (track, revision)
+
+
+# Stamp validation lives OUTSIDE the try/except above on purpose: that except branch is a
+# legacy-snapshot fallback and would swallow the error. An official arm whose PARB_GATE_VERSION is
+# not a registered stamp must die at import, before the serve is reserved: the typo
+# 0.0.2.228 parses as contour 2.228, silently turns on every shipped feature and manufactures a
+# "paired" arm that is a copy of the other one (harness/gate_v45_stamp_guard_test.py).
+if _GV is not None:
+    _GV.registered_stamp(os.environ.get("PARB_GATE_VERSION") or _GV.CURRENT_STAMP)
 
 
 # The exact OS and Ubuntu image type must travel with every gate artifact.
