@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** Historical naming and operational roles do not authorize evidence deletion or override owner approval. See [preservation policy](docs/EVIDENCE-PRESERVATION.md) and [project direction](docs/TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Claryel Agent Lab — Project Rules
 
 This project uses a single Hermes profile (`default`) with Kanban tasks as
