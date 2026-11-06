@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** The early answers describe bounded experiments, not general autonomous engineering or proved synergy. See [preservation policy](EVIDENCE-PRESERVATION.md) and [project direction](TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Research questions — answered so far, and what stays open
 
 ## RQ1 — Autonomous development
