@@ -52,6 +52,7 @@ sys.path.insert(0, ROOT)
 from gate_engine_guard import (STALL_RATE, STALL_S, STALL_WINDOW, StallTracker,
                                health_url, is_stalled, run_record)
 import gate_j_rerank as JR
+import gate_c_ground as CG
 _GV = None
 try:
     import gate_versioning as _GV
@@ -1468,6 +1469,23 @@ G4_F_SEED_OFFSET = 5501
 # model lists are only admitted on this membership path. Zero model tokens, reference never read.
 # If pair-240's pre-registered pattern does not hold exactly, freeze to CONTOUR_REVISION == (2, 40).
 J_MEMBERSHIP_V3 = contour_at_least(2, 40)
+
+# 0.0.2.41 (pair-242 candidate) is the C analogue of the adopted 2.40 J-membership change: the
+# membership is re-derived from the prompt's OWN stated rule, but ONLY for the two rule shapes the
+# grammar can fully parse (threshold conjunction «когда <col> >= N ... на >= M минут», and a
+# truth-table question over single-letter variables with AND/OR/NOT). Group-1's live class: C-ex6-03
+# `set_mismatch got=['A'] want=['A','D']` is the ONLY 2.29-line failure in ~40 published rows;
+# C-ex6-00/01 are judgment tasks whose rule the prompt never states, so the grammar refuses them
+# byte-identical (no mechanism here reaches them; recorded honestly). Fail-closed as in 2.32-2.40:
+# any option silent or double-stated on a rule predicate, an ambiguous formula, an out-of-grammar
+# unit, or a question that does not ask for rule-satisfying options -> refuse, touch nothing. The
+# reference is never read, zero model tokens. Pre-launch dry-run over bank v6.1 (BEFORE any n* row,
+# REVIEW-INBOX 2026-11-06): parses 2 of 8 C prompts (C-ex6-03 -> {A,D}, C-ex6-05 -> {B,C}, both ==
+# gold), mis-derivations 0; replay over 584 published bank-v6.1 C rows converts 3 loss->pass
+# (C-ex6-03 seed 0 of pair-231 arm d31, seed 5 of reps-229 c229r45, seed 0 of four-arm c228v61),
+# zero regressions, every changed row evented. If pair-242's pre-registered pattern does not hold,
+# freeze to CONTOUR_REVISION == (2, 41).
+C_RULE_GROUND = contour_at_least(2, 41)
 _SC_CONST = 20261106
 
 
@@ -1710,6 +1728,21 @@ def post_normalize_answer(cat, t, text):
             rer_text, rer_ev = _j_rerank_answer(t, ids)
             if rer_ev:
                 return (rer_text if rer_text is not None else text), rer_ev
+    # 0.0.2.41: C membership re-derived from the prompt's OWN stated rule (see gate_c_ground.py).
+    # Only two fully-parseable shapes (threshold conjunction, truth table); everything else refuses
+    # and stays byte-identical. Zero model tokens, reference never read. The C analogue of the
+    # adopted 2.40 J-membership change; the matched/refused split makes the live wiring provable.
+    if C_RULE_GROUND and cat == "C" and t.get("mode") != "loop":
+        derived = CG.ground_set_from_prompt(((t.get("assembled_doc") or "") + "\n" + (t.get("prompt") or "")).strip()
+                                            if t.get("assembled_doc") else (t.get("prompt") or ""))
+        m = re.search(r"^\s*ОТВЕТ\s*:(.*)$", text or "", re.M)
+        if derived is not None and m is not None:
+            got = tuple(sorted(set(re.findall(r"(?<![A-Za-z])([A-F])(?![A-Za-z])", m.group(1)))))
+            want = tuple(sorted(derived))
+            if got == want:
+                return text, ["v241_c_rule_ground_matched"]
+            body = (" " + ",".join(want)) if want else " NONE"
+            return text[:m.start(1)] + body + text[m.end(1):], ["v241_c_rule_ground_from_prompt"]
     if not POST_NORMALIZE or not text:
         return text, None
     changed = []

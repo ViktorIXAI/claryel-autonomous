@@ -858,3 +858,38 @@ for owner decision now: `A-ex6-03` (this), `C-ex6-02`, `K-ex6-03`. Contour-side 
 on line `0.0.2.40`: only group 1 (`C-ex6-00/01/03`) with a per-option-grounded mechanism that does
 not exist yet — it will be designed and dry-run over published bytes before any stamp is spent;
 no pair is launched on an unproven mechanism.
+
+## pair-242 launch verification (2026-11-06 20:55 CET, BEFORE any n* row): 0.0.2.41 = C rule-grounded membership
+
+Following the pair-240 close (the only remaining contour headroom on `0.0.2.40` is group 1 with a
+per-option-grounded mechanism), `0.0.2.41` implements that mechanism and spends the stamp only after
+the dry-run gate. Evidence classes stated up front: the grammar re-derives the C letter set from the
+prompt's OWN stated rule, but only for the two shapes it can fully parse — a threshold conjunction
+(«когда <col> >= N [и <col> >= M] … на >= T мин/сек») and a truth table (AND/OR/NOT over
+single-letter variables; options are full assignments or никогда/всегда). Reference never read, zero
+model tokens, every option must state exactly one value per predicate or the WHOLE prompt refuses.
+
+DRY-RUN GATE (before any n* row, bank `f4553aab304f60d7`): coverage 2 of 8 C prompts —
+`C-ex6-03` -> {A,D} == gold, `C-ex6-05` -> {B,C} == gold; the six judgment/spec prompts
+(incl. the chronic `C-ex6-00/01` lotteries and the `C-ex6-02` bank defect) refuse byte-identical,
+so pair-242 makes NO claim on C-ex6-00/01 — the reach limit is published, not hidden. Mis-derivations
+0. Replay over 584 published bank-v6.1 C rows: 3 conversions loss->pass, all `C-ex6-03`
+(`d31r0` seed 0, `c229r45` seed 5, four-arm `c228v61` seed 0), ZERO regressions, every changed row
+evented. gate_v55 (30 checks, CI-enrolled) pins the coverage statement, the synthetic invented-column
+conversions, every refusal path and the replay; the standing suite is 19/19 green at this commit; the
+2.40 arms stay byte-identical (history pin `g240.C_RULE_GROUND == False`).
+
+Live target class: `C-ex6-03` `set_mismatch` — the ONLY failure of the adopted 2.29+ line in ~40
+published C rows (1 of 6 six-seed-map seeds; 0 of 12 pair-239/240 seeds). The pair is therefore at
+risk of the pair-233/238 zero-opportunity mode; the pre-registered rule below declares that outcome
+UNMEASURED, not a pass, and freezes the flag at 2.41.
+
+PRE-REGISTERED RULE for pair-242 (`run_pair242.sh` header carries the same text): MEASURED iff >=1
+control `n40` C-ex6-03 row strict-fails; adoption iff (b) every converted candidate row carries
+`v241_c_rule_ground_from_prompt` at identical ptok/calls, ZERO strict-pass regressions carry any
+2.41-gated event, unrepaired parseable rows carry `v241_c_rule_ground_matched` with identical bytes,
+NO refused C prompt shows a v241 event or byte change, (c) the inherited 2.40 membership / 2.39
+re-rank / 2.35–37 B repair fire identically in both arms (zero A-arithmetic, zero 2.30/31/32/34/36
+events), and (d) the candidate is not >2 cells below control; arm-mean deltas under ~2 cells are
+published unresolvable. Otherwise freeze to exactly (2,41); the line stays 0.0.2.40. Arms `n40r*`
+vs `n41r*`, three paired seeds, same plans, idle endpoint, GPU sampler running.

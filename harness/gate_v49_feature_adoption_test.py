@@ -121,6 +121,16 @@ g239b = load("0.0.2.39")
 ck(not g239b.J_MEMBERSHIP_V3 and g239b.J_RERANK_V2,
    "history pin: the 2.39 arms ran the re-rank WITHOUT membership adoption; the 2.40 change must not "
    "rewrite what pair-239 measured")
+g241 = load("0.0.2.41")
+ck(not g241.CONTRACT_GUARANTEE and not g241.SELFCONSIST and not g241.J_RERANK and g241.J_RERANK_V2
+   and g241.J_MEMBERSHIP_V3 and g241.C_RULE_GROUND and not g241.A_TABLE_ARITH and g241.B_TABLE_AGGREGATE
+   and not g241.B_FIELD_COMPLETE and not g241.G4_LOTTERY,
+   "2.41 inherits the ADOPTED line (2.29 + B table + J grammar v2 + J membership) plus the C "
+   "rule-grounded membership ONLY: 2.30/2.31/2.34/2.36 frozen, 2.32 v1 frozen, A arithmetic still "
+   "pinned to exactly (2,33)/(2,38)")
+g240b = load("0.0.2.40")
+ck(not g240b.C_RULE_GROUND and g240b.J_MEMBERSHIP_V3,
+   "history pin: the 2.40 arms ran WITHOUT C rule-grounding; pair-240's numbers must not move")
 ck(g232.J_RERANK and not g232.J_RERANK_V2,
    "history pin: the 2.32 arms ran grammar v1 only; the 2.39 re-land must not rewrite 2.32")
 g238b = load("0.0.2.38")
