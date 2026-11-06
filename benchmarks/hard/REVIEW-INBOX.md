@@ -673,3 +673,32 @@ v51(21)/v52(37)/v53(38)/versioning all green, fixers 12/12. Pair began **15:23:1
 Pre-registered rule (full text in `PAIR-235-V61.md`): attribution claim only, expected +0.5..+1.5 by
 construction; zero fires across three seeds or any event-less flip credited to the mechanism freezes
 2.36 like 2.33/2.34.
+
+## pair-236 CLOSED / pair-237 launched (2026-11-06, ~16:05 CET)
+
+pair-236 (`i29r*` vs `i36r*`, three paired seeds, 77/77 rows each): verdict and full numbers in
+`PAIR-236-V61.md`. Headline `0.0.2.36` = **−1.0 cells (62.0 vs 63.0), inside the ~2-cell floor and
+negative**; 6 fires (H-ex6-01 x3, H-ex6-03 x1, F-ex6-00 x2), **ZERO converted scoreboard cells** — the F
+strict-best wins raised an already-3/3-passing cell, and on H the re-sample never beat the first draw
+(the extra sample omits the same component: class bias, the 2.31 mode). NOT adopted; frozen to
+`CONTOUR_REVISION == (2, 36)`, added to `REJECTED_FEATURES`, pinned in the v49 flag matrix. Group 4 is
+closed as a contour target. 4 of 5 flips carried no event (identical contour path, calls and ptok per
+cell, different bytes) — the event-less resampling background, re-measured, must be quoted with any
+arm-mean delta. Rescore 30/30 joins clean; energy 4.6–10.1 Wh per window, lottery cost inside noise;
+decision record `history/agent-decisions/2026-11-06-pair236-group4-lottery-frozen-and-237-launch.md`.
+
+pair-237 launch verification (written before any `j*` row): `0.0.2.37` = adopted 2.29 behaviour + the
+re-landed 2.35 B table repair + the 2.36 freeze, nothing else. Endpoint auth-checked again with the exact
+key file (`/v1/models` returns the served alias, loaded), no foreign `gate_run.py` on the host (only
+`parb-gpu-samp2.service` active). Live smoke `smk37c` 15:57:58 (B-ex6-06/B-ex6-03/B-ex6-05): first log
+line `PGR: release 0.0.2.37, contour behavior 2.37`, `contour:v235_b_table_total:available_total` on
+B-ex6-06 ONLY (3/3 scored 1.00, other B cells carry no 2.37-era event). Contracts before push:
+v36/v37/v38/v39/v40/v44/v45/v49(19)/v51(21)/v52(40)/v53(38)/versioning all green, fixers 12/12 (v52 now
+proves the re-adoption at 2.37 and that 2.36 keeps the lottery with the repair frozen out). Pair begins
+as `parb-pair237.service` (`run_pair237.sh`, arms `j29r*` vs `j37r*` alternating, same three rep seeds
+and plans as pair-236) immediately after the decision commit lands on `main`. Pre-registered rule (full
+text in `PAIR-236-V61.md`): adopt 0.0.2.37 iff `B-ex6-06` flips 0/3 -> 3/3 with `contour:v235_b_table_total`
+on every converted row, no other 2.37-gated event appears anywhere, and the candidate does not finish
+>2 cells below control; otherwise the flag freezes again at 2.37 and the line stays 0.0.2.29. The +1.0
+on-target mean from a clean pass is BY CONSTRUCTION below the ~2-cell floor and will still be published
+as sub-floor; the adoption rests on deterministic full attribution, stated plainly.
