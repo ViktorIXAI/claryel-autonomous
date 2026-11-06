@@ -1,3 +1,6 @@
+<!-- TEMPORAL-SCOPE-2026-11-06 -->
+> **Historical scope note (added 2026-11-06; exact UTC time not recorded).** Synthetic-test prototype only; not demonstrated deployment privacy or secure cloud cooperation. See [preservation policy](EVIDENCE-PRESERVATION.md) and [project direction](TESTING-PHILOSOPHY.md). Original text is retained below.
+
 # Privacy architecture (design + working prototype)
 
 **Status: design implemented as a research prototype.** `benchmarks/privacy-boundary/gateway.py` (default-deny, 12 deny-pattern categories, per-lane policy, `redact()` for synthetic-safe payloads) ships with 18 synthetic tests run in CI. No real user data has ever passed through any cloud lane: the lanes exist in code, none are enabled in policy. Nothing in this repository claims measured privacy
