@@ -14,6 +14,7 @@ Checks:
 4. the loop-D J path is untouched by the re-rank (it answers a different contract)
 """
 import importlib
+import importlib.util
 import json
 import os
 import pathlib
