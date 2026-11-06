@@ -30,6 +30,15 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+# run_one must never touch a real workspace state file: pin all artifact env paths to a temp dir
+# before the module is imported (PARB_* resolve at import time).
+import tempfile
+_TMP = tempfile.mkdtemp(prefix="gate-v51-")
+os.environ["PARB_ROOT"] = _TMP
+os.environ["PARB_STATE"] = os.path.join(_TMP, "state.json")
+os.environ["PARB_RESULTS"] = os.path.join(_TMP, "results.jsonl")
+os.environ["PARB_LEDGER"] = os.path.join(_TMP, "ledger.jsonl")
+
 
 def load(ver):
     os.environ["PARB_GATE_VERSION"] = ver
@@ -128,5 +137,57 @@ for tid in sorted(k for k in bank if k.startswith("B") and k not in ("B-ex6-03",
 ck(not fired, "2.34 grammars must refuse every non-target bank B task: %s" % fired)
 ck(len(refused) == len([k for k in bank if k.startswith("B")]) - 2,
    "every non-target B task must be scanned, not silently skipped: %s" % refused)
+
+# --- call-site wiring: scripted model layer through run_one, repair must fire in the pipeline ---------
+# A green unit test plus zero live ledger events once hid a broken pipeline path (the 2.32-era pitfall);
+# this pins the call site itself: with the model forced to answer wrong, run_one must come out repaired,
+# and the v234 event must reach the ledger row.
+# gate_run scores through `parb_check as CK`: the harness copy is the LEGACY v5 module (it mis-scored v6
+# bank rows with KeyError), while every real arm runs in a generated workspace whose parb_check.py the
+# builder emits as the v6 adapter. The wiring test mirrors that adapter exactly, so it measures the same
+# scoring route the arms use.
+import parb_check_v6 as V6
+
+
+class _V6Adapter:
+    check = V6.check
+    CHECK = {"A": V6.check_json_obj, "B": V6.check_json_obj, "C": V6.check_C_v6,
+             "D": V6.check_D_plain_v6, "E": V6.run_battery, "F": V6.check_F_v6,
+             "G": V6.check_G_v6, "H": V6.check_H_v6, "I": V6.check_json_obj,
+             "J": V6.check_J_v6, "K": V6.check_K_v6}
+
+
+rows = []
+_orig_acct = g234.Acct
+
+
+class CapAcct(_orig_acct):
+    def row(self, task, rep):
+        r = _orig_acct.row(self, task, rep)
+        rows.append(r)
+        return r
+
+
+def _bad_model(acct, t, seed, msgs):
+    return {"text": '{"replicas": 2, "mem": "512Mi"}', "ptok": 50, "ctok": 20,
+            "ttft": 0.1, "finish": "stop", "err": None, "el": 0.5}
+
+
+_orig_fg = g234.format_gate
+_orig_ck = g234.CK
+g234.Acct = CapAcct
+g234.CK = _V6Adapter
+g234.format_gate = _bad_model
+try:
+    rec = g234.run_one(bank["B-ex6-03"], {"rep": 9101, "series": "wiring", "rep_group": "wiring",
+                                          "gseed": 7, "stage": 9}, set(), {})
+finally:
+    g234.format_gate = _orig_fg
+    g234.CK = _orig_ck
+    g234.Acct = _orig_acct
+ck(rec and rec.get("content") == 1.0 and bool(rec.get("format_ok")),
+   "run_one with a scripted wrong B answer must end up scored-pass after the 2.34 repair")
+ck(rows and any("contour:v234_b_config_fields" in (r.get("events") or []) for r in rows),
+   "the v234 event must reach the ledger row through the pipeline, not only the unit function")
 
 print("gate_v51_b_fields_test: ALL PASS (%d checks)" % CHECKS)
