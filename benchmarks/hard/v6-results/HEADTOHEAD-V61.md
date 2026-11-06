@@ -42,6 +42,20 @@ three seeds; over the same local model without contour it is **not** significant
 the contour's contribution on this bank is a real but modest +5..+7 cells, and I am not claiming
 otherwise.
 
+## Is the win just format plumbing? No — measured
+
+`ABLATION-RAW-FIXERS.md` gives each raw arm exactly one contour component, the deterministic
+post-normalizer (no retry, no checker feedback, zero model tokens): **0 cells repaired, 0 flips** on
+all three arms, and every raw failure on this bank is content-side (Grok 15/0, ChatGPT 21/0, bare
+basalt 17/0 content vs format-only; contour 8/0). The raw answers are already format-valid where they
+are marked wrong, so the margin is in what the contour checks and re-decides before answering, not in
+how it prints.
+
+Matching caveat, stated precisely: the four-arm baseline paired contour **0.0.2.28** with the raw arms
+(61 vs 50/54/56). The 63/71 figure is contour **0.0.2.29** on the same bank bytes and same frozen
+scorer, so contour-vs-cloud is bank-matched while contour-vs-contour (2.28 vs 2.29) is the
+version-controlled step; the two are reported separately and never merged into one table.
+
 ## Cost side (what the win costs)
 
 | arm | answers | model calls | tokens (in/out) | summed answer seconds | wall clock |

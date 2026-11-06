@@ -1,0 +1,39 @@
+{
+ "contour_rep0": 63,
+ "contour_cells": 71,
+ "arms": {
+  "basalt": {
+   "raw": 56,
+   "raw_plus_repair": 56,
+   "cells": 71,
+   "repair_events": {},
+   "flips": [],
+   "by_cat_before_after": {},
+   "failing_cells_content_vs_format_only": {
+    "content": 15
+   }
+  },
+  "codex": {
+   "raw": 50,
+   "raw_plus_repair": 50,
+   "cells": 71,
+   "repair_events": {},
+   "flips": [],
+   "by_cat_before_after": {},
+   "failing_cells_content_vs_format_only": {
+    "content": 21
+   }
+  },
+  "grok": {
+   "raw": 54,
+   "raw_plus_repair": 54,
+   "cells": 71,
+   "repair_events": {},
+   "flips": [],
+   "by_cat_before_after": {},
+   "failing_cells_content_vs_format_only": {
+    "content": 17
+   }
+  }
+ }
+}
