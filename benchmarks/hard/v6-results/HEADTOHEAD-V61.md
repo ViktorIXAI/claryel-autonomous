@@ -42,6 +42,14 @@ three seeds; over the same local model without contour it is **not** significant
 the contour's contribution on this bank is a real but modest +5..+7 cells, and I am not claiming
 otherwise.
 
+## Exactly where the win is (and where it is not)
+
+`CATEGORY-SPLIT-V61.md` splits the same data. On the 15 contract-sensitive cells (F/H/K) the contour
+scores 14 against 6 (bare basalt, p=0.008), 6 (Grok, p=0.008) and 1 (ChatGPT: 13W/0L, one-sided
+p≈0.0002). On the other 56 cells it is at parity: 49 vs 50, 49 vs 49, 49 vs 48, every paired test
+p=1.00. The claim is therefore "wins contract-sensitive tasks, ties open-ended ones" — the answer-by-
+answer evidence for each of those 60 cells is in `AUDIT-FHK-60.md`.
+
 ## Is the win just format plumbing? No — measured
 
 `ABLATION-RAW-FIXERS.md` gives each raw arm exactly one contour component, the deterministic
