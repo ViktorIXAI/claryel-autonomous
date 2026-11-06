@@ -160,7 +160,10 @@ CONTOUR_NOTES = ("0.0.1.0=base contour (gate+re-ask); 0.0.1.1=chunked extraction
                  "0.0.2.6=contour-behavior axis recorded next to the stamped revision "
                  "(no contour change: behavior stays 0.0.2.2); "
                  "0.0.2.7=K tax-negation flag grounded in the task's own text: an explicit "
-                 "exclusion sentence means yes, silence about taxes means no")
+                 "exclusion sentence means yes, silence about taxes means no; "
+                 "0.0.2.29=C coverage gate reaches the tasks that ship without n_cand: the option "
+                 "letters are read from the task text itself and the picked set is emitted as the "
+                 "answer line the task demands (ОТВЕТ: ...), letters only from the model's own verdicts")
 import parb_check as CK
 try:
     import gate_fixers as GF          # 0.0.1.7: form repair by code (zero model tokens)
@@ -192,6 +195,12 @@ K_BOOL_CYR = contour_at_least(2, 20)
 # Clearing those arrays to [] is keyword-free contract repair (gold never wants
 # fabricated claims/actions); unknown/requires content is untouched.
 H_JSON_CONTRACT = contour_at_least(2, 19)
+# 0.0.2.29: hard-v6 C (coverage_choice) tasks carry no n_cand in the bank, so coverage_gate
+# short-circuited to a plain ask_ladder: no per-candidate verdicts, and the answer never
+# carried the answer line the task itself demands. Deriving the option letters from the task
+# text and emitting "ОТВЕТ: <letters>" is contract plumbing, not invented content: the letters
+# are exactly the ones the model itself marked ПОДХОД.
+COVERAGE_FROM_PROMPT = contour_at_least(2, 29)
 
 
 def post_normalize_allowed() -> bool:
@@ -911,7 +920,11 @@ def logic_by_code(acct, t, seed, msgs0):
     if len(conds) >= 3 and len(cands) >= int(t.get("n_cand") or 3):
         pick = [k for k in sorted(cands) if fits(cands[k], conds)]
         acct.ev("gate", "logic_by_code:%d_условий_%d_кандидатов" % (len(conds), len(cands)))
-        return {"text": ",".join(pick), "ptok": 0, "ctok": 0, "ttft": None,
+        if COVERAGE_FROM_PROMPT:
+            pick_text = coverage_answer_line(t, pick, ",".join(pick))
+            if pick_text.startswith("ОТВЕТ:"):
+                acct.ev("contour", "v229_answer_line_contract")
+            return {"text": pick_text, "ptok": 0, "ctok": 0, "ttft": None,
                 "finish": "stop", "err": None, "el": 0.0}
     acct.ev("gate", "logic_parser_gap_%d_%d" % (len(conds), len(cands)))
     return coverage_gate(acct, t, seed, msgs0)
@@ -1116,6 +1129,15 @@ LETTERS = "ABCDEFGHIJ"
 MUT_CMDS = ("rm ", "sudo ", "systemctl restart", "systemctl stop", "apt-get", "chmod 777", "mkfs", "> /etc/")
 
 
+def coverage_answer_line(t, picked, raw):
+    """0.0.2.29: the C answer line the task contract asks for, built only from the model's
+    own verdicts (empty set -> NONE, which the contract allows). Pre-2.29 behaviour kept."""
+    if not COVERAGE_FROM_PROMPT:
+        return ",".join(sorted(picked)) if picked else raw
+    line = ",".join(sorted(picked)) if picked else "NONE"
+    return ("ОТВЕТ: " + line) if "ОТВЕТ" in (t.get("prompt") or "") else line
+
+
 def coverage_gate(acct, t, seed, msgs0):
     """Logic with constraints: code does not know the right answer but watches completeness.
 
@@ -1124,9 +1146,19 @@ def coverage_gate(acct, t, seed, msgs0):
     which candidate was ignored or where the contradiction is. This cures the lost candidate.
     """
     n = int(t.get("n_cand") or 0)
+    cand = None
+    if n <= 0 and COVERAGE_FROM_PROMPT:
+        doc = (t.get("assembled_doc", "") + "\n" + t["prompt"]) if t.get("assembled_doc") else t["prompt"]
+        opts = []
+        for m in re.finditer(r"(?m)^\s*([A-H])[:\-)]\s", doc):
+            if m.group(1) not in opts:
+                opts.append(m.group(1))
+        if len(opts) >= 2:
+            n, cand = len(opts), "".join(opts)
+            acct.ev("contour", "v229_coverage_from_prompt:%d" % n)
     if n <= 0:
         return ask_ladder(acct, msgs0, seed)
-    cand = LETTERS[:n]
+    cand = cand or LETTERS[:n]
     ask = ("ПОРЯДОК ОТВЕТА СТРОГО ТАКОЙ. Для каждого из %d вариантов (%s) выведи строку "
            "'<буква>=ПОДХОД' или '<буква>=НЕ ПОДХОД'. Никаких других строк кроме этих %d. "
            "Затем последней строкой выведи 'ФИНАЛ: <буквы подходящих вариантов через запятую>' "
@@ -1148,7 +1180,10 @@ def coverage_gate(acct, t, seed, msgs0):
         acct.code_ms += (time.time() - t0) * 1000
         if not missing and (not fin or picked == self_declared):
             acct.ev("gate", "coverage_ok")
-            return {"text": ",".join(sorted(picked)) if picked else text,
+            final = coverage_answer_line(t, picked, text)
+            if COVERAGE_FROM_PROMPT and final.startswith("ОТВЕТ:"):
+                acct.ev("contour", "v229_answer_line_contract")
+            return {"text": final,
                     "ptok": r["ptok"], "ctok": r["ctok"], "ttft": r["ttft"],
                     "finish": r["finish"], "err": r["err"], "el": r["el"]}
         acct.ev("gate", "coverage_gap")
