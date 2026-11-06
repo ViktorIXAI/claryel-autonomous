@@ -21,7 +21,9 @@ RULES = [
     (re.compile(r"192\.168\.\d+\.\d+"), "<LAN_IP>"),
     (re.compile(r"10\.\d+\.\d+\.\d+"), "<LAN_IP>"),
     (re.compile(r"claryel0\d"), "<HOST>"),
-    (re.compile(r"/home/viktor[^\s\"]*"), "<LOCAL_PATH>"),
+    # Absolute home/mount paths on any box, written without a literal `/home/<user>`: the repo's own
+    # secret scanner flags that literal (inbox item B4), so the sanitizer must not carry it.
+    (re.compile(r"/(?:home|Users|mnt|srv|opt)/[^\s\"]*"), "<LOCAL_PATH>"),
 ]
 # Secrets never belong in a row at all; assert they are absent rather than redacting them into history.
 SECRET_MARKERS = ("sk-", "Bearer ", "api_key", "Authorization")

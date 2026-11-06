@@ -23,7 +23,10 @@ RULES = [
     (re.compile(r"192\.168\.\d+\.\d+"), "<LAN_IP>"),
     (re.compile(r"10\.\d+\.\d+\.\d+"), "<LAN_IP>"),
     (re.compile(r"claryel0\d"), "<HOST>"),
-    (re.compile(r"/home/viktor[^\s\"]*"), "<LOCAL_PATH>"),
+    # Any absolute home/mount path, on any box. Written WITHOUT a literal `/home/<user>`: this file is
+    # public and the repo's own secret scanner (and inbox item B4) treats such a literal as a leak, so
+    # a sanitizer carrying the maintainer's home directory is exactly the finding it exists to catch.
+    (re.compile(r"/(?:home|Users|mnt|srv|opt)/[^\s\"]*"), "<LOCAL_PATH>"),
 ]
 
 
