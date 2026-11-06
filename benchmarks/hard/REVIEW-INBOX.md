@@ -382,3 +382,22 @@ or missing required fields (e.g. `value:EXCLUDES_TAXES`, `next`, `avoid`).
 plumbing objection measured (0 cells), matching caveat accepted, provenance fixed, and three things left
 open and named: cloud models inside the contour loop (needs a cloud-backed contour leg), E cache-key
 audit, external holdout + >=5 repeats.
+
+## 06.11 05:00 CET — second seeds landing, GPU power sampling running
+
+Cloud repetitions on bank v6.1, scored by `scripts/raw_rep_score_v6.py` (frozen scorer, the 61 single-
+shot non-E cells, symmetric on both sides):
+
+    ChatGPT rep1 41/61 vs contour rep0 53/61   15W/3L  p=0.0075   (ChatGPT band: rep0 40, rep1 41)
+    bare basalt rep1 partial (42 of 71 tasks so far) 31/42 vs contour rep0 36/42  7W/2L p=0.18
+    Grok rep1 in flight (44 of 71 rows at 05:00)
+
+Repetition interleaving note: `raw_v6.py basalt 1,2` writes task-by-task across both repetitions, so a
+partially finished file has equal partial counts per rep — reported as partial, not as a score.
+
+Energy is now being **measured**, not modelled: `parb-gpu-samp` samples `nvidia-smi power.draw /
+utilization / memory / temperature` on the inference host every ~2 s into `gpu-power.csv` (first
+samples during the running arm: 117-140 W at 100% utilization, 65-66 °C). `scripts/gpu_energy.py`
+integrates the trace to watt-hours per window. Windows chosen are exact task-count boundaries so an arm
+gets a per-arm figure; the method and its limits (board draw, not wall outlet; inference-box CPU/RAM
+excluded; RAPL is root-gated on this host) go in `ENERGY-METHOD.md` with the numbers.
