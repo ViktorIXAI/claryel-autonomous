@@ -48,7 +48,7 @@ Allowed phrasing:
 - "economic evaluation"
 - "decision log"
 
-Forbidden public self-labels:
+Avoid these promotional or academic self-labels in current project descriptions (do not rewrite historical quotes or citations):
 
 - "scientific study"
 - "scientific methodology"
@@ -75,6 +75,8 @@ shape is:
 
 Long historical evidence stays in `history/`, `results/`, `versions/` and
 `logs/`. The landing page links to it instead of repeating it.
+
+The project-wide direction is documented in `docs/TESTING-PHILOSOPHY.md`. Describe Claryel Autonomous as open engineering experimentation; do not imply academic status, validated forecasting, proven Mix AI synergy, or a finished product. Distinguish historical observations, current measurements, hypotheses and distant interests. Correct current-facing claims with dated explanations; never silently rewrite frozen artifacts or attribution logs.
 
 ## Update rules
 
