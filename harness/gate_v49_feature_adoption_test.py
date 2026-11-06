@@ -189,6 +189,15 @@ outd2, evd2 = g232.post_normalize_answer("J", {"prompt": tj["prompt"]}, json.dum
 ck(json.loads(outd2) == list(reversed(list(tj["ref"]))) and evd2 == ["j_id_norm"],
    "2.32 keeps the early-return composition: re-rank never sees a decorated answer")
 
+# pair-242 froze C_RULE_GROUND: the pair was UNMEASURED (the adopted line passed C-ex6-03 strict in
+# all three control seeds, zero live on-target cell), so the flag must stay pinned to exactly 2.41
+# and can never inherit into a future contour. The 2.41 firing itself is pinned by gate_v55 and the
+# published pair ledger (v241_c_rule_ground_matched x6); this check pins the freeze boundary.
+g240c = load("0.0.2.40")
+g241c = load("0.0.2.41")
+ck(not g240c.C_RULE_GROUND, "C_RULE_GROUND is OFF at 0.0.2.40 (the adopted line never ran it)")
+ck(g241c.C_RULE_GROUND, "C_RULE_GROUND is ON only at its own stamp 0.0.2.41")
+
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
       % (CHECKS, len(covered), len([x for x in bank if x["cat"] == "J"])))

@@ -1483,9 +1483,15 @@ J_MEMBERSHIP_V3 = contour_at_least(2, 40)
 # REVIEW-INBOX 2026-11-06): parses 2 of 8 C prompts (C-ex6-03 -> {A,D}, C-ex6-05 -> {B,C}, both ==
 # gold), mis-derivations 0; replay over 584 published bank-v6.1 C rows converts 3 loss->pass
 # (C-ex6-03 seed 0 of pair-231 arm d31, seed 5 of reps-229 c229r45, seed 0 of four-arm c228v61),
-# zero regressions, every changed row evented. If pair-242's pre-registered pattern does not hold,
-# freeze to CONTOUR_REVISION == (2, 41).
-C_RULE_GROUND = contour_at_least(2, 41)
+# zero regressions, every changed row evented.
+# MEASURED pair-242 (n40r* vs n41r*, three paired seeds, PAIR-242-V61.md): UNMEASURED per the
+# pre-registered rule (a) — the adopted 2.40 line strict-passed C-ex6-03 in ALL three control seeds,
+# so the pair carried zero live on-target cell (third zero-opportunity pair after 233/238). The live
+# wiring is nonetheless proven: v241_c_rule_ground_matched fired on C-ex6-03 AND C-ex6-05 in every
+# candidate seed at identical bytes (x6), zero conversion events, no refused C prompt touched, zero
+# regressions carry a 2.41 event, means 65.0 vs 65.0. NOT adopted; frozen to exactly this stamp so a
+# future contour cannot inherit an unmeasured mechanism (the pair-238 A-pin pattern).
+C_RULE_GROUND = CONTOUR_REVISION == (2, 41)
 _SC_CONST = 20261106
 
 

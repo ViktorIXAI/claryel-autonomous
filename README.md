@@ -118,7 +118,18 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   re-derivation, coverage derives-gold 4/7 refuses 3/7, published-bytes replay converting 6 membership
   + 3 re-rank rows with zero regressions), also **resolved**: its chronic target was live, the conversion
   was fully evented at zero added tokens and the mis-derivation guard passed on all 231 paired cells, so
-  it was ADOPTED (`PAIR-240-V61.md`) on an arm mean of +0.0 that is explicitly not the reason. Resolution
+  it was ADOPTED (`PAIR-240-V61.md`) on an arm mean of +0.0 that is explicitly not the reason; an
+  eleventh candidate, 0.0.2.41 (C rule-grounded membership — re-derive the letter set from the prompt's
+  own threshold-conjunction/truth-table rule, parses 2 of 8 C prompts, published-bytes replay converting
+  3 rows with zero regressions), was **UNMEASURED in pair-242**: the adopted line's control seeds all
+  strict-passed its only live target `C-ex6-03`, so the pair carried no on-target cell (third
+  zero-opportunity pair after 233/238), while the live wiring proved the grammar fires at zero tokens
+  and zero regressions — the flag is therefore frozen to exactly (2,41) and the line stays `0.0.2.40`.
+  Group 1 closes at its published reach limit: `C-ex6-00/01` are judgment prompts whose rule the prompt
+  never states (bank-clarification queue, never contour guesses). After pair-242 the contour is **at the
+  bank ceiling** on `0.0.2.40` — every remaining stable fail on the line is a bank defect
+  (`A-ex6-03/C-ex6-02/K-ex6-03`), a frozen-negative class (`B-ex6-04`), or a closed lottery class, so no
+  pair launches without owner-commanded bank clarification (`PAIR-242-V61.md`). Resolution
   floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)

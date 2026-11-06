@@ -893,3 +893,23 @@ re-rank / 2.35–37 B repair fire identically in both arms (zero A-arithmetic, z
 events), and (d) the candidate is not >2 cells below control; arm-mean deltas under ~2 cells are
 published unresolvable. Otherwise freeze to exactly (2,41); the line stays 0.0.2.40. Arms `n40r*`
 vs `n41r*`, three paired seeds, same plans, idle endpoint, GPU sampler running.
+
+## pair-242 closure (2026-11-06 21:35 CET): 0.0.2.41 UNMEASURED — frozen to (2,41); contour at the bank ceiling; NO pair-243 without owner bank clarification
+
+Pre-registered rule (a) decided the pair before any attribution was attempted: the control arm
+(`n40r*`) strict-passed `C-ex6-03` — the mechanism's ONLY live target — in all three seeds, so the
+pair contained no on-target cell (third zero-opportunity pair after 233/238; the launch note above
+named this risk up front). UNMEASURED, NOT adopted. Rules (b)-(d) all held on the published ledgers:
+matched events x6 at identical bytes/ptok/calls (grammar live, zero model tokens), zero conversions,
+no refused C prompt touched, zero strict-pass regressions carry a 2.41 event, B repair x3 parity,
+zero frozen-class re-fires, means 65.0 vs 65.0 (pooled 5W/5L, same-stamp noise signature). Energy
+16.9 vs 19.5 Wh pooled, serve-idle dominated, no claim. Artifacts: `pair-242/`, `PAIR-242-V61.md`.
+`C_RULE_GROUND` pinned to `CONTOUR_REVISION == (2, 41)` and pinned by `gate_v49` (37 checks, suite
+18/18). GROUP 1 CLOSED to its reach limit: `C-ex6-00/01` prompts state no rule, grounding them would
+inject the maintainer's verdict (2.30 lesson). Bank-defect queue for owner decision (unchanged):
+`A-ex6-03` (printed rules contradict gold), `C-ex6-02` (snippets contradict gold), `K-ex6-03`
+(value shapes unstated), plus NEW: state the policy rule inside `C-ex6-00`/`C-ex6-01` prompts so the
+proven grammar family can reach them. Until owner clarification lands, no contour pair launches on
+this line — every other candidate class is frozen-negative or bank-capped, and pair targets must be
+chronic live cells (pair-238 lesson). Owner-commanded bank clarification + four-arm re-run on the
+clarified bank is the next honest move.

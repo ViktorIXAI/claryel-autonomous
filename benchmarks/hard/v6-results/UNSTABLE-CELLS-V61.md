@@ -191,3 +191,29 @@ rule was never re-derived); inherited re-rank ×3 and B repair ×3 identical, A 
   any stamp is spent.
 - `C-ex6-02` and `K-ex6-03` stay bank defects (owner-commanded clarification pending), never a
   contour target.
+
+## Addendum (21:35 CET): pair-242 measures the group-1 mechanism — UNMEASURED; group 1 closed to its reach limit; the contour is at the bank ceiling
+
+`pair-242/` (`n40r*` vs `n41r*`, three matched seeds, control = the adopted `0.0.2.40`): the C
+rule-grounded membership (0.0.2.41) hit the pre-registered zero-opportunity condition exactly as the
+launch note predicted — the adopted line strict-passed `C-ex6-03` in ALL three control seeds, so the
+pair carried zero live on-target cell. **UNMEASURED, not adopted; `C_RULE_GROUND` frozen to exactly
+(2,41)** (wiring nonetheless proven live: `v241_c_rule_ground_matched` on C-ex6-03 AND C-ex6-05 in
+every candidate seed at identical bytes/ptok/calls, zero conversions, no refused prompt touched, zero
+regressions carry a 2.41 event; means 65.0 vs 65.0, pooled 5W/5L — same-stamp noise, unquotable).
+Map deltas:
+
+- `C-ex6-03` is now held by the line at 6/6 seeds since 0.0.2.37 (pair-240 `m39` + pair-242 `n40`
+  controls). The rule-grounding family (2.39/2.40/2.41 grammars) covers everything the bank states a
+  rule for and has measured its true boundary.
+- **Group 1 (`C-ex6-00/01`) closes at its published reach limit**: their prompts never state the rule
+  («по политике безопасности», «по общим правилам»), so no prompt-grounded derivation exists; any
+  mechanism "deriving" them would inject the maintainer's verdict — the 2.30 lesson, banned by this
+  map. They join the owner bank-clarification queue (make the prompts rule-stating), never contour work.
+- `C-ex6-00`/`C-ex6-01` flipped again in both arms (1/3 vs 2/3) carrying NO v241 event — pure
+  resampling on refused prompts, exactly as the launch note stated.
+- After this pair the contour is **at the bank ceiling on `0.0.2.40`**: remaining stable fails are
+  bank defects (`A-ex6-03`, `C-ex6-02`, `K-ex6-03`), a frozen-negative class (`B-ex6-04`, re-chasing
+  banned by this map), and closed lottery classes (group 4 H/F: 2.31/2.36 frozen). No pair-243 launches
+  without an owner bank decision; see the decision record
+  `history/agent-decisions/2026-11-06-pair242-c-ground-unmeasured-bank-ceiling.md`.
