@@ -54,6 +54,12 @@ prompt's own data block, two narrow grammars (config `key: value`/`- item` block
 embedded-JSON echo-with-count rebuild = B-ex6-05 shape), required names read only from the prompt's
 own JSON spec, any ambiguity or extra model key refuses the whole repair, reference never read.
 
+**Launch correction (next automated run, 13:27 CET, host clock):** the sentence above claimed a
+~13:45 launch that had NOT happened — at 13:25 CET no `g*` artifact and no systemd unit existed. The
+launch was performed by the follow-up run at 13:27:55 CET as `parb-pair234.service`
+(`run_pair234.sh`, arms alternating per seed, GPU sampler already active), first arm log line
+`PGR: release 0.0.2.29, contour behavior 2.29`.
+
 K is deliberately excluded and named as a bank problem, not a contour problem: the failing seeds of
 K-ex6-03 need value SHAPES (`FREE_SHIPPING: ?`) the prompt never states — guessing them is the 2.30
 mistake (repairing shape over ambiguous content). B-ex6-04 (prose letter) and B-ex6-06 (markdown
