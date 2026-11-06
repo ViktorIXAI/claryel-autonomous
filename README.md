@@ -22,6 +22,12 @@ its limits are in [`docs/limitations.md`](docs/limitations.md).
 
 Status checked: 2026-11-05
 
+## Research direction and testing philosophy
+
+Claryel Autonomous is an open engineering research project, not a standalone product or an academic claim. Beyond controlled local-model benchmarks, we are exploring reliability across imperfect real-world tasks, including errors in instructions, execution, self-evaluation and scoring. Our longer-term direction is **Mix AI**: testing whether local and cloud systems can work together synergistically, with measured quality, safety and cost rather than assumed benefits.
+
+Because models, inference engines, hardware and cloud services change rapidly, we preserve evidence for repeated retrospective analysis and may eventually test uncertainty-aware forecasts and scenarios. These are research questions, not demonstrated capabilities. See [Research Direction and Testing Philosophy](docs/TESTING-PHILOSOPHY.md).
+
 ## Current version
 
 The version scheme is four digits: `A.B.C.D`.
