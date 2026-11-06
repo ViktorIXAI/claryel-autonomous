@@ -25,4 +25,10 @@ REJECTED_FEATURES = {
 UNADOPTED_FEATURES = {
     "j_prompt_rerank": (2, 32),
     "a_table_arith": (2, 33),
+    # 0.0.2.34 measured -1.0 cells at three seeds with ZERO live fires in either grammar: the config
+    # grammar accepts 1 of 7 B prompts (no-op, the model was already prompt-equal), the echo grammar
+    # matches 1 and refuses on every saved answer for one extra model key, and the two B cells that
+    # actually lose sit outside both grammars (`PAIR-234-V61.md`). The B cells are bit-identical
+    # between arms: the delta is pure resampling and the mechanism reached zero work.
+    "b_field_complete": (2, 34),
 }

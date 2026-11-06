@@ -71,8 +71,13 @@ ck(not g233.CONTRACT_GUARANTEE and not g233.SELFCONSIST and not g233.J_RERANK an
    "2.33 does NOT inherit the unadopted 2.32 re-rank and adds only the threshold-table arithmetic")
 g234 = load("0.0.2.34")
 ck(not g234.CONTRACT_GUARANTEE and not g234.SELFCONSIST and not g234.J_RERANK and not g234.A_TABLE_ARITH
-   and g234.B_FIELD_COMPLETE,
+   and g234.B_FIELD_COMPLETE and not g234.B_TABLE_AGGREGATE,
    "2.34 inherits adopted behaviour plus B field completeness only; the unadopted 2.32/2.33 stay frozen")
+g235 = load("0.0.2.35")
+ck(not g235.CONTRACT_GUARANTEE and not g235.SELFCONSIST and not g235.J_RERANK and not g235.A_TABLE_ARITH
+   and not g235.B_FIELD_COMPLETE and g235.B_TABLE_AGGREGATE,
+   "2.35 inherits adopted behaviour plus the B table aggregation only: the measured -1.0/zero-fire "
+   "2.34 grammar is frozen to its own stamp and must not ride into 2.35")
 
 bank = json.load(open(str(HERE.parent / "benchmarks" / "hard" / "bank-hard-v6.json"), encoding="utf-8"))
 import gate_j_rerank as JR

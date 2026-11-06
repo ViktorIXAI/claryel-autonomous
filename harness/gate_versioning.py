@@ -76,7 +76,8 @@ CONTOUR_FEATURES = (
     (2, 31),  # self-consistency vote for set/order answers (C letters, J id lists): two extra samples of the same task, the plurality answer wins, no scorer and no reference consulted (MEASURED NEGATIVE on bank v6.1, see PAIR-231-V61.md: the model is biased on these cells, so voting amplifies its own mistake; frozen to this stamp)
     (2, 32),  # J ranking repair: the answer's id order re-derived from the (id, value) table and direction phrase already in the prompt; deterministic, zero model tokens, no reference read, permutation-only over the ids the model listed, refused whenever the rule grammar is unsure (MEASURED +1.3 cells at three seeds, BELOW the ~2-cell noise floor: on-target but unresolvable, NOT adopted, frozen to this stamp, see PAIR-232-V61.md)
     (2, 33),  # A threshold-table arithmetic: a tariff chain «N if var>=T [и var>=T], иначе X» plus «id=... var=Nunit» rows — the map values and the total are recomputed by code from the prompt's own table (the adopted 2.27 family); refuses on any ambiguity, membership of the model's own map keys must equal the prompt rows, reference never read (MEASURED +1.3 cells at three seeds with ZERO live fires in the candidate arm — counterfactual replay on saved bytes repairs the failed control seed, but the arm delta contains no on-target cells: unresolvable, NOT adopted, frozen to this stamp, see PAIR-233-V61.md)
-    (2, 34),  # B field completeness: extraction fields recomputed by code from the prompt's own data block — a key:value/- item config block (B-ex6-03 shape) and an embedded-JSON echo-with-count rebuild (B-ex6-05 shape); required names come from the prompt's own JSON spec, extra model keys refuse, any ambiguity refuses, reference never read. Category K excluded: its failing seeds need value SHAPES the prompt never states (bank clarification, not contour guess — the 2.30 lesson).
+    (2, 34),  # B field completeness: extraction fields recomputed by code from the prompt's own data block — a key:value/- item config block (B-ex6-03 shape) and an embedded-JSON echo-with-count rebuild (B-ex6-05 shape); required names come from the prompt's own JSON spec, extra model keys refuse, any ambiguity refuses, reference never read. Category K excluded: its failing seeds need value SHAPES the prompt never states (bank clarification, not contour guess — the 2.30 lesson). (MEASURED -1.0 cells at three seeds with ZERO live fires in either grammar — the config grammar accepts 1 of 7 B prompts and no-ops, the echo grammar matches 1 and refuses on every saved answer for an extra model key, and the two B cells that actually lose sit outside both grammars: unresolvable, NOT adopted, frozen to this stamp, see PAIR-234-V61.md)
+    (2, 35),  # B markdown-table aggregation: a *_total field whose own spec formula names the prompt's table columns (base, «без X», «минус Y») is recomputed by code from that table, including the footnote adjustment the table declares («[1] включает 8 в_transit»); column names matched by stem, one match required, ragged table / unnamed column / unnamed footnote / several footnote numbers / non-numeric cell all refuse and touch nothing, the model's key set is never changed, reference never read. Targets the one B loss no earlier B grammar reaches (B-ex6-06: the model returns a row subtotal where the spec asks for the sum over rows).
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -91,8 +92,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 34)
-CURRENT_STAMP = "0.0.2.34"
+CURRENT_REVISION = (2, 35)
+CURRENT_STAMP = "0.0.2.35"
 
 
 def _digits(value: str) -> list[int]:

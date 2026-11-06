@@ -1386,7 +1386,21 @@ A_TABLE_ARITH = CONTOUR_REVISION == (2, 33)
 # Two narrow grammars (config key:value block; embedded-JSON echo-with-count), required names read from
 # the prompt's own JSON spec, any ambiguity or extra model key refuses. K excluded: value SHAPES the
 # prompt never states are a bank clarification, not a contour guess (the 2.30 lesson).
-B_FIELD_COMPLETE = contour_at_least(2, 34)
+# MEASURED (PAIR-234-V61.md): 62.3 vs control 63.3 = -1.0 cells, BELOW the ~2-cell floor, and the
+# mechanism fired ZERO times in all three candidate seeds. Counterfactual on 42 saved B answers: the
+# config grammar accepts 1 of 7 B prompts (B-ex6-03, no-op — the model was already prompt-equal), the
+# echo grammar matches 1 (B-ex6-05) and refuses on all six saved answers because the model adds a key
+# (`n_tags`) the prompt object never names; the other 5 refuse at the grammar step. The two B cells that
+# actually lose (B-ex6-04, B-ex6-06) are outside both grammars — the arm delta contains no on-target
+# cell. NOT adopted; frozen to its own stamp like 2.32/2.33.
+B_FIELD_COMPLETE = CONTOUR_REVISION == (2, 34)
+# 0.0.2.35: B markdown-table aggregation — a `*_total` field whose definition in the prompt's own JSON
+# spec is a formula over the prompt's own markdown table columns (including a footnote adjustment that
+# the table itself declares) is recomputed by code from that table. Prompt-grounded only: column names,
+# the formula wording and the footnote come from the task text, the reference is never read, and every
+# uncertain step refuses. Targets the one B cell pair-234 proved is a real content gap and no earlier
+# grammar reaches (B-ex6-06: model answers the W1 subtotal where the spec asks for the total).
+B_TABLE_AGGREGATE = contour_at_least(2, 35)
 _SC_CONST = 20261106
 
 
@@ -2308,6 +2322,197 @@ def b_fields_by_code(t, text):
     return _b_fields_echo(t, text, prompt)
 
 
+# --------------------------------------------------------------------------
+# 0.0.2.35 — B markdown-table aggregation (prompt-grounded, zero model tokens)
+#
+# The class pair-234 isolated: the prompt ships a markdown table and the JSON field spec states the
+# field's meaning as a formula over that table's own column names ("available_total": (остаток без
+# transite минус резерв)). The model copies one row's subtotal instead of the total. Everything the
+# repair needs is in the task text: the columns, the minus/exclusion wording, and the footnote saying
+# the marked cell already includes N units of the excluded thing. The reference is never read, and
+# every step that is not certain refuses and touches nothing.
+# --------------------------------------------------------------------------
+_B_TBL_LINE = re.compile(r"^\s*\|(.+)\|\s*$")
+_B_TBL_SEP = re.compile(r"^:?-{2,}:?$")
+_B_FOOT_LINE = re.compile(r"^\s*\[(\d+)\]\s*(.+?)\.?\s*$")
+_B_CELL_FOOT = re.compile(r"^(.*?)\s*\[(\d+)\]$")
+_B_AGG_DEF = re.compile(r'"([A-Za-z_][A-Za-z0-9_]*)"\s*:\s*\(([^()]*)\)')
+_B_STOP_WORDS = {"без", "минус", "minus", "plus", "the", "and", "per", "за", "по"}
+
+
+def _b_stems(text):
+    """Comparable word stems of a prompt phrase; leading в_/in_/из_ dropped (в_transit ~ transite)."""
+    out = []
+    for tok in re.split(r"[^0-9A-Za-zА-Яа-я]+", str(text or "").lower()):
+        t = tok
+        for pref in ("в_", "in_", "из_"):
+            if t.startswith(pref):
+                t = t[len(pref):]
+        if len(t) >= 3 and t not in _B_STOP_WORDS:
+            out.append(t)
+    return out
+
+
+def _b_stem_match(a, b):
+    """Stem equality by common prefix (the column-name rule proven in 2.32), minimum 4 characters."""
+    return (a.startswith(b) or b.startswith(a)) and min(len(a), len(b)) >= 4
+
+
+def _b_markdown_table(prompt):
+    """(header, data rows, footnote texts) of the prompt's markdown table; None when there is none."""
+    header, rows, notes = None, [], {}
+    for ln in prompt.splitlines():
+        fm = _B_FOOT_LINE.match(ln)
+        if fm and "|" not in ln:
+            notes.setdefault(fm.group(1), fm.group(2).strip())
+            continue
+        tm = _B_TBL_LINE.match(ln)
+        if not tm:
+            continue
+        cells = [c.strip() for c in tm.group(1).split("|")]
+        if all(_B_TBL_SEP.fullmatch(c or "-") for c in cells):
+            continue
+        if header is None:
+            header = cells
+        else:
+            rows.append(cells)
+    if not header or not rows:
+        return None
+    return header, rows, notes
+
+
+def _b_cell_value(cell):
+    """(numeric value, footnote id or None) of one table cell; None when the cell is not a plain number."""
+    m = _B_CELL_FOOT.match(cell)
+    raw, fid = (m.group(1) if m else cell), (m.group(2) if m else None)
+    raw = raw.strip().replace(" ", "")
+    if not re.fullmatch(r"-?\d+(?:[.,]\d+)?", raw):
+        return None, fid
+    val = float(raw.replace(",", "."))
+    return (int(val) if val.is_integer() else val), fid
+
+
+def _b_total_field(name, definition):
+    """True when the field spec asks for an aggregate over rows (in the name or in the definition)."""
+    n, d = str(name).lower(), str(definition).lower()
+    return n.endswith("_total") or n == "total" or "total" in n or "сумм" in d or "total" in d
+
+
+def _b_agg_terms(definition):
+    """(base term, exclusion terms, subtracted terms) from the spec's own formula, or None if unreadable."""
+    d = str(definition or "").strip()
+    if not d:
+        return None
+    left, sep, right = d.partition(" минус ")
+    negs = [x.strip() for x in right.split(" минус ")] if sep else []
+    excl = []
+    base = left
+    if " без " in left:
+        base, _, ex = left.partition(" без ")
+        excl = [ex.strip()]
+    base = base.strip()
+    if not base or not all(negs):
+        return None
+    if sep and not right.strip():
+        return None
+    return base, excl, negs
+
+
+def _b_col_for(term, header):
+    """The single table column this spec term names; None when it matches zero or several (ambiguous)."""
+    hits = [h for h in header if any(_b_stem_match(tok, stem)
+                                     for tok in _b_stems(term) for stem in _b_stems(h))]
+    return hits[0] if len(hits) == 1 else None
+
+
+def b_table_aggregate(t, text):
+    """0.0.2.35: recompute a prompt-defined table total from the prompt's own table; refuse when unsure."""
+    if not B_TABLE_AGGREGATE or not text:
+        return text, None
+    prompt = t.get("prompt") or t.get("free_text") or ""
+    if not prompt:
+        return text, None
+    defs = [(f, d) for f, d in _B_AGG_DEF.findall(prompt) if _b_total_field(f, d)]
+    if not defs:
+        return text, None
+    table = _b_markdown_table(prompt)
+    if not table:
+        return text, None
+    header, rows, notes = table
+    cur = _fmt_parse(text)
+    if not isinstance(cur, dict):
+        return text, None
+    marks = []
+    for ri, cells in enumerate(rows):
+        if len(cells) != len(header):
+            return text, None                     # ragged table: refuse, touch nothing
+        for ci, cell in enumerate(cells):
+            _, fid = _b_cell_value(cell)
+            if fid is not None:
+                marks.append((ri, header[ci], fid))
+    out, changed, fired = dict(cur), False, []
+    for field, defn in defs:
+        if field not in cur:
+            continue                              # never invent a key the model did not list
+        if not isinstance(cur[field], (int, float)) or isinstance(cur[field], bool):
+            continue                              # only repair a value the answer states as a number
+        terms = _b_agg_terms(defn)
+        if terms is None:
+            continue
+        base_t, excl, negs = terms
+        base_col = _b_col_for(base_t, header)
+        if base_col is None:
+            continue                              # the table never names the base column
+        neg_cols, bad = [], False
+        for nterm in negs:
+            c = _b_col_for(nterm, header)
+            if c is None or c == base_col:
+                bad = True
+                break
+            neg_cols.append(c)
+        if bad:
+            continue
+        adj = {}
+        if excl:
+            if len(marks) != 1:
+                continue                          # exclusion asked for, footnote marking unclear
+            ri, mcol, fid = marks[0]
+            note = notes.get(fid)
+            if mcol != base_col or not note:
+                continue
+            nums = re.findall(r"-?\d+(?:[.,]\d+)?", note)
+            if len(nums) != 1:
+                continue                          # several numbers: which one to exclude is ambiguous
+            if not any(_b_stem_match(ft, et) for ft in _b_stems(note) for et in _b_stems(excl[0])):
+                continue                          # the footnote talks about something else
+            adj[(ri, base_col)] = float(nums[0].replace(",", "."))
+        elif marks:
+            continue                              # a footnote the spec never accounts for
+        cols = [base_col] + neg_cols
+        total, ok = 0.0, True
+        for ri, cells in enumerate(rows):
+            vals = {}
+            for col in cols:
+                v, _ = _b_cell_value(cells[header.index(col)])
+                if v is None:
+                    ok = False
+                    break
+                vals[col] = float(v)
+            if not ok:
+                break
+            total += vals[base_col] - adj.get((ri, base_col), 0.0) - sum(vals[c] for c in neg_cols)
+        if not ok:
+            continue
+        if abs(total - float(cur[field])) < 1e-9:
+            continue                              # already right: byte-exact no-op
+        out[field] = int(total) if float(total).is_integer() else round(total, 6)
+        changed = True
+        fired.append(field)
+    if not changed:
+        return text, None
+    return json.dumps(out, ensure_ascii=False), ["v235_b_table_total:" + ",".join(sorted(fired))]
+
+
 def h_requires_from_prompt(t, text):
     """v2.28: fill H requires/unknown from an explicit prompt constraint."""
     if not H_REQUIRES_PROMPT or not text:
@@ -2679,6 +2884,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "_".join(ev))
+    if B_TABLE_AGGREGATE and cat == "B" and r["text"]:
+        norm, ev = b_table_aggregate(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", "_".join(ev))
     if H_REQUIRES_PROMPT and cat == "H" and r["text"]:
         norm, ev = h_requires_from_prompt(t, r["text"])
         if ev:
@@ -2815,6 +3027,13 @@ def run_one(t, pos, done, st):
                             acct.ev("contour", "_".join(ev))
                     if B_FIELD_COMPLETE and cat == "B" and r["text"]:
                         norm, ev = b_fields_by_code(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", "_".join(ev))
+                    if B_TABLE_AGGREGATE and cat == "B" and r["text"]:
+                        norm, ev = b_table_aggregate(t, r["text"])
                         if ev:
                             r = dict(r)
                             r["text"] = norm
