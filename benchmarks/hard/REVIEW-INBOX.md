@@ -598,7 +598,8 @@ all flipped cells: 0 mismatches of 24. Energy: candidate lower in every window (
 Adoption state: `A_TABLE_ARITH` frozen to stamp 2.33 alone (`UNADOPTED_FEATURES`, flag matrix updated
 in `gate_v49_feature_adoption_test.py`); adopted line stays `0.0.2.29`.
 
-Next (launched ~13:45 CET, runs `g29r*`/`g34r*`): `0.0.2.34` — B field completeness, the untried half
+Next (launched 13:27:55 CET as `parb-pair234.service`, runs `g29r*`/`g34r*`): `0.0.2.34` — B field
+completeness, the untried half
 of the same UNSTABLE-CELLS group: extraction fields recomputed by code from the prompt's own data
 block (config key:value block = B-ex6-03 shape; embedded-JSON echo-with-count = B-ex6-05 shape),
 required names read from the prompt's own JSON spec, any ambiguity or extra model key refuses.
