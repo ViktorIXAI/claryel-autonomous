@@ -1362,6 +1362,94 @@ def _fmt_parse(text):
     return None
 
 
+CONTRACT_GUARANTEE = contour_at_least(2, 30)
+
+# Shape-only hints. They echo the format the task itself already demands; they never quote a scorer
+# keyword or reference answer (issue #15 keeps the official run keyword-free).
+_SHAPE_HINT = {
+    "J": "Повтори тот же ответ ровно списком JSON ([...]), без пояснений.",
+    "K": "Повтори тот же ответ ровно строками ПОЛЕ: значение, без пояснений.",
+    "C": "Добавь последнюю строку вида ОТВЕТ: <буквы через запятую> или ОТВЕТ: NONE.",
+    "default": "Повтори тот же ответ ровно одним объектом JSON, без пояснений.",
+}
+
+
+def _contract_shape_missing(cat, text):
+    """Which required artifact is absent from this answer, or None if the shape is present.
+
+    Deliberately narrower than the scorer: this only asks 'is there any parseable artifact at all',
+    because the failure mode found in the six-seed stability map was a total parse collapse (no_json /
+    no_list / no_answer_line), not a content disagreement.
+    """
+    if not text or not text.strip():
+        return "empty"
+    if cat == "C":
+        return None if re.search(r"^\s*ОТВЕТ\s*:", text, re.M) else "answer_line"
+    if cat == "K":
+        return None if re.search(r"^\s*[A-Za-z_][A-Za-z0-9_]*\s*:", text, re.M) else "field_lines"
+    j = _fmt_parse(text)
+    if cat == "J":
+        return None if isinstance(j, list) else "json_list"
+    return None if isinstance(j, (dict, list)) else "json_object"
+
+
+def _block_of(text, open_ch, close_ch):
+    """First balanced {...} / [...] block in the text, or None. Deterministic, no model tokens."""
+    depth, start = 0, -1
+    for i, ch in enumerate(text):
+        if ch == open_ch:
+            if depth == 0:
+                start = i
+            depth += 1
+        elif ch == close_ch and depth:
+            depth -= 1
+            if depth == 0 and start >= 0:
+                return text[start:i + 1]
+    return None
+
+
+def _contract_salvage(cat, text):
+    """Recover an artifact from text the model already wrote. Never adds facts."""
+    if cat == "K":
+        lines = [l for l in text.splitlines() if re.match(r"^\s*[A-Za-z_][A-Za-z0-9_]*\s*:", l)]
+        return ("\n".join(lines), "contract_salvage_fields") if len(lines) >= 2 else (text, None)
+    if cat == "J":
+        blk = _block_of(text, "[", "]") or _block_of(text, "{", "}")
+    else:
+        blk = _block_of(text, "{", "}") or _block_of(text, "[", "]")
+    if blk and _fmt_parse(blk) is not None:
+        return blk, "contract_salvage_block"
+    return text, None
+
+
+def contract_guarantee(acct, cat, r, msgs0, seed):
+    """v2.30: the artifact shape is part of the contract. If the answer carries no parseable artifact,
+    take one shape-only re-ask, then salvage the model's own text deterministically. Content is never
+    invented: every salvaged string is a substring of what the model already produced."""
+    if not CONTRACT_GUARANTEE:
+        return r
+    missing = _contract_shape_missing(cat, r.get("text") or "")
+    if missing is None:
+        return r
+    acct.ev("contour", "v230_contract_reask_" + missing)
+    r2 = ask_ladder(acct, list(msgs0) + [{"role": "user", "content": _SHAPE_HINT.get(cat, _SHAPE_HINT["default"])}],
+                    seed + 7717, mt=512)
+    if _contract_shape_missing(cat, r2.get("text") or "") is None:
+        acct.ev("contour", "v230_contract_reask_ok")
+        return r2
+    # The re-ask often answers in prose-with-an-artifact, which still fails the strict shape check but
+    # is salvageable; try it before falling back to the original text.
+    for src in (r2, r):
+        salv, ev = _contract_salvage(cat, src.get("text") or "")
+        if ev:
+            acct.ev("contour", "v230_" + ev)
+            rr = dict(src)
+            rr["text"] = salv
+            return rr
+    acct.ev("contour", "v230_contract_unresolved")
+    return r
+
+
 def post_normalize_answer(cat, t, text):
     """v2.0: only post-process material the model already produced.
 
@@ -2227,6 +2315,15 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v27_" + "_".join(ev))
+    if CONTRACT_GUARANTEE and r["text"] and not r["err"] and cat != "E" \
+            and not (cat == "D" and t.get("kind") == "loop"):
+        before = r["text"]
+        r = contract_guarantee(acct, cat, r, msgs0, seed)
+        if r["text"] != before:
+            rec["answer"] = r["text"]
+            rec["truncated"] = r["finish"] == "length"
+            rec["finish"] = r["finish"]
+            rec["engine_error"] = r["err"]
     if VERIFY_RETRY and r["text"] and not r["err"] and cat not in ("A", "E", "C") \
             and not (cat == "D" and t.get("kind") == "loop"):
         def _score(txt):
