@@ -20,8 +20,9 @@ jobs:
                    harness/gate_v45_stamp_guard_test.py harness/gate_v46_format_guarantee_test.py \
                    harness/gate_v47_selfconsistency_test.py harness/gate_v48_j_rerank_test.py \
                    harness/gate_v49_feature_adoption_test.py harness/gate_v50_a_tariff_test.py \
-                   harness/gate_v51_b_fields_test.py harness/gate_v52_b_table_test.py \
+                   harness/gate_v51_b_fields_test.py                   harness/gate_v52_b_table_test.py \
                    harness/gate_v53_g4_lottery_test.py \
+                   harness/gate_v54_j_membership_test.py \
                    harness/gate_versioning_test.py; do
             echo "=== $f"; python3 "$f"
           done

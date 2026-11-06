@@ -1453,6 +1453,21 @@ G4_LOTTERY = CONTOUR_REVISION == (2, 36)
 G4_H_NOTES = ("unknown_missing", "requires_missing")
 G4_F_NOTES = ("avoid",)
 G4_F_SEED_OFFSET = 5501
+
+# 0.0.2.40 (pair-240, pre-registered in PAIR-239-V61.md BEFORE any m* row) is the single candidate
+# change: J MEMBERSHIP re-derived from the prompt's own filter/top-K rule. pair-239 surfaced the
+# class itself: J-ex6-01 failed seeds 0-1 with byte-identical
+# answers in BOTH arms (["skuC","skuB"] — skuB has срок=12 and violates the prompt's own filter
+# срок<=10; top-2 cheapest among срок<=10 is skuC, skuA), 1/6 in the six-seed map; J-ex6-06 failed
+# seed 0 in both arms with an empty JSON list although the rule (`Отбрось score<70`) is stated in full.
+# The v2 grammar already PARSES those rules (that is why it reports `membership_untouched`); 2.40
+# adopts the parse: when the rule parses fully and the derived id SET differs from the model's, the
+# answer takes the rule's set (ids only ever from the prompt table), then the inherited v2 re-rank
+# orders it. Fail-closed as before: any unparseable segment, ambiguity, formula, unknown tie column,
+# or a top-K boundary tie the stated chain cannot separate returns None and touches nothing; empty
+# model lists are only admitted on this membership path. Zero model tokens, reference never read.
+# If pair-240's pre-registered pattern does not hold exactly, freeze to CONTOUR_REVISION == (2, 40).
+J_MEMBERSHIP_V3 = contour_at_least(2, 40)
 _SC_CONST = 20261106
 
 
@@ -1608,17 +1623,30 @@ def _j_rerank_answer(t, ids):
     Applied only when the result is a pure permutation of what the model wrote: the contour fixes the
     ORDER, it never decides membership and never reads the reference. Unsupported rules return None and
     touch nothing. v1 grammar at stamp 2.32, grammar v2 from 2.39 (`v2g`), byte-identical at each.
+    From 2.40 (`J_MEMBERSHIP_V3`) the sets-differ branch is no longer a refusal: when the full rule
+    parsed and the derived SET differs, the answer takes the rule's set (the pair-240 candidate
+    change, pre-registered in PAIR-239-V61.md; the derived ids are always table ids, the reference is
+    still never read, zero model tokens). Below 2.40 the refusal marker stays exactly as measured.
     """
     if not (J_RERANK or J_RERANK_V2) or t.get("mode") == "loop":
         return None, None
     v2g = J_RERANK_V2 and not J_RERANK
+    memb = bool(J_MEMBERSHIP_V3) and v2g
     doc = ((t.get("assembled_doc") or "") + "\n" + (t.get("prompt") or "")).strip()
-    ranked = JR.rank_from_prompt(t.get("prompt") or "", ids, v2=v2g) or JR.rank_from_prompt(doc, ids, v2=v2g)
+    if ids or memb:
+        ranked = JR.rank_from_prompt(t.get("prompt") or "", ids, v2=v2g, membership=memb) or \
+            JR.rank_from_prompt(doc, ids, v2=v2g, membership=memb)
+    else:
+        ranked = None
     tag_r = "v239_j_rerank_by_prompt" if v2g else "v232_j_rerank_by_prompt"
     tag_m = "v239_j_membership_untouched" if v2g else "v232_j_membership_untouched"
     if ranked and set(ranked) == set(ids) and ranked != ids:
         return json.dumps(ranked, ensure_ascii=False), [tag_r]
     if ranked and set(ranked) != set(ids):
+        if memb:
+            # membership + order both come from the fully-parsed rule; the re-rank within the new
+            # set is the same rule read, so both events ride the same conversion.
+            return json.dumps(ranked, ensure_ascii=False), ["v240_j_membership_from_prompt", tag_r]
         return None, [tag_m]
     return None, None
 
@@ -1673,7 +1701,12 @@ def post_normalize_answer(cat, t, text):
     if (J_RERANK or J_RERANK_V2) and cat == "J" and t.get("mode") != "loop":
         j2 = _fmt_parse(text)
         ids = [x for x in j2] if isinstance(j2, list) and j2 and all(isinstance(x, str) for x in j2) else None
-        if ids:
+        if ids is None and J_MEMBERSHIP_V3 and isinstance(j2, list) and not j2:
+            # 0.0.2.40: a drawn answer that collapsed to the empty list still carries no information
+            # the prompt rule does not state; the membership path may derive it. Older stamps never
+            # see an empty list here (byte-identical pre-2.40 behaviour).
+            ids = []
+        if ids is not None:
             rer_text, rer_ev = _j_rerank_answer(t, ids)
             if rer_ev:
                 return (rer_text if rer_text is not None else text), rer_ev

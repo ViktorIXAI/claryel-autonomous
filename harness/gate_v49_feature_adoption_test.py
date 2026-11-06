@@ -110,6 +110,17 @@ ck(not g239.CONTRACT_GUARANTEE and not g239.SELFCONSIST and not g239.J_RERANK an
    "via a contour_at_least floor; the v1 J flag stays frozen to 2.32 and 2.30/2.31/2.34/2.36 stay frozen")
 ck(g238.A_TABLE_ARITH and not g239.A_TABLE_ARITH,
    "pin matrix: 2.38 still runs the A arithmetic (its own measured stamp), 2.39 does not")
+g240 = load("0.0.2.40")
+ck(not g240.CONTRACT_GUARANTEE and not g240.SELFCONSIST and not g240.J_RERANK and g240.J_RERANK_V2
+   and g240.J_MEMBERSHIP_V3 and not g240.A_TABLE_ARITH and g240.B_TABLE_AGGREGATE
+   and not g240.B_FIELD_COMPLETE and not g240.G4_LOTTERY,
+   "2.40 inherits the ADOPTED line (2.29 + B table + the pair-239-adopted J grammar v2) plus the J "
+   "membership re-derivation ONLY: 2.30/2.31/2.34/2.36 frozen, 2.32 v1 frozen, A arithmetic still "
+   "pinned to exactly (2,33)/(2,38)")
+g239b = load("0.0.2.39")
+ck(not g239b.J_MEMBERSHIP_V3 and g239b.J_RERANK_V2,
+   "history pin: the 2.39 arms ran the re-rank WITHOUT membership adoption; the 2.40 change must not "
+   "rewrite what pair-239 measured")
 ck(g232.J_RERANK and not g232.J_RERANK_V2,
    "history pin: the 2.32 arms ran grammar v1 only; the 2.39 re-land must not rewrite 2.32")
 g238b = load("0.0.2.38")

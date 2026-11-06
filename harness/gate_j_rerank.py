@@ -184,16 +184,21 @@ def _tie_chain(rule, cols, direction_primary):
     return chain
 
 
-def rank_from_prompt(prompt, answer_ids, v2=False):
+def rank_from_prompt(prompt, answer_ids, v2=False, membership=False):
     """Re-rank the model's own ids by the prompt's table and rule. None = do not touch the answer.
     v2=False is the frozen 0.0.2.32 grammar; v2=True adds the 0.0.2.39 coverage extensions, every one
-    of them fail-closed."""
+    of them fail-closed. membership=True (0.0.2.40, pair-240) is the SAME parse run for a membership
+    replacement instead of a pure permutation: an empty model list is then allowed (the drawn answer
+    collapsed to `[]`), and a top-K truncation whose boundary is a genuine tie that the stated chain
+    cannot separate refuses — choosing WHICH row wins a tie the rule never resolved would be the
+    contour inventing membership, exactly what the contract forbids. Callers at stamps below 2.40 keep
+    membership=False and the byte-identical old behaviour."""
     parsed = parse_table(prompt)
     if parsed is None:
         return None
     cols, rows = parsed
     by_id = {rid: rec for rid, rec in rows}
-    if not answer_ids or any(a not in by_id for a in answer_ids):
+    if (not answer_ids and not membership) or any(a not in by_id for a in answer_ids):
         return None
     rule = rule_part(prompt)
     if (_OUT_OF_GRAMMAR_V2 if v2 else _OUT_OF_GRAMMAR).search(rule):
@@ -283,18 +288,48 @@ def rank_from_prompt(prompt, answer_ids, v2=False):
             return tuple(out)
         ordered = sorted(universe, key=sortk)
     top = re.search(r"(?:топ|top)[- ]?(\d+)", rule, re.I)
+    # 0.0.2.40 membership mode: a SET replacement is only ever rule-declared. When the stated rule has
+    # neither a filter segment nor a top-K segment, nothing in the prompt selects which rows belong in
+    # the answer, so a membership CHANGE (or deriving an answer from an empty draw) would be the contour
+    # inventing membership — refuse and touch nothing. A pure permutation of the model's own set stays
+    # allowed: that is the adopted 2.39 repair and must not be lost at 2.40.
+    if membership and fm is None and top is None and (
+            not answer_ids or set(ordered) != set(answer_ids)):
+        return None
     if top:
+        k = int(top.group(1))
+        if membership and v2 and len(ordered) > k:
+            # 0.0.2.40: a membership replacement must not be decided by the contour's own invented
+            # id tie-break. Compare the RULE-STATED sort value at the truncation boundary (the
+            # always-appended final rid is excluded; a chain segment on `id` still separates).
+            def rule_key(rid):
+                return sortk(rid)[:-1]
+            if rule_key(ordered[k - 1]) == rule_key(ordered[k]):
+                return None
         ordered = ordered[:int(top.group(1))]
     return ordered
 
 
-def rule_coverage(bank, v2=False):
-    """Before any arm runs: which J tasks this grammar reproduces, and which it refuses."""
+def rule_coverage(bank, v2=False, membership=False):
+    """Before any arm runs: which J tasks this grammar reproduces, and which it refuses.
+
+    membership=True (0.0.2.40) states the SET-derivation coverage on single-shot tasks: the derived id
+    set must equal the gold set exactly (order judged by the v2 re-rank separately); a derivation that
+    misses the set is a MIS-DERIVATION and the contract test requires zero of them.
+    """
     out = []
     for t in bank:
         if t["cat"] != "J":
             continue
-        got = rank_from_prompt(t["prompt"], t["ref"] if isinstance(t["ref"], list) else [], v2=v2)
-        out.append((t["id"], "reproduces" if got == list(t["ref"]) else (
-            "refuses" if got is None else "MIS-SORTS: %s" % got)))
+        if membership and t.get("mode") == "loop":
+            continue
+        got = rank_from_prompt(t["prompt"], t["ref"] if isinstance(t["ref"], list) else [],
+                               v2=v2 or membership, membership=membership)
+        if membership:
+            ref = set(t["ref"]) if isinstance(t["ref"], list) else set()
+            out.append((t["id"], "derives" if got is not None and set(got) == ref else (
+                "refuses" if got is None else "MIS-DERIVES: %s" % got)))
+        else:
+            out.append((t["id"], "reproduces" if got == list(t["ref"]) else (
+                "refuses" if got is None else "MIS-SORTS: %s" % got)))
     return out
