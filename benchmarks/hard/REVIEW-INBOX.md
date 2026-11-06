@@ -311,3 +311,21 @@ proven, effect size not. Decision record:
 `history/agent-decisions/2026-11-06-contour-229-coverage-and-stamp-guard.md`.
 `scripts/ladder_v6.py` now publishes two separate ladder sections (bank v6 / bank v6.1) so the two
 banks can never share a row. Next stamp: 0.0.2.30, and the four-arm cadence point after it.
+
+## Repeated-seed protocol started (issue #8) — 06.11 04:15 CET
+
+One rep per stamp is the weakest link in this series: `CROSSCHECK-217.md` and the H probe both show
+the same cell moving 1.00/0.33/1.00 across repetitions, so 3W/1L pairs like 2.28->2.29 prove a
+mechanism, not an effect size. Started the protocol:
+
+- `scripts/plan_reps.py` emits extra-repetition plan rows with **fresh deterministic gseeds**
+  derived from `sha256("<task_id>|<rep>")` (same convention as `fresh100_build_ws.py`), so the exact
+  seed set is re-derivable by anyone from the published file.
+- Sequential on one serve: contour 0.0.2.29 on bank v6.1 reps **1 and 2** (154 rows, run id
+  `c229r12`), then the bare basalt raw arm reps 1-2 in a clean workspace (`~/parb-v61-raw-reps`,
+  bank sha16 `9ec86dfca4a6f85f`, seeds 1001/1002). rep0 for both is already published
+  (`full-229/`, `four-arm-v61/`).
+- What it will decide: the contour-vs-bare-basalt gap (63 vs 56 on rep0) with a per-rep spread and a
+  paired sign test over 3 reps x 71 cells. If the gap survives three reps, it is an effect; if not,
+  the ladder's step sizes have been noise and the ladder must be re-read that way. Published either
+  way.
