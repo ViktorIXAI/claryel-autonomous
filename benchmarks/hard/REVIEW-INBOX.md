@@ -401,3 +401,7 @@ samples during the running arm: 117-140 W at 100% utilization, 65-66 °C). `scri
 integrates the trace to watt-hours per window. Windows chosen are exact task-count boundaries so an arm
 gets a per-arm figure; the method and its limits (board draw, not wall outlet; inference-box CPU/RAM
 excluded; RAPL is root-gated on this host) go in `ENERGY-METHOD.md` with the numbers.
+
+## 06.11 05:12 CET — cost accounting and energy method published (numbers still filling in)
+
+`COST-V61.md` (`scripts/cost_table_v61.py`) now carries tasks / model calls / tokens / wall seconds for every arm, with a GPU-energy column that only fills from measured samples. `ENERGY-METHOD.md` gives the exact sampler command, the integrator, and the four things the measurement cannot see (board draw not wall outlet, no RAPL without root, cloud arms not measurable here, serve idle inside the window). A bug caught while generating it: the ledger lookup silently substituted rep0 for a missing rep3 and printed identical numbers — fixed to skip missing arms instead.
