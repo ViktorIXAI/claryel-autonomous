@@ -17,7 +17,7 @@ where those identities are defined, so a quoted number can be traced to bytes.
 | seed protocol | sp1 | per-(task,rep) gseed + per-task plan seed | `scripts/plan_reps.py`, `build_hard_v6_ws.py` |
 | typed failure codes | registry in contract v6.2 | content / protocol / integrity / marker / infra | `gate_scorer_contract.CODE_CLASS`, gate_v59 tests |
 | two published axes | contract v6.2 | answer axis + protocol axis, additive to `strict` | `gate_v59_scorer_contract_v62_test.py` |
-| harness | commit 471b3fd7d102 | contour stamp 2.45 (behavior 2.44) | git + `gate_versioning.py` |
+| harness | commit a307b2a360ad | contour stamp 2.45 (behavior 2.44) | git + `gate_versioning.py` |
 
 Scorer contract v6.2 delegates to the v6.1 bytes, so it changes no score; the equality
 is asserted cell by cell on published answers (`gate_v59_scorer_contract_v62_test.py`),

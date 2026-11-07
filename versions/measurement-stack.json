@@ -64,7 +64,7 @@
    "id": "sp1",
    "definition": "sp1: per-(task,rep) gseed = int(sha256(f'{task}|{rep}')[:8], 16) % 999983 (scripts/plan_reps.py); per-task plan seed = int(sha256(task_id)[:6], 16) (scripts/build_hard_v6_ws.py). Selection retries add a fixed offset per mechanism (2.11 +4096, 2.9/2.36 +8117, 2.43 +8117-loop, 2.44 +12289) so a retry re-draws instead of replaying the losing trajectory."
   },
-  "harness_commit": "471b3fd7d102323e7dd5ba9913d038fbb4d104d2"
+  "harness_commit": "a307b2a360addc712cc53bc9949287d06d3e3e33"
  },
  "contour": {
   "current_revision": "2.45",

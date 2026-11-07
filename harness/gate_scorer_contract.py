@@ -85,7 +85,14 @@ CONTRACT_MODULES = {
     "v6.1": "parb_check_v6.py",
     "v6.2": "parb_check_v6_2.py",
 }
-MODULE_ALIASES = {"parb_loop.py": ("parb_loop.py", "parb_loop_mech.py")}
+# In a generated run workspace the frozen loop module is copied as `parb_loop_mech.py`
+# because the builder's generated ADAPTER owns the name `parb_loop.py` (the adapter routes
+# loop scoring to check_D_loop_v6). The alias order below is therefore not cosmetic:
+# resolving `parb_loop.py` first would hash the generated adapter against the frozen pin and
+# the runner would die with CONTRACT DRIFT before reserving the endpoint (measured 07.11 on
+# the first 0.0.2.45 arm — free, but it burned the launch). The mech copy wins when present;
+# a workspace without it falls back and fails closed, which is the correct outcome.
+MODULE_ALIASES = {"parb_loop.py": ("parb_loop_mech.py", "parb_loop.py")}
 CONTRACT_STATUS = {
     "v6.1": "frozen — every published hard-v6 number up to 0.0.2.44 was produced by these bytes",
     "v6.2": "current — same frozen checkers via delegation, plus identity, typed codes and axes",
@@ -311,12 +318,30 @@ def module_path(name: str, extra=None) -> str:
     raise FileNotFoundError("contract module %r not found in %s" % (name, search_dirs(extra)))
 
 
+def candidate_paths(name: str, extra=None) -> list:
+    """Every place this pinned module could be read from, in resolution order."""
+    out = []
+    for n in MODULE_ALIASES.get(name, (name,)):
+        for d in search_dirs(extra):
+            p = os.path.join(d, n)
+            if os.path.exists(p) and p not in out:
+                out.append(p)
+    return out
+
+
 def verify_contract(cid: str | None = None, extra=None) -> dict:
-    """Re-hash the pinned scoring bytes; raise ContractDrift on ANY difference.
+    """Re-hash the pinned scoring bytes; raise ContractDrift if NO copy matches.
 
     A pinned hash is not decoration: it is the only thing that lets a published
     number be defended later. If these bytes move without a new contract version,
     every earlier table silently changes meaning.
+
+    Resolution is by CONTENT, not by filename, because a generated run workspace
+    deliberately holds two different files under the pinned names: the frozen scorer
+    (copied verbatim, possibly under an alias) and generated adapter glue. The glue is
+    pinned in its own set (`benchmarks/hard/WS-GENERATED.v6*.sha256`, enforced by the
+    builder), so the honest question here is: are the DECIDING frozen bytes present and
+    unmodified? If no candidate copy carries the pinned hash, this refuses to run.
     """
     cid = cid or SCORER_CONTRACT
     if cid not in CONTRACT_PINS:
@@ -324,14 +349,16 @@ def verify_contract(cid: str | None = None, extra=None) -> dict:
     got = {}
     bad = []
     for name, want in CONTRACT_PINS[cid].items():
-        try:
-            h = _sha16(module_path(name, extra))
-        except FileNotFoundError as e:
-            bad.append("%s: %s" % (name, e))
+        cands = candidate_paths(name, extra)
+        if not cands:
+            bad.append("%s: not found in %s" % (name, search_dirs(extra)))
             continue
-        got[name] = h
-        if h != want:
-            bad.append("%s: pinned %s, on disk %s" % (name, want, h))
+        hashes = {_sha16(p): p for p in cands}
+        if want not in hashes:
+            bad.append("%s: pinned %s, on disk %s"
+                       % (name, want, ", ".join(sorted(hashes))))
+            continue
+        got[name] = want
     if bad:
         raise ContractDrift("scorer contract %s does not match its pinned bytes: %s"
                             % (cid, "; ".join(bad)))

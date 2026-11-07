@@ -65,6 +65,35 @@ ck(pins61["parb_check_v6.py"] == SC.CONTRACT_PINS["v6.1"]["parb_check_v6.py"],
 for name, h in SC.verify_contract("v6.1", extra=[os.path.expanduser("~/parb-v61-contour")]).items():
     ck(len(h) == 16, "workspace contract module %s resolves and hashes" % name)
 
+# ----------------------------------- 2b. the run workspace is checked BY CONTENT
+# `module_path` resolves through `search_dirs`, which lists the repo harness first, so
+# asking it about a workspace silently re-reads the repo copy — the check below would
+# have passed even with a corrupt workspace. The first 0.0.2.45 arm proved the real
+# failure mode: in a generated workspace the frozen loop module sits in
+# `parb_loop_mech.py` while the GENERATED ADAPTER owns the name `parb_loop.py`, so a
+# filename-first hash compares the adapter against the frozen pin and dies with
+# CONTRACT DRIFT before the endpoint is reserved. Both facts are pinned here.
+for _ws in (os.path.expanduser("~/parb-v61-contour"), os.path.expanduser("~/parb-v62-contour")):
+    if not os.path.isdir(_ws):
+        continue
+    _ws_name = "v6.2 workspace" if _ws.endswith("v62-contour") else "v6.1 workspace"
+    ck(sha16(os.path.join(_ws, "parb_check_v6.py")) == SC.CONTRACT_PINS["v6.1"]["parb_check_v6.py"],
+       "%s carries the frozen scorer bytes verbatim" % _ws_name)
+    ck(sha16(os.path.join(_ws, "parb_loop_mech.py")) == SC.CONTRACT_PINS["v6.1"]["parb_loop.py"],
+       "%s carries the frozen loop module as parb_loop_mech.py" % _ws_name)
+    ck(sha16(os.path.join(_ws, "e_sandbox.py")) == SC.CONTRACT_PINS["v6.1"]["e_sandbox.py"],
+       "%s carries the frozen sandbox verbatim" % _ws_name)
+    ck(sha16(os.path.join(_ws, "parb_loop.py")) != SC.CONTRACT_PINS["v6.1"]["parb_loop.py"],
+       "%s: `parb_loop.py` is generated adapter glue, NOT the pinned module "
+       "(it is pinned in WS-GENERATED.v6*.sha256 instead)" % _ws_name)
+    ck(SC.verify_contract("v6.1", extra=[_ws])["parb_loop.py"] == SC.CONTRACT_PINS["v6.1"]["parb_loop.py"],
+       "%s verifies through the mech copy (the arm that used to die here now starts)" % _ws_name)
+    for _p in SC.MODULE_ALIASES["parb_loop.py"]:      # declaration order = resolution order
+        if os.path.exists(os.path.join(_ws, _p)):
+            ck(_p == "parb_loop_mech.py",
+               "%s: the alias that resolves first must be the verbatim copy, got %s" % (_ws_name, _p))
+            break
+
 # ------------------------------------------------------------------ 3. tamper
 _real = SC.CONTRACT_PINS["v6.1"]["parb_check_v6.py"]
 SC.CONTRACT_PINS["v6.1"]["parb_check_v6.py"] = "0" * 16
