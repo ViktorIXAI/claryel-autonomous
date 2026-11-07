@@ -139,6 +139,39 @@ CONTOUR_FEATURES = (
     # contour_at_least(2, 48)` inherits as line behavior; gate_v49 pins 2.48 == 2.47 + exactly
     # K_FIELDS_ENUM. Details `PAIR-247-V62.md`, decision record
     # `history/agent-decisions/2026-11-07-pair247-k-fields-enum-adopted-line-moves-to-248.md`.)
+    (2, 51),  # B ECHO RESTORE re-armed (pair-248 candidate) — a frozen-UNMEASURED class made live by
+    # the current line's own published draws. Pair-234 built the two B field grammars, measured zero
+    # fires, and froze the flag to exactly (2,34) — at that revision the echo guard refused any answer
+    # adding the declared count key, so the pair carried zero on-target cell (PAIR-234-V61.md). The
+    # guard was extended immediately after (drop-names + count-key tolerance), but no published arm
+    # ever re-ran the echo bytes. On the ADOPTED line (bank v6.2 `3c866ea7daae611c`, behavior 2.48,
+    # arms t48r22/23/24) `B-ex6-05` now strict-fails 2/3 seeds, every zero the SAME mode: the model
+    # copies `items` but injects its own per-item `n_tags`, violating the prompt's «Items не меняй»,
+    # scored `fields_mismatch:items` (keys_eq: the key exists, the VALUE mismatches). The echo grammar
+    # rebuilds the answer from the PROMPT'S OWN JSON literal: items verbatim, the declared count key
+    # recomputed as the sum of the declared length field over the literal's items, the declared drop
+    # applied; it REFUSES (text untouched, no event) on grammar absence, >1 drop, unparseable literal,
+    # non-list items, an item without the length field, a non-dict answer, any invented top-level key,
+    # or an already-equal answer. Zero model tokens, the reference is never read, and the coverage
+    # census over all 77 bank-v6.2 prompts pins the reachable surface to EXACTLY one task (B-ex6-05)
+    # — the same closed-surface doctrine as the adopted 2.35 B-table repair and the 2.48 K-fields fix.
+    # Echo only: the config-fields grammar stays frozen to exactly (2,34) (its nearest line failure,
+    # B-ex6-01 r24 `[]`, is a degenerate collapse that grammar refuses by construction), and B-ex6-04
+    # stays in the published bank-defect queue. Event at 2.51+: contour:v51_b_echo_restore (the
+    # v234_b_echo_count name belongs to the frozen 2.34 bytes and is never rewritten). PRE-REGISTERED
+    # RULE frozen 2026-11-07 20:28 CET (REVIEW-INBOX): reps 34/35/36 sp1 seeds, control 0.0.2.48 vs
+    # candidate 0.0.2.51; MEASURED iff >=1 control u48 row strict-fails B-ex6-05; a conversion counts
+    # only on a matched (task,rep) strict-PASS carrying contour:v51_b_echo_restore; guards: zero v51
+    # events in control arms or outside B-ex6-05, zero candidate B-ex6-05 P->F cells (a rewrite that
+    # breaks an already-equal answer is a code bug — close the stamp), frozen-band parity, adopted-
+    # family parity within seed noise, stall protocol; 1 task x 3 seeds is cell-level by construction
+    # and the 77-cell mean with the exact pooled sign test is context only. ADOPT iff (a)+(b)+guards
+    # clean, otherwise freeze B_ECHO_RESTORE to `STAMP_REVISION == (2, 51)` and publish the negative
+    # with win-level detail. `gate_v65_b_echo_restore_test.py` pins the per-stamp flag matrix
+    # (2.50 zero-move, 2.51 = 2.50 + exactly B_ECHO_RESTORE; 2.34 keeps BOTH grammars with the v234
+    # event name; 2.35-50 stay silent), the transformation and every refusal branch on real bank bytes
+    # AND on synthetic invented-field prompts, the coverage census == {B-ex6-05} over v6.2, and the
+    # per-stamp event names; gate_v49 extended with the 2.51 matrix.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -208,8 +241,20 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # the adapter mapping from the builder template (ast, without running the builder),
 # cross-pins it against the `scripts/cadence_score_v62.py` rescorer mirror, proves
 # last-call-wins adoption, and re-asserts the flag matrix at 2.50 == 2.48.
-CURRENT_REVISION = (2, 50)
-CURRENT_STAMP = "0.0.2.50"
+# Release 0.0.2.51 (CONTOUR candidate, pair-248): `B_ECHO_RESTORE` re-arms ONLY the echo
+# grammar of the 2.34 B field repair for stamps >= (2,51) — the pair-234 freeze pinned the
+# whole flag to (2,34) because THAT revision's guard refused any answer adding the declared
+# count key (zero fires, zero live target); the guard was extended days ago and the class is
+# now live on the published line (B-ex6-05 strict-fails 2/3 at t48r22/23/24, one failure mode).
+# The config-fields grammar stays frozen to exactly (2,34): `B_FIELD_COMPLETE` bytes are
+# untouched, only `b_fields_by_code` gains the second predicate. Full mechanism, refusal
+# branches, coverage census (exactly B-ex6-05 over bank v6.2) and the frozen pair-248 rule
+# live in the CONTOUR_FEATURES (2,51) entry and REVIEW-INBOX 2026-11-07 20:28 CET.
+# `gate_v65_b_echo_restore_test.py` pins the matrix (2.50 moves ZERO flags vs 2.48; 2.51 =
+# the 2.50 matrix + exactly B_ECHO_RESTORE; 2.34 keeps both grammars under the v234 event
+# name; 2.35-2.50 stay silent) and the per-stamp event naming.
+CURRENT_REVISION = (2, 51)
+CURRENT_STAMP = "0.0.2.51"
 
 
 def _digits(value: str) -> list[int]:

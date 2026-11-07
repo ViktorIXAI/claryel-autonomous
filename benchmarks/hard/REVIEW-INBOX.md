@@ -2036,3 +2036,62 @@ status pins (v6.6 working, v6.5 provisional, v6.4 superseded). Same lesson famil
 as the CURRENT_REVISION exact-pin break (pair-244): contract tests must never pin
 mutable enumerations to exact values. Local full static suite now rc=0 with both
 fixes and audit-v2 (which the harness glob enrolls automatically) included.
+
+## 2026-11-07 20:28 CET — contour 0.0.2.51 PRE-REGISTERED (pair-248): B echo restore re-armed; rules frozen before any u*/ code change
+LIVE TARGET (published, on the ADOPTED line's own bytes, bank v6.2 `3c866ea7daae611c`): the t48
+arms (behavior 2.48, reps 22/23/24, PAIR-247-V62.md artifacts) strict-fail `B-ex6-05` 2/3 seeds
+(r22, r24), every zero the SAME single mode: the model copies `items` but injects its own
+per-item `n_tags`, violating the prompt's «Items не меняй», scored `fields_mismatch:items`; r23
+passes. `fields_mismatch` means a gold key whose VALUE mismatches (keys_eq) — the keys are there,
+the per-item payload is mutated. Pair-234 already published the matching mechanism and then froze
+it UNMEASURED at exactly (2,34): at that revision the echo guard refused any answer adding the
+declared count key, so all three candidate seeds fired ZERO times and the pair carried no on-target
+cell. The guard was extended right after (drop-names + count-key tolerance, published in the
+`_b_fields_echo` comment), but the flag stayed frozen, so NO published arm has ever executed the
+current echo bytes. Pair-234's counterfactual was on 2.34 bytes; it does NOT bind this stamp and
+this pair re-proves everything on current bytes.
+MECHANISM (one substantive change): `B_ECHO_RESTORE = STAMP_REVISION >= (2, 51)` re-arms ONLY the
+echo grammar. When the prompt states `добавь поле "X": сумма длин Y по всем Z` (+ at most one
+`удали "W"`) and embeds a parseable JSON literal, the answer is rebuilt FROM THE PROMPT'S OWN
+OBJECT: Z verbatim from the literal, X recomputed as the sum of len(Y) over the literal's items,
+W dropped, and the repair REFUSES (returns text untouched, no event) on every uncertainty: grammar
+absent, two drops, no parseable literal, items not a list, an item missing the length field, the
+model answer not a dict, any top-level key the literal+declared-edit never names, or answer already
+equal. Zero model tokens, the reference is never read (same doctrine as the adopted 2.35 B-table
+repair and the 2.48 K-fields fix). Config-fields grammar stays frozen to exactly (2,34) — its only
+line-neighbor failure (B-ex6-01 r24 `[]`) is a degenerate collapse that grammar refuses by
+construction, and B-ex6-04 stays in the published bank-defect queue. Event at 2.51+:
+`contour:v51_b_echo_restore` (the `v234_b_echo_count` name belongs to the frozen 2.34 bytes; the
+name split keeps every census attributable). Coverage pinned by contract test over all 77 v6.2
+prompts: the echo grammar matches EXACTLY one task (B-ex6-05), so the reachable surface is closed
+by construction.
+PRE-REGISTERED RULE (this entry is the only text that decides the verdict; frozen NOW, 20:28 CET,
+before any code commit and before any u* row):
+ (a) LIVE TARGET: MEASURED iff >=1 control (u48) arm strict-fails B-ex6-05 at reps 34/35/36.
+     Zero live target in the pair's own control rows = UNMEASURED, never a pass.
+ (b) CELL ATTRIBUTION: a conversion counts only if the candidate strict-PASSES where its matched-seed
+     control strict-failed on B-ex6-05 AND the candidate row carries contour:v51_b_echo_restore.
+ (c) GUARDS: ZERO v51 events in any control arm; ZERO v51 events on tasks other than B-ex6-05 (the
+     coverage census says the grammar cannot match, so a fire elsewhere = grammar regression = close
+     the stamp); ZERO candidate strict-fails on B-ex6-05 where the control passed (the repair only
+     rewrites when the answer is NOT prompt-equal, so a P->F cell there is a code bug, close the
+     stamp); every non-target cell flip must be event-less and within the published seed-noise floor;
+     frozen-band parity (zero 2.30-32/34-config/36/38/41/42/44 events in either arm); adopted-family
+     parity (v47 C set trigger, v48 K enum, v243 loop draws, 2.39/2.40 J, 2.35 B event census
+     identical within seed noise); stall protocol (engine_stalled rows excluded, abort above 25% of
+     the last 20); auth preflight via the exact launched key file; prefill in the healthy band.
+ (d) RESOLUTION: the target pool is 1 task x 3 seeds = 3 cells, so the verdict is CELL-LEVEL by
+     construction; the 77-cell arm means are published with the exact pooled sign test as context
+     only, and a delta under ~2 cells at three seeds is UNRESOLVABLE and never quoted as the reason.
+     ADOPT 0.0.2.51 iff (a) holds, >=1 evented conversion, and all guards clean. Otherwise freeze
+     B_ECHO_RESTORE to `STAMP_REVISION == (2, 51)` and publish the negative with win-level detail.
+ENERGY: separate sampler unit, one fresh csv gpu-power-p248.csv (2 Hz serve-board power), per-arm
+-start.epoch/-end.epoch; the mechanism is zero-token by construction, so extra Wh is attributed
+only if the per-arm medians move beyond run-to-run noise; state the sign test exactly.
+STACK for every u* row: bank v6.2 ws copy (field identity asserted by the builder), scorer contract
+v6.2 `c8c0c7dd114dfc32`, seed protocol sp1 (`gseed = sha256(task|rep)[:8] % 999983`,
+scripts/plan_reps.py, reps 34/35/36 — fresh, never used by any pair or probe on this bank;
+cadence/pairs used 16-18/19-21/22-24, bank probes used 28-33), control stamp 0.0.2.48 (adopted
+line, behavior 2.48), candidate stamp 0.0.2.51 (behavior 2.51), box P2005 Basalt
+`qwen3.8-flash-next-iq3_s-basalt`, serial arms, endpoint idle. Harness commit stamped as
+harness_git_sha in all six run records.

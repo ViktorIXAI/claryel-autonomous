@@ -1556,6 +1556,23 @@ A_TABLE_ARITH = STAMP_REVISION in ((2, 33), (2, 38))
 # actually lose (B-ex6-04, B-ex6-06) are outside both grammars — the arm delta contains no on-target
 # cell. NOT adopted; frozen to its own stamp like 2.32/2.33.
 B_FIELD_COMPLETE = STAMP_REVISION == (2, 34)
+# 0.0.2.51: the B ECHO grammar is RE-ARMED as line behavior; the config-fields grammar
+# stays frozen to exactly (2,34). Pair-234 froze both grammars UNMEASURED (zero fires: at
+# that revision the echo guard refused any answer adding cnt_field, so the pair carried no
+# live target cell — PAIR-234-V61.md). The class returned on the published ADOPTED line
+# (bank v6.2, behavior 2.48, arms t48r22/23/24): B-ex6-05 strict-fails 2/3 seeds, every
+# zero the same single mode — the model copies `items` but injects its own per-item
+# `n_tags`, violating the prompt's «Items не меняй», scored `fields_mismatch:items`. The
+# echo grammar rebuilds the whole answer from the prompt's own JSON literal: items
+# verbatim, the declared count recomputed from the literal, the declared drop applied;
+# zero model tokens, reference never read, refuses on every uncertainty (same doctrine
+# as the adopted 2.35 B-table and 2.48 K-fields fixes). Echo only: the config grammar has
+# no live cell on this line (the B-ex6-01 r24 zero is a degenerate `[]` answer that
+# grammar refuses by construction), and B-ex6-04 stays in the published bank-defect
+# queue. Coverage pinned by contract test: over all 77 bank-v6.2 prompts the echo
+# grammar matches EXACTLY one task (B-ex6-05). Event on 2.51+: contour:v51_b_echo_restore
+# (the v234_b_echo_count name belongs to the 2.34 arm bytes and must not be rewritten).
+B_ECHO_RESTORE = STAMP_REVISION >= (2, 51)
 # 0.0.2.35: B markdown-table aggregation — a `*_total` field whose definition in the prompt's own JSON
 # spec is a formula over the prompt's own markdown table columns (including a footnote adjustment that
 # the table itself declares) is recomputed by code from that table. Prompt-grounded only: column names,
@@ -2653,19 +2670,27 @@ def _b_fields_echo(t, text, prompt):
     out[cnt_field] = total
     if all(k in cur and _b_eq(cur[k], v) for k, v in out.items()):
         return text, None
-    return json.dumps(out, ensure_ascii=False), ["v234_b_echo_count"]
+    # Event naming is per-stamp history: the 2.34 arms carry v234_b_echo_count and those published
+    # bytes are immutable; the 2.51+ re-arm emits its own name so pair-248 attribution cannot be
+    # confused with the frozen 2.34 census.
+    return json.dumps(out, ensure_ascii=False), ["v51_b_echo_restore" if B_ECHO_RESTORE else "v234_b_echo_count"]
 
 
 def b_fields_by_code(t, text):
-    """0.0.2.34: recompute B extraction fields from the prompt's own data; refuse whenever unsure."""
-    if not B_FIELD_COMPLETE or not text:
+    """0.0.2.34: recompute B extraction fields from the prompt's own data; refuse whenever unsure.
+
+    0.0.2.51 re-arms ONLY the echo grammar (B_ECHO_RESTORE); the config grammar stays frozen to
+    exactly (2,34) — pair-234 measured it with zero fires and it has no live cell on this line.
+    """
+    if not (B_FIELD_COMPLETE or B_ECHO_RESTORE) or not text:
         return text, None
     prompt = t.get("prompt") or t.get("free_text") or ""
     if not prompt:
         return text, None
-    new, ev = _b_fields_config(t, text, prompt)
-    if ev:
-        return new, ev
+    if B_FIELD_COMPLETE:
+        new, ev = _b_fields_config(t, text, prompt)
+        if ev:
+            return new, ev
     return _b_fields_echo(t, text, prompt)
 
 
@@ -3267,7 +3292,7 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "_".join(ev))
-    if B_FIELD_COMPLETE and cat == "B" and r["text"]:
+    if (B_FIELD_COMPLETE or B_ECHO_RESTORE) and cat == "B" and r["text"]:
         norm, ev = b_fields_by_code(t, r["text"])
         if ev:
             r = dict(r)
@@ -3415,7 +3440,7 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "_".join(ev))
-                    if B_FIELD_COMPLETE and cat == "B" and r["text"]:
+                    if (B_FIELD_COMPLETE or B_ECHO_RESTORE) and cat == "B" and r["text"]:
                         norm, ev = b_fields_by_code(t, r["text"])
                         if ev:
                             r = dict(r)

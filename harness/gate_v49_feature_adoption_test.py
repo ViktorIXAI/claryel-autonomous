@@ -262,7 +262,7 @@ _FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TAB
           "B_FIELD_COMPLETE", "B_TABLE_AGGREGATE", "G4_LOTTERY", "J_MEMBERSHIP_V3",
           "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
           "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR",
-          "C_BEST2_SET", "K_FIELDS_ENUM")
+          "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE")
 _missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
 ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
 _moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
@@ -309,6 +309,24 @@ ck((2, 48) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.48") == (2, 48)
    "the candidate registers a real contour change; the control keeps behavior 2.47")
 ck(g248.C_BEST2_SET is True and g248.D_BEST2_CLAIM is False,
    "2.48 inherits the adopted pair-246 trigger and still refuses the frozen 2.44 one")
+
+# pair-248 (2026-11-07): 0.0.2.51 is the CONTOUR CANDIDATE stamp (B echo restore re-armed).
+# Matrix discipline holds: the tooling release 2.50 moves ZERO flags vs the adopted 2.48 line,
+# and 2.51 = the 2.50 matrix + exactly B_ECHO_RESTORE. The 2.34 config grammar stays frozen:
+# 2.34 keeps B_FIELD_COMPLETE without the new flag, and 2.51 runs the echo WITHOUT 2.34's flag.
+g250 = load("0.0.2.50")
+ck(getattr(g250, "B_ECHO_RESTORE") is False, "the re-arm does NOT ride backwards into the 2.50 tooling release")
+_m250 = [f for f in _FLAGS if getattr(g250, f) != getattr(g248, f)]
+ck(not _m250, "2.50 moves ZERO contour flags vs the adopted 2.48 line (%s)" % _m250)
+g251 = load("0.0.2.51")
+ck(getattr(g251, "B_ECHO_RESTORE") is True, "the candidate flag is ON at 2.51")
+_m251 = [f for f in _FLAGS if getattr(g251, f) != getattr(g250, f) and f != "B_ECHO_RESTORE"]
+ck(not _m251, "2.51 = the 2.50 matrix + exactly B_ECHO_RESTORE (%s)" % _m251)
+ck(g251.B_FIELD_COMPLETE is False and g234.B_FIELD_COMPLETE is True,
+   "the config-fields grammar stays pinned to exactly (2,34) in both directions")
+ck((2, 51) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.51") == (2, 51)
+   and GV.behavior_tuple("0.0.2.50") == (2, 48),
+   "the candidate registers a real contour change; the 2.50 tooling release keeps behavior 2.48")
 
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
