@@ -349,3 +349,21 @@ genuinely hard for everyone on the corrected gold.
     unresolved on the current line: `A-ex6-03` (arithmetic near-miss), `B-ex6-04` (bank defect,
     closed for contour), `C-ex6-02` (biased draw, retry spent), `H-ex6-01/03/04` + `I-ex6-02` +
     `A-ex6-00` (event-less lottery — selection still has no proven trigger there).
+
+## 2026-11-07 22:40 CET addendum (pair-249, bank v6.6): `A-ex6-03` is CLOSED — chronic arithmetic class repaired by code
+
+    The 12:07/21:07 maps listed `A-ex6-03` as the surviving "arithmetic near-miss": on the adopted
+    2.51 line it strict-failed 2/3 seeds with `fields_mismatch` (cap used as the value, deduction
+    bound to the wrong base) and carried ZERO a-family contour events — the four adopted 2.27
+    grammars never reached the printed percent-chain shape (22% cap 6100; 19% of gross-minus-chain;
+    net formula). The bank-side defect was already repaired in the v6.2 re-gold (gold now equals
+    the printed rules: 2090.0/1179.9/6230.1), so the loss was purely model-side. Contour
+    `0.0.2.52` recomputes the chain from the prompt's own clauses + formula (fail-closed grammar,
+    key set never changed, zero model tokens): pair-249 converted BOTH live control failures 2/2
+    with `contour:v52_a_percent_chain` at byte-identical ptok/ctok (237/80, 237/76), the third
+    seed a proven no-op, guards clean, A category 24/27 -> 27/27 (`PAIR-249-V66.md`). The cell
+    moves to REPAIRED. First v6.6 draws of the adopted line; remaining unresolved: `C-ex6-02`
+    (3/3 in BOTH arms — the v47 set trigger is published-spent, so the derivability audit decides
+    bank correction vs contour closure before any new contour claim targets it), `B-ex6-03`,
+    `C-ex6-01`, `I-ex6-01`, `I-ex6-04` (1/3 each), `H-ex6-01/03/04` + `I-ex6-02` + `A-ex6-00`
+    (event-less lottery — selection still has no proven trigger there), loop pool = lottery band.

@@ -1,0 +1,12 @@
+pair-249 per-arm serve-board energy windows (gpu-power-p249.csv, 2 Hz ssh nvidia-smi on the
+endpoint, separate systemd-run unit parb-p249sampler, fresh csv for this pair, 784 samples
+spanning 1794085240 .. 1794087208 epoch = 1968 s, gaps are skipped ssh failures):
+v51r37 386s 10.00Wh | v52r37 259s 6.49Wh
+v51r38 229s  5.39Wh | v52r38 230s 5.31Wh
+v51r39 250s  6.27Wh | v52r39 234s 5.26Wh
+side totals: control (0.0.2.51) 21.66 Wh, candidate (0.0.2.52) 17.06 Wh (-21.2%).
+The control side is dominated by rep37 (386 s wall, mean 93.2 W) whose D-loop draws ran long
+(one row max 39.1 s); the two converted cells (A-ex6-03 r38/r39) consumed BYTE-IDENTICAL
+ptok/ctok (237/80, 237/76) at 1.16 s vs 1.18 s and 1.08 s vs 1.10 s - zero extra model calls,
+the repair is post-hoc code. Mechanism cost: zero on target by construction; the side
+difference is run-to-run wall variance, not an anti-cost claim.

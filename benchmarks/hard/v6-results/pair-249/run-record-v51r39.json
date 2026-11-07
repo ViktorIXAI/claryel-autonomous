@@ -1,0 +1,40 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "[REDACTED]",
+  "contour_version": "0.0.2.51",
+  "contour_behavior": "2.51",
+  "contour_changed_at_this_release": true,
+  "git_sha": "736b663409feacbecca9084727f0c75bc3e03e16",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "paired contour 0.0.2.51 seed 39 on bank v6.6 (2.52 = A percent-chain arithmetic: chain recomputed by code from the prompt's own cap/floor clauses + formula, key set never changed, zero model tokens, control 0.0.2.51 = adopted line after pair-248; 2.30-2.34/2.36/2.38/2.41/2.42/2.44 frozen) ",
+  "stack": {
+    "bank_version": "v6.6",
+    "bank_version_source": "marker",
+    "bank_sha16": "590503cf1701a6ce",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.51",
+    "contour_behavior": "2.51",
+    "harness_git_sha": "736b663409feacbecca9084727f0c75bc3e03e16"
+  }
+}

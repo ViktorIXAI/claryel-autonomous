@@ -24,7 +24,13 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.51` — ADOPTED on 2026-11-07 after pair-248 (the B echo restore — answer
+Contour gate line: `0.0.2.52` — ADOPTED on 2026-11-07 after pair-249 (the A percent-chain
+arithmetic — fifth branch of the 2.27 family: when a task prints its own percent chain (rate
+clauses with cap/floor plus one formula), the contour recomputes the chain by code from the
+prompt text and replaces only the model's numbers — the chronic `A-ex6-03` strict-failed 2/3
+control seeds and both converted with the event on the row at byte-identical tokens, zero extra
+model calls, A pool 24/27 -> 27/27 on bank v6.6, zero guard violations; `PAIR-249-V66.md`).
+Before it, `0.0.2.51` was ADOPTED after pair-248 (the B echo restore — answer
 rebuilt from the prompt's own JSON literal when the task says "same object, add a computed field,
 don't touch items" — re-armed from the pair-234 grammar that was frozen UNMEASURED at (2,34) and
 came back live on the adopted line itself: `B-ex6-05` strict-failed 2/3 seeds because the model

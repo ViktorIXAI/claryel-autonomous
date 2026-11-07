@@ -2178,3 +2178,33 @@ ADOPT 0.0.2.52 iff (a) + >=1 evented conversion + all guards clean; otherwise fr
 `STAMP_REVISION == (2, 52)` and publish the negative with win-level detail. Energy: new sampler CSV
 gpu-power-p249.csv, per-arm epoch windows. Cadence counter: pair-248 (2.51) and this pair (2.52) are
 the 1st/2nd measured stamps since cadence-249 — the four-arm re-run stays due after the 5th, not forced.
+
+## 2026-11-07 22:40 CET — PAIR-249 VERDICT: contour 0.0.2.52 MEASURED and ADOPTED — line moves 2.51 -> 2.52
+
+Arms v51r37/38/39 vs v52r37/38/39 on the WORKING bank v6.6 (published `5c86252b2ef2f422`, ws copy
+`590503cf1701a6ce`, canonical diff []), contract v6.2 `c8c0c7dd114dfc32`, sp1 reps 37/38/39
+(231/231 plan rows audited — plans + `seed-protocol.md` published), harness `736b6634` in all six
+run records, idle P2005, 6 x 77 rows exit=0, zero blank joins, zero stalls.
+(a) LIVE TARGET MET: control strict-fails A-ex6-03 in reps 38 AND 39 (published base rate ~2/3).
+(b) TWO evented conversions: (A-ex6-03, rep38) `{"social": 6100.0, "tax": 427.5, "net": 2972.5}`
+(cap-as-value, chain order lost) -> gold triple, and (A-ex6-03, rep39) `tax 1370.9` (deduction on
+the wrong base) -> gold triple — both with `contour:v52_a_percent_chain` on the row at BYTE-IDENTICAL
+ptok/ctok (237/80, 237/76) and model_calls 2/2. The recomputed triple equals the dry-run gold
+pinned at pre-registration (2090.0/1179.9/6230.1) — the prediction converted 2/2 on live bytes.
+(c) Guards all clean: v52 event fired exactly 2x, zero in control, zero outside A-ex6-03; zero
+candidate P->F on target; frozen bands (2.30-32/34-config/36/38/41/42/44) ZERO in all six arms;
+56-name event census differs only inside adopted families (v243 4->6 fired / 4->4 won, v47 8->8 /
+3->3, v51 echo 2->2, single-cell J/H/F drifts); rep37 candidate is a proven live no-op (model
+already correct, zero fires on passes).
+(d) Pool context only: 218/231 vs 221/231, per-rep (73/72, 74/74, 71/75), pooled 6W/3L p=0.5078;
+the 7 non-target flips are event-less/adopted-path draws (3 loop P->F inside the published D
+lottery band — loop 18/18 ctrl vs 15/18 cand, a low draw unreachable to a cat=="A" repair — and
+4 F->P: A-ex6-00, B-ex6-04, C-ex6-03, I-ex6-01). Category table: A 24/27 -> 27/27 is the only
+evented move. Energy 21.66 vs 17.06 Wh — control-side wall variance (rep37 386 s), mechanism cost
+zero on target by construction.
+Consequences: A-ex6-03 REPAIRED (chronic map closes its biggest cell); A category strict-clean on
+first v6.6 draws; remaining adopted-line losses: C-ex6-02 3/3 BOTH sides (v47 spent — bank-side
+question now, derivability audit before any contour claim), B-ex6-03/C-ex6-01/I-ex6-01/I-ex6-04
+1/3 each, loop pool lottery band. Cadence counter 2/5. WS-GENERATED.v66full pin restamp
+(bank-version.json line) committed with this verdict — the ws built at 736b6634 after the
+registration commit; verify_manifest --v6 PASS. Full report `PAIR-249-V66.md`.
