@@ -226,9 +226,11 @@ ck(not g243.CONTRACT_GUARANTEE and not g243.SELFCONSIST and not g243.C_RULE_GROU
    "every frozen band (2.30/2.31/2.41) stays off at 2.43")
 
 # pair-244 ADOPTED D_BEST2_BANNED (line moves to 0.0.2.43); pair-245's candidate 2.44 (loop
-# best-of-2 on the false_completion_claim family) must therefore INHERIT the 2.43 trigger as line
-# behavior while adding only its own change; the 2.42 policy tail and every frozen band stay off.
-# Full wiring: gate_v58.
+# best-of-2 on the false_completion_claim family) INHERITED the 2.43 trigger as line behavior.
+# pair-245 verdict (pre-registered): UNMEASURED — zero control loop rows drew the claim note —
+# so 2.44 is NOT adopted and its flag is frozen to exactly (2,44): it must be ON only at its own
+# stamp and the 2.43 line stays unchanged. The 2.42 policy tail and every frozen band stay off.
+# Full wiring: gate_v58; the freeze mirror: gate_v58's per-stamp matrix.
 g244 = load("0.0.2.44")
 ck(not g240c.D_BEST2_CLAIM and not g241c.D_BEST2_CLAIM and not g242f.D_BEST2_CLAIM
    and not g243.D_BEST2_CLAIM,

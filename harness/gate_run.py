@@ -293,7 +293,9 @@ D_BEST2_BANNED_SEED = 8117
 # 2.43 banned_attempted) matches this note, so the family has no selection path at all. Same
 # monotone best-of-2 recipe: the third note family, a THIRD seed offset so the retry re-draws,
 # still exactly one retry per task (precedence banned > claim > 2.11 in offset AND event naming).
-D_BEST2_CLAIM = contour_at_least(2, 44)
+# pair-245 measured the pair UNMEASURED (rule (a): zero control loop rows drew the claim note),
+# so per the pre-registered rule the flag is frozen to exactly (2,44) — the pin sits with the
+# other frozen flags below, where CONTOUR_REVISION exists. Notes/seed constants stay here.
 D_BEST2_CLAIM_NOTES = ("false_completion_claim",)
 D_BEST2_CLAIM_SEED = 12289
 NUDGE = {
@@ -1542,6 +1544,18 @@ C_RULE_GROUND = CONTOUR_REVISION == (2, 41)
 # nudges (the 2.11 D_BEST2 family, trigger-gap noted in PAIR-243-V61.md).
 LOOP_POLICY_REGROUND = CONTOUR_REVISION == (2, 42)
 LOOP_POLICY_TAG = "ПОЛИТИКА ЗАДАЧИ (дословно из условия): "
+
+# 0.0.2.44 (pair-245, pre-registered REVIEW-INBOX 2026-11-07 03:58 CET + run_pair245.sh header,
+# before any q* row): loop best-of-2 SELECTION on the `false_completion_claim` note family was
+# UNMEASURED by rule (a) — ZERO control (q43) loop rows drew the claim note in three seeds (the
+# family's live rate on this line is 0/18, its published base rate 13/504), so the pair carried no
+# live on-target cell (fourth zero-opportunity pair after 233/238/242). NOT a measured loss, and
+# UNMEASURED is never a pass: NOT adopted, frozen to exactly this stamp — contour_at_least would
+# smuggle an unproven trigger into every future arm and poison the adoption rule. Live wiring IS
+# proven: the candidate's own claim draw at an already-passing cell (D-ex6-l3 seed 2) fired the
+# third offset and won with zero claim notes in the adopted trajectory; zero v244 events outside
+# loop rows, zero loop P->F, zero frozen-band events, adopted-2.43 parity intact (PAIR-245-V61.md).
+D_BEST2_CLAIM = CONTOUR_REVISION == (2, 44)
 
 
 def loop_policy_sentence(t):
