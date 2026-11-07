@@ -1,0 +1,6 @@
+17:38:41 PGR: release 0.0.2.50, contour behavior 2.48 (this release changed measurement or reporting only, not the contour)
+17:38:41 PGR: planned tasks 1, previously done 0, limit 14400 s
+17:38:41 PGR: stack bank=919517b75a614d52(marker) version=v6.5 scorer=v6.2(c8c0c7dd114dfc32) seeds=sp1
+17:38:41 PGR: run record run-record-p65r32.json; serve health ok; stall policy retry=1 rate=25% window=20
+17:38:43 H H-ex6-01       rep32   c=0.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.8s tok=313  /205  c=0    tps_eff=47.4 unknown_missing,requires_missing:аудит-лог operations
+17:38:43 PGR finished: records 1, duration 2 s, stop reason: none

@@ -243,6 +243,21 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   fix shipped with the correction: the cadence scorer hardcoded its CSV arm label (now derived
   from run records) and now replays loop rows itself. Artifacts `v6-results/cadence-249/`, writeup `CADENCE-249-V64.md`,
   decision record `history/agent-decisions/2026-11-07-cadence249-v64-fair-contour-margin-holds.md`.
+- **Bank v6.5 published as PROVISIONAL (7 Nov, 17:35-17:45 CET)** — closes the second
+  defect from `bank-defect-b04.md`, open since v6.1: H-ex6-01's reference asks
+  `requires: ["аудит-лог operations"]` but the prompt never names the artifact, so a
+  faithful paraphrase is zeroed by the frozen scorer's stem matcher. One scenario
+  sentence added (v6.5 `cd29d6ac94dc3267`, gold byte-identical, `scripts/verify_bank_v65.py`
+  proves the ask becomes `_token_cover`-derivable only after the fix). Paired contour
+  probe at 6 matched seeds: 5/6 vs 5/6 — the cell is a contour-line LOTTERY (the
+  cadence-249 0/3-on-all-arms pattern was seed correlation), so the frozen rules keep
+  v6.5 provisional; the derivability fix stands mechanically. Raw-arm fairness probe
+  exposed DEFECT 2: basalt/codex/grok all 0/3 with every zero `ungrounded_claims` —
+  the `"claims": [утверждения как факт]` field spec invites listing the partner's
+  assertions while the hidden contract demands `[]`; v6.6 queued for that one field.
+  Disclosure: the contour passes this cell via the `v219_h_clear_claims` repair, not
+  model capability. Artifacts `v6-results/bank-probe-65/`, decision record
+  `history/agent-decisions/2026-11-07-bank-v65-provisional-defect2.md`.
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took

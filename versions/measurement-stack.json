@@ -22,6 +22,11 @@
     "sha16": "85a0cd0dd6fa1fab"
    },
    {
+    "file": "benchmarks/hard/bank-hard-v6.5.json",
+    "label": "v6.5 (provisional)",
+    "sha16": "cd29d6ac94dc3267"
+   },
+   {
     "file": "parb-v62-probe/bank.json",
     "label": "bank v6.2 probe-workspace copy",
     "sha16": "d1e8d11df5840dcc"
@@ -89,7 +94,7 @@
    "id": "sp1",
    "definition": "sp1: per-(task,rep) gseed = int(sha256(f'{task}|{rep}')[:8], 16) % 999983 (scripts/plan_reps.py); per-task plan seed = int(sha256(task_id)[:6], 16) (scripts/build_hard_v6_ws.py). Selection retries add a fixed offset per mechanism (2.11 +4096, 2.9/2.36 +8117, 2.43 +8117-loop, 2.44 +12289) so a retry re-draws instead of replaying the losing trajectory."
   },
-  "harness_commit": "42f8e296cdb9cd31d0fca4a30b38ca0e18c7eefe"
+  "harness_commit": "d935895ee47fd43d7571bb4e10f5b688be7928b1"
  },
  "contour": {
   "current_revision": "2.50",
@@ -428,6 +433,324 @@
     },
     "p63r23": {
      "seconds": 2.0
+    }
+   },
+   "bank_attribution": "recorded in the run record",
+   "scorer_contract_attribution": "recorded per row"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/bank-probe-65",
+   "arms": [
+    "p64r28",
+    "p64r29",
+    "p64r30",
+    "p64r31",
+    "p64r32",
+    "p64r33",
+    "p65r28",
+    "p65r29",
+    "p65r30",
+    "p65r31",
+    "p65r32",
+    "p65r33"
+   ],
+   "ledger_rows": 12,
+   "contour_stamp": "0.0.2.50",
+   "contour_behavior": "2.48",
+   "run_records": {
+    "p64r28": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p64r29": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p64r30": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p64r31": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p64r32": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p64r33": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p65r28": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.5",
+      "bank_version_source": "marker",
+      "bank_sha16": "919517b75a614d52",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p65r29": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.5",
+      "bank_version_source": "marker",
+      "bank_sha16": "919517b75a614d52",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p65r30": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.5",
+      "bank_version_source": "marker",
+      "bank_sha16": "919517b75a614d52",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p65r31": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.5",
+      "bank_version_source": "marker",
+      "bank_sha16": "919517b75a614d52",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p65r32": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.5",
+      "bank_version_source": "marker",
+      "bank_sha16": "919517b75a614d52",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    },
+    "p65r33": {
+     "contour_stamp": "0.0.2.50",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1",
+     "stack": {
+      "bank_version": "v6.5",
+      "bank_version_source": "marker",
+      "bank_sha16": "919517b75a614d52",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.50",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "13c6fc3828d373facd0cfb0b0cd2c8f2829fe5f1"
+     }
+    }
+   },
+   "run_record_has_stack": true,
+   "energy_windows_seconds": {
+    "fair": {
+     "seconds": 246.0
+    },
+    "p64r31": {
+     "seconds": 9.0
+    },
+    "p65r28": {
+     "seconds": 5.0
+    },
+    "p64r30": {
+     "seconds": 3.0
+    },
+    "p64r32": {
+     "seconds": 3.0
+    },
+    "p64r29": {
+     "seconds": 4.0
+    },
+    "p64r33": {
+     "seconds": 4.0
+    },
+    "p64r28": {
+     "seconds": 6.0
+    },
+    "p65r32": {
+     "seconds": 2.0
+    },
+    "p65r31": {
+     "seconds": 4.0
+    },
+    "p65r33": {
+     "seconds": 3.0
+    },
+    "p65r29": {
+     "seconds": 3.0
+    },
+    "p65r30": {
+     "seconds": 4.0
     }
    },
    "bank_attribution": "recorded in the run record",

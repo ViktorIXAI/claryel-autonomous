@@ -59,3 +59,16 @@ v6.4 and v6.5 — its scanner does not cover H `ask` items, so the mechanical ce
 blind to this defect class. The scanner is not amended mid-probe; the coverage gap is
 queued as a tooling follow-up (a scanner change would silently move the census number
 that the changelog chain 39→38→37 pins).
+
+## Appendix (same day, host clock 17:45 CET) — probe results, applied under the frozen rules
+
+- Contour pair reps 28-33 (`v6-results/bank-probe-65/PROBE-ROWS.md`): v6.4 5/6, v6.5
+  5/6; rule (i) unmet (control passed reps 28-30 outright), amended rule (a) violated
+  by one v6.5-only lottery draw (degenerate empty-template answer). v6.5 stays
+  `provisional`. No contour effect claimed either direction; no contour hypothesis
+  opened on the rep-32 draw (bytes rule out the over-priming wording of the rule).
+- Raw fairness reps 28-30 (`fair-rows.md`): basalt/codex/grok ALL 0/3, every zero
+  `ungrounded_claims` -> DEFECT 2: the `claims` field spec invites listing assertions
+  while the contract demands `[]`. v6.6 queued for that one field with a raw lift
+  probe. The H-ex6-01 contour pass rate is disclosed as dependent on the
+  `v219_h_clear_claims` repair.

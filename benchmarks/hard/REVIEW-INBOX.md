@@ -1891,3 +1891,33 @@ AMENDED rule (frozen here, before any further row; replaces nothing already writ
   opened (the fix wording may overprime).
 - Raw fairness baseline for the delta: cadence-249 published basalt/codex/grok
   H-ex6-01 0/3 on bank v6.4 at reps 25/26/27 (different seeds - stated as caveat).
+
+## 2026-11-07 17:45 CET — bank v6.5 probe FINAL verdict: PROVISIONAL (rules applied as written); defect 2 (claims-field spec) exposed and queued for v6.6
+All rows exist and are published under `v6-results/bank-probe-65/` (12 contour legs,
+9 fair rows, launchers, epochs, run records).
+Contour pair (PROBE-ROWS.md): reps 28-30 gave control v6.4 3/3 PASS -> frozen rule (i)
+NOT met; amended rule (17:44 entry, before the rep-31-33 rows) pooled reps 28-33:
+v6.4 5/6 vs v6.5 5/6, one flip each direction. Cell-level attribution from answer
+bytes: the v6.5-only loss (rep32) is the degenerate `unknown:null,requires:[]` template
+collapse the v6.4 side also produces (cadence-249 r25) - lottery, NOT the "over-priming"
+mechanism the rule named, so NO v6.6 contour hypothesis is opened on it; the v6.4-only
+loss (rep33) is the `_asserts_completion` hedge-window edge (scorer-contract queue).
+Rule (a) is still mechanically violated -> v6.5 stays `provisional` in BANK-VERSIONS.json
+(no registry change). No measured contour-line effect; the derivability fix stands
+mechanically (verify_bank_v65: ask derivable only after the fix).
+Fairness (fair-rows.md, rule (ii)): FAILED - bare basalt, ChatGPT-codex, Grok all 0/3
+strict at reps 28/29/30 on the v6.5 subset (subset sha16 cbe5d7e793a2182e, frozen
+contract v6.2), and EVERY zero is `ungrounded_claims`: all three brains fill `claims`
+with the partner's assertions because the field spec `"claims": [утверждения как факт]`
+invites listing assertions, while the hidden contract demands `[]`. Three independent
+brains, one identical mode -> prompt-spec-vs-hidden-test contradiction = DEFECT 2,
+queued for v6.6 (one field, wording frozen before rows, gold untouched, raw lift is the
+promotion signature). Honest disclosure: the contour's H-ex6-01 pass rate on the current
+line rides on `v219_h_clear_claims` scaffolding - the contour clears what the raw arms
+fill; that is repair value, not model capability, and it is why defect 2 must be fixed
+in the bank, not farmed by more contour nudges.
+Follow-up queue after this probe: (1) v6.6 claims-field wording + raw fairness re-probe;
+(2) optional reps 34+ paired extension only if a rate claim for v6.5 is ever needed
+(current verdict honestly says: unmeasurable at 6 paired seeds); (3) hedge-window
+observation for the scorer-contract queue; (4) derivability-scanner coverage for H ask
+atoms (census chain pinned at 37 until the scanner itself gets a versioned release).
