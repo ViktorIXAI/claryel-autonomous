@@ -148,7 +148,10 @@ def dir_block(name, full):
                      "stack": r.get("stack")}
     ledgers = sorted(glob.glob(os.path.join(full, "ledger-*.jsonl")))
     rows = 0
-    stamp = behavior = None
+    # a pair directory legitimately holds TWO stamps (control + candidate); the table must name
+    # every distinct one - showing only the first ledger's stamp silently hid the candidate arm
+    # (measured 2026-11-07: pair-247/pair-248 rows read as if 6 arms shared one stamp).
+    stamps, behaviors = set(), set()
     for p in ledgers:
         for ln in open(p, encoding="utf-8"):
             try:
@@ -156,8 +159,12 @@ def dir_block(name, full):
             except ValueError:
                 continue
             rows += 1
-            stamp = stamp or r.get("contour_version")
-            behavior = behavior or r.get("contour_behavior")
+            if r.get("contour_version"):
+                stamps.add(r["contour_version"])
+            if r.get("contour_behavior"):
+                behaviors.add(r["contour_behavior"])
+    stamp = " + ".join(sorted(stamps)) or None
+    behavior = " + ".join(sorted(behaviors)) or None
     epochs = {}
     for p in glob.glob(os.path.join(full, "*-start.epoch")):
         key = os.path.basename(p)[:-len("-start.epoch")]

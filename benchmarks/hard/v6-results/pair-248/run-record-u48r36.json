@@ -1,0 +1,40 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "[REDACTED]",
+  "contour_version": "0.0.2.48",
+  "contour_behavior": "2.48",
+  "contour_changed_at_this_release": true,
+  "git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "paired contour 0.0.2.48 seed 36 on bank v6.2 (2.51 = B echo restore re-armed: items rebuilt verbatim from the prompt's own JSON literal, count recomputed, declared drop applied, zero model tokens, control 0.0.2.48 = adopted line after pair-247; 2.30-2.34/2.36/2.38/2.41/2.42/2.44 frozen) ",
+  "stack": {
+    "bank_version": "v6.2",
+    "bank_version_source": "marker",
+    "bank_sha16": "d1e8d11df5840dcc",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.48",
+    "contour_behavior": "2.48",
+    "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f"
+  }
+}

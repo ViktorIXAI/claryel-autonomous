@@ -24,7 +24,14 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.48` — ADOPTED on 2026-11-07 after pair-247 (K fields-gate key set taken
+Contour gate line: `0.0.2.51` — ADOPTED on 2026-11-07 after pair-248 (the B echo restore — answer
+rebuilt from the prompt's own JSON literal when the task says "same object, add a computed field,
+don't touch items" — re-armed from the pair-234 grammar that was frozen UNMEASURED at (2,34) and
+came back live on the adopted line itself: `B-ex6-05` strict-failed 2/3 seeds because the model
+injected its own per-item `n_tags` against «Items не меняй»; 1/3 evented conversion (the other two
+seeds the control already passed), answer byte-equal to the prompt literal, zero extra model calls,
+zero guard violations, coverage census exactly 1/77; `PAIR-248-V62.md`). Before it, `0.0.2.48` was
+adopted after pair-247 (K fields-gate key set taken
 from the task's own `Поля:` enumeration instead of the instruction's placeholder token `FIELD`; the
 target cell `K-ex6-03` had been failing 9/9 on our own line because the contour hint itself named the
 placeholder key — 3/3 evented conversions, K pool 9/12 -> 12/12, zero guard violations, zero extra

@@ -2095,3 +2095,28 @@ cadence/pairs used 16-18/19-21/22-24, bank probes used 28-33), control stamp 0.0
 line, behavior 2.48), candidate stamp 0.0.2.51 (behavior 2.51), box P2005 Basalt
 `qwen3.8-flash-next-iq3_s-basalt`, serial arms, endpoint idle. Harness commit stamped as
 harness_git_sha in all six run records.
+
+## 2026-11-07 21:07 CET — PAIR-248 VERDICT: 0.0.2.51 MEASURED and ADOPTED — line moves 2.48 -> 2.51
+
+Rule applied exactly as frozen at 20:28 CET above. Arms u48r34/u51r34/u48r35/u51r35/u48r36/u51r36,
+bank v6.2 `3c866ea7daae611c` (ws copy `d1e8d11df5840dcc`), contract v6.2 `c8c0c7dd114dfc32`,
+sp1 reps 34/35/36, harness `7186be795a7e` in all six run records, idle endpoint, zero stalls,
+zero blank joined answers, per-arm medians 1.32-1.38 s/task. (a) live target MET: u48r35 strict-
+fails B-ex6-05, c=0.0, single note `fields_mismatch:items` — per-item `n_tags` injected against
+«Items не меняй», the published mode. (b) exactly ONE evented conversion: (B-ex6-05, rep35)
+control c=0.0 -> candidate c=1.0/format_ok with `contour:v51_b_echo_restore` on the row; the
+candidate answer is byte-equal to the prompt's own literal; ptok/ctok IDENTICAL to control
+(264/71), 1.44 s vs 1.61 s — zero extra model calls. (c) guards clean: the event fired exactly
+2 times in the whole pair (both candidate arms, both B-ex6-05 — rep34 model mutated, repair fired,
+PASS; rep36 already-equal, no fire, PASS both sides), ZERO in control, ZERO outside the 1/77
+census, ZERO candidate B-ex6-05 P->F, frozen bands silent, the only candidate-only non-v51 events
+are single-shot differences inside already-adopted families (2x v243 win, v224, v228, v222, one
+ladder step). Pool context ONLY: 210/231 -> 214/231 (per-rep 68/69, 70/72, 72/73), pooled 7W/3L
+exact sign p=0.3438, 10 flips with 9 event-less — 7 inside the loop pool (11/18 -> 16/18),
+structurally unreachable to a cat=="B" repair; nothing concluded from it. Energy 20.24 vs 21.87 Wh,
++8% tracks candidate wall length (874 s vs 819 s, D-loop draws), not the mechanism (401 vs 405
+model calls). B_ECHO_RESTORE stays `>= (2,51)`, inherits as line behavior; the 2.34 config grammar
+stays frozen. Artifacts published: `benchmarks/hard/v6-results/PAIR-248-V62.md` + `pair-248/`
+(arms, epochs, energy-windows.txt, sanitized launcher); decision record
+`history/agent-decisions/2026-11-07-pair248-b-echo-restore-adopted-line-moves-to-251.md`. Cadence:
+first measured contour stamp since cadence-249; next four-arm re-run due after the 5th.

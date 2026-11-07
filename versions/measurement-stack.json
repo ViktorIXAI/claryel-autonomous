@@ -99,7 +99,7 @@
    "id": "sp1",
    "definition": "sp1: per-(task,rep) gseed = int(sha256(f'{task}|{rep}')[:8], 16) % 999983 (scripts/plan_reps.py); per-task plan seed = int(sha256(task_id)[:6], 16) (scripts/build_hard_v6_ws.py). Selection retries add a fixed offset per mechanism (2.11 +4096, 2.9/2.36 +8117, 2.43 +8117-loop, 2.44 +12289) so a retry re-draws instead of replaying the losing trajectory."
   },
-  "harness_commit": "5eb1c1324d94af251660be94a8860eb7d2d72214",
+  "harness_commit": "7f630d408e99d53c98d224a658b6a943953e1a9e",
   "gold_audit": [
    {
     "id": "audit-v1",
@@ -118,10 +118,10 @@
   ]
  },
  "contour": {
-  "current_revision": "2.50",
-  "current_stamp": "0.0.2.50",
-  "behavior_at_current": "2.48",
-  "contour_changed_at_current_release": false,
+  "current_revision": "2.51",
+  "current_stamp": "0.0.2.51",
+  "behavior_at_current": "2.51",
+  "contour_changed_at_current_release": true,
   "registered_features": [
    "1.7",
    "1.8",
@@ -167,7 +167,8 @@
    "2.43",
    "2.44",
    "2.47",
-   "2.48"
+   "2.48",
+   "2.51"
   ],
   "adopted_line_features": [
    "1.7",
@@ -204,7 +205,8 @@
    "2.40",
    "2.43",
    "2.47",
-   "2.48"
+   "2.48",
+   "2.51"
   ],
   "frozen_to_own_stamp": {
    "2.30": "contract guarantee (shape re-ask/salvage) — MEASURED NEGATIVE",
@@ -1380,8 +1382,8 @@
     "kb00218"
    ],
    "ledger_rows": 8,
-   "contour_stamp": "0.0.2.17",
-   "contour_behavior": "2.17",
+   "contour_stamp": "0.0.2.17 + 0.0.2.18",
+   "contour_behavior": "2.17 + 2.18",
    "run_records": {},
    "run_record_has_stack": false,
    "energy_windows_seconds": {},
@@ -1394,8 +1396,8 @@
     "loop216"
    ],
    "ledger_rows": 12,
-   "contour_stamp": "0.0.2.15",
-   "contour_behavior": "2.15",
+   "contour_stamp": "0.0.2.15 + 0.0.2.16",
+   "contour_behavior": "2.15 + 2.16",
    "run_records": {
     "loop216": {
      "contour_stamp": "0.0.2.16",
@@ -1423,8 +1425,8 @@
     "c30r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.29",
-   "contour_behavior": "2.28",
+   "contour_stamp": "0.0.2.29 + 0.0.2.30",
+   "contour_behavior": "2.28 + 2.30",
    "run_records": {
     "c29r0": {
      "contour_stamp": "0.0.2.29",
@@ -1497,8 +1499,8 @@
     "d31r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.29",
-   "contour_behavior": "2.29",
+   "contour_stamp": "0.0.2.29 + 0.0.2.31",
+   "contour_behavior": "2.29 + 2.31",
    "run_records": {
     "d29r0": {
      "contour_stamp": "0.0.2.29",
@@ -1571,8 +1573,8 @@
     "e32r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.29",
-   "contour_behavior": "2.29",
+   "contour_stamp": "0.0.2.29 + 0.0.2.32",
+   "contour_behavior": "2.29 + 2.32",
    "run_records": {
     "e29r0": {
      "contour_stamp": "0.0.2.29",
@@ -1645,8 +1647,8 @@
     "f33r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.29",
-   "contour_behavior": "2.29",
+   "contour_stamp": "0.0.2.29 + 0.0.2.33",
+   "contour_behavior": "2.29 + 2.33",
    "run_records": {
     "f29r0": {
      "contour_stamp": "0.0.2.29",
@@ -1719,8 +1721,8 @@
     "g34r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.29",
-   "contour_behavior": "2.29",
+   "contour_stamp": "0.0.2.29 + 0.0.2.34",
+   "contour_behavior": "2.29 + 2.34",
    "run_records": {
     "g29r0": {
      "contour_stamp": "0.0.2.29",
@@ -1793,8 +1795,8 @@
     "h35r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.29",
-   "contour_behavior": "2.29",
+   "contour_stamp": "0.0.2.29 + 0.0.2.35",
+   "contour_behavior": "2.29 + 2.35",
    "run_records": {
     "h29r0": {
      "contour_stamp": "0.0.2.29",
@@ -1867,8 +1869,8 @@
     "i36r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.29",
-   "contour_behavior": "2.29",
+   "contour_stamp": "0.0.2.29 + 0.0.2.36",
+   "contour_behavior": "2.29 + 2.36",
    "run_records": {
     "i29r0": {
      "contour_stamp": "0.0.2.29",
@@ -1941,8 +1943,8 @@
     "j37r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.29",
-   "contour_behavior": "2.29",
+   "contour_stamp": "0.0.2.29 + 0.0.2.37",
+   "contour_behavior": "2.29 + 2.37",
    "run_records": {
     "j29r0": {
      "contour_stamp": "0.0.2.29",
@@ -2015,8 +2017,8 @@
     "k38r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.37",
-   "contour_behavior": "2.37",
+   "contour_stamp": "0.0.2.37 + 0.0.2.38",
+   "contour_behavior": "2.37 + 2.38",
    "run_records": {
     "k37r0": {
      "contour_stamp": "0.0.2.37",
@@ -2089,8 +2091,8 @@
     "l39r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.37",
-   "contour_behavior": "2.37",
+   "contour_stamp": "0.0.2.37 + 0.0.2.39",
+   "contour_behavior": "2.37 + 2.39",
    "run_records": {
     "l37r0": {
      "contour_stamp": "0.0.2.37",
@@ -2163,8 +2165,8 @@
     "m40r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.39",
-   "contour_behavior": "2.39",
+   "contour_stamp": "0.0.2.39 + 0.0.2.40",
+   "contour_behavior": "2.39 + 2.40",
    "run_records": {
     "m39r0": {
      "contour_stamp": "0.0.2.39",
@@ -2237,8 +2239,8 @@
     "n41r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.40",
-   "contour_behavior": "2.40",
+   "contour_stamp": "0.0.2.40 + 0.0.2.41",
+   "contour_behavior": "2.40 + 2.41",
    "run_records": {
     "n40r0": {
      "contour_stamp": "0.0.2.40",
@@ -2311,8 +2313,8 @@
     "o42r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.40",
-   "contour_behavior": "2.40",
+   "contour_stamp": "0.0.2.40 + 0.0.2.42",
+   "contour_behavior": "2.40 + 2.42",
    "run_records": {
     "o40r0": {
      "contour_stamp": "0.0.2.40",
@@ -2385,8 +2387,8 @@
     "p43r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.40",
-   "contour_behavior": "2.40",
+   "contour_stamp": "0.0.2.40 + 0.0.2.43",
+   "contour_behavior": "2.40 + 2.43",
    "run_records": {
     "p40r0": {
      "contour_stamp": "0.0.2.40",
@@ -2459,8 +2461,8 @@
     "q44r2"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.43",
-   "contour_behavior": "2.43",
+   "contour_stamp": "0.0.2.43 + 0.0.2.44",
+   "contour_behavior": "2.43 + 2.44",
    "run_records": {
     "q43r0": {
      "contour_stamp": "0.0.2.43",
@@ -2533,8 +2535,8 @@
     "s47r21"
    ],
    "ledger_rows": 462,
-   "contour_stamp": "0.0.2.46",
-   "contour_behavior": "2.44",
+   "contour_stamp": "0.0.2.46 + 0.0.2.47",
+   "contour_behavior": "2.44 + 2.47",
    "run_records": {
     "s46r19": {
      "contour_stamp": "0.0.2.46",
@@ -2673,8 +2675,8 @@
     "t48r24"
    ],
    "ledger_rows": 464,
-   "contour_stamp": "0.0.2.48",
-   "contour_behavior": "2.48",
+   "contour_stamp": "0.0.2.47 + 0.0.2.48",
+   "contour_behavior": "2.47 + 2.48",
    "run_records": {
     "t47r22": {
      "contour_stamp": "0.0.2.47",
@@ -2799,6 +2801,171 @@
    },
    "run_record_has_stack": true,
    "energy_windows_seconds": {},
+   "bank_attribution": "recorded in the run record",
+   "scorer_contract_attribution": "recorded per row"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-248",
+   "arms": [
+    "u48r34",
+    "u48r35",
+    "u48r36",
+    "u51r34",
+    "u51r35",
+    "u51r36"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.48 + 0.0.2.51",
+   "contour_behavior": "2.48 + 2.51",
+   "run_records": {
+    "u48r34": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f",
+     "stack": {
+      "bank_version": "v6.2",
+      "bank_version_source": "marker",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f"
+     }
+    },
+    "u48r35": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f",
+     "stack": {
+      "bank_version": "v6.2",
+      "bank_version_source": "marker",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f"
+     }
+    },
+    "u48r36": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f",
+     "stack": {
+      "bank_version": "v6.2",
+      "bank_version_source": "marker",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f"
+     }
+    },
+    "u51r34": {
+     "contour_stamp": "0.0.2.51",
+     "contour_behavior": "2.51",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f",
+     "stack": {
+      "bank_version": "v6.2",
+      "bank_version_source": "marker",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.51",
+      "contour_behavior": "2.51",
+      "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f"
+     }
+    },
+    "u51r35": {
+     "contour_stamp": "0.0.2.51",
+     "contour_behavior": "2.51",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f",
+     "stack": {
+      "bank_version": "v6.2",
+      "bank_version_source": "marker",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.51",
+      "contour_behavior": "2.51",
+      "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f"
+     }
+    },
+    "u51r36": {
+     "contour_stamp": "0.0.2.51",
+     "contour_behavior": "2.51",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f",
+     "stack": {
+      "bank_version": "v6.2",
+      "bank_version_source": "marker",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.51",
+      "contour_behavior": "2.51",
+      "harness_git_sha": "7186be795a7e7991922e2dcc6e811d0fbac87c2f"
+     }
+    }
+   },
+   "run_record_has_stack": true,
+   "energy_windows_seconds": {
+    "u51r36": {
+     "seconds": 300.0
+    },
+    "u48r34": {
+     "seconds": 295.0
+    },
+    "u48r36": {
+     "seconds": 259.0
+    },
+    "u51r35": {
+     "seconds": 280.0
+    },
+    "u48r35": {
+     "seconds": 265.0
+    },
+    "u51r34": {
+     "seconds": 294.0
+    }
+   },
    "bank_attribution": "recorded in the run record",
    "scorer_contract_attribution": "recorded per row"
   },

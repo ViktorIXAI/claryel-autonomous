@@ -332,3 +332,20 @@ genuinely hard for everyone on the corrected gold.
     contour closed); `A-ex6-03` = genuine arithmetic near-miss (answer synthesis is a closed class);
     `H-ex6-01/03/04`, `B-ex6-05`, `I-ex6-02`, `A-ex6-00` = event-less single-draw lottery, identical set
     across pair-245/246/247 — no selection trigger left for them; `C-ex6-02` = biased draw, retry spent.
+
+## 2026-11-07 21:07 CET addendum (pair-248, bank v6.2): `B-ex6-05` is CLOSED — the lottery label was wrong, it is a repairable content class
+
+    The 12:07 map listed `B-ex6-05` under "event-less single-draw lottery, no trigger left". That was
+    a description of the flips, not of the class: on the 2.48 line the cell strict-fails when the
+    model injects its own per-item `n_tags` into `items` against «Items не меняй» (scored
+    `fields_mismatch:items`) — 3 strict-fails in its 6 published draws with behavior 2.48 on this
+    bank (t48r22, t48r24, u48r35; t47r22 failed identically under behavior 2.47), format always
+    fine, single note every time. The flips were event-less
+    because the control had NO mechanism for the class — the 2.34 repair was frozen unmeasured.
+    Contour `0.0.2.51` re-arms the prompt-echo grammar: pair-248 converted (B-ex6-05, rep35) with
+    `contour:v51_b_echo_restore` on the row, the answer byte-equal to the prompt's own literal,
+    zero extra model tokens; zero guard violations; the grammar matches exactly 1 of 77 prompts by
+    construction (`PAIR-248-V62.md`). The cell moves from the lottery list to REPAIRED; remaining
+    unresolved on the current line: `A-ex6-03` (arithmetic near-miss), `B-ex6-04` (bank defect,
+    closed for contour), `C-ex6-02` (biased draw, retry spent), `H-ex6-01/03/04` + `I-ex6-02` +
+    `A-ex6-00` (event-less lottery — selection still has no proven trigger there).

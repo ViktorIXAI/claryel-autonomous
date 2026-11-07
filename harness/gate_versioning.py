@@ -171,7 +171,26 @@ CONTOUR_FEATURES = (
     # (2.50 zero-move, 2.51 = 2.50 + exactly B_ECHO_RESTORE; 2.34 keeps BOTH grammars with the v234
     # event name; 2.35-50 stay silent), the transformation and every refusal branch on real bank bytes
     # AND on synthetic invented-field prompts, the coverage census == {B-ex6-05} over v6.2, and the
-    # per-stamp event names; gate_v49 extended with the 2.51 matrix.)
+    # per-stamp event names; gate_v49 extended with the 2.51 matrix. PAIR-248 VERDICT 2026-11-07
+    # 21:05 CET: MEASURED and ADOPTED — arms u48r34/35/36 vs u51r34/35/36 (bank v6.2 3c866ea7daae611c,
+    # ws copy d1e8d11df5840dcc, contract v6.2 c8c0c7dd114dfc32, sp1 reps 34/35/36, harness 7186be795a7e
+    # in all six run records, idle endpoint, zero stalls, zero blank joins, medians 1.32-1.38 s/task):
+    # (a) live target met — u48r35 strict-fails B-ex6-05 (c=0.0 fields_mismatch:items, the published
+    # single mode: per-item n_tags injected against «Items не меняй»); (b) ONE evented conversion —
+    # (B-ex6-05, rep35) F->P carrying contour:v51_b_echo_restore, the candidate answer byte-equal to
+    # the prompt's own literal, ptok/ctok IDENTICAL to control (264/71) in 1.44 s — zero extra model
+    # calls, the repair is post-hoc code; (c) all guards clean — the event fired exactly 2 times in
+    # the whole pair (both candidate arms, both B-ex6-05), ZERO in control, ZERO outside the coverage
+    # census, ZERO candidate B-ex6-05 P->F, frozen bands silent, candidate-only non-v51 events are
+    # single-shot lottery differences inside already-adopted families; the same-seed rep-40 smoke
+    # (20:29 CET, before the pair) proved the already-equal no-op branch on live bytes: zero fires,
+    # both arms PASS. Pool context only: 210/231 -> 214/231, pooled 7W/3L exact sign p=0.3438, 10
+    # flips with 9 event-less (7 in the loop pool 11/18 -> 16/18 — lottery draws structurally
+    # unreachable to a cat=="B" repair) — the +4 pool cells are NOT the adoption basis. Energy 20.24
+    # vs 21.87 Wh, the +8% tracks candidate-side wall length in D-loop draws, not the mechanism.
+    # B_ECHO_RESTORE stays `>= (2,51)` and inherits as line behavior; the 2.34 config grammar stays
+    # frozen. Details `PAIR-248-V62.md`, decision record
+    # `history/agent-decisions/2026-11-07-pair248-b-echo-restore-adopted-line-moves-to-251.md`.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as

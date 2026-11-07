@@ -1,0 +1,10 @@
+pair-248 per-arm serve-board energy windows (gpu-power-p248.csv, 2 Hz ssh nvidia-smi on the
+endpoint, separate systemd-run unit parb-p248sampler, fresh csv for this pair):
+u48r34 293s 7.41Wh | u51r34 291s 7.19Wh
+u48r35 263s 6.38Wh | u51r35 277s 6.92Wh
+u48r36 258s 6.45Wh | u51r36 296s 7.76Wh
+side totals: control (0.0.2.48) 20.24 Wh, candidate (0.0.2.51) 21.87 Wh (+8.1%).
+Candidate side windows are longer in WALL time (874 s vs 819 s, +6.7%) driven by D-loop
+lottery draws (one extra ladder step + protocol re-asks in event-less cells), NOT by the
+mechanism: the converted cell (B-ex6-05 r35) consumed BYTE-IDENTICAL ptok/ctok (264/71)
+in 1.44 s vs control 1.61 s - zero extra model calls, the repair is post-hoc code.
