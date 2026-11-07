@@ -91,3 +91,12 @@ defective cell is UNMEASURED by construction). Published arms measured under v6.
 re-scored here: the B-ex6-04 prompt moved, so old v6.2 numbers stay under v6.2 identity; the four
 raw arms' fairness re-check under v6.4 runs as the pre-registered probe in
 `REVIEW-INBOX.md` 12:56 CET.
+
+## Fairness re-check under v6.4 (raw arms, contour fully OFF) — VERDICT: FAIR
+
+Rule frozen 12:56 CET; rows 13:01-13:05; scorer identity asserted at scoring time (contract v6.2
+`c8c0c7dd114dfc32`, parb_check_v6.py `89437d8cfe1fc6c8`). Strict passes of 3 at reps 22/23/24:
+bare basalt 3/3 (v6.2: 3/3 by year-guess), ChatGPT-codex 3/3 (v6.2: 0/3), Grok 3/3 (v6.2: 0/3).
+The lift for the arms that refuse to guess proves the prompt now states the contract; the basalt
+hold shows no regression. Disclosure grep zero; model/CLI identity in every row.
+`B-ex6-04` is closed as a bank defect fully fixed at the bank level. Rows: `bank-probe-634/fair-rows.md`.

@@ -1641,3 +1641,24 @@ dominate the delta (expected cost: zero extra calls when the first answer alread
       Endpoint discipline: bare basalt shares the idle P2005 serve (chat URL pinned to the reachable
       box IP, never the bind address); cloud legs never touch the serve; arms run serially
       (basalt -> codex -> grok) under unit `parb-bank64fair`; liveness by answers-row COUNT only.
+
+## 2026-11-07 13:08 CET — bank v6.4 FAIRNESS probe VERDICT: FAIR (all three raw arms 3/3) — B-ex6-04 closed at the bank level
+
+    Ran 13:01-13:05 under unit `parb-bank64fair` (serial basalt -> codex -> grok), rule frozen at
+    12:56 CET before any row. Scorer: frozen contract v6.2 `c8c0c7dd114dfc32`; the scoring call
+    asserts `harness/parb_check_v6.py` sha16 `89437d8cfe1fc6c8` == the contract v6.2 pin before
+    quoting a number. ws subset bank.json = byte-identical B-ex6-04 object from full v6.4
+    (`85a0cd0dd6fa1fab`; subset `abf6f00bd3476078`, guard PASS). Transport/model identity per row:
+    bare basalt `qwen3.8-flash-next-iq3_s-basalt` (direct HTTP temp 0.7, seed 1000+rep),
+    ChatGPT-codex `gpt-6.1-sol` (codex-cli 0.166.0, xhigh read-only, STDIN), Grok `grok-4.7`
+    (hermes toolsets off, prompt inline). Disclosure grep (bank/gold/expected/paths/hosts): zero.
+      basalt 22/23/24: 3/3 strict (v6.2 baseline 3/3 by year-GUESS -> now stated, no regression);
+      codex  22/23/24: 3/3 strict (v6.2 baseline 0/3 — both models said the year is absent);
+      grok   22/23/24: 3/3 strict (v6.2 baseline 0/3).
+    Every v6.4 answer byte-exact vs gold (`2026-04-01`, `"2%"`), notes empty. Frozen rule (all
+    three arms >=2/3) => **FAIR**: the corrected prompt states the contract for brains that
+    refuse to guess, and the correction is not contour scaffolding (contour fully OFF in these
+    rows). B-ex6-04 is CLOSED as a bank defect fixed at the bank level; the contour line claims
+    nothing for it. Artifacts: `v6-results/bank-probe-634/fair-rows.md` + `fair-answers-*.jsonl`
+    + sanitized `run_fair_probe.sh`. Next cadence four-arm on bank v6.4 (due at 5 measured stamps
+    after cadence-246; 2.47/2.48 already measured) will carry the first full-pool v6.4 numbers.

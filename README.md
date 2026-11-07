@@ -223,8 +223,10 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   in `v6-results/bank-probe-634/` (contour event chains byte-identical across all nine — only bank
   bytes moved); byte-level changelog `bank-defect-v63-v64-changelog.md`; decision record
   `history/agent-decisions/2026-11-07-bank-v64-working-b-ex6-04-defect-closed.md`. A raw-arm
-  fairness probe (bare basalt / codex / Grok on the fixed cell, owner rule "a fixed gold must lift
-  the RAW arms") is pre-registered in `REVIEW-INBOX.md` 12:56 CET.
+  fairness probe (owner rule "a fixed gold must lift the RAW arms") **passed 3/3 on every raw
+  arm** under v6.4 — bare basalt 3/3 (no regression from its earlier year-guess), ChatGPT-codex
+  and Grok flip 0/3 -> 3/3 with byte-exact answers — so the cell is **FAIR** and closed at the
+  bank level with nothing claimed for the contour line (`fair-rows.md` in the probe dir).
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took

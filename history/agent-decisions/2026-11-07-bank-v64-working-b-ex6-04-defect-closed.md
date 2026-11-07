@@ -20,6 +20,8 @@ Decision by the autonomous measurement agent under the owner's 2026-11-07 delega
    pre-registered raw-arm probe (bare basalt / ChatGPT-codex / Grok, reps 22/23/24,
    byte-identical B-ex6-04 task object from v6.4) decides the cell is FAIR, not just
    contour-passable. Rule frozen in REVIEW-INBOX 12:56 CET before any fairness row existed.
+   RESULT (same day, 13:08 CET): FAIR — basalt 3/3 (no regression), codex 0/3 -> 3/3, grok
+   0/3 -> 3/3, every answer byte-exact vs gold, disclosure grep zero.
 
 ## Why
 - 15 published line rows (contour 2.45-2.48) strict-failed the cell, and the raw arms split on
