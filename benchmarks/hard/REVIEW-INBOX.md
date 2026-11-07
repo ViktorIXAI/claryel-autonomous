@@ -1694,3 +1694,53 @@ dominate the delta (expected cost: zero extra calls when the first answer alread
     pair-244/gate_v57 lesson reintroduced; rewritten as `>=` + derived stamp form.
     Next arms from these workspaces will name `bank_version` in every run record;
     older arms keep their attribution via MEASUREMENT-STACK (regenerated).
+
+## 2026-11-07 14:26 CET — cadence-249 PRE-REGISTERED: four-arm re-run on bank v6.4 (first full-pool v6.4 numbers) — rule frozen before any row
+
+    Owner P0 continuation: the bank was re-worded twice since cadence-246 (v6.2 -> v6.4), and the
+    four raw arms are the standing check that the re-worded tasks became fairer. This is the first
+    FULL-POOL run on v6.4; it also fixes the v6.4 baseline against which the next pairs are judged.
+    Legs: contour `0.0.2.49` (release 2.49 tooling, contour BEHAVIOR 2.48 = adopted line after
+    pair-247; 2.49 registers no contour feature, `gate_v63` pins the matrix equality), bare basalt,
+    ChatGPT-codex (gpt-6.1-sol, xhigh, STDIN), Grok (grok-4.7, hermes toolsets off, prompt inline).
+    Stack (pre-declared, asserted by the scorer at scoring time): bank `bank-hard-v6.4.json`
+    sha16 `85a0cd0dd6fa1fab` (ws copy `7788cc288922b9a4`, built by `build_hard_v6_ws --bank
+    bank-hard-v6.4.json --pins WS-GENERATED.v64full.sha256` at harness commit `926afac`, ws marker
+    names v6.4 -> release-2.49 bank-version wiring proven live); scorer contract **v6.2**
+    `c8c0c7dd114dfc32` (parb_check_v6 `89437d8cfe1fc6c8`, parb_loop `f5f5b78ab46a0f0c`,
+    e_sandbox `424c04126e9b6c1e`); seed protocol sp1 (gseed = sha256(task|rep) % 999983; raw basalt
+    seed 1000+rep); FRESH matched reps **25, 26, 27** for every arm — same rep numbers, so
+    contour cell (task, rep k) and raw cell (task, rep k) are seed-matched.
+    Endpoint: P2005 Basalt serve (`qwen3.8-flash-next-iq3_s-basalt`, key file fetched live from the
+    box at 14:2x CET — the old Strata-era profile is stale; auth GET /v1/models 200). Preflight at
+    14:24 CET proved a healthy engine before any row: prefill 2.6k/3.7k/3.3k tok/s at 24k/96k/260k
+    prompt tokens (no spin degradation; the 06.11 signature would be 20-220x slower). Contour and
+    basalt legs serial on the idle serve; cloud legs never touch it. Key files/launchers untracked;
+    sanitized copies ship with the artifacts.
+    RULES, frozen now before any row:
+    (a) BANK FAIRNESS (owner rule): raw arms must not regress against cadence-246 on the common
+        61-cell pool (basalt 138/183, codex 128/183, grok 137/183). v6.2->v6.4 moved exactly one
+        task (B-ex6-04, the published value-form/year fix — the scorer guard confirms the only
+        field diff is that cell), so any pool movement beyond the published noise floor must be
+        attributable to B-ex6-04 cells or it is a bank defect hunt, not a model claim. Expected
+        signature of a fair fix: B-ex6-04 raw cells pass more often than at v6.2 (fairness probe
+        reps 22-24: 3/3 every arm).
+    (b) CONTOUR MARGIN: paired per-(task,rep) vs each raw arm on the 61-cell common set; per-rep
+        and pooled exact sign tests; verdict only on pooled numbers, single reps are draws. The
+        published same-seed noise floor (5.2% of cells, ~1.4 cells mean) sizes resolvability.
+    (c) Rule-(c) re-score: every contour leg score re-derived from stored answer bytes with
+        contract v6.2; ANY per-cell disagreement = scorer-routing bug, publish cells not means.
+        loop-D legs must store `_loop_rows` (protocol gap of the 2.45-era arms closed for new runs).
+    (d) E excluded symmetrically (raw batteries not re-executed for these seeds; every published
+        seed 10/10 on E), loop-D N/A for single-shot arms; common set 61 cells x 3 reps = 183/arm.
+    (e) Energy: sampler `gpu-power-249.csv` (2 s ssh nvidia-smi) + per-arm `-start.epoch`/
+        `-end.epoch`; publish Wh + wall per arm; stall guard: any leg with median per-task seconds
+        > 5x the pair-247 baseline (~2.3 s) or stall rate > 25% of last 20 rows is aborted and the
+        endpoint fixed, not the numbers published.
+    (f) Publication when all four legs exist: `CADENCE-249-V64.md` + `v6-results/cadence-249/`
+        regenerated ONLY by `scripts/cadence_score_v62.py --bank-pub bank-hard-v6.4.json --ws
+        ~/parb-v64-contour --raw-ws ~/parb-v64-raw-reps --reps 25,26,27 --prefix q49 --gpu-csv
+        gpu-power-249.csv`; raw answers JSONL ship with the report; every table names bank sha16 +
+        contract version. Launch: units `parb-cad249` (stages 1+2), `parb-cad249-cloud` (stages
+        3+4), `parb-gpu249` (sampler); liveness by row COUNT + unit state only.
+

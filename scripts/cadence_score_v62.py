@@ -104,6 +104,9 @@ def main() -> int:
     ap.add_argument("--arms", nargs="*", default=["basalt", "codex", "grok"])
     ap.add_argument("--gpu-csv", default=None)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--bank-pub", default="bank-hard-v6.2.json",
+                    help="published bank file under benchmarks/hard (default keeps "
+                         "cadence-246 reproducible; cadence-249 passes bank-hard-v6.4.json)")
     args = ap.parse_args()
     reps = [int(x) for x in args.reps.split(",")]
     ws = os.path.expanduser(args.ws)
@@ -111,6 +114,7 @@ def main() -> int:
 
     # ---- stack identity: fail closed on any drift or bank mismatch -------------
     CK = SC.load_contract("v6.2")  # registry verifies pinned bytes
+    BANK_PUB = os.path.join(ROOT, "benchmarks", "hard", args.bank_pub)
     bank_pub = json.load(open(BANK_PUB, encoding="utf-8"))
     bank_ws = json.load(open(os.path.join(ws, "bank.json"), encoding="utf-8"))
     bank_pub = bank_pub if isinstance(bank_pub, list) else bank_pub["tasks"]
@@ -123,7 +127,7 @@ def main() -> int:
                       or json.dumps(tpub[t].get("ref")) != json.dumps(tws[t].get("ref"))
                       or tpub[t].get("cat") != tws[t].get("cat")
                       or tpub[t].get("mode") != tws[t].get("mode")))
-    assert not diff, "ws bank copy differs from published v6.2 on: %s" % diff
+    assert not diff, "ws bank copy differs from published %s on: %s" % (args.bank_pub, diff)
     bank_sha16 = SC._sha16(BANK_PUB)
     ws_bank_sha16 = SC._sha16(os.path.join(ws, "bank.json"))
     loop = {k for k in tpub if tpub[k].get("mode") == "loop"}
@@ -131,7 +135,7 @@ def main() -> int:
     common = sorted(k for k in tpub if k not in loop and k not in eset)
 
     print("## stack identity")
-    print("bank v6.2 published sha16 %s (ws copy %s, 77 tasks field-identical)" % (bank_sha16, ws_bank_sha16))
+    print("bank %s published sha16 %s (ws copy %s, 77 tasks field-identical)" % (args.bank_pub, bank_sha16, ws_bank_sha16))
     print("scorer contract %s (%s), strict rule: %s, seed protocol %s"
           % (SC.SCORER_CONTRACT, SC.CONTRACT_PINS["v6.2"], SC.STRICT_RULE, SC.SEED_PROTOCOL))
     print("common set: %d single-shot non-E cells (loop-D N/A for raw arms; E excluded symmetrically)\n" % len(common))

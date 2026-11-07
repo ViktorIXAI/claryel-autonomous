@@ -28,6 +28,7 @@ FILES = [
     "scripts/leakage_scan_v6.py",
     "benchmarks/hard/WS-GENERATED.v6.sha256",
     "benchmarks/hard/WS-GENERATED.v62.sha256",
+    "benchmarks/hard/WS-GENERATED.v64full.sha256",
 ]
 
 
