@@ -36,6 +36,12 @@ inside the noise band); ChatGPT is the most stable arm measured (spread 1) and t
 contract-sensitive cells (F 1/18, H 0/15). Full numbers, all discordant cells, cost and energy:
 `CADENCE-240-V61.md` (regenerate: `scripts/cadence240_cloud_v61.py`).
 
+> **v6.2 boundary (2026-11-07):** the four arms were re-run on the corrected bank v6.2
+> (`bank-hard-v6.2.json`, sha16 `3c866ea7daae611c`, scorer contract v6.2) in cadence-246 —
+> contour 166/183 vs basalt 138 (p=1.3e-4), Grok 137 (p=1.5e-5), ChatGPT-codex 128 (p=2.6e-7)
+> on fresh matched reps 16-18 (`CADENCE-246-V62.md`). v6.1 numbers on this page and v6.2
+> numbers there are never cell-comparable and share no columns.
+
 ## Robustness: three independent seeds of the contour, one seed per cloud arm
 
 `reps-229/REP-VARIANCE.txt` (gseeds re-derived by `scripts/plan_reps.py` from `sha256(task|rep)`):

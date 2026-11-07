@@ -1,0 +1,39 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:8080",
+  "contour_version": "0.0.2.45",
+  "contour_behavior": "2.44",
+  "contour_changed_at_this_release": false,
+  "git_sha": "",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "cadence-246 stage 1: contour 0.0.2.45 (adopted 2.43 line + scorer contract v6.2) on bank v6.2, matched seed rep 17",
+  "stack": {
+    "bank_version": "v6.2",
+    "bank_sha16": "d1e8d11df5840dcc",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.45",
+    "contour_behavior": "2.44",
+    "harness_git_sha": ""
+  }
+}

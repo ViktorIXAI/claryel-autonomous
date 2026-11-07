@@ -17,7 +17,7 @@ where those identities are defined, so a quoted number can be traced to bytes.
 | seed protocol | sp1 | per-(task,rep) gseed + per-task plan seed | `scripts/plan_reps.py`, `build_hard_v6_ws.py` |
 | typed failure codes | registry in contract v6.2 | content / protocol / integrity / marker / infra | `gate_scorer_contract.CODE_CLASS`, gate_v59 tests |
 | two published axes | contract v6.2 | answer axis + protocol axis, additive to `strict` | `gate_v59_scorer_contract_v62_test.py` |
-| harness | commit a307b2a360ad | contour stamp 2.45 (behavior 2.44) | git + `gate_versioning.py` |
+| harness | commit 5d25936a707d | contour stamp 2.46 (behavior 2.44) | git + `gate_versioning.py` |
 
 Scorer contract v6.2 delegates to the v6.1 bytes, so it changes no score; the equality
 is asserted cell by cell on published answers (`gate_v59_scorer_contract_v62_test.py`),
@@ -25,7 +25,7 @@ and `verify_contract()` fails closed if a frozen scoring byte moves without a ne
 
 ## 2. Contour axes
 
-- stamped revision now: **2.45** (`0.0.2.45`); contour behavior reported: **2.44**;
+- stamped revision now: **2.46** (`0.0.2.46`); contour behavior reported: **2.44**;
 - did this release change the contour? **False** (a tooling release registers no feature)
 - adopted line features: 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.7, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.35, 2.37, 2.39, 2.40, 2.43
 - frozen to their own stamp (never inherited): 2.30 (contract guarantee (shape re-ask/salvage) — MEASURED NEGATIVE), 2.31 (self-consistency vote — MEASURED NEGATIVE), 2.32 (J ranking repair v1 — on target, under the noise floor), 2.33 (A threshold-table arithmetic — zero live fires), 2.34 (B field completeness — zero live fires), 2.36 (group-4 lottery selection — MEASURED NEGATIVE), 2.38 (A threshold-table re-land — UNMEASURED), 2.41 (C rule-grounded membership — UNMEASURED), 2.42 (D-loop policy re-ground — MEASURED NEGATIVE), 2.44 (D-loop best-of-2 on false_completion_claim — UNMEASURED)
@@ -43,6 +43,7 @@ produced them are the pinned ones named below.
 | directory | arms | rows | contour stamp / behavior | bank | scorer | stack in record |
 |---|---|---|---|---|---|---|
 | `cadence-240` | 3 | 231 | 0.0.2.40 / 2.40 | 9ec86dfca4a6f85f | v6.1 | no (pre-0.0.2.45) |
+| `cadence-246` | 3 | 231 | 0.0.2.45 / 2.44 | recorded | recorded | yes |
 | `four-arm-v61` | 1 | 77 | 0.0.2.28 / 2.28 | 9ec86dfca4a6f85f | v6.1 | no (pre-0.0.2.45) |
 | `full-216` | 1 | 77 | 0.0.2.16 / 2.16 | 9ec86dfca4a6f85f | v6.1 | no (pre-0.0.2.45) |
 | `full-217` | 1 | 77 | 0.0.2.17 / 2.17 | 9ec86dfca4a6f85f | v6.1 | no (pre-0.0.2.45) |

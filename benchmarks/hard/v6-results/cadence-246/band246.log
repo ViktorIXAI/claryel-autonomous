@@ -1,0 +1,14 @@
+
+rows=77 reps=[16] seeds[0:3]=[('A-ex6-00', 16, 494108), ('A-ex6-01', 16, 618606), ('A-ex6-02', 16, 551461)]
+q45r16: exit=0 rows=77
+
+rows=77 reps=[17] seeds[0:3]=[('A-ex6-00', 17, 410393), ('A-ex6-01', 17, 566746), ('A-ex6-02', 17, 289869)]
+q45r17: exit=0 rows=77
+
+rows=77 reps=[18] seeds[0:3]=[('A-ex6-00', 18, 499886), ('A-ex6-01', 18, 724686), ('A-ex6-02', 18, 367515)]
+q45r18: exit=0 rows=77
+basalt 16,17,18: rc=0 rows=213
+cad246 stage1+2 done
+codex 16,17,18: rc=0 rows=213
+grok 16,17,18: rc=0 rows=213
+cad246 stage3+4 cloud done

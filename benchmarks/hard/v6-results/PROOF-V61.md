@@ -90,3 +90,23 @@ python3 scripts/fhk_answer_audit.py         # 60 F/H/K cells with scorer reasons
 python3 scripts/gpu_energy.py <LOCAL_PATH>/gpu-power.csv --label contour-rep3
 python3 scripts/bank_ask_coverage.py        # gold asks vs prompt reachability
 ```
+
+## Re-check on the corrected bank v6.2 (7 Nov, cadence-246)
+
+Stack: bank `benchmarks/hard/bank-hard-v6.2.json` sha16 `3c866ea7daae611c`, scorer contract
+**v6.2** (`c8c0c7dd114dfc32`), seed protocol sp1, contour stamp `0.0.2.45` (adopted 2.43 feature
+matrix, behavior axis reports 2.44 — name both axes), FRESH matched reps 16/17/18, 61-cell
+single-shot common set, exact paired sign tests — full writeup `CADENCE-246-V62.md`, scorer
+`scripts/cadence_score_v62.py`.
+
+| arm | pooled strict /183 | W / L vs contour | exact p |
+|---|---|---|---|
+| contour (adopted line, 2.45 release) | **166** | — | — |
+| bare basalt (same weights, no contour) | 138 | 40 / 12 | 1.3e-4 |
+| Grok 4.7 | 137 | 37 / 8 | 1.5e-5 |
+| ChatGPT (`gpt-6.1-sol`, codex CLI) | 128 | 47 / 9 | 2.6e-7 |
+
+The margin over the same local weights **without** contour replicates on the corrected bank, and
+the raw arms rose exactly at the two cells whose golds the v6.2 changelog fixed (A-ex6-03 and
+K-ex6-03: every raw arm now 3/3) — the bank-clarification fairness check passes. v6.1 numbers and
+v6.2 numbers are never cell-comparable and share no columns.

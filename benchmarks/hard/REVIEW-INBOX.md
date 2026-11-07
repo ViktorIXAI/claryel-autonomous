@@ -1293,3 +1293,38 @@ are per-arm strict on bank v6.2 over the common set (loop-D N/A for single-shot 
 disagrees with its own stored ledger anywhere, that is a scorer-routing bug to be named cell by
 cell, not averaged; (d) energy per arm from `gpu-power-246.csv` windows (per-arm
 `-start.epoch`/`-end.epoch`), wall and Wh reported, never GPU utilization as liveness.
+
+## 2026-11-07 09:15 CET — cadence-246 complete on bank v6.2: margins replicate, fairness check passes, B-ex6-04 root-caused; release 0.0.2.46 (tooling) fixes run-record harness identity
+
+**Cadence-246 (all four legs, bank v6.2 `3c866ea7daae611c`, contract v6.2 `c8c0c7dd114dfc32`,
+sp1 reps 16/17/18, contour stamp 0.0.2.45 = adopted 2.43 matrix / behavior axis 2.44).**
+Pooled 61-cell pairs: contour **166/183** vs basalt **138** (40W/12L p=1.3e-4), ChatGPT-codex
+**128** (47W/9L p=2.6e-7), Grok **137** (37W/8L p=1.5e-5); every per-rep pair directional except
+basalt-rep16 (p=0.096, single draw). Loop pool 17/18. Rule (c): 0 ledger-vs-bytes mismatches.
+Fairness: A-ex6-03/K-ex6-03 now 3/3 for every raw arm (were 0/120 under v6.1 golds) — bank
+clarification lifted the raw arms as the owner rule requires. Energy: contour 16.25 Wh vs bare
+basalt 69.36 Wh on the same serve (0.070 vs 0.326 Wh/call). Artifacts: `v6-results/cadence-246/`
+(26 files, sanitized, JSON-validated, leak-grep zero), `CADENCE-246-V62.md`,
+`cadence-cells-v62.csv`, scorer `scripts/cadence_score_v62.py`.
+
+**Rulings from the v6.2 line map (addendum in UNSTABLE-CELLS):**
+- `B-ex6-04` (long-frozen-negative): root cause = the prompt never states the year the gold
+  demands (2026); codex correctly refuses, basalt passes by year-guessing. Bank defect -> next
+  bank version must state the year; contour work stays CLOSED on this cell (UNMEASURED target).
+- `C-ex6-02`: strongest live pair target (3/3 control strict-fails, `set_mismatch`, no existing
+  trigger family — 2.13 C best-of-2 fires only on `missed_options`). Next contour candidate:
+  extend C selection coverage for `set_mismatch` — pre-register the rule against the v6.2 map
+  BEFORE any row, same discipline as pair-244/245.
+- `K-ex6-03`: real draw instability (extraction collapses to a meta header line, no values);
+  content/lottery class, no evented fix possible without inventing values; selection target only
+  if a mechanism can be proven against fresh draws.
+
+**Release 0.0.2.46 (tooling-only, zero contour flags move — gate_v49+gate_v60 pin the equality):**
+cadence run records exposed `harness_git_sha: ""` (generated ws is not a git checkout). Builder now
+stamps `HARNESS_GIT_SHA` into every workspace; `gate_run.harness_git_sha()` resolves
+stamped-file > git > empty and warns when empty; gate_v49's `CURRENT_REVISION == (2,45)` literal
+pin made bump-tolerant. New CI-enrolled contract test gate_v60 (15 checks). Standing suite green;
+v6.2 ws rebuilt + repinned; live smoke 0.0.2.46 writes run-record harness sha `5d25936` (HEAD at
+rebuild). Cadence legs themselves ran the pre-2.46 tree `fdd03f2` — stated in CADENCE-246-V62.md.
+Next: cadence stamp clock resets (5 measured stamps -> next cadence after 2.47/2.48/... reaches 5);
+immediate queue = C-ex6-02 pair pre-registration + v6.3 bank defect batch (B-ex6-04 year).

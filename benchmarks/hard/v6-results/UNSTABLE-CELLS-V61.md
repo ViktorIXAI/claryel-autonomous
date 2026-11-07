@@ -290,3 +290,31 @@ Queue: build the v6.2 workspace (`3c866ea7daae611c`), map the adopted line on v6
 due four-arm cadence, then pre-register new pairs ONLY against the v6.2 map. v6.2 watch-list
 for the closed classes: does the corrected bank make `false_completion_claim` (0/18 live) or
 group-4 H notes live again; closed classes stay closed until the map says otherwise.
+
+## Addendum 2026-11-07 09:15 CET — the adopted line mapped on bank v6.2 (cadence-246, reps 16/17/18, stamp 0.0.2.45)
+
+Bank `3c866ea7daae611c`, contract v6.2 `c8c0c7dd114dfc32`, ws bank copy `d1e8d11df5840dcc`
+(field-identity asserted). Pools: single-shot 166/183 strict, loop 17/18. This is the v6.2 line
+map every later pair must pre-register against.
+
+Deterministic contour strict-fails (all 3 seeds):
+- `C-ex6-02` — real failure on the corrected truth-table gold: the model omits candidate B
+  (`set_mismatch`, content 0.0); the 2.13 C best-of-2 fires only on `missed_options`-family notes,
+  which this code family does NOT join; raw arms: basalt/codex 1/3, grok 0/3. **Strongest live
+  pair target on the v6.2 map** (3/3 control fails, mechanism gap = trigger coverage).
+- `K-ex6-03` — real content/draw failure: extraction collapses to a meta header line
+  (`FIELD: ITEM, QTY, ...`), no values, code `missing`, zero contour events; raw arms 3/3 with
+  clean 4-line extraction. Lottery/variance class (not repairable — repair would have to invent
+  values); selection candidates must prove a live target here before any stamp.
+- `B-ex6-04` — ROOT CAUSE ESTABLISHED (previously frozen-negative, cause unknown): the prompt
+  gives no year for `start_date` while the gold demands `2026-04-01`. basalt passes only by
+  guessing the current year (3/3), codex correctly refuses (`null`, 0/3). Unanswerable by
+  inference -> bank defect for the next bank version (state the year); any stamp aimed here is
+  UNMEASURED by construction — closed for contour work.
+
+Single-draw flips (inside the noise band, no action): A-ex6-00 r16, A-ex6-03 r17, B-ex6-05 r18,
+C-ex6-03 r18, C-ex6-08 r16, H-ex6-01 r16, H-ex6-03 r18, I-ex6-01 r18.
+
+Fairness of the corrected golds (owner rule): A-ex6-03 and K-ex6-03 moved 0/120 (v6.1) to 3/3
+for every raw arm under v6.2 — bank clarifications lift raw arms as required. C-ex6-02 remains
+genuinely hard for everyone on the corrected gold.

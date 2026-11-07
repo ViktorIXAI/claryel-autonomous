@@ -171,6 +171,21 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)
+- **Cadence-246 ran the due four-arm cadence on the corrected bank v6.2 (7 Nov)** — workspace
+  `parb-v62-contour`, fresh seed-matched reps 16/17/18 pre-registered at 06:20 CET before any row.
+  Contour (adopted 2.43 matrix, tooling release 0.0.2.45, bank `3c866ea7daae611c`, contract v6.2
+  `c8c0c7dd114dfc32`) pools **166/183** on the 61-cell common set vs bare basalt **138** (40W/12L,
+  p=1.3e-4), ChatGPT-codex **128** (47W/9L, p=2.6e-7), Grok **137** (37W/8L, p=1.5e-5): the margin
+  replicates on the clarified bank and every raw arm now passes the two fixed golds A-ex6-03/K-ex6-03
+  (3/3 each) — the owner's bank-fairness check passes. Rule (c) re-score from stored bytes: **zero**
+  ledger-vs-bytes mismatches. Energy: contour 3 seeds 16.25 Wh vs 69.36 Wh for the raw same-model leg.
+  The root cause of the long-frozen-negative cell **B-ex6-04** was established: its prompt never
+  states the year the gold demands (contour work stays closed there; fix belongs to the next bank
+  version); strongest next live target
+  **C-ex6-02** (3/3 live control fails, no existing trigger family). The empty `harness_git_sha` in
+  these run records was fixed the same day as tooling release **0.0.2.46** (run records now name the
+  real harness commit; zero contour flags move). Artifacts `v6-results/cadence-246/`, writeup
+  `CADENCE-246-V62.md`, scorer `scripts/cadence_score_v62.py`.
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took
