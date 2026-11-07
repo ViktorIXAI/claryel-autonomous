@@ -225,6 +225,23 @@ ck(g243.D_BEST2 and g243.J_RERANK_V2 and g243.J_MEMBERSHIP_V3,
 ck(not g243.CONTRACT_GUARANTEE and not g243.SELFCONSIST and not g243.C_RULE_GROUND,
    "every frozen band (2.30/2.31/2.41) stays off at 2.43")
 
+# pair-244 ADOPTED D_BEST2_BANNED (line moves to 0.0.2.43); pair-245's candidate 2.44 (loop
+# best-of-2 on the false_completion_claim family) must therefore INHERIT the 2.43 trigger as line
+# behavior while adding only its own change; the 2.42 policy tail and every frozen band stay off.
+# Full wiring: gate_v58.
+g244 = load("0.0.2.44")
+ck(not g240c.D_BEST2_CLAIM and not g241c.D_BEST2_CLAIM and not g242f.D_BEST2_CLAIM
+   and not g243.D_BEST2_CLAIM,
+   "D_BEST2_CLAIM is OFF at 0.0.2.40/41/42/43 (published arms byte-identical)")
+ck(g244.D_BEST2_CLAIM, "D_BEST2_CLAIM is ON at its own stamp 0.0.2.44")
+ck(g244.D_BEST2_BANNED and g244.D_BEST2,
+   "the ADOPTED 2.43 banned trigger + 2.11 selection are inherited line behavior at 2.44")
+ck(g244.LOOP_POLICY_REGROUND is False and not g244.C_RULE_GROUND
+   and not g244.CONTRACT_GUARANTEE and not g244.SELFCONSIST,
+   "the frozen bands (2.30/2.31/2.41/2.42) stay off at 2.44 — rejected behaviour never inherits")
+ck(g244.J_RERANK_V2 and g244.J_MEMBERSHIP_V3,
+   "0.0.2.44 builds on the adopted line (J re-rank v2 + J membership inherited)")
+
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
       % (CHECKS, len(covered), len([x for x in bank if x["cat"] == "J"])))

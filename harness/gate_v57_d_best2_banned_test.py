@@ -231,8 +231,8 @@ GV = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(GV)
 ck((2, 43) in GV.CONTOUR_FEATURES, "(2,43) is registered in CONTOUR_FEATURES (stamp != behavior "
    "would silently measure the OLD contour — pair-241's rule)")
-ck(GV.CURRENT_REVISION == (2, 43) and GV.CURRENT_STAMP == "0.0.2.43",
-   "the current revision is 2.43 and the two axes stay in step")
+ck(GV.CURRENT_REVISION >= (2, 43) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
+   "the current revision is at or past 2.43 and the two axes stay in step (pair-245 may move it)")
 ck(GV.format_behavior("0.0.2.43") == "2.43", "stamp 0.0.2.43 resolves to contour behavior 2.43")
 ck(GV.behavior_tuple("0.0.2.43") == (2, 43), "behavior_tuple(0.0.2.43) == (2,43)")
 ck((2, 43) not in GV.RESERVED_TOOLING_REVISIONS, "2.43 is outside the reserved tooling band")
