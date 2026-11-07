@@ -125,6 +125,20 @@ CONTOUR_FEATURES = (
     # enumeration grammar, the placeholder-taint condition, per-stamp flag matrix (2.47 matrix == 2.43 +
     # C_BEST2_SET; 2.48 == 2.47 + exactly K_FIELDS_ENUM), the want_format surface invariance and live
     # fields_gate wiring at both stamps over the real bank prompt; gate_v49 extended with the 2.48 matrix.
+    # (MEASURED pair-247, three paired seeds `t47r*`/`t48r*` vs the adopted 0.0.2.47 line, rule
+    # pre-registered 2026-11-07 11:33 CET: MEASURED and ADOPTED on the strongest form the rule allows —
+    # (a) 3/3 control target cells strict-fail with `missing`; (b) 3/3 conversions, every one carrying
+    # `contour:v48_fields_enum_from_prompt:4` and the model's own values under the real keys, K pool
+    # 9/12 -> 12/12 (the whole category is now strict-clean); (c) zero guard violations: zero v48 events
+    # in a control arm or outside K-ex6-03, zero candidate K regressions, zero loop P->F, zero
+    # frozen-band events, zero engine stalls, zero blank joined answers, adopted-family parity within
+    # seed noise. Cost: ZERO extra model calls — the first hint naming the real keys is sufficient
+    # (+8 ptok / +5..11 ctok per converted cell); serve energy 19.55 vs 17.41 Wh, not attributed. Full
+    # 231-cell pool 204 -> 203 (5W/6L, exact sign p=1.0000, 9 flips total, all non-K flips event-less)
+    # sits at the published noise floor and is not the adoption basis. `K_FIELDS_ENUM =
+    # contour_at_least(2, 48)` inherits as line behavior; gate_v49 pins 2.48 == 2.47 + exactly
+    # K_FIELDS_ENUM. Details `PAIR-247-V62.md`, decision record
+    # `history/agent-decisions/2026-11-07-pair247-k-fields-enum-adopted-line-moves-to-248.md`.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as

@@ -1482,3 +1482,51 @@ holds, >=1 evented conversion, and all guards clean; otherwise freeze `K_FIELDS_
 `CONTOUR_REVISION == (2, 48)` and publish the negative with win-level detail. Energy per arm from the
 `-start.epoch`/`-end.epoch` windows side by side; extra Wh attributed only if on-target re-asks
 dominate the delta (expected cost: zero extra calls when the first answer already names the keys).
+
+## 2026-11-07 12:07 CET — pair-247 VERDICT: contour 0.0.2.48 ADOPTED (K fields-gate key set from the task's own `Поля:` enumeration) — line moves 0.0.2.47 -> 0.0.2.48
+
+    Six serial arms on the idle P2005 endpoint (11:34-12:01), bank v6.2 (ws copy `d1e8d11df5840dcc`,
+    published `3c866ea7daae611c`), contract v6.2 `c8c0c7dd114dfc32`, seed protocol sp1 (reps 22/23/24,
+    fresh — never reusing cadence-246 16/17/18 or pair-246 19/20/21), harness `639f2f54ee74` stamped
+    into all six run records. 6 x 77 rows, all `exit=0`, zero `engine_stalled`, zero blank joined
+    answers, median ~1.3 s/task.
+    (a) LIVE TARGET: MEASURED — **3/3** control (t47) `K-ex6-03` rows strict-fail with code `missing`
+        (content 0.25, format_ok False), reproducing the published 9/9 chronic pattern on fresh seeds.
+        The control answers are the contour's own doing: `FIELD: кресла 'Oslo'` (rep 22), a literal
+        `FIELD: ITEM, QTY, LEAD_WEEKS, FREE_SHIPPING` header copy (rep 23), and after
+        `fields_fixed_by_code` an empty-valued `FIELD: ITEM` (rep 24).
+    (b) CONVERSIONS: **3/3**, every one evented — the candidate strict-PASSES all three seeds with
+        `contour:v48_fields_enum_from_prompt:4` + `gate:fields_ok`, the answer carrying the model's own
+        values under the real keys (`ITEM/QTY/LEAD_WEEKS/FREE_SHIPPING`). Category K 9/12 -> **12/12**:
+        the whole category is strict-clean on v6.2 for the first time. Zero retries were needed — the
+        first hint naming the real keys is sufficient (cost +8 ptok, +5..11 ctok, same call count).
+    (c) GUARDS clean: zero v48 events in a control arm; zero v48 events outside `K-ex6-03`; ZERO
+        candidate K strict-fails where the control passed (all 12 K cells); zero loop P->F; frozen bands
+        silent in all six run records; adopted-family census differs only by seed-noise wobbles
+        (v243 6->3, v219 11->8, v222 4->5) with no code-new family except stamp-gated v48.
+    (d) POOLS: full 231: ctrl 204 cand 203 (9 flips: 5W/6L, exact sign p=1.0000 — at the floor, NOT the
+        reason). Every non-K flip (A-ex6-00, B-ex6-05, H-ex6-01/03/04, I-ex6-02, D-ex6-p2) is event-less
+        and structurally unreachable for a fields-gate-only mechanism; the entire on-target effect (+3)
+        is evented, so cell-level attribution carries the verdict, never the mean.
+    ENERGY: control 19.55 Wh vs candidate 17.41 Wh over three arms each (−11% — unrelated draw length:
+    the candidate side made 400 model calls vs 414; the target cells cost ~0.6 s each). Not attributed.
+    RULE SATISFIED: MEASURED + >=1 evented conversion (3) + guards clean -> **ADOPT 0.0.2.48**;
+    `K_FIELDS_ENUM = contour_at_least(2, 48)` inherits as line behavior (gate_v49 pin: 2.48 == 2.47 +
+    exactly K_FIELDS_ENUM).
+    Queue after 247 (priority order): (1) **bank v6.3** — `B-ex6-04` 9/9 is the published bank defect
+    (gold `start_date` year never stated in the prompt; seeds answer 2023/2024/2025), ship as a new
+    bank file + defect changelog, never an in-place edit; (2) `A-ex6-03` arithmetic near-miss stays a
+    model gap — recomputing the prompt's own formula for the model would be answer synthesis (closed);
+    (3) the event-less H/B/I lottery cells: three pairs running show the same unstable set, so the next
+    honest step is a replication protocol at cell level, not another selection trigger; (4) measurement
+    stack P0 — seed-protocol verification across published reps, rescore integrity under contract v6.2.
+    Cadence counter: stamps measured since cadence-246 = **2.47, 2.48** (2 of 5) — four-arm re-run not
+    due yet.
+    Tooling published with this pair: `scripts/pair_guard_census.py` (reusable pre-registered-pair
+    judge: fail-closed join integrity, candidate-event census per side/task, frozen-band + adopted-family
+    parity, monotonicity guard, per-cell attribution with cost, pooled exact sign test, energy windows);
+    its verbatim output for this pair is `pair-247/guard-census-247.txt`.
+    Artifacts: `v6-results/pair-247/` (33 files: 6 arms x 4 + sanitized launcher/sampler + energy
+    windows + gpu csv + same-seed rep0 smoke pair + guard census), writeup `PAIR-247-V62.md`, decision
+    record `history/agent-decisions/2026-11-07-pair247-k-fields-enum-adopted-line-moves-to-248.md`,
+    README current line -> `0.0.2.48`.

@@ -1,0 +1,10 @@
+Energy sampler used for the pair-247 windows (run as a separate systemd-run --user unit on the
+controller host, one fresh csv per pair, 2 Hz): every 2 s it queries the GPU board power on the
+endpoint box over passwordless key auth (target and key file are untracked local configuration,
+masked here as <LOCAL_PATH> / <user>@<LAN_IP>) with
+
+  nvidia-smi --query-gpu=power.draw,utilization.gpu,memory.used,temperature.gpu --format=csv,noheader,nounits
+
+and appends "<epoch>.<ns>,<power_w>,<util_pct>,<mem_mib>,<temp_c>" to gpu-power-p247.csv. The unit
+was parb-p247sampler; it was stopped when the queue printed "pair247 done", so the csv covers
+exactly the six arm windows in energy-windows.txt.

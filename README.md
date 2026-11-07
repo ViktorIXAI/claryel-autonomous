@@ -24,9 +24,13 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.47` — ADOPTED on 2026-11-07 after pair-246 (C best-of-2 second trigger on
-`set_mismatch`; between pair-244 and pair-246 the line was `0.0.2.43` with tooling-only stamps
-`0.0.2.45/0.0.2.46`, and pair-245's `0.0.2.44` measured **UNMEASURED** and froze to exactly (2,44);
+Contour gate line: `0.0.2.48` — ADOPTED on 2026-11-07 after pair-247 (K fields-gate key set taken
+from the task's own `Поля:` enumeration instead of the instruction's placeholder token `FIELD`; the
+target cell `K-ex6-03` had been failing 9/9 on our own line because the contour hint itself named the
+placeholder key — 3/3 evented conversions, K pool 9/12 -> 12/12, zero guard violations, zero extra
+model calls; `PAIR-247-V62.md`). Before it, `0.0.2.47` was adopted after pair-246 (C best-of-2 second
+trigger on `set_mismatch`); between pair-244 and pair-246 the line was `0.0.2.43` with tooling-only
+stamps `0.0.2.45/0.0.2.46`, and pair-245's `0.0.2.44` measured **UNMEASURED** and froze to exactly (2,44);
 harness stamps are `0.0.2.x`; full
 history in `versions/VERSIONS.md` and `benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31`
 measured **negative** against the former adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured

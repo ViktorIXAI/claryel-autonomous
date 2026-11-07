@@ -1,0 +1,47 @@
+join: ledger=462 results=462 missing=0 blank=0 (0.00%)
+event census (v48_fields_enum): {('cand', 'contour:v48_fields_enum_from_prompt:4'): 3}
+   fire: arm=t48r22 side=cand task=K-ex6-03    rep=22 contour:v48_fields_enum_from_prompt:4
+   fire: arm=t48r23 side=cand task=K-ex6-03    rep=23 contour:v48_fields_enum_from_prompt:4
+   fire: arm=t48r24 side=cand task=K-ex6-03    rep=24 contour:v48_fields_enum_from_prompt:4
+candidate-event fires in a control arm: False
+candidate-event tasks: ['K-ex6-03']
+engine_stalled rows: 0
+frozen-band events (must be empty): none
+GUARD candidate strict-fails a cell the control passed (K*): none
+
+TARGET K-ex6-03 per rep:
+  rep 22 ctrl: c=0.25 f=False codes=['missing'] ev=['gate:fields_ok']
+          ANS="FIELD: кресла 'Oslo'\nFREE_SHIPPING: yes"
+  rep 22 cand: c=1.0 f=True codes=[] ev=['contour:v48_fields_enum_from_prompt:4', 'gate:fields_ok']
+          ANS='ITEM: Oslo\nQTY: 200\nLEAD_WEEKS: 14\nFREE_SHIPPING: yes'
+          cost ctrl ptok=137 ctok=16 calls=1 s=0.59 | cand ptok=145 ctok=27 calls=1 s=0.65
+  rep 23 ctrl: c=0.25 f=False codes=['missing'] ev=['gate:fields_ok']
+          ANS='FIELD: ITEM, QTY, LEAD_WEEKS, FREE_SHIPPING\nFREE_SHIPPING: yes'
+  rep 23 cand: c=1.0 f=True codes=[] ev=['contour:v48_fields_enum_from_prompt:4', 'gate:fields_ok']
+          ANS="ITEM: кресла 'Oslo'\nQTY: 200\nLEAD_WEEKS: 14\nFREE_SHIPPING: yes"
+          cost ctrl ptok=137 ctok=22 calls=1 s=0.58 | cand ptok=145 ctok=33 calls=1 s=0.65
+  rep 24 ctrl: c=0.25 f=False codes=['missing'] ev=['gate:fields_gap_1', 'gate:fields_fixed_by_code', 'gate:fields_repaired_by_code', 'gate:fields_ok']
+          ANS='FIELD: ITEM\nFREE_SHIPPING: yes'
+  rep 24 cand: c=1.0 f=True codes=[] ev=['contour:v48_fields_enum_from_prompt:4', 'gate:fields_ok']
+          ANS='ITEM: Oslo\nQTY: 200\nLEAD_WEEKS: 14\nFREE_SHIPPING: yes'
+          cost ctrl ptok=137 ctok=22 calls=1 s=0.63 | cand ptok=145 ctok=27 calls=1 s=0.66
+evented conversions (candidate strict-PASS over control strict-FAIL carrying v48_fields_enum): 3
+
+pooled 231 cells: ctrl strict=204 cand strict=203 | candidate W=5 L=6 exact sign p=1.0000
+
+adopted-family event census (ctrl vs cand, |diff|>0):
+   loop_protocol_reask                  ctrl=2 cand=3
+   v19_d_order_to_steps                 ctrl=1 cand=0
+   v20_j_id_norm                        ctrl=12 cand=13
+   v20_j_id_norm_v239_j_rerank_by_p     ctrl=5 cand=4
+   v219_h_clear_actions_h_clear_cla     ctrl=4 cand=2
+   v219_h_clear_claims                  ctrl=7 cand=6
+   v222_f_avoid_fill                    ctrl=4 cand=5
+   v228_h_requires_sig                  ctrl=1 cand=0
+   v228_h_requires_sig_h_unknown_nu     ctrl=1 cand=0
+   v228_h_unknown_null                  ctrl=1 cand=0
+   v243_d_best2_banned_fired            ctrl=6 cand=3
+   v243_d_best2_banned_win              ctrl=4 cand=1
+   v48_fields_enum_from_prompt          ctrl=0 cand=3
+
+wrote <LOCAL_PATH>

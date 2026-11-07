@@ -318,3 +318,17 @@ C-ex6-03 r18, C-ex6-08 r16, H-ex6-01 r16, H-ex6-03 r18, I-ex6-01 r18.
 Fairness of the corrected golds (owner rule): A-ex6-03 and K-ex6-03 moved 0/120 (v6.1) to 3/3
 for every raw arm under v6.2 — bank clarifications lift raw arms as required. C-ex6-02 remains
 genuinely hard for everyone on the corrected gold.
+
+## 2026-11-07 12:07 CET addendum (pair-247, bank v6.2): `K-ex6-03` is CLOSED — it was contour-caused and is now fixed
+
+    The chronic 9/9 `K-ex6-03` failure on the v6.2 line was never a model gap: the contour's own
+    `KEY: value` completeness gate derived its required keys by scanning the prompt for UPPERCASE
+    tokens followed by a colon, which in a K prompt returns the instruction's placeholder example
+    (`вида FIELD: значение`), so the hint told the model to key its answer `FIELD:` and the gate called
+    that complete. Contour `0.0.2.48` takes the key set from the task's own `Поля:` enumeration
+    instead: pair-247 converted 3/3 seeds with the event on every converted row, and the K category is
+    now 12/12 strict (`PAIR-247-V62.md`).
+    Cell-class map after this pair, for the next hypothesis: `B-ex6-04` = bank defect (v6.3 queue,
+    contour closed); `A-ex6-03` = genuine arithmetic near-miss (answer synthesis is a closed class);
+    `H-ex6-01/03/04`, `B-ex6-05`, `I-ex6-02`, `A-ex6-00` = event-less single-draw lottery, identical set
+    across pair-245/246/247 — no selection trigger left for them; `C-ex6-02` = biased draw, retry spent.
