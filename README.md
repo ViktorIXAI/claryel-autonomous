@@ -234,11 +234,14 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   one corrected cell. Contour common set **170/183** vs basalt 144 (W31/L5, p=1.3e-5), codex
   131 (W43/L4, p=2.8e-9), grok 134 (W39/L3, p=5.6e-9) — contour > basalt > grok > codex holds
   on v6.4; the adopted 0.0.2.48 K-fields gate shows on brand-new seeds (K 12/12 vs 6/12 raw,
-  K-ex6-03 3/3). Rule-(c) byte re-score: 0/183 mismatches. Negative result published with it:
-  the `_loop_rows` trajectory-storage gap required "for new runs" is still open — 18 loop
-  cells stay as-run ledger claims, queued as a tooling release with a contract test. Tooling
-  fix found during publication: the cadence scorer hardcoded its CSV arm label (now derived
-  from run records). Artifacts `v6-results/cadence-249/`, writeup `CADENCE-249-V64.md`,
+  K-ex6-03 3/3). Rule-(c) byte re-score: 0/183 mismatches. Retracted within the same hour
+  (16:47 CET correction): the first publication reported a `_loop_rows` storage gap and
+  non-replayable loop cells — that was a re-scorer lookup error; loop trajectories are stored
+  (`agent_steps` + the pinned adapter mapping), all 18 loop cells now replay offline with
+  0 ledger mismatches (strict 17/18 = the published column); only category E (docker battery)
+  stays offline-non-replayable. Tooling
+  fix shipped with the correction: the cadence scorer hardcoded its CSV arm label (now derived
+  from run records) and now replays loop rows itself. Artifacts `v6-results/cadence-249/`, writeup `CADENCE-249-V64.md`,
   decision record `history/agent-decisions/2026-11-07-cadence249-v64-fair-contour-margin-holds.md`.
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering

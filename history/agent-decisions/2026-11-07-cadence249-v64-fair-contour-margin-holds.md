@@ -42,3 +42,17 @@ cells x 3 reps = 183/arm.
 - Tooling queue: loop-row trajectory storage (`_loop_rows`) closed for new runs with a
   contract test — every published loop number is currently an as-run claim, which the
   repo states honestly but the rule demanded to close.
+
+## Correction (16:47 CET, same day)
+Item 1's NEGATIVE FINDING was WRONG and is retracted. The `_loop_rows` "storage gap" was
+a re-scorer lookup-convention error in `scripts/cadence_score_v62.py`: loop trajectories
+ARE stored (result-row sibling fields `agent_steps`/`agent_final`), and the generated
+pinned adapter `parb_loop.check_D_loop` maps them to the scorer row form. The scorer now
+applies that pinned mapping: all 18 loop cells replay offline under contract v6.2 with
+0 ledger mismatches (replay strict 17/18 = the published loop column); all other tables
+byte-identical. Loop numbers in CADENCE-249-V64.md are reproducible from stored bytes.
+Remaining offline gap: category E only (30 cells, docker battery). The tooling queue item
+becomes a convenience (store adapter-mapped `_loop_rows` directly) — NOT a protocol gap.
+Class lesson (skill's scorer-routing rule, caught minutes after publication this
+time): a re-scorer that reports every cell of one category broken must be audited against
+the stored-shape convention before the finding is published.

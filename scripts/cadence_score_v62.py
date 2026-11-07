@@ -50,6 +50,28 @@ def strict(c, f):
     return c == 1.0 and bool(f)
 
 
+def _loop_rows_from_steps(steps):
+    """Mirror of the GENERATED workspace adapter `parb_loop.check_D_loop` (pinned in
+    WS_PINNED; cadence-249 correction 2026-11-07): loop result rows store the harness
+    step list in the sibling field `agent_steps`, and the adapter turns those steps into
+    the scorer row form (JSON-string parsed actions; `gate_block` -> attempted-tool dict;
+    `gate_rejected` -> marked dict). An external re-scorer that only looks for
+    `answer._loop_rows` wrongly reports every loop cell 'not replayable' — 18/18 replay
+    clean (0 ledger mismatches) once the pinned mapping is applied."""
+    rows = []
+    for s in (steps or []):
+        p = s.get("parsed")
+        if p is None and "gate_block" in s:
+            rows.append({"tool": s["gate_block"], "arg": None})
+            continue
+        if s.get("gate_rejected"):
+            rows.append(dict(p, gate_rejected=True) if isinstance(p, dict)
+                        else {"gate_rejected": True})
+            continue
+        rows.append(p if isinstance(p, str) else json.dumps(p, ensure_ascii=False))
+    return rows
+
+
 def sign_test(w, l):
     n = w + l
     if n == 0:
@@ -160,11 +182,14 @@ def main() -> int:
                 mismatches.append((key, "blank_answer_bytes"))
                 continue
             if task in loop:
-                try:
-                    tr = json.loads(rr["answer"]).get("_loop_rows")
-                except (TypeError, ValueError):
-                    tr = None
-                if not tr:
+                if "agent_steps" in rr:
+                    tr = _loop_rows_from_steps(rr["agent_steps"])
+                else:
+                    try:
+                        tr = json.loads(rr["answer"]).get("_loop_rows")
+                    except (TypeError, ValueError):
+                        tr = None
+                if tr is None:
                     not_replay.append((key, "trajectory_not_stored"))
                     continue
                 c, f, n = CK.check_D_loop_v6(tpub[task], tr)
@@ -182,7 +207,7 @@ def main() -> int:
         print("  MISMATCH %s r%s: %s" % (k[0], k[1], why))
     from collections import Counter as _C
     why = _C(w for _, w in not_replay)
-    print("rule (c) not-offline-replayable cells: %s (E = docker battery; missing _loop_rows = protocol gap of these arms; ledger scores kept as-run)" % dict(why))
+    print("rule (c) not-offline-replayable cells: %s (E = docker battery, not offline-replayable; loop cells replay from agent_steps via the pinned adapter mapping)" % dict(why))
     blank_ans = sum(1 for rep in reps for t, r in
                     rows_of(os.path.join(ws, "results-%sr%d.jsonl" % (args.prefix, rep))).items()
                     if not r.get("answer"))

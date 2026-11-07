@@ -1773,3 +1773,22 @@ naming bank sha16 + contract per row), decision record
 `2026-11-07-cadence249-v64-fair-contour-margin-holds.md`, README bullet. Sampler unit
 `parb-gpu249` stopped after legs done. Next: contour cadence due after 5 more measured
 stamps; tooling release to close `_loop_rows` for new runs.
+
+## 2026-11-07 16:47 CET — CORRECTION to the cadence-249 verdict entry (16:43): the `_loop_rows` gap claim was WRONG — loop rows ARE replayable, 0 ledger mismatches
+The 16:43 entry (and the first publication of CADENCE-249-V64.md) reported "zero
+`_loop_rows` in all three q49 legs — the protocol gap is still open; 18 loop cells stay
+as-run ledger claims". That finding was a **re-scorer lookup-convention error, not a
+storage gap**: loop result rows store the full trajectory as sibling fields
+`agent_steps`/`agent_final`, and the generated workspace adapter `parb_loop.check_D_loop`
+(byte-pinned, WS_PINNED) maps them to the scorer row form. Replayed all 18 cadence-249
+loop cells offline under frozen contract v6.2 with that pinned mapping: **0 mismatches vs
+the ledger, replay strict 17/18 exactly matching the published loop column**. Re-ran the
+full `scripts/cadence_score_v62.py` (now applies the mapping itself, with a legacy
+`answer._loop_rows` fallback): every non-rule-(c) table byte-identical; CSVs regenerated.
+Only genuine offline gap left: category E (30 cells, docker battery). Class rule: a
+re-scorer reporting EVERY cell of one category broken must be audited against the stored-
+shape convention (harness row fields + pinned adapter) BEFORE the finding is published —
+the skill's scorer-routing rule caught me at minute ~15 of publication this time, not at
+audit time. Fixed surfaces: CADENCE-249-V64.md rule-(c) section (correction block,
+original claim named and retracted, not silently deleted), decision record appended
+correction section, README bullet. No score, pair, or adoption verdict changes.

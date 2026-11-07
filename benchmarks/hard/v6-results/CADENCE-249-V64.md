@@ -30,16 +30,27 @@ N/A for single-shot brains by protocol.
 ## Pre-registered rule (c): contour ledger scores re-derived from stored bytes
 
 Re-scored every contour result answer with the same contract v6.2 and compared cell by
-cell against the stored ledger: **0 mismatches across all 3 legs** (183 replayable cells;
-30 E cells = docker battery not offline-replayable). Zero blank result answers.
+cell against the stored ledger: **0 mismatches across all 3 legs** (201 replayable cells:
+183 single-shot + 18 loop-D; 30 E cells = docker battery, not offline-replayable). Zero
+blank result answers.
 
-**Finding against rule (c): the `_loop_rows` protocol gap is NOT closed.** The pre-
-registered rule required loop-D legs to store `_loop_rows` ("the published protocol gap of
-the 2.45-era arms, closed for new runs"), but zero rows in `results-q49r2{5,6,7}.jsonl`
-carry `_loop_rows` — the same 18 loop cells (6 tasks x 3 reps) stay ledger-scores-only and
-not offline-replayable. The gap is in the loop runner's row storage, not this cadence's
-wiring; it is queued as a tooling fix, and every loop score quoted below is an as-run
-ledger claim, disclosed as such.
+**Correction (16:47 CET, same day — the first publication of this report at 16:43 CET
+was wrong on this section):** it reported "the `_loop_rows` protocol gap is NOT closed"
+and held 18 loop cells as ledger-only claims. That was a **re-scorer lookup-convention
+error, not a storage gap**: the harness stores the full loop trajectory in the result
+rows as the sibling fields `agent_steps`/`agent_final`, and the generated workspace
+adapter `parb_loop.check_D_loop` (byte-pinned, in `WS_PINNED`) maps those steps to the
+scorer row form (parsed actions as JSON strings; `gate_block` -> attempted-tool dict;
+`gate_rejected` -> marked dict). `scripts/cadence_score_v62.py` now applies that pinned
+mapping itself: **all 18 loop cells replay offline under contract v6.2 with 0 ledger
+mismatches, replay strict 17/18 exactly matching the loop column above** (re-verified by
+re-running the whole scorer — every other table byte-identical to the 16:43 run). Every
+loop number in this report is therefore reproducible from stored bytes; the only genuine
+offline gap left is category E (30 cells, docker battery). Honest tooling follow-up
+(convenience, not a protocol gap): have the harness also store the adapter-mapped
+`_loop_rows` rows directly, so external re-scorers need not re-implement the adapter.
+The error and its correction are recorded here, in `REVIEW-INBOX.md` and the decision
+record; nothing in the score tables moved.
 
 ## Pre-registered rule (a): bank fairness — raw arms must not regress on the corrected bank
 
