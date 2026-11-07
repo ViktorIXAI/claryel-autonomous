@@ -262,7 +262,7 @@ _FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TAB
           "B_FIELD_COMPLETE", "B_TABLE_AGGREGATE", "G4_LOTTERY", "J_MEMBERSHIP_V3",
           "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
           "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR",
-          "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE")
+          "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE", "A_PCT_CHAIN")
 _missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
 ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
 _moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
@@ -327,6 +327,18 @@ ck(g251.B_FIELD_COMPLETE is False and g234.B_FIELD_COMPLETE is True,
 ck((2, 51) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.51") == (2, 51)
    and GV.behavior_tuple("0.0.2.50") == (2, 48),
    "the candidate registers a real contour change; the 2.50 tooling release keeps behavior 2.48")
+
+# pair-249 (2026-11-07): 0.0.2.52 is the CONTOUR CANDIDATE stamp (A percent-chain arithmetic,
+# the fifth 2.27-family branch). Matrix discipline: 2.52 = the adopted 2.51 matrix + exactly
+# A_PCT_CHAIN; the pair control 2.51 must not carry the candidate's trigger.
+g252 = load("0.0.2.52")
+ck(getattr(g251, "A_PCT_CHAIN") is False, "the pair-249 candidate trigger is OFF on the 2.51 control")
+ck(getattr(g252, "A_PCT_CHAIN") is True, "the candidate trigger is ON at 2.52")
+_m252 = [f for f in _FLAGS if getattr(g252, f) != getattr(g251, f) and f != "A_PCT_CHAIN"]
+ck(not _m252, "2.52 = the 2.51 matrix + exactly A_PCT_CHAIN (%s)" % _m252)
+ck((2, 52) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.52") == (2, 52)
+   and GV.behavior_tuple("0.0.2.51") == (2, 51),
+   "the candidate registers a real contour change; the control keeps behavior 2.51")
 
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"

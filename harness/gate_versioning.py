@@ -191,6 +191,55 @@ CONTOUR_FEATURES = (
     # B_ECHO_RESTORE stays `>= (2,51)` and inherits as line behavior; the 2.34 config grammar stays
     # frozen. Details `PAIR-248-V62.md`, decision record
     # `history/agent-decisions/2026-11-07-pair248-b-echo-restore-adopted-line-moves-to-251.md`.)
+    (2, 52),  # A PERCENT-CHAIN arithmetic (pair-249 candidate) - the fifth branch of the ADOPTED
+    # 2.27 A-arithmetic family, aimed at the ONLY chronic content loss on the adopted line that no
+    # stamp has ever fired on. Bank v6.2+ published draws strict-fail A-ex6-03 in 10/15 contour rows
+    # (pair-246 3/3 both arms, pair-247 2/3 BOTH arms, pair-248 2/3 BOTH arms, cadence-246 1/3): the
+    # model emits the right JSON shape but miscomputes `tax`/`net` around the chain the prompt states
+    # verbatim («Соцвзнос 22% от базы (gross), но не более 6100. Налог 19% от (gross - соцвзнос -
+    # вычет 1200), не менее 0. (net = gross - social - tax)») - fields_mismatch:net,tax, content 0.0.
+    # Zero a_arith contour events on every published A-ex6-03 row: the four adopted 2.27 grammars
+    # (invoice/FX/proration/trim) and the frozen 2.33 tariff grammar never reach this shape. The new
+    # grammar (_a_pct_chain) parses the chain ONLY from the prompt's own text: exactly one
+    # `id=NUMBER` base, exactly len(keys)-1 «<Label> P% от <expr>, [но] не более|не менее CAP»
+    # clauses, exactly one parenthesized formula whose non-LHS spec-key tokens appear once each in
+    # the clause appearance order (two independent orderings must agree); expressions over +,-,
+    # parentheses, the base id, earlier clause labels and inline «word NUMBER» constants; unknown
+    # tokens, count/order disagreement, a word-vs-label collision, a non-numeric or extra/missing
+    # model key all refuse and touch nothing. Values re-valued by code (key SET never changed),
+    # _a_round2 per stage, an already-equal answer is a no-op, reference never read, zero model
+    # tokens. PRE-LAUNCH DRY-RUN (this commit, before any v* row): (i) coverage census over ALL 77
+    # bank-v6.6 AND all 77 bank-v6.2 prompts: the grammar parses EXACTLY {A-ex6-03}; (ii) the
+    # grammar's values on A-ex6-03 equal the bank ref numerically (2090.0/1179.9/6230.1 - gold
+    # reproduced from the printed rules, same derivability proof as the 2.35/2.48 closed-surface
+    # adoptions); (iii) counterfactual replay over EVERY published A-ex6-03 answer on the v6.2-era
+    # line (cadence-246 + pair-246/247/248): every strict-fail row re-values to the gold with event
+    # contour:v52_a_percent_chain, every strict-pass row is byte-identical (zero fires on passes),
+    # mis-derivations 0; pinned by gate_v66_a_percent_chain_test.py. A-ex6-03 task bytes are
+    # byte-identical v6.2 -> v6.6, so the chronicity evidence transfers to the working bank.
+    # PRE-REGISTERED RULE (REVIEW-INBOX 2026-11-07 22:0x CET + run_pair249.sh header, frozen
+    # before any v* row): pair-249 runs on the WORKING bank v6.6 (5c86252b2ef2f422), sp1 reps
+    # 37/38/39, control = adopted 0.0.2.51 (tag v51r*), candidate = 0.0.2.52 (tag v52r*), serial
+    # arms, idle P2005 Basalt. (a) MEASURED iff >=1 control row strict-fails A-ex6-03 (published
+    # base rate ~2/3 per arm-set, live target expected but never assumed); zero live target =
+    # UNMEASURED, never a pass (pair-233/238/242/245 mode). (b) a conversion counts only on a
+    # matched (task,rep) strict-PASS carrying contour:v52_a_percent_chain at identical ptok/calls
+    # (the repair is post-hoc code, any added model call on a converted row closes the stamp).
+    # (c) guards: ZERO v52 events in any control arm; ZERO v52 events outside A-ex6-03 (the census
+    # pins the surface - a fire elsewhere is a grammar regression, close the stamp); ZERO candidate
+    # A-ex6-03 strict-fails where the control passed (the branch only re-values non-equal answers,
+    # a rewrite that breaks a passing answer is a code bug); frozen-band parity (zero 2.30-32/34-
+    # config/36/38/41/42/44 fires in either arm); adopted-family parity within seed noise (v34 C
+    # families, v47 C-set trigger, v48 K enum, v51 B echo, v243 loop draws, 2.39/2.40 J); stall
+    # protocol (engine_stalled rows excluded, abort above 25% of the last 20). (d) RESOLUTION: the
+    # target pool is 1 task x 3 seeds = 3 cells, cell-level by construction; the 77-cell mean with
+    # the exact pooled sign test is context only, a delta under ~2 cells is UNRESOLVABLE and never
+    # the reason. ADOPT 0.0.2.52 iff (a) holds + >=1 evented conversion + all guards clean;
+    # otherwise freeze A_PCT_CHAIN to `STAMP_REVISION == (2, 52)` and publish the negative with
+    # win-level detail. gate_v66 pins the grammar + refusals on real and synthetic bytes, the
+    # per-stamp flag matrix (2.51 = adopted line WITHOUT the branch, 2.52 = + exactly A_PCT_CHAIN),
+    # the published-bytes replay and the per-stamp event names; gate_v49 extended with the 2.52
+    # matrix.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -272,8 +321,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # `gate_v65_b_echo_restore_test.py` pins the matrix (2.50 moves ZERO flags vs 2.48; 2.51 =
 # the 2.50 matrix + exactly B_ECHO_RESTORE; 2.34 keeps both grammars under the v234 event
 # name; 2.35-2.50 stay silent) and the per-stamp event naming.
-CURRENT_REVISION = (2, 51)
-CURRENT_STAMP = "0.0.2.51"
+CURRENT_REVISION = (2, 52)
+CURRENT_STAMP = "0.0.2.52"
 
 
 def _digits(value: str) -> list[int]:

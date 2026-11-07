@@ -117,7 +117,9 @@ spec = importlib.util.spec_from_file_location("gate_versioning_v65", str(HERE / 
 GV = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(GV)
 ck((2, 51) in GV.CONTOUR_FEATURES, "(2,51) is registered in CONTOUR_FEATURES")
-ck(GV.CURRENT_REVISION >= (2, 51) and GV.CURRENT_STAMP == "0.0.2.51", "CURRENT bumped to 2.51")
+ck(GV.CURRENT_REVISION >= (2, 51) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
+   "CURRENT is at or beyond 2.51 and the stamp follows the revision (never pin an exact tuple: "
+   "the pair-244 lesson)")
 ck(GV.behavior_tuple("0.0.2.51") == (2, 51), "stamp 2.51 IS a contour release (behavior 2.51)")
 ck(GV.behavior_tuple("0.0.2.50") == (2, 48), "tooling 2.50 still reports behavior 2.48")
 ck(GV.summary("0.0.2.51")["contour_changed_at_this_release"] is True,

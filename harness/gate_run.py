@@ -1544,6 +1544,16 @@ J_RERANK_V2 = contour_at_least(2, 39)
 # (2,38) — a `contour_at_least` floor would smuggle an unadopted, never-on-target experiment into
 # every later candidate and pollute its attribution (the inheritance rule that froze 2.30/2.31/2.36).
 A_TABLE_ARITH = STAMP_REVISION in ((2, 33), (2, 38))
+# 0.0.2.52 (pair-249 candidate): A PERCENT-CHAIN arithmetic — the fifth branch of the ADOPTED 2.27
+# family, targeting the only chronic content loss on the adopted line that no stamp has ever touched.
+# On bank v6.2+ the published contour draws strict-fail A-ex6-03 in 10/15 draws (2/3 fails in BOTH
+# arms of pair-247 and pair-248, cadence-246 1/3, pair-246 3/3): the model states the right JSON
+# shape but miscomputes `tax`/`net` around the printed chain «Соцвзнос 22% от базы (gross), но не
+# более 6100. Налог 19% от (gross - соцвзнос - вычет 1200), не менее 0. (net = gross - social - tax)».
+# The adopted 2.27 grammars never fire there (zero a_arith events on every A-ex6-03 row published).
+# The new grammar recomputes the chain by code from the prompt's own numbers; reference never read,
+# zero model tokens, fails closed on every uncertainty (see _a_pct_chain).
+A_PCT_CHAIN = contour_at_least(2, 52)
 # 0.0.2.34: B field completeness — extraction fields recomputed by code from the prompt's own data block.
 # Two narrow grammars (config key:value block; embedded-JSON echo-with-count), required names read from
 # the prompt's own JSON spec, any ambiguity or extra model key refuses. K excluded: value SHAPES the
@@ -2397,6 +2407,167 @@ def _a_tariff_eval(chain, tail, attrs):
     return tail
 
 
+# ---- 0.0.2.52: A percent-chain grammar (A-ex6-03 class) -----------------------------------------
+# The prompt states the whole chain itself: exactly ONE `latin_id=NUMBER` base, exactly
+# (len(spec_keys)-1) clauses of the shape «<Label> P% от <expr>, [но] не более|не менее CAP», and
+# exactly ONE parenthesized formula «(key = id - key - key ...)». The `JSON {...}` spec line gives
+# the output keys; the formula LHS is one of them and the remaining spec keys must appear in the
+# formula RHS EXACTLY once each, in the same order the clauses appear (two independent orderings in
+# the prompt must agree, otherwise refuse). Expression tokens: parentheses, +, -, numbers, the base
+# id, earlier clause labels (Cyrillic, case-insensitive), and inline «word NUMBER» constants; an
+# unknown token or a word-vs-label collision refuses the whole prompt. Values are rounded with the
+# family's own _a_round2 per stage. Reference never read; zero model tokens.
+_A_PCT_CLAUSE_RE = re.compile(
+    r"([А-Яа-яЁё][А-Яа-яЁё]*)\s+(\d+(?:[.,]\d+)?)\s*%\s*от\s+([^,.]+?),"
+    r"\s*(?:но\s*)?(не более|не менее)\s*(\d+(?:[.,]\d+)?)")
+_A_ID_NUM_RE = re.compile(r"\b([a-z_][a-z0-9_]*)\s*=\s*(\d+(?:\.\d+)?)\b")
+_A_SPEC_RE = re.compile(r"JSON\s*\{([^{}]+)\}")
+_A_FORMULA_RE = re.compile(r"\(([a-z_][a-z0-9_]*) = ([a-z_0-9+\- ]+)\)")
+_A_P_TOK_RE = re.compile(r"\d+(?:[.,]\d+)?|[A-Za-z_][A-Za-z0-9_]*|[А-Яа-яЁё]+|[()+\-]")
+
+
+def _a_ptoks(s):
+    """Tokenize a percent-chain expression; None (refuse) on any uncovered character."""
+    toks = _A_P_TOK_RE.findall(s)
+    if sum(len(t) for t in toks) != len(re.sub(r"\s+", "", s)):
+        return None
+    return toks
+
+
+def _a_peval(toks, env, labels):
+    """Evaluate +,-,parentheses over env (exact identifiers; Cyrillic labels lower-cased).
+    A Cyrillic word followed by a NUMBER is an inline constant unless it collides with a
+    clause label (then refuse). Raises on any unknown token."""
+    pos = 0
+
+    def atom():
+        nonlocal pos
+        tk = toks[pos]
+        if tk == "(":
+            pos += 1
+            v = expr()
+            if pos >= len(toks) or toks[pos] != ")":
+                raise ValueError("unbalanced (")
+            pos += 1
+            return v
+        if tk[0].isdigit():
+            pos += 1
+            return float(tk.replace(",", "."))
+        if tk[0].isascii() and (tk[0].isalpha() or tk[0] == "_"):
+            pos += 1
+            if tk not in env:
+                raise ValueError("unknown id " + tk)
+            return env[tk]
+        pos += 1
+        if pos < len(toks) and toks[pos][0].isdigit():
+            if tk.lower() in labels:
+                raise ValueError("word/label collision " + tk)
+            v = float(toks[pos].replace(",", "."))
+            pos += 1
+            return v
+        k = tk.lower()
+        if k not in env:
+            raise ValueError("unknown word " + tk)
+        return env[k]
+
+    def expr():
+        nonlocal pos
+        v = atom()
+        while pos < len(toks) and toks[pos] in ("+", "-"):
+            op = toks[pos]
+            pos += 1
+            w = atom()
+            v = v + w if op == "+" else v - w
+        return v
+
+    val = expr()
+    if pos != len(toks):
+        raise ValueError("trailing tokens")
+    return val
+
+
+def _a_pct_inner(g):
+    """Base expression of a clause: bare latin id, or a (parenthesized) expression with an
+    optional leading Cyrillic qualifier («базы (gross)»). Anything else: refuse."""
+    g = g.strip()
+    if re.fullmatch(r"[a-z_][a-z0-9_]*", g):
+        return g
+    m = re.fullmatch(r"(?:[А-Яа-яЁё][А-Яа-яЁё ]*)?\(\s*(.+?)\s*\)", g)
+    return m.group(1) if m else None
+
+
+def _a_pct_chain(prompt):
+    """Parse the percent chain from the prompt's own text. Returns (keys, {key: value}) in the
+    spec's key order, or None to refuse: every count, order and token must resolve exactly."""
+    spec = _A_SPEC_RE.findall(prompt)
+    if len(spec) != 1:
+        return None
+    keys = [x.strip().strip('"').strip("'") for x in spec[0].split(",")]
+    if (len(keys) < 2 or len(set(keys)) != len(keys)
+            or any(not re.fullmatch(r"[a-z_][a-z0-9_]*", k) for k in keys)):
+        return None
+    bases = _A_ID_NUM_RE.findall(prompt)
+    if len(bases) != 1:
+        return None
+    bkey, bnum = bases[0]
+    forms = _A_FORMULA_RE.findall(prompt)
+    if len(forms) != 1:
+        return None
+    fkey, frhs = forms[0]
+    if fkey not in keys:
+        return None
+    clauses = _A_PCT_CLAUSE_RE.findall(prompt)
+    if len(clauses) != len(keys) - 1:
+        return None
+    labels = [c[0].lower() for c in clauses]
+    if len(set(labels)) != len(labels):
+        return None
+    rtoks = _a_ptoks(frhs)
+    if rtoks is None or fkey in rtoks:
+        return None
+    # every RHS identifier must be the base id or a spec key; the non-LHS spec keys appear
+    # exactly once each and their RHS order binds to the clause appearance order
+    rkeys = []
+    for tk in rtoks:
+        if re.fullmatch(r"[a-z_][a-z0-9_]*", tk):
+            if tk != bkey and tk not in keys:
+                return None
+            if tk in keys and tk != fkey:
+                rkeys.append(tk)
+        elif tk[0].isdigit() or tk in ("+", "-", "(" , ")"):
+            continue
+        else:
+            return None
+    if len(rkeys) != len(clauses) or len(set(rkeys)) != len(rkeys):
+        return None
+    if set(keys) != set(rkeys) | {fkey}:
+        return None
+    env = {bkey: float(bnum)}
+    vals_by_key = {}
+    for (label, pct, base_expr, clamp, cnum) in clauses:
+        inner = _a_pct_inner(base_expr)
+        if inner is None:
+            return None
+        toks = _a_ptoks(inner)
+        if toks is None:
+            return None
+        try:
+            bv = _a_peval(toks, env, set(labels))
+        except (ValueError, IndexError):
+            return None
+        v = float(pct) / 100.0 * bv
+        v = min(v, float(cnum)) if clamp == "не более" else max(v, float(cnum))
+        v = _a_round2(v)
+        env.setdefault(label.lower(), v)
+        vals_by_key[rkeys[len(vals_by_key)]] = v
+    try:
+        fv = _a_peval(list(rtoks), dict(env, **vals_by_key), set(labels))
+    except (ValueError, IndexError):
+        return None
+    vals_by_key[fkey] = _a_round2(fv)
+    return keys, {k: vals_by_key[k] for k in keys}
+
+
 def a_arith_by_code(t, text):
     """v2.27: recompute A JSON from the prompt's own numbers (keyword-free)."""
     if not A_ARITH_CODE or not text:
@@ -2509,6 +2680,30 @@ def a_arith_by_code(t, text):
                                     for rid in cur[mapkey]},
                            totalkey: int(total) if float(total).is_integer() else total}
                     tag = "a_tariff_table"
+    # 0.0.2.52: A percent chain (A-ex6-03 class). The answer must already carry EXACTLY the spec
+    # keys with numeric-parseable values: the grammar only re-values them (membership of the model's
+    # key set is never changed), an already-equal answer is untouched (zero fires on passes), and a
+    # refusal anywhere in _a_pct_chain leaves the text byte-identical.
+    if out is None and A_PCT_CHAIN:
+        parsed = _a_pct_chain(prompt)
+        if parsed:
+            pkeys, pvals = parsed
+            cur = _fmt_parse(text)
+            if isinstance(cur, dict) and set(cur) == set(pkeys):
+                usable, same = True, True
+                for k in pkeys:
+                    try:
+                        curv = float(cur[k])
+                    except (TypeError, ValueError):
+                        usable = False
+                        break
+                    if abs(curv - pvals[k]) > 1e-9:
+                        same = False
+                if usable and same:
+                    return text, None
+                if usable:
+                    out = {k: pvals[k] for k in pkeys}
+                    tag = "a_percent_chain"
     if out is None:
         return text, None
     cur = _fmt_parse(text)
@@ -2524,7 +2719,7 @@ def a_arith_by_code(t, text):
                 same = False; break
         if same and set(out) <= set(cur):
             return text, None
-    _stamps = {"a_tariff_table": "v233_"}  # per-tag stamp: legacy 2.27 branches keep the v227 event
+    _stamps = {"a_tariff_table": "v233_", "a_percent_chain": "v52_"}  # per-tag stamp: legacy 2.27 branches keep the v227 event
     return (json.dumps(out, ensure_ascii=False),
             [_stamps.get(tag or "", "v227_") + (tag or "a_arith_code")])
 

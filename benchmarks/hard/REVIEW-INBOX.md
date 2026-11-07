@@ -2120,3 +2120,61 @@ stays frozen. Artifacts published: `benchmarks/hard/v6-results/PAIR-248-V62.md` 
 (arms, epochs, energy-windows.txt, sanitized launcher); decision record
 `history/agent-decisions/2026-11-07-pair248-b-echo-restore-adopted-line-moves-to-251.md`. Cadence:
 first measured contour stamp since cadence-249; next four-arm re-run due after the 5th.
+
+## 2026-11-07 21:57 CET — PAIR-249 PRE-REGISTRATION: contour 0.0.2.52 (A percent-chain arithmetic), rules frozen BEFORE any v* row
+
+Target chosen from the ADOPTED-LINE map (pair-248 candidate legs u51r34/35/36, 17/231 strict losses):
+C set-mismatch selection is SPENT on this line — the adopted v47 trigger fired on all 4 published C
+losses in pair-248 with zero wins (C-ex6-02 3/3 same omitted candidate = biased draw, published closed);
+D-ex6-l1's banned retry fired 2.43 and lost (both draws attempted the ban, published mechanism limit);
+B-ex6-04 is the bank-defect cell fixed by v6.4+; D-ex6-l3's read_first_missing family drew 1/18 live
+(base rate too thin after pair-245's zero-opportunity lesson — queued, not targeted). The ONE chronic
+content loss no stamp has ever fired on: **A-ex6-03** — strict-fails 10/15 published v6.2-era contour
+draws (2/3 in BOTH arms of pair-247 and pair-248), note `fields_mismatch:net,tax`, and zero a_arith
+events on every one of those rows: the four adopted 2.27 grammars never reach the prompt's percent-chain
+shape («Соцвзнос 22% от базы (gross), но не более 6100. Налог 19% от (gross - соцвзнос - вычет 1200),
+не менее 0. (net = gross - social - tax)»).
+
+Mechanism 0.0.2.52 `A_PCT_CHAIN = contour_at_least(2, 52)`: the fifth branch of the ADOPTED 2.27 family,
+`_a_pct_chain` recomputes the chain by code from the prompt's own text only (one `id=NUMBER` base;
+len(keys)-1 «P% от <expr>, [но] не более|не менее CAP» clauses; one parenthesized formula binding
+clause order to spec-key order — two independent prompt orderings must agree; inline «word NUMBER»
+constants; unknown token / count or order disagreement / word-vs-label collision / extra or
+non-numeric model key = refuse, touch nothing). The model's key SET is never changed; an already-equal
+answer is a no-op; reference never read; zero model tokens; event `contour:v52_a_percent_chain`.
+Bank/scorer stack: v6.6 `5c86252b2ef2f422`, contract v6.2 `c8c0c7dd114dfc32`, sp1 seed protocol.
+
+DRY-RUN (published bytes, before any v* row — pinned by `harness/gate_v66_a_percent_chain_test.py`,
+100 checks PASS): (i) coverage census over ALL 77 bank-v6.6 AND all 77 bank-v6.2 prompts: the grammar
+parses EXACTLY {A-ex6-03}; (ii) its values equal the bank ref (2090.0/1179.9/6230.1) — the gold is
+reproduced from the printed rules; (iii) counterfactual replay over ALL 21 published A-ex6-03 rows on
+the v6.2-era line (cadence-246 + pair-246/247/248): 15/15 strict-fail rows re-value to gold with the
+v52 event, 6/6 strict-pass rows byte-identical (zero fires on passes), mis-derivations 0; at stamp
+2.51 the same bytes emit ZERO a-family events (the control cannot carry the repair). Flag matrix:
+2.52 = 2.51 + exactly A_PCT_CHAIN (gate_v49 extended); CI list updated.
+
+PAIR-249 protocol: WORKING bank v6.6 (first full-bank draws of the adopted line on the working bank —
+the control leg doubles as the v6.6 stability map the coming four-arm cadence needs). A-ex6-03 task
+bytes are byte-identical v6.2 -> v6.6 (only B-ex6-04/H-ex6-01 differ — assert pinned in the test), so
+the chronicity evidence transfers. Workspace `~/parb-b66-contour` rebuilt at the 2.52 harness with the
+v6.6 bank copy `590503cf1701a6ce`, pins `WS-GENERATED.v66full.sha256` re-stamped, `MANIFEST.v6`
+regenerated, `verify_manifest --v6` PASS. sp1 reps **37/38/39** — fresh everywhere (cadence 16-18/25-27,
+pairs 19-24/34-36, probes 28-33, smoke rep 40 outside pairs). Control = adopted 0.0.2.51 (`v51r*`),
+candidate = 0.0.2.52 (`v52r*`), serial arms, idle P2005 Basalt, auth-checked key file, prefill preflight.
+
+FROZEN RULE (the verdict is decided ONLY by this text):
+(a) MEASURED iff >=1 control (v51) row strict-fails A-ex6-03 (published base rate ~2/3 per arm-set —
+    live target expected, never assumed; zero live target = UNMEASURED, never a pass — pair-233/238/242/245 mode).
+(b) A conversion counts only on a matched (task,rep) strict-PASS carrying `contour:v52_a_percent_chain`
+    at identical ptok/calls (post-hoc code repair; any added model call on a converted row closes the stamp).
+(c) Guards: ZERO v52 events in any control arm; ZERO v52 events outside A-ex6-03 (census pins the
+    surface — a fire elsewhere = grammar regression, close the stamp); ZERO candidate A-ex6-03
+    strict-fails where the control passed; frozen-band parity (zero 2.30-32/34-config/36/38/41/42/44
+    fires); adopted-family parity within seed noise (v34 C families, v47 set trigger, v48 K enum,
+    v51 B echo, v243 loop draws, 2.39/2.40 J); stall protocol (>25% of last 20 = abort).
+(d) Resolution: 1 task x 3 seeds = 3 cells, cell-level by construction; the 77-cell mean with the exact
+    pooled sign test is context only, deltas under ~2 cells UNRESOLVABLE and never the reason.
+ADOPT 0.0.2.52 iff (a) + >=1 evented conversion + all guards clean; otherwise freeze A_PCT_CHAIN to
+`STAMP_REVISION == (2, 52)` and publish the negative with win-level detail. Energy: new sampler CSV
+gpu-power-p249.csv, per-arm epoch windows. Cadence counter: pair-248 (2.51) and this pair (2.52) are
+the 1st/2nd measured stamps since cadence-249 — the four-arm re-run stays due after the 5th, not forced.
