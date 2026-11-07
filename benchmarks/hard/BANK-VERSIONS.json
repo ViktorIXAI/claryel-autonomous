@@ -30,6 +30,13 @@
       "published_sha16": "85a0cd0dd6fa1fab",
       "status": "working",
       "note": "v6.3 plus one field: B-ex6-04 value-form hint (example deliberately not the gold). Raw-arm fairness probe FAIR 3/3 on all three arms (REVIEW-INBOX 2026-11-07 13:08 CET)."
+    },
+    {
+      "file": "benchmarks/hard/bank-hard-v6.5.json",
+      "version": "v6.5",
+      "published_sha16": "cd29d6ac94dc3267",
+      "status": "provisional",
+      "note": "H-ex6-01 scenario names the artifact the reference asks for (published defect, bank-defect-b04.md; open since v6.1). Probe rule frozen in REVIEW-INBOX 2026-11-07 17:35 CET before any p64r28+/p65r28+ row; promote to working iff contour pair lifts and the raw-arm fairness probe is FAIR (all arms >= 2/3)."
     }
   ]
 }

@@ -1818,3 +1818,43 @@ corrected before publishing). Full CI-parity contract loop: 28/28 green on pytho
 locally. MEASUREMENT-STACK regenerated (stamp 2.50 / behavior 2.48 / harness commit).
 No arms launched; endpoint idle; next contour stamp needs a fresh live-target audit on
 the v6.4 stability map (cadence-249 draws are the newest evidence).
+
+## 2026-11-07 17:35 CET — bank v6.5 PRE-REGISTERED: H-ex6-01 defect fix (scenario names the artifact); probe rule frozen BEFORE any probe row
+Evidence chain: `bank-defect-b04.md` published the H-ex6-01 defect in the 0.0.2.29 era
+(reference wants `requires: ["аудит-лог operations"]`, the string never appears in the
+prompt) and proposed a bank fix; v6.2 shipped the B-ex6-04 side, H stayed open through
+v6.3/v6.4. New evidence on the current line (cadence-249, bank v6.4, reps 25/26/27):
+H-ex6-01 strict-fails 3/3 for ALL FOUR arms (contour 0.0.2.49 = adopted behavior 2.48,
+bare basalt, ChatGPT-codex, Grok); the contour answers at r26/r27 name the artifact by
+faithful paraphrase ("Проверка системных логов ... операций удаления", "... auditd") and
+are zeroed by the frozen scorer's stem matcher (`_token_cover`, contract v6.2) on the
+unnameable atom — per the standing rule a contour stamp aimed here is UNMEASURED by
+construction, the fix belongs to the bank. Fix: ONE scenario sentence
+(`...этого нет.` -> `...этого нет; есть только аудит-лог operations.`), gold bytes
+untouched; `scripts/verify_bank_v65.py` PASS: v6.4 sha16 identity, changed fields ==
+[H-ex6-01.prompt], all 77 ref+seed byte-identical, ask `_token_cover`-derivable ONLY
+after the fix, spec sentences untouched both sides. New file
+`benchmarks/hard/bank-hard-v6.5.json` sha16 `cd29d6ac94dc3267`.
+Frozen probe rule (applies exactly as written below):
+- Contour side, paired: legs `p64r28/29/30` (bank v6.4 control) vs `p65r28/29/30`
+  (bank v6.5), both `PARB_GATE_VERSION=0.0.2.50` (tooling identical on both sides;
+  behavior 2.48 = adopted line; the contour claims NOTHING), `PARB_SUBSET=H-ex6-01`,
+  matched fresh seeds `plan_reps.py` reps 28/29/30, serial on the idle P2005 Basalt
+  endpoint (auth-checked, preflight prefill >=2k tok/s rules out spin degradation);
+  workspaces rebuilt at HEAD, separate pin sets, bank copies byte-verified.
+- (i) FIX WORKS iff v6.5 legs >= 2/3 strict AND v6.4 legs <= 1/3 strict at the matched
+  seeds. The lift belongs to the bank, never to the contour.
+- (ii) FAIRNESS (owner rule "a fixed gold must lift the RAW arms"): subset ws holding
+  the v6.5 byte-identical H-ex6-01 task object only (guard-assert vs the full file,
+  subset sha16 recorded per row); bare basalt (temp 0.7, seed 1000+rep), ChatGPT-codex
+  (STDIN transport, xhigh, PATH-pinned), Grok (hermes toolsets off); frozen contract
+  v6.2 (`c8c0c7dd114dfc32`) asserted at scoring time; FAIR iff ALL three arms >= 2/3
+  strict. If failures map to the `claims` field (non-empty `claims` -> `ungrounded_claims`
+  zero), expose as defect 2, queue v6.6 (field-spec wording), keep v6.5 PROVISIONAL.
+- (iii) non-H-ex6-01 bank bytes identical by construction (verify); no non-target arm
+  is run; no effect on any other cell is claimable.
+- Promotion: v6.5 -> `working` in BANK-VERSIONS.json iff (i) AND (ii); else stays
+  provisional with the defect-2 note. Decision record at publication.
+- Tool-coverage note: `bank_derivability_audit.py` census is 37 on BOTH banks — its
+  scanner does not cover H `ask` atoms; the scanner is NOT amended mid-probe (the
+  census chain 39->38->37 is pinned), coverage gap queued as tooling follow-up.
