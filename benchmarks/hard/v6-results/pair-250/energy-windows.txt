@@ -1,0 +1,13 @@
+pair-250 per-arm serve-board energy windows (gpu-power-p250.csv, 2 Hz ssh nvidia-smi on the
+endpoint, separate systemd-run unit parb-p250sampler, fresh csv for this pair, 912 samples
+spanning 1794088751 .. 1794090314 epoch = 1563 s, gaps are skipped ssh failures):
+v52r41 322s 8.58Wh | v53r41 280s 6.96Wh
+v52r42 241s 5.28Wh | v53r42 233s 5.25Wh
+v52r43 236s 5.46Wh | v53r43 252s 6.09Wh
+side totals: control (0.0.2.52) 19.32 Wh / 799 s, candidate (0.0.2.53) 18.30 Wh / 765 s (-5.3%).
+The three converted cells are CHEAPER on the candidate side by construction: the deterministic
+ОТВЕТ-line rewrite fires after the single model call, so the candidate never pays the control's
+v47 best-of-2 retry there — ledger seconds 5.07/1.29/1.50 vs 0.76/0.78/1.26, model calls 2 vs 1,
+ptok 370 vs 239 each. Mechanism cost: zero model tokens (post-hoc code); the side Wh delta is
+mostly run-to-run wall variance plus one removed retry per converted cell — not an anti-cost
+claim beyond noise.

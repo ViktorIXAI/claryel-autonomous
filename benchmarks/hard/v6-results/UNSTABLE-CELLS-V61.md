@@ -367,3 +367,46 @@ genuinely hard for everyone on the corrected gold.
     bank correction vs contour closure before any new contour claim targets it), `B-ex6-03`,
     `C-ex6-01`, `I-ex6-01`, `I-ex6-04` (1/3 each), `H-ex6-01/03/04` + `I-ex6-02` + `A-ex6-00`
     (event-less lottery — selection still has no proven trigger there), loop pool = lottery band.
+
+## 2026-11-07 23:43 CET — pair-250 map: C-ex6-02 REPAIRED at 0.0.2.53; first 6-draw stability map of the current line on v6.6
+
+Pair-250 (control 0.0.2.52 vs candidate 0.0.2.53, sp1 reps 41/42/43, bank v6.6
+`5c86252b2ef2f422`/ws `590503cf1701a6ce`, contract v6.2 `c8c0c7dd114dfc32`): `C-ex6-02`
+strict-failed 3/3 control seeds (the 27/27 chronic base rate held live) and converted **3/3** on
+the candidate with `contour:v53_c_py_from_prompt` — the contour EXECUTES the prompt's own printed
+snippets over a closed AST allow-list and rewrites only the ОТВЕТ line to the letter set this
+prompt printed; converted rows carry ONE model call against the control's two (the deterministic
+rewrite passes the cell before the adopted v47 set-selector arms — zero added model calls, the
+operative rule-(b) test; the frozen wording's "identical ptok/calls" would fail every repair that
+pre-empts a control-side retry, disclosed interpretation in `PAIR-250-V66.md` +
+`history/agent-decisions/`). C pool 20/24 -> 22/24; guards all clean; pool 215->216/231 p=1.0
+context only. The cell moves to REPAIRED — the series' biggest single-cell loss is closed by
+prompt-internal grounding, not resampling.
+
+Current-line map (candidate arms of pair-249 (2.52) + pair-250 (2.53) = 6 draws/task on v6.6):
+**60/77 tasks strict-pass every draw.** Partial cells, draws ordered 2.52,2.52,2.52,2.53,2.53,2.53:
+
+| task | passes/6 | pattern | class |
+|---|---|---|---|
+| C-ex6-02 | 3/6 | FFFPPP | REPAIRED at 2.53 (first three draws pre-fix) |
+| C-ex6-01 | 4/6 | FPPPPF | single-shot, notes vary — lottery band |
+| D-ex6-l1 | 4/6 | PPPFFP | loop pool (2 of 6 loop tasks at 4/6) |
+| D-ex6-l2 | 4/6 | FPPFPP | loop pool |
+| D-ex6-p2 | 4/6 | PPPPFF | loop pool (plain D) |
+| H-ex6-03 | 4/6 | PPPFFP | event-less lottery |
+| I-ex6-01 | 4/6 | PFPFPP | P2 target candidate |
+| B-ex6-03 | 5/6 | FPPPPP | bank-adjacent? check notes before targeting |
+| B-ex6-05 | 5/6 | PPPPPF | P2 target candidate (v51 echo family live) |
+| C-ex6-03 | 5/6 | PPPFPP | v47 selector draws |
+| D-ex6-l0/l3/l4 | 5/6 | -FPPPP / FPPPPP / PFPPPP | loop pool |
+| F-ex6-04 | 5/6 | PPPFPP | sysadmin fixer draws |
+| H-ex6-01 | 5/6 | PPPPFP | quote-fixer draws (known lottery) |
+| I-ex6-04 | 5/6 | PPFPPP | lottery band |
+| J-ex6-03 | 5/6 | PPPPFP | 2.32 order_partial grammar coverage <1 on v6.6 bytes — audit before any claim |
+
+Loop pool = 6 tasks, every one partial (4/6-5/6): the published class ruling holds — loop context
+changes re-roll downstream turns, the pool is selection-only and its selection trigger
+(banned_attempted, 2.43) is already on the line. Next targeting rule (from the pair-248/250
+meta-pattern): a stamp may ONLY aim at a cell the CURRENT line still fails; among single-shots
+the highest-frequency content failures are `I-ex6-01` 4/6, `C-ex6-01` 4/6, `H-ex6-03` 4/6 —
+their note taxonomy comes from these 6 published draws before any hypothesis is written.

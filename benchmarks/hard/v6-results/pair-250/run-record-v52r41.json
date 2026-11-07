@@ -1,0 +1,40 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "[REDACTED]",
+  "contour_version": "0.0.2.52",
+  "contour_behavior": "2.52",
+  "contour_changed_at_this_release": true,
+  "git_sha": "740540e5b836161a6b3d3d7514e655c1259eaf13",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "paired contour 0.0.2.52 seed 41 on bank v6.6 (2.53 = C python-literal options: the prompt's own printed snippets executed by code over a closed AST allow-list, letter set re-derived, only the OTVET line touched, zero model tokens, control 0.0.2.52 = adopted line after pair-249; 2.30-2.34/2.36/2.38/2.41/2.42/2.44 frozen) ",
+  "stack": {
+    "bank_version": "v6.6",
+    "bank_version_source": "marker",
+    "bank_sha16": "590503cf1701a6ce",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.52",
+    "contour_behavior": "2.52",
+    "harness_git_sha": "740540e5b836161a6b3d3d7514e655c1259eaf13"
+  }
+}

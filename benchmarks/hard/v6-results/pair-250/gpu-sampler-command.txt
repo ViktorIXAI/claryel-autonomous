@@ -1,0 +1,12 @@
+GPU board-power sampler for pair-250 (the untracked local helper `gpu_sampler_p250.sh`, launched
+as its own systemd-run unit `parb-p250sampler` so it survives the launcher session; a fresh CSV
+per pair, 2 Hz). The actual ssh target and key path live only in the untracked local helper:
+
+  every 2 s: ssh <user>@<LAN_IP> (repo-standard non-interactive key) \
+      "nvidia-smi --query-gpu=power.draw,utilization.gpu,memory.used,temperature.gpu \
+       --format=csv,noheader,nounits"  >> gpu-power-p250.csv
+
+912 samples span the run window (v52r41-start 1794088751 .. v53r43-end 1794090314 epoch; the csv
+runs 1563 s total); gaps are skipped ssh failures - the sampler drops empty reads; per-arm Wh
+integration in `energy-windows.txt` via scripts/gpu_energy.py with the epoch files shipped in
+this directory. The sampler unit was stopped at 23:38 CET once queue.log carried `pair250 done`.

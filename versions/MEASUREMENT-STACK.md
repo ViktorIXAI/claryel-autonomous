@@ -90,6 +90,7 @@ produced them are the pinned ones named below.
 | `pair-247` | 6 | 464 | 0.0.2.47 + 0.0.2.48 / 2.47 + 2.48 | recorded | recorded | yes |
 | `pair-248` | 6 | 462 | 0.0.2.48 + 0.0.2.51 / 2.48 + 2.51 | recorded | recorded | yes |
 | `pair-249` | 6 | 462 | 0.0.2.51 + 0.0.2.52 / 2.51 + 2.52 | recorded | recorded | yes |
+| `pair-250` | 6 | 462 | 0.0.2.52 + 0.0.2.53 / 2.52 + 2.53 | recorded | recorded | yes |
 | `raw-reps-v61` | 0 | 0 | - / - | 9ec86dfca4a6f85f | v6.1 | no (pre-0.0.2.45) |
 | `reps-229` | 3 | 385 | 0.0.2.29 / 2.28 | 9ec86dfca4a6f85f | v6.1 | no (pre-0.0.2.45) |
 

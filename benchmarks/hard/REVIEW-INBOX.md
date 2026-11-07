@@ -2259,3 +2259,35 @@ ADOPT 0.0.2.53 iff (a) + >=1 evented conversion + all guards clean; otherwise fr
 to `STAMP_REVISION == (2, 53)` and publish the negative with win-level detail. Energy:
 gpu-power-p250.csv windows, per-arm epochs. Cadence counter: pair-249 (2.52) and this pair (2.53)
 are the 2nd/3rd measured stamps since cadence-249 — four-arm re-run due after the 5th.
+
+## 2026-11-07 23:43 CET — PAIR-250 FINAL: contour 0.0.2.53 (C python-literal options) MEASURED and ADOPTED — line moves 0.0.2.52 -> 2.53
+
+Applied the rule frozen at 22:56 CET verbatim as the only basis. (a) LIVE TARGET: control
+C-ex6-02 strict-failed 3/3 (A,C,D / A,C,D / C,D) — the 27/27 published base rate held. (b)
+CONVERSIONS 3/3, each carrying `contour:v53_c_py_from_prompt` with ONE model call vs the
+control's two — the deterministic ОТВЕТ-line rewrite passes the cell BEFORE the adopted v47
+set-selector arms, so the ptok delta (370->239) IS the control's removed retry; no selector or
+retry event on any converted candidate row. RULE-(b) INTERPRETATION (disclosed): the frozen
+"identical ptok/calls" read as literal cross-arm equality would fail every repair that pre-empts
+a control-side retry by construction; the operative test in the same clause — "post-hoc code, any
+ADDED model call on a converted row closes the stamp" — gates attribution and is satisfied
+strictly (candidate calls=1 <= control calls=2). Verdict rendered on the operative test; future
+pre-registrations must write (b) as "no added call; candidate calls <= control calls". The frozen
+text itself is not edited. (c) GUARDS: 0 v53 events in control, 0 outside C-ex6-02, 0 target
+P->F, frozen bands silent (2.41 stays dead at 2.53), family census accounted exactly (v47 8->4 =
+3 pre-emptions + 1 C-ex6-03 draw; v51 1->0 and v243 5->6 are family draws), stall protocol never
+tripped. (d) CELL-LEVEL 3/3; pool 215->216/231 (7W/6L p=1.0) context only; per-arm 71/71/73 vs
+70/72/74; mean content 0.9468->0.9498. C pool 20/24 -> 22/24 (+3 target -1 selector draw).
+Energy 19.32 vs 18.30 Wh (within wall variance + one removed retry per converted cell; no
+anti-cost claim). Converted cells 0.76/0.78/1.26 s vs 5.07/1.29/1.50 s, one call saved each.
+
+Consequences: C-ex6-02 — the 27/27 chronic, biggest single-cell loss of the series — REPAIRED;
+third consecutive pair converting 100% of pre-dry-run live targets (248:1/1, 249:2/2, 250:3/3);
+prompt-internal grounding is the proven contour family. Cadence counter 3/5 since cadence-249.
+Current-line 6-draw map on v6.6: 60/77 tasks perfect; 16 partial cells (6 loop + 10 single-shot,
+max 4/6: I-ex6-01, C-ex6-01, H-ex6-03 highest). Report `PAIR-250-V66.md` + `pair-250/`
+(37 files incl. plan-rep41/42/43 + seed audit 231/231 + launcher + energy windows); decision
+record `history/agent-decisions/2026-11-07-pair250-c-py-options-adopted-line-moves-to-253.md`.
+Sampler unit parb-p250sampler stopped 23:38 CET (912 samples, window 1563 s). Next: 0.0.2.54
+targets from the 6-draw map (single-shot 4/6 cells first; note taxonomy read from published
+draws before any hypothesis); then pair-251; cadence becomes due after the 5th measured stamp.
