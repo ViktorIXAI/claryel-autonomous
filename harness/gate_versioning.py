@@ -111,8 +111,18 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # harness sha). The ADOPTED feature matrix at 2.45 is identical to 2.43 — gate_v49
 # pins that equality, including the frozen negatives (2.30-34/36/38/41/42/44) all
 # staying off.
-CURRENT_REVISION = (2, 45)
-CURRENT_STAMP = "0.0.2.45"
+#
+# 0.0.2.46 is a TOOLING/MEASUREMENT-ONLY release (not in CONTOUR_FEATURES, exactly
+# like 2.45): run records now carry the REAL harness commit. Cadence-246 exposed the
+# gap — its run records wrote `harness_git_sha: ""` because `git -C PARB_ROOT` runs
+# in the generated run workspace, which is not a git checkout. The builder now
+# stamps a `HARNESS_GIT_SHA` file into every generated workspace, and
+# `gate_run.harness_git_sha()` reads that file first, falls back to `git -C ROOT`,
+# and only then returns empty (a run without harness identity logs a warning).
+# ZERO contour flags move between 2.45 and 2.46 — `gate_v60_run_record_provenance_test.py`
+# pins that equality and the resolution order.
+CURRENT_REVISION = (2, 46)
+CURRENT_STAMP = "0.0.2.46"
 
 
 def _digits(value: str) -> list[int]:

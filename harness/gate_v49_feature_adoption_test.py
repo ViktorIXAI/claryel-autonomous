@@ -272,7 +272,7 @@ ck(g245.D_BEST2_BANNED and g245.D_BEST2 and g245.J_MEMBERSHIP_V3 and g245.J_RERA
    "2.45 runs the adopted line unchanged (2.11 + 2.39/2.40 + 2.43)")
 ck((2, 45) not in GV.CONTOUR_FEATURES,
    "2.45 registers no contour feature — a tooling release must not fake a contour change")
-ck(GV.behavior_tuple("0.0.2.45") == (2, 44) and GV.CURRENT_REVISION == (2, 45),
+ck(GV.behavior_tuple("0.0.2.45") == (2, 44) and GV.CURRENT_REVISION >= (2, 45),
    "reporting axis: stamp 2.45, behavior 2.44 (newest registered) while the 2.44 flag is "
    "frozen off — name BOTH axes in every table")
 ck(GV.summary("0.0.2.45")["contour_changed_at_this_release"] is False,

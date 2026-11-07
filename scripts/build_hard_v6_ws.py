@@ -17,6 +17,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -210,6 +211,22 @@ def _ws_sha16(path):
 def _ws_sha(name):
     return hashlib.sha256(open(os.path.join(OUT, name), "rb").read()).hexdigest()
 
+
+# Harness provenance for the run record (release 0.0.2.46): a generated run workspace is a
+# copy, not a git checkout, so `gate_run.harness_git_sha()` can only be correct if the
+# builder stamps the build commit. Deliberately NOT hash-pinned: it is build metadata that
+# rotates with every commit, not a scoring byte.
+try:
+    _hsha = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"],
+                           capture_output=True, text=True, timeout=10).stdout.strip()
+except Exception:
+    _hsha = ""
+if re.fullmatch(r"[0-9a-f]{40}", _hsha or ""):
+    open(os.path.join(OUT, "HARNESS_GIT_SHA"), "w", encoding="utf-8").write(_hsha + "\n")
+    print("harness git sha stamped:", _hsha[:12])
+else:
+    print("WARNING: not built from a git checkout — workspace gets no HARNESS_GIT_SHA; "
+          "arms launched from it will record an unattributed harness")
 
 if WRITE_PINS:
     with open(WS_PINS, "w", encoding="utf-8") as fh:

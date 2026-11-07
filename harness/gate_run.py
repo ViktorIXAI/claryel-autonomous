@@ -3523,6 +3523,31 @@ def run_one(t, pos, done, st):
     return rec
 
 
+def harness_git_sha(root: str) -> str:
+    """Harness identity for the run record (P0: every run names its full stack).
+
+    Resolution order, fail-closed to empty (never to a guess):
+      1. `HARNESS_GIT_SHA` written by `scripts/build_hard_v6_ws.py` — the only
+         source that can be correct inside a GENERATED run workspace, which is a
+         copy, not a git checkout (cadence-246 shipped empty shas because of this);
+      2. `git -C <root>` — repo checkouts and staged copies;
+      3. empty string, which the caller must warn about and the publisher label.
+    """
+    p = os.path.join(root, "HARNESS_GIT_SHA")
+    if os.path.exists(p):
+        try:
+            v = open(p, encoding="utf-8").read().strip()
+            if re.fullmatch(r"[0-9a-f]{7,40}", v):
+                return v
+        except OSError:
+            pass
+    try:
+        return subprocess.run(["git", "-C", root, "rev-parse", "--short", "HEAD"],
+                              capture_output=True, text=True, timeout=6).stdout.strip()
+    except Exception:
+        return ""
+
+
 def main():
     st = rj(os.path.join(ROOT, STATEF), None)
     if not st or not st.get("start_wall"):
@@ -3548,12 +3573,10 @@ def main():
         "" if CONTOUR_BEHAVIOR == CONTOUR_SUMMARY.get("contour_version")
         else " (this release changed measurement or reporting only, not the contour)"))
     log("PGR: planned tasks %d, previously done %d, limit %d s" % (len(tasks), len(done), LIMIT))
-    sha = ""
-    try:
-        sha = subprocess.run(["git", "-C", ROOT, "rev-parse", "--short", "HEAD"],
-                             capture_output=True, text=True, timeout=6).stdout.strip()
-    except Exception:
-        pass
+    sha = harness_git_sha(ROOT)
+    if not sha:
+        log("PGR: WARNING — run record has NO harness git identity (no HARNESS_GIT_SHA in "
+            "%s and no git checkout there); such runs must be labelled unattributed" % ROOT)
     try:
         health = json.loads(urllib.request.urlopen(health_url(API), timeout=8).read().decode())
     except Exception:
