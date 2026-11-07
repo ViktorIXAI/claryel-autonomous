@@ -1212,3 +1212,28 @@ standing CI contract suite 20/20 PASS, gate_fixers 12/12; ws rebuilt + repinned,
 off, 0.0.2.43 -> banned ON claim OFF, 0.0.2.44 -> both ON, 2.42/2.41 frozen bands OFF. Endpoint
 auth-checked against `p2005-profile.json` (`/v1/models` lists the served alias, loaded) before the
 first row. Liveness by row COUNT and unit state, never GPU utilization.
+
+## 2026-11-07 04:58 CET — pair-245 published: 0.0.2.44 UNMEASURED, frozen to exactly (2,44), line holds 0.0.2.43 (watcher)
+
+Verdict against the pre-registered text above (03:58): rule (a) fired its zero branch — 0/18
+control loop cells drew `false_completion_claim` (live 0/18 vs archive 13/504) -> **UNMEASURED**,
+never a pass, NOT adopted. Wiring evidence published at win-level detail: 1 fired+win on the
+candidate's own claim draw at an already-passing cell (D-ex6-l3 s2, offset +12289, adopted
+trajectory claim-free); guards all clean (0 loop P->F, 0 v244 events outside loop rows, 0
+frozen-band events, v243 fires only on banned-note draws in both arms: 5 control / 3 candidate,
+missing fires = clean first draws); pools 15/18->17/18 loop (2 event-less lottery wins, NOT
+attributed), single-shot 65.0 vs 64.7 (6W/5L), full 209 vs 212 (8W/5L p=0.58), zero stalls;
+energy 17.72 vs 18.24 Wh, loop cost +1 retry (+6.3% ptok). `D_BEST2_CLAIM` frozen in
+`gate_run.py` to `CONTOUR_REVISION == (2, 44)`; gate_v49 51 + gate_v57 37 + gate_v58 39 +
+versioning + fixers 12/12 PASS on the frozen tree; ws rebuilt + repinned, verify PASS, bank
+identities unchanged (9ec86dfca4a6f85f / f4553aab304f60d7); live per-stamp smoke exact
+(2.43: claim OFF / banned ON; 2.44: both ON; frozen bands OFF).
+
+**Queue ruling (measurability gate, closed group):** the 22 control strict fails over this
+pair's 231 cells are all bank-defect-v6.2-fixed, frozen-negative, closed-unreachable, designed
+refusal, or retry-spent loop draws — zero launchable live targets on v6.1 for a pair-246 stamp.
+No v6.1 pair launches next; the queue is the v6.2 stack step (workspace build on
+`bank-hard-v6.2.json` 3c866ea7daae611c -> line map -> four-arm cadence due since 2.40 -> pairs
+pre-registered against the v6.2 map only). Full census + watch-list in UNSTABLE-CELLS 04:55
+addendum; verdict `PAIR-245-V61.md`; decision record
+`history/agent-decisions/2026-11-07-pair245-d-best2-claim-unmeasured-frozen-line-holds-243.md`.

@@ -261,3 +261,32 @@ Residual loop map on the new line (the 2 failing candidate cells of 18):
   is the named pair-245 hypothesis: the SAME monotone best-of-2 recipe with the claim family as a
   third trigger, new seed offset, new event names — selection only, no context nudges (closed by
   pair-243), no re-draws beyond one retry (this addendum).
+
+## Addendum (04:55 CET): pair-245 UNMEASURED — claim trigger frozen to (2,44); the v6.1 pair queue closes at the bank ceiling on BOTH pools
+
+`pair-245/` (`q43r*` vs `q44r*`, three matched seeds, control = adopted `0.0.2.43`): the
+claim-family selection trigger hit rule (a) with **zero live targets** — none of the 18 control
+loop cells drew `false_completion_claim` (live rate 0/18 vs archive base rate 13/504; expected
+~0.5 live cells, the pre-registration priced this in and froze on it). **UNMEASURED, not adopted;
+`D_BEST2_CLAIM` frozen to exactly (2,44)** — fourth zero-opportunity pair after 233/238/242, and
+the pre-launch measurability gate now has four measured cases behind it. Live wiring proven:
+1 fired+win on the candidate's own claim draw at an already-passing cell (D-ex6-l3 s2, third
+offset 12289, adopted trajectory claim-free); zero v244 events outside loop rows, zero loop
+P->F, zero frozen-band events, adopted-2.43 parity intact; loop 15/18 -> 17/18 with both wins
+event-less lotteries (never attributed); single-shot 65.0 vs 64.7, full 209 vs 212 (8W/5L
+p=0.58) — floor noise throughout; cost +1 retry (+6.3% loop ptok), energy 17.72 vs 18.24 Wh.
+
+Line failure census over this pair's 231 control cells (22 strict fails, zero new families):
+bank defects fixed in `bank-hard-v6.2.json` (A-ex6-03 x3, C-ex6-02 x3, K-ex6-03 wording);
+frozen-negative B-ex6-04 x3; closed unreachable group 1 (C-ex6-00/01 x4); frozen group-4 lottery
+class (H-ex6-01 x3, H-ex6-03, F-ex6-00 — the 2.36 lesson: content-biased draws, selection cannot
+fix them — re-chasing banned); designed J-ex6-03 formula refusal; three banned-family loop cells
+whose one monotone retry is already spent (l0 s0, l0 s2, l1 s1 — pair-244 closed re-buying).
+
+**Map ruling: bank v6.1 is at the contour ceiling on both pools.** Every launchable target is
+closed, frozen, defective, or unreachable, so no pair-246 candidate passes the pre-launch
+measurability gate on this bank, and launching one would repeat the zero-opportunity pattern.
+Queue: build the v6.2 workspace (`3c866ea7daae611c`), map the adopted line on v6.2, run the
+due four-arm cadence, then pre-register new pairs ONLY against the v6.2 map. v6.2 watch-list
+for the closed classes: does the corrected bank make `false_completion_claim` (0/18 live) or
+group-4 H notes live again; closed classes stay closed until the map says otherwise.

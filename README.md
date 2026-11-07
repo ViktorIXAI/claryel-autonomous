@@ -152,7 +152,21 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   new control line**. A fourteenth candidate, 0.0.2.44 (the same recipe on the last untriggered loop
   note family, `false_completion_claim` — claim-a-banned-action-did-happens caps content at 0.3;
   dry-run: 13 occurrences in 504 published loop rows, 13/13 strict-fails, zero on passing rows),
-  pre-registered and launching as pair-245 vs the 0.0.2.43 line (REVIEW-INBOX 2026-11-07 03:58).
+  pre-registered and measured in pair-245 vs the 0.0.2.43 line (REVIEW-INBOX 2026-11-07 03:58):
+  **UNMEASURED — zero of the 18 control loop cells drew the claim note** (live 0/18 vs archive
+  13/504), the fourth zero-opportunity pair after 233/238/242; UNMEASURED is never a pass, so it is
+  NOT adopted and `D_BEST2_CLAIM` is frozen to exactly (2,44) (live smoke on the frozen tree: 2.43
+  claim OFF / banned ON, 2.44 both ON, frozen bands OFF). Wiring was still proven live (one fired+win
+  on the candidate's own claim draw at an already-passing cell, offset +12289, adopted trajectory
+  claim-free; zero off-loop events, zero loop regressions, guards all clean), while pools — loop
+  15/18 vs 17/18 with only event-less lottery wins, single-shot 65.0 vs 64.7, full 209 vs 212
+  (8W/5L p=0.58) — sit at the floor throughout (`PAIR-245-V61.md`). **Queue ruling: bank v6.1 is at
+  the contour ceiling on both pools** — the line's 22 remaining strict fails are all v6.2-fixed bank
+  defects, frozen-negative classes, closed-unreachable prompts, a designed refusal, or retry-spent
+  loop draws, so no pair-246 candidate passes the pre-launch measurability gate on this bank; the
+  next launchable step is the v6.2 workspace + line map + the due four-arm cadence, and new pairs
+  pre-register against the v6.2 map only (decision record
+  `history/agent-decisions/2026-11-07-pair245-d-best2-claim-unmeasured-frozen-line-holds-243.md`).
   Resolution
   floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
