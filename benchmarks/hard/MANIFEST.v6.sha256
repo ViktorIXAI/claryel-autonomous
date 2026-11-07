@@ -3,7 +3,7 @@
 # Pins bank + semantic checkers + builder + shim workspace script + gold + suites + sandbox.
 # v5 pins live in MANIFEST.v5.sha256 and must stay immutable.
 9ec86dfca4a6f85f0cbccd8d39cb0c7ac6cedb35823aa7d47e24ca49b932c4cc  benchmarks/hard/bank-hard-v6.json
-7329dc870d08c76c6ca193aa0ed3217a34d676660de75f3d5f438c58bc8cc2cb  benchmarks/hard/BANK-VERSIONS.json
+25f334e526a9fe61be667e2efe8b50b0499f7e7d04574c13f9fffa70ce042f59  benchmarks/hard/BANK-VERSIONS.json
 c1d346a57a60d14416203a93096d0379f5b2686b8da951b32cde7fbeb2e367ae  benchmarks/hard/gold-answers-v6.jsonl
 faea1730dce5fd48b4e98001d4e6a5e28621727371f0ef64f2cbdcc8203c9813  benchmarks/hard/c_position_dist_v6.json
 13d0f942834ac5214ae4ea41a6a680ddcfab3dac25dc75d39cc3ef4f5f640853  benchmarks/hard/PROTOCOL.md

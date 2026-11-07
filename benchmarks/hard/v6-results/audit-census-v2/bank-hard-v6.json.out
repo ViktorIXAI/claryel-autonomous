@@ -1,0 +1,45 @@
+== benchmarks/hard/bank-hard-v6.json  tasks=77  cats=ABHK
+   SCAN-ID scanner=audit-v2 self-sha16=ac4516f263e3e8f2 bank-sha16=9ec86dfca4a6f85f contract=v6.2 contract-sha16=c8c0c7dd114dfc32
+   A-ex6-00   .total                 number    370
+   A-ex6-01   .gross                 number    2725.2
+   A-ex6-01   .net                   number    2271.0
+   A-ex6-01   .vat                   number    454.2
+   A-ex6-02   .combined_gbp          number    583.18
+   A-ex6-02   .eur_to_usd            number    542.5
+   A-ex6-02   .gbp_to_eur            number    233.0
+   A-ex6-02   .usd_to_gbp            number    225.6
+   A-ex6-03   .net                   number    7629.26
+   A-ex6-03   .social                number    1254.0
+   A-ex6-03   .tax                   number    616.74
+   A-ex6-04   .after_penalty         number    3200
+   A-ex6-04   .prorated              number    7200
+   A-ex6-04   .remaining             number    3300
+   A-ex6-04   .used                  number    3900
+   A-ex6-05   .trimmed_mean          number    4.18
+   A-ex6-06   .book_end_y3           number    9000.0
+   A-ex6-06   .y1                    number    6000.0
+   A-ex6-06   .y2                    number    4500.0
+   A-ex6-06   .y3                    number    4500.0
+   A-ex6-07   .true[0]               number    1
+   A-ex6-08   .good_by_shift.s1      number    109
+   A-ex6-08   .good_by_shift.s2      number    83
+   A-ex6-08   .good_by_shift.s3      number    130
+   A-ex6-08   .good_by_shift.s4      number    48
+   A-ex6-08   .good_total            number    370
+   A-ex6-08   .overall_yield         number    89.2
+   B-ex6-00   .fails                 number    3
+   B-ex6-00   .window_sec            number    14
+   B-ex6-02   .orders[0].id          number    1
+   B-ex6-04   .penalty_per_week      type_form 2%
+   B-ex6-04   .start_date            date      2026-04-01
+   B-ex6-05   .items[0].sku          string    A-1
+   B-ex6-05   .n_tags                number    1
+   B-ex6-06   .available_total       number    60
+   H-ex6-01   ask[0]                 h_absent  аудит-лог operations :: no token-stem copyable (аудит,operations)
+   K-ex6-00   [3]                    string    yes
+   K-ex6-01   [0]                    string    hosting
+   K-ex6-01   [3]                    string    yes
+   K-ex6-03   [0]                    string    кресла Oslo
+   K-ex6-03   [3]                    string    yes
+   summary: 41 candidate atoms over 18 tasks (ABK=40, H=1)
+   tasks with candidates: A-ex6-00(1), A-ex6-01(3), A-ex6-02(4), A-ex6-03(3), A-ex6-04(4), A-ex6-05(1), A-ex6-06(4), A-ex6-07(1), A-ex6-08(6), B-ex6-00(2), B-ex6-02(1), B-ex6-04(2), B-ex6-05(2), B-ex6-06(1), H-ex6-01(1), K-ex6-00(1), K-ex6-01(2), K-ex6-03(2)

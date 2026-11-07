@@ -274,6 +274,20 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   cells show measured defects. Artifacts `v6-results/bank-probe-66/` (subset bytes
   `1b990aa6fc9a25dd`, per-row identity), changelog `bank-defect-v66-changelog.md`,
   decision record `history/agent-decisions/2026-11-07-bankv66-claims-spec-promoted.md`.
+- **Derivability scanner versioned: audit-v2 released (7 Nov, 19:28-19:44 CET)** —
+  `scripts/bank_derivability_audit_v2.py` (self-sha16 `ac4516f263e3e8f2`) stamps every
+  census with scanner version + bank sha16 + scorer contract id, and adds H
+  `ask`/`unknown` atom coverage that mirrors the frozen contract's own `_token_cover`
+  matcher: on v6.1–v6.4 it mechanically flags exactly the published H-ex6-01 defect
+  (`h_absent`), and v6.5/v6.6 come back H=0 — the class is now catchable at bank-build
+  time with zero arms spent. audit-v1 stays byte-frozen and its chain recomputes
+  exactly: 39 (v6.2) → 38 (v6.3) → 37 (v6.4–v6.6); v2 with `cats=ABK` reproduces v1's
+  hit set on all six banks (`harness/audit_v2_scanner_test.py`, 27 checks, in CI).
+  Queue effect: H-ex6-00/02/03/04 atoms are all directly nameable, so the census cannot
+  license the queued H-family claims-fragment change by itself — it stays behind
+  answer-byte arm evidence. Chain of record `benchmarks/hard/DERIVABILITY-CENSUS.md`,
+  outputs `v6-results/audit-census-v2/`, no harness/contour bytes moved (stamp stays
+  0.0.2.50, behavior 2.48).
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took

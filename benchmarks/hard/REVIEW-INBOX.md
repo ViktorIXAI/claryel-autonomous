@@ -1997,3 +1997,42 @@ observation for the basalt-r29 class (only if it recurs across arms); (2) H-fami
 coverage extension strictly behind measured cells; (3) four-arm cadence on v6.6 when
 due (contour stamps measured since cadence-249: none, so not forced); (4) the queued
 hedge-window observation (scorer-contract queue) unchanged.
+
+## 2026-11-07 19:44 CET — derivability scanner versioned release: audit-v2 (H ask-atom coverage + identity); census chain re-verified, working bank v6.6 shows H=0
+Queued tooling from the v6.5/v6.6 changelogs shipped as a new versioned audit element —
+`scripts/bank_derivability_audit_v2.py` (audit-v2, self-sha16 `ac4516f263e3e8f2`).
+audit-v1 (`0e5e4df63718ee1d`) stays byte-frozen; its published chain recomputes exactly
+today: 39 (v6.2) -> 38 (v6.3) -> 37 (v6.4/v6.5/v6.6), v6.1=40 recorded now for completeness.
+audit-v2 changes exactly two things: (1) every census run stamps its own identity
+(scanner version + module sha16 + bank sha16 + scorer contract id/sha16 `c8c0c7dd114dfc32`);
+(2) H ask-atom coverage that mirrors the FROZEN contract's own matcher (`_token_cover`/
+`_stem_tok`, module-path-pinned loads): `h_absent` = no token stem of `ref.unknown`/`ref.ask[i]`
+copyable from the prompt, `h_script` = script-bridge-only. With cats=ABK v2 reproduces v1's
+hit set exactly on all six published banks (contract test `harness/audit_v2_scanner_test.py`,
+27 checks, enrolled in `.github/workflows/scoring-contracts.yml` in the same commit).
+What the new coverage proves mechanically: the one H candidate on v6.1-v6.4 is
+`H-ex6-01 ask[0] "аудит-лог operations" :: h_absent` in all four banks — the bank-probe-65
+defect class visible at build time with zero arms spent; v6.5's naming fix zeroes it
+(v6.5/v6.6 H=0, total 37 unchanged on the ABK column).
+Consequence for the queued H-family extension (inviting claims fragment in H-ex6-00/02/03/04):
+their ask atoms are all directly nameable — the claims-spec problem is a spec-vs-contract
+contradiction, NOT a derivability gap, so the census cannot license a bank v6.7 by itself.
+Extension stays behind answer-byte arm evidence (pair-243 rule), unchanged. No harness
+bytes moved (stamp stays 0.0.2.50, behavior 2.48); no arms launched; endpoint stays idle.
+Artifacts: `benchmarks/hard/DERIVABILITY-CENSUS.md` (chain table + interpretation),
+`v6-results/audit-census-v2/` (6 verbatim v2 outputs + README), MEASUREMENT-STACK
+regenerated with the gold-audit element rows (both scanner shas computed from bytes).
+
+## 2026-11-07 19:52 CET — CI repair: registry missed the v6.4 demotion; gate_v63's exact-count pin went red with the bank chain grew
+The v6.6 push (17:33 UTC) left BOTH `hard-v6 scoring contracts` and `devsecops`
+static-qa red. Single root cause chain: `harness/gate_v63` pinned `len(registry)==4`
+— true when written, stale the moment v6.5/v6.6 joined the registry; and the v6.6
+promotion flipped v6.6 to `working` WITHOUT demoting v6.4, leaving two `working`
+entries. Fix: registry entry v6.4 -> `superseded` (note records the omission; bank
+bytes untouched — this is registry metadata, not a published bank byte); gate_v63
+now asserts the structural invariant instead of a count: registry file set ==
+published `bank-hard-v6*.json` set, exactly one `working` entry, plus per-version
+status pins (v6.6 working, v6.5 provisional, v6.4 superseded). Same lesson family
+as the CURRENT_REVISION exact-pin break (pair-244): contract tests must never pin
+mutable enumerations to exact values. Local full static suite now rc=0 with both
+fixes and audit-v2 (which the harness glob enrolls automatically) included.

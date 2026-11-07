@@ -65,14 +65,27 @@ import gate_bank_versions as GBV  # noqa: E402
 
 # ---- 1. registry identity + immutability guard -------------------------------------
 reg = GBV.check_registry(str(REPO))
-ck(len(reg) == 4, "registry lists the four published hard banks (%d)" % len(reg))
+# (stale-pin repair, 2026-11-07: the old `len(reg) == 4` went red the day v6.5/v6.6
+# joined the registry — exactly the CURRENT_REVISION exact-pin lesson. The invariant
+# is structural: the registry covers EXACTLY the published bank files, and EXACTLY
+# one bank carries `working` at any time.)
+import glob as _glob
+published = sorted(os.path.basename(p) for p in
+                   _glob.glob(str(REPO / "benchmarks" / "hard" / "bank-hard-v6*.json")))
+ck(sorted(e["file"].rsplit("/", 1)[-1] for e in reg) == published,
+   "registry must cover exactly the published bank files: reg=%r files=%r" % (len(reg), published))
+ck(sum(1 for e in reg if e.get("status") == "working") == 1,
+   "exactly one bank is `working` at any time: %r"
+   % [e["version"] for e in reg if e.get("status") == "working"])
 byver = {e["version"]: e for e in reg}
 ck(byver["v6.1"]["file"] == "benchmarks/hard/bank-hard-v6.json"
    and byver["v6.1"]["published_sha16"] == "9ec86dfca4a6f85f",
    "identity trap recorded: bank-hard-v6.json carries the v6.1 bytes forever")
 ck(byver["v6.2"]["published_sha16"] == "3c866ea7daae611c", "v6.2 published bytes pinned")
 ck(byver["v6.3"]["status"] == "provisional", "v6.3 stays PROVISIONAL in the registry")
-ck(byver["v6.4"]["status"] == "working", "v6.4 is the WORKING hard bank")
+ck(byver["v6.4"]["status"] == "superseded", "v6.4 superseded by the v6.6 promotion")
+ck(byver["v6.5"]["status"] == "provisional", "v6.5 stays provisional (frozen verdict)")
+ck(byver["v6.6"]["status"] == "working", "v6.6 is the single WORKING hard bank")
 try:
     GBV.load_registry("/nonexistent-dir-xyz")
     ck(False, "missing registry must raise BankIdentityError")

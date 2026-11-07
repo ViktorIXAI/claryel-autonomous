@@ -23,7 +23,9 @@ where those identities are defined, so a quoted number can be traced to bytes.
 | seed protocol | sp1 | per-(task,rep) gseed + per-task plan seed | `scripts/plan_reps.py`, `build_hard_v6_ws.py` |
 | typed failure codes | registry in contract v6.2 | content / protocol / integrity / marker / infra | `gate_scorer_contract.CODE_CLASS`, gate_v59 tests |
 | two published axes | contract v6.2 | answer axis + protocol axis, additive to `strict` | `gate_v59_scorer_contract_v62_test.py` |
-| harness | commit f19fac140113 | contour stamp 2.50 (behavior 2.48) | git + `gate_versioning.py` |
+| gold audit (derivability) | audit-v1 (frozen) | sha16 0e5e4df63718ee1d; ABK chain 39->38->37 recomputes exactly | `harness/audit_v2_scanner_test.py` ABK-equivalence, `benchmarks/hard/DERIVABILITY-CENSUS.md` |
+| gold audit (derivability) | **audit-v2** | sha16 ac4516f263e3e8f2; adds H ask-atom coverage mirroring the contract's own `_token_cover`/`_stem_tok` | `harness/audit_v2_scanner_test.py`, `benchmarks/hard/DERIVABILITY-CENSUS.md` |
+| harness | commit 5eb1c1324d94 | contour stamp 2.50 (behavior 2.48) | git + `gate_versioning.py` |
 
 Scorer contract v6.2 delegates to the v6.1 bytes, so it changes no score; the equality
 is asserted cell by cell on published answers (`gate_v59_scorer_contract_v62_test.py`),

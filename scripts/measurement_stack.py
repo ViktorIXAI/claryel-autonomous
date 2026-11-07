@@ -19,6 +19,7 @@ Rules it publishes (and enforces for future runs):
 from __future__ import annotations
 
 import glob
+import hashlib
 import json
 import os
 import subprocess
@@ -187,6 +188,16 @@ def dir_block(name, full):
 
 def main():
     el = element_block()
+    def _sha16(rel):
+        return hashlib.sha256(open(os.path.join(ROOT, rel), "rb").read()).hexdigest()[:16]
+    el["gold_audit"] = [
+        {"id": "audit-v1", "file": "scripts/bank_derivability_audit.py",
+         "sha16": _sha16("scripts/bank_derivability_audit.py"), "cats": "ABK",
+         "status": "frozen; published chain 39->38->37 recomputes exactly"},
+        {"id": "audit-v2", "file": "scripts/bank_derivability_audit_v2.py",
+         "sha16": _sha16("scripts/bank_derivability_audit_v2.py"), "cats": "ABK + H opt-in",
+         "status": "current; H ask-atom coverage mirrors the contract matcher"},
+    ]
     ct = contour_block()
     dirs = [dir_block(n, f) for n, f in run_dirs()]
     os.makedirs(os.path.join(ROOT, "versions"), exist_ok=True)
@@ -232,6 +243,10 @@ def main():
            % el["seed_protocol"]["id"],
            "| typed failure codes | registry in contract v6.2 | content / protocol / integrity / marker / infra | `gate_scorer_contract.CODE_CLASS`, gate_v59 tests |",
            "| two published axes | contract v6.2 | answer axis + protocol axis, additive to `strict` | `gate_v59_scorer_contract_v62_test.py` |",
+           "| gold audit (derivability) | audit-v1 (frozen) | sha16 %s; ABK chain 39->38->37 recomputes exactly | `harness/audit_v2_scanner_test.py` ABK-equivalence, `benchmarks/hard/DERIVABILITY-CENSUS.md` |"
+           % hashlib.sha256(open(os.path.join(ROOT, "scripts", "bank_derivability_audit.py"), "rb").read()).hexdigest()[:16],
+           "| gold audit (derivability) | **audit-v2** | sha16 %s; adds H ask-atom coverage mirroring the contract's own `_token_cover`/`_stem_tok` | `harness/audit_v2_scanner_test.py`, `benchmarks/hard/DERIVABILITY-CENSUS.md` |"
+           % hashlib.sha256(open(os.path.join(ROOT, "scripts", "bank_derivability_audit_v2.py"), "rb").read()).hexdigest()[:16],
            "| harness | commit %s | contour stamp %s (behavior %s) | git + `gate_versioning.py` |"
            % ((el["harness_commit"] or "-")[:12], ct["current_revision"], ct["behavior_at_current"]),
            "",

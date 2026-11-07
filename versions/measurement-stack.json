@@ -18,7 +18,7 @@
    },
    {
     "file": "benchmarks/hard/bank-hard-v6.4.json",
-    "label": "v6.4 (working)",
+    "label": "v6.4 (superseded)",
     "sha16": "85a0cd0dd6fa1fab"
    },
    {
@@ -99,7 +99,23 @@
    "id": "sp1",
    "definition": "sp1: per-(task,rep) gseed = int(sha256(f'{task}|{rep}')[:8], 16) % 999983 (scripts/plan_reps.py); per-task plan seed = int(sha256(task_id)[:6], 16) (scripts/build_hard_v6_ws.py). Selection retries add a fixed offset per mechanism (2.11 +4096, 2.9/2.36 +8117, 2.43 +8117-loop, 2.44 +12289) so a retry re-draws instead of replaying the losing trajectory."
   },
-  "harness_commit": "f19fac1401135696b28441b784ba9d236fe7243b"
+  "harness_commit": "5eb1c1324d94af251660be94a8860eb7d2d72214",
+  "gold_audit": [
+   {
+    "id": "audit-v1",
+    "file": "scripts/bank_derivability_audit.py",
+    "sha16": "0e5e4df63718ee1d",
+    "cats": "ABK",
+    "status": "frozen; published chain 39->38->37 recomputes exactly"
+   },
+   {
+    "id": "audit-v2",
+    "file": "scripts/bank_derivability_audit_v2.py",
+    "sha16": "ac4516f263e3e8f2",
+    "cats": "ABK + H opt-in",
+    "status": "current; H ask-atom coverage mirrors the contract matcher"
+   }
+  ]
  },
  "contour": {
   "current_revision": "2.50",
