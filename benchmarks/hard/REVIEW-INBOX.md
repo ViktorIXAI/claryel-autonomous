@@ -1046,3 +1046,53 @@ next loop hypothesis. Artifacts: `pair-243/` (24 files + run script), `PAIR-243-
 decision record `2026-11-07-pair243-loop-policy-reground-measured-negative.md`, UNSTABLE-CELLS
 addendum, README candidate-history entry. Line status unchanged: 0.0.2.40 adopted; bank-ceiling
 queue unchanged (this pair touched none of the blocked cells).
+
+## 2026-11-07 03:05 CET — pair-244 PRE-REGISTERED: 0.0.2.43 (D-loop best-of-2 on the banned-attempt family), paired vs the adopted 0.0.2.40
+
+**Hypothesis (single change, from the newest map entry only):** pair-243 closed prevention on loop
+cells and named the trigger gap — the adopted 2.11 loop best-of-2 fires only on
+`status_filter_violation`/`plans_dangerous_action`, while the loop pool's entire loss family carries
+`banned_attempted:<TOOL>`. 0.0.2.43 adds that note family as a second trigger of the SAME selection
+recipe: after the first loop run, if the loop scorer reports a banned-attempt note (prefix-matched on
+the `:`-split stem), re-run the loop ONCE at `seed + 8117` (different offset from 2.11's 4096, so the
+retry re-draws instead of replaying) and adopt only a strictly better trajectory
+(`content + bool(format_ok)`). Exactly one retry per task whichever trigger matches; the rejected 2.42
+policy tail is frozen to exactly (2,42) and must be ABSENT from this arm. Reference never read; cost is
+one extra loop run on already-failing cells only.
+
+**Pre-launch dry-run (this entry, written before any `p*` row, over published bytes only):** across the
+24 published 0.0.2.40-line loop seeds (`m40`/`n40`/`o40`/`q40`, 144 loop cells) the banned-attempt note
+appears on exactly 9 rows (`m40r1 l3`, `m40r2 l0`, `n40r0 l3`, `n40r1 l3`, `n40r2 l0`, `o40r0 l3`,
+`o40r1 l3`, `q40r7 l0`, `q40r7 l2`) and EVERY one of them strict-fails (content 0.7, format_ok False).
+Family coverage 9/9; ZERO fires on a strict-passing loop row; the mechanism is loop-path-only, so no
+single-shot cell is reachable. The trigger is monotone by construction, so the pair's expected failure
+mode is not "regression" but "retry never beats the first draw".
+
+**Pre-registered decision rule (the verdict is decided ONLY by this text; `run_pair244.sh` carries the
+same header):**
+  (a) LIVE TARGET: MEASURED iff >=1 control (`p40`) loop row carries a banned-attempt note AND
+      strict-fails; zero live target = UNMEASURED (pair-233/238/242 mode), never a pass.
+  (b) CELL ATTRIBUTION: a conversion counts only if the candidate strict-passes where the control
+      strict-failed, carries `fix:v243_d_best2_banned_win` + `contour:v243_d_best2_banned_fired`, and
+      the adopted trajectory shows no banned attempt.
+  (c) GUARDS: zero candidate loop strict-fails where the control passed (any such cell = monotonicity
+      broken in code, not a model regression — close the stamp); zero v243 events outside loop rows;
+      zero frozen-band events (2.30-32/34/36/38/41/42 — the 2.42 policy tail must be absent);
+      adopted-line parity (2.39/2.40 J fires + 2.35 B repair identical); the 2.11 v31 trigger keeps its
+      own event names.
+  (d) RESOLUTION: loop pool n=18/arm with the exact sign test; an arm-mean delta under ~2 cells on the
+      77-cell pool is UNRESOLVABLE and never quoted as the reason; candidate not >2 cells below control.
+  ADOPT 0.0.2.43 iff (a) holds, >=1 evented conversion, all guards clean. Otherwise freeze
+  `D_BEST2_BANNED` to `CONTOUR_REVISION == (2, 43)` and publish the negative with win-level detail.
+
+Arms: `run_pair244.sh`, reps 0/1/2 (same plan/seed files as pair-242/243: plan-full.json,
+plan-rep01.json, plan-rep02.json), rids `p40r*` control then `p43r*` candidate, alternating per rep,
+endpoint P2005 otherwise idle (no other arm shares the serve — hard rule), GPU sampler unit
+`parb-samp244` -> `gpu-power-244.csv`, per-arm `<rid>-start.epoch`/`-end.epoch`. Contracts on the
+rebuilt tree: gate_v57 37 checks (trigger grammar, one-retry rule, seed offset, strict-better-only
+adoption, monotone on passing cells, per-stamp matrix), gate_v49 46 checks, standing suite 20/20 PASS,
+gate_fixers 12/12; ws rebuilt + repinned, `verify_manifest.py --v6` PASS, ws bank `f4553aab304f60d7`
+unchanged, per-stamp smoke in the live ws: 0.0.2.40 -> behavior 2.40 with `D_BEST2_BANNED` off,
+0.0.2.43 -> behavior 2.43 with the 2.42 tail off. Endpoint auth-checked against
+`p2005-profile.json` (`/v1/models` lists `qwen3.8-flash-next-iq3_s-basalt`, loaded, n_ctx 262144)
+before the first row. Liveness checked by row COUNT and unit state, never GPU utilization.

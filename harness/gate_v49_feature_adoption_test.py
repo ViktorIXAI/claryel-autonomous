@@ -209,6 +209,22 @@ ck(not g242f.C_RULE_GROUND, "the frozen 2.41 C grounding stays off at 0.0.2.42")
 ck(g242f.J_RERANK_V2 and g242f.J_MEMBERSHIP_V3,
    "0.0.2.42 builds on the adopted line (J re-rank v2 + J membership inherited)")
 
+# pair-243 froze LOOP_POLICY_REGROUND to exactly (2,42): the prevention nudge was MEASURED NEGATIVE
+# (net-zero loop pool, +9.5% energy) and contour_at_least would otherwise inherit it into every
+# later stamp as a permanent regression. pair-244's candidate 2.43 (loop best-of-2 on the
+# banned_attempted family) must therefore run WITHOUT the policy tail, while keeping the adopted
+# 2.11 selection and the 2.39/2.40 J line. Full wiring: gate_v57.
+g243 = load("0.0.2.43")
+ck(not g240c.D_BEST2_BANNED and not g241c.D_BEST2_BANNED and not g242f.D_BEST2_BANNED,
+   "D_BEST2_BANNED is OFF at 0.0.2.40/41/42 (published arms byte-identical)")
+ck(g243.D_BEST2_BANNED, "D_BEST2_BANNED is ON at its own stamp 0.0.2.43")
+ck(g243.LOOP_POLICY_REGROUND is False,
+   "the frozen 2.42 policy re-ground stays off at 2.43 — rejected behaviour never inherits")
+ck(g243.D_BEST2 and g243.J_RERANK_V2 and g243.J_MEMBERSHIP_V3,
+   "0.0.2.43 keeps the adopted line: 2.11 loop selection + 2.39 re-rank + 2.40 membership")
+ck(not g243.CONTRACT_GUARANTEE and not g243.SELFCONSIST and not g243.C_RULE_GROUND,
+   "every frozen band (2.30/2.31/2.41) stays off at 2.43")
+
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
       % (CHECKS, len(covered), len([x for x in bank if x["cat"] == "J"])))
