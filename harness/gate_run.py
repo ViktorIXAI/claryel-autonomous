@@ -1902,6 +1902,33 @@ def _j_rerank_answer(t, ids):
     return None, None
 
 
+def c_py_ground_answer(cat, t, text):
+    """0.0.2.53: C python-literal options (C-ex6-02 class; see gate_c_ground.py shape C).
+
+    The option set is re-derived by EXECUTING the prompt's own printed snippets under an
+    allow-listed closed subset; only the ОТВЕТ line's letters change, and only to letters
+    THIS prompt printed; an already-equal set emits the matched event with text byte-identical;
+    any parse ambiguity refuses silently. Zero model tokens, reference never read. Same
+    legitimacy class as the adopted 2.40 J membership and the frozen 2.41 (separate function,
+    flag and events). Its own call site emits the BARE registered event name — the legacy
+    "v20_" post-normalize prefix must never ride on it (pair-250 rule (b) names the event
+    contour:v53_c_py_from_prompt exactly; caught by the pre-launch smoke). Returns
+    (text, event-or-None)."""
+    if not (C_PY_GROUND and cat == "C" and t.get("mode") != "loop") or not text:
+        return text, None
+    derived = CG.ground_py_options(((t.get("assembled_doc") or "") + "\n" + (t.get("prompt") or "")).strip()
+                                   if t.get("assembled_doc") else (t.get("prompt") or ""))
+    m = re.search(r"^\s*ОТВЕТ\s*:(.*)$", text, re.M)
+    if derived is None or m is None:
+        return text, None
+    got = tuple(sorted(set(re.findall(r"(?<![A-Za-z])([A-F])(?![A-Za-z])", m.group(1)))))
+    want = tuple(sorted(derived))
+    if got == want:
+        return text, "v53_c_py_matched"
+    body = (" " + ",".join(want)) if want else " NONE"
+    return text[:m.start(1)] + body + text[m.end(1):], "v53_c_py_from_prompt"
+
+
 def post_normalize_answer(cat, t, text):
     """v2.0: only post-process material the model already produced.
 
@@ -1976,23 +2003,10 @@ def post_normalize_answer(cat, t, text):
                 return text, ["v241_c_rule_ground_matched"]
             body = (" " + ",".join(want)) if want else " NONE"
             return text[:m.start(1)] + body + text[m.end(1):], ["v241_c_rule_ground_from_prompt"]
-    # 0.0.2.53: C python-literal options (C-ex6-02 class; see gate_c_ground.py shape C). The
-    # option set is re-derived by EXECUTING the prompt's own snippets under an allow-listed
-    # closed subset; only the ОТВЕТ line's letters change, and only to letters THIS prompt
-    # printed; already-equal set = matched event, text byte-identical (zero fires change no
-    # bytes on passes); any parse ambiguity refuses silently. Zero model tokens, reference
-    # never read. Same legitimacy class as the adopted 2.40 J membership and the frozen 2.41.
-    if C_PY_GROUND and cat == "C" and t.get("mode") != "loop":
-        derived = CG.ground_py_options(((t.get("assembled_doc") or "") + "\n" + (t.get("prompt") or "")).strip()
-                                       if t.get("assembled_doc") else (t.get("prompt") or ""))
-        m = re.search(r"^\s*ОТВЕТ\s*:(.*)$", text or "", re.M)
-        if derived is not None and m is not None:
-            got = tuple(sorted(set(re.findall(r"(?<![A-Za-z])([A-F])(?![A-Za-z])", m.group(1)))))
-            want = tuple(sorted(derived))
-            if got == want:
-                return text, ["v53_c_py_matched"]
-            body = (" " + ",".join(want)) if want else " NONE"
-            return text[:m.start(1)] + body + text[m.end(1):], ["v53_c_py_from_prompt"]
+    # 0.0.2.53 C python-literal options lives at its OWN call site (c_py_ground_answer + the
+    # run_one emit next to the post-normalize blocks), unbundled from POST_NORMALIZE policy
+    # and from this function's legacy "v20_" event prefix (pair-250 PRE-REGISTERED rule (b)
+    # names the event contour:v53_c_py_from_prompt exactly - smoke caught the prefix ride).
     if not POST_NORMALIZE or not text:
         return text, None
     changed = []
@@ -3456,6 +3470,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v20_" + "_".join(ev))
+    if C_PY_GROUND and cat == "C" and t.get("mode") != "loop" and r["text"]:
+        norm, ev53 = c_py_ground_answer(cat, t, r["text"])
+        if ev53:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", ev53)
     if H_JSON_CONTRACT and cat == "H" and r["text"]:
         norm, ev = h_json_contract_normalize(t, r["text"])
         if ev:
@@ -3604,6 +3625,13 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v20_" + "_".join(ev))
+                    if C_PY_GROUND and cat == "C" and t.get("mode") != "loop" and r["text"]:
+                        norm, ev53 = c_py_ground_answer(cat, t, r["text"])
+                        if ev53:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", ev53)
                     if H_JSON_CONTRACT and cat == "H" and r["text"]:
                         norm, ev = h_json_contract_normalize(t, r["text"])
                         if ev:

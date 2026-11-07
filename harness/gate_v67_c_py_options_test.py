@@ -94,18 +94,10 @@ ck(not call_site_applies(g252) and call_site_applies(g253),
 cg = load_cg("0.0.2.53")
 
 
-def call_site(prompt, text):
-    """Mirror of the gate_run 2.53 block: (out_text, event or None)."""
-    derived = cg.ground_py_options(prompt)
-    m = re.search(r"^\s*ОТВЕТ\s*:(.*)$", text or "", re.M)
-    if derived is None or m is None:
-        return text, None
-    got = tuple(sorted(set(re.findall(r"(?<![A-Za-z])([A-F])(?![A-Za-z])", m.group(1)))))
-    want = tuple(sorted(derived))
-    if got == want:
-        return text, "v53_c_py_matched"
-    body = (" " + ",".join(want)) if want else " NONE"
-    return text[:m.start(1)] + body + text[m.end(1):], "v53_c_py_from_prompt"
+def call_site(prompt, text, mod=None):
+    """The REAL gate_run 2.53 helper (NOT a mirror — the mirror let a wiring bug ship to
+    smoke): (out_text, event-or-None). The event must be the bare registered name."""
+    return (mod or g253).c_py_ground_answer("C", {"prompt": prompt}, text)
 
 
 # ---------------------------------------------------------------- 2. bank census
@@ -115,6 +107,12 @@ def bankmap(p):
 
 b62 = bankmap(ROOT / "benchmarks/hard/bank-hard-v6.2.json")
 b66 = bankmap(ROOT / "benchmarks/hard/bank-hard-v6.6.json")
+
+# the control stamp's real helper must be inert: no event, answer bytes intact
+_inert = "Разбор.\nОТВЕТ: A,C,D\n"
+_io, _ie = call_site(b66["C-ex6-02"]["prompt"], _inert, mod=g252)
+ck(_ie is None and _io == _inert,
+   "the REAL helper is inert at 2.52 (pair-250 control): no event, bytes intact")
 ck(json.dumps(b62["C-ex6-02"], sort_keys=True, ensure_ascii=False)
    == json.dumps(b66["C-ex6-02"], sort_keys=True, ensure_ascii=False),
    "C-ex6-02 task bytes byte-identical v6.2 -> v6.6 (chronic map transfers)")
