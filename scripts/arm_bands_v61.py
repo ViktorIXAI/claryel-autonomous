@@ -63,6 +63,7 @@ def main() -> int:
     keep_e = bool(ecache)
 
     bands = collections.defaultdict(dict)   # arm -> rep -> {task: bool}
+    contour_stamps = {}                     # contour rep -> set of contour_version in its rows
 
     def add_raw(path, arm):
         for line in open(path, encoding="utf-8"):
@@ -89,6 +90,9 @@ def main() -> int:
             rep_id = str(r.get("rep", rep or "0"))
             bands["contour"].setdefault(rep_id, {})[r["task"]] = strict(
                 r.get("content") or 0, r.get("format_ok"))
+            stamp = r.get("contour_version")
+            if stamp:
+                contour_stamps.setdefault(rep_id, set()).add(stamp)
 
     for arm in ("basalt", "codex", "grok"):
         add_raw(os.path.join(V6, "four-arm-v61", "answers-%s-v61.jsonl" % arm), arm)
@@ -117,6 +121,11 @@ def main() -> int:
     for p in sorted(glob.glob(os.path.join(V6, "reps-229", "ledger-c229r*.jsonl"))):
         if os.path.basename(p) != "ledger-c229full.jsonl":
             add_contour(p)
+    # cadence-240 legs: contour 0.0.2.40 on fresh matched reps 6,7,8 (cadence-240/README note in
+    # CADENCE-240-V61.md); stamp provenance is printed below so a mixed-stamp contour band is never
+    # read as one stamp.
+    for p in sorted(glob.glob(os.path.join(V6, "cadence-240", "ledger-q40r*.jsonl"))):
+        add_contour(p)
 
     cells = set()
     for arm in bands:
@@ -136,6 +145,11 @@ def main() -> int:
             arm, ", ".join("rep" + s for s in seeds), ", ".join(str(v) for v in vals),
             statistics.mean(vals), max(vals) - min(vals)))
     lines.append("")
+    if contour_stamps:
+        lines.append("contour seed provenance (contour_version read from the ledger rows):")
+        for cs in sorted(contour_stamps):
+            lines.append("  rep%s = %s" % (cs, "/".join(sorted(contour_stamps[cs]))))
+        lines.append("")
     lines.append("paired tests on matched cells (contour seed vs arm seed, exact sign test):")
     for cs in sorted(bands.get("contour", {})):
         for arm in ("basalt", "codex", "grok"):

@@ -945,3 +945,24 @@ contour answers in 585 s / 21.6 Wh vs 213 raw answers in 1722 s / 66.1 Wh serve 
 four-arm table regenerate on the completion tick — no cloud numbers claimed for these seeds until then.
 Line status unchanged: 0.0.2.40 adopted; bank-ceiling decision (no pair-243 without owner bank
 clarification) unchanged.
+
+## four-arm cadence-240 CLOSED (2026-11-07 01:57 CET): contour 0.0.2.40 also beats ChatGPT and Grok on the fresh seed-matched seeds — pooled 162/183 vs 121 (p=8.2e-10) and vs 131 (p=3.4e-07)
+
+Cloud legs landed: codex 6,7,8 rc=0 213 rows (23:43->00:11), grok 6,7,8 rc=0 213 rows
+(23:43->01:32), all rows finish=ok non-empty, zero empty/HTTPError rows, every row carries
+`bank_sha16 9ec86dfca4a6f85f`; answer bytes grep-clean of bank/gold/path references. Six-arm-band
+update: ChatGPT per-seed 40/41/40 (spread 1, the most stable arm measured), Grok 42/43/46.
+Seed-matched pairs vs contour: rep6 16/0 p=3e-5 (codex), 14/0 p=1.2e-4 (grok); rep7 15/1
+p=5.2e-4, 13/1 p=1.8e-3; rep8 14/3 p=0.013, 8/3 p=0.23 (the single in-noise pair — rep8 is the low
+contour draw, disclosed in CADENCE-240-V61.md, not smoothed). Category structure replicates rep0:
+F/H/K carry everything (contour 40/45 vs basalt 12, codex 4, grok 15 of 45); ChatGPT worst ever
+measured on contract cells (F 1/18, H 0/15). Arm margins sit far above the 5-cell same-stamp
+noise floor. Tooling: `scripts/arm_bands_v61.py` now includes cadence contour ledgers and prints
+per-rep contour stamp provenance (rep0-5 = 0.0.2.29, rep6-8 = 0.0.2.40); new
+`scripts/cadence240_cloud_v61.py` regenerates every cadence closure number. Published:
+`ARM-BANDS-V61.md` regenerated (rep0-5 pair lines byte-identical to the previous file),
+`CADENCE-240-V61.md` cloud-closure section, HEADTOHEAD cadence section + open-list items 1-2
+updated, `raw-reps-v61/answers-{codex,grok}-v61-reps.jsonl` +213 rows each, `cadence-240/` gains
+`run-band240-cloud.sh` + both cloud leg logs. No bank byte, scorer or contour file touched;
+line status unchanged (0.0.2.40 adopted, bank-ceiling decision stands, no pair-243 without owner
+bank clarification).
