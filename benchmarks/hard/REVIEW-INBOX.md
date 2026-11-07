@@ -1921,3 +1921,52 @@ Follow-up queue after this probe: (1) v6.6 claims-field wording + raw fairness r
 (current verdict honestly says: unmeasurable at 6 paired seeds); (3) hedge-window
 observation for the scorer-contract queue; (4) derivability-scanner coverage for H ask
 atoms (census chain pinned at 37 until the scanner itself gets a versioned release).
+
+## 2026-11-07 18:22 CET — bank v6.6 PRE-REGISTERED (rules frozen BEFORE any v6.6 row): H-ex6-01 claims-field spec = defect 2 from bank-probe-65
+Defect (published evidence, `v6-results/bank-probe-65/fair-rows.md`): the frozen H
+contract (`check_H_v6`: `claims` non-empty -> 0.0 `ungrounded_claims`) demands the empty
+list, while the shipped spec `"claims": [утверждения как факт]` invites listing the
+partner's assertions. bare basalt / ChatGPT-codex / Grok: 0/3 strict at matched reps
+28/29/30 on the v6.5 subset, EVERY zero `ungrounded_claims`. Three independent brains,
+one failure mode = prompt-spec-vs-hidden-test contradiction, a bank defect. The contour
+passes the cell only via `v219_h_clear_claims` scaffolding (disclosed) — the fix belongs
+in the bank, not in more nudges.
+
+Fix (new file `bank-hard-v6.6.json` sha16 `5c86252b2ef2f422`; v6.5 `cd29d6ac94dc3267`
+and all older bytes immutable; v6.5 stays `provisional`, its verdict is frozen): exactly
+one field, `H-ex6-01.prompt`. Wording frozen here before any row: claims fragment ->
+`"claims": [только утверждения, подтверждённые твоим журналом; если подтверждений нет — пустой список]`.
+States the form + condition, does not state that this instance is empty, leaks no gold
+atom. Gold untouched. `scripts/verify_bank_v66.py` PASS: changed fields ==
+`["H-ex6-01.prompt"]`, all 77 refs+seeds byte-identical, v6.5 scenario fix survives,
+difflib-insert leak check clean, four other H prompts byte-identical. Coverage limit
+published: the inviting fragment stays in H-ex6-00/02/03/04 — only H-ex6-01 has a
+measured defect; family extension is queued behind measured cells. Derivability census
+37 -> 37 (H atoms outside scanner scope; scanner versioning queued separately).
+
+Frozen probe rules:
+- (i) fairness / promotion signature: bare basalt, ChatGPT-codex, Grok on the v6.6
+  subset ws (`bank.json` = the H-ex6-01 task object byte-identical to the published
+  v6.6 file, guard-asserted vs the full file, subset sha16 stamped per row) at the SAME
+  matched reps 28/29/30 (seed protocol sp1; basalt temp 0.7 seed 1000+rep), contour
+  fully OFF, frozen contract v6.2 (`c8c0c7dd114dfc32`, bytes `89437d8cfe1fc6c8`) asserted
+  at scoring time. FAIR iff ALL three arms >= 2/3 strict. The v6.6 subset differs from
+  the v6.5 subset (`cbe5d7e793a2182e`, 0/3 on all arms) by exactly this fragment —
+  a lift maps to the claims spec and to nothing else (single-variable attribution).
+- (ii) contour no-new-loss: legs p66r28/29/30 (workspace `~/parb-b66-contour`, bank v6.6,
+  stamp `0.0.2.50` behavior 2.48 — identical tooling to the published p64/p65 legs;
+  contour claims nothing) vs the PUBLISHED control rows p65r28/29/30 at matched seeds,
+  `PARB_SUBSET=H-ex6-01`, idle endpoint, serial. Conversion is UNCLAIMABLE by
+  construction: v6.5 contour legs strict-pass 3/3 at reps 28-30, so the pair carries
+  zero live target (UNMEASURED-as-effect, pair-233/238/242/245 doctrine); this leg set
+  certifies wiring (run-record bank_version v6.6 source=marker) and no new losses only.
+- (iii) promotion: v6.6 -> `working` in BANK-VERSIONS.json iff (i) FAIR and (ii) no v6.6
+  leg strict-fails where the matched p65 leg passed, plus verify PASS. Else `provisional`,
+  say so, and open NO contour hypothesis on a bank-defect cell.
+- (iv) any surviving fair-arm zero gets fresh note-cause attribution from answer bytes
+  before being blamed on the bank (lottery at temp 0.7 is allowed; the lift claim dies
+  honestly).
+Artifacts after: `v6-results/bank-probe-66/` (3 contour legs x4 + logs/epochs, 9 fair
+rows + epochs + logs, sanitized launchers, PROBE-ROWS.md, fair-rows.md), changelog
+`bank-defect-v66-changelog.md` (this commit), decision record, README bullet if promoted,
+MEASUREMENT-STACK regenerated.

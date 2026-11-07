@@ -37,6 +37,13 @@
       "published_sha16": "cd29d6ac94dc3267",
       "status": "provisional",
       "note": "H-ex6-01 scenario names the artifact the reference asks for (published defect, bank-defect-b04.md; open since v6.1). Probe rule frozen in REVIEW-INBOX 2026-11-07 17:35 CET before any p64r28+/p65r28+ row; promote to working iff contour pair lifts and the raw-arm fairness probe is FAIR (all arms >= 2/3)."
+    },
+    {
+      "file": "benchmarks/hard/bank-hard-v6.6.json",
+      "version": "v6.6",
+      "published_sha16": "5c86252b2ef2f422",
+      "status": "provisional",
+      "note": "v6.5 plus one field: H-ex6-01 claims-field spec (defect 2 from bank-probe-65: the inviting fragment '[утверждения как факт]' vs the frozen contract claims=[] — three independent raw brains 0/3, every zero ungrounded_claims). v6.5 stays provisional (frozen verdict). Probe rule frozen in REVIEW-INBOX 2026-11-07 18:22 CET before any v6.6 row; promote to working iff the matched-seed raw fairness re-probe is FAIR and the contour no-new-loss legs hold."
     }
   ]
 }
