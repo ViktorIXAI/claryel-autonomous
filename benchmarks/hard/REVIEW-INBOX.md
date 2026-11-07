@@ -1126,3 +1126,17 @@ on an already-passing cell (l3 seed 0, wiring), guards all clean, single-shot W4
 / 62->70 calls — every number matches `PAIR-244-V61.md` as published. One prose fix queued:
 the single-shot flip sentence should read 9 flip instances over 7 ids (H-ex6-01 flips both ways
 across seeds 0/1), not "6 cells".
+
+## 2026-11-07 04:00 CET — rescore-v62 published: bank v6.2 fairness proven on every stored answer
+
+`scripts/rescore_v62.py` re-scored BOTH v6.1 and v6.2 golds from identical stored bytes across
+106 published arm files (all contour full/pair arms, four-arm rep0 archives, cadence raw reps;
+240 joined A-ex6-03 + C-ex6-02 cells, 0 blanks): A-ex6-03 strict 0/120 -> 44/120, C-ex6-02
+0/120 -> 27/120, WINs 71, LOSEs 0 — the v6.1 golds were unreachable by construction for every
+stamp AND both raw brains, the v6.2 golds convert exactly the faithful answers, and no cell
+that ever passed changes. results/ledger arms re-score byte-identical to stored scores (0
+routing mismatches); the 54 "mismatch" flags are all answer-archive shape (no score fields).
+Artifacts: `v6-results/rescore-v62/RESCORE-V62.md` + `rescore-v62.csv`, bank identity line
+`9ec86dfca4a6f85f -> 3c866ea7daae611c`, frozen scorer named. Next P0 step: scorer contract
+identity (`SCORER_CONTRACT` + per-version contract module/test), then v6.2 workspace build +
+four-arm cadence on v6.2 (fairness re-check on fresh runs).
