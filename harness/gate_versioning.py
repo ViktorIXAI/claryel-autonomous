@@ -370,6 +370,10 @@ CONTOUR_FEATURES = (
     # (2, 54)` and publish the negative with win-level detail. gate_v68 pins grammar + refusals +
     # census + published-bytes replay + call-site predicate; gate_v49 extended with the 2.54
     # matrix (2.54 = 2.53 + exactly H_UNKNOWN_PROMPT).)
+    # VERDICT 2026-11-08 (PAIR-251-V66.md): UNMEASURED by rule (a) - the pair's own control arms
+    # strict-PASSED H-ex6-03 in 3/3 seeds (zero live target), zero conversions; all guards clean,
+    # wiring proven live (1 from_prompt + 5 matched, census surface only). H_UNKNOWN_PROMPT frozen
+    # to STAMP_REVISION == (2, 54); the line stays 0.0.2.53. Registration kept for the record.
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as

@@ -77,6 +77,14 @@ g254 = load("0.0.2.54")
 ck(hasattr(g253, "H_UNKNOWN_PROMPT") and hasattr(g254, "H_UNKNOWN_PROMPT"), "flag exists at both stamps")
 ck(g253.H_UNKNOWN_PROMPT is False, "2.53 (pair-251 control) runs WITHOUT H_UNKNOWN_PROMPT")
 ck(g254.H_UNKNOWN_PROMPT is True, "2.54 runs WITH H_UNKNOWN_PROMPT")
+# pair-251 UNMEASURED: the flag is FROZEN to its own stamp. No registered stamp > 2.54 exists yet,
+# so the freeze is pinned mechanically at the source: a future stamp must carry H_UNKNOWN_PROMPT
+# False (gate_v49's matrix discipline will then catch any drift), and this line catches the
+# regression at the definition site the day a future stamp exists.
+_src = (HERE / "gate_run.py").read_text(encoding="utf-8")
+ck("H_UNKNOWN_PROMPT = STAMP_REVISION == (2, 54)" in _src and
+   "H_UNKNOWN_PROMPT = contour_at_least(2, 54)" not in _src,
+   "pair-251 UNMEASURED: H_UNKNOWN_PROMPT is equality-frozen to (2,54), never contour_at_least")
 ck(g253.H_REQUIRES_PROMPT is True and g254.H_REQUIRES_PROMPT is True,
    "the adopted 2.28 grammar stays ON at both stamps (frozen bytes, separate v228_* events)")
 ck("v228_" not in ("v54_h_unknown_from_prompt", "v54_h_unknown_matched"),

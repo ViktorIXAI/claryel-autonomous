@@ -243,11 +243,8 @@ G_CONFLICT_OVERWRITE = contour_at_least(2, 26)
 A_ARITH_CODE = contour_at_least(2, 27)
 # 0.0.2.28: H requires/unknown from explicit prompt signature constraint
 H_REQUIRES_PROMPT = contour_at_least(2, 28)
-# 0.0.2.54: H unknown slot filled from the prompt's OWN denial sentence when the model
-# left it null (H-ex6-03 class). The 2.28 grammar is signature-bound and never reaches
-# this shape; its bytes and v228_* event names stay untouched (separate function, flag,
-# and v54_* events - pair-248 re-arm meta-rule applied to a live feature's own gap).
-H_UNKNOWN_PROMPT = contour_at_least(2, 54)
+# 0.0.2.54 H_UNKNOWN_PROMPT is a FROZEN flag (pair-251 UNMEASURED) - like the 2.30/2.31/2.32
+# band below, it is defined against STAMP_REVISION there so it cannot ride past its own stamp.
 # 0.0.2.48: K fields gate — the REQUIRED-KEY set comes from the field list the task
 # itself enumerates («Поля: ITEM, QTY, …»), never from the template placeholder token.
 # The pre-2.48 detector scans the prompt for UPPERCASE tokens followed by a colon; in a
@@ -1703,6 +1700,20 @@ LOOP_POLICY_TAG = "ПОЛИТИКА ЗАДАЧИ (дословно из усло
 # third offset and won with zero claim notes in the adopted trajectory; zero v244 events outside
 # loop rows, zero loop P->F, zero frozen-band events, adopted-2.43 parity intact (PAIR-245-V61.md).
 D_BEST2_CLAIM = STAMP_REVISION == (2, 44)
+# 0.0.2.54 (pair-251, pre-registered REVIEW-INBOX 2026-11-07 23:56 CET + run_pair251.sh header,
+# before any w53r4x/w54r4x row): H unknown slot filled VERBATIM from the prompt's own denial
+# sentence when the model left it null (H-ex6-03 class; the frozen 2.28 grammar is signature-bound
+# and never reaches this shape - separate function, flag and v54_* events per the pair-248 re-arm
+# meta-rule). UNMEASURED by rule (a) - the pair's OWN control arms strict-PASSED H-ex6-03 in 3/3
+# seeds (unknown filled on its own in r45/r46; the r44 draw passed with the slot null), so the pair
+# carried ZERO live target (fifth zero-opportunity pair after 233/238/242/245). NOT a measured
+# loss, never a pass: NOT adopted, frozen to exactly this stamp. Wiring IS proven live: the grammar
+# fired on the census surface only (1 from_prompt + 5 matched events, all in {H-ex6-00, H-ex6-03},
+# ZERO in the control, ZERO on filled slots, zero 2.28 drift, zero frozen-band fires, adopted-family
+# parity within noise, 9 flips W3/L6 p=0.51 under the ~2-cell floor, PAIR-251-V66.md). If the
+# unknown_missing class goes live again on the adopted line, a NEW stamp re-arms it under a NEW
+# flag and NEW event names (pair-248 meta-rule); these v54_* bytes belong to this stamp forever.
+H_UNKNOWN_PROMPT = STAMP_REVISION == (2, 54)
 
 
 def loop_policy_sentence(t):

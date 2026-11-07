@@ -1,0 +1,12 @@
+pair-251 per-arm serve-board energy windows (gpu-power-p251.csv, 2 Hz ssh nvidia-smi on the
+endpoint, separate systemd-run unit parb-p251sampler, fresh csv for this pair, 789 samples
+spanning 1794092665 .. 1794094641 epoch = ~1976 s, gaps are skipped ssh failures):
+w53r44 396s 10.76Wh | w54r44 241s 5.58Wh
+w53r45 244s 5.94Wh | w54r45 250s 6.07Wh
+w53r46 214s 4.68Wh | w54r46 223s 4.87Wh
+side totals: control (0.0.2.53) 21.38 Wh / 854 s, candidate (0.0.2.54) 16.52 Wh / 714 s.
+The w53r44 window is the pair's first arm and carries the endpoint warm-up (mean 97.8 W, GPU
+busy fraction 0.64 vs 0.38-0.48 for every later arm), which alone skews the side totals; the
+matched warm windows (seeds 45+46) are control 10.62 Wh vs candidate 10.94 Wh (+3%, inside
+run-to-run variance). Mechanism cost: zero model tokens by construction (post-hoc code); the
+pair produced NO converted cells (UNMEASURED target), so no energy claim is made either way.
