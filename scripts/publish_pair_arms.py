@@ -14,7 +14,7 @@ import os
 import re
 import sys
 
-WS = os.path.expanduser("~/parb-v61-contour")
+WS = os.path.expanduser(os.environ.get("PARB_WS_DIR", "~/parb-v61-contour"))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DST = os.path.join(ROOT, "benchmarks", "hard", "v6-results", "pair-230")
 RULES = [

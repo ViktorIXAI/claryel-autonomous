@@ -1391,3 +1391,35 @@ PRE-REGISTERED RULE (this entry + run_pair246.sh header; the verdict is decided 
     `C_BEST2_SET = CONTOUR_REVISION == (2, 47)` and publish the negative with win-level detail.
     Energy per arm from gpu-power-p246.csv windows, reported side by side, never attributed to the
     mechanism unless on-target retries dominate the delta.
+
+## 2026-11-07 10:47 CET — pair-246 VERDICT: contour 0.0.2.47 ADOPTED (C best-of-2 second trigger on `set_mismatch`) — line moves 0.0.2.46 -> 0.0.2.47
+
+    Six serial arms on the idle P2005 endpoint (10:16-10:42), bank v6.2 (ws copy `d1e8d11df5840dcc`,
+    published `3c866ea7daae611c`), contract v6.2 `c8c0c7dd114dfc32`, seeds sp1 (plan-rep19/20/21),
+    harness commit `1a590a1` stamped into every run record (`harness_git_sha` non-empty — 2.46
+    tooling fix proven live). Queue 6x77 rows, all exit=0, zero stall-shaped rows, median 1.4 s.
+    (a) LIVE TARGET: MEASURED — 6 control C cells strict-fail with `set_mismatch`
+        (C-ex6-00 r19/r20, C-ex6-02 r19/20/21, C-ex6-03 r20); cadence-246 said C-ex6-02 3/3 chronic
+        — it reproduced 3/3 on fresh seeds.
+    (b) CONVERSIONS: 2, both evented — C-ex6-00 r19 and r20: control strict-fails, candidate carries
+        `contour:v47_c_best2_set_fired` + `fix:v47_c_best2_set_win`, strict-PASSES, winner note-free.
+        4 further fires lost (C-ex6-02 x3, C-ex6-03 r20): the retry draw repeats the same omitted
+        candidate — bias, not variance; selection cannot fix a biased draw (same lesson as 2.31
+        self-consistency). Chronic C-ex6-02 stays open: fired 3/3, converted 0/3.
+    (c) GUARDS clean: 6/6 v47 fires on cat==C only; ZERO v47 events in control; ZERO C regressions
+        (C pool 18/24 -> 20/24); frozen bands touched 0 rows in all six run records; adopted-family
+        event counts differ only by seed-noise wobbles (v243 9->6 etc.), no new family, no band event.
+    (d) POOLS: full 231: ctrl 209 cand 207 (8 flips: 3W/5L, sign p=0.727 — at the floor, NOT the
+        reason); all 3 non-C wins and all 5 losses are event-less B/H noise cells
+        (mechanism structurally cat==C only; 8 flips <= 12-cell same-stamp floor). C pool +2 is the
+        whole on-target effect and both cells carry the full event pair.
+    ENERGY: control 19.23 Wh vs candidate 18.85 Wh over 3 arms each (−2%, inside run-to-run noise;
+    6 extra model calls in 462 rows cannot move Wh at this resolution).
+    RULE SATISFIED: MEASURED + >=1 evented conversion + guards clean -> ADOPT 0.0.2.47.
+    `C_BEST2_SET` inherits as line behavior from 2.47 (gate_v49 matrix: 2.47 == 2.46 + exactly
+    C_BEST2_SET). Queue next: C-ex6-02 is a biased-draw failure — retry selection is spent there;
+    it moves to the bank/frozen-negative review, not another resampling stamp.
+    Artifacts: `v6-results/pair-246/` (24 files incl sanitized launcher + energy windows),
+    writeup `PAIR-246-V62.md`, decision record
+    `history/agent-decisions/2026-11-07-pair246-c-best2-set-adopted-line-moves-to-247.md`.
+

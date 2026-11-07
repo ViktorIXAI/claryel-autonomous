@@ -1,0 +1,39 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "[REDACTED]",
+  "contour_version": "0.0.2.46",
+  "contour_behavior": "2.44",
+  "contour_changed_at_this_release": false,
+  "git_sha": "1a590a1ad71fa84f7d5aaa339f92d70befcde08f",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "paired contour 0.0.2.46 seed 21 on bank v6.2 (2.47 = C best-of-2 second trigger on set_mismatch, one retry at seed+17491, strict-better only; control 0.0.2.46 = adopted behavior 2.44 line; 2.30-2.34/2.36/2.38/2.41/2.42 frozen) ",
+  "stack": {
+    "bank_version": "",
+    "bank_sha16": "d1e8d11df5840dcc",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.46",
+    "contour_behavior": "2.44",
+    "harness_git_sha": "1a590a1ad71fa84f7d5aaa339f92d70befcde08f"
+  }
+}

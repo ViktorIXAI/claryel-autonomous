@@ -24,7 +24,10 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.43` — ADOPTED on 2026-11-07 after pair-244 (harness stamps are `0.0.2.x`; full
+Contour gate line: `0.0.2.47` — ADOPTED on 2026-11-07 after pair-246 (C best-of-2 second trigger on
+`set_mismatch`; between pair-244 and pair-246 the line was `0.0.2.43` with tooling-only stamps
+`0.0.2.45/0.0.2.46`, and pair-245's `0.0.2.44` measured **UNMEASURED** and froze to exactly (2,44);
+harness stamps are `0.0.2.x`; full
 history in `versions/VERSIONS.md` and `benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31`
 measured **negative** against the former adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured
 **+1.3 cells — below the ~2-cell noise floor, NOT adopted** (`PAIR-232-V61.md`; `PAIR-233-V61.md` — 2.33
@@ -186,6 +189,22 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   these run records was fixed the same day as tooling release **0.0.2.46** (run records now name the
   real harness commit; zero contour flags move). Artifacts `v6-results/cadence-246/`, writeup
   `CADENCE-246-V62.md`, scorer `scripts/cadence_score_v62.py`.
+- **Pair-246 ran the pre-registered v6.2 pair the same morning (7 Nov)** — candidate `0.0.2.47`
+  (C best-of-2 **second trigger** on the `set_mismatch` note family: the frozen v6.2 C scorer never
+  emits `missed_options` for C, so the adopted 2.13 trigger had a structural coverage gap; one retry
+  at `seed+17491`, strict-better only, `missed_options` keeps precedence, call site `cat == C`) vs
+  control `0.0.2.46` (the adopted 2.43 matrix), bank v6.2, three fresh sp1 seeds, six serial arms on
+  the idle endpoint. Rule pre-registered 10:04 CET before any row. Verdict: **MEASURED and ADOPTED** —
+  6 live control target cells; 2 evented conversions (C-ex6-00 r19/r20, both v47 events, winners
+  note-free); guards clean (6/6 fires on C, zero in control, zero C regressions, frozen bands
+  silent); C pool 18/24 -> 20/24 with the whole effect evented, full pool 209 vs 207 (3W/5L
+  p=0.727) at the noise floor and not the basis; energy 19.23 vs 18.85 Wh (−2%, noise). Direct
+  negative result published with it: the chronic C-ex6-02 fired 3/3 and converted 0/3 — the retry
+  repeats the same omitted candidate (biased draw, selection spent, no further resampling stamp may
+  target it). `harness_git_sha` `1a590a1` named in all six run records — the 0.0.2.46 provenance fix
+  proven live. **Adopted line moves to `0.0.2.47`** (`PAIR-246-V62.md`, decision record
+  `history/agent-decisions/2026-11-07-pair246-c-best2-set-adopted-line-moves-to-247.md`, arms
+  `v6-results/pair-246/`).
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took
