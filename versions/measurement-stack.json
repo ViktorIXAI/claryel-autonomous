@@ -12,6 +12,31 @@
     "sha16": "3c866ea7daae611c"
    },
    {
+    "file": "bank-hard-v6.3.json",
+    "label": "v6.3 (B-ex6-04 year fix; PROVISIONAL, superseded)",
+    "sha16": "73f7a04d57473545"
+   },
+   {
+    "file": "bank-hard-v6.4.json",
+    "label": "v6.4 (WORKING hard bank: + value-form hint)",
+    "sha16": "85a0cd0dd6fa1fab"
+   },
+   {
+    "file": "parb-v62-probe/bank.json",
+    "label": "bank v6.2 probe-workspace copy",
+    "sha16": "d1e8d11df5840dcc"
+   },
+   {
+    "file": "parb-v63-probe/bank.json",
+    "label": "bank v6.3 probe-workspace copy",
+    "sha16": "42bf2ecf69558dc2"
+   },
+   {
+    "file": "parb-v64-probe/bank.json",
+    "label": "bank v6.4 probe-workspace copy (WORKING)",
+    "sha16": "7788cc288922b9a4"
+   },
+   {
     "file": "parb-v61-contour/bank.json",
     "label": "generated run-workspace copy (v6.1 content)",
     "sha16": "f4553aab304f60d7"
@@ -64,7 +89,7 @@
    "id": "sp1",
    "definition": "sp1: per-(task,rep) gseed = int(sha256(f'{task}|{rep}')[:8], 16) % 999983 (scripts/plan_reps.py); per-task plan seed = int(sha256(task_id)[:6], 16) (scripts/build_hard_v6_ws.py). Selection retries add a fixed offset per mechanism (2.11 +4096, 2.9/2.36 +8117, 2.43 +8117-loop, 2.44 +12289) so a retry re-draws instead of replaying the losing trajectory."
   },
-  "harness_commit": "4c09444acbc8db7f6c7921a4171acec24a7b00e0"
+  "harness_commit": "3ae462167529c8ea76464c034a9098b76db602a1"
  },
  "contour": {
   "current_revision": "2.48",
@@ -177,6 +202,237 @@
   "note": "the ADOPTED feature matrix of 0.0.2.45 equals 0.0.2.43; the behavior axis reports the newest REGISTERED stamp (2.44), whose own flag is frozen OFF — name BOTH axes in every table"
  },
  "runs": [
+  {
+   "dir": "benchmarks/hard/v6-results/bank-probe-634",
+   "arms": [
+    "p62r22",
+    "p62r23",
+    "p62r24",
+    "p63r22",
+    "p63r23",
+    "p63r24",
+    "p64r22",
+    "p64r23",
+    "p64r24"
+   ],
+   "ledger_rows": 9,
+   "contour_stamp": "0.0.2.48",
+   "contour_behavior": "2.48",
+   "run_records": {
+    "p62r22": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    },
+    "p62r23": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    },
+    "p62r24": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "d1e8d11df5840dcc",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    },
+    "p63r22": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "42bf2ecf69558dc2",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    },
+    "p63r23": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "42bf2ecf69558dc2",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    },
+    "p63r24": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "42bf2ecf69558dc2",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    },
+    "p64r22": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    },
+    "p64r23": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    },
+    "p64r24": {
+     "contour_stamp": "0.0.2.48",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 1,
+     "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+     "stack": {
+      "bank_version": "",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.48",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+     }
+    }
+   },
+   "run_record_has_stack": true,
+   "energy_windows_seconds": {
+    "p62r24": {
+     "seconds": 0.0
+    },
+    "p64r24": {
+     "seconds": null
+    },
+    "p63r22": {
+     "seconds": 3.0
+    },
+    "p63r24": {
+     "seconds": 1.0
+    },
+    "p62r23": {
+     "seconds": 2.0
+    },
+    "p64r23": {
+     "seconds": null
+    },
+    "p64r22": {
+     "seconds": null
+    },
+    "p62r22": {
+     "seconds": 6.0
+    },
+    "p63r23": {
+     "seconds": 2.0
+    }
+   },
+   "bank_attribution": "recorded in the run record",
+   "scorer_contract_attribution": "recorded per row"
+  },
   {
    "dir": "benchmarks/hard/v6-results/cadence-240",
    "arms": [

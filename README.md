@@ -209,6 +209,22 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   proven live. **Adopted line moves to `0.0.2.47`** (`PAIR-246-V62.md`, decision record
   `history/agent-decisions/2026-11-07-pair246-c-best2-set-adopted-line-moves-to-247.md`, arms
   `v6-results/pair-246/`).
+- **Bank v6.3 -> v6.4 closed the B-ex6-04 root cause the same day (7 Nov)** — cadence-246 had
+  established the cell as a bank defect; it turned out to carry **two independent unstated-contract
+  defects**. v6.3 (`73f7a04d57473545`) states the gold year in the prompt (derived from the gold,
+  never typed); the pre-registered probe came back 0/3 — the year fix worked (`2026-04-01` in all
+  three rows) and the rows then failed on the second defect: the gold `"2%"` (string) vs an
+  unspecified value form, predicted mechanically by the new `scripts/bank_derivability_audit.py`
+  `type_form` check before it was probed. v6.4 (`85a0cd0dd6fa1fab`) adds the value-form hint
+  (`"число% (например 5%)"`, example deliberately not the gold, leak guard in the builder), one
+  field again, all 77 golds byte-identical. Probe vs **fresh** 0/3 controls at identical sp1 seeds:
+  v6.2 0/3, v6.3 0/3, **v6.4 3/3 strict** — verdict per the frozen rule: **v6.4 is the WORKING hard
+  bank**, B-ex6-04 leaves the defect queue, v6.3 stays published as PROVISIONAL. Nine probe arms
+  in `v6-results/bank-probe-634/` (contour event chains byte-identical across all nine — only bank
+  bytes moved); byte-level changelog `bank-defect-v63-v64-changelog.md`; decision record
+  `history/agent-decisions/2026-11-07-bank-v64-working-b-ex6-04-defect-closed.md`. A raw-arm
+  fairness probe (bare basalt / codex / Grok on the fixed cell, owner rule "a fixed gold must lift
+  the RAW arms") is pre-registered in `REVIEW-INBOX.md` 12:56 CET.
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took

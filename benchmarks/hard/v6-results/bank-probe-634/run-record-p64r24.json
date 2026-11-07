@@ -1,0 +1,39 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:8080",
+  "contour_version": "0.0.2.48",
+  "contour_behavior": "2.48",
+  "contour_changed_at_this_release": true,
+  "git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+  "plan_tasks": 1,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "bank v6.4 probe (v6.3 + penalty_per_week value-form hint, gold bytes identical) contour 0.0.2.48 seed 24 on B-ex6-04 only; paired against p62r*/p63r* at identical sp1 seeds",
+  "stack": {
+    "bank_version": "",
+    "bank_sha16": "7788cc288922b9a4",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.48",
+    "contour_behavior": "2.48",
+    "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+  }
+}

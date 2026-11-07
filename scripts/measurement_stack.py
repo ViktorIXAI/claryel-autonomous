@@ -80,10 +80,18 @@ def contour_block():
 def element_block():
     banks = []
     for name, label in (("bank-hard-v6.json", "v6.1 (published dev bank)"),
-                        ("bank-hard-v6.2.json", "v6.2 (defect corrections)")):
+                        ("bank-hard-v6.2.json", "v6.2 (defect corrections)"),
+                        ("bank-hard-v6.3.json", "v6.3 (B-ex6-04 year fix; PROVISIONAL, superseded)"),
+                        ("bank-hard-v6.4.json", "v6.4 (WORKING hard bank: + value-form hint)")):
         p = os.path.join(ROOT, "benchmarks/hard", name)
         if os.path.exists(p):
             banks.append({"file": name, "label": label, "sha16": sha16(p)})
+    for wsdir, label in (("parb-v62-probe", "bank v6.2 probe-workspace copy"),
+                         ("parb-v63-probe", "bank v6.3 probe-workspace copy"),
+                         ("parb-v64-probe", "bank v6.4 probe-workspace copy (WORKING)")):
+        p = os.path.expanduser(os.path.join("~", wsdir, "bank.json"))
+        if os.path.exists(p):
+            banks.append({"file": "%s/bank.json" % wsdir, "label": label, "sha16": sha16(p)})
     ws_bank = os.path.join(os.environ.get("PARB_WS", os.path.expanduser("~/parb-v61-contour")), "bank.json")
     if os.path.exists(ws_bank):
         banks.append({"file": "parb-v61-contour/bank.json",
@@ -193,11 +201,15 @@ def main():
           % next((b["sha16"] for b in el["banks"] if b["file"] == "bank-hard-v6.json"), "-"),
           "| dev bank (hard) | v6.2 | %s | `scripts/verify_bank_v62.py` (fails if v6.1 moves) |"
           % next((b["sha16"] for b in el["banks"] if b["file"] == "bank-hard-v6.2.json"), "-"),
+          "| dev bank (hard) | v6.3 | %s | `scripts/verify_bank_v63.py` (one field vs v6.2; PROVISIONAL) |"
+          % next((b["sha16"] for b in el["banks"] if b["file"] == "bank-hard-v6.3.json"), "-"),
+          "| dev bank (hard) | **v6.4** | %s | `scripts/verify_bank_v64.py` (one field vs v6.3; WORKING hard bank) |"
+          % next((b["sha16"] for b in el["banks"] if b["file"] == "bank-hard-v6.4.json"), "-"),
           ]
     for b in el["banks"]:
         if "bank.json" in b["file"]:
-            md.append("| run workspace bank copy | generated from v6.1 | %s | `benchmarks/hard/WS-GENERATED.v6.sha256` |"
-                      % b["sha16"])
+            md.append("| run workspace bank copy | %s | %s | run record `stack.bank_sha16` |"
+                      % (b["label"], b["sha16"]))
     for cid in SC.CONTRACT_HISTORY:
         c = el["scorer_contracts"][cid]
         mods = ", ".join("%s %s" % (m, h) for m, h in sorted(c["pins"].items()))

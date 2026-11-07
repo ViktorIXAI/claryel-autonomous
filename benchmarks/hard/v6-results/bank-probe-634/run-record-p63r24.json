@@ -1,0 +1,39 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:8080",
+  "contour_version": "0.0.2.48",
+  "contour_behavior": "2.48",
+  "contour_changed_at_this_release": true,
+  "git_sha": "3ae462167529c8ea76464c034a9098b76db602a1",
+  "plan_tasks": 1,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "bank-identity probe bank v6.3 (ws copy sha in run record) contour 0.0.2.48 seed 24 on B-ex6-04 only; v6.3 = v6.2 + stated year, gold bytes identical; paired with the other bank tag at identical sp1 seeds",
+  "stack": {
+    "bank_version": "",
+    "bank_sha16": "42bf2ecf69558dc2",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.48",
+    "contour_behavior": "2.48",
+    "harness_git_sha": "3ae462167529c8ea76464c034a9098b76db602a1"
+  }
+}

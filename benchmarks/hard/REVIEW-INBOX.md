@@ -1530,3 +1530,114 @@ dominate the delta (expected cost: zero extra calls when the first answer alread
     windows + gpu csv + same-seed rep0 smoke pair + guard census), writeup `PAIR-247-V62.md`, decision
     record `history/agent-decisions/2026-11-07-pair247-k-fields-enum-adopted-line-moves-to-248.md`,
     README current line -> `0.0.2.48`.
+
+## 2026-11-07 12:16 CET — bank v6.3 REGISTERED (one prompt correction) + probe PRE-REGISTERED: B-ex6-04 is a bank defect, not a model gap
+
+    Published bank v6.2 (sha16 `3c866ea7daae611c`) keeps `B-ex6-04` at 0/15 on our own line: fifteen
+    rows across contour 2.45-2.48 (cadence-246 q45r16/17/18, pair-246 s46/s47 r19/20/21, pair-247
+    t47/t48 r22/23/24) are ALL `format_ok=True` with a well-formed ISO date, and they fail on the year
+    alone — 13 answered `2024-04-01`, one `2023-04-01`, one `2025-04-01`, ZERO answered the gold year
+    `2026-04-01`. The v6.2 prompt states month and day (`подписан 3 марта`, `старт работ 1 апреля`) but
+    no year anywhere, so the gold is not contract-derivable: the task is guess-the-year, and the modal
+    faithful answer (2024) is not the gold. Contour work on this cell is closed (a contour repair would
+    be answer synthesis).
+    Fix shipped as a NEW version, v6.2 bytes untouched: `scripts/build_bank_v63.py` produces
+    `benchmarks/hard/bank-hard-v6.3.json` (sha16 `73f7a04d57473545`) from the published v6.2 bytes with
+    exactly ONE field changed — `B-ex6-04.prompt` now carries the year on the two dated facts
+    (`3 марта 2026`, `1 апреля 2026`). The year is re-derived at build time from the shipped gold
+    (`ref["start_date"][:4]`), never typed, so no gold byte moves and the stated year provably equals
+    the gold year. `scripts/verify_bank_v63.py` asserts: exactly one changed task/field, every gold and
+    every seed byte-identical across all 77 tasks, the distractor clause untouched, and the gold date
+    now stated in day+month+year form.
+    New guard published with it: `scripts/bank_derivability_audit.py` — a mechanical census of gold
+    atoms that the shipped prompt never states (numbers, ISO dates, verbatim strings) for the
+    extraction categories A/B/K, so this defect class is found before paying for arms. On v6.2 it lists
+    38 candidate atoms over 17 tasks; on v6.3 exactly one disappears — `B-ex6-04 .start_date
+    date 2026-04-01` — which is the mechanical signature of the correction. It also surfaces two
+    ALREADY-PASSING tasks with the same unstated-value-form weakness as the v6.2 K-ex6-03 fix
+    (`K-ex6-00` gold `EXCLUDES_TAXES=yes`, `K-ex6-01` gold `INCLUDES_TAX=yes` and `SERVICE=hosting`,
+    while the prompts state those facts only in Russian prose): those cells pass today because models
+    guess the English token from the field name — queued as the v6.4 defect candidates, NOT bundled
+    into v6.3 (one substantive change per version). Remaining listed atoms in A/B are computed values
+    or JSON-escaped literals (documented false-positive modes of the audit).
+    PROBE (pre-registered now, before any probe row): fresh workspaces `~/parb-v62-probe` and
+    `~/parb-v63-probe` built from harness `3ae4621` (adopted contour `0.0.2.48`), one arm per bank,
+    `PARB_SUBSET=B-ex6-04`, reps 22/23/24 — the SAME sp1 seeds as the pair-247 candidate arm, run
+    serially on the idle P2005 endpoint, bank identity stamped in each run record.
+    DECISION RULE: v6.3 becomes the WORKING hard bank iff (i) >=2/3 v6.3 probe rows strict-pass
+    (content==1.0 and format_ok) AND (ii) <=1/3 v6.2 probe rows strict-pass in the same session (the
+    fresh same-condition control), AND (iii) verify_bank_v63 PASS with audit delta exactly B-ex6-04.
+    Otherwise v6.3 stays PROVISIONAL, the cell returns to the defect queue with the probe rows as
+    evidence, and the contour claim stays closed either way (no contour stamp is involved).
+    Cost accounting for the probe comes from ledger `ptok/ctok/seconds`; serve-board energy is not
+    sampled for a 6-row probe and no Wh claim will be made.
+
+## 2026-11-07 12:20 CET — v6.3 probe VERDICT: PROVISIONAL (rule condition (i) failed) + bank v6.4 REGISTERED with a second one-field correction; v6.4 probe PRE-REGISTERED
+
+    Probe ran 12:17:36-12:17:58 as `parb-bank63probe` (six arms, one row each, idle endpoint, contour
+    0.0.2.48, harness 3ae462167529, sp1 seeds 861061/593370/188460 identical on both sides):
+      v6.2 control (p62r22/23/24): 0/3 strict — `start_date` `2024-04-01` in all three (gold year
+        unstated), ptok 292, 5.07/1.65/0.68 s;
+      v6.3 (p63r22/23/24): 0/3 strict — but `start_date` is now `2026-04-01` in **all three** rows,
+        i.e. the year correction works exactly as designed; the three rows then fail on
+        `penalty_per_week: 2` (number) vs gold `"2%"` (string), ptok 312, 2.34/1.63/0.53 s.
+    So B-ex6-04 carried TWO independent unstated-contract defects, and the pre-registered rule was
+    applied as written: condition (i) (>=2/3 strict-pass on v6.3) FAILED, therefore **v6.3 stays
+    PROVISIONAL** and the cell stays in the defect queue. Condition (ii) held (0/3 on v6.2), (iii) held.
+    The upgraded `scripts/bank_derivability_audit.py` independently predicted the second defect: a new
+    `type_form` check (a percent-shaped gold string whose JSON spec gives no quoted value-form
+    example) fires on `B-ex6-04 .penalty_per_week` in v6.2 AND v6.3 and on no other A/B/K task.
+    Bank v6.4 registered now: `scripts/build_bank_v64.py` -> `benchmarks/hard/bank-hard-v6.4.json`
+    (sha16 `85a0cd0dd6fa1fab`), again exactly one field (`B-ex6-04.prompt`): the spec types the field
+    as `"число% (например 5%)"` — the hint is derived from the gold's unit and its example value is
+    deliberately NOT the gold (`2%` never appears as an example; the leak guard fails the build if it
+    does). `scripts/verify_bank_v64.py` PASS: one changed field, every gold and seed byte-identical
+    over 77 tasks, v6.3's stated year intact, no leak. Audit on v6.4: B-ex6-04 now has ZERO
+    derivability candidates (39 -> 38 -> 37 bank-wide across v6.2/v6.3/v6.4).
+    V6.4 PROBE RULE (frozen here, before any p64 row exists): the v6.4 arm set (`p64r22/23/24`,
+    contour 0.0.2.48, harness stamped in the run record, `PARB_SUBSET=B-ex6-04`, same sp1 seeds,
+    serial on the idle endpoint, workspace built by `build_hard_v6_ws.py --bank bank-hard-v6.4.json`)
+    decides it: **v6.4 becomes the WORKING hard bank iff >=2/3 v6.4 rows strict-pass** given the
+    already-measured 0/3 fresh controls at the identical seeds on v6.2 and v6.3 in the same session
+    AND verify_bank_v64 PASS AND the audit delta being exactly the two B-ex6-04 atoms. If <2/3 pass,
+    v6.4 is PROVISIONAL too, B-ex6-04 is declared a residual bank defect with all nine probe rows as
+    evidence, and no further contour or bank edit is made on this cell this cycle.
+
+## 2026-11-07 12:56 CET — bank v6.4 VERDICT: WORKING hard bank (rule satisfied 3/3); B-ex6-04 leaves the defect queue; raw-arm FAIRNESS probe PRE-REGISTERED
+
+    Frozen rule from 12:20 CET applied as written to the p64 probe (rule frozen before any p64 row):
+      (i)   >=2/3 v6.4 rows strict-pass: **3/3** (p64r22/23/24, content 1.0, format_ok True, every
+            answer byte-exact: `2026-04-01` + `"2%"`; ptok 330, seconds 6.21/1.36/0.56, calls 2);
+      (ii)  <=1/3 fresh v6.2 control at identical seeds: **0/3** (p62r22-24, `2024-04-01`);
+      (iii) verify_bank_v64 PASS + audit delta exactly the two B-ex6-04 atoms: PASS, 39 -> 38 -> 37.
+    Therefore **bank-hard-v6.4.json (sha16 `85a0cd0dd6fa1fab`) is the WORKING hard bank** from now
+    on; v6.3 (`73f7a04d57473545`) stays published as PROVISIONAL; v6.2 and older bytes untouched.
+    Attribution sanity: all nine probe rows carry the identical contour event chain
+    (`gate:format_gap_json, json_fixed_by_code_as_is, format_repaired_by_code, fix:format_attempt_2,
+    contour:v20_obj_unwrap`, fix=1 calls=2) — contour side byte-identical, only bank prompt bytes
+    moved. p64 arms lack `-end.epoch` (probe script wrote only start); no Wh claim, durations from
+    PGR logs. Queue gap logged: run records stamp `bank_sha16` but the `bank_version` label is
+    empty — builder/runner marker fix queued as a tooling-only release next cycle.
+    Changelog naming every changed byte: `benchmarks/hard/bank-defect-v63-v64-changelog.md`;
+    decision record `history/agent-decisions/2026-11-07-bank-v64-working-b-ex6-04-defect-closed.md`.
+
+    RAW-ARM FAIRNESS PROBE (owner rule: a fixed gold must lift the RAW arms; pre-registered NOW,
+    before any fairness row exists):
+      arms: bare basalt (direct HTTP, temp 0.7, raw seed 1000+rep — raw_v6 protocol, no contour,
+      no fixers), ChatGPT-codex (`codex exec` xhigh read-only, STDIN), Grok (`hermes -z`, toolsets
+      off, prompt inline). reps 22/23/24 (same (task,rep) keys as the contour probe rows).
+      ws `~/parb-v64-raw-fair`: bank.json = the byte-identical B-ex6-04 task object copied out of
+      `bank-hard-v6.4.json` (subset ws; launcher guard asserts byte-identity vs the full file;
+      full-v6.4 sha16 `85a0cd0dd6fa1fab` + subset sha16 recorded per row).
+      scoring: frozen scorer contract v6.2 `c8c0c7dd114dfc32` (harness/parb_check_v6.py), gold from
+      the FULL v6.4 file, strict = content == 1.0 and format_ok.
+      baselines on v6.2 (published cadence-246, reps 16/17/18): basalt 3/3 (year guessed from
+      priors), codex 0/3, grok 0/3 (both state the year is not given).
+      RULE (frozen): FAIR iff ALL THREE raw arms reach >=2/3 strict on v6.4 — codex and grok
+      flipping is the lift that proves the prompt now states the contract; basalt holding proves no
+      regression. If any raw arm stays <2/3, the cell has a residual unstated-contract element:
+      v6.4 stays WORKING (contour evidence stands on its own), but B-ex6-04 returns to the defect
+      queue with the fairness rows as evidence and the changelog gains a residual section.
+      Endpoint discipline: bare basalt shares the idle P2005 serve (chat URL pinned to the reachable
+      box IP, never the bind address); cloud legs never touch the serve; arms run serially
+      (basalt -> codex -> grok) under unit `parb-bank64fair`; liveness by answers-row COUNT only.
