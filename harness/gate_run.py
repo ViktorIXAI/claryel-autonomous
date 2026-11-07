@@ -1511,7 +1511,15 @@ C_RULE_GROUND = CONTOUR_REVISION == (2, 41)
 # successful read, put the task's own policy line at the end of the model's context — the
 # same grounding discipline as the K tax-negation gate (2.7). The line is quoted verbatim
 # from t["sys"]; the reference is never read; zero or multiple matching lines = refuse.
-LOOP_POLICY_REGROUND = contour_at_least(2, 42)
+# MEASURED NEGATIVE (pair-243, three paired seeds vs 0.0.2.40): the mechanism reached and
+# converted its two live target cells (D-ex6-l3 seeds 0+1 -> strict pass, zero banned
+# attempts, evented) but re-rolled the seed lottery on OTHER loop cells and induced two new
+# banned attempts (D-ex6-l1/l2 seed 1) - loop pool net zero (16/18 vs 16/18, loop sign test
+# 2W/2L p=1.0), full 77-cell pool 6W/4L p=0.75 exact. Any context change re-rolls every loop trajectory, so a prevention nudge has
+# no net value while non-target cells re-roll to attempts at the same rate the target cells
+# re-roll to passes. Frozen to exactly this stamp; loop losses belong to SELECTION, not
+# nudges (the 2.11 D_BEST2 family, trigger-gap noted in PAIR-243-V61.md).
+LOOP_POLICY_REGROUND = CONTOUR_REVISION == (2, 42)
 LOOP_POLICY_TAG = "ПОЛИТИКА ЗАДАЧИ (дословно из условия): "
 
 

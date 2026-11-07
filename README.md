@@ -129,7 +129,18 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   never states (bank-clarification queue, never contour guesses). After pair-242 the contour is **at the
   bank ceiling** on `0.0.2.40` — every remaining stable fail on the line is a bank defect
   (`A-ex6-03/C-ex6-02/K-ex6-03`), a frozen-negative class (`B-ex6-04`), or a closed lottery class, so no
-  pair launches without owner-commanded bank clarification (`PAIR-242-V61.md`). Resolution
+  pair launches without owner-commanded bank clarification (`PAIR-242-V61.md`). A twelfth candidate,
+  0.0.2.42 (D-loop **policy re-ground**: after the first successful read the observation quotes the
+  task's own approval-policy line verbatim — prevention for the read-then-banned-attempt trajectory that
+  accounts for all 7 strict loop-D losses of the line), launched under the owner's continuation rule
+  because it targets NONE of the blocked bank cells (loop-D is contour-only headroom): **MEASURED
+  NEGATIVE in pair-243** — the mechanism converted both live target cells (`D-ex6-l3` seeds 0+1, evented,
+  zero attempts) but the context tail re-rolled the loop lottery and induced two NEW banned attempts on
+  cells the control passed (`D-ex6-l1/l2` seed 1), loop pool 16/18 vs 16/18, full pool W6/L4 p=0.75 —
+  the pre-registered zero-regression guard broke, so the flag is frozen to exactly (2,42) and the line
+  stays `0.0.2.40`. Class lesson: any loop context change re-rolls every trajectory, so loop losses are
+  a SELECTION target (the 2.11 best-of-2 family, trigger-gap published), never a prevention nudge
+  (`PAIR-243-V61.md`). Resolution
   floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)
