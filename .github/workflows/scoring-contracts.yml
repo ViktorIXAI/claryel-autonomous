@@ -33,6 +33,7 @@ jobs:
                    harness/gate_v61_c_best2_set_test.py \
                    harness/gate_v62_k_field_enum_test.py \
                    harness/gate_v63_bank_version_marker_test.py \
+                   harness/gate_v64_loop_rows_test.py \
                    harness/gate_versioning_test.py; do
             echo "=== $f"; python3 "$f"
           done

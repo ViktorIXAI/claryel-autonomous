@@ -164,6 +164,11 @@ loop_ad = ('"""loop driver adapter: mechanics from copied v5 module; scoring is 
            "                        else {'gate_rejected': True})\n"
            "            continue\n"
            "        rows.append(p if isinstance(p, str) else json.dumps(p, ensure_ascii=False))\n"
+           # 0.0.2.50 tooling: persist the scorer-row form in the result record so
+           # published loop rows are offline re-scorable without re-implementing this
+           # adapter; the adapter is always called on the FINAL adopted rec (best-of-2
+           # retries re-score), so the stored rows match the adopted trajectory.
+           "    rec['_loop_rows'] = rows\n"
            "    return V6.check_D_loop_v6(t, rows)\n")
 open(os.path.join(OUT, "parb_loop.py"), "w", encoding="utf-8").write(loop_ad)
 

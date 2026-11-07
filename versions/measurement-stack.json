@@ -89,11 +89,11 @@
    "id": "sp1",
    "definition": "sp1: per-(task,rep) gseed = int(sha256(f'{task}|{rep}')[:8], 16) % 999983 (scripts/plan_reps.py); per-task plan seed = int(sha256(task_id)[:6], 16) (scripts/build_hard_v6_ws.py). Selection retries add a fixed offset per mechanism (2.11 +4096, 2.9/2.36 +8117, 2.43 +8117-loop, 2.44 +12289) so a retry re-draws instead of replaying the losing trajectory."
   },
-  "harness_commit": "2d39c90efb6eb6a30af9027d35a04961300ed320"
+  "harness_commit": "42f8e296cdb9cd31d0fca4a30b38ca0e18c7eefe"
  },
  "contour": {
-  "current_revision": "2.49",
-  "current_stamp": "0.0.2.49",
+  "current_revision": "2.50",
+  "current_stamp": "0.0.2.50",
   "behavior_at_current": "2.48",
   "contour_changed_at_current_release": false,
   "registered_features": [
@@ -546,6 +546,86 @@
       "contour_stamp": "2.45",
       "contour_behavior": "2.44",
       "harness_git_sha": ""
+     }
+    }
+   },
+   "run_record_has_stack": true,
+   "energy_windows_seconds": {},
+   "bank_attribution": "recorded in the run record",
+   "scorer_contract_attribution": "recorded per row"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/cadence-249",
+   "arms": [
+    "q49r25",
+    "q49r26",
+    "q49r27"
+   ],
+   "ledger_rows": 231,
+   "contour_stamp": "0.0.2.49",
+   "contour_behavior": "2.48",
+   "run_records": {
+    "q49r25": {
+     "contour_stamp": "0.0.2.49",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "926afac912bfe253db0fe3ecfc52846502eb2af7",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.49",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "926afac912bfe253db0fe3ecfc52846502eb2af7"
+     }
+    },
+    "q49r26": {
+     "contour_stamp": "0.0.2.49",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "926afac912bfe253db0fe3ecfc52846502eb2af7",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.49",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "926afac912bfe253db0fe3ecfc52846502eb2af7"
+     }
+    },
+    "q49r27": {
+     "contour_stamp": "0.0.2.49",
+     "contour_behavior": "2.48",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": "926afac912bfe253db0fe3ecfc52846502eb2af7",
+     "stack": {
+      "bank_version": "v6.4",
+      "bank_version_source": "marker",
+      "bank_sha16": "7788cc288922b9a4",
+      "bank_tasks": 77,
+      "scorer_contract": "v6.2",
+      "contract_sha16": "c8c0c7dd114dfc32",
+      "strict_rule": "content == 1.0 and format_ok",
+      "seed_protocol": "sp1",
+      "contour_stamp": "2.49",
+      "contour_behavior": "2.48",
+      "harness_git_sha": "926afac912bfe253db0fe3ecfc52846502eb2af7"
      }
     }
    },

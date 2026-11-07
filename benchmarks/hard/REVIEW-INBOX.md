@@ -1792,3 +1792,29 @@ the skill's scorer-routing rule caught me at minute ~15 of publication this time
 audit time. Fixed surfaces: CADENCE-249-V64.md rule-(c) section (correction block,
 original claim named and retracted, not silently deleted), decision record appended
 correction section, README bullet. No score, pair, or adoption verdict changes.
+
+## 2026-11-07 16:52 CET — release 0.0.2.50 (TOOLING ONLY): loop adapter persists `_loop_rows`; re-scorer mirror cross-pinned by contract test
+Follow-up to the cadence-249 correction (16:47 entry). The generated loop adapter
+(`parb_loop.check_D_loop` template in `scripts/build_hard_v6_ws.py`) now stores the
+scorer-row form it builds into the result record as `_loop_rows`, so future published
+loop rows are offline re-scorable WITHOUT re-implementing the adapter mapping. The last
+scorer call wins: the harness re-invokes `check_D_loop` on the FINAL adopted rec (the
+best-of-2 paths at 3544/3562/3580 in gate_run), so `_loop_rows` always matches the
+adopted trajectory — proven in the contract test, `gate_run.py` itself untouched.
+(2, 50) NOT in CONTOUR_FEATURES: behavior axis stays 2.48, zero contour flags moved;
+CURRENT_REVISION tests stay in the >= form (pair-244 lesson, re-verified).
+`harness/gate_v64_loop_rows_test.py` (11 checks, enrolled in scoring-contracts.yml):
+identity + behavior equality 2.50==2.48, the adapter TEMPLATE extracted from the builder
+by ast (importing the builder would start a build — no argparse), all five step shapes
+(parsed / gate_block / gate_rejected+parsed / gate_rejected without parsed / salvaged),
+persist + last-call-wins adoption, and a cross-pin: the `cadence_score_v62.py` rescorer
+mirror == adapter rows on the synthetic case AND on all 18 published cadence-249 loop
+rows, so harness and repo rescorer can never drift silently.
+Workspaces: both contour workspaces rebuilt at this code — bank copies byte-identical
+(f4553aab304f60d7 v6.1 ws, d1e8d11df5840dcc v6.2 line), pins + MANIFEST.v6 regen,
+`harness/verify_manifest.py --v6` VERIFY PASS (note: my first verify call this session
+used a wrong script path and "passed" on nothing — the real path is `harness/`;
+corrected before publishing). Full CI-parity contract loop: 28/28 green on python3.12
+locally. MEASUREMENT-STACK regenerated (stamp 2.50 / behavior 2.48 / harness commit).
+No arms launched; endpoint idle; next contour stamp needs a fresh live-target audit on
+the v6.4 stability map (cadence-249 draws are the newest evidence).

@@ -195,8 +195,21 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # source reason. ZERO contour flags move between 2.48 and 2.49 —
 # `gate_v63_bank_version_marker_test.py` pins the matrix equality, the registry
 # identity, the resolution order and the call-site wiring.
-CURRENT_REVISION = (2, 49)
-CURRENT_STAMP = "0.0.2.49"
+# Release 0.0.2.50 (TOOLING ONLY, 07.11): the generated loop adapter
+# (`parb_loop.check_D_loop`, template in scripts/build_hard_v6_ws.py) now STORES the
+# scorer-row form it builds in the result record as `_loop_rows`, so published loop
+# result rows are offline re-scorable without re-implementing the adapter mapping
+# (the cadence-249 correction: the "storage gap" was a rescorer lookup-convention
+# error; trajectories live in `agent_steps`, and only the pinned adapter turns them
+# into scorer rows). The last scorer call wins — best-of-2 retries re-invoke the
+# adapter on the adopted rec, so `_loop_rows` always matches the adopted trajectory.
+# `gate_run` itself is untouched; (2, 50) is NOT in CONTOUR_FEATURES: the behavior
+# axis stays 2.48 and ZERO contour flags move — `gate_v64_loop_rows_test.py` pins
+# the adapter mapping from the builder template (ast, without running the builder),
+# cross-pins it against the `scripts/cadence_score_v62.py` rescorer mirror, proves
+# last-call-wins adoption, and re-asserts the flag matrix at 2.50 == 2.48.
+CURRENT_REVISION = (2, 50)
+CURRENT_STAMP = "0.0.2.50"
 
 
 def _digits(value: str) -> list[int]:
