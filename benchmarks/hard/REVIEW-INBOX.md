@@ -2380,3 +2380,16 @@ Cadence: 2.51/2.52/2.53/2.54 = 4 measured-era stamps since cadence-249; four-arm
 due after the NEXT stamp. Next hypothesis must come from a stability map rebuilt on the 2.53 line
 INCLUDING pair-251's six draws (2.51-2.54 era, 12 draws/task pool), with the pre-launch
 measurability gate >=1 control strict-fail required. Sampler parb-p251sampler stopped 00:38 CET.
+
+## 2026-11-08 01:05 CET — CORRECTION to the pair-251 class ruling + line map published
+
+The 00:55 entry said H-ex6-03 `unknown_missing` was "at/near zero live rate over 9 fresh draws" —
+wrong. All published line-era legs on v6.6 (2.51 v51r37-39, 2.52 v52r37-39, 2.53 v53r41-43 +
+w53r44-46): exactly 2 strict-fails in 12 draws (seeds 41, 42). LOW-RATE LIVE; ~36% chance a
+3-seed pair draws it live — that probability, not class death, is why pair-251 was zero-
+opportunity. PAIR-251-V66.md annotated with [CORRECTION]; decision record patched.
+`benchmarks/hard/v6-results/UNSTABLE-CELLS-V66.md` adds the rebuilt measurability map (six 2.53-
+line arms, seeds 41-46): 60/77 cells 6/6; live-repeat candidates: D-ex6-p2 4/6 (stable
+refused_ok/next_ok), loop D-ex6-l1 3/6 banned_attempted (selection route only), H-ex6-01 4/6
+(mixed families), H-ex6-03 4/6 (rate 2/12 line-wide, do not re-probe). Next contour hypothesis
+should come from that table with the >=1-live-target gate applied at the pair's own seeds.
