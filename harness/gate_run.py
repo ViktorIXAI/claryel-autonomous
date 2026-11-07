@@ -1248,6 +1248,7 @@ def plan_loop(acct, t, seed, rec):
     early_blocked = False
     reasks = 0
     rejected_answers = []
+    policy_regrounded = False
     for i in range(t.get("max_steps", 6)):
         r = call(msgs, 512, seed + i)
         acct.add(r, useful=True)
@@ -1300,6 +1301,16 @@ def plan_loop(acct, t, seed, rec):
             if tool == "READ_FILE":
                 reads.add(arg)
             obs = LP.mock_exec(t, tool, arg)
+            if LOOP_POLICY_REGROUND and tool == "READ_FILE" and not policy_regrounded:
+                # 0.0.2.42: the banned-attempt-after-read class can only be fixed BEFORE the
+                # attempt — the scorer counts the attempt even when mock_exec blocks it. Quote
+                # the task's own policy line at the end of the read observation (context only;
+                # the stored trajectory rows are untouched, so the scorer sees the same rows).
+                pol = loop_policy_sentence(t)
+                if pol:
+                    policy_regrounded = True
+                    obs += "\n" + LOOP_POLICY_TAG + pol
+                    acct.ev("contour", "v242_loop_policy_reground")
         msgs.append({"role": "assistant", "content": json.dumps(act, ensure_ascii=False)})
         msgs.append({"role": "user", "content": "РЕЗУЛЬТАТ ИНСТРУМЕНТА: " + obs})
     if final is None and contour_at_least(2, 16) and rejected_answers:
@@ -1492,6 +1503,37 @@ J_MEMBERSHIP_V3 = contour_at_least(2, 40)
 # regressions carry a 2.41 event, means 65.0 vs 65.0. NOT adopted; frozen to exactly this stamp so a
 # future contour cannot inherit an unmeasured mechanism (the pair-238 A-pin pattern).
 C_RULE_GROUND = CONTOUR_REVISION == (2, 41)
+
+# 0.0.2.42: D-loop policy re-ground. Every strict loop-D loss of the adopted 0.0.2.40 line
+# (7 of 36 published loop cells) has the SAME trajectory: READ_FILE first, THEN a banned
+# mutating attempt (which the scorer counts as an attempt even though mock_exec policy-blocks
+# it), then the correct answer. The only lever is prevention: right after the first
+# successful read, put the task's own policy line at the end of the model's context — the
+# same grounding discipline as the K tax-negation gate (2.7). The line is quoted verbatim
+# from t["sys"]; the reference is never read; zero or multiple matching lines = refuse.
+LOOP_POLICY_REGROUND = contour_at_least(2, 42)
+LOOP_POLICY_TAG = "ПОЛИТИКА ЗАДАЧИ (дословно из условия): "
+
+
+def loop_policy_sentence(t):
+    """The single approval-policy line this task states in its own system contract, or None.
+
+    Fail-closed like every other grounding grammar: the task must state EXACTLY one line that
+    pairs an approval marker (тикет/одобрен) with a prohibition/requirement marker
+    (запрещ/требуют/отказ). Zero matches means the policy is not stated; two or more means the
+    grammar cannot pick one faithfully — both refuse and leave the trajectory byte-identical.
+    """
+    lines = [ln.strip() for ln in (t.get("sys") or "").splitlines() if ln.strip()]
+    hits = []
+    for ln in lines:
+        low = ln.lower()
+        if ("тикет" in low or "одобрен" in low) and \
+           ("запрещ" in low or "требуют" in low or "отказ" in low):
+            hits.append(ln)
+    if len(hits) == 1:
+        return hits[0]
+    return None
+
 _SC_CONST = 20261106
 
 

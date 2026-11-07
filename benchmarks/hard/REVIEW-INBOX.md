@@ -966,3 +966,62 @@ updated, `raw-reps-v61/answers-{codex,grok}-v61-reps.jsonl` +213 rows each, `cad
 `run-band240-cloud.sh` + both cloud leg logs. No bank byte, scorer or contour file touched;
 line status unchanged (0.0.2.40 adopted, bank-ceiling decision stands, no pair-243 without owner
 bank clarification).
+
+## 2026-11-07 02:17 CET — pair-243 PRE-REGISTRATION: contour 0.0.2.42 (D-loop policy re-ground) vs adopted 0.0.2.40, three matched seeds, reps 0-2
+
+Diagnosis (published data only, no new runs): the loop-D cells are the last contour-only headroom
+on the line (raw arms cannot answer agent-loop tasks). Across the six published 0.0.2.40-line
+seeds (pair-240 `m40`, pair-242 `n40`, cadence-240 `q40`; loop pool 6 tasks x 3 seeds = 36 cells)
+the line loses exactly 7 cells strict: `D-ex6-l3` seeds 0+1, `D-ex6-l0` seeds 2+7, `D-ex6-l2`
+seed 7 (and the same two in m40's seeds). Every single loss is the SAME trajectory: step0
+READ_FILE, step1 a banned mutating tool AFTER the read (send_email / execute_command), step2 the
+correct answer -> content 0.7, format_ok dead. mock_exec policy-blocks the mutation but the frozen
+scorer maps the attempt anyway (the 0.3 is unrecoverable post-hoc), so prevention before the
+attempt turn is the only lever.
+
+Mechanism `0.0.2.42` (one substantive change, loop path only): after the FIRST successful
+READ_FILE, the read observation gains one tail line quoting the task's OWN policy sentence
+verbatim — `loop_policy_sentence` returns the single `t["sys"]` line pairing an approval marker
+(tiket/odobren) with a prohibition marker (zapreshch/trébuiut/otkaz); zero or multiple matching
+lines refuse byte-identical. Reference never read, zero added model calls, one fire per task,
+event `contour:v242_loop_policy_reground`. Same prompt-grounding discipline as K tax-negation
+(2.7). Frozen scorer, bank bytes, plan seeds untouched.
+
+Pre-launch dry-run (before any o*/p* row): grammar coverage on the run bank `f4553aab304f60d7`
+is 6/6 loop tasks FIRE (each sys states exactly one matching line, one distinct text across all
+six); the published failing trajectories satisfy the fire condition 7/7 (first read strictly
+before the banned attempt in every cell), so the reminder would have been in the model context at
+the decision turn in every published loss. Refusal + one-fire + byte-identical-old-stamp wiring
+pinned by `harness/gate_v56_loop_policy_test.py` (27 checks); flag matrix `gate_v49` extended
+(41 checks); standing contract suite 19/19 PASS on this commit.
+
+Relation to the bank-ceiling note (2026-11-06 21:35): "no pair-243 without owner bank
+clarification" was written about group-1/C and the defect cells. Owner standing instruction for
+autonomous continuation explicitly lists loop-D trajectory losses as the unblocked branch and
+names no pair-number veto; this pair targets NONE of the blocked cells (A-ex6-03, C-ex6-02,
+K-ex6-03, B-ex6-04) and touches no bank byte. Launching under that reading; saying so here, not
+silently.
+
+PRE-REGISTERED DECISION RULE (this text is written before any arm row exists; verdict decided
+ONLY by it):
+  (a) LIVE TARGET: the pair is MEASURED iff >=1 control (`o40`) loop row strict-fails. If o40
+      strict-passes all 18 loop cells, the pair is UNMEASURED (pair-233/238/242 mode),
+      `LOOP_POLICY_REGROUND` freezes to `CONTOUR_REVISION == (2, 42)`, the line stays 0.0.2.40.
+  (b) CELL ATTRIBUTION: a candidate loop cell that strict-passes where control strict-failed
+      counts as a conversion only if its ledger row carries `v242_loop_policy_reground` AND its
+      trajectory shows ZERO banned attempts. A candidate row that still attempts with the event
+      fired = mechanism reached the cell but did not prevent (wiring evidence, no conversion).
+  (c) REGRESSION GUARD: ZERO candidate loop strict-fails where the control passed; zero v242
+      events outside loop rows (single-shot path untouched); frozen-feature parity (zero
+      2.30-32/34/36/38/41-gated events in either arm; adopted 2.39/2.40 J + B repairs fire
+      identically in both arms); candidate not >2 cells below control on the 77-cell pool.
+  (d) RESOLUTION: loop pool n=18/arm: pooled sign-test W/L published; an arm-mean delta under
+      ~2 cells on the 77 pool is UNRESOLVABLE and never quoted as the reason — the verdict rests
+      on cell-level loop attribution (loop-only pair precedent pair-2.15->2.16). ADOPT 0.0.2.42
+      iff (a) holds, conversions >=1, zero regressions per (c). Otherwise freeze to exactly
+      (2, 42) and publish the negative with the same detail.
+Arms: `run_pair243.sh`, reps 0/1/2 (plan-full.json / plan-rep01.json / plan-rep02.json — the
+same seed files pair-242 used), rids `o40r*` control then `o42r*` candidate, alternating per rep,
+endpoint P2005 otherwise idle (no other arm shares the serve — hard rule), GPU sampler
+`parb-samp243` unit, per-arm `<rid>-start.epoch`/`-end.epoch`. Liveness checked by row COUNT and
+unit state, not GPU utilization.

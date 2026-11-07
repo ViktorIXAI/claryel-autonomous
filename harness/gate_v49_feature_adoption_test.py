@@ -198,6 +198,17 @@ g241c = load("0.0.2.41")
 ck(not g240c.C_RULE_GROUND, "C_RULE_GROUND is OFF at 0.0.2.40 (the adopted line never ran it)")
 ck(g241c.C_RULE_GROUND, "C_RULE_GROUND is ON only at its own stamp 0.0.2.41")
 
+# 2.42 (D-loop policy re-ground): a NEW candidate, so it must be off on every earlier stamp and
+# on exactly itself until pair-243 measures it; the frozen 2.41 must NOT inherit into it and the
+# adopted line must not disappear from it. Full wiring is pinned by gate_v56.
+g242f = load("0.0.2.42")
+ck(not g240c.LOOP_POLICY_REGROUND and not g241c.LOOP_POLICY_REGROUND,
+   "LOOP_POLICY_REGROUND is OFF at 0.0.2.40/0.0.2.41 (older arms byte-identical)")
+ck(g242f.LOOP_POLICY_REGROUND, "LOOP_POLICY_REGROUND is ON at its own stamp 0.0.2.42")
+ck(not g242f.C_RULE_GROUND, "the frozen 2.41 C grounding stays off at 0.0.2.42")
+ck(g242f.J_RERANK_V2 and g242f.J_MEMBERSHIP_V3,
+   "0.0.2.42 builds on the adopted line (J re-rank v2 + J membership inherited)")
+
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
       % (CHECKS, len(covered), len([x for x in bank if x["cat"] == "J"])))
