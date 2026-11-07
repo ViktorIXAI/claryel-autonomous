@@ -1096,3 +1096,33 @@ unchanged, per-stamp smoke in the live ws: 0.0.2.40 -> behavior 2.40 with `D_BES
 0.0.2.43 -> behavior 2.43 with the 2.42 tail off. Endpoint auth-checked against
 `p2005-profile.json` (`/v1/models` lists `qwen3.8-flash-next-iq3_s-basalt`, loaded, n_ctx 262144)
 before the first row. Liveness checked by row COUNT and unit state, never GPU utilization.
+
+## 2026-11-07 03:57 CET — bank-hard-v6.2.json published (sha16 `3c866ea7daae611c`); v6.1 bytes untouched
+
+Owner delegation (07.11) exercised: the three published bank defects are fixed as a NEW bank
+version, not an in-place edit. Changes exactly three fields, all other 74 task bytes verified
+identical by `scripts/verify_bank_v62.py` (raw diff touches only the five lines listed in
+`benchmarks/hard/v6-results/bank-defect-v62-changelog.md`):
+- `A-ex6-03.ref` = faithful execution of its own printed chain (2090.0 / 1179.9 / 6230.1); the
+  v6.1 gold used a hidden base 5700.0 and was not even self-consistent — 0/89 rows ever passed.
+- `C-ex6-02.ref.letters` = the executed truth table of the shipped snippets on CPython
+  (`["A","B","C","D"]`; all four evaluate to [1, 2, 3]) — 0/89 rows ever passed; disclosure:
+  B's result is CPython small-int set order, and the gold is re-executed by the verifier.
+- `K-ex6-03.prompt` gains `(FREE_SHIPPING: yes/no)` on the field-spec line (gold token `yes`
+  was not contract-derivable; 9/91 rows lost exactly 0.25). This is the only prompt change in
+  v6.2: K-ex6-03 answer rows recorded under v6.1 are labelled PRE-v6.2 in future paired tables.
+`C-ex6-00/01` deliberately NOT touched (not defects; policy-wording stays an owner-commanded
+decision). Scorer files, seeds, ids, all published artifacts unchanged. Golds are CI-re-derivable:
+`python3 scripts/build_bank_v62.py && python3 scripts/verify_bank_v62.py` reproduces the file
+byte-for-byte and fail-closes on any deviation. Queued next: rescore of every published arm
+against the v6.2 references (`rescore-v62/`, per-cell delta table), then the four-arm cadence
+on a v6.2 workspace (the ws builder still pins v6.1 until that step; no silent bank swap).
+
+Also cross-verified pair-244 (`p40r*` vs `p43r*`) with a fully independent second scorer over the
+six ledgers+results joins: loop pool 13/18 -> 16/18 (3W/0L p=0.25), 1 evented conversion
+(D-ex6-l3 seed 1, fired+win, zero banned attempts), 1 fired-not-better (l0 seed 2), 1 fired+won
+on an already-passing cell (l3 seed 0, wiring), guards all clean, single-shot W4/L5, full pool
+208/210 with 7W/5L p=0.774, energy 21.41/17.85 Wh, loop cost 19693->21202 ptok / 2940->3247 ctok
+/ 62->70 calls — every number matches `PAIR-244-V61.md` as published. One prose fix queued:
+the single-shot flip sentence should read 9 flip instances over 7 ids (H-ex6-01 flips both ways
+across seeds 0/1), not "6 cells".
