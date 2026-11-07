@@ -242,6 +242,19 @@ G_CONFLICT_OVERWRITE = contour_at_least(2, 26)
 A_ARITH_CODE = contour_at_least(2, 27)
 # 0.0.2.28: H requires/unknown from explicit prompt signature constraint
 H_REQUIRES_PROMPT = contour_at_least(2, 28)
+# 0.0.2.48: K fields gate — the REQUIRED-KEY set comes from the field list the task
+# itself enumerates («Поля: ITEM, QTY, …»), never from the template placeholder token.
+# The pre-2.48 detector scans the prompt for UPPERCASE tokens followed by a colon; in a
+# K prompt the only such tokens are the literal example `FIELD:` in the instruction line,
+# so the gate demanded a line literally beginning `FIELD:` and the contour's own hint
+# told the model to use that placeholder AS a key. Bank v6.2 published line: K-ex6-03
+# strict-fails 9/9 (code `missing`, content 0.25) with every gold value printed in the
+# prompt — a contour-caused, chronic, single-cell failure. Keys stay prompt-derived (the
+# reference is never read) and the surface is limited by construction: `want_format` keeps
+# calling the untouched `want_fields`, so which tasks reach `fields_gate` cannot change
+# (bank v6.2: exactly one task). Event: contour:v48_fields_enum_from_prompt:<n_keys>.
+K_FIELDS_ENUM = contour_at_least(2, 48)
+K_FIELD_TEMPLATE_TOKENS = ("FIELD", "KEY", "КЛЮЧ", "КЛЮЧИ", "NAME", "ИМЯ")
 
 
 def _d_is_loop(t):
@@ -1014,6 +1027,46 @@ def want_fields(prompt):
     return out
 
 
+K_FIELD_ENUM_RE = re.compile(r"(?im)^\s*(?:поля|поле|fields?)\s*:\s*(.+)$")
+
+
+def fields_enumeration(prompt):
+    """0.0.2.48: the field names the task itself enumerates on a `Поля: A, B, C` line.
+
+    Only UPPERCASE identifier-shaped tokens count; a parenthetical value hint
+    (`(FREE_SHIPPING: yes/no)`) and any non-identifier fragment are dropped, so the
+    enumeration can never invent a key the prompt did not print. The reference (`ref`)
+    is never read by this function.
+    """
+    out = []
+    for line in K_FIELD_ENUM_RE.findall(prompt or ""):
+        head = line.split("(")[0].split("[")[0]
+        for tok in re.split(r"[,;]|\s+и\s+", head):
+            tok = tok.strip().strip(":").strip()
+            if re.fullmatch(r"[A-Z][A-Z0-9_]{2,}", tok) and tok not in out:
+                out.append(tok)
+    return out
+
+
+def fields_required(prompt):
+    """Keys the fields gate must see (0.0.2.48: enumeration replaces placeholder tokens).
+
+    Byte-identical to `want_fields` unless BOTH conditions hold: the prompt enumerates
+    its fields AND the old detector's set is placeholder-tainted (contains `FIELD`/`KEY`
+    /`КЛЮЧ`-style tokens, i.e. it read the instruction's own example instead of real key
+    names). A prompt whose old detection already named real keys is untouched, so the
+    adopted line's passing cells cannot change their required set.
+    """
+    old = want_fields(prompt)
+    if not K_FIELDS_ENUM:
+        return old
+    enum = fields_enumeration(prompt)
+    if not enum or not any(k in K_FIELD_TEMPLATE_TOKENS for k in old):
+        return old
+    return list(enum) + [k for k in old
+                         if k not in K_FIELD_TEMPLATE_TOKENS and k not in enum]
+
+
 def want_format(prompt):
     """Which format the task itself requires — the contour enforces exactly that, not its own.
 
@@ -1148,6 +1201,13 @@ def format_gate(acct, t, seed, msgs0):
 def fields_gate(acct, t, seed, msgs0):
     """KEY: value fields — code checks completeness and non-emptiness without peeking at correct values."""
     need = want_fields(t["prompt"])
+    if K_FIELDS_ENUM:
+        # 0.0.2.48 wiring proof: the event fires only where the required set actually
+        # changed, so a ledger census can tell a live fire from a no-op task.
+        enum_need = fields_required(t["prompt"])
+        if enum_need != need:
+            need = enum_need
+            acct.ev("contour", "v48_fields_enum_from_prompt:%d" % len(need))
     hint = ("ВЫВЕДИ строки вида КЛЮЧ: значение ровно для таких ключей: %s. "
             "Каждый ключ один раз, значение без пояснений." % ", ".join(need))
     r = ask_ladder(acct, msgs0 + [{"role": "user", "content": hint}], seed)

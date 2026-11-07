@@ -262,7 +262,7 @@ _FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TAB
           "B_FIELD_COMPLETE", "B_TABLE_AGGREGATE", "G4_LOTTERY", "J_MEMBERSHIP_V3",
           "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
           "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR",
-          "C_BEST2_SET")
+          "C_BEST2_SET", "K_FIELDS_ENUM")
 _missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
 ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
 _moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
@@ -295,6 +295,20 @@ _m247 = [f for f in _FLAGS if getattr(g247, f) != getattr(g246, f) and f != "C_B
 ck(not _m247, "2.47 = the 2.46 matrix + exactly C_BEST2_SET (%s)" % _m247)
 ck((2, 47) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.47") == (2, 47),
    "the candidate registers a real contour change (stamp 2.47 = behavior 2.47)")
+
+# pair-247 (2026-11-07): 0.0.2.48 is the CONTOUR CANDIDATE stamp (K fields-gate key enumeration).
+# Matrix discipline again: the pair control 2.47 (the adopted line after pair-246) must move ZERO
+# flags vs 2.46+C_BEST2_SET, and 2.48 must equal 2.47 plus EXACTLY K_FIELDS_ENUM.
+g248 = load("0.0.2.48")
+ck(getattr(g247, "K_FIELDS_ENUM") is False, "the pair-247 candidate trigger is OFF on the 2.47 control")
+ck(getattr(g248, "K_FIELDS_ENUM") is True, "the candidate trigger is ON at 2.48")
+_m248 = [f for f in _FLAGS if getattr(g248, f) != getattr(g247, f) and f != "K_FIELDS_ENUM"]
+ck(not _m248, "2.48 = the 2.47 matrix + exactly K_FIELDS_ENUM (%s)" % _m248)
+ck((2, 48) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.48") == (2, 48)
+   and GV.behavior_tuple("0.0.2.47") == (2, 47),
+   "the candidate registers a real contour change; the control keeps behavior 2.47")
+ck(g248.C_BEST2_SET is True and g248.D_BEST2_CLAIM is False,
+   "2.48 inherits the adopted pair-246 trigger and still refuses the frozen 2.44 one")
 
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
