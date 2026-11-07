@@ -1,42 +1,44 @@
 #!/usr/bin/env python3
-"""Percent digest after every run: one published row per run, no prose.
+# -*- coding: utf-8 -*-
+"""Percent digest: one published row per completed arm batch, no prose.
 
-Rule from the owner (07.11): "publish a short percentage report after every run".
-A verdict doc is evidence; this is the human-readable counter that must appear next
-to it, computed the same way every time so rows are comparable:
+Owner rule (07.11): "publish a short percentage report after every run". The verdict doc is the
+evidence; this is the counter that has to sit next to it, computed the same way every time so rows
+are comparable:
 
-  single-shot  strict passes / N single-shot tasks (plan rows with max_turns == 1)
-  loop-D       strict passes / M loop tasks (plan rows with max_turns > 1)
-  bank         (single-shot + loop) / (N + M) as a percentage of the WHOLE bank
+  single-shot  strict passes / N single-shot tasks (plan rows whose mode is not "loop")
+  loop-D       strict passes / M loop tasks (plan rows with mode == "loop")
+  bank         (single-shot + loop) / (N + M) as a percent of the WHOLE bank
 
-Every row names the bank sha16, the contour stamp read from the ledger rows, the rep
-count, and the scorer contract id if the ledger carries it, because none of these
-numbers is comparable across a different bank or stamp.
+Every row carries the bank sha16, the contour stamp read from the ledger rows and the arm count,
+because none of these percentages is comparable across a different bank or stamp. Reuses
+arm_score_split's arithmetic (one source for the loop subset and the strict rule); fail-closed on
+missing plans, missing ledgers, unknown-task rate >2%.
 
 Usage: run_digest.py <workspace> <label> [rid ...]
-       (no rids -> every ledger-<rid>.jsonl that holds a full bank)
-Prints the markdown row to stdout and prepends it to DIGEST-<label-family>.md.
+       (no rids -> every ledger-<rid>.jsonl holding at least a full bank)
+Prints the row, prepends it to benchmarks/hard/v6-results/DIGEST.md.
 """
 import glob
 import hashlib
-import json
 import os
 import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from arm_score_split import plan_modes, score_arm  # same arithmetic, one source
+from arm_score_split import known_tasks, load_loop_tasks, plan_rows, score_arm
 
 
 def full_rids(ws):
-    want = None
-    for p in glob.glob(os.path.join(ws, "plan-*.json*")):
-        for t, mt in plan_modes(p):
-            want = (want or 0) + 1
+    known = set()
+    for pf in glob.glob(os.path.join(ws, "plan*.json")):
+        for p in plan_rows(pf):
+            if isinstance(p, dict) and p.get("task"):
+                known.add(p["task"])
     out = []
     for p in sorted(glob.glob(os.path.join(ws, "ledger-*.jsonl"))):
         rid = os.path.basename(p)[len("ledger-"):-len(".jsonl")]
-        if sum(1 for _ in open(p, encoding="utf-8")) >= (want or 1):
+        if sum(1 for l in open(p, encoding="utf-8") if l.strip()) >= len(known):
             out.append(rid)
     return out
 
@@ -45,50 +47,51 @@ def main():
     if len(sys.argv) < 3:
         print(__doc__)
         return 2
-    ws, label = sys.argv[1], sys.argv[2]
+    ws = os.path.expanduser(sys.argv[1])
+    label = sys.argv[2]
     rids = sys.argv[3:] or full_rids(ws)
     if not rids:
-        print("digest: no full arms in %s (not counted)" % os.path.basename(ws))
+        print("digest: no full arms in %s - nothing counted" % os.path.basename(ws))
         return 1
-    res = []
-    for rid in rids:
-        s, ns, l, nl, stamp, _ = score_arm(ws, rid)
-        res.append((s, ns, l, nl, stamp))
+    loop = load_loop_tasks(ws)
+    known = known_tasks(ws)
+    res = [score_arm(ws, rid, loop, known) for rid in rids]
     n = len(res)
+    ns, nl = res[0][1], res[0][3]
+    if not ns or not nl:
+        raise SystemExit("arms hold %d single-shot and %d loop rows - not a full-bank arm, "
+                         "refusing to print a percent" % (ns, nl))
     ss = sum(r[0] for r in res) / n
     lp = sum(r[2] for r in res) / n
-    ns, nl = res[0][1], res[0][3]
     tot = ss + lp
-    stamps = sorted({r[4] for r in res if r[4]})
-    bank_sha = ""
-    bp = os.path.join(ws, "bank.json")
-    if os.path.exists(bp):
-        bank_sha = hashlib.sha256(open(bp, "rb").read()).hexdigest()[:16]
-    row = ("| %s | %s | %s | %s | %d | %.1f/%d = %.1f%% | %.1f/%d = %.1f%% | "
-           "%.1f/%d = %.1f%% |"
-           % (time.strftime("%m-%d %H:%M"), label, bank_sha or "-",
-              stamps[-1] if stamps else "?", n,
+    stamps = sorted({r[4] for r in res if r[4] != "?"})
+    bank = os.path.join(ws, "bank.json")
+    sha16 = hashlib.sha256(open(bank, "rb").read()).hexdigest()[:16] if os.path.exists(bank) else "-"
+
+    row = ("| %s | %s | %s | %s | %d | %.1f/%d = %.1f%% | %.1f/%d = %.1f%% | %.1f/%d = **%.1f%%** |"
+           % (time.strftime("%m-%d %H:%M"), label, sha16, stamps[-1] if stamps else "?", n,
               ss, ns, 100 * ss / ns, lp, nl, 100 * lp / nl,
               tot, ns + nl, 100 * tot / (ns + nl)))
-    hdr = ("| run | bank sha16 | stamp | arms | single-shot | loop-D | percent of bank |\n"
-           "|---|---|---|---|---|---|---|")
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                        "benchmarks", "hard", "v6-results",
-                        "DIGEST.md")
-    path = os.path.normpath(path)
+    path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                         "..", "benchmarks", "hard", "v6-results", "DIGEST.md"))
+    head = ("# Percent digest - one row per completed run\n\n"
+            "Auto-generated by `scripts/run_digest.py` after every arm batch, newest first. "
+            "Rows with a different bank sha16 or contour stamp are not comparable. strict rule: "
+            "`content == 1.0 and format_ok`; loop subset from plan rows, never inferred.\n\n")
+    hdr = ("| when | run | bank sha16 | stamp | arms | single-shot | loop-D | percent of bank |\n"
+           "|---|---|---|---|---|---|---|---|")
     old = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
-    head = ("# Percent digest — one row per completed run\n\n"
-            "Auto-generated by scripts/run_digest.py after every arm batch; newest first. "
-            "Rows from different bank sha16 or stamp are not comparable.\n\n")
-    body = [l for l in old.splitlines() if l.startswith("| ") and "run |" not in l and "---" not in l]
-    open(path, "w", encoding="utf-8").write(head + hdr + "\n" + "\n".join([row] + body) + "\n")
-    print(row.replace("| %s | %s" % (time.strftime("%m-%d %H:%M"), label),
-                      "| %s |" % label).strip())
-    print("SINGLE %.1f%%  LOOP %.1f%%  BANK %.1f%%  (%d arms, stamp %s, bank %s) -> %s"
-          % (100 * ss / ns, 100 * lp / nl, 100 * tot / (ns + nl), n,
-             stamps[-1] if stamps else "?", bank_sha or "-", os.path.basename(path)))
+    body = [l for l in old.splitlines() if l.startswith("| ")
+            and "when |" not in l and not set(l) <= set("|- ")]
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(head + hdr + "\n" + "\n".join([row] + body) + "\n")
+    print("SINGLE %.1f/%d = %.1f%%  LOOP %.1f/%d = %.1f%%  BANK %.1f/%d = **%.1f%%**  "
+          "(%d arms, stamp %s, bank sha16 %s) -> %s"
+          % (ss, ns, 100 * ss / ns, lp, nl, 100 * lp / nl,
+             tot, ns + nl, 100 * tot / (ns + nl), n, stamps[-1] if stamps else "?",
+             sha16, os.path.basename(path)))
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

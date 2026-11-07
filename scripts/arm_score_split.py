@@ -61,14 +61,23 @@ def load_loop_tasks(ws):
     return loop
 
 
-def score_arm(ws, rid, loop):
+def known_tasks(ws):
+    out = set()
+    for pf in glob.glob(os.path.join(ws, "plan*.json")):
+        for p in plan_rows(pf):
+            if isinstance(p, dict) and p.get("task"):
+                out.add(p["task"])
+    return out
+
+
+def score_arm(ws, rid, loop, known):
     lp = os.path.join(ws, "ledger-%s.jsonl" % rid)
     if not os.path.exists(lp):
         raise SystemExit("ledger missing: %s" % lp)
     rows = [json.loads(l) for l in open(lp, encoding="utf-8") if l.strip()]
     if not rows:
         raise SystemExit("ledger has no rows: %s" % lp)
-    unknown = [d["task"] for d in rows if d["task"] not in loop and d["task"] not in KNOWN_TASKS]
+    unknown = [d["task"] for d in rows if d["task"] not in loop and d["task"] not in known]
     if unknown and len(unknown) > 0.02 * len(rows):
         raise SystemExit("%s: %d rows have tasks absent from every plan (%s...) - mode unknown"
                          % (rid, len(unknown), ", ".join(sorted(set(unknown))[:3])))
@@ -87,13 +96,8 @@ def main():
         print(__doc__)
         return 2
     ws = os.path.expanduser(sys.argv[1])
-    global KNOWN_TASKS
-    KNOWN_TASKS = set()
-    for pf in glob.glob(os.path.join(ws, "plan*.json")):
-        for p in plan_rows(pf):
-            if isinstance(p, dict) and p.get("task"):
-                KNOWN_TASKS.add(p["task"])
     loop = load_loop_tasks(ws)
+    known = known_tasks(ws)
 
     bank = os.path.join(ws, "bank.json")
     sha16 = "-"
@@ -117,7 +121,7 @@ def main():
         res = []
         for rid in rids:
             try:
-                res.append(score_arm(ws, rid, loop) + (rid,))
+                res.append(score_arm(ws, rid, loop, known) + (rid,))
             except SystemExit as exc:
                 print("%s: %s" % (label, exc))
         if not res:
