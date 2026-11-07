@@ -1554,6 +1554,15 @@ A_TABLE_ARITH = STAMP_REVISION in ((2, 33), (2, 38))
 # The new grammar recomputes the chain by code from the prompt's own numbers; reference never read,
 # zero model tokens, fails closed on every uncertainty (see _a_pct_chain).
 A_PCT_CHAIN = contour_at_least(2, 52)
+# 0.0.2.53: C PYTHON-LITERAL OPTIONS grounding (C-ex6-02 class, pair-250 candidate). The adopted
+# 2.47 set-selection fired 6/6 published draws and converted 0/3 in pair-246 - biased draw, the
+# resampling route is published-spent and closed for this cell. The residual loss is epistemic:
+# the model applies the «set order is undefined» spec caveat while the task asks what the snippet
+# PRINTS, and the corrected bank gold is the executed truth table (v6.2 changelog). Shape C of
+# gate_c_ground.py executes the task's own printed snippets over a closed AST allow-list and
+# re-derives the letter set; every uncertainty refuses the whole prompt; the frozen 2.41
+# C_RULE_GROUND never reaches this shape (separate function, separate flag, separate event names).
+C_PY_GROUND = contour_at_least(2, 53)
 # 0.0.2.34: B field completeness — extraction fields recomputed by code from the prompt's own data block.
 # Two narrow grammars (config key:value block; embedded-JSON echo-with-count), required names read from
 # the prompt's own JSON spec, any ambiguity or extra model key refuses. K excluded: value SHAPES the
@@ -1967,6 +1976,23 @@ def post_normalize_answer(cat, t, text):
                 return text, ["v241_c_rule_ground_matched"]
             body = (" " + ",".join(want)) if want else " NONE"
             return text[:m.start(1)] + body + text[m.end(1):], ["v241_c_rule_ground_from_prompt"]
+    # 0.0.2.53: C python-literal options (C-ex6-02 class; see gate_c_ground.py shape C). The
+    # option set is re-derived by EXECUTING the prompt's own snippets under an allow-listed
+    # closed subset; only the ОТВЕТ line's letters change, and only to letters THIS prompt
+    # printed; already-equal set = matched event, text byte-identical (zero fires change no
+    # bytes on passes); any parse ambiguity refuses silently. Zero model tokens, reference
+    # never read. Same legitimacy class as the adopted 2.40 J membership and the frozen 2.41.
+    if C_PY_GROUND and cat == "C" and t.get("mode") != "loop":
+        derived = CG.ground_py_options(((t.get("assembled_doc") or "") + "\n" + (t.get("prompt") or "")).strip()
+                                       if t.get("assembled_doc") else (t.get("prompt") or ""))
+        m = re.search(r"^\s*ОТВЕТ\s*:(.*)$", text or "", re.M)
+        if derived is not None and m is not None:
+            got = tuple(sorted(set(re.findall(r"(?<![A-Za-z])([A-F])(?![A-Za-z])", m.group(1)))))
+            want = tuple(sorted(derived))
+            if got == want:
+                return text, ["v53_c_py_matched"]
+            body = (" " + ",".join(want)) if want else " NONE"
+            return text[:m.start(1)] + body + text[m.end(1):], ["v53_c_py_from_prompt"]
     if not POST_NORMALIZE or not text:
         return text, None
     changed = []

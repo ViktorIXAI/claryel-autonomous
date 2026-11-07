@@ -239,7 +239,74 @@ CONTOUR_FEATURES = (
     # win-level detail. gate_v66 pins the grammar + refusals on real and synthetic bytes, the
     # per-stamp flag matrix (2.51 = adopted line WITHOUT the branch, 2.52 = + exactly A_PCT_CHAIN),
     # the published-bytes replay and the per-stamp event names; gate_v49 extended with the 2.52
-    # matrix.)
+    # matrix. PAIR-249 VERDICT 2026-11-07 22:40 CET: MEASURED and ADOPTED - control strict-failed
+    # A-ex6-03 in 2/3 seeds (live target met at the published ~2/3 rate), BOTH live cells converted
+    # with contour:v52_a_percent_chain at byte-identical ptok/ctok/model_calls (237/80, 237/76, 2/2)
+    # re-valued to the dry-run gold triple, rep37 a proven live no-op (zero fires on passes); ALL
+    # guards clean (zero v52 in control, zero outside the 1/77 census cell, zero target P->F, frozen
+    # bands silent, adopted-family census drift only inside adopted paths); pool context 218/231 vs
+    # 221/231, 6W/3L p=0.5078, A category 24/27 -> 27/27 the only evented move; energy 21.66 vs
+    # 17.06 Wh is control-side wall variance, mechanism zero-token. A_PCT_CHAIN inherits as line
+    # behavior from 2.52; the line moves 0.0.2.51 -> 0.0.2.52. See PAIR-249-V66.md and
+    # history/agent-decisions/2026-11-07-pair249-a-percent-chain-adopted-line-moves-to-252.md.)
+    (2, 53),  # C PYTHON-LITERAL OPTIONS grounding (pair-250 candidate) - shape C of gate_c_ground,
+    # aimed at the biggest surviving adopted-line loss: C-ex6-02 strict-fails 6/6 in the FIRST v6.6
+    # draws of the line (pair-249: both arms, all three seeds; note `set_mismatch got=['A','C','D']
+    # want=['A','B','C','D']` or the worse `got=['C']`, content 0.0, format_ok True) and 3/3 in both
+    # pair-246 arms. The RESAMPLING route is published-spent on this cell (pair-246: the 2.47 set
+    # trigger fired 3/3 and converted 0/3 - biased draw, "no further resampling stamp may target
+    # it"), and the loss is epistemic: the model applies the «set order is undefined» spec caveat
+    # while the task asks what the printed snippet PRINTS, and the corrected bank gold IS the
+    # executed truth table (bank v6.2 changelog: C-ex6-02 gold re-computed by execution; A,D are
+    # plain semantics, `list(set([1,2,3,3]))` prints [1,2,3] in CPython - deterministic for small
+    # consecutive ints). Mechanism: ground_py_options (gate_c_ground shape C) parses ONLY
+    # «печатает <literal>?» + contiguous `X: expr` option lines; every option must AST-parse inside
+    # a CLOSED allow-list (literal containers, slices, numeric +,-,*,/,//, pure builtins
+    # sorted/list/set/frozenset/tuple/dict/sum/max/min/abs/round/int/float over them); free names
+    # (`X`, `никогда`), comprehensions, attributes, keyword args, statements, second/missing target
+    # literals, evaluation errors and non-contiguous letters ALL refuse the WHOLE prompt; the match
+    # is strict type+value equality against the prompt's own printed target literal. The derived
+    # letters are always option letters of THIS prompt (membership-change legitimacy = the adopted
+    # 2.40 J grammar and the frozen-but-legitimate 2.41 C grammar); the model's ОТВЕТ line is the
+    # only bytes touched; already-equal set -> matched event, bytes identical; the reference is
+    # NEVER read; zero model tokens. Kept a SEPARATE function + flag (C_PY_GROUND) + event names
+    # (v53_c_py_from_prompt / v53_c_py_matched) from the frozen 2.41 bytes - the pair-248 meta-rule
+    # for re-arming a frozen-UNMEASURED class: new shape, new flag, new events, coverage re-proven
+    # on current bank bytes by contract test before any arm (the 2.41 py-shaped gap is exactly the
+    # docstring's "python snippets ... left byte-identical").
+    # PRE-LAUNCH DRY-RUN (this commit, before any v52r4x/v53r4x row; pinned by gate_v67_c_py_options_test):
+    # (i) coverage census over ALL 77 bank-v6.6 AND all 77 bank-v6.2 prompts: shape C parses
+    # EXACTLY {C-ex6-02}, derived set {A,B,C,D} == gold on both banks; C-ex6-00/01/03/05/06/07/08
+    # refuse (prose/judgment options - the published bank-clarification classes stay unreachable);
+    # (ii) counterfactual replay over EVERY published C-ex6-02 contour answer on the v6.2-era line
+    # (pair-246 s46/s47, pair-247 t47/t48, pair-248 u48/u51, pair-249 v51/v52): every strict-fail
+    # row re-derives {A,B,C,D} == gold (conversion), every strict-pass row byte-identical with the
+    # matched event only, mis-derivations 0; (iii) refusal branches on synthetic invented prompts
+    # (free-name options, second target literal, non-contiguous letters, unsafe call); the 2.52
+    # control bytes emit ZERO v53 events (flag matrix + call-site predicate).
+    # PRE-REGISTERED RULE (this commit + REVIEW-INBOX + run_pair250.sh header, frozen BEFORE any
+    # v52r4x/v53r4x row): pair-250 runs on the WORKING bank v6.6 (published 5c86252b2ef2f422, ws copy per
+    # the re-pinned WS-GENERATED.v66full.sha256), sp1 reps 41/42/43 (fresh everywhere: cadence
+    # 16-18/25-27, pairs 19-24/34-36/37-39, probes 28-33, smoke 40), control = adopted 0.0.2.52
+    # (tag v52r*), candidate = 0.0.2.53 (tag v53r*), serial arms, idle P2005 Basalt, auth-checked
+    # key file, fresh sampler csv gpu-power-p250.csv. (a) MEASURED iff >=1 control row strict-fails
+    # C-ex6-02 (published base rate 6/6 on the first v6.6 draws and 3/3 in pair-246 - live target
+    # expected, never assumed; zero live target = UNMEASURED, never a pass). (b) a conversion
+    # counts only on a matched (task,rep) strict-PASS carrying contour:v53_c_py_from_prompt at
+    # identical ptok/calls (post-hoc code; any added model call closes the stamp). (c) guards:
+    # ZERO v53 events in any control arm; ZERO v53 events outside C-ex6-02 (the census pins the
+    # surface - a fire elsewhere is a grammar regression, close the stamp); ZERO candidate C-ex6-02
+    # strict-fails where the control passed (the branch only replaces non-equal letter sets, a
+    # rewrite that breaks a passing answer is a code bug); frozen-band parity (zero 2.30-32/34-
+    # config/36/38/41/42/44 fires in either arm - the frozen 2.41 C_RULE_GROUND must stay silent at
+    # 2.53); adopted-family parity within seed noise (v47 C-set trigger, v52 A chain, v51 B echo,
+    # v48 K enum, v243 loop draws, 2.39/2.40 J); stall protocol (>25% of last 20 = abort).
+    # (d) RESOLUTION: 1 task x 3 seeds = 3 cells, cell-level by construction; the 77-cell mean with
+    # the exact pooled sign test is context only, deltas under ~2 cells UNRESOLVABLE and never the
+    # reason. ADOPT 0.0.2.53 iff (a) holds + >=1 evented conversion + all guards clean; otherwise
+    # freeze C_PY_GROUND to `STAMP_REVISION == (2, 53)` and publish the negative with win-level
+    # detail. gate_v67 pins grammar + refusals + census + published-bytes replay; gate_v49 extended
+    # with the 2.53 matrix (2.53 = 2.52 + exactly C_PY_GROUND; C_RULE_GROUND False at both).)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -321,8 +388,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # `gate_v65_b_echo_restore_test.py` pins the matrix (2.50 moves ZERO flags vs 2.48; 2.51 =
 # the 2.50 matrix + exactly B_ECHO_RESTORE; 2.34 keeps both grammars under the v234 event
 # name; 2.35-2.50 stay silent) and the per-stamp event naming.
-CURRENT_REVISION = (2, 52)
-CURRENT_STAMP = "0.0.2.52"
+CURRENT_REVISION = (2, 53)
+CURRENT_STAMP = "0.0.2.53"
 
 
 def _digits(value: str) -> list[int]:

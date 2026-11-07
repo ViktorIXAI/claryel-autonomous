@@ -282,3 +282,80 @@ def rule_coverage(bank):
         gold = tuple(sorted((t.get("ref") or {}).get("letters") or []))
         out.append((t["id"], d, gold, d is not None and d == gold))
     return out
+
+
+# ---- shape C: printed Python-literal options (the C-ex6-02 class, contour 0.0.2.53) ----
+# «какой вариант печатает [1, 2, 3]?» with option lines «X: <expr>». The grammar EXECUTES the
+# task's own printed snippets under CPython semantics — the same epistemics the corrected bank
+# gold used (executed truth table: bank v6.2 changelog; the model omits `list(set([1,2,3,3]))`
+# by the spec-caveat hedge while the executed snippet prints [1, 2, 3]). A closed allow-listed
+# subset only: literals, slices, numeric arithmetic, and pure builtins over them. ANY call
+# outside the allow-list, ANY free name (options like `X` or «никогда»), any comprehension,
+# attribute, statement or keyword argument, a missing/second/ambiguous target literal, an option
+# that raises while evaluating, or non-contiguous option letters refuse the WHOLE prompt — a
+# partial evaluation would silently add or drop exactly the letter this class flips on. The
+# derived letters are always option letters of THIS prompt; the reference is never read; zero
+# model tokens. Kept SEPARATE from ground_set_from_prompt so the frozen 2.41 flag can never
+# reach this shape: the 2.41 bytes stay byte-frozen, this grammar fires only under its own flag.
+import ast as _c_ast
+import builtins as _c_builtins
+
+_PYQ = re.compile(r"печатает\s*(\[[^\[\]]*\])\s*\?")
+_PY_SAFE_CALLS = ("sorted", "list", "set", "frozenset", "tuple", "dict", "sum", "max", "min",
+                  "abs", "round", "int", "float")
+
+
+def _py_expr_ok(node):
+    """Closed-subset validator: only the node kinds below may appear anywhere in the option."""
+    if isinstance(node, (_c_ast.Expression, _c_ast.Constant, _c_ast.List, _c_ast.Tuple,
+                         _c_ast.Set, _c_ast.Dict, _c_ast.Slice, _c_ast.Load)):
+        return all(_py_expr_ok(c) for c in _c_ast.iter_child_nodes(node))
+    if isinstance(node, _c_ast.UnaryOp):
+        return (type(node.op).__name__ in ("UAdd", "USub")
+                and type(node.operand) is _c_ast.Constant
+                and type(node.operand.value) in (int, float))
+    if isinstance(node, _c_ast.BinOp):
+        return (type(node.op).__name__ in ("Add", "Sub", "Mult", "Div", "FloorDiv")
+                and _py_expr_ok(node.left) and _py_expr_ok(node.right))
+    if isinstance(node, _c_ast.Subscript):
+        return _py_expr_ok(node.value) and _py_expr_ok(node.slice)
+    if isinstance(node, _c_ast.Call):
+        return (isinstance(node.func, _c_ast.Name) and node.func.id in _PY_SAFE_CALLS
+                and not node.keywords and all(_py_expr_ok(a) for a in node.args))
+    return False
+
+
+def ground_py_options(prompt):
+    """Return the option-letter set whose printed expression evaluates to the printed target,
+    or None to touch nothing. Fail-closed on every uncertainty (see the shape-C header)."""
+    if not prompt:
+        return None
+    q = _PYQ.findall(prompt)
+    if len(q) != 1:
+        return None
+    try:
+        target = _c_ast.literal_eval(q[0])
+    except (ValueError, SyntaxError):
+        return None
+    opts = _OPTS.findall(prompt)
+    if len(opts) < 2:
+        return None
+    letters = [o[0] for o in opts]
+    if letters != [chr(ord("A") + i) for i in range(len(opts))]:
+        return None
+    env = {n: getattr(_c_builtins, n) for n in _PY_SAFE_CALLS}
+    letters_hit = []
+    for letter, expr in opts:
+        try:
+            tree = _c_ast.parse(expr, mode="eval")
+        except (SyntaxError, ValueError):
+            return None
+        if not _py_expr_ok(tree):
+            return None
+        try:
+            val = eval(compile(tree, "<opt>", "eval"), {"__builtins__": {}}, env)
+        except Exception:
+            return None
+        if type(val) is type(target) and val == target:
+            letters_hit.append(letter)
+    return tuple(sorted(letters_hit))

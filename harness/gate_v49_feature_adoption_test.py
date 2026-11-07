@@ -262,7 +262,7 @@ _FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TAB
           "B_FIELD_COMPLETE", "B_TABLE_AGGREGATE", "G4_LOTTERY", "J_MEMBERSHIP_V3",
           "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
           "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR",
-          "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE", "A_PCT_CHAIN")
+          "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE", "A_PCT_CHAIN", "C_PY_GROUND")
 _missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
 ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
 _moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
@@ -339,6 +339,21 @@ ck(not _m252, "2.52 = the 2.51 matrix + exactly A_PCT_CHAIN (%s)" % _m252)
 ck((2, 52) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.52") == (2, 52)
    and GV.behavior_tuple("0.0.2.51") == (2, 51),
    "the candidate registers a real contour change; the control keeps behavior 2.51")
+
+# pair-250 (2026-11-07): 0.0.2.53 is the CONTOUR CANDIDATE stamp (C python-literal options
+# grounding, gate_c_ground shape C). Matrix discipline: 2.53 = the adopted 2.52 matrix + exactly
+# C_PY_GROUND; the frozen 2.41 C_RULE_GROUND must be False at BOTH stamps (shape C fires only
+# under its own flag and its own v53 event names - the pair-248 re-arm meta-rule).
+g253 = load("0.0.2.53")
+ck(getattr(g252, "C_PY_GROUND") is False, "the pair-250 candidate trigger is OFF on the 2.52 control")
+ck(getattr(g253, "C_PY_GROUND") is True, "the candidate trigger is ON at 2.53")
+_m253 = [f for f in _FLAGS if getattr(g253, f) != getattr(g252, f) and f != "C_PY_GROUND"]
+ck(not _m253, "2.53 = the 2.52 matrix + exactly C_PY_GROUND (%s)" % _m253)
+ck(getattr(g253, "C_RULE_GROUND") is False and getattr(g252, "C_RULE_GROUND") is False,
+   "the frozen 2.41 C_RULE_GROUND stays silent at 2.52 and 2.53 (separate function/flag/events)")
+ck((2, 53) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.53") == (2, 53)
+   and GV.behavior_tuple("0.0.2.52") == (2, 52),
+   "the candidate registers a real contour change; the control keeps behavior 2.52")
 
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"

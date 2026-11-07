@@ -2208,3 +2208,54 @@ question now, derivability audit before any contour claim), B-ex6-03/C-ex6-01/I-
 1/3 each, loop pool lottery band. Cadence counter 2/5. WS-GENERATED.v66full pin restamp
 (bank-version.json line) committed with this verdict — the ws built at 736b6634 after the
 registration commit; verify_manifest --v6 PASS. Full report `PAIR-249-V66.md`.
+
+## 2026-11-07 22:56 CET — PAIR-250 PRE-REGISTRATION: contour 0.0.2.53 (C python-literal options), rules frozen BEFORE any v52r4x/v53r4x row
+
+Target from the pair-249 map: **C-ex6-02** strict-fails 6/6 in the first v6.6 draws (both arms,
+all three seeds) and 27/27 across ALL published contour rows on the v6.2-era line (cadence-246 +
+pair-246/247/248/249 replay, note `set_mismatch got=['A','C','D'] want=['A','B','C','D']`, single
+mode). It is the biggest surviving adopted-line loss. The RESAMPLING route is published-spent on
+this cell (pair-246: the 2.47 set trigger fired 3/3, converted 0/3 — biased draw closed; the rule
+"no further resampling stamp may target it" stands and this stamp does NOT resample). The loss is
+epistemic: the model applies the «set order is undefined» spec caveat while the task asks what the
+snippet PRINTS, and the corrected bank gold IS the executed truth table (v6.2 changelog).
+Mechanism 0.0.2.53 `C_PY_GROUND = contour_at_least(2, 53)`: shape C of `gate_c_ground.py` —
+`ground_py_options` parses ONLY «печатает <literal>?» + contiguous `X: expr` option lines, every
+option must AST-parse inside a CLOSED allow-list (literal containers, slices, numeric +,-,*,/,//,
+pure builtins over them), the match is strict type+value equality vs the prompt's own printed
+target; free names (`X`, «никогда»), comprehensions, attributes, keyword args, unsafe calls,
+second/missing target literals, evaluation errors and non-contiguous letters refuse the WHOLE
+prompt. Only the ОТВЕТ line's bytes change, to letters THIS prompt printed; already-equal set =
+matched event with text byte-identical; reference never read; zero model tokens. Separate
+function + flag + event names (`contour:v53_c_py_from_prompt` / `v53_c_py_matched`) from the
+frozen 2.41 `C_RULE_GROUND` bytes — the pair-248 re-arm meta-rule applied to 2.41's own published
+py-shape gap ("python snippets ... left byte-identical"); the 2.41 bytes never move.
+DRY-RUN (pinned by `harness/gate_v67_c_py_options_test.py`, 108 checks PASS): (i) census over all
+77 v6.6 AND all 77 v6.2 prompts: shape C parses EXACTLY {C-ex6-02}, derived {A,B,C,D} == gold on
+both; (ii) counterfactual replay over all 27 published C-ex6-02 rows: 27/27 strict-fails re-derive
+to the gold with the v53 event, only the ОТВЕТ line changed, 0 mis-derivations, 0 passes touched
+(none exist); the frozen 2.41 grammar still refuses this prompt; (iii) refusal branches on
+invented synthetic prompts; gate_v49: 2.53 = 2.52 + exactly C_PY_GROUND, C_RULE_GROUND False at
+both; CI list enrolled; full contract suite 32/32 green at python3.12.
+PAIR-250 protocol: WORKING bank v6.6 `5c86252b2ef2f422` (ws copy `590503cf1701a6ce` lineage,
+ws rebuilt + re-pinned at this stamp), sp1 reps **41/42/43** (fresh everywhere), control = adopted
+0.0.2.52 (`v52r*`), candidate = 0.0.2.53 (`v53r*`), serial arms, idle P2005 Basalt, auth-checked
+key file, fresh sampler csv gpu-power-p250.csv (unit parb-p250sampler).
+FROZEN RULE (the verdict is decided ONLY by this text):
+(a) MEASURED iff >=1 control (v52) row strict-fails C-ex6-02 (base rate 27/27 published — live
+    target expected, never assumed; zero live target = UNMEASURED, never a pass).
+(b) A conversion counts only on a matched (task,rep) strict-PASS carrying
+    contour:v53_c_py_from_prompt at identical ptok/calls (post-hoc code; any added model call on
+    a converted row closes the stamp).
+(c) Guards: ZERO v53 events in any control arm; ZERO v53 events outside C-ex6-02 (census pins the
+    surface — a fire elsewhere = grammar regression, close the stamp); ZERO candidate C-ex6-02
+    strict-fails where the control passed; frozen-band parity (zero 2.30-32/34-config/36/38/41/
+    42/44 fires — the frozen 2.41 must stay silent at 2.53); adopted-family parity within seed
+    noise (v47 C-set trigger, v52 A chain, v51 B echo, v48 K enum, v243 loop draws, 2.39/2.40 J);
+    stall protocol (>25% of last 20 = abort).
+(d) RESOLUTION: 1 task x 3 seeds = 3 cells, cell-level by construction; the 77-cell mean with the
+    exact pooled sign test is context only; deltas under ~2 cells UNRESOLVABLE, never the reason.
+ADOPT 0.0.2.53 iff (a) + >=1 evented conversion + all guards clean; otherwise freeze C_PY_GROUND
+to `STAMP_REVISION == (2, 53)` and publish the negative with win-level detail. Energy:
+gpu-power-p250.csv windows, per-arm epochs. Cadence counter: pair-249 (2.52) and this pair (2.53)
+are the 2nd/3rd measured stamps since cadence-249 — four-arm re-run due after the 5th.
