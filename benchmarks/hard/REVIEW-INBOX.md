@@ -1328,3 +1328,66 @@ v6.2 ws rebuilt + repinned; live smoke 0.0.2.46 writes run-record harness sha `5
 rebuild). Cadence legs themselves ran the pre-2.46 tree `fdd03f2` — stated in CADENCE-246-V62.md.
 Next: cadence stamp clock resets (5 measured stamps -> next cadence after 2.47/2.48/... reaches 5);
 immediate queue = C-ex6-02 pair pre-registration + v6.3 bank defect batch (B-ex6-04 year).
+
+## 2026-11-07 10:04 CET — pair-246 PRE-REGISTRATION: contour 0.0.2.47 (C best-of-2 second trigger on `set_mismatch`) vs control 0.0.2.46, bank v6.2, three matched fresh seeds
+
+The v6.2 line map (cadence-246 addendum above) names `C-ex6-02` the strongest live pair target: the
+adopted line strict-fails it 3/3 with `set_mismatch got=['A', 'C', 'D'] want=['A', 'B', 'C', 'D']`
+(content 0.0, format_ok true), the model's own coverage verdicts omit candidate B, and the adopted
+2.13 C best-of-2 fires ONLY on `missed_options` — which the frozen v6.2 C scorer NEVER emits for C
+(parb_check_v6.py: the only C set note is the space-parameterized `set_mismatch got=... want=...`;
+`missed_options` is a legacy-bank note). The trigger-coverage gap is therefore structural on this
+bank, the same class pair-243/244 closed for loop notes. Raw arms land 1/3 on the same cell —
+draw variance, the class selection answers. Prevention is closed as a class (2.42); more than one
+retry is closed (2.44-era ruling); this is the same monotone best-of-2 recipe with a SECOND trigger.
+
+Mechanism (implemented this commit, stamp `0.0.2.47`, registered in CONTOUR_FEATURES): first-run C
+notes with the `set_mismatch` stem (split at first ':' OR whitespace — the C note is space-form;
+`id_set_mismatch` from J/K scorers is a different stem and stays out) re-draw the task ONCE at
+`seed + 17491` (distinct from C 5309 / D 4096/8117/12289), adopt only a strictly better retry
+(content + bool(format_ok)); `missed_options` keeps precedence for offset AND event naming; exactly
+one C retry per task. Events `contour:v47_c_best2_set_fired` / `fix:v47_c_best2_set_win`. Call site
+cat=="C" only. gate_v61 (40 checks) drives the REAL run_one over the live 2.29 coverage protocol
+(verdicts -> contract-built line -> set_mismatch -> re-draw -> strict-better) at BOTH stamps:
+2.46 fires nothing and keeps the published bytes, 2.47 converts with the 17491 delta, same-score
+re-draws are discarded, passing cells untouched, H rows carrying the same note string behave
+identically at both stamps. gate_v49 extended: 2.46 matrix == 2.43 exactly; 2.47 == 2.46 + exactly
+C_BEST2_SET. Standing CI suite 26/26 green locally.
+
+PRE-LAUNCH DRY-RUN (this entry, before any s* row, over published cadence-246 bytes): 24 contour C
+rows across q45r16/17/18 — 5 carry `set_mismatch` and ALL 5 strict-fail: C-ex6-02 3/3 (the chronic
+target) + C-ex6-08 r16 + C-ex6-03 r18 (single-draw flips). ZERO of those 5 rows carries a v34 event
+(the gap, live). Family live rate 5/24 draws; a fresh pair can legitimately draw zero set_mismatch
+rows only if the flips don't recur AND the chronic cell passes — the chronic 3/3 makes the
+zero-opportunity mode unlikely, but rule (a) decides, not the prior.
+
+ARMS AND SEEDS: ws `~/parb-v62-contour` (bank v6.2 copy `d1e8d11df5840dcc`, published bank
+`3c866ea7daae611c`, scorer contract v6.2 `c8c0c7dd114dfc32`), P2005 endpoint idle-checked before
+launch, model `qwen3.8-flash-next-iq3_s-basalt`. Fresh sp1 reps 19/20/21 via scripts/plan_reps.py
+(box-independent `sha256(task|rep)` seeds, identical per cell in both arms). Control `s46r{19,20,21}`
+stamp 0.0.2.46 (the ADOPTED line: behavior 2.44 = 2.43 matrix; gate_v49 pins the matrix equality);
+candidate `s47r{19,20,21}` stamp 0.0.2.47. Six arms one at a time on an idle endpoint
+(no foreign gate_run, no cadence band), per-arm `-start.epoch`/`-end.epoch`, GPU sampler
+`gpu-power-p246.csv` (2 s cadence, P2005 board), liveness by ROW COUNT + unit state.
+
+PRE-REGISTERED RULE (this entry + run_pair246.sh header; the verdict is decided ONLY by this text):
+(a) LIVE TARGET: MEASURED iff >=1 control (s46) C row carries a `set_mismatch` note AND strict-fails
+    in its arm. Zero live target = UNMEASURED (pair-233/238/242/245 mode), never a pass.
+(b) CELL ATTRIBUTION: a conversion counts only if the candidate STRICT-PASSES a (task,rep) cell
+    where the control strict-failed, and the candidate row carries BOTH `contour:v47_c_best2_set_fired`
+    and `fix:v47_c_best2_set_win`. Wins WITHOUT the events are lottery and published as unattributed.
+    C-ex6-02 cells strict-fail in the control by construction of the map, so each of the 3 seeds is
+    an independent live target; a control C-ex6-02 strict PASS in any seed is published as a map
+    correction, not hidden.
+(c) GUARDS: ZERO `v47` events outside cat=="C" rows; zero v47 events in the control ledgers; frozen-
+    band parity (zero 2.30-32/34/36/38/41/42/44 events in either arm); adopted-line parity (v34
+    c_format_norm/c_best2 fire only on their own note families in BOTH arms; v243 loop events only
+    on banned-note draws; 2.39/2.40 J fires + 2.35 B repair identical seed by seed); zero engine-
+    stalled rows or the pair is voided per the stall protocol.
+(d) RESOLUTION AND DECISION: per-cell flips listed with notes and both arms' cost; exact pooled sign
+    test on the 77-cell pool; an arm-mean delta under ~2 cells is UNRESOLVABLE and never quoted as
+    the reason — the claim is cell-level. ADOPT 0.0.2.47 (line moves 0.0.2.46 -> 0.0.2.47) iff (a)
+    holds AND >=1 evented conversion AND all guards clean. Otherwise freeze
+    `C_BEST2_SET = CONTOUR_REVISION == (2, 47)` and publish the negative with win-level detail.
+    Energy per arm from gpu-power-p246.csv windows, reported side by side, never attributed to the
+    mechanism unless on-target retries dominate the delta.

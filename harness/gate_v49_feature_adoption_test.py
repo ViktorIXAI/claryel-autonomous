@@ -261,7 +261,8 @@ _GV_SPEC.loader.exec_module(GV)
 _FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TABLE_ARITH",
           "B_FIELD_COMPLETE", "B_TABLE_AGGREGATE", "G4_LOTTERY", "J_MEMBERSHIP_V3",
           "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
-          "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR")
+          "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR",
+          "C_BEST2_SET")
 _missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
 ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
 _moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
@@ -279,6 +280,21 @@ ck(GV.summary("0.0.2.45")["contour_changed_at_this_release"] is False,
    "the run record says this release did not change the contour")
 ck(g245.SCORER_CONTRACT_ID == "v6.2" and len(g245.SCORER_ID["contract_sha16"]) == 16,
    "the runner carries a scorer contract identity on every row")
+
+# pair-246 (2026-11-07): 0.0.2.47 is a CONTOUR CANDIDATE stamp. The matrix discipline: 2.46 (the
+# pair control) must still equal the adopted 2.43 matrix exactly, and 2.47 must equal 2.46 plus
+# EXACTLY the C_BEST2_SET trigger — a candidate may not smuggle any other flag forward, and the
+# pair control may not accidentally carry the candidate's mechanism.
+g246 = load("0.0.2.46")
+g247 = load("0.0.2.47")
+_m246 = [f for f in _FLAGS if getattr(g246, f) != getattr(g243, f)]
+ck(not _m246, "2.46 moves ZERO contour flags vs the adopted 2.43 line (%s)" % _m246)
+ck(getattr(g246, "C_BEST2_SET") is False, "the pair-246 candidate trigger is OFF on the 2.46 control")
+ck(getattr(g247, "C_BEST2_SET") is True, "the candidate trigger is ON at 2.47")
+_m247 = [f for f in _FLAGS if getattr(g247, f) != getattr(g246, f) and f != "C_BEST2_SET"]
+ck(not _m247, "2.47 = the 2.46 matrix + exactly C_BEST2_SET (%s)" % _m247)
+ck((2, 47) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.47") == (2, 47),
+   "the candidate registers a real contour change (stamp 2.47 = behavior 2.47)")
 
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"

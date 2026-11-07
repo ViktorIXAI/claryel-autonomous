@@ -30,6 +30,7 @@ jobs:
                    harness/gate_v59_scorer_contract_v61_test.py \
                    harness/gate_v59_scorer_contract_v62_test.py \
                    harness/gate_v60_run_record_provenance_test.py \
+                   harness/gate_v61_c_best2_set_test.py \
                    harness/gate_versioning_test.py; do
             echo "=== $f"; python3 "$f"
           done

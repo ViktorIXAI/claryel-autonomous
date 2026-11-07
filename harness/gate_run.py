@@ -274,6 +274,27 @@ E_MULTIERR = contour_at_least(2, 10)
 C_FORMAT_NORM = contour_at_least(2, 13)
 C_BEST2 = contour_at_least(2, 13)
 C_BEST2_NOTES = ("missed_options",)
+# Pair-246 (0.0.2.47 candidate, pre-registered REVIEW-INBOX 2026-11-07 10:04 CET + run_pair246.sh
+# header BEFORE any r* row): the bank-v6.2 line map (cadence-246, UNSTABLE-CELLS 09:15 addendum) shows
+# the adopted line strict-failing C-ex6-02 in 3/3 seeds with `set_mismatch` (model omits candidate B,
+# «ОТВЕТ: A,C,D» vs corrected executed-truth-table gold A,B,C,D; content 0.0, format_ok true, the 2.29
+# coverage contract already rebuilt the line from the model's own verdicts) — and the adopted 2.13 C
+# best-of-2 fires ONLY on `missed_options`-family notes, which this scorer family never joins. The gap
+# is live 3/3 in the published cadence arms (zero v34 fires on those rows). Same monotone selection
+# recipe, SECOND trigger: a first-run C row whose notes carry `set_mismatch` (prefix-matched stems —
+# the note is parameterized `set_mismatch got=[...] want=[...]`) re-draws the task ONCE at a DISTINCT
+# offset `seed + 17491` (C 2.13 uses 5309; D uses 4096/8117/12289, so every family re-draws instead of
+# replaying) and adopts only a strictly better-scoring retry (content + bool(format_ok)). The 2.13
+# family keeps PRECEDENCE for both the offset and the event naming, so a row carrying both families
+# behaves byte-identically to the adopted line, and exactly one C retry per task whichever trigger
+# matches. Call site is cat=="C" single-shot only — H/D rows carrying the same note string are
+# structurally unreachable (pair-245's H-parity lesson). Reference never read; one extra model call
+# on already-failing C cells only. Events: contour:v47_c_best2_set_fired, fix:v47_c_best2_set_win.
+# If pair-246 does not convert with clean guards, freeze C_BEST2_SET to STAMP_REVISION == (2, 47)
+# below, where CONTOUR_REVISION exists — the pair-238/244/245 pin pattern. gate_v61 pins the wiring.
+C_BEST2_SET = contour_at_least(2, 47)
+C_BEST2_SET_NOTES = ("set_mismatch",)
+C_BEST2_SET_SEED = 17491
 D_BEST2 = contour_at_least(2, 11)
 D_BEST2_NOTES = ("status_filter_violation", "plans_dangerous_action")
 # 0.0.2.43: pair-243's loop map published a SECOND loop failure family the adopted 2.11 trigger
@@ -3011,6 +3032,25 @@ def d_best2_claim_applies(notes):
                                        for n in (notes or []))
 
 
+def c_best2_triggers(notes):
+    """Pair-246: which C selection family a first-run score belongs to — (missed_options, set_mismatch).
+
+    The 2.13 family has PRECEDENCE: a row carrying both families keeps the adopted 5309 offset and the
+    v34 event names, so candidate-vs-control attribution stays byte-identical on adopted-path rows and
+    exactly one C retry fires per task. Stems are prefix-matched on ':' like every other family (the
+    note is parameterized: `set_mismatch got=['A'] want=['A','B']` never equals the bare name).
+    The set trigger exists only at stamps that register it (candidate 2.47); on the adopted line the
+    second slot is always False (gate_v61)."""
+    # Stems split at the FIRST ':' OR whitespace: the C scorer parameterizes with spaces
+    # (`set_mismatch got=['A'] want=['A','B']`, parb_check_v6.py line 158), while other families
+    # use the colon form (`missed_options:['B']`). `id_set_mismatch` (J/K scorers) has a different
+    # first token and stays out; a note merely CONTAINING the family name never matches.
+    _stems = [re.split(r"[:\s]", str(n), 1)[0] for n in (notes or [])]
+    _m = bool(C_BEST2) and any(s in C_BEST2_NOTES for s in _stems)
+    _s = (not _m) and bool(C_BEST2_SET) and any(s in C_BEST2_SET_NOTES for s in _stems)
+    return _m, _s
+
+
 def h_best2_pick(check, t, text_a, text_b):
     """Return text_b only if it scores STRICTLY better than text_a under the H
     scorer (content + format). Equal scores keep the first answer; a scorer
@@ -3408,15 +3448,19 @@ def run_one(t, pos, done, st):
                     acct.fixes += 1
                     acct.ev("fix", "v34_c_format_norm")
 
-    if cat == "C" and C_BEST2 and r["text"] and not r["err"]:
+    if cat == "C" and (C_BEST2 or C_BEST2_SET) and r["text"] and not r["err"]:
         try:
             _c1c, _f1c, _n1c = CK.CHECK["C"](t, r["text"])
         except Exception:
             _c1c, _f1c, _n1c = None, False, []
-        if _c1c is not None and any(str(n).split(":")[0] in C_BEST2_NOTES
-                                    for n in _n1c):
-            acct.ev("contour", "v34_c_best2_fired")
-            r3 = ask_ladder(acct, msgs0, seed + 5309)
+        _c213_trig, _cset_trig = c_best2_triggers(_n1c)
+        if _c1c is not None and (_c213_trig or _cset_trig):
+            # Pair-246: `set_mismatch` draws the second trigger at its own offset (17491); the
+            # 2.13 `missed_options` family keeps precedence for offset AND event naming, so an
+            # adopted-path row is byte-identical between arms and one retry per task holds (gate_v61).
+            acct.ev("contour", "v47_c_best2_set_fired" if _cset_trig else "v34_c_best2_fired")
+            r3 = ask_ladder(acct, msgs0,
+                            seed + (C_BEST2_SET_SEED if _cset_trig else 5309))
             txt3 = r3["text"] if (r3["text"] and not r3["err"]) else ""
             if txt3:
                 txt3 = c_format_normalize(t, txt3)
@@ -3432,7 +3476,7 @@ def run_one(t, pos, done, st):
                         r["text"] = txt3
                         rec["answer"] = txt3
                         acct.fixes += 1
-                        acct.ev("fix", "v34_c_best2_win")
+                        acct.ev("fix", "v47_c_best2_set_win" if _cset_trig else "v34_c_best2_win")
 
     if cat == "D" and (D_BEST2 or D_BEST2_BANNED or D_BEST2_CLAIM) and t.get("kind") == "loop":
         try:
