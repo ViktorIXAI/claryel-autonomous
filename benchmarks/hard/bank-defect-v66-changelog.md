@@ -63,3 +63,27 @@ subset only by this fragment, so a lift maps to the fragment alone;
 2.48 identical tooling): conversion unclaimable (control 3/3 strict — zero live
 target, UNMEASURED by construction), no-new-loss + wiring only;
 (iii) promote to working iff (i) FAIR and (ii) no new strict losses.
+
+## Probe verdict (2026-11-07 18:40 CET) — rules applied as written: v6.6 PROMOTED to working
+
+Fairness (rule i, `v6-results/bank-probe-66/fair-rows.md`): FAIR — ChatGPT-codex
+0/3 -> 3/3, Grok 0/3 -> 3/3, bare basalt 0/3 -> 2/3 at matched reps 28/29/30, subset
+`1b990aa6fc9a25dd` differing from the v6.5 baseline subset `cbe5d7e793a2182e` by
+exactly the claims fragment (guard-asserted join; same frozen contract v6.2, same
+seeds, contour OFF). Basalt's surviving zero (r29) is a NEW narrower mode — the
+scenario's meta-facts placed in `claims` as journal-confirmed — re-attributed from
+answer bytes before any bank blame (rule iv); kept as a wording-observation queue
+item, not a defect claim from one draw.
+Contour (rule ii, `PROBE-ROWS.md`): 3/3 strict PASS, no new losses vs the published
+p65/p64 legs; conversion UNMEASURED by construction (controls passed 3/3); wiring
+live (`bank_version=v6.6 source=marker` in every run record). Answer-bytes bonus
+signal: `contour:v219_h_clear_claims` fired 3/3 on the v6.5 legs and 0/3 on the
+v6.6 legs — with the fix, the model's OWN answer carries `claims: []` and the
+contour needs no claims scaffolding on this cell.
+Energy/latency (subset legs): ptok 348/350/345, ctok 247/246/289, 4.3/2.5/2.9 s per
+leg; preflight prefill 1.7-3.7k tok/s, zero stalled/empty rows.
+Decision record: `history/agent-decisions/2026-11-07-bankv66-claims-spec-promoted.md`.
+Queue after closure: (1) wording observation — basalt-r29 class (scenario meta-facts
+vs claims semantics) only if it recurs across arms; (2) H-ex6-00/02/03/04 coverage —
+extend the fragment ONLY on measured cells; (3) next cadence on v6.6 is the standing
+four-arm re-run when due.

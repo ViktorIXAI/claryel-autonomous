@@ -42,8 +42,8 @@
       "file": "benchmarks/hard/bank-hard-v6.6.json",
       "version": "v6.6",
       "published_sha16": "5c86252b2ef2f422",
-      "status": "provisional",
-      "note": "v6.5 plus one field: H-ex6-01 claims-field spec (defect 2 from bank-probe-65: the inviting fragment '[утверждения как факт]' vs the frozen contract claims=[] — three independent raw brains 0/3, every zero ungrounded_claims). v6.5 stays provisional (frozen verdict). Probe rule frozen in REVIEW-INBOX 2026-11-07 18:22 CET before any v6.6 row; promote to working iff the matched-seed raw fairness re-probe is FAIR and the contour no-new-loss legs hold."
+      "status": "working",
+      "note": "v6.5 plus one field: H-ex6-01 claims-field spec (defect 2 from bank-probe-65: the inviting fragment '[утверждения как факт]' vs the frozen contract claims=[] — three independent raw brains 0/3, every zero ungrounded_claims). PROMOTED to working 2026-11-07 18:40 CET per the rule frozen in REVIEW-INBOX 18:22 CET before any row: fairness FAIR (subset 1b990aa6fc9a25dd at matched reps 28/29/30: codex 0/3->3/3, Grok 0/3->3/3, basalt 0/3->2/3 with the residual zero re-attributed to a NEW narrower mode), contour no-new-loss legs p66r28-30 3/3 PASS with v219_h_clear_claims scaffolding no longer needed (3/3 fired on v6.5 legs, 0/3 on v6.6), verify_bank_v66 PASS. v6.5 stays provisional (frozen verdict)."
     }
   ]
 }

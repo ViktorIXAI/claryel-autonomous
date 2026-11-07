@@ -258,6 +258,22 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   Disclosure: the contour passes this cell via the `v219_h_clear_claims` repair, not
   model capability. Artifacts `v6-results/bank-probe-65/`, decision record
   `history/agent-decisions/2026-11-07-bank-v65-provisional-defect2.md`.
+- **Bank v6.6 published and PROMOTED to working (7 Nov, 18:22-18:40 CET)** — closes
+  defect 2 with exactly one field: the H-ex6-01 claims spec
+  `[утверждения как факт]` -> `[только утверждения, подтверждённые твоим журналом; если
+  подтверждений нет — пустой список]` (v6.6 `5c86252b2ef2f422`, gold byte-identical,
+  `scripts/verify_bank_v66.py` PASS; v6.5 stays provisional with its frozen verdict).
+  Rules frozen in REVIEW-INBOX before any row: raw fairness at the SAME matched reps
+  28/29/30 — FAIR: ChatGPT-codex 0/3->3/3, Grok 0/3->3/3, bare basalt 0/3->2/3 (the
+  surviving zero re-attributed from answer bytes to a NEW narrower mode, kept as an
+  observation, not a defect); contour no-new-loss legs p66r28-30 3/3 PASS, conversion
+  UNMEASURED by construction (controls passed), wiring live (`bank_version=v6.6
+  source=marker`); answer-bytes bonus: `v219_h_clear_claims` fired 3/3 on v6.5 legs,
+  0/3 on v6.6 — the model's own answer now satisfies the contract on this cell.
+  Coverage limit published: the old fragment stays in H-ex6-00/02/03/04 until those
+  cells show measured defects. Artifacts `v6-results/bank-probe-66/` (subset bytes
+  `1b990aa6fc9a25dd`, per-row identity), changelog `bank-defect-v66-changelog.md`,
+  decision record `history/agent-decisions/2026-11-07-bankv66-claims-spec-promoted.md`.
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took

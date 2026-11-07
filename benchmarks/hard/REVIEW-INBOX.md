@@ -1970,3 +1970,30 @@ Artifacts after: `v6-results/bank-probe-66/` (3 contour legs x4 + logs/epochs, 9
 rows + epochs + logs, sanitized launchers, PROBE-ROWS.md, fair-rows.md), changelog
 `bank-defect-v66-changelog.md` (this commit), decision record, README bullet if promoted,
 MEASUREMENT-STACK regenerated.
+
+## 2026-11-07 18:40 CET — bank v6.6 probe FINAL verdict: FAIR + no new losses -> v6.6 WORKING (defect 2 closed); v6.5 stays provisional
+All rows exist and are published under `v6-results/bank-probe-66/` (3 contour legs x4,
+9 fair rows, epochs, logs, sanitized launcher, `subset-bank.json`).
+Fairness (fair-rows.md, rule i): FAIR — at the SAME matched reps 28/29/30 on the v6.6
+subset `1b990aa6fc9a25dd` (guard-asserted single-variable join vs the v6.5 subset
+`cbe5d7e793a2182e`: only the claims fragment differs), ChatGPT-codex 0/3 -> 3/3, Grok
+0/3 -> 3/3, bare basalt 0/3 -> 2/3. Basalt r29 attributed from answer bytes per rule
+(iv): the zero is no longer the v6.5 mode — it lists the scenario's own meta-facts as
+journal-confirmed claims (the frozen contract forbids ANY claims). Wording-observation
+queue item, no defect claim from one draw. Scoring identity asserted at scoring time:
+contract v6.2 `c8c0c7dd114dfc32`, modules parb_check_v6 `89437d8cfe1fc6c8` /
+parb_loop `f5f5b78ab46a0f0c` / e_sandbox `424c04126e9b6c1e`, seed sp1; new committed
+tool `scripts/score_fair_rows.py` (fail-closed contract + subset guards; re-scores the
+v6.5 baseline rows under the identical scorer for comparability).
+Contour (PROBE-ROWS.md, rule ii): p66r28/29/30 strict 3/3 PASS, zero new losses vs the
+published p65/p64 legs; conversion UNMEASURED by construction (controls 3/3). Wiring
+live in run records: stamp 2.50 / behavior 2.48 / `bank_version=v6.6 source=marker` /
+ws copy `590503cf1701a6ce` / harness `f19fac140113`. Answer-bytes signal: the
+`v219_h_clear_claims` scaffolding fired 3/3 on the v6.5 legs and 0/3 on the v6.6 legs
+— with the fix, the raw model answer already carries `claims: []` on this cell.
+Promotion (rule iii): all conditions hold -> BANK-VERSIONS.json v6.6 status `working`.
+H-ex6-01 defect queue CLOSED for both published defects. Follow-up queue: (1) wording
+observation for the basalt-r29 class (only if it recurs across arms); (2) H-family
+coverage extension strictly behind measured cells; (3) four-arm cadence on v6.6 when
+due (contour stamps measured since cadence-249: none, so not forced); (4) the queued
+hedge-window observation (scorer-contract queue) unchanged.

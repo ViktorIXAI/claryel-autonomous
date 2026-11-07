@@ -23,7 +23,7 @@ where those identities are defined, so a quoted number can be traced to bytes.
 | seed protocol | sp1 | per-(task,rep) gseed + per-task plan seed | `scripts/plan_reps.py`, `build_hard_v6_ws.py` |
 | typed failure codes | registry in contract v6.2 | content / protocol / integrity / marker / infra | `gate_scorer_contract.CODE_CLASS`, gate_v59 tests |
 | two published axes | contract v6.2 | answer axis + protocol axis, additive to `strict` | `gate_v59_scorer_contract_v62_test.py` |
-| harness | commit d935895ee47f | contour stamp 2.50 (behavior 2.48) | git + `gate_versioning.py` |
+| harness | commit f19fac140113 | contour stamp 2.50 (behavior 2.48) | git + `gate_versioning.py` |
 
 Scorer contract v6.2 delegates to the v6.1 bytes, so it changes no score; the equality
 is asserted cell by cell on published answers (`gate_v59_scorer_contract_v62_test.py`),
@@ -50,6 +50,7 @@ produced them are the pinned ones named below.
 |---|---|---|---|---|---|---|
 | `bank-probe-634` | 9 | 9 | 0.0.2.48 / 2.48 | recorded | recorded | yes |
 | `bank-probe-65` | 12 | 12 | 0.0.2.50 / 2.48 | recorded | recorded | yes |
+| `bank-probe-66` | 3 | 3 | 0.0.2.50 / 2.48 | recorded | recorded | yes |
 | `cadence-240` | 3 | 231 | 0.0.2.40 / 2.40 | 9ec86dfca4a6f85f | v6.1 | no (pre-0.0.2.45) |
 | `cadence-246` | 3 | 231 | 0.0.2.45 / 2.44 | recorded | recorded | yes |
 | `cadence-249` | 3 | 231 | 0.0.2.49 / 2.48 | recorded | recorded | yes |

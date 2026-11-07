@@ -1,0 +1,40 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:8080",
+  "contour_version": "0.0.2.50",
+  "contour_behavior": "2.48",
+  "contour_changed_at_this_release": false,
+  "git_sha": "f19fac1401135696b28441b784ba9d236fe7243b",
+  "plan_tasks": 1,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "bank v6.6 probe: bank v6.6 (published 5c86252b2ef2f422) CANDIDATE, claims-field spec; control = published p65r28 (bank v6.5, ws copy 919517b75a614d52); contour 0.0.2.50 behavior 2.48 on H-ex6-01 only, matched seed rep 28; rule REVIEW-INBOX 18:22 CET",
+  "stack": {
+    "bank_version": "v6.6",
+    "bank_version_source": "marker",
+    "bank_sha16": "590503cf1701a6ce",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.50",
+    "contour_behavior": "2.48",
+    "harness_git_sha": "f19fac1401135696b28441b784ba9d236fe7243b"
+  }
+}
