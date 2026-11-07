@@ -227,6 +227,19 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   arm** under v6.4 — bare basalt 3/3 (no regression from its earlier year-guess), ChatGPT-codex
   and Grok flip 0/3 -> 3/3 with byte-exact answers — so the cell is **FAIR** and closed at the
   bank level with nothing claimed for the contour line (`fair-rows.md` in the probe dir).
+- **Cadence-249 re-ran all four arms on bank v6.4 the same day (7 Nov)** and confirmed the
+  bank **FAIR** on fresh independent seeds: the `B-ex6-04` lift signature reproduced exactly
+  (codex/grok/contour 0/3 -> 3/3, basalt's year-guess 3/3 holds) and no raw pool regressed
+  beyond the noise floor — every pool movement mapped to byte-identical categories or to the
+  one corrected cell. Contour common set **170/183** vs basalt 144 (W31/L5, p=1.3e-5), codex
+  131 (W43/L4, p=2.8e-9), grok 134 (W39/L3, p=5.6e-9) — contour > basalt > grok > codex holds
+  on v6.4; the adopted 0.0.2.48 K-fields gate shows on brand-new seeds (K 12/12 vs 6/12 raw,
+  K-ex6-03 3/3). Rule-(c) byte re-score: 0/183 mismatches. Negative result published with it:
+  the `_loop_rows` trajectory-storage gap required "for new runs" is still open — 18 loop
+  cells stay as-run ledger claims, queued as a tooling release with a contract test. Tooling
+  fix found during publication: the cadence scorer hardcoded its CSV arm label (now derived
+  from run records). Artifacts `v6-results/cadence-249/`, writeup `CADENCE-249-V64.md`,
+  decision record `history/agent-decisions/2026-11-07-cadence249-v64-fair-contour-margin-holds.md`.
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took

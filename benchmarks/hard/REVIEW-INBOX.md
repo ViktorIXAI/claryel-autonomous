@@ -1744,3 +1744,32 @@ dominate the delta (expected cost: zero extra calls when the first answer alread
         contract version. Launch: units `parb-cad249` (stages 1+2), `parb-cad249-cloud` (stages
         3+4), `parb-gpu249` (sampler); liveness by row COUNT + unit state only.
 
+
+## 2026-11-07 16:43 CET — cadence-249 VERDICT: bank v6.4 FAIR on fresh seeds; contour margin holds (170 vs 144/131/134); _loop_rows gap NOT closed (disclosed)
+All four legs completed 14:27-16:16 CET (contour q49r25/26/27 exit=0 rows=77; basalt,
+codex, grok rc=0 rows=213 each). Scored ONLY by `scripts/cadence_score_v62.py --bank-pub
+bank-hard-v6.4.json` against the rules frozen at 14:26 CET.
+- (c) re-score: 0/183 ledger-vs-bytes mismatches; 0 blank answers. NEGATIVE: zero
+  `_loop_rows` in all three q49 legs — the protocol gap the rule required closed "for new
+  runs" is still open in the loop runner; 18 loop cells stay as-run ledger claims. Queued
+  as a tooling fix + contract test (next release); no loop number is quoted as re-scoreable.
+- (a) fairness: pools basalt 138->144, codex 128->131, grok 137->134 (noise floor ~9.5/183,
+  none breached). B-ex6-04 (the only bank byte moved v6.2->v6.4): codex 0/3->3/3, grok
+  0/3->3/3, contour 0/3->3/3, basalt 3/3->3/3 — the exact frozen fairness-lift signature on
+  fresh independent seeds. Residual movement only in byte-identical F/H classes. **v6.4 FAIR,
+  no bank-defect hunt.**
+- (b) margin: contour 170/183 vs basalt 144 (W31/L5 p=1.3e-5), codex 131 (W43/L4 p=2.8e-9),
+  grok 134 (W39/L3 p=5.6e-9). 166->170 attributed: +3 bank fix (bank's credit), +3 adopted
+  2.48 K gate (K 9/12->12/12, raw 6/12 each), minus F/H seed variance (F 18->16, H 13->10).
+  K-ex6-03 3/3 on new seeds confirms the pair-247 adoption; A-ex6-03 contour 1/3 vs raw 3/3
+  = watch item (closed class, no new contour work claimed).
+- (e) stall guard: leg medians 1.26-1.30 s vs pair-247 ~2.3 s baseline — clean; contour
+  energy 19.63 Wh total, wall 259/277/263 s.
+- Tooling fix shipped with publication: CSV arm label hardcoded `contour-2.45` -> derived
+  from run records (`contour-2.49`); label column only, scores untouched.
+Published: `CADENCE-249-V64.md`, `v6-results/cadence-249/` (27 sanitized artifacts incl.
+raw answers JSONL 213 rows/arm re-scoreable, launchers, energy CSV, cells CSV 780 rows
+naming bank sha16 + contract per row), decision record
+`2026-11-07-cadence249-v64-fair-contour-margin-holds.md`, README bullet. Sampler unit
+`parb-gpu249` stopped after legs done. Next: contour cadence due after 5 more measured
+stamps; tooling release to close `_loop_rows` for new runs.

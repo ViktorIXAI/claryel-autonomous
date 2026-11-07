@@ -296,13 +296,27 @@ def main() -> int:
 
     # ---- per-cell CSV ---------------------------------------------------------------
     if args.out:
+        # contour arm label comes from the legs' own run records (the contour stamp
+        # they ran under), never a hardcoded revision: a hardcoded "contour-2.45"
+        # mislabeled the cadence-249 legs (stamp 2.49 / behavior 2.48) in the CSV.
+        contour_label = "contour"
+        for rep in reps:
+            rp = os.path.join(ws, "run-record-%sr%d.json" % (args.prefix, rep))
+            if os.path.exists(rp):
+                try:
+                    stamp = (json.load(open(rp)).get("stack") or {}).get("contour_stamp")
+                    if stamp:
+                        contour_label = "contour-%s" % stamp
+                        break
+                except (ValueError, OSError):
+                    pass
         out_dir = os.path.join(ROOT, "benchmarks", "hard", args.out) if not os.path.isabs(args.out) else args.out
         os.makedirs(out_dir, exist_ok=True)
         with open(os.path.join(out_dir, "cadence-cells-v62.csv"), "w", newline="") as fh:
             wr = csv.writer(fh)
             wr.writerow(["arm", "rep", "task", "cat", "strict", "bank_sha16", "contract"])
             for key, st in sorted(contour.items()):
-                wr.writerow(["contour-2.45", key[1], key[0], tpub[key[0]]["cat"], st, bank_sha16, SC.SCORER_CONTRACT])
+                wr.writerow([contour_label, key[1], key[0], tpub[key[0]]["cat"], st, bank_sha16, SC.SCORER_CONTRACT])
             for arm, sc in raw.items():
                 for key, st in sorted(sc.items()):
                     wr.writerow([arm, key[1], key[0], tpub[key[0]]["cat"], st, bank_sha16, SC.SCORER_CONTRACT])

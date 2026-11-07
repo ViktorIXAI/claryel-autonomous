@@ -1,0 +1,40 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:8080",
+  "contour_version": "0.0.2.49",
+  "contour_behavior": "2.48",
+  "contour_changed_at_this_release": false,
+  "git_sha": "926afac912bfe253db0fe3ecfc52846502eb2af7",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "cadence-249 stage 1: contour 0.0.2.49 (behavior 2.48, adopted line) on bank v6.4, matched seed rep 26",
+  "stack": {
+    "bank_version": "v6.4",
+    "bank_version_source": "marker",
+    "bank_sha16": "7788cc288922b9a4",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.49",
+    "contour_behavior": "2.48",
+    "harness_git_sha": "926afac912bfe253db0fe3ecfc52846502eb2af7"
+  }
+}
