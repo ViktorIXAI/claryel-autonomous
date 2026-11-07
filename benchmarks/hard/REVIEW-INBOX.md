@@ -1858,3 +1858,36 @@ Frozen probe rule (applies exactly as written below):
 - Tool-coverage note: `bank_derivability_audit.py` census is 37 on BOTH banks — its
   scanner does not cover H `ask` atoms; the scanner is NOT amended mid-probe (the
   census chain 39->38->37 is pinned), coverage gap queued as tooling follow-up.
+
+## 2026-11-07 17:44 CET — bank v6.5 probe at reps 28/29/30: rule (i) NOT met — the v6.4 CONTROL passed 3/3; cell is a CONTOUR-LINE LOTTERY, not chronic; rule amended BEFORE extension rows
+Result of the frozen probe (rows exist now, published below unchanged): p64r28/29/30
+(bank v6.4 control) ALL strict PASS - the model spontaneously wrote "аудит-лог"
+("Полный аудит-лог всех операций...", "...аудит-лог системы...") and _token_cover was
+satisfied without any bank help; p65r28/29/30 (v6.5) 3/3 PASS with the artifact named
+verbatim in unknown AND requires. So the cell's published failure record (cadence-249
+0/3 on all four arms at reps 25/26/27) is SEED-CORRELATED lottery, not chronic failure:
+the whole history (rep0-2 mixed, pair-246 2/3-ish, pair-247 2/3, cadence-249 0/3,
+probe28-30 3/3) is an unstable cell whose failure rate rises whenever the model
+paraphrases the artifact away and the prompt never states it.
+Consequence under the frozen text: rule (i) required v6.4 <= 1/3 at matched seeds - it
+got 3/3, so rule (i) is NOT met and the (i)-style EFFECT claim is UNMEASURED at reps
+28-30; the derivability DEFECT itself stands mechanically proven (verify_bank_v65:
+gold ask not _token_cover-derivable from v6.4 prompt, derivable after the fix - a
+contract-level fact independent of any draw).
+AMENDED rule (frozen here, before any further row; replaces nothing already written):
+- Extension: paired subset legs p64r31/32/33 vs p65r31/32/33, identical mechanics
+  (stamp 0.0.2.50, SUBSET=H-ex6-01, serial, same endpoint). Pooled over reps 28-33
+  (6 paired seeds per side): a MEASURED conversion exists iff >=1 seed where the v6.4
+  leg strict-fails while the v6.5 leg passes; a REGRESSION exists iff >=1 seed the
+  other way. Either can coexist with rule (ii).
+- Promotion to `working` now requires: (a) no v6.5-only strict failure across the 6
+  paired seeds (the fix must not create new losses); (b) fairness rule (ii) UNCHANGED
+  (raw basalt/codex/grok on the v6.5 subset at reps 28/29/30, all three >= 2/3 strict
+  under frozen contract v6.2); (c) if (a) and (b) hold but no conversion cell exists,
+  v6.5 is promoted with the explicit wording: derivability fix, no measured contour-
+  line effect at 6 paired seeds (the contour line survives the trap by lottery); the
+  bank's credit is the raw-arm fairness delta, not a contour delta.
+- If v6.5 loses a cell v6.4 wins: v6.5 stays PROVISIONAL and a v6.6 hypothesis is
+  opened (the fix wording may overprime).
+- Raw fairness baseline for the delta: cadence-249 published basalt/codex/grok
+  H-ex6-01 0/3 on bank v6.4 at reps 25/26/27 (different seeds - stated as caveat).
