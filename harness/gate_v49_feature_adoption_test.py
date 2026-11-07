@@ -262,7 +262,8 @@ _FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TAB
           "B_FIELD_COMPLETE", "B_TABLE_AGGREGATE", "G4_LOTTERY", "J_MEMBERSHIP_V3",
           "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
           "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR",
-          "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE", "A_PCT_CHAIN", "C_PY_GROUND")
+          "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE", "A_PCT_CHAIN", "C_PY_GROUND",
+          "H_UNKNOWN_PROMPT")
 _missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
 ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
 _moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
@@ -354,6 +355,24 @@ ck(getattr(g253, "C_RULE_GROUND") is False and getattr(g252, "C_RULE_GROUND") is
 ck((2, 53) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.53") == (2, 53)
    and GV.behavior_tuple("0.0.2.52") == (2, 52),
    "the candidate registers a real contour change; the control keeps behavior 2.52")
+
+# pair-251 (2026-11-07): 0.0.2.54 is the CONTOUR CANDIDATE stamp (H unknown slot grounded from
+# the prompt's own denial sentence - a re-arm of the ADOPTED 2.28 grammar's own documented gap).
+# Matrix discipline: 2.54 = the adopted 2.53 matrix + exactly H_UNKNOWN_PROMPT; the pair control
+# 2.53 must not carry the candidate's flag; the 2.28 H_REQUIRES_PROMPT stays ON at both stamps
+# (its bytes never move) and the frozen 2.41 C_RULE_GROUND stays silent.
+g254 = load("0.0.2.54")
+ck(getattr(g253, "H_UNKNOWN_PROMPT") is False, "the pair-251 candidate trigger is OFF on the 2.53 control")
+ck(getattr(g254, "H_UNKNOWN_PROMPT") is True, "the candidate trigger is ON at 2.54")
+_m254 = [f for f in _FLAGS if getattr(g254, f) != getattr(g253, f) and f != "H_UNKNOWN_PROMPT"]
+ck(not _m254, "2.54 = the 2.53 matrix + exactly H_UNKNOWN_PROMPT (%s)" % _m254)
+ck(getattr(g253, "H_REQUIRES_PROMPT") is True and getattr(g254, "H_REQUIRES_PROMPT") is True,
+   "the adopted 2.28 grammar stays ON at 2.53 and 2.54 (the re-arm is a separate function/flag/events)")
+ck((2, 54) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.54") == (2, 54)
+   and GV.behavior_tuple("0.0.2.53") == (2, 53),
+   "the candidate registers a real contour change; the control keeps behavior 2.53")
+ck(GV.CURRENT_REVISION >= (2, 54) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
+   "CURRENT follows the newest registered stamp without pinning an exact tuple")
 
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"

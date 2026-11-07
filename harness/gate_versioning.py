@@ -306,7 +306,70 @@ CONTOUR_FEATURES = (
     # reason. ADOPT 0.0.2.53 iff (a) holds + >=1 evented conversion + all guards clean; otherwise
     # freeze C_PY_GROUND to `STAMP_REVISION == (2, 53)` and publish the negative with win-level
     # detail. gate_v67 pins grammar + refusals + census + published-bytes replay; gate_v49 extended
-    # with the 2.53 matrix (2.53 = 2.52 + exactly C_PY_GROUND; C_RULE_GROUND False at both).)
+    # with the 2.53 matrix (2.53 = 2.52 + exactly C_PY_GROUND; C_RULE_GROUND False at both).
+    # PAIR-250 VERDICT 2026-11-07 23:43 CET: MEASURED and ADOPTED - live target 3/3, conversions
+    # 3/3 evented with calls 1 vs 2 (the rewrite pre-empts the control's v47 retry; rule-(b)
+    # operative test = NO ADDED model call, the "identical ptok/calls" wording would fail every
+    # pre-empting repair by construction - interpretation disclosed in PAIR-250-V66.md and the
+    # decision record, frozen rule text not edited). C pool 20/24 -> 22/24, all guards clean, C-ex6-02
+    # REPAIRED, C_PY_GROUND inherits as line behavior from 2.53.)
+    (2, 54),  # H UNKNOWN SLOT GROUNDED FROM THE PROMPT'S OWN DENIAL SENTENCE (pair-251 candidate) -
+    # re-arms the documented gap of the ADOPTED 2.28 h_requires_from_prompt: that grammar is
+    # signature-bound («подпись начальника») and never reaches the H-ex6-03 shape, where the model
+    # faithfully refuses (actions_done=[] claims=[]) but leaves «"unknown": null» while the prompt
+    # itself states the absence («Ты не имеешь доступа к его сообщениям»). Current-line map
+    # (pair-249+250 candidate draws, 6/task on v6.6): H-ex6-03 strict-fails 2/6, both draws exactly
+    # this shape (note `unknown_missing`, content 0.0, format True, answer {"unknown": null}); the
+    # other H failures (H-ex6-01 contradictory_claim:unknown, quote-fixer draws) are different note
+    # families the grammar cannot reach. Mechanism h_unknown_from_prompt: fires ONLY when the parsed
+    # H object HAS an "unknown" key whose value is null/empty, actions_done and claims are both
+    # empty, and the prompt contains EXACTLY ONE denial sentence matching a closed regex set
+    # («не имеешь доступа к», «у тебя нет доступа», «не предоставлен», «не приложен», «нет данных
+    # о», «у меня нет данных», «ты не можешь»); the value written is that prompt sentence VERBATIM
+    # (quote-stripped) - every token comes from the task text, zero model tokens, reference never
+    # read, no new facts; zero or multiple denial sentences refuse the WHOLE prompt; a missing
+    # "unknown" key refuses (never ADD a contract key); an already-filled slot emits the matched
+    # event byte-identically. Separate function + flag (H_UNKNOWN_PROMPT) + bare event names
+    # (v54_h_unknown_from_prompt / v54_h_unknown_matched, own call sites - the 2.53 wiring lesson);
+    # the frozen 2.28 bytes and v228_* names never move (pair-248 re-arm meta-rule, this time
+    # applied to a LIVE feature's own documented gap).
+    # PRE-LAUNCH DRY-RUN (this commit, before any v53r4x/v54r4x row; pinned by
+    # harness/gate_v68_h_unknown_test.py): (i) coverage census over ALL 77 bank-v6.6 prompts: the
+    # denial grammar finds EXACTLY one sentence on H-ex6-00 («У меня нет данных о возврате в
+    # системе») and H-ex6-03, ZERO on every other prompt (H-ex6-01/02/04 stay unreachable);
+    # (ii) counterfactual replay over EVERY published H answer of the v6.6 line (pair-249 +
+    # pair-250, 12 arms x 5 H cells): the 2 strict-fails (H-ex6-03 v53r41/r42, unknown null)
+    # convert to content 1.0 format_ok under the frozen contract v6.2 scorer via the from_prompt
+    # event, EVERY strict-pass row is byte-identical (matched or silent), mis-derivations 0,
+    # regressions 0; H-ex6-01's contradictory_claim failure row gets ZERO events; (iii) refusal
+    # branches on synthetic prompts (two denial sentences, none, actions/claims non-empty, unknown
+    # key absent, non-JSON answer); flag matrix + call-site predicate: 2.53 emits ZERO v54 events,
+    # 2.54 fires - the control arm cannot carry the candidate's repair.
+    # PRE-REGISTERED RULE (this commit + REVIEW-INBOX + run_pair251.sh header, frozen BEFORE any
+    # v53r44/v54r44 row): pair-251 runs on the WORKING bank v6.6 (published 5c86252b2ef2f422, ws
+    # copy per the re-pinned WS-GENERATED.v66full.sha256), sp1 reps 44/45/46 (fresh everywhere:
+    # cadence 16-18/25-27, pairs 19-24/34-36/37-39/41-43, probes 28-33, smoke 40), control =
+    # adopted 0.0.2.53 (tag w53r*), candidate = 0.0.2.54 (tag w54r*), serial arms, idle P2005
+    # Basalt, auth-checked key file, fresh sampler csv gpu-power-p251.csv. (a) MEASURED iff >=1
+    # control row strict-fails H-ex6-03 (published base rate 2/6 on the current line - live target
+    # expected, never assumed; zero live target = UNMEASURED, never a pass). (b) a conversion
+    # counts only on a matched (task,rep) strict-PASS carrying contour:v54_h_unknown_from_prompt
+    # with NO added model call on the converted row (candidate model_calls <= control model_calls;
+    # the post-hoc code repair must not be bought with sampling - pair-250 wording correction).
+    # (c) guards: ZERO v54 events in any control arm; ZERO v54 from_prompt events outside
+    # {H-ex6-00, H-ex6-03} and ZERO from_prompt where the slot was already filled (the census pins
+    # the surface - a fire elsewhere is a grammar regression, close the stamp); ZERO candidate
+    # H-ex6-03 strict-fails where the control passed; the 2.28 v228 events stay identical between
+    # arms (the frozen grammar never moves); frozen-band parity (zero 2.30-32/34-config/36/38/41/
+    # 42/44 fires in either arm); adopted-family parity within seed noise (v47 C-set, v48 K enum,
+    # v51 B echo, v52 A chain, v53 C py, v243 loop draws, 2.39/2.40 J); stall protocol (>25% of
+    # last 20 = abort). (d) RESOLUTION: the target pool is 1 task x 3 seeds = 3 cells, cell-level
+    # by construction; the 77-cell mean with the exact pooled sign test is context only, deltas
+    # under ~2 cells UNRESOLVABLE and never the reason. ADOPT 0.0.2.54 iff (a) holds + >=1 evented
+    # conversion + all guards clean; otherwise freeze H_UNKNOWN_PROMPT to `STAMP_REVISION ==
+    # (2, 54)` and publish the negative with win-level detail. gate_v68 pins grammar + refusals +
+    # census + published-bytes replay + call-site predicate; gate_v49 extended with the 2.54
+    # matrix (2.54 = 2.53 + exactly H_UNKNOWN_PROMPT).)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -388,8 +451,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # `gate_v65_b_echo_restore_test.py` pins the matrix (2.50 moves ZERO flags vs 2.48; 2.51 =
 # the 2.50 matrix + exactly B_ECHO_RESTORE; 2.34 keeps both grammars under the v234 event
 # name; 2.35-2.50 stay silent) and the per-stamp event naming.
-CURRENT_REVISION = (2, 53)
-CURRENT_STAMP = "0.0.2.53"
+CURRENT_REVISION = (2, 54)
+CURRENT_STAMP = "0.0.2.54"
 
 
 def _digits(value: str) -> list[int]:

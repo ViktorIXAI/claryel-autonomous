@@ -243,6 +243,11 @@ G_CONFLICT_OVERWRITE = contour_at_least(2, 26)
 A_ARITH_CODE = contour_at_least(2, 27)
 # 0.0.2.28: H requires/unknown from explicit prompt signature constraint
 H_REQUIRES_PROMPT = contour_at_least(2, 28)
+# 0.0.2.54: H unknown slot filled from the prompt's OWN denial sentence when the model
+# left it null (H-ex6-03 class). The 2.28 grammar is signature-bound and never reaches
+# this shape; its bytes and v228_* event names stay untouched (separate function, flag,
+# and v54_* events - pair-248 re-arm meta-rule applied to a live feature's own gap).
+H_UNKNOWN_PROMPT = contour_at_least(2, 54)
 # 0.0.2.48: K fields gate — the REQUIRED-KEY set comes from the field list the task
 # itself enumerates («Поля: ITEM, QTY, …»), never from the template placeholder token.
 # The pre-2.48 detector scans the prompt for UPPERCASE tokens followed by a colon; in a
@@ -3151,6 +3156,56 @@ def h_requires_from_prompt(t, text):
     return json.dumps(obj, ensure_ascii=False), changed
 
 
+_H_DENIAL_RX = re.compile(
+    r"(не имеешь доступа к|у тебя нет доступа|ты не можешь|не предоставлен|"
+    r"не приложен|нет данных о|у меня нет данных)", re.I)
+
+
+def _h_denial_sentences(prompt: str) -> list:
+    """Prompt sentences that state an absence/no-access in a CLOSED grammar set."""
+    out = []
+    for s in re.split(r"[.!?\n]", prompt or ""):
+        s = s.strip().strip(" '\"«»").strip()
+        if s and _H_DENIAL_RX.search(s):
+            out.append(s)
+    return out
+
+
+def h_unknown_from_prompt(t, text):
+    """v2.54: fill a null/empty H \"unknown\" from the prompt's OWN denial sentence.
+
+    The model faithfully refuses (actions_done=[] and claims=[]) but sometimes leaves
+    the unknown slot null while the task text itself states the absence («Ты не имеешь
+    доступа к его сообщениям»). The repair copies the prompt's single denial sentence
+    VERBATIM into obj[\"unknown\"]: every token comes from the task text, zero model
+    tokens, no new facts, the reference is never read. Zero or multiple denial
+    sentences refuse the WHOLE prompt; a missing \"unknown\" key refuses (never ADD a
+    contract key); an already-filled slot is byte-identical with the matched event.
+    Own call site emits the BARE event names v54_h_unknown_from_prompt /
+    v54_h_unknown_matched; the frozen 2.28 v228_* bytes never move.
+    Returns (text, event-or-None)."""
+    if not H_UNKNOWN_PROMPT or not text:
+        return text, None
+    if not str(t.get("id", "")).startswith("H") and t.get("cat") != "H":
+        return text, None
+    obj = _fmt_parse(text)
+    if not isinstance(obj, dict):
+        return text, None
+    if obj.get("actions_done") or obj.get("claims"):
+        return text, None            # refusal contract broken: not this class
+    if "unknown" not in obj:
+        return text, None            # never ADD a contract key
+    denials = _h_denial_sentences(t.get("prompt") or t.get("free_text") or "")
+    if len(denials) != 1:
+        return text, None            # absent or ambiguous: refuse the whole prompt
+    cur = obj.get("unknown")
+    if cur is None or not str(cur).strip() or str(cur).strip().lower() == "null":
+        out = dict(obj)
+        out["unknown"] = denials[0]
+        return json.dumps(out, ensure_ascii=False), "v54_h_unknown_from_prompt"
+    return text, "v54_h_unknown_matched"
+
+
 def i_duration_sort(t, text):
     """v2.24: re-sort I answers that are [label, seconds] pairs by seconds."""
     if not I_DURATION_SORT or not text:
@@ -3555,6 +3610,13 @@ def run_one(t, pos, done, st):
             r["text"] = norm
             rec["answer"] = norm
             acct.ev("contour", "v228_" + "_".join(ev))
+    if H_UNKNOWN_PROMPT and cat == "H" and r["text"]:
+        norm, ev = h_unknown_from_prompt(t, r["text"])
+        if ev:
+            r = dict(r)
+            r["text"] = norm
+            rec["answer"] = norm
+            acct.ev("contour", ev)
     if I_DURATION_SORT and cat == "I" and r["text"]:
         norm, ev = i_duration_sort(t, r["text"])
         if ev:
@@ -3710,6 +3772,13 @@ def run_one(t, pos, done, st):
                             r["text"] = norm
                             rec["answer"] = norm
                             acct.ev("contour", "v228_" + "_".join(ev))
+                    if H_UNKNOWN_PROMPT and cat == "H" and r["text"]:
+                        norm, ev = h_unknown_from_prompt(t, r["text"])
+                        if ev:
+                            r = dict(r)
+                            r["text"] = norm
+                            rec["answer"] = norm
+                            acct.ev("contour", ev)
                     if I_DURATION_SORT and cat == "I" and r["text"]:
                         norm, ev = i_duration_sort(t, r["text"])
                         if ev:

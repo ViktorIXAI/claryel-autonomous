@@ -37,6 +37,7 @@ jobs:
                    harness/gate_v65_b_echo_restore_test.py \
                    harness/gate_v66_a_percent_chain_test.py \
                    harness/gate_v67_c_py_options_test.py \
+                   harness/gate_v68_h_unknown_test.py \
                    harness/audit_v2_scanner_test.py \
                    harness/gate_versioning_test.py; do
             echo "=== $f"; python3 "$f"

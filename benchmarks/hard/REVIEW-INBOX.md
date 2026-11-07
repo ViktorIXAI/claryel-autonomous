@@ -2291,3 +2291,63 @@ record `history/agent-decisions/2026-11-07-pair250-c-py-options-adopted-line-mov
 Sampler unit parb-p250sampler stopped 23:38 CET (912 samples, window 1563 s). Next: 0.0.2.54
 targets from the 6-draw map (single-shot 4/6 cells first; note taxonomy read from published
 draws before any hypothesis); then pair-251; cadence becomes due after the 5th measured stamp.
+
+## 2026-11-07 23:56 CET — PAIR-251 PRE-REGISTRATION: contour 0.0.2.54 (H unknown grounded from the prompt's own denial sentence), rules frozen BEFORE any w53r4x/w54r4x row
+
+Target from the current-line map (pair-249+250 candidate draws, 6/task on v6.6): **H-ex6-03
+strict-fails 2/6** (pair-250 v53r41/r42: `{"actions_done": [], "claims": [], "unknown": null,
+"requires": ...}` — the model faithfully refuses but leaves the unknown slot null; note
+`unknown_missing`, content 0.0, format_ok True). The prompt itself states the absence
+(«Ты не имеешь доступа к его сообщениям»). Other H failures (H-ex6-01
+contradictory_claim:unknown, H-ex6-00/01 quote-fixer draws) are note families the grammar
+cannot reach. This re-arms the DOCUMENTED GAP OF THE ADOPTED 2.28 h_requires_from_prompt (that
+grammar is signature-bound to «подпись начальник» and never fires on this shape — gate_v68
+proves it still refuses at 2.54): the pair-248 meta-rule (new flag, new function, new event
+names; frozen bytes never move) applied for the first time to a live feature's own gap.
+Mechanism 0.0.2.54 `H_UNKNOWN_PROMPT = contour_at_least(2, 54)`: fires ONLY when the parsed H
+answer HAS an `unknown` key whose value is null/empty, `actions_done` and `claims` are both
+empty, and the prompt contains EXACTLY ONE denial sentence from a closed regex set («не имеешь
+доступа к», «у тебя нет доступа», «не предоставлен», «не приложен», «нет данных о», «у меня нет
+данных», «ты не можешь»). The value written is that prompt sentence VERBATIM (quote-stripped):
+every token comes from the task text, zero model tokens, no new facts, the reference is never
+read. Zero/multiple denial sentences refuse the WHOLE prompt; a missing `unknown` key refuses
+(never ADD a contract key); a filled slot emits `v54_h_unknown_matched` byte-identically. Own
+call sites emit BARE event names (`contour:v54_h_unknown_from_prompt` / `v54_h_unknown_matched`)
+— the 2.53 wiring lesson.
+DRY-RUN (pinned by `harness/gate_v68_h_unknown_test.py`, 101 checks PASS at python3.12):
+(i) census over all 77 v6.6 AND all 77 v6.2 prompts: EXACTLY {H-ex6-00, H-ex6-03}, one denial
+sentence each; the H-ex6-03 sentence token-covers the gold unknown atom under the executed
+frozen scorer; (ii) counterfactual replay over all 60 published H rows of the v6.6 line
+(pair-249 + pair-250): 4 strict-fails convert to strict PASS (only the unknown slot differs),
+all 54 passes byte-identical, 0 mis-derivations, 0 regressions; (iii) refusal branches on
+invented prompts (zero/two denial sentences, actions/claims non-empty, unknown key absent,
+non-JSON, non-H task); gate_v49: 2.54 = 2.53 + exactly H_UNKNOWN_PROMPT, H_REQUIRES_PROMPT ON
+at both; full contract suite 33/33 green; CI enrolled; ws rebuilt at the new stamp
+(`WS-GENERATED.v66full.sha256`, bank copy `590503cf1701a6ce`), `verify_manifest --v6` PASS.
+PAIR-251 protocol: WORKING bank v6.6 `5c86252b2ef2f422` (ws copy `590503cf1701a6ce`), sp1 reps
+**44/45/46** (fresh everywhere; smoke rep 47 outside pairs), control = adopted 0.0.2.53
+(`w53r*`), candidate = 0.0.2.54 (`w54r*`), serial arms, idle P2005 Basalt, auth-checked key
+file (GET /v1/models 200 at the exact PARB_KEY_FILE), fresh sampler csv gpu-power-p251.csv
+(unit parb-p251sampler).
+FROZEN RULE (the verdict is decided ONLY by this text):
+(a) MEASURED iff >=1 control (w53) row strict-fails H-ex6-03 (current-line base rate 2/6 —
+    live target expected, never assumed; zero live target = UNMEASURED, never a pass).
+(b) A conversion counts only on a matched (task,rep) strict-PASS carrying
+    contour:v54_h_unknown_from_prompt with NO added model call on the converted row
+    (candidate model_calls <= control model_calls — the pair-250 wording correction: the
+    operative test is the no-added-call parenthetical, not cross-arm cost equality).
+(c) Guards: ZERO v54 events in any control arm; ZERO v54 from_prompt events outside
+    {H-ex6-00, H-ex6-03} (census pins the surface — a fire elsewhere = grammar regression,
+    close the stamp); ZERO from_prompt on a row whose unknown slot was already filled; ZERO
+    candidate H-ex6-03 strict-fails where the control passed; v228 parity (the frozen 2.28
+    grammar fires identically in both arms); frozen-band parity (zero 2.30-32/34-config/36/
+    38/41/42/44 fires); adopted-family parity within seed noise (v47 C-set, v48 K enum, v51 B
+    echo, v52 A chain, v53 C py, v243 loop draws, 2.39/2.40 J); stall protocol (>25% of last 20
+    = abort).
+(d) RESOLUTION: 1 task x 3 seeds = 3 cells, cell-level by construction; the 77-cell mean with
+    the exact pooled sign test is context only; deltas under ~2 cells UNRESOLVABLE, never the
+    reason.
+ADOPT 0.0.2.54 iff (a) + >=1 evented conversion + all guards clean; otherwise freeze
+H_UNKNOWN_PROMPT to `STAMP_REVISION == (2, 54)` and publish the negative with win-level detail.
+Energy: gpu-power-p251.csv windows, per-arm epochs. Cadence counter: this pair is the 4th
+measured stamp since cadence-249 — four-arm re-run due after the 5th.
