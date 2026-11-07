@@ -1,0 +1,35 @@
+{
+  "schema": "bank-versions-v1",
+  "identity_rule": "A published hard-bank version is one file whose bytes never change; a correction ships as a new file with a new version and a new sha16. This registry is the ONLY place a bank file name may be mapped to a version label: `bank-hard-v6.json` holds v6.1 bytes (it was edited in place before this rule existed - the identity trap that made pre-fix workspace bank copies silently possible), and it stays labelled v6.1 here forever. scripts/build_hard_v6_ws.py fails closed if a bank file does not appear in this registry with matching bytes, and stamps the resolved version into every generated workspace as `bank-version.json`, which `gate_run` writes into the run record.",
+  "sha_rule": "sha16 = sha256 of the file bytes, first 16 hex characters",
+  "banks": [
+    {
+      "file": "benchmarks/hard/bank-hard-v6.json",
+      "version": "v6.1",
+      "published_sha16": "9ec86dfca4a6f85f",
+      "status": "superseded",
+      "note": "published dev bank after the J/K corrections; the file name predates the version rule and carries the v6.1 bytes (identity trap, see bank-defect-v62-changelog.md). The pre-correction ladder-era workspace copy f52acbd15b3271e7 belongs to the older bank content and is NOT labelled v6.1."
+    },
+    {
+      "file": "benchmarks/hard/bank-hard-v6.2.json",
+      "version": "v6.2",
+      "published_sha16": "3c866ea7daae611c",
+      "status": "superseded",
+      "note": "A-ex6-03 gold from the printed rules; C-ex6-02 gold = executed truth table; K-ex6-03 FREE_SHIPPING value form. See bank-defect-v62-changelog.md."
+    },
+    {
+      "file": "benchmarks/hard/bank-hard-v6.3.json",
+      "version": "v6.3",
+      "published_sha16": "73f7a04d57473545",
+      "status": "provisional",
+      "note": "B-ex6-04 year-from-gold fix; superseded by v6.4 (second defect: value form)."
+    },
+    {
+      "file": "benchmarks/hard/bank-hard-v6.4.json",
+      "version": "v6.4",
+      "published_sha16": "85a0cd0dd6fa1fab",
+      "status": "working",
+      "note": "v6.3 plus one field: B-ex6-04 value-form hint (example deliberately not the gold). Raw-arm fairness probe FAIR 3/3 on all three arms (REVIEW-INBOX 2026-11-07 13:08 CET)."
+    }
+  ]
+}

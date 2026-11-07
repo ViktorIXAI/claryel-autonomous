@@ -12,6 +12,7 @@ where those identities are defined, so a quoted number can be traced to bytes.
 | dev bank (hard) | v6.2 | 3c866ea7daae611c | `scripts/verify_bank_v62.py` (fails if v6.1 moves) |
 | dev bank (hard) | v6.3 | 73f7a04d57473545 | `scripts/verify_bank_v63.py` (one field vs v6.2; PROVISIONAL) |
 | dev bank (hard) | **v6.4** | 85a0cd0dd6fa1fab | `scripts/verify_bank_v64.py` (one field vs v6.3; WORKING hard bank) |
+| bank version identity | registry `bank-versions-v1` | names -> version + published sha16 | `benchmarks/hard/BANK-VERSIONS.json` (build-time immutability guard, release 0.0.2.49); the builder stamps `bank-version.json` per workspace, run records write `stack.bank_version` + `bank_version_source` |
 | run workspace bank copy | bank v6.2 probe-workspace copy | d1e8d11df5840dcc | run record `stack.bank_sha16` |
 | run workspace bank copy | bank v6.3 probe-workspace copy | 42bf2ecf69558dc2 | run record `stack.bank_sha16` |
 | run workspace bank copy | bank v6.4 probe-workspace copy (WORKING) | 7788cc288922b9a4 | run record `stack.bank_sha16` |
@@ -22,7 +23,7 @@ where those identities are defined, so a quoted number can be traced to bytes.
 | seed protocol | sp1 | per-(task,rep) gseed + per-task plan seed | `scripts/plan_reps.py`, `build_hard_v6_ws.py` |
 | typed failure codes | registry in contract v6.2 | content / protocol / integrity / marker / infra | `gate_scorer_contract.CODE_CLASS`, gate_v59 tests |
 | two published axes | contract v6.2 | answer axis + protocol axis, additive to `strict` | `gate_v59_scorer_contract_v62_test.py` |
-| harness | commit 3ae462167529 | contour stamp 2.48 (behavior 2.48) | git + `gate_versioning.py` |
+| harness | commit 2d39c90efb6e | contour stamp 2.49 (behavior 2.48) | git + `gate_versioning.py` |
 
 Scorer contract v6.2 delegates to the v6.1 bytes, so it changes no score; the equality
 is asserted cell by cell on published answers (`gate_v59_scorer_contract_v62_test.py`),
@@ -30,8 +31,8 @@ and `verify_contract()` fails closed if a frozen scoring byte moves without a ne
 
 ## 2. Contour axes
 
-- stamped revision now: **2.48** (`0.0.2.48`); contour behavior reported: **2.48**;
-- did this release change the contour? **True** (a tooling release registers no feature)
+- stamped revision now: **2.49** (`0.0.2.49`); contour behavior reported: **2.48**;
+- did this release change the contour? **False** (a tooling release registers no feature)
 - adopted line features: 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.7, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.35, 2.37, 2.39, 2.40, 2.43, 2.47, 2.48
 - frozen to their own stamp (never inherited): 2.30 (contract guarantee (shape re-ask/salvage) — MEASURED NEGATIVE), 2.31 (self-consistency vote — MEASURED NEGATIVE), 2.32 (J ranking repair v1 — on target, under the noise floor), 2.33 (A threshold-table arithmetic — zero live fires), 2.34 (B field completeness — zero live fires), 2.36 (group-4 lottery selection — MEASURED NEGATIVE), 2.38 (A threshold-table re-land — UNMEASURED), 2.41 (C rule-grounded membership — UNMEASURED), 2.42 (D-loop policy re-ground — MEASURED NEGATIVE), 2.44 (D-loop best-of-2 on false_completion_claim — UNMEASURED)
 - reserved tooling band (behavior pinned forever): 2.3, 2.4, 2.5, 2.6, 2.8

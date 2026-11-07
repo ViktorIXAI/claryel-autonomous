@@ -19,8 +19,11 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "harness"))
+import gate_bank_versions as GBV    # bank version identity (release 0.0.2.49)
 WRITE_PINS = "--write-pins" in sys.argv
 # --bank <file> builds a workspace on a DIFFERENT bank version; --pins <file> keeps that
 # workspace's pin set separate, because a bank swap changes the pinned `bank.json` hash and
@@ -43,7 +46,8 @@ WS_PINS = os.path.join(ROOT, "benchmarks", "hard",
 WS_PINNED = ("parb_check.py", "parb_loop.py", "parb_check_v6.py", "e_sandbox.py",
                "gate_run.py", "gate_versioning.py", "gate_engine_guard.py",
                "parb_bank_v6.py", "parb_loop_mech.py", "bank.json", "plan.json",
-               "parb_check_v6_2.py", "gate_scorer_contract.py")
+               "parb_check_v6_2.py", "gate_scorer_contract.py",
+               "gate_bank_versions.py", "bank-version.json")
 
 bank_src = os.path.join(ROOT, "benchmarks", "hard",
              BANK_OVERRIDE or "bank-hard-v6.json")
@@ -51,6 +55,25 @@ bank = json.load(open(bank_src, encoding="utf-8"))
 assert len(bank) == 77
 os.makedirs(OUT, exist_ok=True)
 json.dump(bank, open(os.path.join(OUT, "bank.json"), "w", encoding="utf-8"), ensure_ascii=False)
+
+# Bank version identity (release 0.0.2.49): every generated workspace names the
+# bank VERSION next to its hash. The registry is checked first — a published bank
+# file whose bytes moved without a new version fails the build closed (published
+# bytes of a version are immutable; corrections ship as new files). Then the
+# resolved version is stamped into the ws as `bank-version.json`, which
+# `gate_run` reads back into the run record (2.46 HARNESS_GIT_SHA pattern).
+GBV.check_registry(ROOT)
+_bank_entry = GBV.resolve_for_file(bank_src, ROOT)
+if _bank_entry is None:
+    sys.exit("BANK NOT IN REGISTRY: %s is not a versioned published bank in "
+             "benchmarks/hard/BANK-VERSIONS.json (name and bytes must match). "
+             "Every element carries a version: register a NEW file + NEW version "
+             "with its sha16 before building a workspace on it." % os.path.basename(bank_src))
+_ws_bank_sha16 = hashlib.sha256(open(os.path.join(OUT, "bank.json"), "rb").read()).hexdigest()[:16]
+GBV.write_marker(OUT, _bank_entry, _ws_bank_sha16,
+                 time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+print("bank version marker:", _bank_entry["version"],
+      "published", _bank_entry["published_sha16"], "-> ws copy", _ws_bank_sha16)
 
 plan = []
 for t in bank:
@@ -196,10 +219,14 @@ LAUNCH ONLY AFTER THE OWNER'S EXPLICIT GO (issue #15). Planned arms:
   scripts/score_answers_v6.py (offline scoring of archived answers)
 Results: results-<arm>-v6.jsonl under benchmarks/hard/v6-results/ (not ignored).
 """
-readme += ("\nBank line: built from `benchmarks/hard/%s` (sha16 %s). Pins for this workspace:"
-           " `benchmarks/hard/%s`.\n"
+readme += ("\nBank line: built from `benchmarks/hard/%s` (sha16 %s). Bank version: **%s** "
+           "(status %s, published sha16 %s, ws copy sha16 %s) — identity stamped in "
+           "`%s` and pinned. Pins for this workspace: `benchmarks/hard/%s`.\n"
            % (os.path.basename(bank_src),
               hashlib.sha256(open(bank_src, "rb").read()).hexdigest()[:16],
+              _bank_entry["version"], _bank_entry.get("status", "?"),
+              _bank_entry["published_sha16"], _ws_bank_sha16,
+              GBV.MARKER_NAME,
               os.path.basename(WS_PINS)))
 open(os.path.join(OUT, "RUN-README.md"), "w").write(readme)   # bank line added above
 

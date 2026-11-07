@@ -180,8 +180,23 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # REVIEW-INBOX (2026-11-07 10:04 CET). Until that pair resolves, the ADOPTED line remains
 # 0.0.2.46/behavior 2.44: the pair control arm is stamped 0.0.2.46 and its flag matrix is pinned
 # identical to 2.45; 2.47 must equal that matrix plus exactly C_BEST2_SET (gate_v49 + gate_v61).
-CURRENT_REVISION = (2, 48)
-CURRENT_STAMP = "0.0.2.48"
+#
+# 0.0.2.49 is a TOOLING/MEASUREMENT-ONLY release (not in CONTOUR_FEATURES, exactly
+# like 2.45/2.46): the run record's `stack.bank_version` label stops being empty.
+# It was fed only by `PARB_BANK_VERSION`, which no runner ever set, while the
+# published version chain (v6.1 -> v6.2 -> v6.3 -> v6.4) made the version label as
+# load-bearing as the sha16. New single source `benchmarks/hard/BANK-VERSIONS.json`
+# (file -> version + published sha16 + status): the builder fails closed on any
+# bank file not registered with matching bytes — the published-bytes immutability
+# rule enforced at build time — and stamps `bank-version.json` into every generated
+# workspace, mirroring the 2.46 HARNESS_GIT_SHA pattern. `gate_run` resolves the
+# label: marker (validated against the live bank.json bytes; drift fails closed to
+# empty) > content match from a repo checkout > explicit env > empty with a logged
+# source reason. ZERO contour flags move between 2.48 and 2.49 —
+# `gate_v63_bank_version_marker_test.py` pins the matrix equality, the registry
+# identity, the resolution order and the call-site wiring.
+CURRENT_REVISION = (2, 49)
+CURRENT_STAMP = "0.0.2.49"
 
 
 def _digits(value: str) -> list[int]:

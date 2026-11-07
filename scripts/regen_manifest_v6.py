@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "benchmarks" / "hard" / "MANIFEST.v6.sha256"
 FILES = [
     "benchmarks/hard/bank-hard-v6.json",
+    "benchmarks/hard/BANK-VERSIONS.json",
     "benchmarks/hard/gold-answers-v6.jsonl",
     "benchmarks/hard/c_position_dist_v6.json",
     "benchmarks/hard/PROTOCOL.md",
@@ -15,6 +16,7 @@ FILES = [
     "harness/parb_loop.py",
     "harness/parb_check_v6_2.py",
     "harness/gate_scorer_contract.py",
+    "harness/gate_bank_versions.py",
     "harness/parb_bank_v6.py",
     "harness/e_sandbox.py",
     "harness/verify_manifest.py",

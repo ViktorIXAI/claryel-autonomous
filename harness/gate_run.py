@@ -178,6 +178,7 @@ CONTOUR_NOTES = ("0.0.1.0=base contour (gate+re-ask); 0.0.1.1=chunked extraction
                  "answer line the task demands (ОТВЕТ: ...), letters only from the model's own verdicts")
 import parb_check as CK
 import gate_scorer_contract as SC   # scorer contract identity: no number without its scorer
+import gate_bank_versions as GBV    # bank version identity (0.0.2.49): no bank hash without its version label
 try:
     import gate_fixers as GF          # 0.0.1.7: form repair by code (zero model tokens)
 except Exception:
@@ -3693,8 +3694,13 @@ def main():
     # its stack is invalid by definition (bank v6.1 vs v6.2 numbers are not
     # cell-comparable — that trap cost a fake "G transfer failure" once).
     stack = SC.stack_snapshot(ROOT)
+    # 0.0.2.49: the bank VERSION label (v6.1/v6.2/v6.3/v6.4) is resolved from the
+    # workspace marker the builder wrote, never from a runner env nobody set.
+    # Empty label = no bank version identity: log loudly, publisher must label.
+    _bver, _bvsrc = GBV.run_record_bank_version(ROOT, stack.get("bank_sha16") or "")
     record["stack"] = {
-        "bank_version": os.environ.get("PARB_BANK_VERSION", ""),
+        "bank_version": _bver,
+        "bank_version_source": _bvsrc,
         "bank_sha16": stack.get("bank_sha16"),
         "bank_tasks": stack.get("bank_tasks"),
         "scorer_contract": SCORER_CONTRACT_ID,
@@ -3708,8 +3714,13 @@ def main():
     if not stack.get("bank_sha16"):
         log("PGR: WARNING — no bank.json under %s; this run's numbers have no bank identity "
             "and must not be published" % ROOT)
-    log("PGR: stack bank=%s scorer=%s(%s) seeds=%s" % (
-        stack.get("bank_sha16") or "MISSING", SCORER_CONTRACT_ID,
+    elif not _bver:
+        log("PGR: WARNING — bank bytes present but NO bank version label (source=%s); build the "
+            "workspace with build_hard_v6_ws.py so it carries bank-version.json, or the numbers "
+            "must be published version-less" % _bvsrc)
+    log("PGR: stack bank=%s(%s) version=%s scorer=%s(%s) seeds=%s" % (
+        stack.get("bank_sha16") or "MISSING", _bvsrc, _bver or "UNLABELLED",
+        SCORER_CONTRACT_ID,
         SCORER_ID["contract_sha16"], SC.SEED_PROTOCOL))
     record_path = os.path.join(ROOT, "run-record-%s.json"
                                % (os.environ.get("PARB_RUN_ID") or "gate"))

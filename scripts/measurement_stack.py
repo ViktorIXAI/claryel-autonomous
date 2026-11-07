@@ -79,13 +79,20 @@ def contour_block():
 
 def element_block():
     banks = []
-    for name, label in (("bank-hard-v6.json", "v6.1 (published dev bank)"),
-                        ("bank-hard-v6.2.json", "v6.2 (defect corrections)"),
-                        ("bank-hard-v6.3.json", "v6.3 (B-ex6-04 year fix; PROVISIONAL, superseded)"),
-                        ("bank-hard-v6.4.json", "v6.4 (WORKING hard bank: + value-form hint)")):
-        p = os.path.join(ROOT, "benchmarks/hard", name)
-        if os.path.exists(p):
-            banks.append({"file": name, "label": label, "sha16": sha16(p)})
+    # Bank version labels come from the registry (single source, release 0.0.2.49);
+    # a published file whose bytes moved without a new version prints as DRIFT here.
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    import gate_bank_versions as GBV
+    try:
+        for e in GBV.load_registry(ROOT):
+            p = os.path.join(ROOT, e["file"])
+            got = sha16(p) if os.path.exists(p) else "-"
+            lab = "%s (%s%s)" % (e["version"], e.get("status", "?"),
+                                 "" if got == e["published_sha16"]
+                                 else " — DRIFT registered %s on-disk %s" % (e["published_sha16"], got))
+            banks.append({"file": e["file"], "label": lab, "sha16": got})
+    except GBV.BankIdentityError as ex:
+        print("BANK REGISTRY PROBLEM:", ex)
     for wsdir, label in (("parb-v62-probe", "bank v6.2 probe-workspace copy"),
                          ("parb-v63-probe", "bank v6.3 probe-workspace copy"),
                          ("parb-v64-probe", "bank v6.4 probe-workspace copy (WORKING)")):
@@ -198,13 +205,17 @@ def main():
           "| element | version | identity (sha16) | pinned by |",
           "|---|---|---|---|",
           "| dev bank (hard) | v6.1 | %s | `benchmarks/hard/MANIFEST.v6.sha256`, `bank-defect-v62-changelog.md` |"
-          % next((b["sha16"] for b in el["banks"] if b["file"] == "bank-hard-v6.json"), "-"),
+          % next((b["sha16"] for b in el["banks"] if b["file"].endswith("/bank-hard-v6.json")), "-"),
           "| dev bank (hard) | v6.2 | %s | `scripts/verify_bank_v62.py` (fails if v6.1 moves) |"
-          % next((b["sha16"] for b in el["banks"] if b["file"] == "bank-hard-v6.2.json"), "-"),
+          % next((b["sha16"] for b in el["banks"] if b["file"].endswith("/bank-hard-v6.2.json")), "-"),
           "| dev bank (hard) | v6.3 | %s | `scripts/verify_bank_v63.py` (one field vs v6.2; PROVISIONAL) |"
-          % next((b["sha16"] for b in el["banks"] if b["file"] == "bank-hard-v6.3.json"), "-"),
+          % next((b["sha16"] for b in el["banks"] if b["file"].endswith("/bank-hard-v6.3.json")), "-"),
           "| dev bank (hard) | **v6.4** | %s | `scripts/verify_bank_v64.py` (one field vs v6.3; WORKING hard bank) |"
-          % next((b["sha16"] for b in el["banks"] if b["file"] == "bank-hard-v6.4.json"), "-"),
+          % next((b["sha16"] for b in el["banks"] if b["file"].endswith("/bank-hard-v6.4.json")), "-"),
+          "| bank version identity | registry `bank-versions-v1` | names -> version + published sha16 | "
+          "`benchmarks/hard/BANK-VERSIONS.json` (build-time immutability guard, release 0.0.2.49); the "
+          "builder stamps `bank-version.json` per workspace, run records write `stack.bank_version` + "
+          "`bank_version_source` |",
           ]
     for b in el["banks"]:
         if "bank.json" in b["file"]:

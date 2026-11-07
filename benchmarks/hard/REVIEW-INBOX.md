@@ -1662,3 +1662,35 @@ dominate the delta (expected cost: zero extra calls when the first answer alread
     nothing for it. Artifacts: `v6-results/bank-probe-634/fair-rows.md` + `fair-answers-*.jsonl`
     + sanitized `run_fair_probe.sh`. Next cadence four-arm on bank v6.4 (due at 5 measured stamps
     after cadence-246; 2.47/2.48 already measured) will carry the first full-pool v6.4 numbers.
+
+## 2026-11-07 13:47 CET — release 0.0.2.49 (TOOLING ONLY): bank version labels stop being empty; registry enforces bank immutability at build time
+
+    The queued gap from the v6.4 migration is closed. Run records carried
+    `stack.bank_sha16` since 2.45 but `stack.bank_version` was always "" — it read
+    `PARB_BANK_VERSION`, which no runner ever set. With v6.1 -> v6.4 now published,
+    the version label is as load-bearing as the hash, so it becomes data, not prose.
+    New single source `benchmarks/hard/BANK-VERSIONS.json` (schema `bank-versions-v1`:
+    file -> version + published sha16 + status): v6.1 = `bank-hard-v6.json`
+    9ec86dfca4a6f85f (trap recorded: file name predates the version rule), v6.2
+    3c866ea7daae611c superseded, v6.3 73f7a04d57473545 provisional, v6.4
+    85a0cd0dd6fa1fab WORKING. `gate_bank_versions.py` (harness): `check_registry`
+    fails CLOSED if a published bank byte disagrees with its registered sha16 — the
+    published-bytes-immutability rule now runs automatically inside every
+    `build_hard_v6_ws.py`, which also stamps `bank-version.json` into the workspace
+    (2.46 HARNESS_GIT_SHA pattern) and fails closed on any bank file not registered
+    with matching bytes. `gate_run` resolves the label
+    marker(bytes-validated; drift -> empty, beats a hostile env) > content match
+    (repo checkouts) > explicit env > empty with logged source; run records gain
+    `bank_version_source`. Pinned: registry + module in MANIFEST.v6, marker + module
+    in WS_PINNED; both contour workspaces rebuilt (bank copies f4553aab304f60d7 /
+    d1e8d11df5840dcc byte-identical, verify_manifest --v6 PASS).
+    PROVEN LIVE: `~/parb-v62-contour` -> ('v6.2','marker'), `~/parb-v61-contour` ->
+    ('v6.1','marker'), simulated bank swap under the marker -> ('','marker-drift').
+    Contracts: gate_v63 (37 checks: registry identity + drift + hostile-env fail-closed,
+    resolution order, call-site and builder wiring, 2.49 flag matrix == 2.48 exactly,
+    (2,49) not in CONTOUR_FEATURES, behavior stays 2.48) enrolled in CI. ZERO contour
+    flags moved; 2.48 stays the adopted line. CI-parity loop green locally (27 files)
+    after fixing gate_v62's exact `CURRENT_REVISION == (2,48)` pin — the documented
+    pair-244/gate_v57 lesson reintroduced; rewritten as `>=` + derived stamp form.
+    Next arms from these workspaces will name `bank_version` in every run record;
+    older arms keep their attribution via MEASUREMENT-STACK (regenerated).

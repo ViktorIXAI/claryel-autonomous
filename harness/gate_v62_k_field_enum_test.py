@@ -269,8 +269,9 @@ ck(any("fields_gap" in x for x in a48.events),
 # ---------------------------------------------------------------- 6. versioning axes
 import gate_versioning as GV
 ck((2, 48) in GV.CONTOUR_FEATURES, "(2,48) registered in CONTOUR_FEATURES")
-ck(GV.CURRENT_REVISION == (2, 48) and GV.CURRENT_STAMP == "0.0.2.48",
-   "CURRENT bumped to the candidate stamp")
+ck(GV.CURRENT_REVISION >= (2, 48) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
+   "CURRENT advanced past the candidate stamp (never pin CURRENT to an exact tuple — "
+   "tooling releases keep bumping it; pair-244/gate_v57 lesson)")
 ck(GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION, "stamp string matches the revision")
 ck(GV.behavior_tuple("0.0.2.47") == (2, 47) and GV.behavior_tuple("0.0.2.48") == (2, 48),
    "behavior axis moves only at the candidate stamp")
