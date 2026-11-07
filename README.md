@@ -24,7 +24,7 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.40` — ADOPTED on 2026-11-06 after pair-240 (harness stamps are `0.0.2.x`; full
+Contour gate line: `0.0.2.43` — ADOPTED on 2026-11-07 after pair-244 (harness stamps are `0.0.2.x`; full
 history in `versions/VERSIONS.md` and `benchmarks/hard/v6-results/LADDER.md`). `0.0.2.30` and `0.0.2.31`
 measured **negative** against the former adopted `0.0.2.29`; `0.0.2.32` and `0.0.2.33` each measured
 **+1.3 cells — below the ~2-cell noise floor, NOT adopted** (`PAIR-232-V61.md`; `PAIR-233-V61.md` — 2.33
@@ -140,7 +140,20 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   the pre-registered zero-regression guard broke, so the flag is frozen to exactly (2,42) and the line
   stays `0.0.2.40`. Class lesson: any loop context change re-rolls every trajectory, so loop losses are
   a SELECTION target (the 2.11 best-of-2 family, trigger-gap published), never a prevention nudge
-  (`PAIR-243-V61.md`). Resolution
+  (`PAIR-243-V61.md`). A thirteenth candidate, 0.0.2.43 (the SELECTION answer that gap named: loop
+  best-of-2 on the `banned_attempted:<TOOL>` note family — one retry at seed+8117, strict-better only,
+  monotone by construction): **MEASURED and ADOPTED in pair-244** on 2026-11-07 — 3 live control draws,
+  exactly 1 evented conversion (fired+win, zero banned attempts in the adopted trajectory; two further
+  loop wins carried NO event and are published as lottery, one fired draw lost because BOTH draws
+  attempted the ban — selection covers variance, not bias), zero regressions, zero off-loop events,
+  zero frozen-band events, line parity identical; loop pool 13/18 -> 16/18 (W3/L0 p=0.25,
+  directional), means 65.0 vs 64.7 single-shot and 208 vs 210 of 231 full-pool — both under the
+  resolution floor and explicitly not the reason (`PAIR-244-V61.md`): **`0.0.2.43` is ADOPTED as the
+  new control line**. A fourteenth candidate, 0.0.2.44 (the same recipe on the last untriggered loop
+  note family, `false_completion_claim` — claim-a-banned-action-did-happens caps content at 0.3;
+  dry-run: 13 occurrences in 504 published loop rows, 13/13 strict-fails, zero on passing rows),
+  pre-registered and launching as pair-245 vs the 0.0.2.43 line (REVIEW-INBOX 2026-11-07 03:58).
+  Resolution
   floor measured directly: the same
   stamp over the same seeds twice differs on 12 of 231 cells, so any contour delta under ~2 cells is
   reported as unresolvable (`PAIR-230-V61.md`, `PAIR-231-V61.md`, `PAIR-232-V61.md`, `PAIR-233-V61.md`)
