@@ -1423,3 +1423,62 @@ PRE-REGISTERED RULE (this entry + run_pair246.sh header; the verdict is decided 
     writeup `PAIR-246-V62.md`, decision record
     `history/agent-decisions/2026-11-07-pair246-c-best2-set-adopted-line-moves-to-247.md`.
 
+
+## 2026-11-07 11:33 CET — pair-247 PRE-REGISTERED: contour 0.0.2.48 (K fields-gate key set from the task's own enumeration) vs the adopted 0.0.2.47 line
+
+**The target is a published contour bug on our own line, not a model gap.** `want_fields` scans a
+prompt for UPPERCASE tokens followed by a colon; in a K prompt the only such tokens are the
+instruction's own example (`верни ровно 4 строк вида FIELD: значение`) plus a parenthetical value
+form. So on `K-ex6-03` the required key set was `[FIELD, FREE_SHIPPING]`, the contour hint told the
+model to use the literal placeholder `FIELD` as a key, and the gate then accepted the answer
+(`gate:fields_ok`). Bank v6.2 published line, 9 contour arms (693 rows: cadence-246 q45r16/17/18 +
+pair-246 s46/s47 r19/20/21): **K-ex6-03 strict-fails 9/9** with code `missing` (content 0.25,
+format_ok False) while ITEM/QTY/LEAD_WEEKS values are printed verbatim in the prompt — 6/9 rows end
+in `gate:fields_ok`, 3/9 got a code fill that manufactured shape without content (`FIELD: ITEM`).
+The other three K tasks carry the same placeholder-tainted detection but never reach the gate.
+Residual map after pair-246: B-ex6-04 9/9 is the **published bank defect** (cadence-246 root cause:
+gold year `2026-04-01` is never stated in the prompt) → bank v6.3 queue, no contour stamp on it;
+A-ex6-03 7/9 is a genuine arithmetic near-miss (tax 1178.0 vs the prompt's own 1179.9 — recomputing
+it for the model would be answer synthesis, closed); C-ex6-02 is retry-spent (pair-246); K-ex6-03 is
+the only chronic cell the contour itself causes.
+
+**Mechanism (one substantive change, `0.0.2.48`)**: `fields_required(prompt)` = the field names the
+prompt enumerates on its `Поля:` line (UPPERCASE identifier tokens only; parentheticals, Cyrillic,
+lowercase and numeric fragments dropped, dedup) replacing the old set ONLY when the prompt enumerates
+fields AND the old detection is placeholder-tainted (`FIELD`/`KEY`/`КЛЮЧ`/`КЛЮЧИ`/`NAME`/`ИМЯ`);
+non-placeholder old keys are kept. Reference never read; `want_format` keeps calling the untouched
+`want_fields`, so which tasks reach `fields_gate` cannot change. Dry-run over all 77 bank-v6.2
+prompts (this commit, before any t* row): required set changes on exactly the four K tasks, of which
+only K-ex6-03 reaches the fields path; `want_format` identical at 2.47 and 2.48. Event
+`contour:v48_fields_enum_from_prompt:<n_keys>` fires only where the set actually changed.
+Same-seed smoke (rep0, sp1 gseed, 11:32/11:33 CET, OUTSIDE the pair seeds, artifacts
+`results/ledger-smk47/48.jsonl`): control `FIELD: 200 кресел 'Oslo'` + `gate:fields_ok` → c=0.25
+f=False; candidate four real keys + the v48 event → c=1.00 f=True, one model call on both sides.
+Wiring proof on identical bytes, NOT the verdict. Contracts: `gate_v62_k_field_enum_test.py` 130
+checks PASS (grammar incl. invented field names, taint condition both ways, per-stamp matrix,
+surface invariance over 77 prompts, live `fields_gate` drives at both stamps), `gate_v49` 69 checks
+(2.48 == 2.47 + exactly `K_FIELDS_ENUM`), full CI contract list green locally under python3.12; ws
+`~/parb-v62-contour` rebuilt with `HARNESS_GIT_SHA 639f2f54ee74`, bank copy `d1e8d11df5840dcc`
+unchanged, `verify_manifest --v6` PASS. Endpoint pre-flight: `/health` 200, zero foreign
+`gate_run` processes, prefill 881/2331/3355 tok/s at 2k/8k/20k words with the served alias.
+
+**Pre-registered rule (the verdict is decided ONLY by this text; queue
+`run_pair247.sh`, arms `t47r22/t48r22/t47r23/t48r23/t47r24/t48r24`, sp1 reps 22/23/24, serial,
+endpoint idle, GPU sampler `gpu-power-p247.csv`):**
+(a) LIVE TARGET: MEASURED iff >=1 control (`t47`) K-ex6-03 row strict-fails carrying a `missing`
+code; zero live target = UNMEASURED, never a pass (pair-233/238/242/245 mode).
+(b) CELL ATTRIBUTION: a conversion counts only if the candidate strict-PASSES where the control
+strict-failed on the same (task,rep) AND the row carries `contour:v48_fields_enum_from_prompt:4`.
+(c) GUARDS: zero v48 events in a control arm; zero v48 events outside the four enumerating K tasks
+and never on a task whose required set did not change; ZERO candidate K strict-fails where the
+control passed (the required set is the only changed path — such a cell closes the stamp);
+frozen-band parity (zero 2.30-32/34/36/38/41/42/44 fires in either arm); adopted-line parity (v34 C
+families, v47 set trigger, v243 loop draws, 2.39/2.40 J, 2.35 B census identical within seed noise);
+stall protocol (engine_stalled rows excluded, abort above 25% of the last 20).
+(d) RESOLUTION: the target pool is 1 task x 3 seeds = 3 cells, so the verdict is CELL-LEVEL by
+construction; the 77-cell arm mean is published with the exact pooled sign test as context only and
+a delta under ~2 cells at three seeds is UNRESOLVABLE, never the reason. ADOPT 0.0.2.48 iff (a)
+holds, >=1 evented conversion, and all guards clean; otherwise freeze `K_FIELDS_ENUM` to
+`CONTOUR_REVISION == (2, 48)` and publish the negative with win-level detail. Energy per arm from the
+`-start.epoch`/`-end.epoch` windows side by side; extra Wh attributed only if on-target re-asks
+dominate the delta (expected cost: zero extra calls when the first answer already names the keys).
