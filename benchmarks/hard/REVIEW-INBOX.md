@@ -1025,3 +1025,24 @@ same seed files pair-242 used), rids `o40r*` control then `o42r*` candidate, alt
 endpoint P2005 otherwise idle (no other arm shares the serve — hard rule), GPU sampler
 `parb-samp243` unit, per-arm `<rid>-start.epoch`/`-end.epoch`. Liveness checked by row COUNT and
 unit state, not GPU utilization.
+
+## 2026-11-07 02:53 CET — pair-243 CLOSED: 0.0.2.42 MEASURED NEGATIVE, frozen to exactly (2,42); line stays 0.0.2.40
+
+All six arms 77/77 exit=0, endpoint otherwise idle, sampler + epoch windows recorded. Rule
+(a) MEASURED: fresh control reproduced `D-ex6-l3` seeds 0+1 (the published read-then-attempt
+trajectory). Rule (b) held: 2/2 live targets converted in the candidate, `contour:v242_loop_policy_reground`
+on every converted row, zero banned attempts, 3-4 calls both sides. Rule (c) BROKE: seed 1
+re-drew `D-ex6-l1`/`D-ex6-l2` into NEW banned attempts over control passes (both evented —
+prevention reached, did not prevent). Pools: loop 16/18 vs 16/18 (2W/2L p=1.0), single-shot
+65.3 vs 64.7 (W4/L2 p=0.6875; six flips all published lotteries, zero events, at the 5% floor),
+full 77-cell W6/L4 p=0.7539. Zero v242 events outside loop rows, zero frozen-feature events,
+adopted-line parity intact. Energy 16.55 vs 18.12 Wh (+9.5%), +4 model calls, +6.3k ptok.
+Verdict per the 02:17 pre-registration: NOT adopted, `LOOP_POLICY_REGROUND` frozen to
+`CONTOUR_REVISION == (2,42)` (gate_v49/v56 green on the freeze, ws rebuilt + repinned, verify
+PASS, bank f4553aab304f60d7 unchanged). Class ruling published: prevention nudges on loop
+trajectories are net-zero (context change re-rolls every turn); the loop queue is SELECTION —
+the 2.11 best-of-2 trigger family does not cover banned-attempt failures, that gap is the named
+next loop hypothesis. Artifacts: `pair-243/` (24 files + run script), `PAIR-243-V61.md`,
+decision record `2026-11-07-pair243-loop-policy-reground-measured-negative.md`, UNSTABLE-CELLS
+addendum, README candidate-history entry. Line status unchanged: 0.0.2.40 adopted; bank-ceiling
+queue unchanged (this pair touched none of the blocked cells).
