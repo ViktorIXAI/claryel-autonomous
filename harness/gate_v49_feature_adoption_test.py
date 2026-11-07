@@ -244,6 +244,42 @@ ck(g244.LOOP_POLICY_REGROUND is False and not g244.C_RULE_GROUND
 ck(g244.J_RERANK_V2 and g244.J_MEMBERSHIP_V3,
    "0.0.2.44 builds on the adopted line (J re-rank v2 + J membership inherited)")
 
+# 0.0.2.45 is the first MEASUREMENT-ONLY release since the reserved band: the scorer
+# gained a version identity (contract v6.2, `gate_scorer_contract.py`) and every row /
+# run record now names its stack, but NO contour tuple was registered. Two things must
+# hold. (1) The adopted flag matrix at 2.45 is IDENTICAL to 2.43 — an identity release
+# may not move a single contour flag. (2) The reporting axis still says behavior 2.44
+# (the newest REGISTERED stamp), while the 2.44 flag itself is frozen off at 2.45 —
+# exactly the stamp-vs-behavior trap the skill names, so it is pinned here instead of
+# being discovered in a scoreboard later.
+g245 = load("0.0.2.45")
+import importlib.util as _ilu  # noqa: E402
+_GV_SPEC = _ilu.spec_from_file_location("gate_versioning_v49", str(HERE / "gate_versioning.py"))
+assert _GV_SPEC and _GV_SPEC.loader, "cannot load gate_versioning for the 2.45 matrix check"
+GV = _ilu.module_from_spec(_GV_SPEC)
+_GV_SPEC.loader.exec_module(GV)
+_FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TABLE_ARITH",
+          "B_FIELD_COMPLETE", "B_TABLE_AGGREGATE", "G4_LOTTERY", "J_MEMBERSHIP_V3",
+          "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
+          "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR")
+_missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
+ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
+_moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
+ck(not _moved, "2.45 moves ZERO contour flags vs the adopted 2.43 line (%s)" % _moved)
+ck(g245.D_BEST2_CLAIM is False,
+   "the frozen 2.44 claim trigger does NOT ride into the measurement release 2.45")
+ck(g245.D_BEST2_BANNED and g245.D_BEST2 and g245.J_MEMBERSHIP_V3 and g245.J_RERANK_V2,
+   "2.45 runs the adopted line unchanged (2.11 + 2.39/2.40 + 2.43)")
+ck((2, 45) not in GV.CONTOUR_FEATURES,
+   "2.45 registers no contour feature — a tooling release must not fake a contour change")
+ck(GV.behavior_tuple("0.0.2.45") == (2, 44) and GV.CURRENT_REVISION == (2, 45),
+   "reporting axis: stamp 2.45, behavior 2.44 (newest registered) while the 2.44 flag is "
+   "frozen off — name BOTH axes in every table")
+ck(GV.summary("0.0.2.45")["contour_changed_at_this_release"] is False,
+   "the run record says this release did not change the contour")
+ck(g245.SCORER_CONTRACT_ID == "v6.2" and len(g245.SCORER_ID["contract_sha16"]) == 16,
+   "the runner carries a scorer contract identity on every row")
+
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
       % (CHECKS, len(covered), len([x for x in bank if x["cat"] == "J"])))

@@ -249,8 +249,10 @@ GV = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(GV)
 ck((2, 44) in GV.CONTOUR_FEATURES, "(2,44) is registered in CONTOUR_FEATURES (stamp != behavior "
    "would silently measure the OLD contour — pair-241's rule)")
-ck(GV.CURRENT_REVISION == (2, 44) and GV.CURRENT_STAMP == "0.0.2.44",
-   "the current revision is 2.44 and the two axes stay in step")
+ck(GV.CURRENT_REVISION >= (2, 44) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
+   "the current release is at least 2.44 and CURRENT_STAMP tracks CURRENT_REVISION "
+   "(never pin CURRENT to an exact tuple — every later release breaks this test, "
+   "as the 2.43 bump broke gate_v57)")
 ck(GV.format_behavior("0.0.2.44") == "2.44", "stamp 0.0.2.44 resolves to contour behavior 2.44")
 ck(GV.behavior_tuple("0.0.2.44") == (2, 44), "behavior_tuple(0.0.2.44) == (2,44)")
 ck((2, 44) not in GV.RESERVED_TOOLING_REVISIONS, "2.44 is outside the reserved tooling band")

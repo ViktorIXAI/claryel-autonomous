@@ -1,0 +1,1728 @@
+{
+ "elements": {
+  "banks": [
+   {
+    "file": "bank-hard-v6.json",
+    "label": "v6.1 (published dev bank)",
+    "sha16": "9ec86dfca4a6f85f"
+   },
+   {
+    "file": "bank-hard-v6.2.json",
+    "label": "v6.2 (defect corrections)",
+    "sha16": "3c866ea7daae611c"
+   },
+   {
+    "file": "parb-v61-contour/bank.json",
+    "label": "generated run-workspace copy (v6.1 content)",
+    "sha16": "f4553aab304f60d7"
+   }
+  ],
+  "scorer_contracts": {
+   "v6.1": {
+    "pins": {
+     "parb_check_v6.py": "89437d8cfe1fc6c8",
+     "parb_loop.py": "f5f5b78ab46a0f0c",
+     "e_sandbox.py": "424c04126e9b6c1e"
+    },
+    "identity": {
+     "scorer_contract": "v6.1",
+     "contract_sha16": "91c09e8ca16b8841",
+     "strict_rule": "content == 1.0 and format_ok",
+     "seed_protocol": "sp1",
+     "scorer_modules": {
+      "parb_check_v6.py": "89437d8cfe1fc6c8",
+      "parb_loop.py": "f5f5b78ab46a0f0c",
+      "e_sandbox.py": "424c04126e9b6c1e"
+     },
+     "contract_status": "frozen — every published hard-v6 number up to 0.0.2.44 was produced by these bytes"
+    },
+    "status": "frozen — every published hard-v6 number up to 0.0.2.44 was produced by these bytes"
+   },
+   "v6.2": {
+    "pins": {
+     "parb_check_v6.py": "89437d8cfe1fc6c8",
+     "parb_loop.py": "f5f5b78ab46a0f0c",
+     "e_sandbox.py": "424c04126e9b6c1e"
+    },
+    "identity": {
+     "scorer_contract": "v6.2",
+     "contract_sha16": "c8c0c7dd114dfc32",
+     "strict_rule": "content == 1.0 and format_ok",
+     "seed_protocol": "sp1",
+     "scorer_modules": {
+      "parb_check_v6.py": "89437d8cfe1fc6c8",
+      "parb_loop.py": "f5f5b78ab46a0f0c",
+      "e_sandbox.py": "424c04126e9b6c1e"
+     },
+     "contract_status": "current — same frozen checkers via delegation, plus identity, typed codes and axes"
+    },
+    "status": "current — same frozen checkers via delegation, plus identity, typed codes and axes"
+   }
+  },
+  "strict_rule": "content == 1.0 and format_ok",
+  "seed_protocol": {
+   "id": "sp1",
+   "definition": "sp1: per-(task,rep) gseed = int(sha256(f'{task}|{rep}')[:8], 16) % 999983 (scripts/plan_reps.py); per-task plan seed = int(sha256(task_id)[:6], 16) (scripts/build_hard_v6_ws.py). Selection retries add a fixed offset per mechanism (2.11 +4096, 2.9/2.36 +8117, 2.43 +8117-loop, 2.44 +12289) so a retry re-draws instead of replaying the losing trajectory."
+  },
+  "harness_commit": "471b3fd7d102323e7dd5ba9913d038fbb4d104d2"
+ },
+ "contour": {
+  "current_revision": "2.45",
+  "current_stamp": "0.0.2.45",
+  "behavior_at_current": "2.44",
+  "contour_changed_at_current_release": false,
+  "registered_features": [
+   "1.7",
+   "1.8",
+   "1.9",
+   "2.0",
+   "2.1",
+   "2.2",
+   "2.7",
+   "2.9",
+   "2.10",
+   "2.11",
+   "2.12",
+   "2.13",
+   "2.14",
+   "2.15",
+   "2.16",
+   "2.17",
+   "2.18",
+   "2.19",
+   "2.20",
+   "2.21",
+   "2.22",
+   "2.23",
+   "2.24",
+   "2.25",
+   "2.26",
+   "2.27",
+   "2.28",
+   "2.29",
+   "2.30",
+   "2.31",
+   "2.32",
+   "2.33",
+   "2.34",
+   "2.35",
+   "2.36",
+   "2.37",
+   "2.38",
+   "2.39",
+   "2.40",
+   "2.41",
+   "2.42",
+   "2.43",
+   "2.44"
+  ],
+  "adopted_line_features": [
+   "1.7",
+   "1.8",
+   "1.9",
+   "2.0",
+   "2.1",
+   "2.2",
+   "2.7",
+   "2.9",
+   "2.10",
+   "2.11",
+   "2.12",
+   "2.13",
+   "2.14",
+   "2.15",
+   "2.16",
+   "2.17",
+   "2.18",
+   "2.19",
+   "2.20",
+   "2.21",
+   "2.22",
+   "2.23",
+   "2.24",
+   "2.25",
+   "2.26",
+   "2.27",
+   "2.28",
+   "2.29",
+   "2.35",
+   "2.37",
+   "2.39",
+   "2.40",
+   "2.43"
+  ],
+  "frozen_to_own_stamp": {
+   "2.30": "contract guarantee (shape re-ask/salvage) — MEASURED NEGATIVE",
+   "2.31": "self-consistency vote — MEASURED NEGATIVE",
+   "2.32": "J ranking repair v1 — on target, under the noise floor",
+   "2.33": "A threshold-table arithmetic — zero live fires",
+   "2.34": "B field completeness — zero live fires",
+   "2.36": "group-4 lottery selection — MEASURED NEGATIVE",
+   "2.38": "A threshold-table re-land — UNMEASURED",
+   "2.41": "C rule-grounded membership — UNMEASURED",
+   "2.42": "D-loop policy re-ground — MEASURED NEGATIVE",
+   "2.44": "D-loop best-of-2 on false_completion_claim — UNMEASURED"
+  },
+  "reserved_tooling_band": [
+   "2.3",
+   "2.4",
+   "2.5",
+   "2.6",
+   "2.8"
+  ],
+  "note": "the ADOPTED feature matrix of 0.0.2.45 equals 0.0.2.43; the behavior axis reports the newest REGISTERED stamp (2.44), whose own flag is frozen OFF — name BOTH axes in every table"
+ },
+ "runs": [
+  {
+   "dir": "benchmarks/hard/v6-results/cadence-240",
+   "arms": [
+    "q40r6",
+    "q40r7",
+    "q40r8"
+   ],
+   "ledger_rows": 231,
+   "contour_stamp": "0.0.2.40",
+   "contour_behavior": "2.40",
+   "run_records": {
+    "q40r6": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "q40r7": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "q40r8": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/four-arm-v61",
+   "arms": [
+    "c228v61"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.28",
+   "contour_behavior": "2.28",
+   "run_records": {
+    "c228v61": {
+     "contour_stamp": "0.0.2.28",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-216",
+   "arms": [
+    "c216full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.16",
+   "contour_behavior": "2.16",
+   "run_records": {
+    "c216full": {
+     "contour_stamp": "0.0.2.16",
+     "contour_behavior": "2.16",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-217",
+   "arms": [
+    "c217full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.17",
+   "contour_behavior": "2.17",
+   "run_records": {
+    "c217full": {
+     "contour_stamp": "0.0.2.17",
+     "contour_behavior": "2.17",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-218",
+   "arms": [
+    "c218full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.18",
+   "contour_behavior": "2.18",
+   "run_records": {
+    "c218full": {
+     "contour_stamp": "0.0.2.18",
+     "contour_behavior": "2.18",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-219",
+   "arms": [
+    "c219full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.19",
+   "contour_behavior": "2.19",
+   "run_records": {
+    "c219full": {
+     "contour_stamp": "0.0.2.19",
+     "contour_behavior": "2.19",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-220",
+   "arms": [
+    "c220full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.20",
+   "contour_behavior": "2.20",
+   "run_records": {
+    "c220full": {
+     "contour_stamp": "0.0.2.20",
+     "contour_behavior": "2.20",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-221",
+   "arms": [
+    "c221full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.21",
+   "contour_behavior": "2.21",
+   "run_records": {
+    "c221full": {
+     "contour_stamp": "0.0.2.21",
+     "contour_behavior": "2.21",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-222",
+   "arms": [
+    "c222full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.22",
+   "contour_behavior": "2.22",
+   "run_records": {
+    "c222full": {
+     "contour_stamp": "0.0.2.22",
+     "contour_behavior": "2.22",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-223",
+   "arms": [
+    "c223full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.23",
+   "contour_behavior": "2.23",
+   "run_records": {
+    "c223full": {
+     "contour_stamp": "0.0.2.23",
+     "contour_behavior": "2.23",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-225",
+   "arms": [
+    "c225full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.25",
+   "contour_behavior": "2.25",
+   "run_records": {
+    "c225full": {
+     "contour_stamp": "0.0.2.25",
+     "contour_behavior": "2.25",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-228",
+   "arms": [
+    "c228full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.28",
+   "contour_behavior": "2.28",
+   "run_records": {
+    "c228full": {
+     "contour_stamp": "0.0.2.28",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/full-229",
+   "arms": [
+    "c229full"
+   ],
+   "ledger_rows": 77,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.28",
+   "run_records": {
+    "c229full": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/j-probe-218",
+   "arms": [
+    "jp"
+   ],
+   "ledger_rows": 12,
+   "contour_stamp": "0.0.2.18",
+   "contour_behavior": "2.18",
+   "run_records": {},
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/k-218",
+   "arms": [
+    "kb00217",
+    "kb00218"
+   ],
+   "ledger_rows": 8,
+   "contour_stamp": "0.0.2.17",
+   "contour_behavior": "2.17",
+   "run_records": {},
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/loopd-216",
+   "arms": [
+    "loop216"
+   ],
+   "ledger_rows": 12,
+   "contour_stamp": "0.0.2.15",
+   "contour_behavior": "2.15",
+   "run_records": {
+    "loop216": {
+     "contour_stamp": "0.0.2.16",
+     "contour_behavior": "2.16",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "B2003",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-230",
+   "arms": [
+    "c29r0",
+    "c29r1",
+    "c29r2",
+    "c30r0",
+    "c30r1",
+    "c30r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.28",
+   "run_records": {
+    "c29r0": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "c29r1": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "c29r2": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "c30r0": {
+     "contour_stamp": "0.0.2.30",
+     "contour_behavior": "2.30",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "c30r1": {
+     "contour_stamp": "0.0.2.30",
+     "contour_behavior": "2.30",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "c30r2": {
+     "contour_stamp": "0.0.2.30",
+     "contour_behavior": "2.30",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-231",
+   "arms": [
+    "d29r0",
+    "d29r1",
+    "d29r2",
+    "d31r0",
+    "d31r1",
+    "d31r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.29",
+   "run_records": {
+    "d29r0": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "d29r1": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "d29r2": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "d31r0": {
+     "contour_stamp": "0.0.2.31",
+     "contour_behavior": "2.31",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "d31r1": {
+     "contour_stamp": "0.0.2.31",
+     "contour_behavior": "2.31",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "d31r2": {
+     "contour_stamp": "0.0.2.31",
+     "contour_behavior": "2.31",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-232",
+   "arms": [
+    "e29r0",
+    "e29r1",
+    "e29r2",
+    "e32r0",
+    "e32r1",
+    "e32r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.29",
+   "run_records": {
+    "e29r0": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "e29r1": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "e29r2": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "e32r0": {
+     "contour_stamp": "0.0.2.32",
+     "contour_behavior": "2.32",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "e32r1": {
+     "contour_stamp": "0.0.2.32",
+     "contour_behavior": "2.32",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "e32r2": {
+     "contour_stamp": "0.0.2.32",
+     "contour_behavior": "2.32",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-233",
+   "arms": [
+    "f29r0",
+    "f29r1",
+    "f29r2",
+    "f33r0",
+    "f33r1",
+    "f33r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.29",
+   "run_records": {
+    "f29r0": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "f29r1": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "f29r2": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "f33r0": {
+     "contour_stamp": "0.0.2.33",
+     "contour_behavior": "2.33",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "f33r1": {
+     "contour_stamp": "0.0.2.33",
+     "contour_behavior": "2.33",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "f33r2": {
+     "contour_stamp": "0.0.2.33",
+     "contour_behavior": "2.33",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-234",
+   "arms": [
+    "g29r0",
+    "g29r1",
+    "g29r2",
+    "g34r0",
+    "g34r1",
+    "g34r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.29",
+   "run_records": {
+    "g29r0": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "g29r1": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "g29r2": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "g34r0": {
+     "contour_stamp": "0.0.2.34",
+     "contour_behavior": "2.34",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "g34r1": {
+     "contour_stamp": "0.0.2.34",
+     "contour_behavior": "2.34",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "g34r2": {
+     "contour_stamp": "0.0.2.34",
+     "contour_behavior": "2.34",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-235",
+   "arms": [
+    "h29r0",
+    "h29r1",
+    "h29r2",
+    "h35r0",
+    "h35r1",
+    "h35r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.29",
+   "run_records": {
+    "h29r0": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "h29r1": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "h29r2": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "h35r0": {
+     "contour_stamp": "0.0.2.35",
+     "contour_behavior": "2.35",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "h35r1": {
+     "contour_stamp": "0.0.2.35",
+     "contour_behavior": "2.35",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "h35r2": {
+     "contour_stamp": "0.0.2.35",
+     "contour_behavior": "2.35",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-236",
+   "arms": [
+    "i29r0",
+    "i29r1",
+    "i29r2",
+    "i36r0",
+    "i36r1",
+    "i36r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.29",
+   "run_records": {
+    "i29r0": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "i29r1": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "i29r2": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "i36r0": {
+     "contour_stamp": "0.0.2.36",
+     "contour_behavior": "2.36",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "i36r1": {
+     "contour_stamp": "0.0.2.36",
+     "contour_behavior": "2.36",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "i36r2": {
+     "contour_stamp": "0.0.2.36",
+     "contour_behavior": "2.36",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-237",
+   "arms": [
+    "j29r0",
+    "j29r1",
+    "j29r2",
+    "j37r0",
+    "j37r1",
+    "j37r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.29",
+   "run_records": {
+    "j29r0": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "j29r1": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "j29r2": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.29",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "j37r0": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "j37r1": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "j37r2": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-238",
+   "arms": [
+    "k37r0",
+    "k37r1",
+    "k37r2",
+    "k38r0",
+    "k38r1",
+    "k38r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.37",
+   "contour_behavior": "2.37",
+   "run_records": {
+    "k37r0": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "k37r1": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "k37r2": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "k38r0": {
+     "contour_stamp": "0.0.2.38",
+     "contour_behavior": "2.38",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "k38r1": {
+     "contour_stamp": "0.0.2.38",
+     "contour_behavior": "2.38",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "k38r2": {
+     "contour_stamp": "0.0.2.38",
+     "contour_behavior": "2.38",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-239",
+   "arms": [
+    "l37r0",
+    "l37r1",
+    "l37r2",
+    "l39r0",
+    "l39r1",
+    "l39r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.37",
+   "contour_behavior": "2.37",
+   "run_records": {
+    "l37r0": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "l37r1": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "l37r2": {
+     "contour_stamp": "0.0.2.37",
+     "contour_behavior": "2.37",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "l39r0": {
+     "contour_stamp": "0.0.2.39",
+     "contour_behavior": "2.39",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "l39r1": {
+     "contour_stamp": "0.0.2.39",
+     "contour_behavior": "2.39",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "l39r2": {
+     "contour_stamp": "0.0.2.39",
+     "contour_behavior": "2.39",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-240",
+   "arms": [
+    "m39r0",
+    "m39r1",
+    "m39r2",
+    "m40r0",
+    "m40r1",
+    "m40r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.39",
+   "contour_behavior": "2.39",
+   "run_records": {
+    "m39r0": {
+     "contour_stamp": "0.0.2.39",
+     "contour_behavior": "2.39",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "m39r1": {
+     "contour_stamp": "0.0.2.39",
+     "contour_behavior": "2.39",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "m39r2": {
+     "contour_stamp": "0.0.2.39",
+     "contour_behavior": "2.39",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "m40r0": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "m40r1": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "m40r2": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-242",
+   "arms": [
+    "n40r0",
+    "n40r1",
+    "n40r2",
+    "n41r0",
+    "n41r1",
+    "n41r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.40",
+   "contour_behavior": "2.40",
+   "run_records": {
+    "n40r0": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "n40r1": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "n40r2": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "n41r0": {
+     "contour_stamp": "0.0.2.41",
+     "contour_behavior": "2.41",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "n41r1": {
+     "contour_stamp": "0.0.2.41",
+     "contour_behavior": "2.41",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "n41r2": {
+     "contour_stamp": "0.0.2.41",
+     "contour_behavior": "2.41",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-243",
+   "arms": [
+    "o40r0",
+    "o40r1",
+    "o40r2",
+    "o42r0",
+    "o42r1",
+    "o42r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.40",
+   "contour_behavior": "2.40",
+   "run_records": {
+    "o40r0": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "o40r1": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "o40r2": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "o42r0": {
+     "contour_stamp": "0.0.2.42",
+     "contour_behavior": "2.42",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "o42r1": {
+     "contour_stamp": "0.0.2.42",
+     "contour_behavior": "2.42",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "o42r2": {
+     "contour_stamp": "0.0.2.42",
+     "contour_behavior": "2.42",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-244",
+   "arms": [
+    "p40r0",
+    "p40r1",
+    "p40r2",
+    "p43r0",
+    "p43r1",
+    "p43r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.40",
+   "contour_behavior": "2.40",
+   "run_records": {
+    "p40r0": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "p40r1": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "p40r2": {
+     "contour_stamp": "0.0.2.40",
+     "contour_behavior": "2.40",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "p43r0": {
+     "contour_stamp": "0.0.2.43",
+     "contour_behavior": "2.43",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "p43r1": {
+     "contour_stamp": "0.0.2.43",
+     "contour_behavior": "2.43",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "p43r2": {
+     "contour_stamp": "0.0.2.43",
+     "contour_behavior": "2.43",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/pair-245",
+   "arms": [
+    "q43r0",
+    "q43r1",
+    "q43r2",
+    "q44r0",
+    "q44r1",
+    "q44r2"
+   ],
+   "ledger_rows": 462,
+   "contour_stamp": "0.0.2.43",
+   "contour_behavior": "2.43",
+   "run_records": {
+    "q43r0": {
+     "contour_stamp": "0.0.2.43",
+     "contour_behavior": "2.43",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "q43r1": {
+     "contour_stamp": "0.0.2.43",
+     "contour_behavior": "2.43",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "q43r2": {
+     "contour_stamp": "0.0.2.43",
+     "contour_behavior": "2.43",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "q44r0": {
+     "contour_stamp": "0.0.2.44",
+     "contour_behavior": "2.44",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "q44r1": {
+     "contour_stamp": "0.0.2.44",
+     "contour_behavior": "2.44",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "q44r2": {
+     "contour_stamp": "0.0.2.44",
+     "contour_behavior": "2.44",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/raw-reps-v61",
+   "arms": [],
+   "ledger_rows": 0,
+   "contour_stamp": null,
+   "contour_behavior": null,
+   "run_records": {},
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  },
+  {
+   "dir": "benchmarks/hard/v6-results/reps-229",
+   "arms": [
+    "c229r12",
+    "c229r3",
+    "c229r45"
+   ],
+   "ledger_rows": 385,
+   "contour_stamp": "0.0.2.29",
+   "contour_behavior": "2.28",
+   "run_records": {
+    "c229r12": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 154,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "c229r3": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 77,
+     "harness_git_sha": null,
+     "stack": null
+    },
+    "c229r45": {
+     "contour_stamp": "0.0.2.29",
+     "contour_behavior": "2.28",
+     "model": "qwen3.8-flash-next-iq3_s-basalt",
+     "box": "P2005",
+     "plan_tasks": 154,
+     "harness_git_sha": null,
+     "stack": null
+    }
+   },
+   "run_record_has_stack": false,
+   "energy_windows_seconds": {},
+   "bank_attribution": "bank-hard-v6.json 9ec86dfca4a6f85f (ws copy f4553aab304f60d7): every published arm up to 0.0.2.44 scored that bank",
+   "scorer_contract_attribution": "v6.1 (the pinned bytes in gate_scorer_contract)"
+  }
+ ]
+}

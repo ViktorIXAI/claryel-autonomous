@@ -21,15 +21,31 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WRITE_PINS = "--write-pins" in sys.argv
+# --bank <file> builds a workspace on a DIFFERENT bank version; --pins <file> keeps that
+# workspace's pin set separate, because a bank swap changes the pinned `bank.json` hash and
+# must not invalidate the v6.1 pin file (published v6.1 artifacts stay verifiable).
 _args = [x for x in sys.argv[1:] if x != "--write-pins"]
+BANK_OVERRIDE = None
+PINS_OVERRIDE = None
+if "--bank" in _args:
+    i = _args.index("--bank")
+    BANK_OVERRIDE = _args[i + 1]
+    _args = _args[:i] + _args[i + 2:]
+if "--pins" in _args:
+    i = _args.index("--pins")
+    PINS_OVERRIDE = _args[i + 1]
+    _args = _args[:i] + _args[i + 2:]
 OUT = _args[0] if _args else os.path.expanduser("~/parb-2005-hardv6")
 # Generated shim/adapter files are hash-pinned here (itself pinned in MANIFEST.v6).
-WS_PINS = os.path.join(ROOT, "benchmarks", "hard", "WS-GENERATED.v6.sha256")
+WS_PINS = os.path.join(ROOT, "benchmarks", "hard",
+              PINS_OVERRIDE or "WS-GENERATED.v6.sha256")
 WS_PINNED = ("parb_check.py", "parb_loop.py", "parb_check_v6.py", "e_sandbox.py",
                "gate_run.py", "gate_versioning.py", "gate_engine_guard.py",
-             "parb_bank_v6.py", "parb_loop_mech.py", "bank.json", "plan.json")
+               "parb_bank_v6.py", "parb_loop_mech.py", "bank.json", "plan.json",
+               "parb_check_v6_2.py", "gate_scorer_contract.py")
 
-bank_src = os.path.join(ROOT, "benchmarks", "hard", "bank-hard-v6.json")
+bank_src = os.path.join(ROOT, "benchmarks", "hard",
+             BANK_OVERRIDE or "bank-hard-v6.json")
 bank = json.load(open(bank_src, encoding="utf-8"))
 assert len(bank) == 77
 os.makedirs(OUT, exist_ok=True)
@@ -139,6 +155,10 @@ for fname in ("parb_check.py", "parb_loop.py"):
 
 for f in ("parb_check_v6.py", "e_sandbox.py", "parb_bank_v6.py"):
     shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
+# The scorer contract (v6.2) ships with the workspace: the registry verifies the frozen
+# scorer bytes at run start and stamps every row, so the arm's numbers carry their scorer.
+for f in ("parb_check_v6_2.py",):
+    shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
 for f in ("gate_run.py", "gate_versioning.py", "gate_engine_guard.py"):
     shutil.copy2(os.path.join(ROOT, "harness", f), os.path.join(OUT, f))
 # Copy every harness module the contour imports, not a hand-kept list: the contour grows siblings
@@ -161,7 +181,8 @@ shutil.copy2(os.path.join(ROOT, "harness", "parb_loop.py"), os.path.join(OUT, "p
 
 readme = """# Hard-v6 run workspace
 
-Gate artifacts: `bank.json` (= bank-hard-v6.json), scorer adapter `parb_check.py`
+Gate artifacts: `bank.json` (built from the bank named in the Bank line at the bottom of
+this file), scorer adapter `parb_check.py`
 (imports `parb_check_v6` + `e_sandbox`, both copied verbatim; `parb_loop.py` ->
 `check_D_loop_v6`). Verify integrity BEFORE any launch:
   python3 <repo>/harness/verify_manifest.py --v6
@@ -174,7 +195,16 @@ LAUNCH ONLY AFTER THE OWNER'S EXPLICIT GO (issue #15). Planned arms:
   scripts/score_answers_v6.py (offline scoring of archived answers)
 Results: results-<arm>-v6.jsonl under benchmarks/hard/v6-results/ (not ignored).
 """
-open(os.path.join(OUT, "RUN-README.md"), "w").write(readme)
+readme += ("\nBank line: built from `benchmarks/hard/%s` (sha16 %s). Pins for this workspace:"
+           " `benchmarks/hard/%s`.\n"
+           % (os.path.basename(bank_src),
+              hashlib.sha256(open(bank_src, "rb").read()).hexdigest()[:16],
+              os.path.basename(WS_PINS)))
+open(os.path.join(OUT, "RUN-README.md"), "w").write(readme)   # bank line added above
+
+
+def _ws_sha16(path):
+    return hashlib.sha256(open(path, "rb").read()).hexdigest()[:16]
 
 
 def _ws_sha(name):

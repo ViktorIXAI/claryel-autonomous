@@ -1237,3 +1237,59 @@ No v6.1 pair launches next; the queue is the v6.2 stack step (workspace build on
 pre-registered against the v6.2 map only). Full census + watch-list in UNSTABLE-CELLS 04:55
 addendum; verdict `PAIR-245-V61.md`; decision record
 `history/agent-decisions/2026-11-07-pair245-d-best2-claim-unmeasured-frozen-line-holds-243.md`.
+
+## 2026-11-07 06:20 CET — release 0.0.2.45 (measurement-only) + scorer contract v6.2 + full-corpus re-score; cadence-246 pre-registered
+
+**Published now (measurement system, no contour change).** `harness/gate_scorer_contract.py`
+is the scorer-contract registry: `v6.1` = the frozen bytes behind every published hard-v6
+number (`parb_check_v6.py 89437d8cfe1fc6c8`, `parb_loop.py f5f5b78ab46a0f0c`,
+`e_sandbox.py 424c04126e9b6c1e`), `v6.2` = `parb_check_v6_2.py`, which loads that module by
+path, refuses to load if a pinned byte moves, and adds identity + typed failure codes
+(content/protocol/integrity/marker/infra) + the two published axes (answer / protocol).
+Contract tests per version, enrolled in CI: `gate_v59_scorer_contract_v61_test.py` 207 checks
+(183 published rows replayed byte-identical, 48 rows reported not-replayable),
+`gate_v59_scorer_contract_v62_test.py` 814 checks (244 rows v6.1==v6.2 with 0 strict flips,
+24 loop rows decomposed faithfully). Runner stamps `scorer_contract`/`contract_sha16`/`codes`/
+`axes` on every results row, `scorer_contract`+`codes` on every ledger row, and a `stack` block
+in every run record; it calls `verify_contract()` before reserving the endpoint and dies on
+drift. `versions/MEASUREMENT-STACK.md` (+ JSON) names bank sha16, contract + module hashes,
+seed protocol, stamp vs behavior and harness sha for all 33 run directories.
+
+**Defect found by the new test and fixed (contour-relevant, zero published-arm impact).**
+`gate_v49` now asserts a tooling release moves ZERO contour flags; it failed on the first run:
+every frozen band compared `CONTOUR_REVISION`, which is the **behavior** axis, and at an
+unregistered stamp (2.45) behavior resolves to the newest registered feature (2.44) — so the
+frozen, deliberately-unadopted 2.44 `false_completion_claim` trigger would have switched back
+ON in every future arm. All ten frozen bands now compare `STAMP_REVISION` (parsed stamp); the
+two axes coincide at registered stamps, so no published arm's behavior changes. Live per-stamp
+smoke in the rebuilt ws: 2.43 banned ON/claim OFF, 2.44 both ON, **2.45 banned ON/claim OFF**,
+frozen bands (2.30-34/36/38/41/42) OFF.
+
+**Corpus re-score (offline, stored bytes, zero model calls).**
+`scripts/rescore_corpus_v62.py` → `rescore-v62/CORPUS-V62.md` + `CORPUS-CELLS-V62.csv`:
+8 476 replayable cells over 127 published answer files. Contract v6.1 vs v6.2 on the same
+bank: **0 disagreements** (the additive claim is measured). Bank v6.1 → v6.2 gold correction:
+**83 wins / 0 losses** (`A-ex6-03` 51, `C-ex6-02` 32), strict 6 912 → 6 995 on the replayable
+set; 1 380 E cells need the docker battery, 675 loop-D cells stored no `_loop_rows` (protocol
+gap of those arms), 3 empty answers. Banks: v6.1 `9ec86dfca4a6f85f` (untouched), v6.2
+`3c866ea7daae611c`; ws copies v6.1 `f4553aab304f60d7` (line unchanged), v6.2 `d1e8d11df5840dcc`.
+
+**Pre-registered before any row is written — cadence-246 (four-arm cadence on bank v6.2, due
+since 2.40; stamps measured since: 2.41, 2.42, 2.43, 2.44, 2.45 = 5).**
+Workspace `parb-v62-contour` (built on `bank-hard-v6.2.json`, ws bank copy `d1e8d11df5840dcc`,
+pins `WS-GENERATED.v62.sha256`, `verify_manifest.py --v6` PASS, endpoint auth-checked against
+the exact launch key file: `/v1/models` lists the served alias, `/health` loaded).
+Stage 1: contour at **0.0.2.45** (adopted 2.43 feature matrix + contract v6.2), reps **16, 17,
+18**, gseeds re-derived by `scripts/plan_reps.py` from `(task, rep)` — rule ids `q45r16/17/18`.
+Stage 2: bare basalt single-shot on the SAME reps (`raw_v6.py basalt 16,17,18`, raw seed
+`1000+rep`, appended to `answers-basalt.jsonl` in `parb-v62-raw-reps`). Grok and ChatGPT-codex
+legs follow in the next cycle on the same reps; publication happens when all four legs exist.
+Pre-registered verdicts: (a) **parity is the expectation, not a win** — 2.45 registers no
+contour feature and gate_v49 pins its flag matrix equal to 2.43, so any contour-vs-published-
+line difference at three seeds under ~2 cells is UNRESOLVABLE noise and must be reported as
+such; (b) the cadence measures the external arms on the CORRECTED golds — the quotable numbers
+are per-arm strict on bank v6.2 over the common set (loop-D N/A for single-shot brains), and v6.
+1 numbers never share a column with v6.2 numbers; (c) if the contour leg's per-cell strict
+disagrees with its own stored ledger anywhere, that is a scorer-routing bug to be named cell by
+cell, not averaged; (d) energy per arm from `gpu-power-246.csv` windows (per-arm
+`-start.epoch`/`-end.epoch`), wall and Wh reported, never GPU utilization as liveness.

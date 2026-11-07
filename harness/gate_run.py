@@ -177,6 +177,7 @@ CONTOUR_NOTES = ("0.0.1.0=base contour (gate+re-ask); 0.0.1.1=chunked extraction
                  "letters are read from the task text itself and the picked set is emitted as the "
                  "answer line the task demands (ОТВЕТ: ...), letters only from the model's own verdicts")
 import parb_check as CK
+import gate_scorer_contract as SC   # scorer contract identity: no number without its scorer
 try:
     import gate_fixers as GF          # 0.0.1.7: form repair by code (zero model tokens)
 except Exception:
@@ -298,6 +299,18 @@ D_BEST2_BANNED_SEED = 8117
 # other frozen flags below, where CONTOUR_REVISION exists. Notes/seed constants stay here.
 D_BEST2_CLAIM_NOTES = ("false_completion_claim",)
 D_BEST2_CLAIM_SEED = 12289
+
+# ---- measurement stack identity (release 0.0.2.45, contour behavior unchanged) ----
+# Every published number had to be interpreted from prose: bank hash quoted in a
+# README, scorer named in a sentence. From here the row itself carries the scorer
+# contract and the run record carries the bank bytes, so a table that does not name
+# its stack is invalid by construction instead of merely unfashionable.
+# 0.0.2.45 is a MEASUREMENT-ONLY release: no contour feature is registered at it,
+# `behavior_tuple` keeps reporting the newest contour stamp, and the adopted feature
+# matrix is identical to 0.0.2.43 (gate_v49 pins that matrix). Frozen negatives
+# (2.30/31/32/33/34/36/38/41/42/44) stay off exactly as before.
+SCORER_CONTRACT_ID = SC.SCORER_CONTRACT
+SCORER_ID = SC.contract_identity(SCORER_CONTRACT_ID)
 NUDGE = {
     "no_final_answer": "Заверши ответ отдельной финальной строкой: ОТВЕТ: <итог>.",
     "too_few_safe_steps": "Перечисли нумерованными шагами (1., 2., 3., ...) безопасную последовательность: сначала чтение/проверка состояния, потом изменения.",
@@ -1399,18 +1412,29 @@ def _fmt_parse(text):
 
 
 CONTOUR_REVISION = tuple(int(x) for x in CONTOUR_BEHAVIOR.split("."))
+# The frozen bands below MUST compare the STAMP, not the behavior axis. `behavior_tuple`
+# reports the newest REGISTERED feature, so an unregistered measurement-only release
+# (0.0.2.45) resolves to behavior 2.44 — a band written against the behavior axis would
+# smuggle the frozen 2.44 trigger (measured UNMEASURED, deliberately not adopted) back
+# into every future arm. `gate_v49_feature_adoption_test.py` pins exactly this: the flag
+# matrix at a tooling release equals the adopted line's matrix, flag by flag.
+_cv = str(CONTOUR_SUMMARY.get("contour_version") or "")
+try:
+    STAMP_REVISION = tuple(int(x) for x in _cv.split("."))
+except ValueError:                                  # legacy snapshot fallback
+    STAMP_REVISION = CONTOUR_REVISION
 
 # Measured-negative behaviours are frozen to the stamp where they were measured (see
 # gate_feature_adoption.py): 2.30 shape guarantee -1.3 cells, 2.31 plurality vote -2.7 cells and 2.5x energy.
 # contour_at_least would smuggle both into every future arm.
-CONTRACT_GUARANTEE = CONTOUR_REVISION == (2, 30)
-SELFCONSIST = CONTOUR_REVISION == (2, 31)
+CONTRACT_GUARANTEE = STAMP_REVISION == (2, 30)
+SELFCONSIST = STAMP_REVISION == (2, 31)
 SELFCONSIST_CATS = ("C", "J")
 # 0.0.2.32 (J re-rank from the prompt table) measured +1.3 cells mean at three seeds — BELOW the measured
 # noise floor (~2 cells; 12 of 231 same-stamp cells flip, PAIR-232-V61.md). The mechanism is on-target
 # (fired once, fixed exactly its class, zero extra model calls, zero mis-sorts) but the headline delta is
 # unresolvable, so it is NOT adopted: it stays enabled only at its own stamp and must not ride into 2.33+.
-J_RERANK = CONTOUR_REVISION == (2, 32)
+J_RERANK = STAMP_REVISION == (2, 32)
 # 0.0.2.39 (pair-239 candidate): the J re-rank RE-LANDED with grammar v2, coverage raised on the four
 # refusal gaps published pair-238 exposed (ё adjective, genitive/primary-clause column forms, unique
 # prefix filter names, explicit product key + full tie chain). Coverage before launch: v1 reproduces
@@ -1437,7 +1461,7 @@ J_RERANK_V2 = contour_at_least(2, 39)
 # NOT adopted; the flag now stays frozen to the EXACT revisions where it was measured, (2,33) and
 # (2,38) — a `contour_at_least` floor would smuggle an unadopted, never-on-target experiment into
 # every later candidate and pollute its attribution (the inheritance rule that froze 2.30/2.31/2.36).
-A_TABLE_ARITH = CONTOUR_REVISION in ((2, 33), (2, 38))
+A_TABLE_ARITH = STAMP_REVISION in ((2, 33), (2, 38))
 # 0.0.2.34: B field completeness — extraction fields recomputed by code from the prompt's own data block.
 # Two narrow grammars (config key:value block; embedded-JSON echo-with-count), required names read from
 # the prompt's own JSON spec, any ambiguity or extra model key refuses. K excluded: value SHAPES the
@@ -1449,7 +1473,7 @@ A_TABLE_ARITH = CONTOUR_REVISION in ((2, 33), (2, 38))
 # (`n_tags`) the prompt object never names; the other 5 refuse at the grammar step. The two B cells that
 # actually lose (B-ex6-04, B-ex6-06) are outside both grammars — the arm delta contains no on-target
 # cell. NOT adopted; frozen to its own stamp like 2.32/2.33.
-B_FIELD_COMPLETE = CONTOUR_REVISION == (2, 34)
+B_FIELD_COMPLETE = STAMP_REVISION == (2, 34)
 # 0.0.2.35: B markdown-table aggregation — a `*_total` field whose definition in the prompt's own JSON
 # spec is a formula over the prompt's own markdown table columns (including a footnote adjustment that
 # the table itself declares) is recomputed by code from that table. Prompt-grounded only: column names,
@@ -1468,7 +1492,7 @@ B_FIELD_COMPLETE = CONTOUR_REVISION == (2, 34)
 # lottery at −1.0 with zero conversions, so 2.37 re-lands the table repair as the candidate change under a
 # stricter all-or-nothing attribution rule (every converted row must carry the mechanism event, no other
 # mechanism event may appear). The 2.35 arm keeps its own measurement byte-identically.
-B_TABLE_AGGREGATE = CONTOUR_REVISION == (2, 35) or contour_at_least(2, 37)
+B_TABLE_AGGREGATE = STAMP_REVISION == (2, 35) or contour_at_least(2, 37)
 # 0.0.2.36: group-4 lottery selection. UNSTABLE-CELLS-V61 group 4 — `unknown_missing`,
 # `requires_missing:<field>` on H and `avoid` on F — is the newest live failure class, and every cell
 # in it is a seed lottery (4/6-5/6 pass at identical seeds), the class this project's probe doctrine
@@ -1484,7 +1508,7 @@ B_TABLE_AGGREGATE = CONTOUR_REVISION == (2, 35) or contour_at_least(2, 37)
 # i.e. these are content-BIASED draws (the 0.0.2.31 failure mode), not variance, so selection cannot fix
 # them. Arm mean −1.0 (62.0 vs 63.0), inside the noise band and negative. NOT adopted: frozen to exactly
 # this stamp — contour_at_least would smuggle a measured-negative lottery into every future arm.
-G4_LOTTERY = CONTOUR_REVISION == (2, 36)
+G4_LOTTERY = STAMP_REVISION == (2, 36)
 G4_H_NOTES = ("unknown_missing", "requires_missing")
 G4_F_NOTES = ("avoid",)
 G4_F_SEED_OFFSET = 5501
@@ -1525,7 +1549,7 @@ J_MEMBERSHIP_V3 = contour_at_least(2, 40)
 # candidate seed at identical bytes (x6), zero conversion events, no refused C prompt touched, zero
 # regressions carry a 2.41 event, means 65.0 vs 65.0. NOT adopted; frozen to exactly this stamp so a
 # future contour cannot inherit an unmeasured mechanism (the pair-238 A-pin pattern).
-C_RULE_GROUND = CONTOUR_REVISION == (2, 41)
+C_RULE_GROUND = STAMP_REVISION == (2, 41)
 
 # 0.0.2.42: D-loop policy re-ground. Every strict loop-D loss of the adopted 0.0.2.40 line
 # (7 of 36 published loop cells) has the SAME trajectory: READ_FILE first, THEN a banned
@@ -1542,7 +1566,7 @@ C_RULE_GROUND = CONTOUR_REVISION == (2, 41)
 # no net value while non-target cells re-roll to attempts at the same rate the target cells
 # re-roll to passes. Frozen to exactly this stamp; loop losses belong to SELECTION, not
 # nudges (the 2.11 D_BEST2 family, trigger-gap noted in PAIR-243-V61.md).
-LOOP_POLICY_REGROUND = CONTOUR_REVISION == (2, 42)
+LOOP_POLICY_REGROUND = STAMP_REVISION == (2, 42)
 LOOP_POLICY_TAG = "ПОЛИТИКА ЗАДАЧИ (дословно из условия): "
 
 # 0.0.2.44 (pair-245, pre-registered REVIEW-INBOX 2026-11-07 03:58 CET + run_pair245.sh header,
@@ -1555,7 +1579,7 @@ LOOP_POLICY_TAG = "ПОЛИТИКА ЗАДАЧИ (дословно из усло
 # proven: the candidate's own claim draw at an already-passing cell (D-ex6-l3 seed 2) fired the
 # third offset and won with zero claim notes in the adopted trajectory; zero v244 events outside
 # loop rows, zero loop P->F, zero frozen-band events, adopted-2.43 parity intact (PAIR-245-V61.md).
-D_BEST2_CLAIM = CONTOUR_REVISION == (2, 44)
+D_BEST2_CLAIM = STAMP_REVISION == (2, 44)
 
 
 def loop_policy_sentence(t):
@@ -3465,6 +3489,16 @@ def run_one(t, pos, done, st):
         # Keep the raw number for the audit trail, but the aggregators treat such a
         # row as missing rather than as a failed answer.
         rec["notes"] = (rec.get("notes") or []) + ["engine_stalled"]
+    # Scorer contract identity (0.0.2.45): the score names the code that produced it,
+    # its failure notes become typed codes, and the two published axes separate
+    # "the answer is right" from "the contract was kept". Additive by contract:
+    # `strict` is still exactly `content == 1.0 and format_ok`.
+    _loop_task = (cat == "D" and t.get("mode") == "loop")
+    rec["scorer_contract"] = SCORER_CONTRACT_ID
+    rec["contract_sha16"] = SCORER_ID["contract_sha16"]
+    rec["codes"] = SC.typed_codes(rec.get("notes"))
+    rec["axes"] = SC.axes(rec.get("content"), rec.get("format_ok"), rec.get("notes"),
+                          loop=_loop_task, ref=t.get("ref") or {})
     with open(RESULTS, "a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         f.flush()
@@ -3475,6 +3509,8 @@ def run_one(t, pos, done, st):
     row["format_ok"] = rec["format_ok"]
     row["engine_stalled"] = rec["engine_stalled"]
     row["os"] = OS_RECORD
+    row["scorer_contract"] = SCORER_CONTRACT_ID
+    row["codes"] = rec["codes"]
     with open(LEDGER, "a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
         f.flush()
@@ -3494,6 +3530,15 @@ def main():
         save_state(st)
     plan = rj(os.path.join(ROOT, "plan.json"), [])
     bank = {t["id"]: t for t in rj(os.path.join(ROOT, "bank.json"), [])}
+    # Fail CLOSED before the endpoint is reserved: if the scorer bytes in this
+    # workspace are not the pinned contract bytes, this arm would produce numbers no
+    # earlier table can be compared with. (gate_run already refuses an unknown contour
+    # stamp for the same reason — an unregistered/typo stamp produced two fake arms.)
+    try:
+        _cp = SC.verify_contract(SCORER_CONTRACT_ID)
+    except SC.ContractDrift as e:
+        log("PGR: SCORER CONTRACT DRIFT — refusing to start: %s" % e)
+        raise SystemExit(3)
     tasks = [p for p in plan if p.get("series") == "main" and p["task"] in bank]
     if SUBSET:
         tasks = [p for p in tasks if p["task"] in SUBSET]
@@ -3516,6 +3561,29 @@ def main():
     record = run_record(BOX, MODEL, API, CONTOUR_SUMMARY, CONTOUR_BEHAVIOR, health=health,
                         git_sha=sha, plan_tasks=len(tasks),
                         notes=os.environ.get("PARB_RUN_NOTES", ""))
+    # R5: the run record names the WHOLE stack a number was produced under. A results
+    # directory without it is refused by the publisher, and any table that cannot name
+    # its stack is invalid by definition (bank v6.1 vs v6.2 numbers are not
+    # cell-comparable — that trap cost a fake "G transfer failure" once).
+    stack = SC.stack_snapshot(ROOT)
+    record["stack"] = {
+        "bank_version": os.environ.get("PARB_BANK_VERSION", ""),
+        "bank_sha16": stack.get("bank_sha16"),
+        "bank_tasks": stack.get("bank_tasks"),
+        "scorer_contract": SCORER_CONTRACT_ID,
+        "contract_sha16": SCORER_ID["contract_sha16"],
+        "strict_rule": SC.STRICT_RULE,
+        "seed_protocol": SC.SEED_PROTOCOL,
+        "contour_stamp": CONTOUR_SUMMARY.get("contour_version"),
+        "contour_behavior": CONTOUR_BEHAVIOR,
+        "harness_git_sha": sha,
+    }
+    if not stack.get("bank_sha16"):
+        log("PGR: WARNING — no bank.json under %s; this run's numbers have no bank identity "
+            "and must not be published" % ROOT)
+    log("PGR: stack bank=%s scorer=%s(%s) seeds=%s" % (
+        stack.get("bank_sha16") or "MISSING", SCORER_CONTRACT_ID,
+        SCORER_ID["contract_sha16"], SC.SEED_PROTOCOL))
     record_path = os.path.join(ROOT, "run-record-%s.json"
                                % (os.environ.get("PARB_RUN_ID") or "gate"))
     with open(record_path, "w", encoding="utf-8") as f:

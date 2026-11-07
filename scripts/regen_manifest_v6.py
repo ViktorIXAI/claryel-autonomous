@@ -12,6 +12,9 @@ FILES = [
     "benchmarks/hard/c_position_dist_v6.json",
     "benchmarks/hard/PROTOCOL.md",
     "harness/parb_check_v6.py",
+    "harness/parb_loop.py",
+    "harness/parb_check_v6_2.py",
+    "harness/gate_scorer_contract.py",
     "harness/parb_bank_v6.py",
     "harness/e_sandbox.py",
     "harness/verify_manifest.py",
@@ -22,6 +25,7 @@ FILES = [
     "scripts/dedup_hard_bank.py",
     "scripts/leakage_scan_v6.py",
     "benchmarks/hard/WS-GENERATED.v6.sha256",
+    "benchmarks/hard/WS-GENERATED.v62.sha256",
 ]
 
 

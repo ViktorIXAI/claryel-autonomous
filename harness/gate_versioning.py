@@ -101,8 +101,18 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # answers, and every run records the conditions it was measured under). Bump this
 # for any audited release; move the contour axis only by adding a gate tuple to
 # CONTOUR_FEATURES — never inside the reserved tooling band.
-CURRENT_REVISION = (2, 44)
-CURRENT_STAMP = "0.0.2.44"
+#
+# 0.0.2.45 is a MEASUREMENT-ONLY release (no CONTOUR_FEATURES tuple on purpose, so
+# `behavior_tuple` still reports 2.44 and no contour flag changes): the scorer gets
+# a version identity (`harness/gate_scorer_contract.py`, contract v6.2 delegating to
+# the frozen v6.1 bytes, pinned by hash), every results/ledger row carries
+# `scorer_contract` + typed `codes` + the two published axes, and every run record
+# carries the full stack (bank sha16, scorer contract, seed protocol, contour stamp,
+# harness sha). The ADOPTED feature matrix at 2.45 is identical to 2.43 — gate_v49
+# pins that equality, including the frozen negatives (2.30-34/36/38/41/42/44) all
+# staying off.
+CURRENT_REVISION = (2, 45)
+CURRENT_STAMP = "0.0.2.45"
 
 
 def _digits(value: str) -> list[int]:

@@ -27,6 +27,8 @@ jobs:
                    harness/gate_v56_loop_policy_test.py \
                    harness/gate_v57_d_best2_banned_test.py \
                    harness/gate_v58_claim_best2_test.py \
+                   harness/gate_v59_scorer_contract_v61_test.py \
+                   harness/gate_v59_scorer_contract_v62_test.py \
                    harness/gate_versioning_test.py; do
             echo "=== $f"; python3 "$f"
           done
