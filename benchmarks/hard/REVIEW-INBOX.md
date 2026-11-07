@@ -2351,3 +2351,32 @@ ADOPT 0.0.2.54 iff (a) + >=1 evented conversion + all guards clean; otherwise fr
 H_UNKNOWN_PROMPT to `STAMP_REVISION == (2, 54)` and publish the negative with win-level detail.
 Energy: gpu-power-p251.csv windows, per-arm epochs. Cadence counter: this pair is the 4th
 measured stamp since cadence-249 — four-arm re-run due after the 5th.
+
+## 2026-11-08 00:55 CET — PAIR-251 RESULT: 0.0.2.54 UNMEASURED (zero live target) — H_UNKNOWN_PROMPT frozen to (2,54), line stays 0.0.2.53
+
+Frozen rule (23:56 CET commit 8118580) applied to the six arms w53r44/45/46 vs w54r44/45/46
+(bank v6.6 5c86252b2ef2f422 / ws copy 590503cf1701a6ce, contract v6.2 c8c0c7dd114dfc32, sp1
+231/231 audited, all exit=0, zero stalls, zero blank joined answers):
+
+- (a) NOT MET: control strict-PASSED H-ex6-03 in 3/3 seeds. The null-unknown shape drew once (r44)
+  and still passed strict there (content 1.0, notes empty); r45/r46 filled the slot verbatim-in-
+  spirit on their own. Zero live target -> UNMEASURED, fifth zero-opportunity pair (233/238/242/245).
+- (b) 0 conversions by construction. (c) guards all clean: 1 from_prompt + 5 matched events, all
+  inside {H-ex6-00, H-ex6-03}, zero in control, zero on filled slots, zero candidate H fails where
+  control passed, v228 parity 2/2 rows, zero frozen-band fires, adopted-family parity within noise.
+- (d) 9 flips W3/L6 p=0.508 over 231 cells — under the measured floor; bank means control 223/231
+  (96.5%) vs candidate 220/231 (95.2%) UNRESOLVABLE context only. Loop pool 15/18 both sides.
+- Energy (gpu-power-p251.csv, 789 samples): side totals 21.38 vs 16.52 Wh but the first arm's
+  warm-up skews it; matched warm windows (seeds 45+46) 10.62 vs 10.94 Wh (+3%, noise).
+
+Actions taken: H_UNKNOWN_PROMPT redefined `STAMP_REVISION == (2, 54)` (freeze pattern), gate_v68
+pins the freeze at the definition site, gate_versioning registration annotated, full CI contract
+suite 34/34 PASS at python3.12, v66full ws pins rebuilt + verify_manifest --v6 PASS.
+PAIR-251-V66.md + pair-251/ artifacts + seed-protocol.md + DIGEST.md row (BANK 95.9%, 6 arms).
+
+Target-class follow-up: H-ex6-03 unknown_missing live rate on the 2.53 line is at/near ZERO over
+9 fresh draws (pair-249/250/251) — do NOT re-probe, do NOT open a contour hypothesis for it.
+Cadence: 2.51/2.52/2.53/2.54 = 4 measured-era stamps since cadence-249; four-arm re-run falls
+due after the NEXT stamp. Next hypothesis must come from a stability map rebuilt on the 2.53 line
+INCLUDING pair-251's six draws (2.51-2.54 era, 12 draws/task pool), with the pre-launch
+measurability gate >=1 control strict-fail required. Sampler parb-p251sampler stopped 00:38 CET.

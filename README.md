@@ -30,7 +30,11 @@ EXECUTES them by code over a closed AST allow-list and rewrites only the ОТВ�
 THIS prompt printed: the chronic `C-ex6-02` — a 27/27 loss across every published era — strict-failed
 3/3 control seeds and all three converted with the event on the row and ZERO added model calls
 (the rewrite even removes the control's selector retry there), C pool 20/24 -> 22/24 on bank
-v6.6, zero guard violations; `PAIR-250-V66.md`). Before it, `0.0.2.52` was ADOPTED after pair-249 (the A percent-chain
+v6.6, zero guard violations; `PAIR-250-V66.md`). Its candidate `0.0.2.54` (pair-251, the H
+`unknown` slot grounded from the prompt's own denial sentence) then measured **UNMEASURED**: the
+pair's own control arms strict-PASSED the target `H-ex6-03` 3/3 — zero live target, zero
+conversions, all guards clean, wiring proven live (1 `from_prompt` + 5 `matched`, census surface
+only) — so it froze to exactly (2,54) and the line stayed `0.0.2.53` (`PAIR-251-V66.md`). Before it, `0.0.2.52` was ADOPTED after pair-249 (the A percent-chain
 arithmetic — fifth branch of the 2.27 family: when a task prints its own percent chain (rate
 clauses with cap/floor plus one formula), the contour recomputes the chain by code from the
 prompt text and replaces only the model's numbers — the chronic `A-ex6-03` strict-failed 2/3
