@@ -1,0 +1,41 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "[REDACTED]",
+  "contour_version": "0.0.2.56",
+  "contour_behavior": "2.56",
+  "contour_changed_at_this_release": true,
+  "git_sha": "22516491b30748e14945972aca1b74d43ad0168e",
+  "plan_tasks": 77,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "stack": {
+    "bank_version": "v6.8",
+    "bank_version_source": "marker",
+    "bank_sha16": "361f7bdb24d6ac71",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.56",
+    "contour_behavior": "2.56",
+    "harness_git_sha": "22516491b30748e14945972aca1b74d43ad0168e"
+  },
+  "run_id": "c68r27",
+  "notes": "map-258 leg rep 27: adopted-line 0.0.2.56 full-bank map leg on bank v6.8 (77 tasks; first v6.8 full-bank percent + rebuilt measurability map; no contour change vs the 0.0.2.56 line; endpoint P2005 idle; harness 2251649)"
+}

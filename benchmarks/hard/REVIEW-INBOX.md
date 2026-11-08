@@ -2915,3 +2915,44 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   rebuilt after map-258).
 - queued (next runs): map-258 = re-draw 25/26/27 on v6.8 ws -> first v6.8 full-bank percent;
   then the C-ex6-01 contour candidate on the rebuilt map.
+
+## 2026-11-08 13:3x CET — MAP-258: first v6.8 full-bank percent + rebuilt measurability map (P0; map, not a pair)
+
+- Nothing live, nothing pending at start (units/pgrep/queue.log empty). Ran the queued P0 job:
+  three full-bank (77-task) legs of the adopted line 0.0.2.56 on bank v6.8, fresh matched seeds
+  rep 25/26/27, idle+auth-checked P2005 Basalt, serial `parb-map258`. 3-task smoke first
+  (stamp==behavior, real tokens), then 231/231 rows complete, zero blanks, zero `engine_stalled`,
+  ptok>0 on every row, 231/231 sp1 seed audit. Endpoint healthy end-to-end (80-87% prefix hits,
+  ~100 t/s decode, zero park/trim/admission signals); c68r26's longer window is ONE pathologically
+  long thinking-budget request mid-leg, the rest at ~2-3 s/task (not the spin/parking signature).
+- Generated `UNSTABLE-CELLS-V68-258.md/.csv`: stable pass 70/77, stable fail 0, seed-unstable 7/77,
+  loop pool with >=1 failure **0** (loop 6/6 all three seeds). Percent (owner rule):
+  **single-shot 68.3/71 = 96.2%, loop-D 6.0/6 = 100.0%, whole bank 74.3/77 = 96.5%**
+  (bank `7a9527bf2e4ebbff` / ws `361f7bdb24d6ac71`, stamp 0.0.2.56, 3 arms; DIGEST.md row).
+- The -0.7 vs the v6.6 map-256 figure (75.0/77=97.4%) is NOT a model/contour regression: different
+  bank AND different seeds (not paired). Structural cause = the v6.8 C-ex6-01 gold fix (`want`
+  now `['C','F']`) exposing the contour C-coverage path over-including B against the corrected
+  gold — the contour DEBT the promotion pre-flagged. With contour OFF the same brain answers C,F
+  unanimously, so the bank fix stays raw-proven and this is the contour's job to re-ground.
+- The ONE live repeat target is C-ex6-01 (1/3 pass, stable family
+  `set_mismatch got=['B','C','F'] want=['C','F']` on both failing seeds, contour fired all arms).
+  `scripts/live_target_check.py --task C-ex6-01 --stamp 0.0.2.56 --min-fails 1` -> **LIVE (fails=2)**
+  BEFORE reserving the endpoint: the pair-233/238/242/245 zero-opportunity trap is cleared by the
+  current line's own draws, so the queued candidate can be measured.
+- PIN REPAIR carried here: the v6.8 promotion flipped `bank-version.json` marker provisional->
+  working without re-pinning `WS-GENERATED.v68full.sha256`, so a fresh v6.8-full build failed the
+  WS-DRIFT gate on that single line. Rebuilt the v6.8 ws and refreshed that pin file (only the
+  marker hash moves; 15 other pinned files byte-identical); the map workspace is reproducible,
+  harness byte-identical to `2251649`.
+- Artifacts published in `map-258/` (3 legs x results/ledger/log/run-record with `os.hostname` ->
+  `<HOST>` and `api_host` -> `[REDACTED]`, plans, seed-protocol.md, energy-windows.txt 6.05/13.67/
+  5.60 Wh, prose launcher). No DIGEST row for a probe applies here — this is a full-bank map, so the
+  percent row IS published per the owner rule.
+- NEXT (queued, not started this run): contour 2.58 candidate pair-259 = C-ex6-01 B-inclusion
+  gating — re-derive the C answer set from the MODEL's OWN verdicts and stop the coverage step
+  injecting a letter the verdicts reject; closed refusal on ambiguity, reference never read, zero
+  extra model calls. Write the pre-registered adoption rule in REVIEW-INBOX BEFORE any arm row
+  (MEASURED iff >=1 control C-ex6-01 strict-fail, already LIVE); convert iff every candidate
+  strict-pass on a control-failed C-ex6-01 seed carries the new event at identical ptok/calls with
+  ZERO strict-pass C regressions carrying that event; frozen-band parity (zero 2.30-32/34-44/54
+  events, 2.47 C-set/2.39-40 J/2.35-37 B/2.56 loop adopted families fire identically in both arms).

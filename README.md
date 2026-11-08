@@ -33,7 +33,12 @@ registry are published: `PROBE-GUARD-RULES.md`, `bank-probe-68/PROBE-ROWS.md`). 
 v6.6 `5c86252b2ef2f422` superseded (its 97.4% = 75.0/77 strict map-256 baseline stays a
 v6.6-era figure, never quoted for v6.8); v6.7 `b4464127dc5b5b97` provisional chain of
 record (fails fairness under both guard versions); v6.5/v6.3 provisional per their frozen
-verdicts. First v6.8 full-bank percent arrives with the map-258 legs (queued).
+verdicts. First v6.8 full-bank percent measured: **74.3/77 = 96.5%** (single-shot 96.2%,
+loop-D 100%) from the map-258 legs — three 0.0.2.56 full-bank arms, bank `7a9527bf2e4ebbff`,
+sp1 231/231, zero stalls (`MAP-258-V68.md`, `UNSTABLE-CELLS-V68-258.md`). The −0.7 vs the v6.6
+figure is the v6.8 C-ex6-01 gold fix turning the contour's B-inclusion into a loss (contour debt,
+not a model regression); C-ex6-01 is the one live repeat target (`live_target_check` → LIVE,
+fails=2) for the next candidate.
 
 ## Current version
 

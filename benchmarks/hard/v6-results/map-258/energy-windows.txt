@@ -1,0 +1,10 @@
+map-258 GPU energy windows (scripts/gpu_energy.py gpu-power-m258.csv --start <epoch> --end <epoch>)
+Sampler: 2 Hz ssh nvidia-smi, self-stopped at the queue sentinel; 966 samples total.
+
+c68r25  window 13:14:05 -> 13:18:18  samples=253  mean_power=85.9W  gpu_busy_fraction=0.46  energy=6.05Wh (21774 J)
+c68r26  window 13:18:19 -> 13:26:09  samples=468  mean_power=104.6W gpu_busy_fraction=0.65  energy=13.67Wh (49203 J)
+c68r27  window 13:26:10 -> 13:30:13  samples=243  mean_power=83.0W  gpu_busy_fraction=0.40  energy=5.60Wh (20163 J)
+
+c68r26's higher window is one pathologically long reasoning-trace task mid-leg (a single
+request drawing a ~100k-token thinking budget at ~100 t/s); the leg's other tasks ran at the
+normal ~2-3 s/task. Energy is reported per leg; not attributed to contour behaviour.
