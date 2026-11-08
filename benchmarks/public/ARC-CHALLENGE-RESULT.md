@@ -42,6 +42,13 @@ Discordant ids, so an outside reader can audit the flips:
 
 ## Contour parity (item P0): the frozen runtime on the same 300 ids
 
+> **SUPERSEDED 2026-11-08 23:20 CET as a parity row.** This section's arm ran at a
+> 512-token first rung with `enable_thinking:false` and a pinned request seed — a request
+> shape the bare arm never used (it generated 1,911 tokens in total, 6.4 per task, because
+> thinking was switched off, against the bare arm's 110 per task). The matched-shape re-run
+> at the end of this document (**291/300 = 97.0 %**) replaces it. The bytes of this leg stay
+> published unchanged.
+
 The arm ran as a systemd user unit on the same endpoint as the bare leg, staged by
 `scripts/pub_bench_contour_ws.py` (harness modules byte-verbatim, contract guard green, tasks
 sha16 `523af08216f14256`), scored with the same `pub-checkers-v2` bytes as every other row.
@@ -119,3 +126,49 @@ is attributed to request shape and engine restart, stated in the same table, not
    `bank|answer_key|expected|/home/|/Users/` — 0 matches.
 5. The 25-row dead first attempt of the contour leg (engine restarted under it) is kept on disk
    as `dead1/` and contributes nothing to any published number.
+
+## Matched-shape contour parity (item P0 re-run, 2026-11-08 23:15 CET) — supersedes the section above
+
+The parity rule on this line requires the contour leg's request shape to equal the bare arm's:
+first token rung = the bare arm's 1200, the serve's default thinking state (no
+`chat_template_kwargs`, no `reasoning_effort`), temperature 0.7, no request seed. The re-run used
+the frozen stamp `0.0.2.56` with `PARB_SHAPE=bare PARB_LADDER=1200` (a call-parameter switch,
+pinned by `harness/gate_shape_parity_test.py`; no contour feature is registered and the hard line
+stays frozen), workspace `pub-arc-challenge-contour-matched`, bank sha16 `e56146d09263ca89`
+(byte-identical bank to the superseded leg), harness git `06def0b`, checker contract
+`pub-checkers-v2`, the same first 300 ids in file order.
+
+| measure | escalation shape (superseded) | **matched shape (this row)** | bare arm (same 300) |
+|---|---|---|---|
+| strict | 283/300 = 94.3 % | **291/300 = 97.0 %** | 293/300 = 97.7 % |
+| first rung / ladder | 512→1200 | 1200, single rung | 1200 |
+| request seed | sp1 pinned | none (bare policy) | none |
+| thinking | `enable_thinking:false` | serve default | serve default |
+| endpoint requests | 300 + 1 ladder escalation | **300 (0 ladder steps)** | 300 |
+| contour/repair events, edits, truncations, stalls | 0 / 0 / 0 / 0 | **0 / 0 / 0 / 0** | n/a |
+| generated tokens (total, mean per task) | 1,911 (6.4) | **32,304 (108)** | 32,986 (110.0, same 300 ids) |
+| prompt tokens | 24,737 | **36,737** | — |
+| engine time / leg wall | 127.3 s / 144 s | **554.9 s / 567 s** | one 1172-task leg: 1665 s wall, 1.42 s/task |
+| GPU energy (sampled) | 4.50 Wh (57 samples, mean 112.9 W) = 15.0 mWh/task | **19.38 Wh** (225 samples, mean 123.0 W, busy 0.68) = 64.6 mWh/task | 61.58 Wh over the full 1172-task leg = 52.5 mWh/task (the first-300 slice was not sampled separately) |
+
+### Paired sign tests on the matched 300
+
+| pair | W/L | diff | p |
+|---|---|---|---|
+| bare vs contour (matched shape) | 3W / 1L | +0.7 pp for bare | 0.625 |
+| contour (matched) vs contour (escalation shape) | 10W / 2L | **+2.7 pp for matched** | 0.0386 |
+| bare vs contour (escalation shape), published earlier | 11W / 1L | −3.3 pp | 0.0063 |
+
+### Verdict on this row
+
+* **Parity, as expected on a saturated set:** 97.0 % matched-shape contour vs 97.7 % bare, 3W/1L,
+  p = 0.625 — no measurable harness effect in either direction, and the edit census is zero again.
+* The superseded −3.3 pp was a **thinking-state artifact**, not variance hand-waving: with
+  `enable_thinking:false` the same brain generated 6.4 tokens per task instead of 108 and lost
+  2.7 pp (10W/2L against the matched leg, p = 0.039). The attribution written above — "request
+  shape and engine restart" — is now resolved to the request shape; the engine restart explains
+  nothing on its own.
+* Cost side: one request per task, 0 ladder steps, 19.38 Wh for 300 tasks (0.065 Wh/task) against
+  the bare arm's 0.053 Wh/task on the same ids — the +21 % is the contour arm's streamed transport
+  and the check pass, not extra model calls; the superseded thinking-off leg cost only 15.0 mWh/task precisely
+  because it stopped the brain from reasoning, which is the same effect that cost it 2.7 pp.

@@ -1,0 +1,40 @@
+{
+  "box": "PUBPAR",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:8080",
+  "contour_version": "0.0.2.56",
+  "contour_behavior": "2.56",
+  "contour_changed_at_this_release": true,
+  "git_sha": "381dc5b23f429e328a55565c4e4a7a633dc9f607",
+  "plan_tasks": 198,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "item P0 contour parity: frozen 0.0.2.56 over the full gpqa-diamond file (198 ids), sp1 seeds, public checker contract pub-checkers-v2 in the validator slot",
+  "stack": {
+    "bank_version": "pub-gpqa-diamond-198",
+    "bank_version_source": "marker",
+    "bank_sha16": "1b30f3cc51204d03",
+    "bank_tasks": 198,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.56",
+    "contour_behavior": "2.56",
+    "harness_git_sha": "381dc5b23f429e328a55565c4e4a7a633dc9f607"
+  }
+}

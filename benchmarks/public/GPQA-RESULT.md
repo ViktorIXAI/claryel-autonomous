@@ -19,6 +19,13 @@ can** — and it does.
 
 198/198 answered in every completed arm, 0 empty, 0 transport failures; the join dropped no ids.
 
+**Superseded 2026-11-08 23:20 CET:** the `contour-0.0.2.56 (item P0)` row above is a
+**request-shape** measurement, not a parity one — the frozen arm started at a 512-token rung,
+pinned a request seed and set `enable_thinking:false`, none of which the bare arm does. A
+matched-shape re-run (`PARB_SHAPE=bare PARB_LADDER=1200`) landed later the same evening:
+**139/198 = 70.2 %** (see *Matched-shape contour parity* at the end of this document). The old
+row, its ledger and its answer bytes stay published unchanged; the matched row supersedes it.
+
 ## Paired sign tests (matched 198)
 
 Exact two-sided sign test over discordant pairs only (`scripts/pub_bench_compare.py`).
@@ -90,3 +97,73 @@ parity, not patched tonight (the hard line is frozen at `0.0.2.56`; no new stamp
 5. No energy samples for the GPQA contour leg (sampler wiring bug, listed in the table rather
    than papered over); GPU energy numbers elsewhere in this repo use the method in
    `../hard/v6-results/ENERGY-METHOD.md`.
+
+## Matched-shape contour parity (item P0 re-run, 2026-11-08 23:06 CET) — supersedes the escalation-shape row
+
+**Why this row exists.** The parity rule on this line is that a contour row is admissible only
+when its *request shape* equals the bare arm's: first token rung = 1200, the serve's default
+thinking state, temperature 0.7, same seed policy. The superseded row started at a 512-token rung,
+pinned an sp1 request seed and set `enable_thinking:false` — three differences the bare row never
+had. Measured on this endpoint with one identical prompt: with the thinking kwargs omitted the
+chain of thought streams in `delta.reasoning_content` (144 chars of visible content, 126 completion
+tokens), while `enable_thinking:false` moves the whole chain into `delta.content` (1108 chars, 372
+tokens). That is the mechanism behind the truncation census above, and it is a call-parameter
+effect, not a contour effect. The re-run used the frozen stamp `0.0.2.56` with the switch
+`PARB_SHAPE=bare PARB_LADDER=1200` (pinned by `harness/gate_shape_parity_test.py`; it registers no
+contour feature — the hard line stays frozen at `0.0.2.56`), workspace
+`pub-gpqa-diamond-contour-matched`, bank sha16 `1b30f3cc51204d03` (identical to the superseded
+leg), harness git `06def0b`, checker contract `pub-checkers-v2`, same 198 ids in file order.
+
+| measure | escalation shape (superseded) | **matched shape (this row)** | bare arm |
+|---|---|---|---|
+| strict | 91/198 = 46.0 % | **139/198 = 70.2 %** | 127/198 = 64.1 % |
+| first rung / ladder | 512→1200 | 1200, single rung | 1200 |
+| request seed | sp1 pinned | none (bare policy) | none |
+| thinking | `enable_thinking:false`, `reasoning_effort:none` | serve default | serve default |
+| endpoint requests | 386 (198 + 188 escalations) | **198 (0 ladder steps)** | 198 |
+| truncated at the ceiling | 122 (62 %), 98 of them scored as losses | **11 (5.6 %), 10 scored as losses** | engine finish not recorded; 16 rows sit at `ctok=1200` |
+| contour/repair events, answer edits | 0 edits (`gate:fields_ok` 7) | **0 edits (`gate:fields_ok` 7)** | n/a |
+| mean visible answer chars | 3198 | **407** | 464 |
+| mean completion tokens (accepted calls) | 1030 | **789** | 802 |
+| prompt / completion tokens | 48,594 / 203,882 (+ ~100 k discarded drafts) | **56,514 / 156,136** | — |
+| engine time / leg wall | 1367.2 s / 2187 s | **1585.9 s / 1594 s** | 1785 s |
+| GPU energy | not sampled (sampler wiring bug) | **56.85 Wh** (629 samples, mean 128.4 W, busy fraction 0.89) | 64.21 Wh |
+
+### Paired sign tests (matched 198)
+
+| pair | W/L | diff | p |
+|---|---|---|---|
+| bare vs contour (matched shape) | 16W / 28L | +6.1 pp for the contour leg | 0.096 |
+| contour (matched) vs contour (escalation shape) | 63W / 15L | **+24.2 pp** | < 1e-6 |
+| bare vs contour (escalation shape), published earlier | 51W / 15L | −18.2 pp | 1.0e-5 |
+
+Discordant ids, bare-vs-matched (44 of 198, i.e. 22 % of cells flip between two independent
+temperature-0.7 draws on this set): bare wins
+`gpqa-003, 025, 031, 041, 052, 084, 087, 106, 115, 124, 128, 134, 141, 145, 154, 172`; matched
+contour wins `gpqa-011, 015, 018, 021, 033, 040, 049, 058, 060, 069, 083, 089, 096, 102, 104, 110,
+122, 125, 130, 135, 136, 139, 140, 163, 174, 184, 188, 189`.
+
+### Verdict on this row
+
+* With the shape matched, the frozen contour runtime is **statistically indistinguishable from the
+  bare brain** on expert MCQ: 70.2 % vs 64.1 %, 44 discordant cells of 198, p = 0.096. Do not
+  quote the +6.1 pp as a contour gain — 22 % cell discordance at temperature 0.7 is the
+  resolution of this instrument on this set, and the contour edit census is again zero.
+* The published −18.2 pp was a **request-shape artifact**: same stamp, same bank bytes, same ids,
+  24.2 pp apart. The escalation ladder, not the contour, did the damage.
+* The remaining harness-visible cost on this set is the **1200-token ceiling**, not the harness:
+  11 rows still ran out of room and 10 of them scored as losses.
+* Cost side, matched shape: one request per task (0 ladder steps), 56.85 Wh for 198 tasks
+  (0.287 Wh/task) against the bare arm's 64.21 Wh (0.324 Wh/task) — the harness is no more
+  expensive than bare once the token budget is right, because it stops re-drafting.
+
+### Caveats on this row
+
+1. Matched shape drops the pinned request seed (the bare arm sends none), so the leg is
+   shape-reproducible, not bit-reproducible; the plan still carries the sp1 `gseed` per cell for
+   identity, and every row stores `gen.request_shape`.
+2. Single draw per arm. The 6.1 pp sits inside the ±6 pp resolution of a 198-task MCQ set at
+   temperature 0.7; only the 24.2 pp shape effect clears that floor.
+3. Both matched legs ran back-to-back on the endpoint after the 20:36 CET restart, at comparable
+   load (the grok cloud leg does not touch the endpoint), so the two matched rows are at least
+   mutually comparable.
