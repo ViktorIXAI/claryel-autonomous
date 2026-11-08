@@ -1729,9 +1729,11 @@ H_UNKNOWN_PROMPT = STAMP_REVISION == (2, 54)
 # enumeration is two-character-id and sits outside the grammar). Published-bytes replay over all
 # 12 line-era arms (pair-249/250/251, seeds 37-46): BOTH strict losses of D-ex6-p2 (r42, r43)
 # convert to strict PASS under the frozen scorer, every other surface row byte-identical
-# `matched`, 0 breaks, 0 refusals, 0 fires outside the census. If pair-252 does not convert with
-# clean guards, freeze D_ID_NORMALIZE to `STAMP_REVISION == (2, 55)` and publish the negative
-# with win-level detail; gate_v69 pins grammar + refusals + flag matrix + published-bytes replay.
+# `matched`, 0 breaks, 0 refusals, 0 fires outside the census. MEASURED pair-252 (2026-11-08,
+# `PAIR-252-V66.md`): live target 1/3 control seeds, ONE evented conversion at byte-identical
+# ptok/ctok and model_calls 1 vs 1, target pool D-ex6-p2 2/3 -> 3/3, all guards clean — ADOPTED,
+# `D_ID_NORMALIZE` stays `contour_at_least(2, 55)` and inherits forward; the line is 0.0.2.55.
+# gate_v69 pins grammar + refusals + flag matrix + published-bytes replay.
 D_ID_NORMALIZE = contour_at_least(2, 55)
 _D_ID_LETTER = re.compile(r"^[A-Z]$")
 

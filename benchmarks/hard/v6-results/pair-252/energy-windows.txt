@@ -1,0 +1,13 @@
+pair-252 per-arm serve-board energy windows (gpu-power-p252.csv, 2 Hz ssh nvidia-smi on the
+endpoint, separate systemd-run unit parb-p252sampler, fresh csv for this pair, 802 samples
+spanning 1794098620 .. 1794100633 epoch (~2014 s; the arms run 1794098618 .. 1794100059), gaps
+are skipped ssh failures - the sampler drops empty reads):
+x53r48 254s  5.92Wh | x55r48 239s  5.25Wh
+x53r49 271s  6.76Wh | x55r49 234s  5.32Wh
+x53r50 214s  4.66Wh | x55r50 214s  4.54Wh
+side totals: control (0.0.2.53) 17.34 Wh / 739 s, candidate (0.0.2.55) 15.11 Wh / 687 s.
+Matched warm windows (seeds 49+50): control 11.42 Wh vs candidate 9.86 Wh (-13.7%, inside
+run-to-run variance; the pair's first arm x53r48 carries mild endpoint warm-up). Mechanism
+cost: zero model tokens by construction (post-hoc code) — the converted row carries
+model_calls 1 vs 1 (the shortening happens after the single call), whole-pair single-shot
+model calls 323 vs 322. No energy claim is made either way: the delta is inside noise.

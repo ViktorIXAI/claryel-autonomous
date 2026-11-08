@@ -2450,3 +2450,33 @@ ADOPT 0.0.2.55 iff (a) + ≥1 evented conversion + all guards clean; otherwise f
 windows, per-arm epochs; mechanism zero-token by construction, extra Wh attributed only beyond
 run-to-run noise. Cadence counter: pair-252 is the 5th measured-era stamp since cadence-249 —
 the four-arm cadence re-run falls due immediately after this pair's verdict.
+
+== RESULT 2026-11-08 02:2x CET — pair-252 FROZEN RULE EXECUTED: 0.0.2.55 ADOPTED ==
+
+Arms: x53r48/49/50 (control 0.0.2.53) vs x55r48/49/50 (candidate 0.0.2.55), 6x77 rows all exit=0,
+serial on idle auth-checked P2005 Basalt, bank v6.6 (published sha256-16 5c86252b2ef2f422, ws copy
+590503cf1701a6ce stamped in all six run records; field identity re-proven after the pins rebuild),
+sp1 reps 48/49/50 audited 231/231 (pair-252/seed-protocol.md).
+(a) LIVE TARGET met: control D-ex6-p2 strict-failed seed 48 (0.0/T, refused_ok=False next_ok=False)
+    and passed 49/50 — 1/3 live at the published 2/6 base rate.
+(b) ONE evented conversion: (D-ex6-p2, r48) 0.0/T -> 1.0/T carrying
+    contour:v55_d_id_normalized_from_prompt, model_calls 1 vs 1 AND byte-identical ptok 84 / ctok 91
+    — both arms drew the SAME answer, the code shortening alone flipped the cell. Target pool 2/3->3/3.
+(c) GUARDS all clean: zero v55 events in control; zero outside {D-ex6-p1, D-ex6-p2}; zero on loop
+    rows; 5 further fires byte-identical `matched` (5 matched + 1 from_prompt total); ZERO candidate
+    p2 P->F; v221 parity on all 9 surface cells; zero frozen-band fires (2.30-32/34-config/36/38/
+    41/42/44 + the 2.54 freeze: zero v54 rows either side); adopted-family parity within seed noise;
+    zero engine_stalled, per-arm medians 1.15-1.32 s/task on the line-era rate.
+(d) RESOLUTION: single-shot 206/213 -> 209/213 (bank-mean +1 cell, below the ~2-cell floor, context
+    only); flips 8 over 231 cells, exact sign test W5/L3 p=0.727; loop pool 16/18 -> 15/18 is the
+    known banned-attempt re-roll on D-ex6-l2 r50 with NO v55 event (the stamp never touches loop
+    context). Energy: control 17.34 Wh vs candidate 15.11 Wh (matched warm windows inside variance;
+    mechanism zero-token; the only real extra cost in the pair is one loop lottery draw, +2 calls).
+DECISION: ADOPTED per the frozen rule (MEASURED + >=1 evented conversion + guards clean).
+`D_ID_NORMALIZE` stays `contour_at_least(2, 55)`; the line moves 0.0.2.53 -> 0.0.2.55.
+Cadence counter: pair-252 is the 5th measured-era stamp since cadence-249 (2.51/2.52/2.53/
+2.54-UNMEASURED/2.55) — the four-arm cadence re-run on bank v6.6 falls due NOW: contour leg on the
+2.55 line + bare basalt + codex + grok, fresh matched seeds 52/53/54 (rep 51 spent on the 2.55
+smoke). Next contour hypothesis must come from a stability map rebuilt on the 2.55 line.
+Full evidence: benchmarks/hard/v6-results/PAIR-252-V66.md + pair-252/ (arms, plans, epochs,
+seed-protocol.md, energy-windows.txt, sanitized launcher).

@@ -422,7 +422,24 @@ CONTOUR_FEATURES = (
     # is context only, deltas under ~2 cells UNRESOLVABLE and never the reason. ADOPT 0.0.2.55 iff
     # (a) holds + >=1 evented conversion + all guards clean; otherwise freeze D_ID_NORMALIZE to
     # `STAMP_REVISION == (2, 55)` and publish the negative with win-level detail. gate_v69 pins
-    # grammar + refusals + census + published-bytes replay + call-site predicate.)
+    # grammar + refusals + census + published-bytes replay + call-site predicate.
+    # (MEASURED pair-252, three paired seeds `x53r*`/`x55r*` vs the adopted 0.0.2.53 line, rule
+    # pre-registered 2026-11-08 01:4x CET: MEASURED — control D-ex6-p2 strict-FAILED seed 48
+    # (0.0/T, notes refused_ok=False next_ok=False — right verdict, spelled form) and passed 49/50,
+    # exactly the 2/6 line-era rate. ONE evented conversion (rep 48: 0.0/T -> 1.0/T carrying
+    # contour:v55_d_id_normalized_from_prompt; ptok 84/ctok 91 byte-identical, model_calls 1 vs 1 —
+    # both arms drew the same answer, the code shortening alone flipped the cell); target pool
+    # D-ex6-p2 2/3 -> 3/3. Guards all clean: zero v55 events in control, zero outside
+    # {D-ex6-p1, D-ex6-p2}, zero on loop rows, zero candidate P->F on p2 (.PP -> PPP), 5 byte-
+    # identical `matched` fires on the rest of the census surface, v221 parity on all 9 surface
+    # cells, zero frozen-band fires (incl. the 2.54 freeze: zero v54 rows either side), adopted-
+    # family parity within seed noise (J/A/K/B answer-line families identical; ±1 answer-triggered
+    # deltas strict-effectless), zero engine_stalled. Single-shot 206/213 -> 209/213 and pooled
+    # flips W5/L3 p=0.727 published as context below the ~2-cell floor; loop pool 16/18 -> 15/18
+    # is one known banned-attempt re-roll carrying no v55 event. Energy: side totals 17.34 vs
+    # 15.11 Wh, matched warm windows inside variance, mechanism zero-token. ADOPTED per
+    # pre-registered rule: `D_ID_NORMALIZE = contour_at_least(2, 55)` inherits forward; the line
+    # moves 0.0.2.53 -> 0.0.2.55, `PAIR-252-V66.md`.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as

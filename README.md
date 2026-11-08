@@ -24,7 +24,17 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.53` — ADOPTED on 2026-11-07 after pair-250 (the C python-literal
+Contour gate line: `0.0.2.55` — ADOPTED on 2026-11-08 after pair-252 (the D-plain answer-item
+shortening — when the model's own `refused`/`next_ok` lists spell the prompt's own bracket-
+enumeration entries, the contour shortens each item to the one-letter id the prompt itself declares:
+a closed grammar over the prompt text (id table from its enumerations, list names from its JSON
+spec, membership and list names never change; ungrounded, ragged or duplicated inputs refuse
+byte-identical), zero model tokens, reference never read. The format-class `D-ex6-p2` — a CORRECT verdict scoring 0.0
+because of spelled form, 2/12 line-era draws — strict-failed 1/3 control seeds (live target,
+exactly the predicted rate) and converted 2/3 -> 3/3 with `contour:v55_d_id_normalized_from_prompt`
+on the row at byte-identical ptok/ctok and model_calls 1 vs 1; census surface {D-ex6-p1, D-ex6-p2}
+only, 5 further fires byte-identical `matched`, ZERO guard violations, loop pool untouched by the
+grammar; `PAIR-252-V66.md`). The previous line `0.0.2.53` was ADOPTED on 2026-11-07 after pair-250 (the C python-literal
 options gate — when a C task prints its own snippets and literal option expressions, the contour
 EXECUTES them by code over a closed AST allow-list and rewrites only the ОТВЕТ line to the set
 THIS prompt printed: the chronic `C-ex6-02` — a 27/27 loss across every published era — strict-failed
