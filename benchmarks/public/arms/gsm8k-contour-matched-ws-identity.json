@@ -1,0 +1,41 @@
+{
+  "contour_stamp": "0.0.2.56",
+  "harness_git_sha": "06def0bc8f5c4aa1ef2ce6355ede7f80fa19115f",
+  "tasks_file": "benchmarks/public/gsm8k.tasks.jsonl",
+  "tasks_file_sha16": "7dd0080ff23b8bc3",
+  "tasks": 300,
+  "bank_ws_sha16": "ea10c530de68db21",
+  "plan_sha16": "3e15017d454e3103",
+  "seed_protocol": "sp1 (gseed = int(sha256(task|rep)[:8],16) % 999983); in 'bare' shape the gseed stays in the plan for cell identity but is NOT sent as a request seed, matching the bare arm's seed policy",
+  "request_shape": {
+    "mode": "bare-matched",
+    "launch_env_required": "PARB_SHAPE=bare PARB_LADDER=1200",
+    "why": "parity with the bare arm: first token rung = the bare arm's max_tokens, serve-default thinking (no chat_template_kwargs), temperature 0.7, no request seed"
+  },
+  "validator": {
+    "contract": "pub-checkers-v2",
+    "module": "scripts/pub_bench_score.py",
+    "sha16": "b0f19cf90c23c438"
+  },
+  "frozen_scorer_bytes_present": {
+    "parb_check_v6.py": "89437d8cfe1fc6c8",
+    "parb_loop.py": "f5f5b78ab46a0f0c",
+    "e_sandbox.py": "424c04126e9b6c1e"
+  },
+  "ws_modules": {
+    "gate_run.py": "1012bc4d5e8eb459",
+    "gate_versioning.py": "964fb6557b985f7a",
+    "gate_engine_guard.py": "f5a2f80e855a84d8",
+    "gate_j_rerank.py": "6380eb485de280a4",
+    "gate_c_ground.py": "59b506bc90b6c37e",
+    "gate_fixers.py": "bd05a43c63ea38da",
+    "gate_scorer_contract.py": "774cccba5cf550d2",
+    "gate_bank_versions.py": "80425aee31bbafce",
+    "os_record.py": "1a7170b71087f5cb",
+    "parb_check.py": "68875d65545eb14e",
+    "parb_check_v6.py": "89437d8cfe1fc6c8",
+    "parb_check_v6_2.py": "1a21d921b4706cf6",
+    "parb_loop.py": "f5f5b78ab46a0f0c",
+    "e_sandbox.py": "424c04126e9b6c1e"
+  }
+}

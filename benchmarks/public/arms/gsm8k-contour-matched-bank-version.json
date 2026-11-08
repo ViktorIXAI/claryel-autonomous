@@ -1,0 +1,6 @@
+{
+  "bank_version": "pub-gsm8k-300",
+  "ws_bank_sha16": "ea10c530de68db21",
+  "source": "benchmarks/public/gsm8k.tasks.jsonl (first 300 ids, file order)",
+  "written": "2026-11-08T22:18:19Z"
+}

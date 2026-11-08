@@ -17,6 +17,11 @@ import sys
 import time
 
 OUT_DEFAULT = os.environ.get("PUB_OUT", os.path.expanduser("~/pub-bench"))
+# Per-call wall limit for one CLI invocation. 900 s was fine for gsm8k/ARC/HumanEval
+# (0 timeouts over 1264 cloud rows) but the gpqa-diamond grok leg timed out on 8 of its
+# first 46 expert-science prompts at exactly the cap, so the cap is now a launch parameter:
+# a row lost to the cap is a blank answer, and blanks are refused by the >5 % guard.
+CLOUD_TIMEOUT = int(os.environ.get("PUB_CLOUD_TIMEOUT", "900"))
 
 
 def cli_version(prog):
@@ -34,14 +39,14 @@ def ask(arm, prompt, cwd):
                "-c", "model_reasoning_effort=xhigh", "-m", "gpt-6.1-sol",
                "--output-last-message", last, "-"]
         r = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
-                           timeout=900, cwd=cwd)
+                           timeout=CLOUD_TIMEOUT, cwd=cwd)
         txt = open(last, encoding="utf-8").read() if os.path.exists(last) else ""
         return txt.strip(), ("ok" if r.returncode == 0 and txt.strip() else "rc%d" % r.returncode), \
             (r.stderr or "")[:300]
     if arm == "grok":
         r = subprocess.run(["hermes", "-z", prompt, "-m", "grok-4.7",
                             "--provider", "xai-oauth", "-t", ""],
-                           capture_output=True, text=True, timeout=900, cwd=cwd)
+                           capture_output=True, text=True, timeout=CLOUD_TIMEOUT, cwd=cwd)
         return r.stdout.strip(), ("ok" if r.returncode == 0 and r.stdout.strip() else "rc%d" % r.returncode), \
             (r.stderr or "")[:300]
     raise SystemExit("unknown cloud arm: " + arm)

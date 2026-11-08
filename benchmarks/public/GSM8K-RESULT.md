@@ -14,7 +14,8 @@ them.
 | brain-basalt (full set) | `qwen3.8-flash-next-iq3_s-basalt`, IQ3_S on a 24 GB-class GPU, no contour | 1319/1319 | **1284/1319 = 97.3 %** | 5828 s of measured call time (mean 4.42 s/task), one draw per task | temp 0.7, max_tokens 1200, single seed pass |
 | codex | `gpt-6.1-sol`, codex-cli 0.166.0, reasoning xhigh, read-only sandbox, prompt via STDIN | 300/300 | **293/300 = 97.7 %** | 2263 s (7.5 s/task) | sampling parameters not exposed by the transport |
 | grok | `grok-4.7`, hermes one-shot, toolsets off, prompt inline | 300/300 | **288/300 = 96.0 %** | 6270 s (20.9 s/task) | sampling parameters not exposed by the transport |
-| contour-0.0.2.56 (item P0) | the FROZEN contour runtime `0.0.2.56` over the same endpoint model, category `P` (no hard-bank family scaffolding), public checkers in the validator slot | 300/300 | **290/300 = 96.7 %** | 1426 s wall, 1194 s measured call time (mean 3.98 s/task) | streamed request, `request_seed` pinned (sp1), token ladder 512→1200, `enable_thinking` off — NOT identical to the bare row's call shape, see the parity section |
+| contour-0.0.2.56 (item P0) | the FROZEN contour runtime `0.0.2.56` over the same endpoint model, category `P` (no hard-bank family scaffolding), public checkers in the validator slot | 300/300 | **290/300 = 96.7 %** | 1426 s wall, 1194 s measured call time (mean 3.98 s/task) | streamed request, `request_seed` pinned (sp1), token ladder 512→1200, `enable_thinking` off — NOT identical to the bare row's call shape; **superseded as a parity row**, see the parity section |
+| contour-0.0.2.56, matched shape (item P0 re-run, 2026-11-09) | the same frozen runtime, same workspace recipe, request shape equal to the bare arm's (`PARB_SHAPE=bare PARB_LADDER=1200`) | 300/300 | **294/300 = 98.0 %** | 1326 s wall, 1312 s measured engine time (mean 4.37 / median 2.63 s/task) | temp 0.7, first rung 1200 (single rung), serve-default thinking, no request seed — the bare arm's call shape |
 
 Cross-arm numbers use the **pre-registered matched subset**: the first 300 task ids of the
 pinned file in file order, fixed before any arm ran (`--limit 300 --offset 0`). No ids were
@@ -69,6 +70,8 @@ label `pub-gsm8k-300`, tasks sha16 `7dd0080ff23b8bc3`) and scored with the same
 > gap to bare sits inside the noise the doc itself names. A matched-shape re-run
 > (`PARB_SHAPE=bare PARB_LADDER=1200`, frozen stamp, no new contour feature) is running as of
 > this edit; the old bytes stay published and are shipped under `arms/` for re-scoring.
+> **The matched-shape row landed 2026-11-09 00:35 CET: 294/300 = 98.0 %, 2W/1L against bare
+> (p = 1.000) — section "Matched-shape contour parity" at the end of this document.**
 ### What the harness actually did (from `gate-ledger.jsonl`, 300 rows)
 
 | measure | value |
@@ -125,6 +128,12 @@ and why its energy figure is not pairable against the bare leg (which has no sam
   this leg** — no sampler was attached when it ran; the number stays missing rather than
   estimated. From the ARC legs on, a GPU sampler runs per local leg.
 * Cloud legs: wall time only (no local resources consumed).
+* Item P0 matched-shape contour leg (2026-11-09 row): prompt 39,164 + generated 82,805 tokens for
+  300 tasks (mean 130.5 in / 276.0 out per task), 1312.2 s measured engine time, leg wall 1326 s.
+  GPU sampler at ~2 s (524 samples, window 23:35:16–23:57:20, span 1324 s): mean 117.9 W, GPU busy
+  fraction 0.86, **energy 43.35 Wh** integrated from `power.draw` (board-level GPU draw, method and
+  limits in `../hard/v6-results/ENERGY-METHOD.md`); 144 mWh per task. The endpoint was exclusive to
+  this leg.
 
 ## Honest caveats
 
@@ -137,8 +146,10 @@ and why its energy figure is not pairable against the bare leg (which has no sam
    graded on the final answer only (`number` checker on the `ANSWER:` line), so contour vs
    no-contour was expected to be invisible here — the item P0 parity arm (section above) ran the
    frozen runtime on these same ids and it fired **zero** gates while costing 12 % extra
-   requests. Item P0 (owner request 2026-11-08) nevertheless requires the parity row on every
-   published set, precisely so this claim is auditable rather than stated.
+   requests. The matched-shape re-run (last section, 2026-11-09) repeats the zero census with
+   **zero** extra requests, which puts that 12 % on the token ladder rather than on the harness.
+   Item P0 (owner request 2026-11-08) nevertheless requires the parity row on every published
+   set, precisely so this claim is auditable rather than stated.
 3. **One draw per task, temperature 0.7.** No best-of-N, no retry, no seed sweep. On a set this
    saturated a single-draw flip is worth at most one task per arm; all three paired verdicts
    above are within that noise floor except where noted.
@@ -150,3 +161,83 @@ and why its energy figure is not pairable against the bare leg (which has no sam
    `bank|gold|expected|/home/|/Users/|<LAN_IP-prefix>|answer_key` before publication: the only
    two matches are the word *gold* inside task text the model was restating (`gold coins` in
    `gsm8k-0033`, `marigolds` in `gsm8k-0074`), i.e. 0 leakage hits and 0 local paths.
+
+## Matched-shape contour parity (item P0 re-run, 2026-11-09 00:35 CET) — supersedes the escalation-shape row
+
+**Why this row exists.** The parity rule on this line is that a contour row is admissible only
+when its *request shape* equals the bare arm's: first token rung = the bare arm's 1200, the
+serve's default thinking state, temperature 0.7, same seed policy. The published GSM8K parity arm
+started at a 512-token rung, pinned an sp1 request seed and set `enable_thinking:false` — three
+differences the bare row never had. The re-run used the frozen stamp `0.0.2.56` with the switch
+`PARB_SHAPE=bare PARB_LADDER=1200` (pinned by `harness/gate_shape_parity_test.py`; it registers no
+contour feature — the hard line stays frozen at `0.0.2.56`), workspace `pub-gsm8k-contour-matched`,
+bank label `pub-gsm8k-300` with bank sha16 `ea10c530de68db21` (**identical to the superseded leg**,
+so the two contour rows are cell-comparable), tasks sha16 `7dd0080ff23b8bc3` (first 300 ids in file
+order), harness git `06def0bc` (the escalation leg ran at `6527c834`), checker contract
+`pub-checkers-v2`.
+
+| measure | escalation shape (superseded) | **matched shape (this row)** | bare arm (same 300 ids) |
+|---|---|---|---|
+| strict | 290/300 = 96.7 % | **294/300 = 98.0 %** | 295/300 = 98.3 % |
+| first rung / ladder | 512→1200 | **1200, single rung** | 1200 |
+| request seed | sp1 pinned | **none (bare policy)** | none |
+| thinking | `enable_thinking:false` | **serve default** | serve default |
+| endpoint requests | 337 (300 + 37 escalations) | **300 (0 ladder steps)** | 300 |
+| truncated at the 1200 ceiling | 6 (5 scored as losses) | **0** | 0 rows at `ctok=1200` |
+| contour/repair events, answer edits | 0 / 0 | **0 / 0** | n/a |
+| prompt tokens (accepted calls) | 27,164 | **39,164** | 39,164 |
+| generated tokens (total, mean per task) | 104,629 (348.8) | **82,805 (276.0)** | 81,514 (271.7) |
+| engine time (mean / median per task) | 1194.4 s (3.98 / 3.04 s) | **1312.2 s (4.37 / 2.63 s)** | 2148.2 s (7.16 / 3.16 s) |
+| leg wall | 1426 s | **1326 s** | — |
+| GPU energy (sampled) | 46.53 Wh (562 samples, mean 118.0 W, busy 0.88) = 155 mWh/task | **43.35 Wh** (524 samples, 1324 s, mean 117.9 W, busy 0.86) = **144 mWh/task** | not sampled (no sampler on that leg, see Resources) |
+
+### Paired sign tests (matched 300, `scripts/pub_bench_compare.py`)
+
+| pair | W/L | diff | p |
+|---|---|---|---|
+| bare vs contour (matched shape) | 2W / 1L | +0.3 pp for bare | 1.000 |
+| contour (escalation shape) vs contour (matched shape) | 2W / 6L | −1.3 pp for the old shape | 0.289 |
+| bare vs contour (escalation shape), published earlier | 6W / 1L | +1.7 pp for bare | 0.125 |
+
+Discordant ids, listed so the flips are auditable: matched contour loses to bare on
+`gsm8k-0161, 0255` and beats it on `gsm8k-0234`. Against the escalation-shape leg the matched leg
+wins `gsm8k-0062, 0084, 0139, 0162, 0163, 0234` and loses `gsm8k-0085, 0161` — and `0062`/`0139`
+are exactly the two ladder/ceiling losses named in the superseded section, which is the shape
+difference showing up in the flips rather than in the totals. `gsm8k-0084` (the double-`ANSWER:`
+first-match artifact) flipped back: in this draw the answer carried one `ANSWER:` line, so the
+artifact is draw-dependent, not a stable cell defect.
+
+### Verdict on this row
+
+* **Parity, and this time measured rather than shape-guaranteed.** 294/300 against the bare arm's
+  295/300, three discordant cells of 300, p = 1.000, and the contour edit census is zero: no
+  `contour:*`, no `fix:*`, no gate block, no answer rewrite, no ladder step. The frozen runtime is
+  one request per task on this set, exactly like the bare arm.
+* The escalation row's −1.7 pp was a **request-shape cost**, not a contour effect: same stamp, same
+  bank bytes, same ids, 6W/2L in favour of the matched shape. At n = 8 discordant pairs that
+  direction is itself unresolved (p = 0.289), so the quotable part stays the mechanism census
+  (37 escalations, 6 ceiling truncations, 5 of them scored as losses) rather than a point delta.
+* **Harness cost at the right shape is zero extra requests** — the +12 % of the escalation row was
+  ladder re-drafting. Generated tokens sit 1.6 % above the bare draw (82,805 vs 81,514) with
+  prompt tokens byte-for-byte equal in total (39,164 on both legs), which is the mechanical
+  signature of a matched request shape.
+* Energy per task is quoted **inside one leg**: 144 mWh/task (matched contour) against 155 mWh/task
+  (escalation contour). No bare-vs-contour energy comparison is made here, because the bare GSM8K
+  leg ran before samplers existed.
+
+### Caveats on this row
+
+1. **Seconds are not pairable across windows.** The bare leg's mean on these 300 ids (7.16 s) is
+   above its own full-leg mean (4.42 s) because it ran early in a contended window; this leg ran
+   23:35–23:57 CET on an otherwise idle endpoint. Median per-task engine time (2.63 s) is the
+   comparable figure.
+2. **One draw per task, temperature 0.7, no seed on this leg** (the bare policy, per the parity
+   rule). The bare arm and the two contour legs are three independent draws of the same model.
+3. **The set is saturated for this brain** (98.3 % for bare on these 300 ids, 5 failures total), so
+   the whole parity question here is bounded by ±2 cells; GSM8K pins plumbing and harness cost, it
+   cannot resolve a quality difference.
+4. **Answer bytes shipped, re-scored after publication.** `arms/gsm8k-contour-matched-*.jsonl`
+   (results / ledger / answers / stats / run-record / plan / ws-identity, sha16 printed by
+   `scripts/publish_pub_arms.py`) were re-scored from the published copy with `pub_bench_score.check`
+   and reproduce **294/300**; the answer fields contain 0 hits for
+   `bank|answer_key|expected_|/home/|/Users/|192.168|api_key`.
