@@ -114,8 +114,14 @@ def main() -> int:
                 fails.append("case2: %s must NOT be BAD (offline): %s" % (u, sorted(bad)))
 
     # --- case 3: classifier unit (anchors, refs, schemes) ---------------------
-    sys.path.insert(0, str(HERE.parent))
-    import check_links as cl  # noqa: E402  (REPO here is THIS repo's remote)
+    # Load the CONFIGURED checker (SAH_LINK_CHECKER-aware): the in-process cases
+    # must exercise the same revision the subprocess cases do, or a reviewer
+    # pointing SAH_LINK_CHECKER at an old revision silently tests the new code.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("check_links_under_test", CHECKER)
+    assert spec is not None and spec.loader is not None, "checker not found: %s" % CHECKER
+    cl = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cl)  # REPO here is THIS repo's remote (cwd = repo root)
     this = cl.REPO
     cases = {
         "https://github.com/%s/blob/main/a.md" % this: ("blob", "main/a.md"),
@@ -134,7 +140,37 @@ def main() -> int:
         if cl.classify_repo_link(other) is not None:
             fails.append("classify(%s) must be None (not this repo)" % other)
 
-    # --- case 4: the shipped documentation links still resolve ----------------
+    # --- case 4: transient remote failures never redden the gate --------------
+    # Measured 2026-11-08: a github.com-wide 504 window made three green jobs red
+    # (link probes AND the gitleaks installer). A 5xx after curl's own retries is
+    # a remote outage, not a broken reference: it must print WARN and not fail.
+    # 4xx and every offline/path/sha verdict stay BAD. (Non-vacuous against the
+    # pre-fix checker via SAH_LINK_CHECKER: the old http_verdict returned the
+    # bare "http 504" string, so the None-with-warn-prefix assertion fails.)
+    real_http_code = cl.http_code
+    try:
+        cl.http_code = lambda url: "504"
+        v504 = cl.http_verdict("https://example.com/whatever")
+        if not (v504 or "").startswith("warn:"):
+            fails.append("external 504 must be warn-prefixed, got %r" % (v504,))
+        cl.http_code = lambda url: "503"
+        if cl.classify_repo_link and (cl.http_verdict(
+                "https://github.com/%s/issues/25" % cl.REPO) or "").find("warn:") != 0:
+            fails.append("same-repo object link under 5xx must ALSO warn, not BAD")
+        cl.http_code = lambda url: "404"
+        if cl.http_verdict("https://example.com/gone") != "http 404":
+            fails.append("external 404 must stay BAD (a moved/deleted target is a "
+                         "real finding)")
+        cl.http_code = lambda url: ""
+        if cl.http_verdict("https://example.com/x") != "http ":
+            fails.append("empty/failed probe must stay BAD, never silently passed")
+        cl.http_code = lambda url: "200"
+        if cl.http_verdict("https://example.com/ok") is not None:
+            fails.append("200 must pass")
+    finally:
+        cl.http_code = real_http_code
+
+    # --- case 5: the shipped documentation links still resolve ----------------
     # Honour the static-QA link mode: SAH_LINK_MODE=offline means the runner has
     # no egress, so the repository pass is asserted in offline mode too.
     repo = Path(__file__).resolve().parents[2]
@@ -147,7 +183,7 @@ def main() -> int:
                      % ("offline" if "--offline" in args else "online",
                         r.returncode, r.stdout))
 
-    print("check_links contract: %d case group(s), %d failure(s)" % (4, len(fails)))
+    print("check_links contract: %d case group(s), %d failure(s)" % (5, len(fails)))
     for f in fails:
         print("FAIL " + f)
     return 1 if fails else 0

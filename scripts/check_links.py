@@ -91,7 +91,16 @@ def http_verdict(link):
         # datacenter agent; accounts verified out-of-band
         # (owner-controlled public profiles).
         ok = ok + ("999", "403")
-    return None if code in ok else "http " + code
+    if code in ok:
+        return None
+    # A 5xx AFTER curl's own retries is someone else's bad day (measured
+    # 2026-11-08: a github.com-wide 504 window reddened three jobs whose
+    # content was fine). Server-side failure says nothing about whether the
+    # reference resolves, so it is reported as WARN and never fails the gate.
+    # 4xx (gone/forbidden), empty codes and every path/sha check stay BAD.
+    if code.startswith("5"):
+        return "warn:http " + code
+    return "http " + code
 
 
 def commit_verdict(link, sha, offline):
@@ -113,8 +122,15 @@ def main():
     offline = "--offline" in sys.argv
     files = tracked_files()
     bad = []
+    warns = []
     skipped = []
     checked = 0
+
+    def verdict_sink(f, link, why):
+        if why and why.startswith("warn:"):
+            warns.append((f, link, why[5:]))
+        elif why:
+            bad.append((f, link, why))
     for f in sorted(x for x in files if x.endswith(".md")):
         for _txt, link in MD.findall(open(f, encoding="utf-8", errors="ignore").read()):
             checked += 1
@@ -131,21 +147,15 @@ def main():
                                       and not any(x.startswith(rp + "/") for x in files)):
                             bad.append((f, link, "path not in git"))
                     elif kind == "commit":
-                        why = commit_verdict(link, rest, offline)
-                        if why:
-                            bad.append((f, link, why))
+                        verdict_sink(f, link, commit_verdict(link, rest, offline))
                     elif offline:
                         # issues / pull / releases need the network; in offline
                         # mode they are reported, never silently passed.
                         skipped.append((f, link, kind + " (offline)"))
                     else:
-                        why = http_verdict(link)
-                        if why:
-                            bad.append((f, link, why))
+                        verdict_sink(f, link, http_verdict(link))
                 elif not offline:
-                    why = http_verdict(link)
-                    if why:
-                        bad.append((f, link, why))
+                    verdict_sink(f, link, http_verdict(link))
                 continue
             path, _, anchor = link.partition("#")
             if not path:
@@ -163,6 +173,10 @@ def main():
     print("checked %d links across %d markdown files" % (checked, len([x for x in files if x.endswith(".md")])))
     for f, link, why in skipped:
         print("SKIP %s -> %s (%s)" % (f, link, why))
+    for f, link, why in warns:
+        print("WARN %s -> %s (%s: remote server failure after retries, not a "
+              "broken reference - reported, never fails the gate)"
+              % (f, link, why))
     for f, link, why in bad:
         print("BAD %s -> %s (%s)" % (f, link, why))
     sys.exit(1 if bad else 0)
