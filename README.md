@@ -15,11 +15,30 @@ same model  ·  same frozen task prompts  ·  same seeds
         only the software around the model changes
 ```
 
-**Status 2026-11-08: hard-bank contour development is frozen at the measured stamp
+**Status 2026-11-08 21:55 CET: hard-bank contour development is frozen at the measured stamp
 `0.0.2.56` (97.4 % of the 77-task hard bank v6.6, `5c86252b2ef2f422`; full history in
-`benchmarks/hard/v6-results/VERSION-LADDER-PERCENT.md`). The active line is now the public
-benchmark line: pinned public task sets, deterministic scorers, arms against cloud brains —
-`benchmarks/public/PUB-PLAN.md` and `benchmarks/public/PUB-DIGEST.md`.**
+`benchmarks/hard/v6-results/VERSION-LADDER-PERCENT.md`). The active line is the public
+benchmark line: pinned task sets, deterministic scorers, cloud-brain arms plus the frozen
+contour runtime as a parity arm (item P0). Five sets are in; GPQA-Diamond — the first
+unsaturated set — is tonight's headline.**
+
+Public four-arm table (strict % on the pre-registered matched set; each number's bank/contract
+provenance in `benchmarks/public/PUB-DIGEST.md`, per-set docs `benchmarks/public/*-RESULT.md`):
+
+| set (matched n) | local basalt (24 GB IQ3_S) | contour 0.0.2.56 | codex gpt-6.1-sol | grok-4.7 |
+|---|---|---|---|---|
+| GSM8K (300) | 98.3 | 96.7 | 97.7 | 96.0 |
+| ARC-Easy (300) | 96.7 | 96.7 (0W/0L, identical verdicts) | 96.7 | 96.3 |
+| ARC-Challenge (300) | 97.7 | 94.3 (variance-attributed, 0 edits) | 96.7 | 96.0 |
+| HumanEval (164, executed pytest-v1) | 96.3 | refused (checker = hidden tests) | 99.4 | queued |
+| **GPQA-Diamond (198, unsaturated)** | **64.1** | 46.0 (ladder-ceiling cost, 0 edits) | **97.0** | in flight |
+
+The four saturated sets place every brain inside a 1.7 pp band (instrument-limited, stated in
+their docs); GPQA resolves a real −32.8 pp gap between the local 24 GB brain and the cloud brain
+(paired p < 1e-6, contamination caveat in the doc). Parity arms fire **zero** answer edits
+across 1098 contour-arm rows; on GPQA the frozen token ladder is the wrong shape for a
+long-thinking model (−18.2 pp cost, census-null, written up in `GPQA-RESULT.md`).
+`benchmarks/public/PUB-PLAN.md` and `benchmarks/public/PUB-DIGEST.md` carry the plan and rows.**
 
 An AI agent developed and tested many harness changes under operator rules.
 The operator set objectives, constraints, publication scope and final adoption
