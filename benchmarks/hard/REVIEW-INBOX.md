@@ -2956,3 +2956,26 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   strict-pass on a control-failed C-ex6-01 seed carries the new event at identical ptok/calls with
   ZERO strict-pass C regressions carrying that event; frozen-band parity (zero 2.30-32/34-44/54
   events, 2.47 C-set/2.39-40 J/2.35-37 B/2.56 loop adopted families fire identically in both arms).
+
+## 2026-11-08 14:2x CET — C-probe-258: queued C-ex6-01 contour candidate probed OFF-ENDPOINT and CLOSED (P1 executed as pre-arm probe; no arm, no stamp)
+
+- Byte-level replay of the `coverage_gate` request at the map-258 sp1 seeds refutes the queued
+  "injection" framing: every C-ex6-01 leg carries `gate:coverage_ok` and on the failing draws the
+  MODEL itself writes `B=ПОДХОД` -> `ФИНАЛ: B, C, F`. The scaffold's cost is agreeableness under
+  forced per-option enumeration, not code inventing letters.
+- Three zero-extra-call prompt-layer families probed on all 8 v6.8 C tasks x seeds 25/26/27 on the
+  idle endpoint: COMMIT-FIRST 6/24 (catastrophic — same-context enumeration contaminates the
+  committed line), V1 agreeableness guard 18/24 then 15/24 (collateral on the all-correct-gold
+  task C-ex6-02), V2 in-call recheck 16/24 (no gain). Baseline old-protocol same-seed band
+  18-22/24. All candidates at or below baseline -> **2.58/pair-259 CLOSED UNBUILT**; selection
+  family (best-of-N over verdicts) rejected by construction (any set-shrinking bias is wrong on
+  C-ex6-02's all-correct gold, visible in the probe tables).
+- Evaluation-system finding (P0 backlog): the C pool drifts >=2 cells per session at IDENTICAL
+  seeds and idle endpoint (baseline C-ex6-02 3/3 arm vs 0/3 probe; V1 18/24 vs 15/24). Single-draw
+  C-cell probes cannot resolve +/-1-cell effects; C-class probes need >=3 draws/cell before a
+  family may be promoted to a pair. Seeds 25/26/27 are burned for C-ask-wording hypotheses.
+- Line status unchanged: adopted 0.0.2.56, bank v6.8 96.5% (MAP-258); with loop 6/6, zero stable
+  fails and the repeat-fail cell closed above, the contour is at the BANK CEILING on v6.8. Next
+  scheduled measurement: four-arm cadence when due (5 stamps after cadence-255).
+- Artifacts: `benchmarks/hard/v6-results/c-probe-258/` (PROBE.md + 72 byte-captured rows; probe
+  scripts untracked by design, sha256 pinned in PROBE.md). No DIGEST row (no arm ran).
