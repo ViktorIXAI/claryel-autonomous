@@ -2691,3 +2691,21 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
 - No DIGEST percent row for pair-256 (loop-only partial arms fail-close by design, as
   pre-registered); bank-wide percent context stays the cadence-255 row (74.7/77 = 97.0%,
   ws bank sha16 `590503cf`, stamp 0.0.2.55).
+
+## 2026-11-08 09:10 CET — MAP-256: adopted-line 0.0.2.56 full-bank map legs (no arms pending, batch complete)
+
+- Ran the pair-256 NEXT pointer: three full-bank (77-task) legs of the adopted line at
+  0.0.2.56, fresh reps 58/59/60, idle+auth-checked P2005 Basalt, serial `parb-map256`
+  (map build, NOT a pair: no candidate, no verdict). 231/231 rows complete, zero blanks, zero
+  `engine_stalled`, ptok>0 on every row, stamp==behavior on every leg, 231/231 sp1 seed audit.
+- Generated the 2.56-era gate table: `UNSTABLE-CELLS-V66-256.md/.csv` — stable pass 71/77,
+  stable fail 0, six seed-unstable cells ALL at 2/3 (A-ex6-07, B-ex6-03/05/06, C-ex6-01,
+  D-ex6-l4): NO cell-level repeat failure at 3 seeds on the line.
+- DIGEST row: bank 75.0/77 = 97.4% (single-shot 69.3/71, loop-D 5.7/6), bank sha16
+  `590503cf`, stamp 0.0.2.56 — baseline re-measurement at the resolution floor, not a gain claim.
+- Class signal logged for the next candidate (see MAP-256-V66.md): `fields_mismatch` spans 4/6
+  unstable draws (2 eras); `false_completion_claim` on D-ex6-l4 failed 3/9 line draws since
+  2.55 — re-arming the frozen 2.44 claim grammar needs the pair-248 meta-rule (new stamp/flag/
+  events + contract coverage proof), the live-rate part is now on record.
+- Artifacts published: `map-256/` (3 legs x results/ledger/log/run-record, plans, seed audit,
+  energy windows, launcher prose). Energy 5.65-6.74 Wh/leg. Sampler stopped at queue end.

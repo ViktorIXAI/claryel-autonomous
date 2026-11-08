@@ -1,0 +1,8 @@
+map-256 per-arm serve-board energy windows (gpu-power-m256.csv, 2 Hz ssh nvidia-smi on the
+endpoint, separate systemd-run unit parb-m256sampler, fresh csv for this batch, 387 samples
+spanning the queue 08:49:58 .. 09:02:46 local; gaps are skipped ssh failures - the sampler
+drops empty reads; the unit was stopped as soon as queue.log showed `map256 done`):
+m56r58 272s mean 84.7W busy 0.46  6.41Wh
+m56r59 248s mean 82.1W busy 0.44  5.65Wh
+m56r60 237s mean 102.3W busy 0.65  6.74Wh
+total 757 s wall, ~18.8 Wh for 231 model-visible rows (~4.9 min and 8.1 Wh per 77-task leg).
