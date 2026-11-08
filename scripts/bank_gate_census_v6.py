@@ -59,8 +59,8 @@ def rescore_sandbox_fails(bank, gfails):
     byid = {t["id"]: t for t in bank}
     keep = []
     for tid, cont, fmt, notes in gfails:
-        if any(str(n).startswith("sandbox") for n in notes):
-            t = byid[tid]
+        t = byid[tid]
+        if t["cat"] == "E" or any(str(n).startswith("sandbox") for n in notes):
             if t["cat"] == "D" and t.get("mode") == "loop":
                 c2, f2, _ = c6.check_D_loop_v6(t, gold_loop_rows(t))
             else:
@@ -159,7 +159,9 @@ def render(rows, meta):
             "answer marker inside any prompt). Verdicts are recomputed from current bytes every run; "
             "any bank whose bytes no longer match its registry sha16 fails closed. `working` must pass "
             "both gates; older rows are historical context, their status column is registry state, not a "
-            "re-narrated promotion verdict.\n\n")
+            "re-narrated promotion verdict. E-category failures get one re-draw (the battery runs in "
+            "docker and a container hiccup must not fabricate a bank defect); a task failing BOTH draws "
+            "is a real FAIL and goes red.\n\n")
     stamp = ("\nscanner: `bank_gate_census_v6.py` %s | scorer `harness/parb_check_v6.py` %s | "
              "registry `BANK-VERSIONS.json` %s\n"
              % (meta["census_sha16"], meta["scorer_sha16"], meta["registry_sha16"]))
