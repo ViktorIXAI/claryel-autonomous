@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # fetch-depth 0 so /commit/<sha> documentation links resolve against
+          # real local history instead of a network guess (scripts/check_links.py)
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -63,3 +67,5 @@ jobs:
         run: python3 scripts/rescore_v6_cells.py
       - name: link integrity
         run: python3 scripts/check_links.py
+      - name: link-checker contract (repo URL kinds classify correctly)
+        run: python3 scripts/qa/check_links_test.py

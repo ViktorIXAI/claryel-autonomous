@@ -8,6 +8,10 @@ jobs:
         python-version: ["3.11", "3.13"]
     steps:
       - uses: actions/checkout@v4
+        with:
+          # fetch-depth 0 so /commit/<sha> documentation links resolve against
+          # real local history instead of a network guess (scripts/check_links.py)
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "${{ matrix.python-version }}"
@@ -21,6 +25,8 @@ jobs:
         run: python benchmarks/privacy-boundary/test_gateway.py
       - name: link integrity (all markdown references resolve)
         run: python scripts/check_links.py
+      - name: link-checker contract (repo URL kinds classify correctly)
+        run: python scripts/qa/check_links_test.py
   reproduce:
     runs-on: ubuntu-latest
     steps:

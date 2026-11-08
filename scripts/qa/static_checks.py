@@ -16,6 +16,9 @@ TEST_FILES = sorted((ROOT / "harness").glob("*test.py")) + [
 EXTRA_SCRIPTS = [
     "scripts/sanity_data.py",
     "scripts/check_links.py",
+    # the link gate's own contract: repo URL kinds (blob/tree/commit/issues)
+    # must classify correctly, or documentation links go red on a green repo
+    "scripts/qa/check_links_test.py",
     "scripts/qa/validate_json.py",
 ]
 EXTRA_ARG_SCRIPTS = [
