@@ -4,6 +4,7 @@ One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. R
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| arc-easy | grok-4.7 | 300 | cac604a076e8b00a | hermes Hermes Agent v0.23.0+860.gf17db36.dirty (2026.9.24) · upstre toolsets off CLI (sampling params not exposed by the transport) | 289/300 = **96.3%** |
 | gsm8k | qwen3.8-flash-next-iq3_s-basalt | 1319 | 7dd0080ff23b8bc3 | temp 0.7, max_tokens 1200 | 1284/1319 = **97.3%** |
 | arc-easy | gpt-6.1-sol | 300 | cac604a076e8b00a | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport) | 290/300 = **96.7%** |
 | arc-challenge | qwen3.8-flash-next-iq3_s-basalt | 1172 | 523af08216f14256 | temp 0.7, max_tokens 1200 | 1129/1172 = **96.3%** |
