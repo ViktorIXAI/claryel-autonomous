@@ -81,3 +81,11 @@ if any exists, can actually be resolved.
    `bank|answer_key|expected_|/home/|/Users/|<LAN_IP-prefix>`: **0 matches** in each.
 6. **A 4-option MCQ has a 25 % guessing floor.** All three brains sit 71 pp above it, so the
    measured differences are not a floor artifact — they are just too small for this sample.
+7. **This doc is not yet P0-complete.** Item P0 (contour parity, added to `PUB-PLAN.md` on
+   2026-11-08, after this set's legs had already run) asks every published set for a second row
+   from the frozen contour runtime `0.0.2.56` over the same ids, with gate-fire, edit,
+   truncation, token and energy counts. No contour leg has been run against ARC-Easy, so the
+   three-arm table above is explicitly the *bare-brain* comparison; the parity row is an open
+   item, not an omission to be back-filled by re-labelling a bare row. P0's own order runs
+   GSM8K-300 first, so a contour row here depends on what that first attempt shows about whether
+   the frozen runtime can take a public MCQ task class at all.
