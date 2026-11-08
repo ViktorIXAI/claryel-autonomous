@@ -2713,3 +2713,57 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
 ## 2026-11-08 09:2x CET — percent digest: the merged row was a mixed-stamp artifact, corrected
 
 `scripts/run_digest.py` at 924c403 pooled every full-bank ledger in a workspace into ONE percent row and printed only the last contour stamp found, so the published "bank v6.6 / 0.0.2.53 / 12 arms / 94.2%" silently averaged arms of stamps 2.51-2.55. The tool now emits one row per contour stamp and labels the bank with its published version + sha16 read from `bank-version.json` (the workspace `bank.json` sha is a build artifact, not the bank identity), and refuses partial/loop-only arms. DIGEST.md regenerated; corrected per-stamp ladder (94.4 / 94.4 / 95.4 / 95.2 / 97.0 / 97.4%) is in `STATUS-20261108.md`. Reporting arithmetic only - no arm byte changed.
+
+## 2026-11-08 09:55 CET — PAIR-257 PRE-REGISTRATION: contour 0.0.2.57 candidate — claim-family loop selection RE-ARMED (rule frozen below BEFORE any arm row)
+
+- Nothing live, nothing pending (units/pgrep/queue.log empty). Chose P1 from the map-256
+  pointer: the loop pool's only seed-unstable cell is `D-ex6-l4` (2/3, fail-note family
+  `false_completion_claim`), and across the published 2.55/2.56-era draws the claim note hit
+  3/9 loop-task draws (pair-256 control x2, map-256 m56r58), every one strict-failing at
+  content 0.3. No adopted trigger matches the note (2.11 status_filter/plans, 2.43
+  banned_attempted, 2.56 second draw banned-only) — the line has NO selection path for its
+  only live loop-failure family. The 2.44 grammar was frozen UNMEASURED because that era's
+  control drew 0/18 claim rows; per the pair-248 meta-rule a NEW stamp re-arms the SAME
+  grammar under a NEW flag (`D_BEST2_CLAIM_V57`) and NEW events
+  (`contour:v57_d_best2_claim_fired` / `fix:v57_d_best2_claim_win`), offset 12289 (the frozen
+  grammar's own, no live competitor), one retry, strict-better-only, monotone; the 2.56 second
+  draw stays banned-only; v244_* bytes immutable.
+- Coverage proven by contract BEFORE any arm: `harness/gate_v71_claim_rearm_test.py` (35
+  checks: grammar + prefix-matching, per-stamp matrix 2.44/2.53/2.55/2.56 off -> 2.57 on,
+  frozen 2.44 flag on ONLY at 2.44, event-era discipline 2.44 vs 2.57, banned precedence on
+  multi-family rows, no third draw on claim rows, monotone fixtures, live run_one wiring at
+  2.56 silent and 2.57 firing) + gate_v49 extended (2.57 = 2.56 matrix + exactly
+  D_BEST2_CLAIM_V57). Whole CI contract list green locally (29 + gate_v49 + gate_versioning,
+  fails=0) and gate_fixers_test 12/12.
+- MEASURABILITY GATE: `scripts/live_target_check.py --csv
+  benchmarks/hard/v6-results/UNSTABLE-CELLS-V66-256.csv --task D-ex6-l4 --stamp 0.0.2.56
+  --min-fails 1` run BEFORE reserving the endpoint; the LIVE/DEAD answer and timestamp are
+  recorded in the pair-257 report (if DEAD/STALE, the pair is NOT launched and the stamp is
+  frozen UNMEASURED without burning the endpoint).
+- FROZEN RULE (the verdict is decided ONLY by this text): loop-only pair, six arms, reps
+  61/62/63 (sp1 seeds `sha256(task|rep)[:8]%999983`), serial queue on idle P2005 Basalt,
+  control = adopted 0.0.2.56 (`x56r61/62/63`), candidate = 0.0.2.57 (`x57r61/62/63`):
+  (a) MEASURED iff >=1 control row carries a `false_completion_claim` note AND strict-fails;
+      zero live target = UNMEASURED, never a pass (pair-233/238/242/245 mode).
+  (b) a conversion counts only when the candidate strict-PASSES where the control
+      strict-failed on the same (task,rep) AND the row carries contour:v57_d_best2_claim_fired
+      + fix:v57_d_best2_claim_win with the claim note ABSENT from the adopted trajectory.
+  (c) guards: zero v57 events in any control arm; zero v57 events outside kind==loop rows;
+      ZERO candidate loop strict-fails where the control strict-passed (monotonicity broken
+      in code -> close the stamp); no third draw (seed+16234) on claim-triggered rows;
+      frozen-band parity (zero 2.30-32/34-config/36/38/41/42/44/54 events either side);
+      adopted-family parity (v243/v56 banned draws fire only on banned notes in BOTH arms,
+      v31 only on its notes, J/B/K/C answer-line families identical within seed noise); stall
+      protocol (engine_stalled rows excluded, abort above 25% of the last 20); candidate not
+      >2 cells below control on the 18-cell loop pool.
+  (d) resolution: loop pool n=18/arm, on-target claim surface max ~3 cells -> cell-level
+      attribution decides; arm means published with the exact pooled sign test as context;
+      deltas under ~2 cells at three seeds UNRESOLVABLE and never the reason; pair-243 n=6
+      caveat restated (directional evidence at loop sizes).
+  ADOPT 0.0.2.57 iff (a) + >=1 evented conversion + all guards clean; otherwise freeze
+  D_BEST2_CLAIM_V57 to STAMP_REVISION == (2, 57) and publish the negative with win-level
+  detail. Energy per arm from gpu-power-p257.csv windows (per-arm -start/-end epochs); the
+  mechanism costs one extra loop reroll (~3 model calls) per claim-noted row only.
+- DIGEST rule boundary restated: this is a loop-only pair (6 of 77 tasks), run_digest.py
+  fail-closes by design, so NO whole-bank percent row for pair-257; bank-wide percent context
+  stays the map-256 row (75.0/77 = 97.4%, bank v6.6 ws `590503cf`, stamp 0.0.2.56).

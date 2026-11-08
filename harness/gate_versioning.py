@@ -454,6 +454,47 @@ CONTOUR_FEATURES = (
     # v56 events in control, frozen families silent; `D_BEST2_BANNED_RETRY2 =
     # contour_at_least(2, 56)` inherits forward; the line moves 0.0.2.55 -> 0.0.2.56,
     # `PAIR-256-V66.md`; gate_v70 pins grammar + wiring + matrix.)
+    (2, 57),  # LOOP CLAIM-FAMILY SELECTION re-armed (pair-257 candidate) under the pair-248
+    # meta-rule: a frozen-UNMEASURED stamp describes its era's data, and when later published
+    # draws make the class live a NEW stamp may re-arm the SAME grammar under a NEW flag and
+    # NEW event names, coverage re-proven by contract test before any arm. The 2.44 claim
+    # best-of-2 was UNMEASURED only because that day's control drew 0/18 claim rows; on the
+    # ADOPTED line the family is live: 3/9 published 2.55/2.56-era loop draws carried
+    # `false_completion_claim` and strict-failed at content 0.3 (pair-256 control 2/6, map-256
+    # m56r58 on D-ex6-l4), and UNSTABLE-CELLS-V66-256 names that family on the loop pool's only
+    # seed-unstable cell. No adopted trigger matches the note (2.11 status_filter/plans, 2.43
+    # banned_attempted, 2.56 second draw banned-only), so the line has no selection path for
+    # its only live loop-failure family. Mechanism = the 2.44 grammar re-armed under
+    # D_BEST2_CLAIM_V57: loop first-draw notes carrying a claim stem (prefix-matched) re-run the
+    # loop ONCE at seed+12289 (the frozen grammar's offset, no live claim retry competes with
+    # it), adopt only a strictly better trajectory, exactly one retry per task, precedence
+    # banned > claim > 2.11 for offset AND events; the 2.56 second draw stays banned-only.
+    # Events ONLY contour:v57_d_best2_claim_fired / fix:v57_d_best2_claim_win; the v244_* names
+    # belong to the 2.44 bytes forever. PRE-REGISTERED RULE (REVIEW-INBOX 2026-11-08 ~09:50 CET,
+    # BEFORE any x56r6x/x57r6x row; loop-only pair, six arms reps 61/62/63, control = adopted
+    # 0.0.2.56): (a) MEASURED iff >=1 control row carries a false_completion_claim note AND
+    # strict-fails (live_target_check on UNSTABLE-CELLS-V66-256.csv answered LIVE for D-ex6-l4
+    # fails>=1 BEFORE the endpoint was reserved; zero live target = UNMEASURED, never a pass);
+    # (b) a conversion counts only when the candidate strict-PASSES where the control
+    # strict-failed and the row carries contour:v57_d_best2_claim_fired +
+    # fix:v57_d_best2_claim_win with the claim note ABSENT from the adopted trajectory;
+    # (c) guards: zero v57 events in any control arm; zero v57 events outside kind==loop rows
+    # (the H single-shot scorer emits the same note string and must stay untouched); ZERO
+    # candidate loop strict-fails where the control strict-passed (monotonicity broken in code
+    # -> close the stamp); no third draw (seed+16234) on claim-triggered rows; frozen-band
+    # parity (zero 2.30-32/34-config/36/38/41/42/44/54 events either side); adopted-family
+    # parity (v243/v56 banned draws fire only on banned notes in BOTH arms; v31 only on its
+    # notes; J/B/K/C answer-line families identical within seed noise); stall protocol
+    # (engine_stalled rows excluded, abort above 25% of the last 20); candidate not >2 cells
+    # below control on the 18-cell loop pool; (d) resolution: loop pool n=18/arm, on-target
+    # claim surface max ~3 cells -> cell-level attribution decides, arm means published with
+    # the exact sign test as context, deltas under ~2 cells UNRESOLVABLE and never the reason;
+    # pair-243 n=6 caveat restated. ADOPT 0.0.2.57 iff (a) + >=1 evented conversion + all
+    # guards clean; otherwise freeze D_BEST2_CLAIM_V57 to STAMP_REVISION == (2, 57) and publish
+    # the negative with win-level detail. gate_v71 pins grammar, per-stamp flag matrix, event
+    # naming eras (2.44 -> v244_*, 2.57 -> v57_*), no-third-draw-on-claim, monotonicity and
+    # live run_one wiring at 2.56 (silent) and 2.57 (fires); gate_v49 extended with the 2.57
+    # matrix.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -535,8 +576,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # `gate_v65_b_echo_restore_test.py` pins the matrix (2.50 moves ZERO flags vs 2.48; 2.51 =
 # the 2.50 matrix + exactly B_ECHO_RESTORE; 2.34 keeps both grammars under the v234 event
 # name; 2.35-2.50 stay silent) and the per-stamp event naming.
-CURRENT_REVISION = (2, 56)
-CURRENT_STAMP = "0.0.2.56"
+CURRENT_REVISION = (2, 57)
+CURRENT_STAMP = "0.0.2.57"
 
 
 def _digits(value: str) -> list[int]:

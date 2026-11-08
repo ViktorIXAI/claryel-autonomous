@@ -352,6 +352,24 @@ D_BEST2_CLAIM_SEED = 12289
 # NEW v56_* event names; the v243_* bytes belong to the 2.43 measurement forever.
 D_BEST2_BANNED_RETRY2 = contour_at_least(2, 56)
 D_BEST2_BANNED_SEED2 = 16234
+# 0.0.2.57 (pair-257, rule pre-registered in REVIEW-INBOX 2026-11-08 09:5x CET BEFORE any
+# x56r6x/x57r6x row): the claim family RE-ARMED under the pair-248 meta-rule (a frozen-UNMEASURED
+# stamp is a claim about ITS era, not a permanent rejection: a NEW stamp may re-arm the grammar
+# under a NEW flag and NEW event names, coverage re-proven by contract test before any arm).
+# 2.44 was UNMEASURED only because that day's control line drew ZERO claim rows (0/18); on the
+# CURRENT line the family is live: 3/9 published 0.0.2.55/2.56-era draws of loop tasks carried
+# `false_completion_claim` and strict-failed at content 0.3 (pair-256 control x2, map-256 r58 on
+# D-ex6-l4), and map UNSTABLE-CELLS-V66-256 names that note family on the loop pool's ONLY
+# unstable cell. No adopted trigger matches it (2.11 status_filter/plans, 2.43 banned_attempted,
+# 2.56 second draw banned-only), so the line has NO selection path for its only live loop-failure
+# family. Re-arm of the SAME proven grammar under this flag: prefix-matched claim-note trigger,
+# the same seed offset 12289 (no live claim retry exists on the line, so the frozen grammar's
+# offset is reused, not its event names), exactly one retry, strict-better-only adoption,
+# monotone on passing cells. The second draw stays BANNED-family-only (the 2.56 bytes are
+# immutable); trigger precedence stays banned > claim > 2.11 for offset AND event naming.
+# v244_* events belong to the 2.44 published bytes forever; 2.57 arms emit ONLY v57_* names.
+# If pair-257 fails to convert or any guard breaks, freeze to STAMP_REVISION == (2, 57).
+D_BEST2_CLAIM_V57 = contour_at_least(2, 57)
 
 # ---- measurement stack identity (release 0.0.2.45, contour behavior unchanged) ----
 # Every published number had to be interpreted from prose: bank hash quoted in a
@@ -3527,6 +3545,16 @@ def d_best2_claim_applies(notes):
                                        for n in (notes or []))
 
 
+def d_best2_claim_v57_applies(notes):
+    """Claim family RE-ARMED at 0.0.2.57 under the pair-248 meta-rule (new stamp, new flag, new
+    event names; the frozen 2.44 trigger stays at exactly (2,44) and its bytes never move). Same
+    prefix-matched note set and seed offset as the 2.44 grammar — only the event names differ so
+    published 2.44 and 2.57 bytes stay distinguishable. Loop path only, so single-shot H rows
+    carrying the same note string stay structurally unreachable (the pair-245 H-parity lesson)."""
+    return bool(D_BEST2_CLAIM_V57) and any(str(n).split(":")[0] in D_BEST2_CLAIM_NOTES
+                                           for n in (notes or []))
+
+
 def c_best2_triggers(notes):
     """Pair-246: which C selection family a first-run score belongs to — (missed_options, set_mismatch).
 
@@ -4001,7 +4029,8 @@ def run_one(t, pos, done, st):
                         acct.fixes += 1
                         acct.ev("fix", "v47_c_best2_set_win" if _cset_trig else "v34_c_best2_win")
 
-    if cat == "D" and (D_BEST2 or D_BEST2_BANNED or D_BEST2_CLAIM) and t.get("kind") == "loop":
+    if (cat == "D" and (D_BEST2 or D_BEST2_BANNED or D_BEST2_CLAIM or D_BEST2_CLAIM_V57)
+            and t.get("kind") == "loop"):
         try:
             _c1d, _f1d, _n1d = LP.check_D_loop(t, rec)
         except Exception:
@@ -4015,12 +4044,18 @@ def run_one(t, pos, done, st):
         _s1d = (_c1d if _c1d is not None else 0) + (1 if _f1d else 0)
         _banned_trig = d_best2_banned_applies(_n1d)
         _claim_trig = (not _banned_trig) and d_best2_claim_applies(_n1d)
-        if _banned_trig or _claim_trig or d_best2_applies(_n1d):
+        # 2.57 re-arm: same family, own flag, own event names; the 2.44 frozen trigger and the
+        # 2.57 flag are mutually exclusive by construction, so one _claim_* branch names events.
+        _claim_trig57 = (not _banned_trig) and d_best2_claim_v57_applies(_n1d)
+        _claim_any = _claim_trig or _claim_trig57
+        if _banned_trig or _claim_any or d_best2_applies(_n1d):
             acct.ev("contour", "v243_d_best2_banned_fired" if _banned_trig
-                    else ("v244_d_best2_claim_fired" if _claim_trig else "v31_d_best2_fired"))
+                    else ("v57_d_best2_claim_fired" if _claim_trig57
+                          else ("v244_d_best2_claim_fired" if _claim_trig
+                                else "v31_d_best2_fired")))
             rec2 = {"agent_steps": [], "agent_final": None}
             _off = (D_BEST2_BANNED_SEED if _banned_trig
-                    else (D_BEST2_CLAIM_SEED if _claim_trig else 4096))
+                    else (D_BEST2_CLAIM_SEED if _claim_any else 4096))
             r2 = plan_loop(acct, t, seed + _off, rec2)
             _best_s, _best_n = _s1d, _n1d
             if r2["text"]:
@@ -4037,8 +4072,9 @@ def run_one(t, pos, done, st):
                         r = r2
                         acct.fixes += 1
                         acct.ev("fix", "v243_d_best2_banned_win" if _banned_trig
-                                else ("v244_d_best2_claim_win" if _claim_trig
-                                      else "v31_d_best2_win"))
+                                else ("v57_d_best2_claim_win" if _claim_trig57
+                                      else ("v244_d_best2_claim_win" if _claim_trig
+                                            else "v31_d_best2_win")))
                         _best_s, _best_n = _s2, _n2d
             if _banned_trig and D_BEST2_BANNED_RETRY2 and d_best2_banned_applies(_best_n):
                 # pair-256 second draw: same family, third seed offset, strict-better-only over

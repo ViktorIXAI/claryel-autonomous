@@ -263,7 +263,7 @@ _FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TAB
           "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
           "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR",
           "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE", "A_PCT_CHAIN", "C_PY_GROUND",
-          "H_UNKNOWN_PROMPT", "D_ID_NORMALIZE", "D_BEST2_BANNED_RETRY2")
+          "H_UNKNOWN_PROMPT", "D_ID_NORMALIZE", "D_BEST2_BANNED_RETRY2", "D_BEST2_CLAIM_V57")
 _missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
 ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
 _moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
@@ -401,6 +401,27 @@ ck((2, 56) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.56") == (2, 56)
    "the candidate registers a real contour change; the control keeps behavior 2.55")
 ck(GV.CURRENT_REVISION >= (2, 56) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
    "CURRENT follows the newest registered stamp (2.56) without pinning an exact tuple")
+
+# pair-257 matrix extension: 2.57 = the adopted 2.56 matrix + exactly D_BEST2_CLAIM_V57 (the
+# pair-248 meta-rule re-arm of the frozen 2.44 claim grammar under a NEW flag and NEW events);
+# the control 2.56 must NOT carry it, and the frozen D_BEST2_CLAIM stays off on the whole 2.5x
+# line including 2.57 (the re-arm never moves frozen bytes).
+g257 = load("0.0.2.57")
+ck(getattr(g256, "D_BEST2_CLAIM_V57") is False,
+   "the pair-257 candidate trigger is OFF on the adopted 2.56 control line")
+ck(getattr(g257, "D_BEST2_CLAIM_V57") is True, "the candidate trigger is ON at 2.57")
+_m257 = [f for f in _FLAGS if getattr(g257, f) != getattr(g256, f)
+         and f != "D_BEST2_CLAIM_V57"]
+ck(not _m257, "2.57 = the 2.56 matrix + exactly D_BEST2_CLAIM_V57 (%s)" % _m257)
+ck(getattr(g257, "D_BEST2_CLAIM") is False and getattr(g256, "D_BEST2_CLAIM") is False,
+   "the frozen 2.44 claim flag stays off on both pair-257 arms (event-era discipline)")
+ck(g257.D_BEST2_BANNED_RETRY2 is True and g257.D_BEST2_BANNED is True,
+   "0.0.2.57 builds on the adopted line: 2.43 banned best-of-2 and the 2.56 second draw inherit")
+ck((2, 57) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.57") == (2, 57)
+   and GV.behavior_tuple("0.0.2.56") == (2, 56),
+   "the candidate registers a real contour change; the control keeps behavior 2.56")
+ck(GV.CURRENT_REVISION >= (2, 57) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
+   "CURRENT follows the newest registered stamp (2.57) without pinning an exact tuple")
 
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"
