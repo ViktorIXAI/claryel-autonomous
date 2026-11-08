@@ -55,3 +55,26 @@ tuning on measured tasks (contour nudges are answer-form reminders, logged
 and adoption-gated); no cherry-picked windows (in-progress series are marked
 in-progress); no silent rescaling (scorer changes would be versioned and
 visible).
+
+## Dated scope clarification — 2026-11-08 (documentation audit #25)
+
+The `current contour line is 2.4` and `active F-grounding behavior is 2.2`
+statements above describe an **earlier documented release era**, not a
+verified current deployment. They are retained verbatim for historical
+provenance. At this review, [`README.md`](../README.md) reports Contour
+`0.0.2.55` **ADOPTED** after pair-252 on 2026-11-08; the source publication is
+[commit eb0e8436](https://github.com/ViktorIXAI/claryel-autonomous/commit/eb0e8436128e3f0392977d8e37ba98f3cbf2c85f).
+That is an **author-published adoption claim**, not an independently replayed
+raw-row audit, a verified deployment, or proof of a tagged software release.
+Candidate `0.0.2.54` is reported **UNMEASURED** (pair-251), not adopted.
+
+This section does **not** extend the older methodology's behavior-axis claims
+to later revisions. Determine the actual behavior revision, scorer, bank,
+seeds, physical environment and adoption criteria from the corresponding
+versioned paired artifacts before making a new comparison. The older
+[`versions/VERSIONS.md`](../versions/VERSIONS.md) chronology and
+[`CHANGELOG.md`](../CHANGELOG.md) remain historically scoped; their
+current-line reconciliation and exact-tip CI verification remain open in
+[issue #25](https://github.com/ViktorIXAI/claryel-autonomous/issues/25).
+No benchmark score, frozen artifact, or historical statement is changed by
+this explanatory addendum.
