@@ -25,12 +25,15 @@ Status checked: 2026-11-08 (historical snapshot; version and run status require 
 The next stamp `0.0.2.57` (loop claim-family selection re-arm) is FROZEN UNMEASURED to
 exactly 2.57 (2026-11-08, pair-257: the loop claim family's per-draw base rate is ~2.9%,
 so a 3+3 loop pair carried zero live target; live wiring evidence published in `pair-257/`).
-Working bank: v6.6 `5c86252b2ef2f422` — adopted-line bank baseline 97.4% (75.0/77 strict,
-map-256); bank v6.7 `b4464127dc5b5b97` (six answer-byte-proven raw-fairness defects fixed,
-found by the `raw_gold_disagreement` census) ran its frozen probe (2026-11-08) and STAYS
-PROVISIONAL: raw fairness failed on one cell/brain (grok 1/3 on H-ex6-03 — session-state
-statements in `claims`), every other fixed cell lifted to 3/3 on all arms; details in
-`benchmarks/hard/v6-results/bank-probe-67/PROBE-ROWS.md`.
+Working bank: **v6.8 `7a9527bf2e4ebbff`** — adopted 2026-11-08 after bank-probe-68:
+raw fairness FAIR (all three raw arms >=2/3 on every fixed task; the claims-wording fix
+flipped grok H-ex6-03 1/3→3/3) and no-new-loss CLEAN under probe-guard-v2 (one known-noise
+flip; the as-run probe-guard-v1 column said DIRTY — both columns and the guard version
+registry are published: `PROBE-GUARD-RULES.md`, `bank-probe-68/PROBE-ROWS.md`). Chain:
+v6.6 `5c86252b2ef2f422` superseded (its 97.4% = 75.0/77 strict map-256 baseline stays a
+v6.6-era figure, never quoted for v6.8); v6.7 `b4464127dc5b5b97` provisional chain of
+record (fails fairness under both guard versions); v6.5/v6.3 provisional per their frozen
+verdicts. First v6.8 full-bank percent arrives with the map-258 legs (queued).
 
 ## Current version
 

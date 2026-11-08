@@ -1,63 +1,63 @@
 {
-  "schema": "bank-versions-v1",
-  "identity_rule": "A published hard-bank version is one file whose bytes never change; a correction ships as a new file with a new version and a new sha16. This registry is the ONLY place a bank file name may be mapped to a version label: `bank-hard-v6.json` holds v6.1 bytes (it was edited in place before this rule existed - the identity trap that made pre-fix workspace bank copies silently possible), and it stays labelled v6.1 here forever. scripts/build_hard_v6_ws.py fails closed if a bank file does not appear in this registry with matching bytes, and stamps the resolved version into every generated workspace as `bank-version.json`, which `gate_run` writes into the run record.",
-  "sha_rule": "sha16 = sha256 of the file bytes, first 16 hex characters",
-  "banks": [
-    {
-      "file": "benchmarks/hard/bank-hard-v6.json",
-      "version": "v6.1",
-      "published_sha16": "9ec86dfca4a6f85f",
-      "status": "superseded",
-      "note": "published dev bank after the J/K corrections; the file name predates the version rule and carries the v6.1 bytes (identity trap, see bank-defect-v62-changelog.md). The pre-correction ladder-era workspace copy f52acbd15b3271e7 belongs to the older bank content and is NOT labelled v6.1."
-    },
-    {
-      "file": "benchmarks/hard/bank-hard-v6.2.json",
-      "version": "v6.2",
-      "published_sha16": "3c866ea7daae611c",
-      "status": "superseded",
-      "note": "A-ex6-03 gold from the printed rules; C-ex6-02 gold = executed truth table; K-ex6-03 FREE_SHIPPING value form. See bank-defect-v62-changelog.md."
-    },
-    {
-      "file": "benchmarks/hard/bank-hard-v6.3.json",
-      "version": "v6.3",
-      "published_sha16": "73f7a04d57473545",
-      "status": "provisional",
-      "note": "B-ex6-04 year-from-gold fix; superseded by v6.4 (second defect: value form)."
-    },
-    {
-      "file": "benchmarks/hard/bank-hard-v6.4.json",
-      "version": "v6.4",
-      "published_sha16": "85a0cd0dd6fa1fab",
-      "status": "superseded",
-      "note": "v6.3 plus one field: B-ex6-04 value-form hint (example deliberately not the gold). Raw-arm fairness probe FAIR 3/3 on all three arms (REVIEW-INBOX 2026-11-07 13:08 CET). Working 13:08-18:40 CET; superseded by v6.6 at the v6.6 promotion (status flip recorded 2026-11-07 19:44 CET - the promotion commit forgot to demote v6.4 and gate_v63's stale exact-count pin kept CI red until then; bank bytes untouched)."
-    },
-    {
-      "file": "benchmarks/hard/bank-hard-v6.5.json",
-      "version": "v6.5",
-      "published_sha16": "cd29d6ac94dc3267",
-      "status": "provisional",
-      "note": "H-ex6-01 scenario names the artifact the reference asks for (published defect, bank-defect-b04.md; open since v6.1). Probe rule frozen in REVIEW-INBOX 2026-11-07 17:35 CET before any p64r28+/p65r28+ row; promote to working iff contour pair lifts and the raw-arm fairness probe is FAIR (all arms >= 2/3)."
-    },
-    {
-      "file": "benchmarks/hard/bank-hard-v6.6.json",
-      "version": "v6.6",
-      "published_sha16": "5c86252b2ef2f422",
-      "status": "working",
-      "note": "v6.5 plus one field: H-ex6-01 claims-field spec (defect 2 from bank-probe-65: the inviting fragment '[утверждения как факт]' vs the frozen contract claims=[] — three independent raw brains 0/3, every zero ungrounded_claims). PROMOTED to working 2026-11-07 18:40 CET per the rule frozen in REVIEW-INBOX 18:22 CET before any row: fairness FAIR (subset 1b990aa6fc9a25dd at matched reps 28/29/30: codex 0/3->3/3, Grok 0/3->3/3, basalt 0/3->2/3 with the residual zero re-attributed to a NEW narrower mode), contour no-new-loss legs p66r28-30 3/3 PASS with v219_h_clear_claims scaffolding no longer needed (3/3 fired on v6.5 legs, 0/3 on v6.6), verify_bank_v66 PASS. v6.5 stays provisional (frozen verdict)."
-    },
-    {
-      "file": "benchmarks/hard/bank-hard-v6.7.json",
-      "version": "v6.7",
-      "published_sha16": "b4464127dc5b5b97",
-      "status": "provisional",
-      "note": "raw-fairness release: five answer-byte-proven defects fixed (census = scripts/raw_gold_disagreement.py on cadence-255, all raw brains failing every draw on bank v6.6): C-ex6-01 gold letters [B,C,F]->[C,F] (option B states the spare-battery rule reversed; 27/27 raw answers across three bank eras unanimously C,F); F-ex6-01 next id-form pin + grounded N2 danger line (spec vs gold value-form contradiction, dangling danger-list reference); H-ex6-00/H-ex6-03 claims-spec = the v6.6 H-ex6-01 class left unfixed in the shared template (9/9 ungrounded_claims zeros restating prompt facts); K-ex6-00/K-ex6-01 boolean yes/no pin + K-ex6-01 SERVICE Latin form with NON-gold example (gold 'hosting' not copyable from a Russian prompt). G-ex6-03 kept: honest attention test, gold derivable in-document. H-ex6-02/H-ex6-04 keep the old claims fragment (coverage limit; raw passes them, no defect evidence). Derivability census v6.7 (audit-v2): 35 atoms/15 tasks, down from 37/16 on v6.6. Promotion rule frozen in REVIEW-INBOX 2026-11-08 before any v6.7 row: raw subset probe reps 64/65/66 FAIR iff every arm >=2/3 per fixed task; contour no-new-loss subset legs 0.0.2.56 on matched reps; C-ex6-01 fairness additionally proven offline from saved cadence-255 bytes (prompt bytes unchanged). PROBE RUN 2026-11-08 (bank-probe-67, rule applied as written): stays PROVISIONAL. Fairness NOT FAIR (grok H-ex6-03 1/3: session-state statements inside claims; wording iteration queued for v6.7b); all other cells lifted to 3/3 on every raw arm; C-ex6-01 additionally 3/3x3 offline from saved cadence-255 bytes. Contour no-new-loss DIRTY (C fairness flip 3/3->0/3 with scaffolding-B-inclusion published as a finding; one F no_json lottery)."
-    },
-    {
-      "file": "benchmarks/hard/bank-hard-v6.8.json",
-      "version": "v6.8",
-      "published_sha16": "7a9527bf2e4ebbff",
-      "status": "provisional",
-      "note": "v6.7 + claims-wording iteration on H-ex6-00/H-ex6-03 only (session-state statements excluded from claims: probe-67 fairness failed exactly there - grok counted its own context as confirming data, 1/3). C-ex6-01 gold fix and all v6.7 value-form fixes carried verbatim. Promotion rule frozen in REVIEW-INBOX 2026-11-08 ~12:40 CET BEFORE any v6.8 row: fairness gate unchanged (every arm >=2/3 per fixed task); contour no-new-loss guard REPAIRED per the probe-67 lesson: C-ex6-01 excluded from totals and per-task deltas (fairness flip on a cell whose bank fix is raw-proven 18/18+27/27; contour scaffolding bias published as a separate contour debt, it must not gate a provably fair bank); remaining 5 tasks totals floor + |delta|<=1 + no new note family vs the published c66r64-66 legs."
-    }
-  ]
+ "schema": "bank-versions-v1",
+ "identity_rule": "A published hard-bank version is one file whose bytes never change; a correction ships as a new file with a new version and a new sha16. This registry is the ONLY place a bank file name may be mapped to a version label: `bank-hard-v6.json` holds v6.1 bytes (it was edited in place before this rule existed - the identity trap that made pre-fix workspace bank copies silently possible), and it stays labelled v6.1 here forever. scripts/build_hard_v6_ws.py fails closed if a bank file does not appear in this registry with matching bytes, and stamps the resolved version into every generated workspace as `bank-version.json`, which `gate_run` writes into the run record.",
+ "sha_rule": "sha16 = sha256 of the file bytes, first 16 hex characters",
+ "banks": [
+  {
+   "file": "benchmarks/hard/bank-hard-v6.json",
+   "version": "v6.1",
+   "published_sha16": "9ec86dfca4a6f85f",
+   "status": "superseded",
+   "note": "published dev bank after the J/K corrections; the file name predates the version rule and carries the v6.1 bytes (identity trap, see bank-defect-v62-changelog.md). The pre-correction ladder-era workspace copy f52acbd15b3271e7 belongs to the older bank content and is NOT labelled v6.1."
+  },
+  {
+   "file": "benchmarks/hard/bank-hard-v6.2.json",
+   "version": "v6.2",
+   "published_sha16": "3c866ea7daae611c",
+   "status": "superseded",
+   "note": "A-ex6-03 gold from the printed rules; C-ex6-02 gold = executed truth table; K-ex6-03 FREE_SHIPPING value form. See bank-defect-v62-changelog.md."
+  },
+  {
+   "file": "benchmarks/hard/bank-hard-v6.3.json",
+   "version": "v6.3",
+   "published_sha16": "73f7a04d57473545",
+   "status": "provisional",
+   "note": "B-ex6-04 year-from-gold fix; superseded by v6.4 (second defect: value form)."
+  },
+  {
+   "file": "benchmarks/hard/bank-hard-v6.4.json",
+   "version": "v6.4",
+   "published_sha16": "85a0cd0dd6fa1fab",
+   "status": "superseded",
+   "note": "v6.3 plus one field: B-ex6-04 value-form hint (example deliberately not the gold). Raw-arm fairness probe FAIR 3/3 on all three arms (REVIEW-INBOX 2026-11-07 13:08 CET). Working 13:08-18:40 CET; superseded by v6.6 at the v6.6 promotion (status flip recorded 2026-11-07 19:44 CET - the promotion commit forgot to demote v6.4 and gate_v63's stale exact-count pin kept CI red until then; bank bytes untouched)."
+  },
+  {
+   "file": "benchmarks/hard/bank-hard-v6.5.json",
+   "version": "v6.5",
+   "published_sha16": "cd29d6ac94dc3267",
+   "status": "provisional",
+   "note": "H-ex6-01 scenario names the artifact the reference asks for (published defect, bank-defect-b04.md; open since v6.1). Probe rule frozen in REVIEW-INBOX 2026-11-07 17:35 CET before any p64r28+/p65r28+ row; promote to working iff contour pair lifts and the raw-arm fairness probe is FAIR (all arms >= 2/3)."
+  },
+  {
+   "file": "benchmarks/hard/bank-hard-v6.6.json",
+   "version": "v6.6",
+   "published_sha16": "5c86252b2ef2f422",
+   "status": "superseded",
+   "note": "v6.5 plus one field: H-ex6-01 claims-field spec (defect 2 from bank-probe-65: the inviting fragment '[утверждения как факт]' vs the frozen contract claims=[] — three independent raw brains 0/3, every zero ungrounded_claims). PROMOTED to working 2026-11-07 18:40 CET per the rule frozen in REVIEW-INBOX 18:22 CET before any row: fairness FAIR (subset 1b990aa6fc9a25dd at matched reps 28/29/30: codex 0/3->3/3, Grok 0/3->3/3, basalt 0/3->2/3 with the residual zero re-attributed to a NEW narrower mode), contour no-new-loss legs p66r28-30 3/3 PASS with v219_h_clear_claims scaffolding no longer needed (3/3 fired on v6.5 legs, 0/3 on v6.6), verify_bank_v66 PASS. v6.5 stays provisional (frozen verdict). SUPERSEDED by v6.8 2026-11-08 (probe-guard-v2 re-verdict of bank-probe-68: FAIR + CLEAN). The 97.4% (75.0/77 strict, map-256) baseline stays a v6.6-era figure, never quoted for v6.8."
+  },
+  {
+   "file": "benchmarks/hard/bank-hard-v6.7.json",
+   "version": "v6.7",
+   "published_sha16": "b4464127dc5b5b97",
+   "status": "provisional",
+   "note": "raw-fairness release: five answer-byte-proven defects fixed (census = scripts/raw_gold_disagreement.py on cadence-255, all raw brains failing every draw on bank v6.6): C-ex6-01 gold letters [B,C,F]->[C,F] (option B states the spare-battery rule reversed; 27/27 raw answers across three bank eras unanimously C,F); F-ex6-01 next id-form pin + grounded N2 danger line (spec vs gold value-form contradiction, dangling danger-list reference); H-ex6-00/H-ex6-03 claims-spec = the v6.6 H-ex6-01 class left unfixed in the shared template (9/9 ungrounded_claims zeros restating prompt facts); K-ex6-00/K-ex6-01 boolean yes/no pin + K-ex6-01 SERVICE Latin form with NON-gold example (gold 'hosting' not copyable from a Russian prompt). G-ex6-03 kept: honest attention test, gold derivable in-document. H-ex6-02/H-ex6-04 keep the old claims fragment (coverage limit; raw passes them, no defect evidence). Derivability census v6.7 (audit-v2): 35 atoms/15 tasks, down from 37/16 on v6.6. Promotion rule frozen in REVIEW-INBOX 2026-11-08 before any v6.7 row: raw subset probe reps 64/65/66 FAIR iff every arm >=2/3 per fixed task; contour no-new-loss subset legs 0.0.2.56 on matched reps; C-ex6-01 fairness additionally proven offline from saved cadence-255 bytes (prompt bytes unchanged). PROBE RUN 2026-11-08 (bank-probe-67, rule applied as written): stays PROVISIONAL. Fairness NOT FAIR (grok H-ex6-03 1/3: session-state statements inside claims; wording iteration queued for v6.7b); all other cells lifted to 3/3 on every raw arm; C-ex6-01 additionally 3/3x3 offline from saved cadence-255 bytes. Contour no-new-loss DIRTY (C fairness flip 3/3->0/3 with scaffolding-B-inclusion published as a finding; one F no_json lottery). Re-admission check under probe-guard-v2: still fails fairness gate (a) on v6.7 bytes (grok 1/3 H-ex6-03) - stays provisional; v2 never relaxes (a)."
+  },
+  {
+   "file": "benchmarks/hard/bank-hard-v6.8.json",
+   "version": "v6.8",
+   "published_sha16": "7a9527bf2e4ebbff",
+   "status": "working",
+   "note": "v6.7 + claims-wording iteration on H-ex6-00/H-ex6-03 only (session-state statements excluded from claims: probe-67 fairness failed exactly there - grok counted its own context as confirming data, 1/3). C-ex6-01 gold fix and all v6.7 value-form fixes carried verbatim. Promotion rule frozen in REVIEW-INBOX 2026-11-08 ~12:40 CET BEFORE any v6.8 row: fairness gate unchanged (every arm >=2/3 per fixed task); contour no-new-loss guard REPAIRED per the probe-67 lesson: C-ex6-01 excluded from totals and per-task deltas (fairness flip on a cell whose bank fix is raw-proven 18/18+27/27; contour scaffolding bias published as a separate contour debt, it must not gate a provably fair bank); remaining 5 tasks totals floor + |delta|<=1 + no new note family vs the published c66r64-66 legs. PROBE RUN 2026-11-08 (bank-probe-68): raw fairness FAIR 18/18 arm-cells >=2/3 (grok H-ex6-03 1/3->3/3, the claims-wording fix hit its exact defect). Contour guard surface 14/15: one flip (H03 r64 unknown_missing; quote-hallucination draw, contour gates behaved; same mode observed on probe-67 basalt RAW for the same task). As-run probe-guard-v1: DIRTY. probe-guard-v2 (frozen same day with the map-256 ~5%/draw calibration; version registry + delta table in PROBE-GUARD-RULES.md): CLEAN. PROMOTED to working 2026-11-08 13:0x CET; both verdict columns published in bank-probe-68/PROBE-ROWS.md."
+  }
+ ]
 }
