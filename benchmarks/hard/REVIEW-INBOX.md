@@ -2559,3 +2559,46 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
 - NEXT (pre-registered): rebuild UNSTABLE-CELLS-V66.md on the 2.55 line (the current map is the
   2.53 line) before any new contour hypothesis; the B single-cell draws feed the map. Next cadence
   due after 5 further measured stamps.
+
+== eval-system work 2026-11-08 07:17 CET (no arm launched; CI + measurement tooling) ==
+- **CI link gate repaired (three jobs were red).** devsecops/static-qa, contour self-tests and
+  hard-v6 scoring contracts all failed on the SAME step: `scripts/check_links.py` reported
+  `docs/methodology.md`'s commit link and issue #25 as "path not in git". Root cause: the checker
+  ran `link.split("/blob/main/")[-1]` on every same-repo github.com URL, so a repo OBJECT url was
+  compared against tracked file paths. Both targets exist (issue #25 open, commit in history).
+  Now same-repo links are classified first: blob/tree/raw -> tracked path, commit -> sha must
+  resolve in local git (malformed sha = finding; shallow clone + online -> URL fallback;
+  offline + missing = reported, never silent), issues/pull/releases -> network when online and
+  printed as SKIP offline. Relative links/anchors/external handling unchanged. The three jobs now
+  check out with `fetch-depth: 0` so commit references verify against real history.
+- **Non-vacuity proof:** `scripts/qa/check_links_test.py` (4 case groups on throwaway temp repos)
+  run against the PRE-fix checker via `SAH_LINK_CHECKER` reports 5 failures, including exactly the
+  two documentation links that broke CI; against the fixed checker it reports 0. Enrolled in
+  static_checks.py, selftest.yml and scoring-contracts.yml. Verified on GitHub: run for `f64a259`
+  = contour self-tests / devsecops / secret-scan / hard-v6 scoring contracts / pages all success,
+  where the previous commit `439d661` had three of those failing.
+- **Measurability map rebuilt on the adopted line 0.0.2.55** (pre-registered NEXT above). New
+  parameterized generator `scripts/unstable_cells_v62.py` -> `UNSTABLE-CELLS-V66-255.md` (+ CSV).
+  Six arms of the adopted line, one seed each: pair-252 candidate legs x55r48/49/50 + cadence-255
+  contour legs q55r52/53/54, all stamped `0.0.2.55`, bank v6.6 published `5c86252b2ef2f422`
+  (ws copy `590503cf1701a6ce`), scorer contract v6.2 `c8c0c7dd114dfc32`, seed protocol sp1,
+  harness git `5f7c167`. Guards fail closed on stamp drift, partial arms, stack disagreement,
+  unpublished bank bytes and blank-answer joins; the generator refuses a bank whose bytes do not
+  match its `BANK-VERSIONS.json` entry.
+- **Map verdict (numbers regenerated, not typed): 65/77 cells strict-pass in all six arms,
+  ZERO stable fails, 12 seed-unstable.** Cells with >=2 failures: `D-ex6-l0` (loop) 4/6 with a
+  stable family `banned_attempted:SEND_EMAIL` x2 while `contour:v243_d_best2_banned_fired` fired on
+  all six draws, and `H-ex6-04` 4/6 with two DIFFERENT causes (`unknown_missing`+`requires_missing`
+  on x55r48, `no_json` on q55r52) so it is not a single-family hypothesis. Everything else is a
+  single draw at the ~5% noise floor. No stable fail means no chronic defect left on this bank: the
+  remaining gap on v6.6 is variance plus one partially-handled loop class, not a bank ceiling and
+  not a blind spot.
+- **Pre-launch measurability gate is now mechanical:** `scripts/live_target_check.py` reads the map
+  CSV and answers LIVE / DEAD / STALE-MAP before an endpoint is reserved (exit 0/3/1). Verified
+  against the new map: `D-ex6-l0` and `H-ex6-04` LIVE (>=2 fails), `B-ex6-03` DEAD at
+  `--min-fails 2`, and a `--stamp 0.0.2.53` query correctly refused as a stale map. The superseded
+  2.53 map carries a dated pointer and is kept byte-unchanged as the pair-251-era record.
+- **Nothing launched this run**: no new arm rows, no DIGEST row (no arm batch). The next contour
+  candidate against `D-ex6-l0` must be pre-registered here BEFORE its first arm row and must clear
+  `live_target_check.py` on this map; the loop-pool rule from pair-243 (selection, not prevention
+  nudges) still applies.

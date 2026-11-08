@@ -69,3 +69,14 @@ jobs:
         run: python3 scripts/check_links.py
       - name: link-checker contract (repo URL kinds classify correctly)
         run: python3 scripts/qa/check_links_test.py
+      - name: adopted-line live-rate map is reproducible from the published arms
+        run: |
+          python3 scripts/unstable_cells_v62.py \
+            --bank benchmarks/hard/bank-hard-v6.6.json --stamp 0.0.2.55 \
+            --check --out benchmarks/hard/v6-results/UNSTABLE-CELLS-V66-255.md \
+            benchmarks/hard/v6-results/pair-252/x55r48 \
+            benchmarks/hard/v6-results/pair-252/x55r49 \
+            benchmarks/hard/v6-results/pair-252/x55r50 \
+            benchmarks/hard/v6-results/cadence-255/q55r52 \
+            benchmarks/hard/v6-results/cadence-255/q55r53 \
+            benchmarks/hard/v6-results/cadence-255/q55r54
