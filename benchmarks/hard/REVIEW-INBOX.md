@@ -2517,3 +2517,20 @@ must show up as lifts in the RAW arms, and if raw arms do not improve on the cla
 bank versus v6.4-era cadence-249, the bank is the problem, not the models. Percent
 digest row via scripts/run_digest.py naming bank sha16 + stamp. No contour hypothesis
 from this cadence before the stability map is rebuilt on the 2.55 line.
+
+== cadence-255 addendum 2026-11-08 04:2x CET (relaunch record, written before scoring) ==
+- Grok leg (stage 4) transport was dead at leg start: 186/213 rows rc1, empty answers at
+  a uniform ~1.2 s; the last 27 rows (G/J block, ~03:10-03:12 CET) succeeded at normal
+  6-19 s. Signature = expired xai-oauth access token that self-refreshed mid-leg, not a
+  model failure (verified: one-shot probe now returns normally). Per the skill rule the
+  dead rows had to be PURGED (backup answers-grok.jsonl.bad-rc1.bak) because the raw
+  runner's done-set keys on (task,rep) — leaving them would make those seeds unretryable.
+- Relaunch 04:15 CET via systemd-run --user --collect --unit=parb-c255grok (PATH export
+  + command -v fail-closed inside the go-script); 186 rows redone, 27 valid rows kept;
+  ETA ~1.7 h from cadence-249 per-task seconds (grok leg windows: cloud-grokretry-*.epoch).
+- raw_v6.py tooling fix (same commit, additive): transport stderr now stored in an `err`
+  row field; abort with rc3 after 5 consecutive empty answers so a dead token cannot
+  burn a whole leg window again. No scoring arithmetic touched; done-set semantics
+  unchanged.
+- Sampler c255 stopped 04:1x CET (all four arm windows covered in gpu-power-c255.csv;
+  cloud legs consume no GPU, retry needs no sampler).
