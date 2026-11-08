@@ -63,12 +63,26 @@ exactly — asserted for every arm below.
 | gsm8k-contour-escalation-run-record.json | 40 | `c04c6872de8ee3d2` |
 | gsm8k-contour-escalation-stats.json | 24 | `1bbfa5f23461a217` |
 | gsm8k-contour-escalation-ws-identity.json | 36 | `678a8d65b6d7040c` |
+| gsm8k-contour-matched-answers.jsonl | 300 | `f171767f0848d1c5` |
+| gsm8k-contour-matched-bank-version.json | 6 | `e5d1738b14ffc4e5` |
+| gsm8k-contour-matched-ledger.jsonl | 300 | `c036d32b5e5bac1a` |
+| gsm8k-contour-matched-plan.json | 1 | `8d98d11112bb738b` |
+| gsm8k-contour-matched-results.jsonl | 300 | `eb9660c74b337484` |
+| gsm8k-contour-matched-run-record.json | 45 | `1d260013ceb354e1` |
+| gsm8k-contour-matched-stats.json | 28 | `1eef1c20e0b26658` |
+| gsm8k-contour-matched-ws-identity.json | 41 | `175da640f32b9fbd` |
 Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
 
 * `gpqa-diamond` 198 ids `af73cc064d4d8529`, ws bank sha16 `1b30f3cc51204d03`
 * `arc-challenge` first 300 of 1172 ids `523af08216f14256`, ws bank sha16 `e56146d09263ca89`
-* `arc-easy` first 300 of 2376 ids `cac604a076e8b00a`, ws bank sha16 `055b650afd938842`
-* `gsm8k` first 300 of 1319 ids `7dd0080ff23b8bc3`, ws bank sha16 `d0f6180e96b14c44`
+* `arc-easy` first 300 of 2376 ids `cac604a076e8b00a`, ws bank sha16 `6c473c1f8dc4469f`
+* `gsm8k` first 300 of 1319 ids `7dd0080ff23b8bc3`, ws bank sha16 `ea10c530de68db21`
+
+Index correction 2026-11-09, no measurement changes: the `arc-easy` and `gsm8k` lines above used to
+carry the sha16 of each arm's `*-bank-version.json` **file** (`055b650afd938842`,
+`d0f6180e96b14c44`) instead of the workspace `bank.json` hash. Both values were re-measured from the
+workspace files (escalation and matched ws agree per set, and every `*-bank-version.json` shipped
+here names the same hash), so escalation and matched legs of one set are cell-comparable.
 
 All arms: contour stamp `0.0.2.56` (behavior 2.56), checker contract `pub-checkers-v2`, endpoint
 `<LAN_IP>:8080`.
@@ -86,7 +100,7 @@ Verified re-score of the published copies:
 gpqa-diamond     matched 139/198 = 70.2 %   escalation 91/198 = 46.0 %
 arc-challenge    matched 291/300 = 97.0 %   escalation 283/300 = 94.3 %
 arc-easy         matched 289/300 = 96.3 %   escalation 290/300 = 96.7 %
-gsm8k            (matched leg running)      escalation 290/300 = 96.7 %
+gsm8k            matched 294/300 = 98.0 %   escalation 290/300 = 96.7 %
 ```
 
 Reproduce one row:
