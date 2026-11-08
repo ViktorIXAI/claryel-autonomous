@@ -1,5 +1,12 @@
 # Changelog
 
+## Documentation audit addendum — 2026-11-08 (issue #25; source-linked snapshot)
+
+As of the 2026-11-08 review, the project README **reports** Contour `0.0.2.56` as ADOPTED after pair-256, published in [commit 8ada24a](https://github.com/ViktorIXAI/claryel-autonomous/commit/8ada24abebddb009cdf3706b62c596fe632545d6). The commit describes a **loop-only** paired pool of 18 cases, 14/18 to 18/18, with two mechanism-linked conversions and two explicitly labeled lottery resamples. These are author-published observations, **not** an independently replayed full-bank result, a general performance guarantee, a verified production deployment or a tagged release. The preceding 0.0.2.55 adoption claim is a historical snapshot, not the current-line claim at this review time.
+
+The chronological entries below (including the 0.0.2.8 heading) remain intact as historical release notes; they are **not** a complete ledger of every later Contour revision. For contemporaneous version claims and evidence see [README](README.md), [version chronology](versions/VERSIONS.md), [methodology](docs/methodology.md), and the [documentation audit](https://github.com/ViktorIXAI/claryel-autonomous/issues/25). No raw benchmark rows, scoring rules, or earlier release text are changed by this addendum. The current-line statement requires re-review if newer commits supersede it.
+
+
 Contour (harness) generations. Rejected generations are listed under
 **Rejected** — they are part of the record, not hidden history.
 
