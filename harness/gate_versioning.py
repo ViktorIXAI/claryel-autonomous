@@ -494,7 +494,21 @@ CONTOUR_FEATURES = (
     # the negative with win-level detail. gate_v71 pins grammar, per-stamp flag matrix, event
     # naming eras (2.44 -> v244_*, 2.57 -> v57_*), no-third-draw-on-claim, monotonicity and
     # live run_one wiring at 2.56 (silent) and 2.57 (fires); gate_v49 extended with the 2.57
-    # matrix.)
+    # matrix. PAIR-257 VERDICT 2026-11-08 10:05 CET: UNMEASURED per rule (a) — six loop-only
+    # arms (x56r61/62/63 vs x57r61/62/63, reps 61/62/63, idle endpoint, zero stalls, zero blank
+    # joins, stamp==behavior in all 36 rows) drew ZERO control claim rows (0/18): the sixth
+    # zero-opportunity pair after 233/238/242/245/251; the family's rate over ALL published loop
+    # draws is 30/1050 ~= 2.9%/draw, so P(0 control claim rows at 18 draws) ~ 0.6 was on record
+    # BEFORE launch (design finding: low-rate note families need larger rep budgets than
+    # loop-only pairs carry). Live wiring proven: candidate x57r63 D-ex6-l4 (control strict-
+    # passed) carried the claim first draw, fired contour:v57_d_best2_claim_fired at offset
+    # 12289 and won with fix:v57_d_best2_claim_win, adopted trajectory claim-free, no third
+    # draw. All guards clean (zero v57 in control, zero outside loop rows, zero loop P->F,
+    # frozen bands silent, v243/v56 parity within draw noise). Loop pool 16/18 -> 17/18, W1/L0
+    # (the win is an unevented resample, published as lottery), cost +12 calls/+4188 ptok/+0.54
+    # Wh side, not attributed to a measured effect. NOT adopted — UNMEASURED is never a pass;
+    # `D_BEST2_CLAIM_V57` frozen to `STAMP_REVISION == (2, 57)`; the line stays 0.0.2.56, see
+    # `PAIR-257-V66.md`.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as

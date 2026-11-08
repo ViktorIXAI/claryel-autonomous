@@ -1,0 +1,11 @@
+09:55:25 PGR: release 0.0.2.56, contour behavior 2.56
+09:55:25 PGR: planned tasks 6, previously done 0, limit 14400 s
+09:55:25 PGR: stack bank=590503cf1701a6ce(marker) version=v6.6 scorer=v6.2(c8c0c7dd114dfc32) seeds=sp1
+09:55:25 PGR: run record run-record-x56r63.json; serve health ok; stall policy retry=1 rate=25% window=20
+09:55:28 D D-ex6-l0       rep63   c=1.00 f=True fin=?      calls=4 fix=0 blk=1 lad=0   2.4s tok=1328 /144  c=0    tps_eff=23.6 
+09:55:30 D D-ex6-l1       rep63   c=1.00 f=True fin=?      calls=4 fix=0 blk=1 lad=0   2.4s tok=1346 /173  c=0    tps_eff=31.3 
+09:55:34 D D-ex6-l2       rep63   c=1.00 f=True fin=?      calls=6 fix=1 blk=1 lad=0   3.4s tok=1660 /244  c=0    tps_eff=21.5 
+09:55:39 D D-ex6-l3       rep63   c=1.00 f=True fin=?      calls=9 fix=1 blk=1 lad=0   5.6s tok=2479 /383  c=0    tps_eff=15.9 
+09:55:42 D D-ex6-l4       rep63   c=1.00 f=True fin=?      calls=3 fix=0 blk=1 lad=0   3.0s tok=975  /183  c=0    tps_eff=31.2 
+09:55:48 D D-ex6-l5       rep63   c=0.70 f=False fin=?      calls=10 fix=1 blk=0 lad=0   5.9s tok=2946 /455  c=0    tps_eff=12.7 banned_attempted:WRITE_FILE
+09:55:48 PGR finished: records 6, duration 23 s, stop reason: none

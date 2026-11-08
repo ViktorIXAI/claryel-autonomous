@@ -368,8 +368,9 @@ D_BEST2_BANNED_SEED2 = 16234
 # monotone on passing cells. The second draw stays BANNED-family-only (the 2.56 bytes are
 # immutable); trigger precedence stays banned > claim > 2.11 for offset AND event naming.
 # v244_* events belong to the 2.44 published bytes forever; 2.57 arms emit ONLY v57_* names.
-# If pair-257 fails to convert or any guard breaks, freeze to STAMP_REVISION == (2, 57).
-D_BEST2_CLAIM_V57 = contour_at_least(2, 57)
+# PAIR-257 VERDICT 2026-11-08: UNMEASURED by rule (a) — zero control loop rows drew the claim
+# note (0/18 fresh draws); the flag is FROZEN to exactly (2,57) in the STAMP_REVISION region
+# below (the 2.44 pin pattern), never inherits forward. Notes/seed constants stay here.
 
 # ---- measurement stack identity (release 0.0.2.45, contour behavior unchanged) ----
 # Every published number had to be interpreted from prose: bank hash quoted in a
@@ -1734,6 +1735,23 @@ LOOP_POLICY_TAG = "ПОЛИТИКА ЗАДАЧИ (дословно из усло
 # third offset and won with zero claim notes in the adopted trajectory; zero v244 events outside
 # loop rows, zero loop P->F, zero frozen-band events, adopted-2.43 parity intact (PAIR-245-V61.md).
 D_BEST2_CLAIM = STAMP_REVISION == (2, 44)
+# 0.0.2.57 (pair-257, rule pre-registered REVIEW-INBOX 2026-11-08 09:55 CET + run_pair257.sh
+# header, before any x56r6x/x57r6x row): the claim-family selection re-armed under the pair-248
+# meta-rule was UNMEASURED by rule (a) — ZERO control (x56) loop rows drew the claim note in
+# three fresh seeds (0/18 live draws; the family's published base rate is 30/1050 loop rows ~=
+# 2.9% per draw, so a 3+3-arm loop pair carried ~0.6 zero-opportunity probability before launch —
+# published as a design finding, sixth zero-opportunity pair after 233/238/242/245/251). NOT a
+# measured loss, never a pass: NOT adopted, frozen to exactly this stamp (contour_at_least would
+# smuggle an unproven trigger forward and poison the adoption rule). Live wiring IS proven: the
+# candidate's own claim draw at D-ex6-l4 r63 (control strict-passed) fired offset 12289 and won
+# with the claim note ABSENT from the adopted trajectory, no third draw paid; zero v57 events in
+# control, zero v57 outside loop rows, zero loop P->F, frozen bands silent, adopted-family
+# parity intact; loop pool 16/18 -> 17/18 (the single win is an unevented r63/D-ex6-l5 resample,
+# published as lottery, never attributed), W1/L0 p=1.0. Energy 2.20 vs 2.74 Wh side totals
+# (+0.54 Wh = the one claim retry plus 2 extra banned-draw draws, not attributed). A future
+# re-arm needs a NEW stamp/flag/events AND either a measured-higher family rate or a rep budget
+# that makes P(zero live target) small (PAIR-257-V66.md meta-note).
+D_BEST2_CLAIM_V57 = STAMP_REVISION == (2, 57)
 # 0.0.2.54 (pair-251, pre-registered REVIEW-INBOX 2026-11-07 23:56 CET + run_pair251.sh header,
 # before any w53r4x/w54r4x row): H unknown slot filled VERBATIM from the prompt's own denial
 # sentence when the model left it null (H-ex6-03 class; the frozen 2.28 grammar is signature-bound

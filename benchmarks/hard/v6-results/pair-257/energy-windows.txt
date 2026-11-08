@@ -1,0 +1,7 @@
+pair-257 per-arm energy windows (scripts/gpu_energy.py gpu-power-p257.csv --start <epoch> --end <epoch>;
+sampler unit parb-p257sampler, 146 samples, stopped at queue end; epochs from <rid>-start/-end.epoch):
+x56r61  0.66 Wh (2372 J)   x57r61  0.97 Wh (3499 J)
+x56r62  0.69 Wh (2482 J)   x57r62  0.69 Wh (2476 J)
+x56r63  0.85 Wh (3061 J)   x57r63  1.08 Wh (3879 J)
+side totals: control(2.56) 2.20 Wh, candidate(2.57) 2.74 Wh (+0.54 Wh: one claim retry plus two
+extra banned-draw draws on other rows - draws differ between arms, not attributed to the mechanism).

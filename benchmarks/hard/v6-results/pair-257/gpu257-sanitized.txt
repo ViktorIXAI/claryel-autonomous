@@ -1,0 +1,11 @@
+#!/bin/bash
+# pair-257 GPU sampler: fresh csv for THIS pair only; stopped when queue shows pair257 done.
+CSV=<LOCAL_PATH>/parb-b66-contour/gpu-power-p257.csv
+while grep -q "pair257 done" <LOCAL_PATH>/parb-b66-contour/queue.log 2>/dev/null; do sleep 5; done
+for i in $(seq 1 100000); do
+  grep -q "pair257 done" <LOCAL_PATH>/parb-b66-contour/queue.log && break
+  line=$(ssh -o ConnectTimeout=3 -i ~/.ssh/hermes-netfix claryel@<LAN_IP> \
+    "nvidia-smi --query-gpu=power.draw,utilization.gpu,memory.used,temperature.gpu --format=csv,noheader,nounits" 2>/dev/null | tr -d ' ')
+  [ -n "$line" ] && echo "$(date +%s),$line" >> "$CSV"
+  sleep 0.5
+done

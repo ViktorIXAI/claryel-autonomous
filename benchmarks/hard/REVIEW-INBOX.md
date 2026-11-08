@@ -2767,3 +2767,33 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
 - DIGEST rule boundary restated: this is a loop-only pair (6 of 77 tasks), run_digest.py
   fail-closes by design, so NO whole-bank percent row for pair-257; bank-wide percent context
   stays the map-256 row (75.0/77 = 97.4%, bank v6.6 ws `590503cf`, stamp 0.0.2.56).
+
+## 2026-11-08 10:10 CET — PAIR-257 VERDICT: contour 0.0.2.57 UNMEASURED — NOT adopted, `D_BEST2_CLAIM_V57` frozen to exactly (2,57); line stays 0.0.2.56
+
+- Ran exactly the frozen rule above: six loop-only arms (`x56r61/62/63` control vs
+  `x57r61/62/63` candidate, reps 61/62/63 sp1, idle auth-checked P2005, harness b2fb0d6 in all
+  six run records), all exit 0, 36/36 rows stamp==behavior, zero stalls, zero blank joins.
+- Rule (a) NOT met: ZERO control loop rows drew the claim note (0/18). Sixth zero-opportunity
+  pair (233/238/242/245/251/257). Full numbers in `PAIR-257-V66.md` + published `pair-257/`.
+- Live wiring proven: candidate x57r63 D-ex6-l4 claim first draw -> fired offset 12289 + won,
+  adopted trajectory claim-free, no third draw. Loop pool 16/18 -> 17/18 with the single win
+  UNEVENTED (lottery, never attributed), W1/L0 p=1.0; every guard clean (zero v57 in control or
+  outside loop rows, zero P->F, frozen bands silent, v243/v56 parity within draw noise).
+- Design finding published with the negative: the claim family's per-draw base rate is
+  30/1050 ~= 2.9%, so this pair was ~59% likely to carry zero live target BEFORE launch; the
+  3/9 cell-level rate that motivated the re-arm is NOT a per-draw probability. Standing rule
+  stated in the report: low-rate note-family pairs need a draw budget with
+  P(>=1 control strict-fail) >= 0.8 (for 2.9%/draw: ~60+ control loop draws), not a 3+3 pair.
+- Cost: +12 calls / +4,188 ptok / +0.54 Wh side, not attributed (one claim retry + two extra
+  banned draws on other rows).
+- Frozen: flag -> `STAMP_REVISION == (2, 57)`; gate_v71 gains a source-pinned freeze check
+  (future stamps cannot be imported); ws v66full pins rebuilt at the verdict bytes +
+  `verify_manifest --v6` PASS; gate_fixers 12/12; full contract loop green.
+- No DIGEST percent row (loop-only pair, documented fail-close). Percent context stays map-256:
+  97.4% bank v6.6 (`590503cf` ws / `5c86252b` published), stamp 0.0.2.56.
+- NEXT pointer: loop pool's remaining stable loss mode is banned-family BIAS that already spends
+  the full 2.43+2.56 chain in both arms (r62-l2: 9 calls, still 0.7/False in both) — selection
+  there is measured-spent; a third mechanism on that family needs a new live-target proof under
+  the >=0.8 rule. Single-shot pool at 71/77 stable-pass, zero stable fails (map-256) -> next
+  launchable P0 work is bank v6.7 (derivability census candidates + the fields_mismatch lottery
+  class audit), not another n=18 loop pair.

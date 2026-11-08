@@ -261,6 +261,18 @@ ck(GV.behavior_tuple("0.0.2.57") == (2, 57) and GV.behavior_tuple("0.0.2.56") ==
 ck((2, 57) not in GV.RESERVED_TOOLING_REVISIONS, "2.57 is outside the reserved tooling band")
 GV.registered_stamp("0.0.2.57")          # must not raise: the runner fail-closes on unknown stamps
 
+# ---- 6. the freeze itself ---------------------------------------------------
+# pair-257 UNMEASURED => the flag must stay at exactly (2,57): contour_at_least would smuggle an
+# unproven trigger into every future stamp. A future stamp cannot be IMPORTED to test inheritance
+# (the runner fail-closes on stamps newer than the newest release), so the freeze is pinned on the
+# source: the flag assignment is an STAMP_REVISION equality, never a floor.
+SRC = (HERE / "gate_run.py").read_text(encoding="utf-8")
+ck("D_BEST2_CLAIM_V57 = STAMP_REVISION == (2, 57)" in SRC
+   and "D_BEST2_CLAIM_V57 = contour_at_least" not in SRC,
+   "the 2.57 flag is frozen to exactly its stamp in source (the pair-245/251 freeze pattern)")
+ck(GV.behavior_tuple("0.0.2.56") == (2, 56),
+   "the adopted line keeps behavior 2.56 after the freeze (the line did not move)")
+
 print("gate_v71 PASS: %d checks | claim-family selection re-armed at 2.57: one retry at "
       "seed+12289 with own v57_* events, no third draw on claim rows, banned precedence kept, "
       "frozen 2.44 bytes and event names immutable, monotone on passing cells, (2,57) registered"
