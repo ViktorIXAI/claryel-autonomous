@@ -2979,3 +2979,41 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   scheduled measurement: four-arm cadence when due (5 stamps after cadence-255).
 - Artifacts: `benchmarks/hard/v6-results/c-probe-258/` (PROBE.md + 72 byte-captured rows; probe
   scripts untracked by design, sha256 pinned in PROBE.md). No DIGEST row (no arm ran).
+
+## 2026-11-08 15:3x CET — eval-system: bank gate census shipped (P0) + parallel-agent DIGEST backfill picked up and re-verified
+
+- **Standing bank gates were version-frozen on the wrong bytes.** `gold_selftest_v6.py`
+  and `leakage_scan_v6.py` hardcoded `bank-hard-v6.json`, so the bank marked `working`
+  (v6.8) was never gated by them after promotion. Both now take an optional bank path
+  (no-arg invocation byte-compatible with CI); the gate logic itself is unchanged.
+- **New tooling: `scripts/bank_gate_census_v6.py`** runs BOTH gates over every file in
+  `BANK-VERSIONS.json`, recomputed from current bytes, banks scored in parallel threads
+  (~100 s instead of ~12 min). Fail-closed structural invariants (no pinned version
+  names - the gate_v63 lesson): registry file set == bank files on disk, every file
+  byte-matches its `published_sha16`, exactly one `working`, working passes both gates.
+  Generated `benchmarks/hard/BANK-GATE-CENSUS.md` carries the scanner/scorer/registry
+  sha16 stamp; `--check` re-derives and CI (scoring-contracts.yml) runs
+  `harness/bank_gate_census_test.py`, so a retyped row or edited scanner goes red.
+  Non-vacuity proven: tampering one verdict cell and one stamp line each flipped
+  --check to rc=1 (measured 08.11 this session; controls not committed by design).
+- **First census verdict (8 banks, chain v6.1->v6.8):** every published bank passes
+  BOTH gates at current bytes - v6.8 working: gold self-test 77/77, leakage 0
+  (bank `7a9527bf2e4ebbff`, scorer `89437d8cfe1fc6c8`). No hidden gold/leakage defect
+  in the published chain.
+- **Measurement-stack flake found and encoded:** the E battery runs in docker; under
+  8-way parallel scoring E-ex6-05 (bank v6.1) failed once and passed serially and on
+  re-draw. Census policy: E-category failures get exactly one re-draw; failing BOTH
+  draws is a real FAIL (fail-closed for content, a container hiccup cannot fabricate a
+  bank defect). Same lesson class as the engine-stall guard: classify the tool failure
+  before reporting the subject.
+- **DIGEST backfill picked up** (23 per-stamp percent rows from the parallel
+  contour-loop agent, v6.1/v6.2/v6.4 eras; committed in `ee84649`): re-verified IN
+  THIS SESSION - 23/23 rows reproduce exactly from the published ledgers via the
+  `arm_score_split` arithmetic (arms 23, mismatches 0). The census tooling, the
+  refactored gates and this verification were picked up by the parallel agent in
+  `ee84649`/`d14d7e6` mid-session; verdict cells re-checked against the committed
+  bytes after the merge (HEAD table = 77/77 everywhere, stamp `25c5efa4804adc53`).
+- Standing control suites on the idle host (no arm live): gold selftest 77/77, leakage
+  0 leaks, semantic suite 66 controls 0 violations.
+- Line status unchanged: adopted 0.0.2.56, bank v6.8 at the bank ceiling (96.5% map-258);
+  next scheduled measurement remains the four-arm cadence when due.

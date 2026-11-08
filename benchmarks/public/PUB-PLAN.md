@@ -45,6 +45,17 @@ both score format and protocol compliance; the classic MCQ/math sets are scored 
 answer, so there the measurement is the model, not the harness — that will be stated in the
 result rows, not hidden.
 
+### Source status (2026-11-08)
+
+| set | tasks | tasks sha16 | source | status |
+|---|---|---|---|---|
+| gsm8k | 1319 | `7dd0080ff23b8bc3` | openai/grade-school-math test.jsonl | pinned, normalised |
+| arc-easy | 2376 | `cac604a076e8b00a` | HF allenai/ai2_arc ARC-Easy test | pinned, normalised |
+| arc-challenge | 1172 | `523af08216f14256` | HF allenai/ai2_arc ARC-Challenge test | pinned, normalised |
+| gpqa-diamond | 198 | `af73cc064d4d8529` | HF fingertap/GPQA-Diamond (mirror of Idavidrein/gpqa) | pinned, normalised; mirror used because the upstream card is agreement-gated |
+| humaneval | 164 | `971d976289cd9357` | openai/human-eval HumanEval.jsonl.gz | pinned; execution checker not shipped yet, so unscored |
+| ifeval | 0 | — | HF google-deepmind/ifeval returns 401 (agreement-gated), the google-research raw path 404s | BLOCKED: try the `randxie-boson/ifeval-data` mirror, vendor the upstream `instructions.py` checker before running arms |
+
 ## Arms
 
 * **brain-basalt** — our stable local stack: `qwen3.8-flash-next-iq3_s-basalt` on P2005 (24 GB

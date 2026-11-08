@@ -106,8 +106,9 @@ def main():
                     return 1
             if (i + 1) % 20 == 0:
                 rate = (i + 1) / (time.time() - t0)
-                print("%s %d/%d ok=%d bad=%d %.1f s/task eta %.0f min"
-                      % (arm, i + 1, len(rows), n_ok, n_bad, (i + 1) / rate,
+                print("%s %d/%d ok=%d bad=%d elapsed %.0f s (%.1f s/task) eta %.0f min"
+                      % (arm, i + 1, len(rows), n_ok, n_bad, time.time() - t0,
+                         (time.time() - t0) / (i + 1),
                          (len(rows) - i - 1) / rate / 60), flush=True)
     print("%s done: ok=%d bad=%d wall %.0f s -> %s" % (arm, n_ok, n_bad, time.time() - t0, dst))
     return 0 if n_ok else 1

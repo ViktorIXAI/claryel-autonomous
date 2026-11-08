@@ -51,16 +51,19 @@ check(len(working) == 1, "exactly one working bank required, found %d" % len(wor
 check(all(r["status"] in cen.ALLOWED_STATUS for r in rows), "illegal status present")
 
 # the working bank is gated at current bytes, not asserted in prose
+# (E battery columns are sandbox-host-only; gold_ok already folds that in)
 for w in working:
-    check(w["gold_ok"], "working bank %s gold selftest: %s" % (w["version"], w["gold"]))
+    check(w["gold_ok"], "working bank %s gold selftest: %s / E: %s"
+          % (w["version"], w["gold"], w["gold_e"]))
     check(w["leak_ok"], "working bank %s leakage scan: %s" % (w["version"], w["leak"]))
 
 # committed md must match a fresh recompute
 check(cen.check_md(rows, meta) == 0, "committed BANK-GATE-CENSUS.md does not match recompute")
 
-print("BANK GATE CENSUS TEST: %d banks, statuses=%s, working gold=%s leak=%s"
+print("BANK GATE CENSUS TEST: %d banks, statuses=%s, working gold=%s E=%s leak=%s"
       % (len(rows), sorted({r["status"] for r in rows}),
-         working[0]["gold"] if working else "-", working[0]["leak"] if working else "-"))
+         working[0]["gold"] if working else "-",
+         working[0]["gold_e"] if working else "-", working[0]["leak"] if working else "-"))
 if fails:
     for f in fails:
         print("FAIL:", f)

@@ -21,6 +21,7 @@ import gzip
 import hashlib
 import json
 import os
+import re
 import sys
 import time
 import urllib.parse
@@ -43,7 +44,13 @@ def fetch(url, dst, timeout=120):
 
 def hf_rows(dataset, config, split, dst, total=None):
     """datasets-server pages 100 rows; public datasets need no auth. The endpoint throws
-    intermittent 5xx, so each page is retried before the fetch is called a failure."""
+    intermittent 5xx, so each page is retried before the fetch is called a failure. The raw
+    JSONL on disk is the cache: once a split is fully downloaded, re-running the prep does not
+    re-page the hub (429 lesson from the ARC + GPQA pass)."""
+    if os.path.exists(dst) and os.path.getsize(dst) > 0 and not os.environ.get("PUB_FETCH_FORCE"):
+        print("  cached %s (%d rows)"
+              % (os.path.basename(dst), sum(1 for l in open(dst, encoding="utf-8") if l.strip())))
+        return dst
     rows, off = [], 0
     while True:
         u = "%s?dataset=%s&config=%s&split=%s&offset=%d&limit=100" % (
@@ -61,7 +68,15 @@ def hf_rows(dataset, config, split, dst, total=None):
                 print("  page offset %d: %s - retrying in %ds" % (off, exc, wait))
                 time.sleep(wait)
         chunk = data.get("rows") or []
-        rows.extend(x.get("row", x) for x in chunk)
+        # the hub wraps rows as {"row_idx": i, "row": {...}}, but some builders return the row
+        # objects directly; a bare string row means the response shape changed and we must not
+        # silently feed garbage into a normaliser.
+        for x in chunk:
+            if isinstance(x, dict):
+                rows.append(x.get("row", x))
+            else:
+                raise SystemExit("unexpected rows shape at offset %d in %s: %r"
+                                 % (off, dataset, str(x)[:80]))
         off += len(chunk)
         time.sleep(1.0)
         if not chunk or (total and off >= total) or (not total and len(chunk) < 100):
@@ -131,6 +146,39 @@ def ifeval(raw, out):
     return n
 
 
+def gpqa(raw, out):
+    """GPQA-Diamond (198) as MCQ. This mirror carries the four options inline in `question`
+    (a) .. (d)) and the correct option text in `answer`; the gold letter is derived by matching
+    the option text, never by guessing."""
+    n = 0
+    with open(out, "w", encoding="utf-8") as fh:
+        for i, line in enumerate(open(raw, encoding="utf-8")):
+            r = json.loads(line)
+            q = (r.get("question") or "").strip()
+            ans = (r.get("answer") or "").strip()
+            opts = dict(re.findall(r"(?m)^([a-d])\)\s*(.+)$", q))
+            gold = None
+            if ans.upper() in ("A", "B", "C", "D"):
+                gold = ans.upper()
+            else:
+                na = re.sub(r"\s+", " ", ans).strip().lower()
+                for k, v in opts.items():
+                    if re.sub(r"\s+", " ", v).strip().lower() == na:
+                        gold = k.upper()
+                        break
+            if gold is None:
+                continue
+            fh.write(json.dumps({"id": "gpqa-%03d" % i, "bench": "gpqa-diamond",
+                                 "prompt": q + "\n\nReply with the single correct option on the "
+                                              "last line exactly as: ANSWER: X",
+                                 "gold": gold, "checker": "letter",
+                                 "meta": {"n_opts": len(opts), "src": "fingertap/GPQA-Diamond "
+                                                                      "(mirror of Idavidrein/gpqa)"}},
+                                ensure_ascii=False) + "\n")
+            n += 1
+    return n
+
+
 def ifeval_job(rawf, out):
     src = hf_rows("google-deepmind/ifeval", "default", "train", rawf, total=541)
     if os.path.exists(out):
@@ -164,10 +212,13 @@ def main():
                                           os.path.join(OUT, "arc-challenge.tasks.jsonl"),
                                           "arc-challenge", "challenge"),
              raw("arc-challenge.jsonl"), "HF allenai/ai2_arc ARC-Challenge test"),
-            ("ifeval", lambda: ifeval_job(raw, out_ife), raw("ifeval.jsonl"),
+            ("gpqa-diamond", lambda: gpqa(hf_rows("fingertap/GPQA-Diamond", "default", "test",
+                                                  raw("gpqa-diamond.jsonl")),
+                                          os.path.join(OUT, "gpqa-diamond.tasks.jsonl")),
+             raw("gpqa-diamond.jsonl"), "HF fingertap/GPQA-Diamond (mirror of Idavidrein/gpqa)"),
+            ("ifeval", lambda: ifeval_job(raw("ifeval.jsonl"), out_ife), raw("ifeval.jsonl"),
              "HF google-deepmind/ifeval"),
         ]
-        out_ife = os.path.join(OUT, "ifeval.tasks.jsonl")
         for name, fn, rawf, url in net:
             try:
                 jobs.append((name, fn(), {"url": url, "raw_sha16": sha16(rawf)}))

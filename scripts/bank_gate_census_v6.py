@@ -75,8 +75,16 @@ def collect():
     """Return (rows, meta, errors). rows: one dict per registry entry.
     Banks are scored in parallel threads: the E battery runs docker containers per
     task, so a serial full-chain recompute is ~12 min; parallel keeps `--check`
-    (which recomputes EVERY verdict - no trusting cached rows) inside ~2 min."""
+    (which recomputes EVERY verdict - no trusting cached rows) inside ~2 min.
+
+    The E battery needs the docker sandbox and is a LOCAL-ONLY re-execution by repo
+    policy (the scoring-contracts workflow says so). When the sandbox is unavailable
+    (CI runners), E rows get verdict `NOT RUN (no sandbox)` and only E-uncapable
+    failures bind; `--check` then does not compare the E column (its inputs are still
+    byte-pinned by the bank sha16 + scorer sha16 stamp). A sandbox-capable host always
+    re-derives the E verdict strictly."""
     from concurrent.futures import ThreadPoolExecutor
+    docker_ok = bool(getattr(c6, "_docker_available", lambda: False)())
     reg = json.load(open(REGISTRY, encoding="utf-8"))
     errors = []
     entries = reg.get("banks", [])
@@ -90,7 +98,16 @@ def collect():
         got = sha16(absf)
         bytes_ok = got == e["published_sha16"]
         bank = json.load(open(absf, encoding="utf-8"))
-        gfails = rescore_sandbox_fails(bank, gold_selftest(bank))
+        non_e = [t for t in bank if t["cat"] != "E"]
+        e_only = [t for t in bank if t["cat"] == "E"]
+        gfails = gold_selftest(non_e)
+        if docker_ok and e_only:
+            efails = rescore_sandbox_fails(bank, gold_selftest(e_only))
+            e_verdict = "PASS %d/%d" % (len(e_only) - len(efails), len(e_only))
+            e_ok = not efails
+        else:
+            e_verdict = "NOT RUN (no sandbox)"
+            e_ok = None
         leaks = leakage_scan(bank)
         return {
             "version": e["version"],
@@ -98,10 +115,11 @@ def collect():
             "file": f,
             "sha16": e["published_sha16"],
             "bytes_ok": bytes_ok,
-            "gold": "PASS %d/%d" % (len(bank) - len(gfails), len(bank)) if not gfails
-                    else "FAIL %d/%d (%s)" % (len(bank) - len(gfails), len(bank),
+            "gold": "PASS %d/%d" % (len(non_e) - len(gfails), len(non_e)) if not gfails
+                    else "FAIL %d/%d (%s)" % (len(non_e) - len(gfails), len(non_e),
                                               ",".join(x[0] for x in gfails[:3])),
-            "gold_ok": not gfails,
+            "gold_ok": not gfails and e_ok is not False,
+            "gold_e": e_verdict,
             "leak": "PASS 0 leaks" if not leaks else "FAIL %d (%s)"
                     % (len(leaks), ",".join(x[0] for x in leaks[:3])),
             "leak_ok": not leaks,
@@ -142,12 +160,13 @@ def collect():
 
 
 def md_table(rows):
-    lines = ["| version | status | file | published sha16 | bytes vs registry | gold selftest | leakage scan |",
-             "|---|---|---|---|---|---|---|"]
+    lines = ["| version | status | file | published sha16 | bytes vs registry | gold selftest (non-E) | gold E battery | leakage scan |",
+             "|---|---|---|---|---|---|---|---|"]
     for r in rows:
-        lines.append("| %s | %s | %s | `%s` | %s | %s | %s |"
+        lines.append("| %s | %s | %s | `%s` | %s | %s | %s | %s |"
                      % (r["version"], r["status"], r["file"], r["sha16"],
-                        "match" if r["bytes_ok"] else "**DRIFT**", r["gold"], r["leak"]))
+                        "match" if r["bytes_ok"] else "**DRIFT**", r["gold"],
+                        r["gold_e"], r["leak"]))
     return lines
 
 
@@ -159,9 +178,12 @@ def render(rows, meta):
             "answer marker inside any prompt). Verdicts are recomputed from current bytes every run; "
             "any bank whose bytes no longer match its registry sha16 fails closed. `working` must pass "
             "both gates; older rows are historical context, their status column is registry state, not a "
-            "re-narrated promotion verdict. E-category failures get one re-draw (the battery runs in "
-            "docker and a container hiccup must not fabricate a bank defect); a task failing BOTH draws "
-            "is a real FAIL and goes red.\n\n")
+            "re-narrated promotion verdict. The `gold E battery` column is the docker-sandbox re-execution "
+            "and runs on sandbox-capable hosts only (repo policy: E re-execution is local); a runner "
+            "without the sandbox shows `NOT RUN (no sandbox)` and `--check` skips that column - its inputs "
+            "stay byte-pinned by the scanner/scorer/bank sha16 stamp below. E-category failures get one "
+            "re-draw on a sandbox host (a container hiccup must not fabricate a bank defect); a task "
+            "failing BOTH draws is a real FAIL and goes red.\n\n")
     stamp = ("\nscanner: `bank_gate_census_v6.py` %s | scorer `harness/parb_check_v6.py` %s | "
              "registry `BANK-VERSIONS.json` %s\n"
              % (meta["census_sha16"], meta["scorer_sha16"], meta["registry_sha16"]))
@@ -174,8 +196,21 @@ def check_md(rows, meta):
         return 1
     want = render(rows, meta)
     have = open(MD_PATH, encoding="utf-8").read()
+    docker_ok = bool(getattr(c6, "_docker_available", lambda: False)())
+
     def table(text):
-        return [l for l in text.splitlines() if l.startswith("| v6")]
+        lines = [l for l in text.splitlines() if l.startswith("| v6")]
+        if docker_ok:
+            return lines
+        # E battery is a local-only re-execution: a runner without the sandbox may
+        # not compare (and must not overwrite) the locally measured E column.
+        out = []
+        for l in lines:
+            parts = l.split("|")
+            if len(parts) > 7:
+                parts[7] = " E-COLUMN-COMPARISON-SKIPPED "
+            out.append("|".join(parts))
+        return out
     if table(want) != table(have):
         print("CENSUS TABLE DRIFT: committed BANK-GATE-CENSUS.md does not match a fresh recompute")
         for a, b in zip(table(want), table(have)):
@@ -194,9 +229,9 @@ def check_md(rows, meta):
 def main():
     rows, meta, errors = collect()
     for r in rows:
-        print("%-5s %-11s %-38s %s  %s  %s  bytes:%s"
+        print("%-5s %-11s %-38s %s  %s  E:%s  %s  bytes:%s"
               % (r["version"], r["status"], os.path.basename(r["file"]), r["sha16"],
-                 r["gold"], r["leak"], "ok" if r["bytes_ok"] else "DRIFT"))
+                 r["gold"], r["gold_e"], r["leak"], "ok" if r["bytes_ok"] else "DRIFT"))
     for e in errors:
         print("ERROR:", e)
     if errors:

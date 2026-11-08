@@ -16,6 +16,10 @@
     "arc-challenge": {
       "url": "HF allenai/ai2_arc ARC-Challenge test",
       "raw_sha16": "03227c30fd557ad1"
+    },
+    "gpqa-diamond": {
+      "url": "HF fingertap/GPQA-Diamond (mirror of Idavidrein/gpqa)",
+      "raw_sha16": "71991ea576f83033"
     }
   },
   "benches": {
@@ -38,6 +42,10 @@
     "arc-challenge": {
       "tasks": 1172,
       "tasks_sha16": "523af08216f14256"
+    },
+    "gpqa-diamond": {
+      "tasks": 198,
+      "tasks_sha16": "af73cc064d4d8529"
     }
   }
 }
