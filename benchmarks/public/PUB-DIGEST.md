@@ -4,6 +4,7 @@ One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. R
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| arc-easy | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 300 | cac604a076e8b00a | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking), ladder rungs 1200, first rung 1200 | 289/300 = **96.3%** |
 | arc-challenge | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 300 | 523af08216f14256 | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking), ladder rungs 1200, first rung 1200 | 291/300 = **97.0%** |
 | gpqa-diamond | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 198 | af73cc064d4d8529 | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking), ladder rungs 1200, first rung 1200 | 139/198 = **70.2%** |
 | gpqa-diamond | gpt-6.1-sol | 198 | af73cc064d4d8529 | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport) | 192/198 = **97.0%** |

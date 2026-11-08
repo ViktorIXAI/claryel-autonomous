@@ -125,3 +125,37 @@ the ARC-Challenge ±3 pp caveat applies to any use of this row as an instrument.
 The honest framing stays: on an answer-only MCQ the contour *cannot* change the score by
 construction (category `P` routes away from every hard-bank grammar), so the parity rows exist
 to prove that claim mechanically and to bound the harness cost — not to claim a tie on quality.
+
+## Matched-shape contour parity (item P0 re-run, 2026-11-08 23:36 CET)
+
+Request shape equal to the bare arm's (`PARB_SHAPE=bare PARB_LADDER=1200`: first rung 1200,
+serve-default thinking, temperature 0.7, no request seed), same frozen stamp `0.0.2.56`, same
+`pub-checkers-v2`, first 300 ids (tasks sha16 `cac604a076e8b00a`), harness `06def0b`, workspace
+`pub-arc-easy-contour-matched`. No contour feature was registered for this leg.
+
+| measure | escalation shape (superseded) | **matched shape (this row)** | bare arm (same 300) |
+|---|---|---|---|
+| strict | 290/300 = 96.7 % | **289/300 = 96.3 %** | 290/300 = 96.7 % |
+| paired vs bare | 0W / 0L, p = 1.000 (shape-guaranteed, see above) | **1W / 0L, p = 1.000** | — |
+| endpoint requests | 300 (0 ladder) | **300 (0 ladder steps)** | 300 |
+| contour events / edits / truncations | 0 / 0 / 0 | **0 / 0 / 0** | n/a |
+| generated tokens (total, mean per task) | 600 (2.0 — thinking off) | **25,894 (86.3)** | 27,720 (92.4) |
+| prompt tokens | 21,943 | **33,943** | 33,943 |
+| engine time (mean / median per task) | 103.2 s (0.34 / 0.30 s) | **1004.8 s (3.35 / 1.06 s)** | 406.2 s (1.35 / 0.98 s) |
+| GPU energy (sampled) | 3.70 Wh = 12.3 mWh/task | **33.42 Wh** (402 samples, mean 118.4 W, busy 0.79) = 111 mWh/task | 126.93 Wh over the whole 2376-task leg = 53 mWh/task |
+
+The single discordant id is `arc-easy-0285`, which the bare arm and the escalation-shape arm both
+got and this draw missed.
+
+**Verdict: parity, and this time the parity is measured rather than shape-guaranteed.** With the
+request shape matched the arm actually emits reasoning-shaped output (86.3 tokens per task against
+the superseded leg's 2.0), still fires no contour machinery, still needs exactly one request per
+task, and lands within one task of the bare arm on 300 ids (p = 1.000, 1 discordant id).
+
+**Cost caveat, stated rather than smoothed.** Median per-task engine time is at parity with the
+bare arm (1.06 s vs 0.98 s), but this leg's *mean* is 3.35 s because of a slow tail (individual
+tasks at 17–27 s), and the sampled per-task energy is therefore 111 mWh against the bare leg's
+53 mWh/task. The arm made the same 300 requests as the bare arm and zero ladder retries, so the
+tail is endpoint state (this P2005 box had been swapping since the GPQA leg), not harness work.
+The escalation leg's 12.3 mWh/task is not cheaper harness work either — it is the price of not
+reasoning. Quoted cost comparisons on this box are only valid inside one endpoint window.

@@ -1,0 +1,45 @@
+{
+  "box": "PUBPAR",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:8080",
+  "contour_version": "0.0.2.56",
+  "contour_behavior": "2.56",
+  "contour_changed_at_this_release": true,
+  "git_sha": "06def0bc8f5c4aa1ef2ce6355ede7f80fa19115f",
+  "plan_tasks": 300,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "item P0 matched-shape parity: frozen 0.0.2.56, request shape = bare arm (first rung 1200, serve-default thinking, no request seed), first 300 ids file order, checker contract pub-checkers-v2",
+  "stack": {
+    "bank_version": "pub-arc-easy-300",
+    "bank_version_source": "marker",
+    "bank_sha16": "6c473c1f8dc4469f",
+    "bank_tasks": 300,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.56",
+    "contour_behavior": "2.56",
+    "request_shape": "bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking)",
+    "first_rung": 1200,
+    "ladder": [
+      1200
+    ],
+    "harness_git_sha": "06def0bc8f5c4aa1ef2ce6355ede7f80fa19115f"
+  }
+}
