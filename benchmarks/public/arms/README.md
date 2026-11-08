@@ -7,7 +7,6 @@ rules; **answer text is never edited**. Re-scoring a published `*-answers.jsonl`
 exactly — asserted for every arm below.
 
 | arm file | lines | sha16 |
-|---|---|---|
 | arc-challenge-contour-escalation-answers.jsonl | 300 | `90bf60cc70007866` |
 | arc-challenge-contour-escalation-bank-version.json | 6 | `845cdf76a755ec50` |
 | arc-challenge-contour-escalation-ledger.jsonl | 300 | `0e4eae97bdb7ebf5` |
@@ -32,6 +31,14 @@ exactly — asserted for every arm below.
 | arc-easy-contour-escalation-run-record.json | 40 | `9b30f05be12c9d29` |
 | arc-easy-contour-escalation-stats.json | 22 | `fc788d183fd5cc58` |
 | arc-easy-contour-escalation-ws-identity.json | 36 | `1491da4724a0ecf7` |
+| arc-easy-contour-matched-answers.jsonl | 300 | `1f0bffde0a8e8133` |
+| arc-easy-contour-matched-bank-version.json | 6 | `35f62500bfc27f93` |
+| arc-easy-contour-matched-ledger.jsonl | 300 | `11f24b49d972096c` |
+| arc-easy-contour-matched-plan.json | 1 | `e1638a6a84d969f7` |
+| arc-easy-contour-matched-results.jsonl | 300 | `7c5981b5350fcd61` |
+| arc-easy-contour-matched-run-record.json | 45 | `5281b896bea709cf` |
+| arc-easy-contour-matched-stats.json | 28 | `e17486d3bdbed2cb` |
+| arc-easy-contour-matched-ws-identity.json | 41 | `1d6eaf5cddd81e57` |
 | gpqa-diamond-contour-escalation-answers.jsonl | 198 | `b28ab5ac6f562ee8` |
 | gpqa-diamond-contour-escalation-bank-version.json | 6 | `330a74aeec4a8240` |
 | gpqa-diamond-contour-escalation-ledger.jsonl | 198 | `f8b46c25e51ff0a7` |
@@ -56,7 +63,6 @@ exactly — asserted for every arm below.
 | gsm8k-contour-escalation-run-record.json | 40 | `c04c6872de8ee3d2` |
 | gsm8k-contour-escalation-stats.json | 24 | `1bbfa5f23461a217` |
 | gsm8k-contour-escalation-ws-identity.json | 36 | `678a8d65b6d7040c` |
-
 Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
 
 * `gpqa-diamond` 198 ids `af73cc064d4d8529`, ws bank sha16 `1b30f3cc51204d03`
@@ -79,8 +85,8 @@ Verified re-score of the published copies:
 ```
 gpqa-diamond     matched 139/198 = 70.2 %   escalation 91/198 = 46.0 %
 arc-challenge    matched 291/300 = 97.0 %   escalation 283/300 = 94.3 %
-arc-easy         (matched leg in flight)    escalation 290/300 = 96.7 %
-gsm8k            (matched leg in flight)    escalation 290/300 = 96.7 %
+arc-easy         matched 289/300 = 96.3 %   escalation 290/300 = 96.7 %
+gsm8k            (matched leg running)      escalation 290/300 = 96.7 %
 ```
 
 Reproduce one row:
