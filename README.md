@@ -321,6 +321,20 @@ answer bytes (`benchmarks/hard/v6-results/HEADTOHEAD-V61.md`):
   answer-byte arm evidence. Chain of record `benchmarks/hard/DERIVABILITY-CENSUS.md`,
   outputs `v6-results/audit-census-v2/`, no harness/contour bytes moved (stamp stays
   0.0.2.50, behavior 2.48).
+- **Cadence-255 re-ran all four arms on bank v6.6 (8 Nov, 03:00-06:27 CET)**, due on both
+  frozen clauses (5 measured stamps since cadence-249 AND two bank re-words). Bank FAIR:
+  the fixed H-ex6-01 lifted all three raw arms 0/3 -> 3/3 on fresh reps 52-54 (v6.5-probe
+  zeros were all `ungrounded_claims`), pooled raw totals hold (basalt 146, codex 135,
+  grok 134 vs 144/131/134 at v6.4). Contour margin WIDENED: common 177 vs 146/135/134,
+  pooled W/L 37/6, 46/4, 48/5, all p<2e-6; adopted gates hold on brand-new seeds
+  (K-ex6-03, A-ex6-03 1/3 -> 3/3, C-ex6-02 0/3 -> 3/3, D-plain 9/9); rule-(c) byte
+  re-score 0/201 mismatches; contour digest row `74.7/77 = 97.0%` of the whole bank
+  (bank sha16 `590503cf` ws copy, stamp `0.0.2.55`). Grok transport death mid-leg
+  (186 rc1 rows, expired oauth token) purged and retried clean per the done-set rule;
+  `raw_v6.py` hardened the same window (`err` field, abort after 5 empty answers).
+  Artifacts `v6-results/cadence-255/`, writeup `CADENCE-255-V66.md`, decision record
+  `history/agent-decisions/2026-11-08-cadence255-v66-fair-margin-widened.md`. Next:
+  rebuild the UNSTABLE-CELLS map on the 2.55 line before any new contour hypothesis.
 - measured cost and energy (`COST-V61.md`, `ENERGY-METHOD.md`): contour arms cost **0.085-0.089 Wh per
   task** of measured GPU energy (two independent windows: 6.82 Wh and 13.02 Wh), the same model answering
   raw costs **0.468 Wh per task** — a ~5.4× energy difference at a *lower* score; ChatGPT/Grok arms took

@@ -1,0 +1,82 @@
+03:03:13 PGR: release 0.0.2.55, contour behavior 2.55
+03:03:13 PGR: planned tasks 77, previously done 0, limit 14400 s
+03:03:13 PGR: stack bank=590503cf1701a6ce(marker) version=v6.6 scorer=v6.2(c8c0c7dd114dfc32) seeds=sp1
+03:03:13 PGR: run record run-record-q55r52.json; serve health ok; stall policy retry=1 rate=25% window=20
+03:03:20 A A-ex6-00       rep52   c=1.00 f=True fin=stop   calls=3 fix=0 blk=0 lad=0   7.1s tok=703  /592  c=0    tps_eff=64.6 
+03:03:30 A A-ex6-01       rep52   c=1.00 f=True fin=stop   calls=3 fix=0 blk=0 lad=0  10.4s tok=403  /165  c=0    tps_eff=4.7 
+03:03:32 A A-ex6-02       rep52   c=1.00 f=True fin=stop   calls=2 fix=0 blk=0 lad=0   1.6s tok=295  /135  c=0    tps_eff=43.7 
+03:03:33 A A-ex6-03       rep52   c=1.00 f=True fin=stop   calls=2 fix=0 blk=0 lad=0   1.2s tok=237  /84   c=0    tps_eff=33.5 
+03:03:34 A A-ex6-04       rep52   c=1.00 f=True fin=stop   calls=2 fix=0 blk=0 lad=0   1.4s tok=255  /107  c=0    tps_eff=39.9 
+03:03:39 A A-ex6-05       rep52   c=1.00 f=True fin=stop   calls=3 fix=0 blk=0 lad=0   5.0s tok=406  /524  c=0    tps_eff=90.9 
+03:03:41 A A-ex6-06       rep52   c=1.00 f=True fin=stop   calls=2 fix=0 blk=0 lad=0   1.7s tok=245  /102  c=0    tps_eff=39.6 
+03:03:51 A A-ex6-07       rep52   c=1.00 f=True fin=stop   calls=2 fix=0 blk=0 lad=1   4.9s tok=269  /574  c=0    tps_eff=115.1 
+03:03:53 A A-ex6-08       rep52   c=1.00 f=True fin=stop   calls=2 fix=0 blk=0 lad=0   2.1s tok=259  /161  c=0    tps_eff=39.2 
+03:03:54 B B-ex6-00       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.6s tok=394  /76   c=0    tps_eff=20.7 
+03:03:56 B B-ex6-01       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.3s tok=224  /56   c=0    tps_eff=21.6 
+03:03:59 B B-ex6-02       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   3.1s tok=94   /252  c=0    tps_eff=81.4 
+03:04:00 B B-ex6-03       rep52   c=0.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.4s tok=254  /53   c=0    tps_eff=20.9 fields_mismatch:replicas
+03:04:02 B B-ex6-04       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.7s tok=330  /107  c=0    tps_eff=25.4 
+03:04:03 B B-ex6-05       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.3s tok=264  /62   c=0    tps_eff=23.4 
+03:04:04 B B-ex6-06       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.0s tok=260  /35   c=0    tps_eff=19.7 
+03:04:05 K K-ex6-00       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.7s tok=105  /43   c=0    tps_eff=64.9 
+03:04:06 K K-ex6-01       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=97   /38   c=0    tps_eff=60.5 
+03:04:06 K K-ex6-02       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.7s tok=86   /26   c=0    tps_eff=38.7 
+03:04:07 K K-ex6-03       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=145  /27   c=0    tps_eff=48.6 
+03:04:09 C C-ex6-00       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.8s tok=414  /56   c=1    tps_eff=5.6 
+03:04:10 C C-ex6-01       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.2s tok=341  /53   c=0    tps_eff=43.5 
+03:04:11 C C-ex6-02       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.8s tok=239  /39   c=0    tps_eff=51.0 
+03:04:12 C C-ex6-03       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.0s tok=310  /46   c=0    tps_eff=47.0 
+03:04:13 C C-ex6-05       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.8s tok=237  /45   c=0    tps_eff=56.0 
+03:04:14 C C-ex6-06       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.0s tok=266  /54   c=0    tps_eff=55.0 
+03:04:15 C C-ex6-07       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.0s tok=306  /53   c=0    tps_eff=51.7 
+03:04:26 C C-ex6-08       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=1   5.7s tok=410  /542  c=0    tps_eff=88.6 
+03:04:27 D D-ex6-p0       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.0s tok=117  /47   c=0    tps_eff=48.6 
+03:04:28 D D-ex6-p1       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.7s tok=74   /44   c=0    tps_eff=63.2 
+03:04:28 D D-ex6-p2       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=84   /44   c=0    tps_eff=70.2 
+03:04:33 D D-ex6-l0       rep52   c=1.00 f=True fin=?      calls=7 fix=1 blk=1 lad=0   4.2s tok=2114 /239  c=0    tps_eff=12.3 
+03:04:35 D D-ex6-l1       rep52   c=1.00 f=True fin=?      calls=3 fix=0 blk=1 lad=0   2.0s tok=845  /97   c=0    tps_eff=20.8 
+03:04:38 D D-ex6-l2       rep52   c=1.00 f=True fin=?      calls=3 fix=1 blk=0 lad=0   3.4s tok=794  /205  c=0    tps_eff=18.7 
+03:04:41 D D-ex6-l3       rep52   c=1.00 f=True fin=?      calls=4 fix=0 blk=1 lad=0   2.8s tok=1290 /162  c=0    tps_eff=23.3 
+03:04:44 D D-ex6-l4       rep52   c=1.00 f=True fin=?      calls=4 fix=0 blk=1 lad=0   2.5s tok=1336 /162  c=0    tps_eff=26.0 
+03:04:47 D D-ex6-l5       rep52   c=1.00 f=True fin=?      calls=4 fix=0 blk=1 lad=0   3.0s tok=1428 /202  c=0    tps_eff=31.6 
+03:04:50 H H-ex6-00       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   2.9s tok=293  /211  c=0    tps_eff=43.3 
+03:04:53 H H-ex6-01       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   3.8s tok=351  /316  c=0    tps_eff=40.1 
+03:04:56 H H-ex6-02       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   2.5s tok=293  /218  c=0    tps_eff=44.1 
+03:04:58 H H-ex6-03       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.7s tok=288  /131  c=0    tps_eff=45.6 
+03:05:01 H H-ex6-04       rep52   c=0.00 f=False fin=stop   calls=2 fix=1 blk=0 lad=0   3.1s tok=298  /244  c=0    tps_eff=37.7 no_json
+03:05:02 I I-ex6-00       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.8s tok=55   /31   c=0    tps_eff=40.4 
+03:05:06 I I-ex6-01       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   4.3s tok=81   /493  c=0    tps_eff=115.2 
+03:05:08 I I-ex6-02       rep52   c=0.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   2.1s tok=70   /235  c=0    tps_eff=111.6 value_mismatch
+03:05:09 I I-ex6-03       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=103  /28   c=0    tps_eff=48.3 
+03:05:09 I I-ex6-04       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.9s tok=84   /81   c=0    tps_eff=94.1 
+03:05:10 I I-ex6-05       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=70   /29   c=0    tps_eff=51.2 
+03:05:21 E E-ex6-00       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.3s tok=175  /77   c=377  tps_eff=60.4 sandbox:docker:oracle_isolated_v3
+03:05:33 E E-ex6-01       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.2s tok=228  /84   c=332  tps_eff=67.5 sandbox:docker:oracle_isolated_v3
+03:05:45 E E-ex6-02       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.9s tok=161  /61   c=371  tps_eff=64.8 sandbox:docker:oracle_isolated_v3
+03:05:55 E E-ex6-03       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.0s tok=137  /49   c=386  tps_eff=50.1 sandbox:docker:oracle_isolated_v3
+03:06:05 E E-ex6-04       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.8s tok=186  /53   c=359  tps_eff=68.7 sandbox:docker:oracle_isolated_v3
+03:06:28 E E-ex6-05       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0  12.7s tok=210  /125  c=367  tps_eff=9.8 sandbox:docker:oracle_isolated_v3
+03:06:40 E E-ex6-06       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.4s tok=171  /100  c=370  tps_eff=72.8 sandbox:docker:oracle_isolated_v3
+03:06:51 E E-ex6-07       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.1s tok=185  /85   c=346  tps_eff=74.7 sandbox:docker:oracle_isolated_v3
+03:07:01 E E-ex6-08       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.8s tok=163  /49   c=322  tps_eff=65.2 sandbox:docker:oracle_isolated_v3
+03:07:12 E E-ex6-09       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=141  /24   c=376  tps_eff=41.5 sandbox:docker:oracle_isolated_v3
+03:07:14 F F-ex6-00       rep52   c=1.00 f=True fin=stop   calls=2 fix=2 blk=0 lad=0   2.7s tok=445  /163  c=0    tps_eff=24.3 
+03:07:16 F F-ex6-01       rep52   c=1.00 f=True fin=stop   calls=2 fix=2 blk=0 lad=0   1.2s tok=465  /92   c=0    tps_eff=42.2 
+03:07:17 F F-ex6-02       rep52   c=1.00 f=True fin=stop   calls=2 fix=2 blk=0 lad=0   1.1s tok=439  /123  c=0    tps_eff=52.6 
+03:07:18 F F-ex6-03       rep52   c=1.00 f=True fin=stop   calls=2 fix=2 blk=0 lad=0   1.4s tok=483  /142  c=0    tps_eff=54.5 
+03:07:20 F F-ex6-04       rep52   c=1.00 f=True fin=stop   calls=2 fix=2 blk=0 lad=0   1.4s tok=431  /140  c=0    tps_eff=54.0 
+03:07:21 F F-ex6-05       rep52   c=1.00 f=True fin=stop   calls=2 fix=2 blk=0 lad=0   1.1s tok=467  /115  c=0    tps_eff=58.6 
+03:07:22 G G-ex6-00       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.2s tok=191  /77   c=0    tps_eff=63.6 
+03:07:23 G G-ex6-01       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=171  /30   c=0    tps_eff=49.7 
+03:07:24 G G-ex6-02       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.0s tok=181  /78   c=0    tps_eff=75.4 
+03:07:25 G G-ex6-03       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.8s tok=179  /42   c=0    tps_eff=51.3 
+03:07:25 G G-ex6-04       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.6s tok=173  /30   c=0    tps_eff=52.3 
+03:07:26 G G-ex6-05       rep52   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   1.0s tok=207  /86   c=0    tps_eff=84.9 
+03:07:28 J J-ex6-00       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.2s tok=269  /62   c=0    tps_eff=40.4 
+03:07:29 J J-ex6-01       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.1s tok=312  /34   c=0    tps_eff=15.0 
+03:07:31 J J-ex6-02       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   2.2s tok=304  /263  c=0    tps_eff=68.9 
+03:07:32 J J-ex6-03       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.4s tok=316  /104  c=0    tps_eff=37.8 
+03:07:34 J J-ex6-04       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.2s tok=310  /55   c=0    tps_eff=19.4 
+03:07:35 J J-ex6-05       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.4s tok=224  /117  c=0    tps_eff=65.5 
+03:07:37 J J-ex6-06       rep52   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.8s tok=354  /176  c=0    tps_eff=71.6 
+03:07:37 PGR finished: records 77, duration 264 s, stop reason: none

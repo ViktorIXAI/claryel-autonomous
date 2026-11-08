@@ -2534,3 +2534,28 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   unchanged.
 - Sampler c255 stopped 04:1x CET (all four arm windows covered in gpu-power-c255.csv;
   cloud legs consume no GPU, retry needs no sampler).
+
+== cadence-255 RESULT 2026-11-08 06:5x CET (all four legs complete; scored with the frozen script) ==
+- Legs: contour 0.0.2.55 q55r52/53/54 77 rows each; bare basalt, codex, grok each 213 rows
+  (task,rep) unique, 0 empty answers, 0 err fields; grok retry leg clean (band-grok-retry.log
+  `cad255 grok-retry done rc=0` at 06:19 CET). Endpoint healthy (leg medians 1.27-1.28 s/task,
+  max 12.7 s; no stall/spin signatures).
+- Rule (c): 0 ledger-vs-bytes mismatches (201 replayable contour cells; 30 E = docker battery).
+- Rule (a) fairness: bank v6.6 FAIR. H-ex6-01 (the v6.5/v6.6 fixed task, the only v6.4->v6.6
+  bank byte): all three raw arms 0/3 (v6.5 probe) -> 3/3 (reps 52-54); pooled raw 144/131/134 ->
+  146/135/134, no arm regressed.
+- Rule (b) margin: contour common 177 vs basalt 146 (W/L 37/6, p=2.0e-06), codex 135 (46/4,
+  p<1e-06), grok 134 (48/5, p<1e-06) — WIDENED vs cadence-249. contour plain 68/69/70, loop 6/5/6,
+  E 10/10 x3; contour strict-fail cells: A-ex6-00 r53, B-ex6-03 r52, B-ex6-06 r54, D-ex6-l0 r53
+  (loop), F-ex6-00 r53, H-ex6-04 r52, I-ex6-02 r52 — all single draws, none twice.
+- Energy: contour 6.42+6.53+5.83 = 18.78 Wh / 775 s wall (0.0813 Wh per bank-cell, at/below band);
+  sampler gpu-power-c255.csv 1616 samples, windows in cadence-255-energy.csv.
+- Seed audit: 231/231 plan rows match sp1 (seed-protocol.md).
+- Published: v6-results/cadence-255/ (answers JSONL per arm, contour results/ledgers/run-records/
+  logs, plans, seed-protocol.md, energy csv, sanitized launchers + sampler, band logs; the dead
+  grok .bad-rc1.bak is deliberately NOT published, disclosed in the writeup), writeup
+  CADENCE-255-V66.md, decision record 2026-11-08-cadence255-v66-fair-margin-widened.md,
+  DIGEST row.
+- NEXT (pre-registered): rebuild UNSTABLE-CELLS-V66.md on the 2.55 line (the current map is the
+  2.53 line) before any new contour hypothesis; the B single-cell draws feed the map. Next cadence
+  due after 5 further measured stamps.
