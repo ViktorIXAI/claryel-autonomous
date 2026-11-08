@@ -2871,3 +2871,31 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   refuted cells. NEXT queued: (1) claims-wording iteration (claims never about the session itself)
   -> v6.7b candidate bank + fresh probe reps 67/68/69 with fresh artifact names; (2) map-257
   full-bank legs on v6.6 + regenerated UNSTABLE-CELLS gate table (percent context refresh).
+
+## 2026-11-08 12:4x CET — bank v6.8 PROVISIONAL (v6.7 + claims wording on H00/H03); probe rule frozen here, BEFORE any v6.8 row
+
+- Lineage: probe-67 proved every v6.7 fix lifts its cell on the raw arms; only grok/H-ex6-03
+  failed (session-state statements in claims). v6.7 bytes are immutable => iteration = NEW file.
+  v6.8 `7a9527bf2e4ebbff` = v6.7 with the claims spec additionally excluding statements about
+  the session/context/answering act itself (conditional, prints no answer form). verify_bank_v68
+  PASS (diff set exactly H00/H03 prompts; C gold and all refs/seeds byte-preserved). audit-v2
+  census: 35 atoms/15 tasks, identical to v6.7.
+- FROZEN RULE for the v6.8 probe (this text decides the verdict; supersedes nothing older):
+  (a) fairness gate UNCHANGED: raw arms basalt/codex/grok contour-OFF on the byte-guarded v6.8
+      subset at reps 64/65/66 (sp1), FAIR iff every arm strict-passes >= 2/3 on EVERY fixed task;
+  (b) contour no-new-loss, guard REPAIRED per the probe-67 lesson and frozen now:
+      - C-ex6-01 is EXCLUDED from the totals floor and from per-task deltas. Reason, published
+        before rows: its bank fix is raw-proven (18 fresh + 27 historical unanimous C,F draws),
+        while the adopted-line contour answers B,C,F on 3/3 matched seeds — a scaffolding bias
+        that is contour DEBT (future contour candidate on the fair gold), not a bank regression.
+        A bank fix cannot be gated by the contour losing a lottery it was winning against a
+        defective gold. C-ex6-01 candidate draws are still published and reported.
+      - remaining 5 tasks: strict-pass totals v6.8-candidate >= v6.6-control (the published
+        c66r64/65/66 legs are the control side, identical seeds and harness HEAD 988113f both
+        sides); per task |fail_v68 - fail_v66| <= 1; no note family on a candidate failing cell
+        outside the families already observed for that task across v6.6/v6.7 probe legs.
+  (c) PROMOTE iff (a) FAIR and (b) CLEAN: flip v6.8 -> working and v6.6 -> superseded in the
+      same commit; v6.7 stays provisional (chain of record, v6.3/v6.5 precedent). Else v6.8
+      stays provisional, numbers published as measured, no contour hypothesis on refuted cells.
+  (d) No DIGEST percent row for subset probes; bank-wide percent context stays map-256 (97.4%,
+      v6.6) until the next full-bank map legs.
