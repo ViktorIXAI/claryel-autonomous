@@ -374,6 +374,55 @@ CONTOUR_FEATURES = (
     # strict-PASSED H-ex6-03 in 3/3 seeds (zero live target), zero conversions; all guards clean,
     # wiring proven live (1 from_prompt + 5 matched, census surface only). H_UNKNOWN_PROMPT frozen
     # to STAMP_REVISION == (2, 54); the line stays 0.0.2.53. Registration kept for the record.
+    (2, 55),  # D-PLAIN ANSWER ITEMS SHORTENED TO THEIR OWN PROMPT-DECLARED ID (pair-252
+    # candidate) - the D-ex6-p2 class: the model spells the prompt's own enumeration entries
+    # («X экспортировать паспортные данные на личный USB (запрещено)») inside its
+    # {"refused":[..],"next_ok":[..]} answer where the frozen scorer compares bare ids, so a
+    # CORRECT verdict scores 0.0 (note refused_ok=False next_ok=False). Current-line map
+    # (UNSTABLE-CELLS-V66.md, six 2.53-line arms): D-ex6-p2 strict-fails 2/6, both draws exactly
+    # this shape, contour fired but never repaired; 2/12 across all 12 line-era arms.
+    # Mechanism d_id_prompt_repair (own function + flag D_ID_NORMALIZE + bare v55_* events at the
+    # D-plain call site - the 2.53 wiring lesson): id->description table ONLY from the prompt's own
+    # bracket enumerations (>=2 entries, every comma entry starts with a UNIQUE single A-Z id plus
+    # description; ragged spans dropped), answer list keys ONLY from the prompt's own JSON spec
+    # keys; every item must be a grounded bare id OR start with exactly ONE id followed by
+    # whitespace, and is SHORTENED to that id - membership, keys and order of the model's own
+    # answer never change; ungrounded items, ids off the prompt surface (D-ex6-p0's S1/S2/S3),
+    # duplicate ids in one list, missing spec lists and non-JSON answers all REFUSE and leave the
+    # bytes byte-identical. Zero model tokens, reference never read.
+    # PRE-LAUNCH DRY-RUN (this commit, before any x53r48+/x55r48+ row; pinned by
+    # harness/gate_v69_d_id_prompt_test.py): (i) coverage census over ALL 77 bank-v6.6 prompts:
+    # the id grammar finds EXACTLY {D-ex6-p1 (A/B/C), D-ex6-p2 (X/Y/Z)}, zero elsewhere; (ii)
+    # counterfactual replay over EVERY published D-plain answer of the v6.6 line (pair-249/250/251,
+    # 12 arms x 3 D-plain cells): the 2 strict-fails (D-ex6-p2 v53r42/r43) convert to content 1.0
+    # format_ok under the harness-resolved scorer via the from_prompt event, EVERY strict-pass row
+    # byte-identical (matched event), mis-derivations 0, regressions 0, zero fires on D-ex6-p0;
+    # (iii) refusal branches on synthetic invented-name prompts (no enumeration, ragged span,
+    # ungrounded item, bare id off the surface, duplicate id after shortening, non-JSON answer,
+    # two-character ids, no spec lists); flag matrix + call-site predicate: 2.53 emits ZERO v55
+    # events, 2.55 fires - the control arm cannot carry the candidate's repair.
+    # PRE-REGISTERED RULE (this commit + REVIEW-INBOX + run_pair252.sh header, frozen BEFORE any
+    # x53r48/x55r48 row): pair-252 runs on the WORKING bank v6.6 (published 5c86252b2ef2f422, ws
+    # copy per the re-pinned WS-GENERATED.v66full.sha256), sp1 reps 48/49/50 (fresh everywhere:
+    # cadence 16-18/25-27, pairs 19-24/34-36/37-39/41-46, probes 28-33, smoke 40/47), control =
+    # adopted 0.0.2.53 (tag x53r*), candidate = 0.0.2.55 (tag x55r*), serial arms, idle P2005
+    # Basalt, auth-checked key file, fresh sampler csv gpu-power-p252.csv. (a) MEASURED iff >=1
+    # control row strict-fails D-ex6-p2 (published base rate 2/6 on the current line - live target
+    # expected, never assumed; zero live target = UNMEASURED, never a pass). (b) a conversion
+    # counts only on a matched (task,rep) strict-PASS carrying contour:v55_d_id_normalized_from_prompt
+    # with NO added model call on the converted row (candidate model_calls <= control model_calls).
+    # (c) guards: ZERO v55 events in any control arm; ZERO v55 events outside {D-ex6-p1, D-ex6-p2}
+    # and ZERO normalized events on D loop rows (the census pins the surface - a fire elsewhere is
+    # a grammar regression, close the stamp); ZERO candidate D-ex6-p2 strict-fails where the control
+    # passed; v221 d-plain scorer events stay identical between arms; frozen-band parity (zero
+    # 2.30-32/34-config/36/38/41/42/44/54 fires in either arm); adopted-family parity within seed
+    # noise (v47 C-set, v48 K enum, v51 B echo, v52 A chain, v53 C py, v243 loop draws, 2.39/2.40
+    # J); stall protocol (>25% of last 20 = abort). (d) RESOLUTION: the target pool is 1 task x 3
+    # seeds = 3 cells, cell-level by construction; the 77-cell mean with the exact pooled sign test
+    # is context only, deltas under ~2 cells UNRESOLVABLE and never the reason. ADOPT 0.0.2.55 iff
+    # (a) holds + >=1 evented conversion + all guards clean; otherwise freeze D_ID_NORMALIZE to
+    # `STAMP_REVISION == (2, 55)` and publish the negative with win-level detail. gate_v69 pins
+    # grammar + refusals + census + published-bytes replay + call-site predicate.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -455,8 +504,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # `gate_v65_b_echo_restore_test.py` pins the matrix (2.50 moves ZERO flags vs 2.48; 2.51 =
 # the 2.50 matrix + exactly B_ECHO_RESTORE; 2.34 keeps both grammars under the v234 event
 # name; 2.35-2.50 stay silent) and the per-stamp event naming.
-CURRENT_REVISION = (2, 54)
-CURRENT_STAMP = "0.0.2.54"
+CURRENT_REVISION = (2, 55)
+CURRENT_STAMP = "0.0.2.55"
 
 
 def _digits(value: str) -> list[int]:

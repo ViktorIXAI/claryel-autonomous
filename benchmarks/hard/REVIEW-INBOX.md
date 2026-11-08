@@ -2393,3 +2393,60 @@ line arms, seeds 41-46): 60/77 cells 6/6; live-repeat candidates: D-ex6-p2 4/6 (
 refused_ok/next_ok), loop D-ex6-l1 3/6 banned_attempted (selection route only), H-ex6-01 4/6
 (mixed families), H-ex6-03 4/6 (rate 2/12 line-wide, do not re-probe). Next contour hypothesis
 should come from that table with the >=1-live-target gate applied at the pair's own seeds.
+
+## 2026-11-08 01:45 CET — PAIR-252 PRE-REGISTERED: contour 0.0.2.55 (D-plain answer items shortened to their OWN prompt-declared id)
+
+Hypothesis from the rebuilt 2.53-line map (`UNSTABLE-CELLS-V66.md`): **D-ex6-p2 strict-fails 2/6 on
+the adopted line [PFFPPP], stable note family `refused_ok=False next_ok=False`**, contour fired on all
+six seeds but never repaired this class. Answer bytes (v53r42/r43): the model spells the prompt's own
+enumeration entries inside its JSON — `"refused": ["X экспортировать паспортные данные на личный USB
+(запрещено)", ...]` — where `check_D_plain_v6` compares the bare ids `["X","Z"]/["Y"]`. The verdict
+is in the answer; only its FORM is wrong. No other 5/6 cell has a stable family (each is one
+isolated draw = noise floor), and the loop pool stays a selection-route-only class per the 2.43 rule.
+
+Mechanism (ONE change; `D_ID_NORMALIZE = contour_at_least(2,55)`, function `d_id_prompt_repair`,
+events `v55_d_id_normalized_from_prompt` / `v55_d_id_matched`, own call site in the D-plain scoring
+branch — the 2.53 wiring lesson): id→description table ONLY from the prompt's own bracket
+enumerations (≥2 comma entries, every entry starts with a UNIQUE single A-Z id + description; ragged
+spans dropped fail-closed); answer list keys ONLY from the prompt's own JSON spec keys; every item
+must be a grounded bare id or start with EXACTLY ONE id + whitespace and is SHORTENED to that id —
+membership, keys and order never change; ungrounded items, ids off the prompt surface (D-ex6-p0's
+S1/S2/S3), duplicate ids after shortening, non-JSON answers, missing spec lists all REFUSE and leave
+bytes byte-identical. Zero model tokens, reference never read.
+
+Pre-launch dry-run (this commit, pinned by `harness/gate_v69_d_id_prompt_test.py`, 104 checks PASS;
+full CI contract list 34/34 PASS at python3.12): (i) census over ALL 77 v6.2 + v6.6 prompts: surface
+is EXACTLY {D-ex6-p1 (A/B/C), D-ex6-p2 (X/Y/Z)}; (ii) published-bytes replay over EVERY published
+D-plain answer of the v6.6 line (pair-249/250/251, 18 arms × 3 cells = 54 rows): the 3 strict-fails
+(D-ex6-p2 at v52r42, v53r42, v53r43) all convert to strict PASS under the frozen scorer with ONLY
+item shortenings; every strict-pass row byte-identical (matched), zero fires on D-ex6-p0, zero
+regressions, zero mis-derivations; (iii) refusals proved on synthetic invented-name prompts
+(Q/R/T, fields denied/allowed). ws v66full pins rebuilt + `verify_manifest --v6` PASS at this commit.
+
+FROZEN RULE for pair-252 (this text decides the verdict; nothing below was written after any arm row):
+pair runs on the WORKING bank v6.6 (published `5c86252b2ef2f422`, ws copy `590503cf1701a6ce`), sp1
+reps **48/49/50** (fresh everywhere: cadence 16-18/25-27, pairs 19-24/34-36/37-39/41-46, probes
+28-33, smoke 40/47; smoke for this stamp uses rep 51 outside the pair), control = adopted
+**0.0.2.53** (tag x53r*), candidate = **0.0.2.55** (tag x55r*), serial arms on an idle, auth-checked
+P2005 Basalt endpoint (per-arm seconds median must match the 1.18-1.29 s/task line-era rate before
+any flip is trusted), fresh sampler csv `gpu-power-p252.csv`.
+(a) LIVE TARGET: MEASURED iff ≥1 control row strict-fails D-ex6-p2 (published base rate 2/6 per seed
+→ ≥1 live in a 3-seed pair with probability 0.70; expected, NEVER assumed; zero live target =
+UNMEASURED, never a pass).
+(b) CELL ATTRIBUTION: a conversion counts only if the candidate strict-PASSES where the control
+strict-failed on the same (task,rep) AND the row carries `contour:v55_d_id_normalized_from_prompt`
+with NO added model call on the converted row (candidate model_calls ≤ control model_calls).
+(c) GUARDS: ZERO v55 events in any control arm; ZERO v55 events outside {D-ex6-p1, D-ex6-p2} and
+ZERO normalized events on D-loop rows (census pins the surface — a fire elsewhere = grammar
+regression, close the stamp); ZERO candidate D-ex6-p2 strict-fails where the control passed; v221
+d-plain scorer events identical between arms; frozen-band parity (zero 2.30-32/34-config/36/38/41/
+42/44/54 fires in either arm); adopted-family parity within seed noise (v47 C-set, v48 K enum,
+v51 B echo, v52 A chain, v53 C py, v243 loop draws, 2.39/2.40 J); stall protocol (>25% of last 20 =
+abort, zero engine_stalled required for a clean verdict).
+(d) RESOLUTION: target pool 1 task × 3 seeds = 3 cells, cell-level by construction; the 77-cell mean
+with the exact pooled sign test is context only; deltas under ~2 cells UNRESOLVABLE, never the reason.
+ADOPT 0.0.2.55 iff (a) + ≥1 evented conversion + all guards clean; otherwise freeze D_ID_NORMALIZE to
+`STAMP_REVISION == (2, 55)` and publish the negative with win-level detail. Energy: gpu-power-p252.csv
+windows, per-arm epochs; mechanism zero-token by construction, extra Wh attributed only beyond
+run-to-run noise. Cadence counter: pair-252 is the 5th measured-era stamp since cadence-249 —
+the four-arm cadence re-run falls due immediately after this pair's verdict.
