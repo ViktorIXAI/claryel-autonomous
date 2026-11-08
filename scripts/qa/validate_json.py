@@ -99,6 +99,26 @@ def validate(value: Any, schema: dict[str, Any], path: str = "$") -> list[str]:
     return errors
 
 
+def jsonl_failures(path: Path) -> list[str]:
+    """Syntax findings for one JSONL file, one entry per bad line.
+
+    JSONL is newline-delimited, so lines split on "\n" ONLY. Python's splitlines() also
+    breaks on U+2028/U+2029/U+0085/U+000B..., and GPQA-Diamond's upstream text carries a
+    literal LINE SEPARATOR (U+2028) inside a prompt string: that turned one valid record
+    into two phantom syntax errors (measured 08.11 on gpqa-diamond.tasks.jsonl:168-169,
+    while `json.loads` on the real line parses fine). Pinned by validate_json_test.py.
+    """
+    failures: list[str] = []
+    for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").split("\n"), 1):
+        if not line.strip():
+            continue
+        try:
+            json.loads(line)
+        except Exception as exc:
+            failures.append(f"line {lineno}: invalid JSONL line: {exc}")
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
 
@@ -116,7 +136,13 @@ def main() -> int:
                 elif data.get("type") != "object":
                     failures.append(f"{rel}: public schema root type must be object")
         else:
-            for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+            # JSONL is newline-delimited: split on "\n" only. Python's splitlines()
+            # also breaks on U+2028/U+2029/U+0085/..., and GPQA-Diamond's upstream text
+            # carries a literal LINE SEPARATOR (U+2028) inside a prompt string, which
+            # turned one valid record into two phantom syntax errors (measured 08.11:
+            # gpqa-diamond.tasks.jsonl:168-169 while `json.loads` on the real line works).
+            for lineno, line in enumerate(
+                    path.read_text(encoding="utf-8", errors="ignore").split("\n"), 1):
                 if not line.strip():
                     continue
                 try:

@@ -20,6 +20,9 @@ EXTRA_SCRIPTS = [
     # must classify correctly, or documentation links go red on a green repo
     "scripts/qa/check_links_test.py",
     "scripts/qa/validate_json.py",
+    # the JSONL line-splitting contract: a U+2028 inside a prompt string must not
+    # turn one valid record into two phantom syntax errors
+    "scripts/qa/validate_json_test.py",
 ]
 EXTRA_ARG_SCRIPTS = [
     ["scripts/qa/docs_policy.py", "--push"],
