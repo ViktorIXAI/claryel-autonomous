@@ -1,6 +1,6 @@
 # Public benchmark percent digest
 
-One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. Rows are only comparable when the task-file sha16 and the call parameters match; unscored checkers (pytest, ifeval) are excluded from the denominator and named. Checker contract in force: `pub-checkers-v2` - the scorer refuses to publish while its own self-test fails, and a gold the contract cannot parse is scored as UNSCORED, never guessed. A row re-scored under another contract id is a new row, not an edit.
+One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. Rows are only comparable when the task-file sha16 and the call parameters match. Deterministic checkers live here; the HumanEval `pytest-v1` execution checker lives in `scripts/pub_bench_exec.py` and names itself in the call column; an unshipped checker keeps its tasks out of the denominator and says so. Checker contract in force: `pub-checkers-v2` - the scorer refuses to publish while its own self-test fails, and a gold the contract cannot parse is scored as UNSCORED, never guessed. A row re-scored under another contract id is a new row, not an edit.
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
