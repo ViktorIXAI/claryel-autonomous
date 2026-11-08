@@ -145,3 +145,19 @@ launchers are published as prose; real scripts stay untracked). No other pair-25
 changed; the repo-wide strict scan is green again. Git history still contains the masked
 file under the no-history-rewrite rule (the value there is a local key PATH, not a secret;
 history scanning is non-blocking by policy and is the owner's separate decision).
+
+## 2026-11-08 CORRECTION (same day, ~20 min later) — the pair-257 secret-scan cause claim above is WRONG; retract it
+
+Verified by local reproduction: the published `gpu257-sanitized.txt` NEVER triggered the
+repo scanner (`secret_scan.py --strict` on the exact committed file: exit 0, zero findings;
+the `ssh_material` and gitleaks `ssh-connection-material` rules need `ssh -i <path>`
+adjacency, a `.key` suffix, or a literal IP, none of which the masked file contained).
+The CI `secret-scan` failure on commit a36774c was the "Install pinned Gitleaks" step dying
+on GitHub HTTP 504s (the same infra flake window also failed the link-integrity job, whose
+log shows every external link returning `http 504`). The scan never ran. The
+script->prose replacement was therefore a PRECAUTION consistent with the pair-250 rule, not
+a response to a real finding, and the prose file stands on its own. Both commits
+(85967f7 message included) repeated the wrong cause; per the honesty rules this retraction
+is appended rather than the history rewritten. Rule reminder captured: before committing a
+CI-failure cause, read WHICH step failed (gh run view --json jobs steps), never infer from
+adjacent evidence.
