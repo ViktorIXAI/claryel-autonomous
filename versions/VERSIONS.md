@@ -423,3 +423,29 @@ guard instead of being reported.
 7. A version number names a change that exists in the code and has been paired-
    tested. A planned change gets no number until it is built, and a tooling
    revision never borrows the contour axis (0.0.2.6).
+
+
+## Dated current-line scope note — 2026-11-08 (documentation audit #25)
+
+The title and compatibility mapping above are a **historical chronology through
+0.0.2.8**, not an exhaustive register of subsequent candidate, tooling, or
+adopted stamps. Preserve the original entries and their contemporary status.
+For the later sequence consult [README.md](../README.md), the paired evidence
+under [benchmarks/hard/v6-results/](../benchmarks/hard/v6-results/) and the
+version-specific decision records in [history/agent-decisions/](../history/agent-decisions/).
+
+The README reports Contour **0.0.2.55 ADOPTED** on 2026-11-08 following
+pair-252 (source [commit eb0e8436](https://github.com/ViktorIXAI/claryel-autonomous/commit/eb0e8436128e3f0392977d8e37ba98f3cbf2c85f)).
+This is the project's **published adoption decision**, not a claim that this
+older register already covers all intervening revisions, that a release tag
+exists, or that audit #25 independently reproduced the raw benchmark scores.
+Candidate 0.0.2.54 is reported **UNMEASURED**, not adopted. The subsequent
+cadence-255 four-arm publication is recorded in [commit f9eaae46](https://github.com/ViktorIXAI/claryel-autonomous/commit/f9eaae466009fc2fda01d2ff3d991d36e977e61d);
+its scores and transport-retry assertions are author-published observations,
+not independently validated by this documentation clarification.
+
+The older behavior-axis descriptions above apply to their documented era;
+do not infer the exact current contour behavior, bank, scorer, environment or
+release state from them. A full, evidence-backed revision-by-revision mapping
+and exact-tip CI check remain open under [issue #25](https://github.com/ViktorIXAI/claryel-autonomous/issues/25).
+No historical version, benchmark row or score is changed by this note.
