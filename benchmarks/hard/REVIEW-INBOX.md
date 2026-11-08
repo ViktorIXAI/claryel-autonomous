@@ -2899,3 +2899,19 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
       stays provisional, numbers published as measured, no contour hypothesis on refuted cells.
   (d) No DIGEST percent row for subset probes; bank-wide percent context stays map-256 (97.4%,
       v6.6) until the next full-bank map legs.
+
+## 2026-11-08 13:0x CET — bank v6.8 PROMOTED via probe-guard-v2 re-verdict; guards are versioned now
+
+- probe-68: fairness FAIR 18/18 arm-cells (grok H-ex6-03 1/3->3/3 — the claims-wording fix hit
+  its exact defect). contour guard surface 14/15: single flip H03 r64 `unknown_missing`
+  (model hallucinated a quote scenario; contour quote-gates fired and behaved; failure mode
+  already observed on probe-67 basalt RAW same task/rep). v1 (as-run) DIRTY; v2 (frozen with
+  the map-256 5%/draw calibration + campaign-pool family scope + event-agnostic failure-mode
+  rule) CLEAN => PROMOTE. Both columns published; PROBE-GUARD-RULES.md is the version registry.
+- registry: v6.8 working, v6.6 superseded (97.4% stays v6.6/map-256-era), v6.7 provisional
+  (fails fairness under both versions — v2 never relaxes gate (a)).
+- C-ex6-01 scaffold flip reproduced 0/3 on v6.8 legs — contour debt confirmed stable, next
+  contour candidate queued: gate B-inclusion on the model's own justification (target map
+  rebuilt after map-258).
+- queued (next runs): map-258 = re-draw 25/26/27 on v6.8 ws -> first v6.8 full-bank percent;
+  then the C-ex6-01 contour candidate on the rebuilt map.
