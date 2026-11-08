@@ -87,14 +87,23 @@ def main():
                 n_empty += 1
             if r.get("truncated"):
                 n_trunc += 1
+            gen = r.get("gen") or {}
+            rungs = ",".join(str(x) for x in gen.get("ladder", []))
+            if gen.get("request_shape"):
+                # 2026-11-08 parity rule: the row names its own request shape, so a matched-shape
+                # leg never wears the old escalation-start label.
+                note = ("frozen contour runtime %s (behavior %s): %s, ladder rungs %s, first rung %s"
+                        % (stamp, behaviours[0] if behaviours else "?", gen["request_shape"],
+                           rungs, gen.get("max_tokens")))
+            else:
+                note = ("frozen contour runtime %s (behavior %s): streamed request, "
+                        "request_seed pinned (sp1), ladder rungs %s, enable_thinking off"
+                        % (stamp, behaviours[0] if behaviours else "?", rungs))
             fh.write(json.dumps({
                 "id": r["task"], "bench": a.bench or (r.get("cat") or ""), "arm": "contour",
                 "model": "%s+contour-%s" % (model, stamp), "temp": 0.7,
                 "transport": "gate_run %s" % stamp,
-                "transport_note": ("frozen contour runtime %s (behavior %s): streamed request, "
-                                   "request_seed pinned (sp1), ladder rungs %s, enable_thinking off"
-                                   % (stamp, behaviours[0] if behaviours else "?",
-                                      ",".join(str(x) for x in (r.get("gen") or {}).get("ladder", [])))),
+                "transport_note": note,
                 "answer": ans,
                 "seconds": (ladder.get((r["task"], r.get("rep"))) or {}).get("seconds"),
             }, ensure_ascii=False) + "\n")
@@ -125,6 +134,11 @@ def main():
             "overhead_tokens_total": sum(r.get("overhead_tokens", 0) or 0 for r in led),
             "engine_seconds_total": round(sum(r.get("seconds", 0) or 0 for r in led), 1),
             "engine_stalled_rows": sum(1 for r in res if r.get("engine_stalled")),
+            # the arm's own request shape, read out of the rows (never from the launcher)
+            "request_shapes": sorted({str((r.get("gen") or {}).get("request_shape"))
+                                      for r in res if (r.get("gen") or {}).get("request_shape")}),
+            "first_rungs": sorted({int((r.get("gen") or {}).get("max_tokens"))
+                                   for r in res if (r.get("gen") or {}).get("max_tokens")}),
         }
         json.dump(stats, open(a.stats, "w", encoding="utf-8"), indent=2)
 

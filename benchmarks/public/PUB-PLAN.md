@@ -85,6 +85,24 @@ real truncation, so the contour row carries its own call label.
 publishes the accounting beside the percent: gate-fire events, ladder steps, truncations, tokens,
 model calls, engine seconds.
 
+**PARITY SHAPE RULE (added 2026-11-08 after the GPQA finding).** A contour-parity row is
+admissible only when the contour leg's REQUEST SHAPE equals the bare leg's: the first token rung
+is the bare arm's `max_tokens` (1200, not a 512 escalation start), the same thinking state the
+bare arm gets from the serve default (no `chat_template_kwargs`, no `reasoning_effort`), the same
+temperature (0.7) and the same seed policy (no request seed). The published GPQA parity row
+(46.0 % against 64.1 % bare, 0 gates fired, ladder escalated 188/198 and truncated 122 at the
+ceiling) is a **request-shape cost, not a contour effect**, and stays published as such until a
+matched-shape leg supersedes it. Measured on the endpoint with the same prompt: with
+`enable_thinking` omitted the chain of thought streams in `delta.reasoning_content` and the visible
+`content` stays short, while `enable_thinking:false` moves the whole chain into `content`
+(144 chars vs 1108 chars of visible text on the same task), so the frozen shape burns the 1200
+ceiling on reasoning-heavy sets. `PARB_SHAPE=bare` + `PARB_LADDER=1200` is the matched shape; it
+is a call-parameter switch only - it registers no contour feature and changes nothing about the
+published escalation-shape arms - pinned by `harness/gate_shape_parity_test.py` (15 checks) and
+recorded in every row (`gen.request_shape`) and in the run-record stack. If a matched-shape parity
+row cannot be produced for a set, that is written as the finding; no row is published that measures
+the wrong thing.
+
 ## Arms
 
 * **brain-basalt** — our stable local stack: `qwen3.8-flash-next-iq3_s-basalt` on P2005 (24 GB

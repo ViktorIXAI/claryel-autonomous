@@ -37,6 +37,24 @@ SUBSET = [x for x in os.environ.get("PARB_SUBSET", "").split(",") if x.strip()]
 _LADDER_DEFAULT = "512,1024,2048"
 _LADDER_ENV = os.environ.get("PARB_LADDER")
 LADDER = [int(x) for x in (_LADDER_ENV or _LADDER_DEFAULT).split(",")]
+# PARITY SHAPE RULE (public line, 2026-11-08). A contour-parity row is only admissible when the
+# arm's REQUEST SHAPE equals the bare arm's: first token rung = the bare arm's max_tokens (not a
+# 512 escalation start), the same thinking state the bare arm gets from the serve default, the
+# same temperature and the same seed policy. PARB_SHAPE=bare states that explicitly: the first
+# rung becomes LADDER[0] and the sampling kwargs the bare arm never sends (seed, reasoning_effort,
+# chat_template_kwargs/enable_thinking) are dropped so the serve default applies. This is a
+# call-parameter switch only - it registers no contour feature and enables no gate, nudge or
+# fixer - and with PARB_SHAPE unset every published arm keeps its request bytes identical.
+SHAPE_BARE = os.environ.get("PARB_SHAPE", "").strip().lower() == "bare"
+SHAPE_LABEL = ("bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no "
+               "chat_template_kwargs (serve default thinking)" if SHAPE_BARE else
+               "contour-default: first rung 512, sp1 request seed, reasoning_effort none, "
+               "enable_thinking false")
+# On this endpoint the effect is large and measurable: with enable_thinking omitted the chain of
+# thought streams in delta.reasoning_content and delta.content stays short, while
+# enable_thinking:false moves the whole chain into delta.content (~3x longer visible text), which
+# is what truncated the GPQA parity leg at the 1200 ceiling.
+FIRST_RUNG = LADDER[0] if SHAPE_BARE else 512
 # contour 2.12: on the HARD tier the old ceiling of 2048 still truncated
 # 200-field JSON and 90-row CSV answers (finish=length in 5/77 tasks). A
 # truncation is a missing budget, not a wrong answer, so the top rung rises
@@ -474,9 +492,16 @@ if _k:
 
 
 def call(msgs, mt, seed):
-    body = {"model": MODEL, "messages": msgs, "temperature": 0.7, "max_tokens": mt,
-            "stream": True, "seed": seed, "reasoning_effort": "none",
-            "chat_template_kwargs": {"enable_thinking": False}}
+    if SHAPE_BARE:
+        # Exactly the bare public arm's body plus streaming (the transport the stall guard
+        # needs): no seed, no reasoning_effort, no chat_template_kwargs, so the serve's default
+        # sampling state is what the bare arm saw.
+        body = {"model": MODEL, "messages": msgs, "temperature": 0.7, "max_tokens": mt,
+                "stream": True}
+    else:
+        body = {"model": MODEL, "messages": msgs, "temperature": 0.7, "max_tokens": mt,
+                "stream": True, "seed": seed, "reasoning_effort": "none",
+                "chat_template_kwargs": {"enable_thinking": False}}
     req = urllib.request.Request(API, data=json.dumps(body).encode(), headers=HDRS)
     txt = ""
     ptok = ctok = None
@@ -626,8 +651,13 @@ def ask_repair(acct, msgs0, hint, seed, prev=None):
     return r
 
 
-def ask_ladder(acct, msgs, seed, mt=512):
-    """A truncated answer is not a failure but a missing budget: raise max_tokens."""
+def ask_ladder(acct, msgs, seed, mt=None):
+    """A truncated answer is not a failure but a missing budget: raise max_tokens.
+
+    The first rung is FIRST_RUNG: 512 on every published arm, or LADDER[0] when PARB_SHAPE=bare
+    asks for the bare arm's request shape (parity rule on the public line)."""
+    if mt is None:
+        mt = FIRST_RUNG
     r = call(msgs, mt, seed)
     i = LADDER.index(mt) if mt in LADDER else 0
     while r["finish"] == "length" and i + 1 < len(LADDER):
@@ -3632,8 +3662,10 @@ def run_one(t, pos, done, st):
     rec = {"task": t["id"], "rep": pos["rep"], "series": pos["series"], "rep_group": pos["rep_group"],
            "cat": cat, "subcat": t.get("kind", ""), "level": t["level"], "seed": t["seed"],
            "run_tag": "gate", "stage": pos["stage"],
-           "gen": {"temperature": 0.7, "thinking": False, "max_tokens": LADDER[0],
-                   "request_seed": seed, "fresh_context": True, "ladder": LADDER},
+           "gen": {"temperature": 0.7, "thinking": (None if SHAPE_BARE else False),
+                   "max_tokens": FIRST_RUNG, "request_seed": (None if SHAPE_BARE else seed),
+                   "request_shape": SHAPE_LABEL,
+                   "fresh_context": True, "ladder": LADDER},
            "box": BOX, "contour_version": CONTOUR_VERSION, "contour_behavior": CONTOUR_BEHAVIOR,
            "contour_notes": CONTOUR_NOTES,
            "versioning": CONTOUR_SUMMARY,
@@ -4262,6 +4294,9 @@ def main():
         "seed_protocol": SC.SEED_PROTOCOL,
         "contour_stamp": CONTOUR_SUMMARY.get("contour_version"),
         "contour_behavior": CONTOUR_BEHAVIOR,
+        "request_shape": SHAPE_LABEL,
+        "first_rung": FIRST_RUNG,
+        "ladder": LADDER,
         "harness_git_sha": sha,
     }
     if not stack.get("bank_sha16"):

@@ -18,7 +18,7 @@ onto a public prompt. Scoring goes through the public checker module (`scripts/p
 loaded by path), i.e. the same bytes that decided the bare row. If the frozen runtime cannot
 serve a public class at all, that refusal is the published finding — no contour row is faked.
 
-Usage: pub_bench_contour_ws.py <bench> <limit> [out-dir]
+Usage: pub_bench_contour_ws.py <bench> <limit> [shape=frozen|bare] [out-dir]
 """
 import hashlib
 import json
@@ -83,7 +83,16 @@ def main():
         print(__doc__)
         return 2
     bench, limit = sys.argv[1], int(sys.argv[2])
-    out = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser("~/parb-pub-contour/%s" % bench)
+    # Item P0 parity rule (2026-11-08): `bare` stages a workspace whose leg must be launched with
+    # PARB_SHAPE=bare PARB_LADDER=<bare arm's max_tokens>, i.e. the request shape the bare row
+    # used (first rung = 1200, serve-default thinking, no request seed). `frozen` (default) keeps
+    # the published escalation shape.
+    shape = (sys.argv[3] if len(sys.argv) > 3 else "frozen").strip().lower()
+    if shape not in ("frozen", "bare"):
+        sys.exit("shape must be 'frozen' or 'bare', got %r" % shape)
+    out = (sys.argv[4] if len(sys.argv) > 4
+           else os.path.expanduser("~/parb-pub-contour/%s%s"
+                                   % (bench, "-matched" if shape == "bare" else "")))
     os.makedirs(out, exist_ok=True)
     for m in MODULES:
         shutil.copy2(os.path.join(HARN, m), os.path.join(out, m))
@@ -91,6 +100,11 @@ def main():
         got = sha16(os.path.join(out, name))
         if got != want:
             sys.exit("PIN DRIFT %s: contract wants %s, ws has %s" % (name, want, got))
+    if shape == "bare":
+        gr = open(os.path.join(out, "gate_run.py"), encoding="utf-8").read()
+        if "SHAPE_BARE" not in gr:
+            sys.exit("SHAPE SWITCH MISSING: this harness has no PARB_SHAPE switch; a 'bare' "
+                     "parity workspace would silently re-measure the escalation shape")
     with open(os.path.join(out, "parb_check.py"), "a", encoding="utf-8") as fh:
         fh.write(SHIM.replace("@@PUBPATH@@",
                               json.dumps(os.path.join(REPO, "scripts", "pub_bench_score.py"))))
@@ -128,7 +142,20 @@ def main():
              "tasks_file": "benchmarks/public/%s.tasks.jsonl" % bench,
              "tasks_file_sha16": sha16(tasks_f), "tasks": len(bank),
              "bank_ws_sha16": bank_sha, "plan_sha16": sha16(os.path.join(out, "plan.json")),
-             "seed_protocol": "sp1 (gseed = int(sha256(task|rep)[:8],16) % 999983)",
+             "seed_protocol": ("sp1 (gseed = int(sha256(task|rep)[:8],16) % 999983); in 'bare' "
+                               "shape the gseed stays in the plan for cell identity but is NOT "
+                               "sent as a request seed, matching the bare arm's seed policy"
+                               if shape == "bare" else
+                               "sp1 (gseed = int(sha256(task|rep)[:8],16) % 999983)"),
+             "request_shape": ({"mode": "bare-matched",
+                                "launch_env_required": "PARB_SHAPE=bare PARB_LADDER=1200",
+                                "why": ("parity with the bare arm: first token rung = the bare "
+                                        "arm's max_tokens, serve-default thinking (no "
+                                        "chat_template_kwargs), temperature 0.7, no request seed")
+                                } if shape == "bare" else
+                               {"mode": "frozen-contour",
+                                "why": ("published shape: first rung 512 escalating to the "
+                                        "ladder ceiling, sp1 request seed, enable_thinking off")}),
              "validator": {"contract": "pub-checkers-v2",
                            "module": "scripts/pub_bench_score.py",
                            "sha16": sha16(os.path.join(REPO, "scripts", "pub_bench_score.py"))},
@@ -136,8 +163,10 @@ def main():
              "ws_modules": {m: sha16(os.path.join(out, m)) for m in MODULES}}
     json.dump(ident, open(os.path.join(out, "WS-IDENTITY.json"), "w", encoding="utf-8"), indent=2)
     print("ws ready:", out)
-    print("stamp", STAMP, "tasks", len(bank), "bank", bank_sha,
+    print("stamp", STAMP, "shape", shape, "tasks", len(bank), "bank", bank_sha,
           "tasks-file", ident["tasks_file_sha16"], "harness", sha[:12])
+    if shape == "bare":
+        print("launch this ws with: PARB_SHAPE=bare PARB_LADDER=1200 (the bare arm's shape)")
     return 0
 
 

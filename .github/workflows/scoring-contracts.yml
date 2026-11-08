@@ -45,6 +45,7 @@ jobs:
                    harness/gate_v69_d_id_prompt_test.py \
                    harness/gate_v70_d_best3_banned_test.py \
                    harness/gate_v71_claim_rearm_test.py \
+                   harness/gate_shape_parity_test.py \
                    harness/bank_gate_census_test.py \
                    harness/audit_v2_scanner_test.py \
                    harness/gate_versioning_test.py; do
