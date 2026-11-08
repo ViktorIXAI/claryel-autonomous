@@ -81,11 +81,35 @@ if any exists, can actually be resolved.
    `bank|answer_key|expected_|/home/|/Users/|<LAN_IP-prefix>`: **0 matches** in each.
 6. **A 4-option MCQ has a 25 % guessing floor.** All three brains sit 71 pp above it, so the
    measured differences are not a floor artifact — they are just too small for this sample.
-7. **This doc is not yet P0-complete.** Item P0 (contour parity, added to `PUB-PLAN.md` on
-   2026-11-08, after this set's legs had already run) asks every published set for a second row
-   from the frozen contour runtime `0.0.2.56` over the same ids, with gate-fire, edit,
-   truncation, token and energy counts. No contour leg has been run against ARC-Easy, so the
-   three-arm table above is explicitly the *bare-brain* comparison; the parity row is an open
-   item, not an omission to be back-filled by re-labelling a bare row. P0's own order runs
-   GSM8K-300 first, so a contour row here depends on what that first attempt shows about whether
-   the frozen runtime can take a public MCQ task class at all.
+7. **P0-complete since 2026-11-08 20:43 CET.** The contour-parity row (item P0) ran and is
+   published in the section below; the three-arm table above stays the bare-brain comparison.
+
+## Contour parity (item P0): the frozen runtime on the same 300 ids
+
+The frozen contour runtime `0.0.2.56` (tag `stable-hard-0.0.2.56`, harness tree `381dc5b2`-era
+modules byte-verbatim via `scripts/pub_bench_contour_ws.py`) ran over the first 300 ids on the
+same endpoint, category `P`, public checkers in the validator slot, scored by the same
+`pub-checkers-v2` bytes. Note this leg ran **after a serving-engine restart** (the box hit full
+swap at ~20:36 and keep-up relaunched the engine; a first 25-row attempt on the sick endpoint was
+discarded whole as `dead1/` and contributes nothing).
+
+| measure | value |
+|---|---|
+| strict on the matched 300 | **290/300 = 96.7 %** — identical to the bare arm |
+| paired vs bare arm | **0W / 0L** (p = 1.000): every one of the 300 verdicts is identical |
+| contour/repair events fired | **0**; ladder escalations **0**; truncations **0**; stalls **0** |
+| model calls / fixes / blocks | 300 / 0 / 0 |
+| prompt + generated tokens | 21,943 in + 600 out |
+| wall / measured engine time | 115 s / 103.2 s (0.34–0.39 s/task) |
+| GPU energy (2 s sampler, 46 samples, 113 s full-leg window) | **3.70 Wh** (~12.3 mWh/task) |
+
+This is the strongest parity result on the line: on 300 ids the frozen runtime reproduced the
+bare arm's verdict on **every task**, fired zero machinery and paid zero ladder retries — its
+measured overhead here is the streaming/seed request shape alone. Unlike ARC-Challenge (same
+stamp, 12 discordant ids with the same null mechanism census, attributed there to sampling
+shape and the engine restart), this leg shows the variance budget can also land at zero flips;
+the ARC-Challenge ±3 pp caveat applies to any use of this row as an instrument.
+
+The honest framing stays: on an answer-only MCQ the contour *cannot* change the score by
+construction (category `P` routes away from every hard-bank grammar), so the parity rows exist
+to prove that claim mechanically and to bound the harness cost — not to claim a tie on quality.
