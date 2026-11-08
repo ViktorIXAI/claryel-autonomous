@@ -2846,3 +2846,28 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
       (queued as the next P0: map-257 legs + regenerated UNSTABLE-CELLS gate table).
 - Energy/telemetry: probe legs record start/end epochs; no GPU sampler unit (subset
   probe, minutes of endpoint time; the paired-telemetry rule applies to full pairs).
+
+## 2026-11-08 12:2x CET — BANK-PROBE-67 VERDICT: v6.7 stays PROVISIONAL (frozen rule applied as written)
+
+- Ran exactly the frozen rule: 6 contour legs (c66r64-66 control bank v6.6 vs c67r64-66 candidate
+  bank v6.7, stamp 0.0.2.56, harness HEAD 988113f BOTH sides — control ws rebuilt fresh because the
+  old b66 ws had drifted `parb_loop.py` bytes; bank is the only diff), then raw arms
+  basalt/codex/grok contour-OFF on the byte-guarded v6.7 subset (`724e90...`->`724e9a0150ce45f5`),
+  all rc=0, 18 rows each. sp1 audit 36/36 gseeds exact; zero stalls; answers clean of bank/gold refs.
+- (a) FAIRNESS NOT FAIR: grok H-ex6-03 1/3 (`ungrounded_claims` twice — claims carry SESSION-STATE
+  statements; the model counts its own context as confirming data; basalt once answered `unknown`
+  in English -> `unknown_missing`, model-side lottery). Everything else 3/3 on every arm — the K
+  boolean/Latin pins, the F id-form + grounded N2 line, the H claims conditional and the C gold
+  fix all lift their cells 0/3->3/3. C-ex6-01 fairness additionally 3/3x3 offline from saved
+  cadence-255 bytes (prompt bytes unchanged, zero new calls).
+- (b) NO-NEW-LOSS DIRTY: C-ex6-01 contour 3/3->0/3 (fairness flip: all three candidate draws answered
+  `B,C,F`; with contour OFF the same brain answers `C,F` unanimously across 18 fresh + 27 historical
+  draws -> the C-scaffolding coverage path steers toward the reversed safety-sounding statement —
+  published as a FINDING and a future contour candidate on the fair gold; the guard still fails per
+  the frozen totals floor), plus one F `no_json` collapsed draw (new family, lottery).
+- Consequences: v6.7 note updated (status stays provisional, one working preserved); probe published
+  in `benchmarks/hard/v6-results/bank-probe-67/` (answers, plans, seed audit, logs, epochs; prose
+  launcher only); no DIGEST row (subset probe fail-close); NO contour hypothesis opened on the
+  refuted cells. NEXT queued: (1) claims-wording iteration (claims never about the session itself)
+  -> v6.7b candidate bank + fresh probe reps 67/68/69 with fresh artifact names; (2) map-257
+  full-bank legs on v6.6 + regenerated UNSTABLE-CELLS gate table (percent context refresh).

@@ -1,0 +1,10 @@
+How probe67 was launched (prose; the real queue script stays untracked):
+a serial queue under one `systemd-run --user --collect --unit=parb-probe67 bash <absolute script>`
+started from a cron session. Per contour leg, in the side's workspace: plan_reps.py for the rep,
+then gate_run.py with PARB_GATE_VERSION=0.0.2.56, PARB_SUBSET=<the six task ids>, PARB_BOX=P2005,
+PARB_API=<P2005 Basalt chat URL>, PARB_KEY_FILE=p2005-profile.json (auth-checked before launch
+with GET /v1/models: alias qwen3.8-flash-next-iq3_s-basalt, status loaded). Raw fairness arms:
+scripts/raw_v6.py basalt/codex/grok at reps 64,65,66 with PARB_RAW_WS=<v6.7 subset ws> and the
+chat URL derived from the profile JSON, PATH pinned to the user bin dir with a command -v
+fail-closed check. Exit codes and row counts appended to a queue log; every leg got fresh
+results/ledger/state/log names and start/end epoch files.

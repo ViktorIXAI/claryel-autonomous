@@ -1,0 +1,40 @@
+{
+  "box": "P2005",
+  "model": "qwen3.8-flash-next-iq3_s-basalt",
+  "api_host": "http://<LAN_IP>:8080",
+  "contour_version": "0.0.2.56",
+  "contour_behavior": "2.56",
+  "contour_changed_at_this_release": true,
+  "git_sha": "988113f3456c4b1140f5ac56cdc89bf2c8dfff41",
+  "plan_tasks": 6,
+  "serve_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-iq3_s-basalt",
+    "images": true,
+    "api_key": true,
+    "loaded": true,
+    "loading": false,
+    "service": "basalt"
+  },
+  "stall_policy": {
+    "retry": 1,
+    "rate": 0.25,
+    "window": 20,
+    "stall_seconds": 18.0
+  },
+  "notes": "bank v6.7 probe: subset fairness+no-new-loss, rule REVIEW-INBOX 2026-11-08 11:33 CET; bank ws v6.7-candidate; stamp 0.0.2.56 both sides, harness HEAD 988113f+manifest regen, matched seed rep 64",
+  "stack": {
+    "bank_version": "v6.7",
+    "bank_version_source": "marker",
+    "bank_sha16": "7e099f6a49ee715b",
+    "bank_tasks": 77,
+    "scorer_contract": "v6.2",
+    "contract_sha16": "c8c0c7dd114dfc32",
+    "strict_rule": "content == 1.0 and format_ok",
+    "seed_protocol": "sp1",
+    "contour_stamp": "2.56",
+    "contour_behavior": "2.56",
+    "harness_git_sha": "988113f3456c4b1140f5ac56cdc89bf2c8dfff41"
+  }
+}

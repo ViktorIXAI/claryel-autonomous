@@ -27,8 +27,10 @@ exactly 2.57 (2026-11-08, pair-257: the loop claim family's per-draw base rate i
 so a 3+3 loop pair carried zero live target; live wiring evidence published in `pair-257/`).
 Working bank: v6.6 `5c86252b2ef2f422` — adopted-line bank baseline 97.4% (75.0/77 strict,
 map-256); bank v6.7 `b4464127dc5b5b97` (six answer-byte-proven raw-fairness defects fixed,
-found by the `raw_gold_disagreement` census) is PROVISIONAL pending its frozen probe rule
-(REVIEW-INBOX 2026-11-08).
+found by the `raw_gold_disagreement` census) ran its frozen probe (2026-11-08) and STAYS
+PROVISIONAL: raw fairness failed on one cell/brain (grok 1/3 on H-ex6-03 — session-state
+statements in `claims`), every other fixed cell lifted to 3/3 on all arms; details in
+`benchmarks/hard/v6-results/bank-probe-67/PROBE-ROWS.md`.
 
 ## Current version
 

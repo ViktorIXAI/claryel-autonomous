@@ -1,0 +1,11 @@
+11:46:59 PGR: release 0.0.2.56, contour behavior 2.56
+11:46:59 PGR: planned tasks 6, previously done 0, limit 14400 s
+11:47:00 PGR: stack bank=7e099f6a49ee715b(marker) version=v6.7 scorer=v6.2(c8c0c7dd114dfc32) seeds=sp1
+11:47:00 PGR: run record run-record-c67r65.json; serve health ok; stall policy retry=1 rate=25% window=20
+11:47:00 K K-ex6-00       rep65   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.8s tok=125  /40   c=0    tps_eff=53.5 
+11:47:01 K K-ex6-01       rep65   c=1.00 f=True fin=stop   calls=1 fix=0 blk=0 lad=0   0.8s tok=124  /34   c=0    tps_eff=41.2 
+11:47:16 C C-ex6-01       rep65   c=0.00 f=True fin=stop   calls=2 fix=0 blk=0 lad=1   8.5s tok=570  /736  c=2    tps_eff=80.1 set_mismatch got=['B', 'C', 'F'] want=['C', 'F']
+11:47:19 H H-ex6-00       rep65   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   3.0s tok=333  /194  c=0    tps_eff=35.8 
+11:47:21 H H-ex6-03       rep65   c=1.00 f=True fin=stop   calls=2 fix=1 blk=0 lad=0   1.9s tok=326  /129  c=0    tps_eff=34.2 
+11:47:22 F F-ex6-01       rep65   c=1.00 f=True fin=stop   calls=2 fix=2 blk=0 lad=0   1.6s tok=555  /118  c=0    tps_eff=36.3 
+11:47:22 PGR finished: records 6, duration 23 s, stop reason: none
