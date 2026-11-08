@@ -220,7 +220,7 @@ def main():
     by = {}
     for tid, t in tasks.items():
         b, ck = t["bench"], t["checker"]
-        ok = check(ck, t["gold"], ans[tid].get("answer", ""))
+        ok = check(ck, t["gold"], ans.get(tid, {}).get("answer", ""))
         r = by.setdefault(b, {"scored": 0, "ok": 0, "unscored": 0})
         if ok is None:
             r["unscored"] += 1

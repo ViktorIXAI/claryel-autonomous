@@ -58,6 +58,16 @@ result rows, not hidden.
 | humaneval | 164 | `971d976289cd9357` | openai/human-eval HumanEval.jsonl.gz | pinned; execution checker shipped as contract `pytest-v1` (`scripts/pub_bench_exec.py`, self-test: the reference solution passes and a wrong completion fails) |
 | ifeval | 0 | — | HF google-deepmind/ifeval returns 401 (agreement-gated), the google-research raw path 404s | BLOCKED: try the `randxie-boson/ifeval-data` mirror, vendor the upstream `instructions.py` checker before running arms |
 
+## Item P0 — contour parity (owner request 2026-11-08)
+
+Every published public set must carry two rows: the bare brain and the **frozen contour runtime
+`0.0.2.56`** over the same task ids, same temperature and same `max_tokens`, scored by the same
+public checker contract. The contour leg publishes its gate-fire count, contour edit count,
+truncations, tokens, energy and wall time next to the percent, because a harness that never fires
+is a cost, not a gain, and that has to be visible. If the frozen runtime cannot run a public task
+class without hard-bank-specific assumptions, that refusal is written into the result doc as the
+finding — no contour row is faked. Order: GSM8K first 300 ids, GPQA-Diamond (198), ARC-Easy 300.
+
 ## Arms
 
 * **brain-basalt** — our stable local stack: `qwen3.8-flash-next-iq3_s-basalt` on P2005 (24 GB
