@@ -12,7 +12,7 @@ jobs:
           # fetch-depth 0 so /commit/<sha> documentation links resolve against
           # real local history instead of a network guess (scripts/check_links.py)
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "${{ matrix.python-version }}"
       - name: fixer suite (12 cases incl. refusal paths)
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: download pinned artifacts from public release (no auth)
