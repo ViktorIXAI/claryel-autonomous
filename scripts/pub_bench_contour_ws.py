@@ -18,7 +18,11 @@ onto a public prompt. Scoring goes through the public checker module (`scripts/p
 loaded by path), i.e. the same bytes that decided the bare row. If the frozen runtime cannot
 serve a public class at all, that refusal is the published finding — no contour row is faked.
 
-Usage: pub_bench_contour_ws.py <bench> <limit> [shape=frozen|bare] [out-dir]
+Usage: pub_bench_contour_ws.py <bench> <limit> [shape=frozen|bare] [out-dir] [validator=score|exec]
+
+`validator=exec` puts the pytest-v1 execution checker (scripts/pub_bench_exec.py) in the validator
+slot, which is what HumanEval's bare row was scored with; the builder runs that checker's self-test
+and refuses to stage if it fails. Default `score` keeps `pub-checkers-v2`.
 """
 import hashlib
 import json
@@ -73,6 +77,49 @@ def check_public(t, text):
 CHECK["P"] = check_public
 '''
 
+# Variant for execution-graded public sets (HumanEval). The validator slot must hold the SAME
+# bytes that scored the bare arm, and for HumanEval that is the `pytest-v1` execution contract in
+# scripts/pub_bench_exec.py, not the number/letter/exact contract. The staging builder refuses to
+# build this variant unless that checker's own self-test passes first.
+SHIM_EXEC = '''
+
+# ---- public-benchmark validator shim, EXECUTION variant (workspace-only, written by
+# ---- pub_bench_contour_ws.py). Contract: pytest-v1 (scripts/pub_bench_exec.py). ----
+# Category "P" is a public benchmark task: gate_run's contour routing is keyed to the hard-bank
+# families A..K, so a "P" task reaches only the generic ladder path and no family grammar is
+# grafted onto a public prompt. The verdict is decided by RUNNING the task's own upstream
+# check(candidate) tests in the rlimit'd child pub_bench_exec.py uses for the bare arm — the same
+# bytes, the same isolation, so the contour row and the bare row are graded identically.
+# format_ok is fixed to 1 because the public contract has no separate format axis.
+import hashlib as _shim_hashlib
+import importlib.util as _shim_ilu
+_PUB_EXEC_PATH = @@PUBPATH@@
+_spec = _shim_ilu.spec_from_file_location("pub_bench_exec_shim", _PUB_EXEC_PATH)
+PBS = _shim_ilu.module_from_spec(_spec)
+_spec.loader.exec_module(PBS)
+PUB_CHECKER_CONTRACT = "pytest-v1"
+PUB_SCORER_SHA16 = _shim_hashlib.sha256(open(_PUB_EXEC_PATH, "rb").read()).hexdigest()[:16]
+
+
+def check_public(t, text):
+    """Execution verdict mapped onto the harness score slots (documented above)."""
+    meta = t.get("meta") or {}
+    if isinstance(meta, str):
+        import json as _shim_json
+        meta = _shim_json.loads(meta)
+    entry = PBS.entry_point(t.get("prompt", ""))
+    if not entry or not meta.get("test"):
+        return None, None, ["pub_unscored_checker:no_test_material"]
+    ok, note = PBS.run_case(t.get("prompt", ""), PBS.strip_code(text or ""),
+                            meta["test"], entry)
+    if ok:
+        return 1.0, 1, ["pub:exec_ok"]
+    return 0.0, 1, ["pub:exec_fail:%s" % str(note)[:120]]
+
+
+CHECK["P"] = check_public
+'''
+
 
 def sha16(path):
     return hashlib.sha256(open(path, "rb").read()).hexdigest()[:16]
@@ -90,6 +137,19 @@ def main():
     shape = (sys.argv[3] if len(sys.argv) > 3 else "frozen").strip().lower()
     if shape not in ("frozen", "bare"):
         sys.exit("shape must be 'frozen' or 'bare', got %r" % shape)
+    # The validator slot must hold the bytes that decided the BARE row of this set. For the
+    # answer-graded sets that is the number/letter/exact contract; for HumanEval it is the
+    # pytest-v1 execution checker, which is a different module and a different contract id.
+    validator = (sys.argv[5] if len(sys.argv) > 5 else "score").strip().lower()
+    if validator not in ("score", "exec"):
+        sys.exit("validator must be 'score' or 'exec', got %r" % validator)
+    pub_mod = "pub_bench_exec.py" if validator == "exec" else "pub_bench_score.py"
+    if validator == "exec":
+        r = subprocess.run([sys.executable, os.path.join(REPO, "scripts", "pub_bench_exec.py"),
+                            "selftest"], capture_output=True, text=True)
+        print((r.stdout or "").strip() or (r.stderr or "").strip())
+        if r.returncode != 0:
+            sys.exit("EXEC CHECKER SELF-TEST FAILED - refusing to stage an execution-validated ws")
     out = (sys.argv[4] if len(sys.argv) > 4
            else os.path.expanduser("~/parb-pub-contour/%s%s"
                                    % (bench, "-matched" if shape == "bare" else "")))
@@ -106,8 +166,8 @@ def main():
             sys.exit("SHAPE SWITCH MISSING: this harness has no PARB_SHAPE switch; a 'bare' "
                      "parity workspace would silently re-measure the escalation shape")
     with open(os.path.join(out, "parb_check.py"), "a", encoding="utf-8") as fh:
-        fh.write(SHIM.replace("@@PUBPATH@@",
-                              json.dumps(os.path.join(REPO, "scripts", "pub_bench_score.py"))))
+        fh.write((SHIM_EXEC if validator == "exec" else SHIM).replace(
+            "@@PUBPATH@@", json.dumps(os.path.join(REPO, "scripts", pub_mod))))
 
     tasks_f = os.path.join(REPO, "benchmarks", "public", "%s.tasks.jsonl" % bench)
     rows = [json.loads(l) for l in open(tasks_f, encoding="utf-8") if l.strip()][:limit]
@@ -156,14 +216,19 @@ def main():
                                {"mode": "frozen-contour",
                                 "why": ("published shape: first rung 512 escalating to the "
                                         "ladder ceiling, sp1 request seed, enable_thinking off")}),
-             "validator": {"contract": "pub-checkers-v2",
-                           "module": "scripts/pub_bench_score.py",
-                           "sha16": sha16(os.path.join(REPO, "scripts", "pub_bench_score.py"))},
+             "validator": ({"contract": "pytest-v1",
+                            "module": "scripts/pub_bench_exec.py",
+                            "sha16": sha16(os.path.join(REPO, "scripts", "pub_bench_exec.py"))}
+                           if validator == "exec" else
+                           {"contract": "pub-checkers-v2",
+                            "module": "scripts/pub_bench_score.py",
+                            "sha16": sha16(os.path.join(REPO, "scripts", "pub_bench_score.py"))}),
              "frozen_scorer_bytes_present": PINS,
              "ws_modules": {m: sha16(os.path.join(out, m)) for m in MODULES}}
     json.dump(ident, open(os.path.join(out, "WS-IDENTITY.json"), "w", encoding="utf-8"), indent=2)
     print("ws ready:", out)
-    print("stamp", STAMP, "shape", shape, "tasks", len(bank), "bank", bank_sha,
+    print("stamp", STAMP, "shape", shape, "validator", ident["validator"]["contract"],
+          "tasks", len(bank), "bank", bank_sha,
           "tasks-file", ident["tasks_file_sha16"], "harness", sha[:12])
     if shape == "bare":
         print("launch this ws with: PARB_SHAPE=bare PARB_LADDER=1200 (the bare arm's shape)")
