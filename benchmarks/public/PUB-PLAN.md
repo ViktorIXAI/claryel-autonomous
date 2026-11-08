@@ -91,8 +91,10 @@ model calls, engine seconds.
   class GPU, IQ3_S quant), no contour (contour gates are keyed to hard-bank task classes).
 * **codex** — ChatGPT `gpt-6.1-sol`, xhigh reasoning, via the documented CLI transport.
 * **grok** — `grok-4.7` via the documented CLI transport.
-* **contour-0.0.2.56** — only on benchmarks whose scoring is format/protocol sensitive (4, 9), so
-  a harness comparison stays honest.
+* **contour-0.0.2.56** — the frozen runtime, run as the item P0 parity arm on **every** published
+  set (owner request 2026-11-08, which supersedes the earlier plan to restrict it to the
+  format/protocol-sensitive sets 4 and 9). On the answer-graded classic sets the parity row is
+  expected to show a harness that never fires; the accounting beside the percent is the finding.
 
 ## First measured row
 
