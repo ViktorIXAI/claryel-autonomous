@@ -42,6 +42,7 @@ the published chain exactly — rescore integrity of the audit tooling itself.
 | v6.4 `85a0cd0dd6fa1fab` | 37 (16) — published chain value | 37 (identical set) | 1 | 38 (17) |
 | v6.5 `cd29d6ac94dc3267` | 37 (16) | 37 (identical set) | **0** | 37 (16) |
 | v6.6 `5c86252b2ef2f422` (WORKING) | 37 (16) | 37 (identical set) | **0** | 37 (16) |
+| v6.7 `b4464127dc5b5b97` (PROVISIONAL) | not run (audit-v1 chain frozen at v6.6) | 35 (identical set minus the two K boolean atoms `K-ex6-00[3]`, `K-ex6-01[3]`) | **0** | 35 (15) |
 
 \* v6.1 was never in the published chain; recorded now for completeness.
 Never quote a total across scanner versions — the ABK column is the comparable one.
@@ -73,3 +74,11 @@ answer-byte evidence from arms (the pair-243/fairness-probe rule), unchanged.
 Verbatim audit-v2 census outputs (one file per bank, identity headers included):
 `v6-results/audit-census-v2/*.out`. Reproduce:
 `PARB_AUDIT_CATS=ABKH python3 scripts/bank_derivability_audit_v2.py benchmarks/hard/<bank>.json`.
+
+## Raw-gold disagreement census (companion scanner, 2026-11-08)
+
+`scripts/raw_gold_disagreement.py` (self-sha16 stamped) answers the question the
+atom scanners cannot: which gold VALUES every honest raw brain refuses. On
+cadence-255 (bank v6.6) it flagged 7 cells; byte reads fixed 6 and kept 1
+(`bank-defect-v67-changelog.md`). Like the atom census, its output is CANDIDATES:
+a flag is only evidence that the answer-byte read must happen.

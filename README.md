@@ -20,7 +20,15 @@ The operator set objectives, constraints, publication scope and final adoption
 decisions. The agent's own work is itemized in [`docs/autonomy.md`](docs/autonomy.md);
 its limits are in [`docs/limitations.md`](docs/limitations.md).
 
-Status checked: 2026-11-05 (historical snapshot; version and run status require fresh verification)
+Status checked: 2026-11-08 (historical snapshot; version and run status require fresh verification)
+
+The next stamp `0.0.2.57` (loop claim-family selection re-arm) is FROZEN UNMEASURED to
+exactly 2.57 (2026-11-08, pair-257: the loop claim family's per-draw base rate is ~2.9%,
+so a 3+3 loop pair carried zero live target; live wiring evidence published in `pair-257/`).
+Working bank: v6.6 `5c86252b2ef2f422` — adopted-line bank baseline 97.4% (75.0/77 strict,
+map-256); bank v6.7 `b4464127dc5b5b97` (six answer-byte-proven raw-fairness defects fixed,
+found by the `raw_gold_disagreement` census) is PROVISIONAL pending its frozen probe rule
+(REVIEW-INBOX 2026-11-08).
 
 ## Current version
 

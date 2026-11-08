@@ -2797,3 +2797,52 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   the >=0.8 rule. Single-shot pool at 71/77 stable-pass, zero stable fails (map-256) -> next
   launchable P0 work is bank v6.7 (derivability census candidates + the fields_mismatch lottery
   class audit), not another n=18 loop pair.
+
+## 2026-11-08 11:33 CET — bank v6.7 PROVISIONAL: raw-fairness release (6 tasks); promotion rule frozen here BEFORE any v6.7 row
+
+- NEXT-pointer executed (from the pair-257 verdict): P0 = bank v6.7 work — derivability
+  census candidates + the fields_mismatch lottery-class audit. Both done by code:
+  `scripts/raw_gold_disagreement.py` (new versioned census: every raw arm fails EVERY
+  published draw => gold-defect candidate; scan id + bank/contract sha in every run)
+  and a per-cell byte read of the map-256 fields_mismatch class.
+- fields_mismatch audit verdict (map-256 losers, bank v6.6): A-ex6-07 loss = model
+  arithmetic lottery (gold exactly derivable: markup 50%, margin 33.3%, P=160 -> 50%
+  margin, price 100 -> margin 20% so claim 4 false; the fail draw computed markups as
+  margins); B-ex6-03 = model emitted `[]`; B-ex6-05 = items array with invented id/qty
+  keys (the adopted echo grammar refuses changed items — correct refusal); B-ex6-06 =
+  per-warehouse array instead of the spec object (the 2.35 grammar that fixes this class
+  was measured at the noise floor and is frozen). ALL FOUR banks sound: every required
+  field name is verbatim in the prompt; no bank change for this class. C-ex6-01 and
+  D-ex6-l4 losses are handled under the census (C defect below; loop claim family stays
+  closed per pair-257).
+- Census on cadence-255 (bank v6.6, three raw brains, reps 52/53/54) flagged 7 cells;
+  byte reads: 6 fixed (C-ex6-01 gold B reversed-rule distractor — 27/27 raw answers
+  unanimously C,F across three bank eras; F-ex6-01 next value-form contradiction +
+  dangling danger list; H-ex6-00/H-ex6-03 claims fragment = the unfixed v6.6 class;
+  K-ex6-00/K-ex6-01 boolean/Latin value forms never pinned), 1 kept (G-ex6-03 honest
+  32k-doc attention test, gold derivable in-document). Full bytes quoted in
+  `bank-defect-v67-changelog.md`. v6.7 sha16 `b4464127dc5b5b97`, verify PASS, audit-v2
+  census 37->35 atoms.
+- FROZEN PROMOTION RULE (decided by THIS text only): probe = 6 fixed tasks subset,
+  reps 64/65/66 (sp1 seeds), P2005 idle serial queue, harness = current HEAD stamp
+  0.0.2.56 (adopted line; behavior 2.56):
+  (a) RAW fairness: arms codex/grok/basalt (contour OFF, subset-bank guard asserts the
+      6 task objects byte-identical to the published v6.7 file) — FAIR iff EVERY arm
+      strict-passes >= 2/3 draws on EVERY fixed task. C-ex6-01 additionally proven
+      offline from saved cadence-255 bytes (prompt bytes unchanged): 3/3 per arm under
+      the new gold, zero new calls.
+  (b) CONTOUR no-new-loss: legs c66r64/65/66 (bank v6.6 subset ws) vs c67r64/65/66
+      (bank v6.7 subset ws), same stamp, matched seeds: total strict passes v6.7 >=
+      v6.6; per task |fail_v67 - fail_v66| <= 1; on C-ex6-01 a draw flip in EITHER
+      direction is expected and allowed (the fairness fix flips who "wins" the B
+      lottery); no new note family on F/H/K tasks (families must be a subset of the
+      v6.6-leg families for the same task).
+  (c) PROMOTE iff FAIR (a) + clean (b): flip v6.7 -> working and v6.6 -> superseded in
+      BANK-VERSIONS.json in the same commit. Otherwise v6.7 stays provisional, the
+      probe numbers are published as-is, and no contour hypothesis is opened on any
+      cell the bytes refute.
+  (d) No DIGEST percent row for the probe (subset arms; run_digest fail-close is by
+      design). Bank-wide percent on v6.7 comes from the NEXT full-bank map run
+      (queued as the next P0: map-257 legs + regenerated UNSTABLE-CELLS gate table).
+- Energy/telemetry: probe legs record start/end epochs; no GPU sampler unit (subset
+  probe, minutes of endpoint time; the paired-telemetry rule applies to full pairs).

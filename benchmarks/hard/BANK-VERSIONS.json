@@ -44,6 +44,13 @@
       "published_sha16": "5c86252b2ef2f422",
       "status": "working",
       "note": "v6.5 plus one field: H-ex6-01 claims-field spec (defect 2 from bank-probe-65: the inviting fragment '[утверждения как факт]' vs the frozen contract claims=[] — three independent raw brains 0/3, every zero ungrounded_claims). PROMOTED to working 2026-11-07 18:40 CET per the rule frozen in REVIEW-INBOX 18:22 CET before any row: fairness FAIR (subset 1b990aa6fc9a25dd at matched reps 28/29/30: codex 0/3->3/3, Grok 0/3->3/3, basalt 0/3->2/3 with the residual zero re-attributed to a NEW narrower mode), contour no-new-loss legs p66r28-30 3/3 PASS with v219_h_clear_claims scaffolding no longer needed (3/3 fired on v6.5 legs, 0/3 on v6.6), verify_bank_v66 PASS. v6.5 stays provisional (frozen verdict)."
+    },
+    {
+      "file": "benchmarks/hard/bank-hard-v6.7.json",
+      "version": "v6.7",
+      "published_sha16": "b4464127dc5b5b97",
+      "status": "provisional",
+      "note": "raw-fairness release: five answer-byte-proven defects fixed (census = scripts/raw_gold_disagreement.py on cadence-255, all raw brains failing every draw on bank v6.6): C-ex6-01 gold letters [B,C,F]->[C,F] (option B states the spare-battery rule reversed; 27/27 raw answers across three bank eras unanimously C,F); F-ex6-01 next id-form pin + grounded N2 danger line (spec vs gold value-form contradiction, dangling danger-list reference); H-ex6-00/H-ex6-03 claims-spec = the v6.6 H-ex6-01 class left unfixed in the shared template (9/9 ungrounded_claims zeros restating prompt facts); K-ex6-00/K-ex6-01 boolean yes/no pin + K-ex6-01 SERVICE Latin form with NON-gold example (gold 'hosting' not copyable from a Russian prompt). G-ex6-03 kept: honest attention test, gold derivable in-document. H-ex6-02/H-ex6-04 keep the old claims fragment (coverage limit; raw passes them, no defect evidence). Derivability census v6.7 (audit-v2): 35 atoms/15 tasks, down from 37/16 on v6.6. Promotion rule frozen in REVIEW-INBOX 2026-11-08 before any v6.7 row: raw subset probe reps 64/65/66 FAIR iff every arm >=2/3 per fixed task; contour no-new-loss subset legs 0.0.2.56 on matched reps; C-ex6-01 fairness additionally proven offline from saved cadence-255 bytes (prompt bytes unchanged)."
     }
   ]
 }

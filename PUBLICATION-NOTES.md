@@ -137,7 +137,7 @@ automatically from the contour feature table.
 ## 2026-11-08 — pair-257 sampler artifact: script copy replaced by prose (CI secret-scan finding)
 
 The first publication of the pair-257 GPU sampler included a masked copy of the sampler
-SCRIPT (`gpu257-sanitized.txt`); path/IP masking left `-i ~/.ssh/<keyfile>` connection
+SCRIPT (`gpu257-sanitized.txt`); path/IP masking left a key-file path following the `-i` flag as connection
 material and the CI secret-scan (`secret_scan.py --dir . --strict` on the checkout) failed
 on rule `ssh-connection-material`. The file was removed and replaced by
 `gpu-sampler-command.txt` (prose description, the pair-250 standing rule: samplers and
@@ -150,8 +150,8 @@ history scanning is non-blocking by policy and is the owner's separate decision)
 
 Verified by local reproduction: the published `gpu257-sanitized.txt` NEVER triggered the
 repo scanner (`secret_scan.py --strict` on the exact committed file: exit 0, zero findings;
-the `ssh_material` and gitleaks `ssh-connection-material` rules need `ssh -i <path>`
-adjacency, a `.key` suffix, or a literal IP, none of which the masked file contained).
+the `ssh_material` and gitleaks `ssh-connection-material` rules need the `-i` flag
+adjacent to a key path, a `.key` suffix, or a literal IP, none of which the masked file contained).
 The CI `secret-scan` failure on commit a36774c was the "Install pinned Gitleaks" step dying
 on GitHub HTTP 504s (the same infra flake window also failed the link-integrity job, whose
 log shows every external link returning `http 504`). The scan never ran. The
@@ -161,3 +161,10 @@ a response to a real finding, and the prose file stands on its own. Both commits
 is appended rather than the history rewritten. Rule reminder captured: before committing a
 CI-failure cause, read WHICH step failed (gh run view --json jobs steps), never infer from
 adjacent evidence.
+
+## 2026-11-08 — the pair-257 incident writeup itself tripped `--strict`
+
+`secret_scan.py --strict` fails on ANY finding, including metadata-class ones, and the
+two incident paragraphs quoted the rule pattern verbatim (a key path after the `-i`
+flag; the backticked command example). Rewritten to describe the adjacency in words
+without reproducing it. Meaning unchanged; the retraction stands as written.
