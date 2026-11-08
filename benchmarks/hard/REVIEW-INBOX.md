@@ -2480,3 +2480,40 @@ Cadence counter: pair-252 is the 5th measured-era stamp since cadence-249 (2.51/
 smoke). Next contour hypothesis must come from a stability map rebuilt on the 2.55 line.
 Full evidence: benchmarks/hard/v6-results/PAIR-252-V66.md + pair-252/ (arms, plans, epochs,
 seed-protocol.md, energy-windows.txt, sanitized launcher).
+
+== cadence-255 PRE-REGISTERED 2026-11-08 03:0x CET — written BEFORE any arm row ==
+
+Cadence falls due by the frozen rule in the pair-252 RESULT block: pair-252 was the 5th
+measured-era stamp since cadence-249 (2.51/2.52/2.53/2.54-UNMEASURED/2.55). Four arms on
+the WORKING bank v6.6 (published sha256-16 5c86252b2ef2f422; ws copy 590503cf1701a6ce in
+~/parb-b66-contour, bank-version.json marker stamped, re-verified at preflight), fresh
+matched seeds rep **52/53/54** (44-46 spent pair-251, 48-50 pair-252, 51 spent on the
+2.55 smoke):
+  stage 1  contour **0.0.2.55** (the adopted line; CURRENT_REVISION (2,55)), rids
+           q55r52/q55r53/q55r54 serial on the idle auth-checked P2005 Basalt serve,
+           sp1 plans via scripts/plan_reps.py (plan-rep52/53/54.json);
+  stage 2  bare basalt single-shot, SAME reps (raw seed 1000+rep), SERIAL after stage 1
+           (never two local arms on one serve), fresh done-set
+           ~/parb-b66-raw-reps/answers-basalt.jsonl;
+  stage 3  ChatGPT codex CLI (gpt-6.1-sol, xhigh, read-only, prompt via STDIN) and
+  stage 4  Grok (hermes -z toolsets off, prompt inline, finding S3) run in PARALLEL —
+           cloud legs never touch the serve.
+Endpoint preflight 02:59 CET: GET /v1/models 200 with the launched key file; served
+alias qwen3.8-flash-next-iq3_s-basalt; prefill 3.2-3.4k tok/s at 62k/167k fresh prompt
+tokens, zero empty completions. Noted: host swap 7.9/8.0 GiB from the parked keep-up
+cache (engine itself NOT swapped — top-5 swap owners are desktop processes); prefill
+rate is the health assertion that matters for the arms.
+Energy: fresh sampler csv gpu-power-c255.csv (2 Hz), per-arm epoch files (per-rid
+contour windows, basalt-r525354-*, cloud-r525354-*); cadence-249 cloud wall time
+(109 min) sets the ETA, not the contour-leg rate.
+Scoring on completion (next loop tick, after stage lines `cad255 stage1+2 done` +
+`cad255 stage3+4 cloud done`): scripts/cadence_score_v62.py --bank-pub
+benchmarks/hard/bank-hard-v6.6.json — asserts ws-vs-published bank field identity and
+the rule-(c) ledger-vs-bytes re-score, prints every table with bank sha16 + contract
+version; publish benchmarks/hard/v6-results/cadence-255/ (answers-*.jsonl included —
+213 rows/arm — plus plans, seed-protocol.md, energy csv+windows, sanitized launchers)
+and CADENCE-255-V66.md; fairness check per the cadence rule: the v6.6 clarifications
+must show up as lifts in the RAW arms, and if raw arms do not improve on the clarified
+bank versus v6.4-era cadence-249, the bank is the problem, not the models. Percent
+digest row via scripts/run_digest.py naming bank sha16 + stamp. No contour hypothesis
+from this cadence before the stability map is rebuilt on the 2.55 line.
