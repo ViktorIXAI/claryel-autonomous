@@ -86,6 +86,15 @@ if any exists, can actually be resolved.
 
 ## Contour parity (item P0): the frozen runtime on the same 300 ids
 
+> **SUPERSEDED 2026-11-08 23:35 CET as a parity row.** The parity rule on this line requires
+> the contour leg's request shape to equal the bare arm's (first rung 1200, serve-default
+> thinking, no pinned request seed). This arm ran at a 512-token first rung with
+> `enable_thinking:false` and a pinned sp1 seed, and it generated **2.0 tokens per task** — it
+> never reasoned, which is why the answer-only checker left all 300 verdicts untouched. The
+> matched-shape re-run (`PARB_SHAPE=bare PARB_LADDER=1200`, frozen stamp, no new contour
+> feature) is running as of this edit and lands as its own row. The bytes of this leg stay
+> published unchanged and are shipped under `arms/` for re-scoring.
+
 The frozen contour runtime `0.0.2.56` (tag `stable-hard-0.0.2.56`, harness tree `381dc5b2`-era
 modules byte-verbatim via `scripts/pub_bench_contour_ws.py`) ran over the first 300 ids on the
 same endpoint, category `P`, public checkers in the validator slot, scored by the same
@@ -103,9 +112,12 @@ discarded whole as `dead1/` and contributes nothing).
 | wall / measured engine time | 115 s / 103.2 s (0.34–0.39 s/task) |
 | GPU energy (2 s sampler, 46 samples, 113 s full-leg window) | **3.70 Wh** (~12.3 mWh/task) |
 
-This is the strongest parity result on the line: on 300 ids the frozen runtime reproduced the
-bare arm's verdict on **every task**, fired zero machinery and paid zero ladder retries — its
-measured overhead here is the streaming/seed request shape alone. Unlike ARC-Challenge (same
+Read as a request-shape result this is informative: on 300 ids the frozen runtime reproduced the
+bare arm's verdict on **every task**, fired zero machinery and paid zero ladder retries. What it
+did *not* do is answer the parity question: with thinking switched off the arm emitted 2.0 tokens
+per task, so the null mechanism census and the null delta are both guaranteed by the request shape
+rather than measured. On an answer-only MCQ the checker cannot see reasoning at all, so the
+matched-shape leg is expected to land at parity too — and it has to be run to be worth quoting. Unlike ARC-Challenge (same
 stamp, 12 discordant ids with the same null mechanism census, attributed there to sampling
 shape and the engine restart), this leg shows the variance budget can also land at zero flips;
 the ARC-Challenge ±3 pp caveat applies to any use of this row as an instrument.

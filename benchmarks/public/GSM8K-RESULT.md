@@ -60,6 +60,15 @@ a systemd user unit on the same endpoint as the bare leg, staged by
 label `pub-gsm8k-300`, tasks sha16 `7dd0080ff23b8bc3`) and scored with the same
 `pub-checkers-v2` bytes as every other row here.
 
+
+> **SUPERSEDED 2026-11-08 23:35 CET as a parity row** (the section below stays the record of
+> what the harness did). Under the parity rule this arm is a *request-shape* measurement: it
+> ran at a 512-token first rung with a pinned sp1 seed and `enable_thinking:false`, while the
+> bare arm sent an unseeded 1200-token request with the serve's default thinking. Its 37
+> ladder escalations and 6 ceiling truncations are properties of that shape, and the +2.3 pp
+> gap to bare sits inside the noise the doc itself names. A matched-shape re-run
+> (`PARB_SHAPE=bare PARB_LADDER=1200`, frozen stamp, no new contour feature) is running as of
+> this edit; the old bytes stay published and are shipped under `arms/` for re-scoring.
 ### What the harness actually did (from `gate-ledger.jsonl`, 300 rows)
 
 | measure | value |

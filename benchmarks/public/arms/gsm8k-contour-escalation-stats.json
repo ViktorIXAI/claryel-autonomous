@@ -1,0 +1,24 @@
+{
+  "contour_stamp": "0.0.2.56",
+  "contour_behavior": "2.56",
+  "rows": 300,
+  "answers_present": 300,
+  "answers_empty": 0,
+  "truncations": 6,
+  "rows_with_any_event": 37,
+  "rows_with_contour_or_fix_event": 0,
+  "gate_fire_events": {},
+  "all_events": {
+    "ladder:512->1200": 37
+  },
+  "model_calls_total": 300,
+  "gate_fixes_total": 0,
+  "gate_blocks_total": 0,
+  "ladder_steps_total": 37,
+  "ptok_total": 27164,
+  "ctok_total": 104629,
+  "useful_tokens_total": 104629,
+  "overhead_tokens_total": 0,
+  "engine_seconds_total": 1194.4,
+  "engine_stalled_rows": 0
+}
