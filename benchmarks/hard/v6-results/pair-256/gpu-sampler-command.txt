@@ -1,0 +1,9 @@
+GPU sampler for pair-256 (prose; the real script stays untracked):
+
+A separate `systemd-run --user --collect --unit=parb-p256sampler` unit ran a 2 Hz loop that
+ssh'd to the endpoint box (`ssh <user>@<LAN_IP>`, repo-standard key) and appended
+`epoch,power_W,util_pct,mem_used_MB,temp_C` (nvidia-smi csv,noheader,nounits) to a fresh
+`gpu-power-p256.csv` for this pair only; empty reads were skipped. The unit was stopped as
+soon as `queue.log` showed `pair256 done` (126 samples total), so no sampler outlived the
+pair. Windows per arm were computed with `scripts/gpu_energy.py <csv> --start <epoch> --end
+<epoch>` where the epochs come from the per-arm `-start.epoch`/`-end.epoch` files.

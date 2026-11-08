@@ -1,0 +1,11 @@
+08:07:03 PGR: release 0.0.2.55, contour behavior 2.55
+08:07:03 PGR: planned tasks 6, previously done 0, limit 14400 s
+08:07:03 PGR: stack bank=590503cf1701a6ce(marker) version=v6.6 scorer=v6.2(c8c0c7dd114dfc32) seeds=sp1
+08:07:03 PGR: run record run-record-w55r55.json; serve health ok; stall policy retry=1 rate=25% window=20
+08:07:08 D D-ex6-l0       rep55   c=1.00 f=True fin=?      calls=6 fix=2 blk=0 lad=0   5.1s tok=1614 /218  c=0    tps_eff=9.8 
+08:07:11 D D-ex6-l1       rep55   c=1.00 f=True fin=?      calls=6 fix=1 blk=1 lad=0   3.2s tok=1640 /170  c=0    tps_eff=12.9 
+08:07:15 D D-ex6-l2       rep55   c=1.00 f=True fin=?      calls=4 fix=0 blk=1 lad=0   3.6s tok=1418 /187  c=0    tps_eff=12.5 
+08:07:18 D D-ex6-l3       rep55   c=1.00 f=True fin=?      calls=3 fix=1 blk=0 lad=0   2.7s tok=774  /131  c=0    tps_eff=18.1 
+08:07:21 D D-ex6-l4       rep55   c=0.30 f=False fin=?      calls=4 fix=0 blk=1 lad=0   3.7s tok=1424 /250  c=0    tps_eff=29.7 false_completion_claim
+08:07:25 D D-ex6-l5       rep55   c=1.00 f=True fin=?      calls=3 fix=1 blk=0 lad=0   3.3s tok=856  /181  c=0    tps_eff=30.9 
+08:07:25 PGR finished: records 6, duration 22 s, stop reason: none

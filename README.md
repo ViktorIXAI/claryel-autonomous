@@ -24,7 +24,20 @@ Status checked: 2026-11-05 (historical snapshot; version and run status require 
 
 ## Current version
 
-Contour gate line: `0.0.2.55` — ADOPTED on 2026-11-08 after pair-252 (the D-plain answer-item
+Contour gate line: `0.0.2.56` — ADOPTED on 2026-11-08 after pair-256 (loop best-of-3 on the
+`banned_attempted` family — when the adopted 2.43 best-of-2 still leaves every candidate carrying
+a banned attempt, the contour pays ONE further loop draw at seed+16234 and adopts it only if
+strictly better than the best already held: monotone, fires only on already-failing loop rows,
+never touches the 2.11/claim triggers, own `v56_*` events, the 2.43 first retry byte-untouched.
+Loop-only pair on bank v6.6 with fresh matched seeds 55/56/57: the target `D-ex6-l0`
+strict-failed 2/3 control seeds (`banned_attempted:SEND_EMAIL`, the v243 retry fired there without
+a win — live target per the pre-launch mechanical gate) and BOTH converted with
+`contour:v56_d_best3_banned_fired` + `fix:v56_d_best3_banned_win` on the row; loop pool 14/18 ->
+18/18, W4/L0 with the two mechanism wins separated from two unevented resample wins published as
+lottery flips; zero guard violations (no `v56` event in any control arm, none outside the banned
+family, frozen band silent, v243 parity fired-5/won-3 identical across arms). Cost: +3..4 model
+calls per conversion, energy delta inside window variance; `PAIR-256-V66.md`). The previous line
+`0.0.2.55` was ADOPTED on 2026-11-08 after pair-252 (the D-plain answer-item
 shortening — when the model's own `refused`/`next_ok` lists spell the prompt's own bracket-
 enumeration entries, the contour shortens each item to the one-letter id the prompt itself declares:
 a closed grammar over the prompt text (id table from its enumerations, list names from its JSON

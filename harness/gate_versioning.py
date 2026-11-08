@@ -447,8 +447,13 @@ CONTOUR_FEATURES = (
     # pair-243 class ruling: SELECTION only), so this stamp adds ONE further draw at seed
     # offset 16234, gated on the best after two candidates still carrying a banned_attempted
     # stem, strict-better-only adoption, own flag D_BEST2_BANNED_RETRY2 and bare v56_* events
-    # (v243_* bytes immutable). Pre-registered REVIEW-INBOX 2026-11-08 08:00 CET; pair-256
-    # decides adoption; gate_v70 pins grammar + wiring + matrix.)
+    # (v243_* bytes immutable). Pre-registered REVIEW-INBOX 2026-11-08 08:00 CET; MEASURED and
+    # ADOPTED by pair-256 the same day: the live target D-ex6-l0 strict-failed 2/3 control seeds
+    # and BOTH converted with the v56 events on the row; loop pool 14/18 -> 18/18, W4/L0 (two
+    # mechanism wins, two unevented resample wins labeled lottery); zero guard violations, zero
+    # v56 events in control, frozen families silent; `D_BEST2_BANNED_RETRY2 =
+    # contour_at_least(2, 56)` inherits forward; the line moves 0.0.2.55 -> 0.0.2.56,
+    # `PAIR-256-V66.md`; gate_v70 pins grammar + wiring + matrix.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as

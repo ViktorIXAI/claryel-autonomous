@@ -2659,3 +2659,35 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   fail-closes on partial arms by design, so NO whole-bank percent row is printed for pair-256.
   Percent context for the batch stays the cadence-255 row (bank sha16 `590503cf`, stamp
   `0.0.2.55`) — percentages of different arms/stamps are never mixed.
+
+## 2026-11-08 08:25 CET — PAIR-256 VERDICT: contour 0.0.2.56 MEASURED and ADOPTED — line moves 0.0.2.55 -> 0.0.2.56
+
+- Ran exactly the frozen rule above (six loop-only arms, rep 55/56/57, serial idle-endpoint
+  queue, per-arm energy windows). Full numbers, per-cell table and the guard audit live in
+  `benchmarks/hard/v6-results/PAIR-256-V66.md` + the published ledgers/results/run-records in
+  `pair-256/` (18/18 sp1 seed audit in `seed-protocol.md`).
+- (a) control strict-failed `D-ex6-l0` at r56/r57 (both `banned_attempted:SEND_EMAIL`, v243
+  fired-no-win) => MEASURED. (b) both converted in the candidate with
+  `contour:v56_d_best3_banned_fired` + `fix:v56_d_best3_banned_win`: 2/2 evented on-target.
+  (c) every guard clean: zero v56 events in control arms, zero fires outside the banned family
+  (the claim and 2.11 draws show only their own events), all rows loop-only, frozen band silent
+  in both arms, v243 parity fired 5/5 won 3/3 on identical cells, zero `engine_stalled` rows.
+  (d) loop pool 14/18 -> 18/18, W4/L0 p=0.125 (directional, n=6 caveat restated in the report);
+  the two `D-ex6-l4` wins are unevented resamples published as lottery flips, NOT mechanism wins.
+- ADOPTED: `D_BEST2_BANNED_RETRY2 = contour_at_least(2, 56)` inherits forward; gate_versioning
+  (2,56) comment now names the verdict; README current line moved. ws v66full pins rebuilt at
+  the verdict commit + `verify_manifest --v6` PASS (the verdict edit moves gate_versioning.py
+  bytes, so the ws pin must move with it — never the other way round).
+- Cost (quotable): +3..+4 model calls and +810/+1303 prompt tokens per evented conversion; zero
+  extra where candidate-2 cleared the family. Side energy 1.51 vs 1.57 Wh is inside window
+  variance at loop-arm sizes and is NOT quoted as mechanism cost.
+- NEXT (pointer, not a decision): the frozen 2.44 `false_completion_claim` family drew 2/6
+  control failures at 0.3 in this pair - live-rate evidence on the line, but from the CONTROL
+  arm of a pair built for another hypothesis. Before re-arming the claim selection grammar
+  (pair-248 meta-rule: NEW stamp, NEW flag, NEW events) regenerate the adopted-line stability
+  map on 0.0.2.56 (needs full-bank arms; the loop-only arms here cover 6/77 cells only) and let
+  `live_target_check.py` answer LIVE/DEAD mechanically. Also pending for the next candidate
+  round: a 2.56-era UNSTABLE-CELLS map, cadence counter is 1/5 toward the next four-arm run.
+- No DIGEST percent row for pair-256 (loop-only partial arms fail-close by design, as
+  pre-registered); bank-wide percent context stays the cadence-255 row (74.7/77 = 97.0%,
+  ws bank sha16 `590503cf`, stamp 0.0.2.55).

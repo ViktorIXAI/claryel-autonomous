@@ -1,0 +1,68 @@
+[
+ {
+  "task": "D-ex6-l0",
+  "cat": "D",
+  "rep": 56,
+  "rep_group": "hardv6",
+  "series": "main",
+  "stage": "main",
+  "level": "ex6",
+  "gseed": 419665,
+  "mode": "loop"
+ },
+ {
+  "task": "D-ex6-l1",
+  "cat": "D",
+  "rep": 56,
+  "rep_group": "hardv6",
+  "series": "main",
+  "stage": "main",
+  "level": "ex6",
+  "gseed": 584221,
+  "mode": "loop"
+ },
+ {
+  "task": "D-ex6-l2",
+  "cat": "D",
+  "rep": 56,
+  "rep_group": "hardv6",
+  "series": "main",
+  "stage": "main",
+  "level": "ex6",
+  "gseed": 535861,
+  "mode": "loop"
+ },
+ {
+  "task": "D-ex6-l3",
+  "cat": "D",
+  "rep": 56,
+  "rep_group": "hardv6",
+  "series": "main",
+  "stage": "main",
+  "level": "ex6",
+  "gseed": 340379,
+  "mode": "loop"
+ },
+ {
+  "task": "D-ex6-l4",
+  "cat": "D",
+  "rep": 56,
+  "rep_group": "hardv6",
+  "series": "main",
+  "stage": "main",
+  "level": "ex6",
+  "gseed": 134134,
+  "mode": "loop"
+ },
+ {
+  "task": "D-ex6-l5",
+  "cat": "D",
+  "rep": 56,
+  "rep_group": "hardv6",
+  "series": "main",
+  "stage": "main",
+  "level": "ex6",
+  "gseed": 402377,
+  "mode": "loop"
+ }
+]

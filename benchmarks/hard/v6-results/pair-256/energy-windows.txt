@@ -1,0 +1,15 @@
+pair-256 per-arm serve-board energy windows (gpu-power-p256.csv, 2 Hz ssh nvidia-smi on the
+endpoint, separate systemd-run unit parb-p256sampler, fresh csv for this pair, 126 samples
+spanning the queue 08:07:05 .. 08:09:00 local; gaps are skipped ssh failures - the sampler
+drops empty reads; windows are SHORT (loop-only arms, 13-30 s each) so per-arm Wh resolution
+is limited to ~+-0.05 Wh and the sampler was stopped immediately after the queue):
+w55r55 18s  0.52Wh | w56r55 13s  0.50Wh
+w55r56 30s  1.02Wh | w56r56 15s  0.57Wh
+w55r57 13s  0.49Wh | w56r57 13s  0.50Wh
+side totals: control (0.0.2.55) 1.51 Wh / 61 s, candidate (0.0.2.56) 1.57 Wh / 41 s.
+The +0.06 Wh (+4%) candidate delta is INSIDE run-to-run variance at this window size and is
+not quotable as the mechanism cost. The quotable cost is per-conversion model calls: on the
+two evented conversions (D-ex6-l0 r56, r57) the candidate spent 9 and 10 model calls vs 6 in
+control (+3/+4 = exactly one extra loop reroll of 3-4 turns), prompt tokens +810/+1303 and
+wall +1.9/+1.9 s per converted row. Rows where candidate-2 already cleared the family paid
+ZERO extra (w56r55 identical call counts to control on all six cells).
