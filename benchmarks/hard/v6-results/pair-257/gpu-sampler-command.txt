@@ -1,0 +1,14 @@
+GPU sampler for pair-257 (prose; the real script stays untracked):
+
+A separate `systemd-run --user --collect --unit=parb-p257sampler` unit ran a 2 Hz loop that
+ssh'd to the endpoint box (`ssh <user>@<LAN_IP>`, repo-standard key) and appended
+`epoch,power_W,util_pct,mem_used_MB,temp_C` (nvidia-smi csv,noheader,nounits) to a fresh
+`gpu-power-p257.csv` for this pair only; empty reads were skipped. The unit was stopped as
+soon as `queue.log` showed `pair257 done` (146 samples total), so no sampler outlived the
+pair. Windows per arm were computed with `scripts/gpu_energy.py <csv> --start <epoch> --end
+<epoch>` where the epochs come from the per-arm `-start.epoch`/`-end.epoch` files.
+
+Publication note (same-day repair): an earlier copy of the raw sampler SCRIPT with path/IP
+masking was published first and correctly failed the CI secret-scan on rule
+`ssh-connection-material` (masked copies of scripts still carry connection material -
+the pair-250 lesson). The script file was replaced by this prose; no other artifact changed.

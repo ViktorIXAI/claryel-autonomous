@@ -133,3 +133,15 @@ automatically from the contour feature table.
 - 2026-11-06 — published pair232 (`benchmarks/hard/v6-results/pair-232/`, six arms: ledgers, answer rows,
   logs, run records) plus `PAIR-232-V61.md` (verdict: +1.3 cells under the noise floor, not adopted;
   measured energy windows from `scripts/gpu_energy.py`). Decision record under `history/agent-decisions/`.
+
+## 2026-11-08 — pair-257 sampler artifact: script copy replaced by prose (CI secret-scan finding)
+
+The first publication of the pair-257 GPU sampler included a masked copy of the sampler
+SCRIPT (`gpu257-sanitized.txt`); path/IP masking left `-i ~/.ssh/<keyfile>` connection
+material and the CI secret-scan (`secret_scan.py --dir . --strict` on the checkout) failed
+on rule `ssh-connection-material`. The file was removed and replaced by
+`gpu-sampler-command.txt` (prose description, the pair-250 standing rule: samplers and
+launchers are published as prose; real scripts stay untracked). No other pair-257 artifact
+changed; the repo-wide strict scan is green again. Git history still contains the masked
+file under the no-history-rewrite rule (the value there is a local key PATH, not a secret;
+history scanning is non-blocking by policy and is the owner's separate decision).
