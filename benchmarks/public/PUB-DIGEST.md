@@ -4,5 +4,6 @@ One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. R
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| gsm8k | qwen3.8-flash-next-iq3_s-basalt | 1319 | 7dd0080ff23b8bc3 | temp 0.7, max_tokens 1200 | 1284/1319 = **97.3%** |
 | gsm8k | gpt-6.1-sol | 300 | 7dd0080ff23b8bc3 | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport) | 293/300 = **97.7%** |
 | gsm8k | qwen3.8-flash-next-iq3_s-basalt | 25 | 7dd0080ff23b8bc3 | temp 0.7 | 24/25 = **96.0%** |
