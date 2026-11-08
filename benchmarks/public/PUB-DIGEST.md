@@ -4,6 +4,10 @@ One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. R
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| arc-easy | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 300 | cac604a076e8b00a | frozen contour runtime 0.0.2.56 (behavior 2.56): streamed request, request_seed pinned (sp1), ladder rungs 512,1200, enable_thinking off | 290/300 = **96.7%** |
+| arc-challenge | grok-4.7 | 300 | 523af08216f14256 | hermes Hermes Agent v0.23.0+860.gf17db36.dirty (2026.9.24) · upstre toolsets off CLI (sampling params not exposed by the transport) | 288/300 = **96.0%** |
+| gpqa-diamond | qwen3.8-flash-next-iq3_s-basalt | 198 | af73cc064d4d8529 | temp 0.7, max_tokens 1200 | 127/198 = **64.1%** |
+| humaneval | gpt-6.1-sol | 164 | 971d976289cd9357 | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport); checker pytest-v1 | 163/164 = **99.4%** |
 | gsm8k | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 300 | 7dd0080ff23b8bc3 | frozen contour runtime 0.0.2.56 (behavior 2.56): streamed request, request_seed pinned (sp1), ladder rungs 512,1200, enable_thinking off | 290/300 = **96.7%** |
 | arc-challenge | gpt-6.1-sol | 300 | 523af08216f14256 | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport) | 290/300 = **96.7%** |
 | humaneval | qwen3.8-flash-next-iq3_s-basalt | 164 | 971d976289cd9357 | temp 0.7, max_tokens 1200; checker pytest-v1 | 158/164 = **96.3%** |
