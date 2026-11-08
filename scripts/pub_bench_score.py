@@ -74,8 +74,14 @@ def call_label(rows, temp):
 
     The local endpoint arm pins temperature/max_tokens and stores them; the cloud CLI arms do
     not expose sampling parameters at all, so printing `temp None` there would be a fabricated
-    pin. Label the transport instead and say the parameters are not exposed.
+    pin. Label the transport instead and say the parameters are not exposed. An arm whose
+    transport genuinely differs from the plain single-call shape (the frozen contour runtime
+    streams, pins a seed and walks a token ladder) carries `transport_note`, which is printed
+    verbatim: a harness row must never wear the bare row's call label.
     """
+    note = next((str(r.get("transport_note")) for r in rows if r.get("transport_note")), "")
+    if note:
+        return note
     if temp is not None:
         return "temp %s, max_tokens 1200" % temp
     tr = next((str(r.get("transport")) for r in rows if r.get("transport")), "")

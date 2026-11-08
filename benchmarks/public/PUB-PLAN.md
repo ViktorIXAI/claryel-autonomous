@@ -68,6 +68,23 @@ is a cost, not a gain, and that has to be visible. If the frozen runtime cannot 
 class without hard-bank-specific assumptions, that refusal is written into the result doc as the
 finding — no contour row is faked. Order: GSM8K first 300 ids, GPQA-Diamond (198), ARC-Easy 300.
 
+**How the parity arm is staged (wiring shipped 2026-11-08).** `scripts/pub_bench_contour_ws.py`
+builds the workspace the same way `build_hard_v6_ws.py` stages a hard-bank one: the harness
+modules are copied verbatim at the frozen stamp `0.0.2.56`, and the builder checks the frozen
+deciding scorer bytes first (the contract guard inside `gate_run` fails closed on drift, so a
+staging mistake never burns an endpoint). A public task is category `P`: the contour machinery is
+keyed to the hard-bank families A–K, so a `P` task reaches only the generic ladder path and no
+family grammar (invoice fields, coverage-choice nudges, plan gates) is grafted onto a public
+prompt — the ledger event census is the proof of that, not a claim. The validator slot holds the
+public checker contract (`pub-checkers-v2`), the same bytes that decided the bare row, with
+`format_ok` fixed to 1 because the public contract has no separate format axis. Call-parameter
+differences are stated, not hidden: the frozen runtime streams the request, pins a request seed
+(sp1) and starts at the first ladder rung (`512`), escalating to the bare arm's `1200` only on a
+real truncation, so the contour row carries its own call label.
+`scripts/pub_bench_gate_convert.py` turns the gate artifacts into the public answer format and
+publishes the accounting beside the percent: gate-fire events, ladder steps, truncations, tokens,
+model calls, engine seconds.
+
 ## Arms
 
 * **brain-basalt** — our stable local stack: `qwen3.8-flash-next-iq3_s-basalt` on P2005 (24 GB
