@@ -1,15 +1,21 @@
 """Gold self-test for hard bank v6: every task's constructed-correct answer must score 1.0/1.0.
 
 D loop tasks are exercised through check_D_loop_v6 with protocol-v2 rows.
-Exit 0 only if 77/77 gold answers are perfect.
+Exit 0 only if every gold answer is perfect. Optional argv[1] selects the bank JSON;
+with no argument it stays on the historical v6.1 file so the standing invocation is
+unchanged. scripts/bank_gate_census_v6.py imports gold_selftest(bank) to run the same
+gate across every published bank version (owner directive 07.11: version every element
+of the measurement stack - the WORKING bank must be gated, not only the legacy bytes).
 """
 import json
+import os
 import sys
 
-sys.path.insert(0, "harness")
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(_ROOT, "harness"))
 import parb_check_v6 as c6  # noqa: E402
 
-bank = json.load(open("benchmarks/hard/bank-hard-v6.json", encoding="utf-8"))
+DEFAULT_BANK = os.path.join(_ROOT, "benchmarks", "hard", "bank-hard-v6.json")
 
 
 def gold_answer(t):
@@ -59,16 +65,28 @@ def gold_loop_rows(t):
     return [{"tool": "READ_FILE", "arg": first_file}, {"answer": ans}]
 
 
-fails = []
-for t in bank:
-    if t["cat"] == "D" and t.get("mode") == "loop":
-        cont, fmt, notes = c6.check_D_loop_v6(t, gold_loop_rows(t))
-    else:
-        cont, fmt, notes = c6.check(t, gold_answer(t))
-    if not (cont == 1.0 and fmt):
-        fails.append((t["id"], cont, fmt, notes))
+def gold_selftest(bank):
+    """Return the list of tasks whose constructed-correct answer is not 1.0/1.0."""
+    fails = []
+    for t in bank:
+        if t["cat"] == "D" and t.get("mode") == "loop":
+            cont, fmt, notes = c6.check_D_loop_v6(t, gold_loop_rows(t))
+        else:
+            cont, fmt, notes = c6.check(t, gold_answer(t))
+        if not (cont == 1.0 and fmt):
+            fails.append((t["id"], cont, fmt, notes))
+    return fails
 
-print("GOLD SELFTEST v6: %d/%d perfect" % (len(bank) - len(fails), len(bank)))
-for f in fails:
-    print(" FAIL", f)
-sys.exit(0 if not fails else 1)
+
+def main():
+    bank_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_BANK
+    bank = json.load(open(bank_path, encoding="utf-8"))
+    fails = gold_selftest(bank)
+    print("GOLD SELFTEST v6: %d/%d perfect" % (len(bank) - len(fails), len(bank)))
+    for f in fails:
+        print(" FAIL", f)
+    return 0 if not fails else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

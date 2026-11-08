@@ -15,6 +15,12 @@ same model  ·  same frozen task prompts  ·  same seeds
         only the software around the model changes
 ```
 
+**Status 2026-11-08: hard-bank contour development is frozen at the measured stamp
+`0.0.2.56` (97.4 % of the 77-task hard bank v6.6, `5c86252b2ef2f422`; full history in
+`benchmarks/hard/v6-results/VERSION-LADDER-PERCENT.md`). The active line is now the public
+benchmark line: pinned public task sets, deterministic scorers, arms against cloud brains —
+`benchmarks/public/PUB-PLAN.md` and `benchmarks/public/PUB-DIGEST.md`.**
+
 An AI agent developed and tested many harness changes under operator rules.
 The operator set objectives, constraints, publication scope and final adoption
 decisions. The agent's own work is itemized in [`docs/autonomy.md`](docs/autonomy.md);

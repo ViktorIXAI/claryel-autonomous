@@ -1,0 +1,43 @@
+{
+  "schema": "pub-bench-v1",
+  "sources": {
+    "gsm8k": {
+      "url": "openai/grade-school-math test.jsonl",
+      "raw_sha16": "3730d312f6e34405"
+    },
+    "humaneval": {
+      "url": "openai/human-eval HumanEval.jsonl.gz",
+      "raw_sha16": "b796127e635a67f9"
+    },
+    "arc-easy": {
+      "url": "HF allenai/ai2_arc ARC-Easy test",
+      "raw_sha16": "874354cf37266753"
+    },
+    "arc-challenge": {
+      "url": "HF allenai/ai2_arc ARC-Challenge test",
+      "raw_sha16": "03227c30fd557ad1"
+    }
+  },
+  "benches": {
+    "ifeval": {
+      "tasks": 0,
+      "fetch_error": "HTTP Error 401: Unauthorized"
+    },
+    "gsm8k": {
+      "tasks": 1319,
+      "tasks_sha16": "7dd0080ff23b8bc3"
+    },
+    "humaneval": {
+      "tasks": 164,
+      "tasks_sha16": "971d976289cd9357"
+    },
+    "arc-easy": {
+      "tasks": 2376,
+      "tasks_sha16": "cac604a076e8b00a"
+    },
+    "arc-challenge": {
+      "tasks": 1172,
+      "tasks_sha16": "523af08216f14256"
+    }
+  }
+}
