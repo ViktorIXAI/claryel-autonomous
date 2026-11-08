@@ -2602,3 +2602,60 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   candidate against `D-ex6-l0` must be pre-registered here BEFORE its first arm row and must clear
   `live_target_check.py` on this map; the loop-pool rule from pair-243 (selection, not prevention
   nudges) still applies.
+
+## 2026-11-08 08:00 CET — PAIR-256 PRE-REGISTERED: contour 0.0.2.56 (loop best-of-3 on the `banned_attempted` family), rules frozen BEFORE any w55r5x/w56r5x row
+
+- **Live target (generated map, not prose):** `UNSTABLE-CELLS-V66-255.md` (script-built this
+  morning from six adopted-line arms): `D-ex6-l0` strict-fails 2/6 with a STABLE note family
+  `banned_attempted:SEND_EMAIL` (x55r50, q55r53) — the only <=4/6 cell with a stable family on
+  the line. `scripts/live_target_check.py` re-run against the map immediately before launch;
+  the recorded answer must be LIVE (it was LIVE at map build: >=2 fails).
+- **Evidence for the mechanism choice (published ledgers, six 0.0.2.55 arms):** the adopted
+  2.43 selection retry fires but does not convert most of the time: on `D-ex6-l0`
+  `contour:v243_d_best2_banned_fired` fired on 3/6 draws and won exactly 1 (x55r48); on x55r50
+  and q55r53 BOTH candidates still carried `banned_attempted:SEND_EMAIL` and the row finished
+  content 0.7 / format False. Prevention on this class is closed (2.42 measured net-zero,
+  pair-243 class ruling: loop losses are a SELECTION problem). The within-family answer is one
+  more selection draw, not a new nudge.
+- **Mechanism (single change):** after the 2.43 banned retry at seed+8117, if the best
+  candidate-so-far STILL carries a `banned_attempted` note, run ONE further loop draw at
+  seed+16234 and adopt only if strictly better than the best already held. Monotone by the same
+  argument as 2.43: fires only on a row the loop scorer already failed, can only raise the
+  adopted score, never touches passing cells, never re-arms the frozen claim/2.11 triggers.
+  NEW event names `contour:v56_d_best3_banned_fired` / `fix:v56_d_best3_banned_win`; the
+  `v243_*` event bytes belong to the 2.43 measurement forever.
+- **Arms:** loop-only paired queue, workspace `~/parb-b66-contour` (bank v6.6 ws copy
+  `590503cf1701a6ce`, published `5c86252b2ef2f422`, contract v6.2 `c8c0c7dd114dfc32`, seed
+  protocol sp1), endpoint P2005 idle. FRESH reps 55/56/57 — the loop pool consumed reps
+  37-54 on this bank; every loop (task,rep) at 55/56/57 is unused. Control `w55r55..w55r57`
+  stamp `0.0.2.55` (adopted line), candidate `w56r55..w56r57` stamp `0.0.2.56`. Sequential
+  queue under `systemd-run --user --collect --unit=parb-pair256`, fresh GPU sampler csv
+  `gpu-power-p256.csv`, per-arm `-start.epoch`/`-end.epoch`.
+- **PRE-REGISTERED RULE (this entry is the only text that decides the verdict; frozen NOW,
+  before any code of the candidate runs an arm row):**
+  - (a) LIVE TARGET: MEASURED iff >=1 control row strict-fails `D-ex6-l0` across the three
+    seeds. Zero control failures on the target = UNMEASURED, never a pass; the candidate is
+    then frozen to `STAMP_REVISION == (2, 56)` and published as a fifth wiring-only pair.
+  - (b) CELL ATTRIBUTION: a conversion counts only where the candidate strict-PASSES the same
+    (task,rep) the control strict-FAILED (control row carrying `banned_attempted`), AND the
+    candidate row carries `contour:v56_d_best3_banned_fired` and `fix:v56_d_best3_banned_win`.
+  - (c) GUARDS: ZERO `v56_*` events in any control arm; ZERO `v56` fires where the
+    best-after-two-draws note set has no `banned_attempted` stem (surface = banned family only,
+    never 2.11/claim triggers); ZERO fires outside `kind=="loop"` rows; frozen-band parity
+    (zero 2.30-2.32/2.34-config/2.36/2.38/2.41/2.42/2.44/2.54 events in either arm); v243
+    first-draw parity (each arm's own fired/win set self-consistent; cross-arm cell flips are
+    seed noise and counted in (d)); stall protocol (rows `engine_stalled` excluded, abort above
+    25% of the last 20).
+  - (d) RESOLUTION + ADOPTION: loop pool = 6 tasks x 3 seeds = 18 cells/arm; on-target surface
+    is `D-ex6-l0` (max 3 cells), so the pair carries DIRECTIONAL evidence only (the pair-243
+    n=6 caveat is restated in the verdict, never hidden). ADOPT `0.0.2.56` iff (a) holds AND
+    >=1 evented conversion on-target AND every guard in (c) is clean AND loop-pool net W-L >=
+    +2 with zero guard-attributable losses; energy delta from the sampler windows is published
+    either way (the mechanism adds <=1 loop reroll per still-banned row, ~3 model calls).
+    Otherwise FREEZE `D_BEST2_BANNED_RETRY2` to exactly (2,56) and publish the negative or
+    UNMEASURED result with win-level detail — negative results carry the same publication
+    weight as wins.
+- DIGEST rule boundary: this is a loop-only pair (6 of 77 tasks); `scripts/run_digest.py`
+  fail-closes on partial arms by design, so NO whole-bank percent row is printed for pair-256.
+  Percent context for the batch stays the cadence-255 row (bank sha16 `590503cf`, stamp
+  `0.0.2.55`) — percentages of different arms/stamps are never mixed.

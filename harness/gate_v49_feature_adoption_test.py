@@ -263,7 +263,7 @@ _FLAGS = ("CONTRACT_GUARANTEE", "SELFCONSIST", "J_RERANK", "J_RERANK_V2", "A_TAB
           "C_RULE_GROUND", "LOOP_POLICY_REGROUND", "D_BEST2_BANNED", "D_BEST2_CLAIM",
           "D_BEST2", "H_BEST2", "C_BEST2", "E_MULTIERR", "CODE_FIX", "FORMAT_REPAIR",
           "C_BEST2_SET", "K_FIELDS_ENUM", "B_ECHO_RESTORE", "A_PCT_CHAIN", "C_PY_GROUND",
-          "H_UNKNOWN_PROMPT")
+          "H_UNKNOWN_PROMPT", "D_ID_NORMALIZE", "D_BEST2_BANNED_RETRY2")
 _missing = [f for f in _FLAGS if not hasattr(g245, f) or not hasattr(g243, f)]
 ck(not _missing, "every flag name in the matrix exists at 2.43 and 2.45 (%s)" % _missing)
 _moved = [f for f in _FLAGS if getattr(g245, f) != getattr(g243, f)]
@@ -373,6 +373,34 @@ ck((2, 54) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.54") == (2, 54)
    "the candidate registers a real contour change; the control keeps behavior 2.53")
 ck(GV.CURRENT_REVISION >= (2, 54) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
    "CURRENT follows the newest registered stamp without pinning an exact tuple")
+
+# pair-252 + pair-256 matrix extension: 2.55 = the adopted 2.54 matrix + exactly D_ID_NORMALIZE
+# (pair-252 ADOPTED, inherits forward); 2.56 = the adopted 2.55 matrix + exactly
+# D_BEST2_BANNED_RETRY2 (pair-256 candidate); the control 2.55 must NOT carry the candidate flag.
+g255 = load("0.0.2.55")
+ck(getattr(g254, "D_ID_NORMALIZE") is False and getattr(g255, "D_ID_NORMALIZE") is True,
+   "the adopted 2.55 D-plain id grammar is off at 2.54 and on at 2.55")
+ck(getattr(g255, "H_UNKNOWN_PROMPT") is False,
+   "the frozen pair-251 grammar (2.54 only) stays OFF on the adopted 2.55 line")
+_m255 = [f for f in _FLAGS if getattr(g255, f) != getattr(g254, f)
+         and f not in ("D_ID_NORMALIZE", "H_UNKNOWN_PROMPT")]
+ck(not _m255, "2.55 = the 2.54 matrix + D_ID_NORMALIZE on, frozen H_UNKNOWN_PROMPT off (%s)"
+   % _m255)
+g256 = load("0.0.2.56")
+ck(getattr(g255, "D_BEST2_BANNED_RETRY2") is False,
+   "the pair-256 candidate trigger is OFF on the 2.55 control line")
+ck(getattr(g256, "D_BEST2_BANNED_RETRY2") is True, "the candidate trigger is ON at 2.56")
+_m256 = [f for f in _FLAGS if getattr(g256, f) != getattr(g255, f)
+         and f != "D_BEST2_BANNED_RETRY2"]
+ck(not _m256, "2.56 = the 2.55 matrix + exactly D_BEST2_BANNED_RETRY2 (%s)" % _m256)
+ck(g256.D_BEST2_BANNED is True and g256.D_ID_NORMALIZE is True and g256.D_BEST2 is True,
+   "0.0.2.56 builds on the adopted line: 2.43 banned best-of-2, 2.55 id grammar and 2.11 "
+   "loop best-of-2 all inherited")
+ck((2, 56) in GV.CONTOUR_FEATURES and GV.behavior_tuple("0.0.2.56") == (2, 56)
+   and GV.behavior_tuple("0.0.2.55") == (2, 55),
+   "the candidate registers a real contour change; the control keeps behavior 2.55")
+ck(GV.CURRENT_REVISION >= (2, 56) and GV.CURRENT_STAMP == "0.0.%d.%d" % GV.CURRENT_REVISION,
+   "CURRENT follows the newest registered stamp (2.56) without pinning an exact tuple")
 
 print("gate_v49 PASS: %d checks | features frozen per stamp; J re-rank v1 ONLY at 2.32 (not adopted), "
       "grammar v2 from 2.39 only; covers %d/%d J tasks under v1"

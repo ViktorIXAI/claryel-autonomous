@@ -336,6 +336,22 @@ D_BEST2_BANNED_SEED = 8117
 # other frozen flags below, where CONTOUR_REVISION exists. Notes/seed constants stay here.
 D_BEST2_CLAIM_NOTES = ("false_completion_claim",)
 D_BEST2_CLAIM_SEED = 12289
+# 0.0.2.56 (pair-256, pre-registered REVIEW-INBOX 2026-11-08 08:00 CET BEFORE any w55r5x/w56r5x
+# row): the 2.43 banned_attempted selection retry FIRES but does not convert most of the time on
+# the adopted line — over the six published 0.0.2.55 draws of D-ex6-l0 the v243 trigger fired on
+# 3/6 and won exactly 1 (x55r48); on x55r50 and q55r53 BOTH candidates still carried
+# `banned_attempted:SEND_EMAIL` and the row finished content 0.7 / format False. Prevention in
+# this class stays closed (2.42 measured net-zero; pair-243 class ruling: loop losses are a
+# SELECTION problem), so the answer inside the same family is ONE MORE SELECTION DRAW: after the
+# first two candidates, if the best-so-far note set still carries a `banned_attempted` stem, run
+# the loop once more at a THIRD seed offset (16234, distinct from 8117/12289/4096/17491 so the
+# draw is a fresh trajectory) and adopt only if strictly better than the best already held.
+# Monotone by the same argument as 2.43: fires only on a row the loop scorer already failed,
+# only ever raises the adopted score, never touches a passing cell, and never re-arms the frozen
+# claim (2.44) or 2.11 triggers — the second draw exists for the banned family ONLY.
+# NEW v56_* event names; the v243_* bytes belong to the 2.43 measurement forever.
+D_BEST2_BANNED_RETRY2 = contour_at_least(2, 56)
+D_BEST2_BANNED_SEED2 = 16234
 
 # ---- measurement stack identity (release 0.0.2.45, contour behavior unchanged) ----
 # Every published number had to be interpreted from prose: bank hash quoted in a
@@ -3993,7 +4009,10 @@ def run_one(t, pos, done, st):
         # One re-run per task, whichever trigger matched. Trigger precedence for BOTH the retry
         # seed offset and event naming is banned (8117) > claim (12289) > 2.11 (4096), so a row
         # carrying more than one failing family stays attributable to the higher family; never
-        # two retries in one task.
+        # two retries in one task — except from 0.0.2.56 the banned family alone may spend a
+        # SECOND draw (seed+16234) when the best after two candidates STILL carries a
+        # banned_attempted stem (pair-256; every other family keeps exactly one retry).
+        _s1d = (_c1d if _c1d is not None else 0) + (1 if _f1d else 0)
         _banned_trig = d_best2_banned_applies(_n1d)
         _claim_trig = (not _banned_trig) and d_best2_claim_applies(_n1d)
         if _banned_trig or _claim_trig or d_best2_applies(_n1d):
@@ -4003,15 +4022,15 @@ def run_one(t, pos, done, st):
             _off = (D_BEST2_BANNED_SEED if _banned_trig
                     else (D_BEST2_CLAIM_SEED if _claim_trig else 4096))
             r2 = plan_loop(acct, t, seed + _off, rec2)
+            _best_s, _best_n = _s1d, _n1d
             if r2["text"]:
                 try:
                     _c2d, _f2d, _n2d = LP.check_D_loop(t, rec2)
                 except Exception:
                     _c2d, _f2d, _n2d = None, False, []
-                _s1 = (_c1d if _c1d is not None else 0) + (1 if _f1d else 0)
                 if _c2d is not None:
                     _s2 = _c2d + (1 if _f2d else 0)
-                    if _s2 > _s1:
+                    if _s2 > _s1d:
                         rec["agent_steps"] = rec2.get("agent_steps")
                         rec["agent_final"] = rec2.get("agent_final")
                         rec["answer"] = r2["text"]
@@ -4020,6 +4039,27 @@ def run_one(t, pos, done, st):
                         acct.ev("fix", "v243_d_best2_banned_win" if _banned_trig
                                 else ("v244_d_best2_claim_win" if _claim_trig
                                       else "v31_d_best2_win"))
+                        _best_s, _best_n = _s2, _n2d
+            if _banned_trig and D_BEST2_BANNED_RETRY2 and d_best2_banned_applies(_best_n):
+                # pair-256 second draw: same family, third seed offset, strict-better-only over
+                # the best already held (never over the loser when candidate 2 won).
+                acct.ev("contour", "v56_d_best3_banned_fired")
+                rec3 = {"agent_steps": [], "agent_final": None}
+                r3 = plan_loop(acct, t, seed + D_BEST2_BANNED_SEED2, rec3)
+                if r3["text"]:
+                    try:
+                        _c3d, _f3d, _n3d = LP.check_D_loop(t, rec3)
+                    except Exception:
+                        _c3d, _f3d, _n3d = None, False, []
+                    if _c3d is not None:
+                        _s3 = _c3d + (1 if _f3d else 0)
+                        if _s3 > _best_s:
+                            rec["agent_steps"] = rec3.get("agent_steps")
+                            rec["agent_final"] = rec3.get("agent_final")
+                            rec["answer"] = r3["text"]
+                            r = r3
+                            acct.fixes += 1
+                            acct.ev("fix", "v56_d_best3_banned_win")
 
     try:
         if cat == "D" and (not D_PLAIN_SCORE or _d_is_loop(t)):

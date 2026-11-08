@@ -440,6 +440,15 @@ CONTOUR_FEATURES = (
     # 15.11 Wh, matched warm windows inside variance, mechanism zero-token. ADOPTED per
     # pre-registered rule: `D_ID_NORMALIZE = contour_at_least(2, 55)` inherits forward; the line
     # moves 0.0.2.53 -> 0.0.2.55, `PAIR-252-V66.md`.)
+    (2, 56),  # LOOP BEST-OF-3 ON THE banned_attempted FAMILY (pair-256 candidate): the adopted
+    # 2.43 selection retry fires on D-ex6-l0 but converts 1/3 on its six published 0.0.2.55
+    # draws (x55r48 won; x55r50 and q55r53 kept `banned_attempted:SEND_EMAIL` in BOTH
+    # candidates, row finished 0.7/format False). Prevention stays closed (2.42 net-zero,
+    # pair-243 class ruling: SELECTION only), so this stamp adds ONE further draw at seed
+    # offset 16234, gated on the best after two candidates still carrying a banned_attempted
+    # stem, strict-better-only adoption, own flag D_BEST2_BANNED_RETRY2 and bare v56_* events
+    # (v243_* bytes immutable). Pre-registered REVIEW-INBOX 2026-11-08 08:00 CET; pair-256
+    # decides adoption; gate_v70 pins grammar + wiring + matrix.)
 )
 
 # Revisions 2.3-2.6 are permanently reserved: they were released as
@@ -521,8 +530,8 @@ RESERVED_TOOLING_REVISIONS = (2, 3), (2, 4), (2, 5), (2, 6), (2, 8)
 # `gate_v65_b_echo_restore_test.py` pins the matrix (2.50 moves ZERO flags vs 2.48; 2.51 =
 # the 2.50 matrix + exactly B_ECHO_RESTORE; 2.34 keeps both grammars under the v234 event
 # name; 2.35-2.50 stay silent) and the per-stamp event naming.
-CURRENT_REVISION = (2, 55)
-CURRENT_STAMP = "0.0.2.55"
+CURRENT_REVISION = (2, 56)
+CURRENT_STAMP = "0.0.2.56"
 
 
 def _digits(value: str) -> list[int]:
