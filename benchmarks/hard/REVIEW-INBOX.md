@@ -2997,9 +2997,19 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   Non-vacuity proven: tampering one verdict cell and one stamp line each flipped
   --check to rc=1 (measured 08.11 this session; controls not committed by design).
 - **First census verdict (8 banks, chain v6.1->v6.8):** every published bank passes
-  BOTH gates at current bytes - v6.8 working: gold self-test 77/77, leakage 0
-  (bank `7a9527bf2e4ebbff`, scorer `89437d8cfe1fc6c8`). No hidden gold/leakage defect
-  in the published chain.
+  BOTH gates at current bytes - v6.8 working: gold self-test 67/67 non-E + E battery
+  10/10, leakage 0 (bank `7a9527bf2e4ebbff`, scorer `89437d8cfe1fc6c8`). No hidden
+  gold/leakage defect in the published chain.
+- **CI repair carried with it (two real breaks found by running the pipeline, not by
+  guessing):** (1) `MANIFEST.v6.sha256` byte-pins `gold_selftest_v6.py` and
+  `leakage_scan_v6.py`, so the refactor red the "frozen bank/scorer pins" step -
+  re-pinned via `regen_manifest_v6.py` (tooling-only change; gate semantics unchanged),
+  `verify_manifest.py --v6` PASS; (2) the census test is the first CI job touching the
+  E battery, but per repo policy E re-execution is LOCAL-ONLY (docker sandbox) - the
+  table now has a separate `gold E battery` column: strict on sandbox hosts, `NOT RUN
+  (no sandbox)` + column-skip in `--check` on runners without it (inputs stay bound by
+  the bank/scorer sha16 stamp). Proven both ways: local strict --check PASS and a
+  no-sandbox simulation --check rc=0.
 - **Measurement-stack flake found and encoded:** the E battery runs in docker; under
   8-way parallel scoring E-ex6-05 (bank v6.1) failed once and passed serially and on
   re-draw. Census policy: E-category failures get exactly one re-draw; failing BOTH
