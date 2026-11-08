@@ -17,7 +17,9 @@ bytes, one percent row per run.
 3. An arm is refused if >5% of answers are missing; partial arms publish nothing.
 4. Cross-arm tables use one matched subset with the same task ids and the same call parameters
    (`temperature 0.7`, `max_tokens 1200`, one seed). Cloud arms are expensive, so the matched
-   cross-arm set is 300 tasks; the local brain runs the full set.
+   cross-arm set is 300 tasks; the local brain runs the full set. The matched set is the first 300
+   ids of the pinned task file in file order, fixed before any arm ran — subsets are never chosen
+   after seeing scores.
 5. Contamination is stated per benchmark: the classic sets below are public and static, and are
    retired for frontier comparison in 2026 aggregators (last reported GSM8K 92.6%, ARC 95.3%,
    MMLU 90.1%). They are still the right first yardstick for a 24 GB quantized local brain, and
