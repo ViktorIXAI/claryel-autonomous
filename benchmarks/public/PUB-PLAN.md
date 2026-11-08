@@ -33,7 +33,7 @@ bytes, one percent row per run.
 |---|---|---|---|---|---|
 | 1 | GSM8K (test) | 1319 | grade-school arithmetic chains | ~55 min | 300 |
 | 2 | ARC-Easy / ARC-Challenge | 2376 / 1172 | school science MCQ | ~40 min each | 300 |
-| 3 | HumanEval | 164 | code synthesis, execution-verified | ~20 min (needs `pytest` checker) | 164 (full) |
+| 3 | HumanEval | 164 | code synthesis, execution-verified | ~20 min (`pytest-v1` execution checker in force) | 164 (full) |
 | 4 | IFEval | 541 | verifiable instruction/format compliance | ~25 min (needs `ifeval` checker) | 541 (full) |
 | 5 | SimpleBench dev | 2500 → 500 | common-sense trap questions, **not saturated** (best public number 81.9%) | ~30 min on the subset | 500 |
 | 6 | GPQA Diamond | 198 | expert science MCQ, noise ±3 pp | ~10 min | 198 (full) |
@@ -55,7 +55,7 @@ result rows, not hidden.
 | arc-easy | 2376 | `cac604a076e8b00a` | HF allenai/ai2_arc ARC-Easy test | pinned, normalised |
 | arc-challenge | 1172 | `523af08216f14256` | HF allenai/ai2_arc ARC-Challenge test | pinned, normalised |
 | gpqa-diamond | 198 | `af73cc064d4d8529` | HF fingertap/GPQA-Diamond (mirror of Idavidrein/gpqa) | pinned, normalised; mirror used because the upstream card is agreement-gated |
-| humaneval | 164 | `971d976289cd9357` | openai/human-eval HumanEval.jsonl.gz | pinned; execution checker not shipped yet, so unscored |
+| humaneval | 164 | `971d976289cd9357` | openai/human-eval HumanEval.jsonl.gz | pinned; execution checker shipped as contract `pytest-v1` (`scripts/pub_bench_exec.py`, self-test: the reference solution passes and a wrong completion fails) |
 | ifeval | 0 | — | HF google-deepmind/ifeval returns 401 (agreement-gated), the google-research raw path 404s | BLOCKED: try the `randxie-boson/ifeval-data` mirror, vendor the upstream `instructions.py` checker before running arms |
 
 ## Arms

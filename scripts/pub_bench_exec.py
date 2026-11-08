@@ -15,6 +15,7 @@ Usage:
   pub_bench_exec.py selftest
   pub_bench_exec.py <tasks.jsonl> <answers.jsonl>
 """
+import hashlib
 import json
 import os
 import re
@@ -24,6 +25,10 @@ import sys
 import tempfile
 
 TIMEOUT = 25
+EXEC_CHECKER = "pytest-v1"      # named in the digest row: this percent is not `number`/`letter`
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from pub_bench_score import call_label, digest_row, write_digest  # noqa: E402  (one digest format)
 
 
 def strip_code(ans):
@@ -139,9 +144,16 @@ def main():
     if missing > 0.05 * len(tasks):
         print("partial arm: %d/%d answers present - no percent printed" % (n - missing, len(tasks)))
         return 1
-    print("humaneval %d/%d = %.1f%% (executed, checker pytest v1)" % (ok, n, 100.0 * ok / max(n, 1)))
+    print("humaneval %d/%d = %.1f%% (executed, checker %s)" % (ok, n, 100.0 * ok / max(n, 1), EXEC_CHECKER))
     for tid, err in fails[:12]:
         print("  FAIL %s %s" % (tid, err))
+    model = next((a.get("model") for a in ans.values() if a.get("model")), "unknown")
+    temp = next((a.get("temp") for a in ans.values() if a.get("temp") is not None), None)
+    row = digest_row(
+        os.path.basename(tasks_f).replace(".tasks.jsonl", ""), model, len(tasks),
+        hashlib.sha256(open(tasks_f, "rb").read()).hexdigest()[:16],
+        "%s; checker %s" % (call_label(list(ans.values()), temp), EXEC_CHECKER), ok, n)
+    print("-> %s" % os.path.basename(write_digest(row)))
     return 0
 
 

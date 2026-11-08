@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 
 NUM = re.compile(r"-?\d[\d,]*(?:\.\d+)?")
 LET = re.compile(r"\b([A-J])\b")
@@ -83,6 +84,39 @@ def call_label(rows, temp):
     return "parameters not recorded"
 
 
+def digest_head():
+    """The digest header is regenerated on every write so the contract in force is never stale."""
+    return ("# Public benchmark percent digest\n\n"
+            "One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. "
+            "Rows are only comparable when the task-file sha16 and the call parameters match; "
+            "unscored checkers (pytest, ifeval) are excluded from the denominator and named. "
+            "Checker contract in force: `%s` - the scorer refuses to publish while its own "
+            "self-test fails, and a gold the contract cannot parse is scored as UNSCORED, never "
+            "guessed. A row re-scored under another contract id is a new row, not an edit.\n\n"
+            % CHECKER_CONTRACT)
+
+
+def digest_row(bench, model, n_tasks, tasks_sha16, call, ok, scored):
+    return "| %s | %s | %d | %s | %s | %d/%d = **%.1f%%** |" % (
+        bench, model, n_tasks, tasks_sha16, call, ok, scored, 100.0 * ok / max(scored, 1))
+
+
+def write_digest(row, dst=None):
+    """Prepend one percent row, newest first. One writer, one format: an execution-checked arm
+    (`pub_bench_exec.py`) must land in the same table, not a side table nobody compares."""
+    if dst is None:
+        dst = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            "..", "benchmarks", "public", "PUB-DIGEST.md"))
+    hdr = ("| bench | model | tasks | tasks sha16 | call | strict |\n"
+           "|---|---|---|---|---|---|")
+    old = open(dst, encoding="utf-8").read() if os.path.exists(dst) else ""
+    body = [l for l in old.splitlines() if l.startswith("| ") and "bench |" not in l
+            and not set(l) <= set("|- ")]
+    with open(dst, "w", encoding="utf-8") as fh:
+        fh.write(digest_head() + hdr + "\n" + "\n".join([row] + body) + "\n")
+    return dst
+
+
 def check(checker, gold, ans):
     if checker == "number":
         g, a = gold_number(gold), answer_number(ans)
@@ -130,7 +164,20 @@ def selftest():
     ]
     bad += [("call_label", repr((rows, temp)), None, call_label(rows, temp))
             for rows, temp, ok in labels if not ok(call_label(rows, temp))]
-    print("selftest cases=%d failures=%d" % (len(cases) + len(labels), len(bad)))
+    # the digest writer is a published artifact: prepend order and header must be stable,
+    # and an execution-checked arm lands in the SAME table (tested on a temp path only).
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, "PUB-DIGEST.md")
+        r1 = digest_row("bench-a", "m1", 10, "abc123", "temp 0.7, max_tokens 1200", 8, 10)
+        write_digest(r1, p)
+        r2 = digest_row("bench-b", "m2", 5, "def456", "temp 0.7; checker pytest-v1", 4, 5)
+        write_digest(r2, p)
+        txt = open(p, encoding="utf-8").read()
+        rows_out = [l for l in txt.splitlines()
+                    if l.startswith("| ") and "bench |" not in l and not set(l) <= set("|- ")]
+        if rows_out != [r2, r1] or CHECKER_CONTRACT not in txt or txt.count("# Public") != 1:
+            bad.append(("digest_writer", repr(rows_out), "newest-first, one header", txt[:160]))
+    print("selftest cases=%d failures=%d" % (len(cases) + len(labels) + 1, len(bad)))
     for b in bad:
         print("  FAIL %s gold=%r expected=%r got=%r" % b)
     if bad:
@@ -186,28 +233,12 @@ def main():
         note = "" if not r["unscored"] else ("  [%d unscored, checker pending]" % r["unscored"])
         print("%-14s %4d/%4d = %5.1f%%  (answers %d/%d)%s"
               % (b, r["ok"], r["scored"], pct, len(tasks) - len(missing), len(tasks), note))
-    row = "| %s | %s | %d | %s | %s | %d/%d = **%.1f%%** |" % (
+    row = digest_row(
         os.path.basename(tasks_f).replace(".tasks.jsonl", ""), model, len(tasks),
         hashlib.sha256(open(tasks_f, "rb").read()).hexdigest()[:16],
         call_label(list(ans.values()), temp),
-        sum(r["ok"] for r in by.values()), sum(r["scored"] for r in by.values()),
-        100.0 * sum(r["ok"] for r in by.values()) / max(sum(r["scored"] for r in by.values()), 1))
-    dst = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                        "..", "benchmarks", "public", "PUB-DIGEST.md"))
-    head = ("# Public benchmark percent digest\n\n"
-            "One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. "
-            "Rows are only comparable when the task-file sha16 and the call parameters match; "
-            "unscored checkers (pytest, ifeval) are excluded from the denominator and named. "
-            "Checker contract in force: `%s` - the scorer refuses to publish while its own "
-            "self-test fails, and a gold the contract cannot parse is scored as UNSCORED, never "
-            "guessed. A row re-scored under another contract id is a new row, not an edit.\n\n"
-            % CHECKER_CONTRACT)
-    hdr = "| bench | model | tasks | tasks sha16 | call | strict |\n|---|---|---|---|---|---|"
-    old = open(dst, encoding="utf-8").read() if os.path.exists(dst) else ""
-    body = [l for l in old.splitlines() if l.startswith("| ") and "bench |" not in l
-            and not set(l) <= set("|- ")]
-    with open(dst, "w", encoding="utf-8") as fh:
-        fh.write(head + hdr + "\n" + "\n".join([row] + body) + "\n")
+        sum(r["ok"] for r in by.values()), sum(r["scored"] for r in by.values()))
+    dst = write_digest(row)
     print("-> %s" % os.path.basename(dst))
     return 0
 
