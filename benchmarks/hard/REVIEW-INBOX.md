@@ -2709,3 +2709,7 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   events + contract coverage proof), the live-rate part is now on record.
 - Artifacts published: `map-256/` (3 legs x results/ledger/log/run-record, plans, seed audit,
   energy windows, launcher prose). Energy 5.65-6.74 Wh/leg. Sampler stopped at queue end.
+
+## 2026-11-08 09:2x CET — percent digest: the merged row was a mixed-stamp artifact, corrected
+
+`scripts/run_digest.py` at 924c403 pooled every full-bank ledger in a workspace into ONE percent row and printed only the last contour stamp found, so the published "bank v6.6 / 0.0.2.53 / 12 arms / 94.2%" silently averaged arms of stamps 2.51-2.55. The tool now emits one row per contour stamp and labels the bank with its published version + sha16 read from `bank-version.json` (the workspace `bank.json` sha is a build artifact, not the bank identity), and refuses partial/loop-only arms. DIGEST.md regenerated; corrected per-stamp ladder (94.4 / 94.4 / 95.4 / 95.2 / 97.0 / 97.4%) is in `STATUS-20261108.md`. Reporting arithmetic only - no arm byte changed.
