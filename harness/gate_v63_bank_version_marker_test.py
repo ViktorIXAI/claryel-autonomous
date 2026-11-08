@@ -85,7 +85,12 @@ ck(byver["v6.2"]["published_sha16"] == "3c866ea7daae611c", "v6.2 published bytes
 ck(byver["v6.3"]["status"] == "provisional", "v6.3 stays PROVISIONAL in the registry")
 ck(byver["v6.4"]["status"] == "superseded", "v6.4 superseded by the v6.6 promotion")
 ck(byver["v6.5"]["status"] == "provisional", "v6.5 stays provisional (frozen verdict)")
-ck(byver["v6.6"]["status"] == "working", "v6.6 is the single WORKING hard bank")
+# (stale-pin repair, 2026-11-08: this line pinned v6.6 as `working` — a CURRENT-state
+# claim — and went red the day the v6.8 promotion moved the slot. Which version holds
+# `working` is mutable by design; the structural assertion above (exactly one working)
+# is the invariant. Statuses of PAST versions are frozen history and stay pinned.)
+ck(byver["v6.6"]["status"] == "superseded", "v6.6 demoted at a later promotion (frozen history)")
+ck(byver["v6.7"]["status"] == "provisional", "v6.7 stays provisional (frozen probe rule)")
 try:
     GBV.load_registry("/nonexistent-dir-xyz")
     ck(False, "missing registry must raise BankIdentityError")
