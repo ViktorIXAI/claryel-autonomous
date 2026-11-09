@@ -99,6 +99,50 @@
       "tasks": 541,
       "tasks_sha16": "2c672531577dcc33"
     },
+    "livecodebench": {
+      "checker": "lcb-exec-v1",
+      "checker_files": {
+        "scripts/pub_bench_lcb.py": "0430437a774eb39d"
+      },
+      "checker_gates": "self-test 10/10: pickler decodes pure data, pickler REFUSES a payload that references a global class (control payload), reference solution passes, wrong completion fails, crash fails, infinite loop -> TLE loss, empty answer fails, payload-pin mismatch fails closed as UNSCORED, functional regime named as unscored, over-byte-cap test is a loss not a skip",
+      "difficulty_split": {
+        "easy": 43,
+        "hard": 80,
+        "medium": 52
+      },
+      "execution_budget_pre_registered": {
+        "child_memory_limit_bytes": 1073741824,
+        "measured_max_question_total_bytes": 29924904,
+        "measured_max_single_test_input_bytes": 4355536,
+        "measured_max_single_test_output_bytes": 3444445,
+        "measured_median_question_total_bytes": 48665,
+        "note": "caps set above the measured maxima so no question is excluded by construction; over-cap is a REJECT (a loss), never a silent skip",
+        "per_question_total_cap_bytes": 67108864,
+        "per_question_wall_seconds": 600,
+        "per_test_input_cap_bytes": 8388608,
+        "per_test_output_cap_bytes": 8388608,
+        "per_test_wall_seconds": 20
+      },
+      "hidden_payload": {
+        "bytes": 100111386,
+        "decoded_bytes": 289489972,
+        "file": "livecodebench.hidden.jsonl.gz",
+        "note": "the hidden tests are base64 -> zlib -> pickle -> JSON; the decoder refuses every pickle global (measured: all 175 rows decode as pure data). The tracked tasks file carries, per question, the public tests plus hidden_count and the SHA-256/16 of the canonical hidden-test JSON, and `score` fail-closes if a sidecar row does not match that pin. Publishing this payload as a GitHub release asset is a separate owner decision; until then the payload lives only on the local box and an outside reader can verify the per-question pins but not re-run the hidden battery.",
+        "sha16": "86f92ab37602195a",
+        "tests": 6537,
+        "tracked": false
+      },
+      "platform_split": {
+        "atcoder_stdin": 112,
+        "leetcode_functional": 63
+      },
+      "raw_slice": "test6.jsonl (the only code_generation_lite slice inside the local byte budget; test/test2..test5 are 0.5-1.3 GB and are not pinned)",
+      "scored_scope": "stdin regime 112 tasks score under lcb-exec-v1; the 63 LeetCode functional tasks are UNSCORED until a driver generated from each case's own type list ships, and every print names the unscored count and keeps those tasks out of the denominator",
+      "tasks": 175,
+      "tasks_sha16": "8da729553c7c5710",
+      "tasks_sha1_16": "572c76cf72de552e",
+      "window": "contest dates 2025-01-04T00:00:00 .. 2025-04-06T00:00:00 (post-cutoff window, which is why this item exists)"
+    },
     "mmlu-pro": {
       "tasks": 500,
       "tasks_sha16": "c64264aede2498c7"
@@ -133,6 +177,12 @@
     "ifeval": {
       "raw_sha16": "98b6b83558bfc673",
       "url": "google-research/google-research instruction_following_eval/data/input_data.jsonl @ e6890f85757dd84e27ca6df2dd30651dafad28e0"
+    },
+    "livecodebench": {
+      "license": "cc",
+      "raw_bytes": 134303240,
+      "raw_sha16": "bb4c364f71921c44",
+      "url": "HF livecodebench/code_generation_lite, file test6.jsonl (LFS/Xet, answers 200 unauthenticated)"
     },
     "mmlu-pro": {
       "raw_sha16": "21420424edfbbbc2",
