@@ -181,3 +181,33 @@ not a blanket suspension of benchmark work, so benchmark legs keep running under
 policy: a leg unit is a transient user-scoped process this line starts and stops for its own arm, and
 it leaves no configuration behind. Anything that would change the architecture waits for the explicit
 owner go/no-go after 2026-11-10 10:10 CET; time expiry alone does not authorize it.
+
+## Headroom measurement for a validator-driven repair gate (2026-11-09, from stored bytes)
+
+Why the contour is a null on this line, quantified from verdict sidecars already in `arms/` (no new
+arm needed): the gates are triggered by structural/protocol signals, and on public category-P sets the
+model already emits a well-formed single-shot answer at the first rung — the parity ledgers show
+`model_calls == rows`, 0 gate fixes, 0 blocks, 0 ladder steps on all four parity workspaces
+(IFEval 541, BFCL 1244, HumanEval 164, MMLU-Pro 500). On the hard bank the same runtime fires on most
+tasks: 77 rows -> 126-145 model calls (1.6-1.9 per task), 30-46 gate fixes, 3-8 blocks, 1-12 ladder
+steps. The bank's defect mix is the gate habitat; the public sets are the clean holdout.
+
+Failure anatomy decides whether a repair gate could ever help:
+* BFCL (1240 tasks, 124 failing cells): 78 wrong function name/arguments, 34 emitted a call where the
+  gold call set is empty, 5 wrong call count, 2 unparseable. Gate-addressable format headroom is
+  therefore ~0.16 % of cells; a perfect format repair could not move the percent more than ~0.2 pp.
+* IFEval (541 tasks, 74 strict fails): 68 of 74 fail ONLY on surface-verifiable checks
+  (`length_constraints:number_words` 14, `keywords:letter_frequency` 11, `combination:repeat_prompt` 10,
+  `detectable_format:json_format` 6, `punctuation:no_comma` 6, `length_constraints:number_sentences` 6,
+  `change_case:english_capital` 5, `startend:quotation` 4, ...). That is 12.6 % of the set with real
+  mechanically checkable headroom, and the contour used none of it, because its validator slot only
+  scores the bytes and is not wired into any repair path.
+
+Next candidate, and it is an arm-level experiment, not a contour stamp (the hard line stays frozen at
+`0.0.2.56`): `pub-repair-v1` — after the first answer, run the pinned validator; only when it reports a
+failed check, re-ask once with the violated check id and its pinned kwargs named, re-check with the same
+checker, keep the first answer if the retry scores worse, and publish the retry census, the percent and
+the energy next to the untouched 0.0.2.56 rows. Expected ceiling: +12.6 pp on IFEval if every surface
+failure were fixable, realistically +3 to +6 pp, ~+0.2 pp on BFCL, zero on the answer-graded sets where
+no validator exists. Run it only on the sets with teeth (IFEval, then LiveCodeBench once the exec
+checker has a public-test validator slot), and it never replaces the frozen 0.0.2.56 rows.
