@@ -1,39 +1,16 @@
 {
-  "schema": "pub-bench-v1",
-  "sources": {
-    "gsm8k": {
-      "url": "openai/grade-school-math test.jsonl",
-      "raw_sha16": "3730d312f6e34405"
-    },
-    "humaneval": {
-      "url": "openai/human-eval HumanEval.jsonl.gz",
-      "raw_sha16": "b796127e635a67f9"
+  "benches": {
+    "arc-challenge": {
+      "tasks": 1172,
+      "tasks_sha16": "523af08216f14256"
     },
     "arc-easy": {
-      "url": "HF allenai/ai2_arc ARC-Easy test",
-      "raw_sha16": "874354cf37266753"
-    },
-    "arc-challenge": {
-      "url": "HF allenai/ai2_arc ARC-Challenge test",
-      "raw_sha16": "03227c30fd557ad1"
+      "tasks": 2376,
+      "tasks_sha16": "cac604a076e8b00a"
     },
     "gpqa-diamond": {
-      "url": "HF fingertap/GPQA-Diamond (mirror of Idavidrein/gpqa)",
-      "raw_sha16": "71991ea576f83033"
-    },
-    "mmlu-pro": {
-      "url": "HF TIGER-Lab/MMLU-Pro test (500-row pre-registered stride-24 subset of 12032)",
-      "raw_sha16": "21420424edfbbbc2"
-    }
-  },
-  "benches": {
-    "simplebench": {
-      "tasks": 0,
-      "fetch_error": "HTTP Error 401: Unauthorized"
-    },
-    "ifeval": {
-      "tasks": 0,
-      "fetch_error": "HTTP Error 401: Unauthorized"
+      "tasks": 198,
+      "tasks_sha16": "af73cc064d4d8529"
     },
     "gsm8k": {
       "tasks": 1319,
@@ -43,21 +20,69 @@
       "tasks": 164,
       "tasks_sha16": "971d976289cd9357"
     },
-    "arc-easy": {
-      "tasks": 2376,
-      "tasks_sha16": "cac604a076e8b00a"
-    },
-    "arc-challenge": {
-      "tasks": 1172,
-      "tasks_sha16": "523af08216f14256"
-    },
-    "gpqa-diamond": {
-      "tasks": 198,
-      "tasks_sha16": "af73cc064d4d8529"
+    "ifeval": {
+      "checker": "pub-ifeval-v1",
+      "checker_files": {
+        "evaluation_lib.py": "e0b6db8fcbb9005c",
+        "instructions.py": "0408215285bf39f6",
+        "instructions_registry.py": "85d6360b7709934f",
+        "instructions_test.py": "d5258d03277cd333",
+        "instructions_util.py": "8ad230f0b60767b4"
+      },
+      "reference_response_file": {
+        "name": "gpt4_sample.jsonl",
+        "sha16": "ff57ec6d17688771"
+      },
+      "runtime": {
+        "deps": {
+          "absl-py": "2.5.1",
+          "immutabledict": "4.3.1",
+          "langdetect": "1.0.9",
+          "nltk": "words corpus 236736 entries"
+        },
+        "python": "venv"
+      },
+      "tasks": 541,
+      "tasks_sha16": "f6fa761e8e85efa9"
     },
     "mmlu-pro": {
       "tasks": 500,
       "tasks_sha16": "c64264aede2498c7"
+    },
+    "simplebench": {
+      "fetch_error": "no full public set: official repo simple-bench/SimpleBench ships a 10-question demo (simple_bench_public.json, simple_bench_public_set.csv); HF mirrors (crellis/simplebench, oliveirabruno01/simple-bench, Impulse2000/simple_bench_public-20-12-2024, sapiens-technology/simple_bench) carry the same 10 rows; the 2431-question paper set is not published at a fetchable URL",
+      "tasks": 0
+    }
+  },
+  "schema": "pub-bench-v1",
+  "sources": {
+    "arc-challenge": {
+      "raw_sha16": "03227c30fd557ad1",
+      "url": "HF allenai/ai2_arc ARC-Challenge test"
+    },
+    "arc-easy": {
+      "raw_sha16": "874354cf37266753",
+      "url": "HF allenai/ai2_arc ARC-Easy test"
+    },
+    "gpqa-diamond": {
+      "raw_sha16": "71991ea576f83033",
+      "url": "HF fingertap/GPQA-Diamond (mirror of Idavidrein/gpqa)"
+    },
+    "gsm8k": {
+      "raw_sha16": "3730d312f6e34405",
+      "url": "openai/grade-school-math test.jsonl"
+    },
+    "humaneval": {
+      "raw_sha16": "b796127e635a67f9",
+      "url": "openai/human-eval HumanEval.jsonl.gz"
+    },
+    "ifeval": {
+      "raw_sha16": "98b6b83558bfc673",
+      "url": "google-research/google-research instruction_following_eval/data/input_data.jsonl @ e6890f85757dd84e27ca6df2dd30651dafad28e0"
+    },
+    "mmlu-pro": {
+      "raw_sha16": "21420424edfbbbc2",
+      "url": "HF TIGER-Lab/MMLU-Pro test (500-row pre-registered stride-24 subset of 12032)"
     }
   }
 }

@@ -1,0 +1,4 @@
+Vendored from https://github.com/google-research/google-research (Apache-2.0, LICENSE in LICENSE.instruction_following_eval).
+Pinned upstream commit e6890f85757dd84e27ca6df2dd30651dafad28e0, path instruction_following_eval/.
+No upstream file is edited; the checker is used as shipped. IFEval data and code are Apache-2.0, so no
+dataset agreement was needed - the gated Hugging Face card was skipped in favour of the upstream source.
