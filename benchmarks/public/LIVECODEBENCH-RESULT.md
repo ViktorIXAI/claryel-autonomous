@@ -42,14 +42,65 @@ denominator, printed beside every percent. They are not counted as losses.
 | arm | tasks scored | tasks sha16 | call | strict |
 |---|---|---|---|---|
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | **112 of 175** (63 functional unscored) | `8da729553c7c5710` | temp 0.7, `max_tokens` 2400, one request per task, no request seed, serve-default thinking; checker `lcb-exec-v1` | **60/112 = 53.6 %** |
-| contour 0.0.2.56, matched shape (first rung 2400 = the bare arm's ceiling, no seed, serve-default thinking, validator slot = `lcb-exec-v1`) | 175 ids, same slice | `8da729553c7c5710` | leg in flight from 16:31 CET, no percent until it completes — a partial arm publishes nothing | pending |
-| codex `gpt-6.1-sol` | 175 | `8da729553c7c5710` | — | not launched yet |
+| contour 0.0.2.56, matched shape (first rung 2400 = the bare arm's ceiling, no seed, serve-default thinking, validator slot = `lcb-exec-v1`) | **112 of 175** (same 63 unscored) | `8da729553c7c5710` | leg 16:31:23 → 17:35:06 CET, 175/175 rows, 176 model calls, 1 gate fix, 0 ladder steps, 35 truncations, 3438 s engine time, 131.88 Wh; shape proven from the rows (`request_shape = bare-matched`, `first_rungs = [2400]`) | **54/112 = 48.2 %** |
+| codex `gpt-6.1-sol` | 175 | `8da729553c7c5710` | leg running from 16:59 CET (`parb-pub-lcb-codex`) — a partial arm publishes no percent | pending |
 | grok-4.7 | 175 | `8da729553c7c5710` | — | suspended by owner quota, resumes 2026-11-12 |
 
 Cross-arm standard for this window is three arms (bare local / contour matched shape / ChatGPT
 codex). Note the parity shape rule binds **2400** on this set, not 1200: the bare arm's
 `max_tokens` is the contour leg's first rung, and this is the first set where that number is not
 1200.
+
+## Contour arm (0.0.2.56, matched shape) — the paired verdict
+
+* One clean leg, unit `parb-pub-contour-lcb-matched`, **16:31:23 → 17:35:06 CET**, `PGR finished:
+  records 175, duration 3832 s, stop reason: none`, 175/175 rows, **0 empty answers, 0 engine
+  stalls**, no restart, no quarantined file. The endpoint was reserved only for this leg: the
+  earlier bare leg had already finished and the codex leg that started at 16:59 does not touch
+  this serve.
+* **Shape proven from the rows, not from the launcher**: `request_shape = "bare-matched: first rung
+  = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking)"` and
+  `first_rungs = [2400]` on every row, so the contour leg asked the same ceiling the bare arm asked.
+* Gate accounting (`contour-stats.json`, the number the owner asked for beside the percent):
+  **176 model calls over 175 rows** (exactly one retry), **1 gate fix**
+  (`fix:fields_attempt_1`, on `lcb-3721`, a `functional` row that is unscored in this contract),
+  **0 gate blocks, 0 ladder steps**, event census `gate:fields_ok ×2`, `gate:fields_gap_2 ×1`,
+  `fix:fields_attempt_1 ×1` — 2 rows of 175 carry any event at all. Tokens 109 872 prompt /
+  307 090 completion, useful 304 979, overhead 2 111; engine seconds **3438.2** against the bare
+  arm's **3447.6**.
+* GPU energy (2 Hz sampler, 1512 samples over 3827 s): **131.88 Wh**, mean 124.0 W, max 202 W,
+  mean utilisation 92 %, peak 23 563 MiB, peak 71 °C — **+2.84 Wh (+2.2 %)** over the bare leg for
+  the one extra model call. Verdict **tight**, unchanged.
+* **Paired verdict on the 112 scored ids: bare 60, contour 54** — 8 cells only the bare arm passes,
+  2 cells only the contour arm passes, exact two-sided sign test **p = 0.109**. Inside the set's
+  resolution band, so this is published as a null, not as a contour regression. Discordant
+  ids, with the contour ledger's own event column beside each:
+
+  | id | bare | contour | contour events on this row |
+  |---|---|---|---|
+  | lcb-abc388_e (hard) | pass | fail | none |
+  | lcb-abc390_b (easy) | pass | fail | `gate:fields_ok` (observation, no repair) |
+  | lcb-abc390_d (medium) | pass | fail | none |
+  | lcb-abc391_g (hard) | pass | fail | none (contour row truncated at 2400) |
+  | lcb-abc393_f (hard) | pass | fail | none |
+  | lcb-abc395_f (hard) | pass | fail | none |
+  | lcb-abc396_f (hard) | pass | fail | none |
+  | lcb-abc400_d (medium) | pass | fail | none |
+  | lcb-abc388_d (medium) | fail | pass | none |
+  | lcb-abc390_f (hard) | fail | pass | none |
+
+  **9 of the 10 discordant cells carry no contour event at all**, so by this line's own rule a
+  flip with no event on its cell is sampling noise at temperature 0.7, not the change under test.
+  The mechanism behind the loss side is visible in the token column instead: the contour leg hit
+  the 2400 ceiling on **28** stdin-scored rows where the bare leg hit it on **22**, and all 28 are
+  automatic losses (a truncated program cannot pass) — 26 of the contour arm's 48 hard losses are
+  truncations against the bare arm's 21 of 44. Same ceiling, same shape, different draws: this is
+  the cost of scoring a hard code set at a fixed ceiling with no seed, and it is stated as a
+  request-shape/ceiling effect, never as a contour effect.
+* Per-difficulty: contour easy 25/26, medium 17/26, hard 12/60 (bare 26/26, 18/26, 16/60).
+* This is the **9th matched-shape parity row on the line and the 9th measured null**: the contour
+  event census on public sets is 0–2 rows out of 112–1240, so the frozen harness changes nothing
+  here by construction, exactly as on the answer-graded sets.
 
 ## Bare arm — provenance and cost
 

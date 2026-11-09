@@ -6,6 +6,7 @@ Supersession pointers (parity shape rule, 2026-11-08; never an edit of old bytes
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| livecodebench | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 112 | 8da729553c7c5710 | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched shape (first rung 2400 = the bare arm's max_tokens, serve-default thinking, no request seed), 175 ids file order, 176 model calls, 1 gate fix, 0 ladder steps, 35 truncated at the ceiling; checker lcb-exec-v1; 63 unscored (driver gap), hidden tests by sha16; checker lcb-exec-v1 | 54/112 = **48.2%** |
 | livecodebench | qwen3.8-flash-next-iq3_s-basalt | 112 | 8da729553c7c5710 | temp 0.7, max_tokens 2400, one request per task; 38/175 rows api_finish=length (ctok>=2400) (2400-token ceiling); 63 unscored (driver gap), hidden tests by sha16; checker lcb-exec-v1 | 60/112 = **53.6%** |
 | bfcl | gpt-6.1-sol | 300 | 00b74e037240792d | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport); codex leg 14:37-15:07 CET, 300/300 finish=ok, wall 1807 s (6.0 s/task); cross-arm slice = first 300 ids of the pinned file in file order, which is category-pure simple_python (stated skew); checker bfcl-ast-v1 | 281/300 = **93.7%** |
 | ifeval | gpt-6.1-sol | 541 | 2c672531577dcc33 | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport); leg stopped 440/541 by owner-side usage limit 12:39, resumed 13:34, completed 14:41; checker pub-ifeval-v1 | 515/541 = **95.2%** strict (526/541 loose) |
