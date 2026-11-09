@@ -387,21 +387,338 @@ def run_lcb(a, tasks, first, first_rows):
     dig = HERE.parent / "benchmarks" / "public" / "PUB-DIGEST.md"
     import pub_bench_score as pbs                          # noqa: E402
     bench = tasks[0]["bench"]
+    # the tasks cell must name the SAME sha the scorer rows for this set use (SHA-256/16), or
+    # digest rows for one set would not be comparable; the census names SHA-1/16 beside it
+    tasks_cell = hashlib.sha256(open(a.tasks, "rb").read()).hexdigest()[:16]
     model_label = "%s+%s(keep-best)" % (model or first_model, CONTRACT)
-    key_cell = "\n| %s | %s | %d | %s |" % (bench, model_label, n, sha16(a.tasks))
+    key_cell = "\n| %s | %s | %d | %s |" % (bench, model_label, n, tasks_cell)
     body = dig.read_text() if dig.exists() else ""
     if key_cell in body:
         print("digest row already present - not duplicated")
     else:
         line = ("| %s | %s | %d | %s | validator = the question's PUBLIC sample tests "
-                "(lcb-public-v1), scorer = hidden battery %s: %d re-asks, %d pass public after "
-                "repair, hidden fixed %d, hidden worse %d (sign test p=%.2g); same %s, temp %.1f, "
-                "retry max_tokens %d (first arm %d); %d functional unscored; retry-only variant "
+                "(lcb-public-v1), scorer = hidden battery %s over the full set (%d functional "
+                "questions driver-scored): %d re-asks, %d pass public after repair, hidden "
+                "fixed %d, hidden worse %d (sign test p=%.2g); same %s, temp %.1f, "
+                "retry max_tokens %d (first arm %d); retry-only variant "
                 "%d/%d = %.1f%% | %d/%d = **%.1f%%** |"
-                % (bench, model_label, n, sha16(a.tasks), lcb.LCB_CONTRACT, len(pub_ok),
+                % (bench, model_label, n, tasks_cell, lcb.LCB_CONTRACT,
+                   cen["functional_tasks"], len(pub_ok),
                    cen["retry_passes_public"], len(fixed), len(worse), p_kb, lcb.LCB_CONTRACT,
-                   TEMP, max_tokens, first_budget, cen["unscored_functional"], ro, n,
+                   TEMP, max_tokens, first_budget, ro, n,
                    100.0 * ro / n, kb, n, 100.0 * kb / n))
+        pbs.write_digest(line, str(dig))
+        print("digest row appended")
+    return 0
+
+
+# ------------------------------------------------------------------ bfcl validator
+# Contract `pub-repair-bfcl-v1`, the line's PRE-REGISTERED NEGATIVE CONTROL. On this set the pinned
+# AST verifier (`bfcl-ast-v1`) IS the scorer: there is no held-out signal the loop could be accused
+# of reading, but there is also no proxy, so two rails keep the row honest.
+#   (1) The re-ask names only the failure CLASS — never a gold call name, never an expected call
+#       count, never a parameter value. A gold call name would be a grading byte the bare prompt
+#       never ships, and the arm would measure hint-reading instead of repair.
+#   (2) The redraw control published beside the row is computed from PUBLISHED bytes of the same
+#       brain at the same shape (`--control-verdicts`, the contour-0.0.2.56 matched arm): the cells
+#       where a plain second draw under the same keep rule turned a first-arm failure into a pass.
+#       A repair pass is only worth claiming above that count.
+# Because every asked cell is a first-arm failure, keep-best and retry-only coincide by
+# construction here (a failed retry replaces an already-failing answer); the census says so.
+
+BFCL_CLASS_TEXT = {
+    "calls": "the answer did not contain exactly the number of function calls the request implies "
+             "(a call is missing or an extra call was emitted)",
+    "unmatched": "at least one function call in the answer does not match the request — re-check "
+                 "the function name, every parameter name and every parameter value and type "
+                 "against the function docs given above",
+}
+
+
+def bfcl_class(why):
+    """Verifier verdict -> failure class, with every gold token stripped."""
+    stem = (why.split("=")[0] if "=" in why else why.split(" ")[0]).strip()
+    return stem, BFCL_CLASS_TEXT.get(stem, "the pinned verifier rejected the answer")
+
+
+def build_prompt_bfcl(B, task, prev):
+    """The retry request PREFIX is the pinned first-arm prompt bytes verbatim (`task["prompt"]` is
+    exactly what `pub_bench_run.py` sent), so the retry differs from the bare call only by the
+    feedback block appended after it."""
+    stem, text = bfcl_class(task["_why"])
+    truncated = len(prev or "") > MAX_PREV_CHARS_CODE
+    return ("%s\n\n### Verifier feedback on your previous answer\n"
+            "The pinned verifier rejected your previous answer for this exact request. The request "
+            "and the function docs above are unchanged; nothing has been added to them.\n"
+            "What the verifier reports: %s\n"
+            "Re-answer the request above in the required format (only the calls, one per line, no "
+            "explanation) and fix exactly what the verdict names.\n\n"
+            "### Your previous answer%s\n%s\n"
+            % (task["prompt"], text,
+               " (truncated)" if truncated else "", (prev or "")[:MAX_PREV_CHARS_CODE]))
+
+
+def run_bfcl(a, tasks, first, first_rows):
+    """pub-repair-bfcl-v1: verdict-only re-ask over the AST-checker failures, keep-best."""
+    global CONTRACT
+    CONTRACT = "pub-repair-bfcl-v1"
+    if str(HERE) not in sys.path:
+        sys.path.insert(0, str(HERE))
+    import pub_bench_bfcl as B                            # noqa: E402
+    if not B.selftest():
+        sys.exit("REFUSING TO RUN: %s checker gate failed" % B.BFCL_CHECKER)
+
+    budgets = {r.get("max_tokens") for r in first_rows if r.get("max_tokens")}
+    if len(budgets) != 1:
+        sys.exit("REFUSING TO RUN: first arm mixes call budgets %s" % sorted(map(str, budgets)))
+    max_tokens = int(budgets.pop())
+    first_budget = max_tokens
+    env_budget = os.environ.get("PARB_MAX_TOKENS")
+    if env_budget and int(env_budget) != max_tokens:
+        CONTRACT = "pub-repair-bfcl-v2"
+        print("note: PARB_MAX_TOKENS overrides the first arm budget %d -> %d; this arm runs "
+              "under contract %s" % (max_tokens, int(env_budget), CONTRACT), flush=True)
+        max_tokens = int(env_budget)
+    temps = {r.get("temp") for r in first_rows if r.get("temp") is not None}
+    temps.discard(None)
+    if temps and temps != {TEMP}:
+        sys.exit("REFUSING TO RUN: first arm temperature %s != this arm's %s" % (temps, TEMP))
+
+    # Wiring guard: the first arm must reproduce the PUBLISHED verdict rows cell for cell, or this
+    # script is mis-wired and no model call may happen.
+    ok_first, asked = {}, []
+    for t in tasks:
+        if t["id"] not in first:
+            sys.exit("REFUSING TO RUN: no first-arm answer for %s" % t["id"])
+        ok, why = B.score_entry(t, first[t["id"]])
+        ok_first[t["id"]] = ok
+        t["_why"] = why
+        t["_class"] = bfcl_class(why)[0]
+        if not ok:
+            asked.append(t)
+    n_first = sum(1 for v in ok_first.values() if v)
+    by_class = {}
+    for t in asked:
+        by_class[t["_class"]] = by_class.get(t["_class"], 0) + 1
+    print("first arm %d/%d = %.1f %% | verifier rejects %d tasks (%s) -> %d re-asks"
+          % (n_first, len(ok_first), 100.0 * n_first / len(ok_first), len(asked),
+             ", ".join("%s %d" % kv for kv in sorted(by_class.items())), len(asked)), flush=True)
+
+    if a.verdicts_ref:
+        ref = {}
+        for line in pathlib.Path(a.verdicts_ref).read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                ref.setdefault(r["id"], bool(r["ok"]))
+        diff = [i for i in ok_first if ref.get(i) != ok_first[i]]
+        if diff or set(ref) != set(ok_first):
+            sys.exit("REFUSING TO RUN: first-arm verdicts differ from the published reference on "
+                     "%d cells %s" % (len(diff), diff[:5]))
+        print("first-arm verdicts match the published reference cell for cell (%d ids)"
+              % len(ref), flush=True)
+
+    # Redraw control, computed from published bytes BEFORE any call: how many first-arm failures a
+    # plain second draw of this brain at the same shape turned into passes.
+    control = {"file": None, "control_arms": 0, "redraw_keep_conversions": None}
+    if a.control_verdicts:
+        cv = {}
+        for line in pathlib.Path(a.control_verdicts).read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                cv.setdefault(r["id"], bool(r["ok"]))
+        if set(cv) != set(ok_first):
+            sys.exit("REFUSING TO RUN: control verdicts cover %d ids, first arm covers %d"
+                     % (len(cv), len(ok_first)))
+        conv = [i for i in ok_first if not ok_first[i] and cv[i]]
+        control = {"file": str(pathlib.Path(a.control_verdicts).name),
+                   "file_sha16": sha16(a.control_verdicts),
+                   "control_arm_pass": sum(1 for v in cv.values() if v),
+                   "redraw_keep_conversions": len(conv),
+                   "redraw_keep_pp": round(100.0 * len(conv) / len(ok_first), 2)}
+        print("redraw control (%s): a plain second draw converts %d first-arm failures (%.2f pp)"
+              % (control["file"], control["redraw_keep_conversions"],
+                 control["redraw_keep_pp"]), flush=True)
+
+    if a.dry_run:
+        return 0
+
+    if a.merge:
+        url = key_file = key = model = None
+    else:
+        url = os.environ.get("PARB_API")
+        key_file = os.environ.get("PARB_KEY_FILE")
+        model = os.environ.get("PARB_MODEL")
+        if not (url and key_file and model):
+            raise SystemExit("PARB_API, PARB_KEY_FILE and PARB_MODEL are required")
+        key = json.load(open(key_file, encoding="utf-8"))["api_key"]
+
+    out = pathlib.Path(a.out or str(pathlib.Path(a.first_answers).parent))
+    dst = out / ("pub-repair-%s.jsonl" % CONTRACT)
+    done = {}
+    if dst.exists():
+        for line in dst.read_text().splitlines():
+            r = json.loads(line)
+            if r.get("finish") == "ok":
+                done[r["id"]] = r
+    queue = [t for t in asked if t["id"] not in done]
+    if a.limit:
+        queue = queue[:a.limit]
+    if a.merge:
+        queue = []
+    print("asked=%d already stored=%d to run=%d" % (len(asked), len(done), len(queue)), flush=True)
+
+    t0, n_bad = time.time(), 0
+    with dst.open("a", encoding="utf-8") as fh:
+        for i, t in enumerate(queue):
+            rec = {"id": t["id"], "bench": t["bench"], "arm": CONTRACT, "model": model,
+                   "temp": TEMP, "max_tokens": max_tokens,
+                   "task_sha16": sha16(a.tasks),
+                   "first_answer_sha16": hashlib.sha1(first[t["id"]].encode()).hexdigest()[:16],
+                   "verifier_class": t["_class"], "validator": "bfcl-ast-v1 (verdict only)",
+                   "prev_truncated": len(first[t["id"]] or "") > MAX_PREV_CHARS_CODE}
+            st = time.time()
+            try:
+                r = api_call(url, key, model, build_prompt_bfcl(B, t, first[t["id"]]), max_tokens)
+                ch = (r.get("choices") or [{}])[0]
+                rec["answer"] = (ch.get("message") or {}).get("content") or ""
+                rec["finish"] = "ok" if rec["answer"].strip() else "empty"
+                rec["api_finish"] = ch.get("finish_reason")
+                u = r.get("usage") or {}
+                rec["ptok"], rec["ctok"] = u.get("prompt_tokens"), u.get("completion_tokens")
+            except Exception as exc:                      # noqa: BLE001 - store, do not hide
+                rec["answer"], rec["finish"] = "", "error"
+                rec["engine_error"] = "%s: %s" % (type(exc).__name__, str(exc)[:160])
+                n_bad += 1
+            rec["seconds"] = round(time.time() - st, 2)
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            fh.flush()
+            if (i + 1) % 10 == 0:
+                rate = (i + 1) / max(time.time() - t0, 0.01)
+                print("repair %d/%d %.1f s/task eta %.0f s"
+                      % (i + 1, len(queue), (time.time() - t0) / (i + 1),
+                         (len(queue) - i - 1) / rate), flush=True)
+
+    stored = dict(done)
+    for line in dst.read_text().splitlines():
+        r = json.loads(line)
+        if r.get("finish") == "ok":
+            stored[r["id"]] = r
+
+    # The same pinned verifier re-checks every retry. It is the scorer for this set, which is why
+    # the re-ask names only the class: the census below publishes what the loop could have learned.
+    chk_retry = {}
+    for t in asked:
+        if t["id"] in stored:
+            chk_retry[t["id"]] = B.score_entry(t, stored[t["id"]]["answer"])[0]
+    kb_ok, ro_ok, keep = {}, {}, {}
+    for t in tasks:
+        asked_here = t["id"] in chk_retry
+        use_retry = asked_here and chk_retry[t["id"]]
+        kb_ok[t["id"]] = True if use_retry else ok_first[t["id"]]
+        ro_ok[t["id"]] = chk_retry[t["id"]] if asked_here else ok_first[t["id"]]
+        keep[t["id"]] = "retry" if use_retry else "first"
+    n = len(kb_ok)
+    kb = sum(1 for v in kb_ok.values() if v)
+    ro = sum(1 for v in ro_ok.values() if v)
+    fixed = [i for i in kb_ok if kb_ok[i] and not ok_first[i]]
+    worse = [i for i in kb_ok if ok_first[i] and not kb_ok[i]]
+    fixed_by_class = {}
+    for t in asked:
+        if t["id"] in fixed or kb_ok[t["id"]] and not ok_first[t["id"]]:
+            fixed_by_class[t["_class"]] = fixed_by_class.get(t["_class"], 0) + 1
+    p_kb, p_ro = 0, 0
+    try:
+        from pub_bench_compare import sign_test          # one sign test for the whole line
+        p_kb = sign_test(len(fixed), len(worse))
+        p_ro = sign_test(len([i for i in ro_ok if ro_ok[i] and not ok_first[i]]),
+                         len([i for i in ro_ok if ok_first[i] and not ro_ok[i]]))
+    except Exception:                                    # noqa: BLE001
+        pass
+    first_model = first_rows[0].get("model")
+    merged, verdict_rows = [], []
+    for t in tasks:
+        merged.append({"id": t["id"], "bench": t["bench"], "arm": "%s-merged" % CONTRACT,
+                       "model": first_model, "temp": TEMP, "max_tokens": max_tokens,
+                       "finish": "ok", "kept": keep[t["id"]],
+                       "answer": stored[t["id"]]["answer"]
+                       if (t["id"] in stored and keep[t["id"]] == "retry") else first[t["id"]]})
+        verdict_rows.append({"id": t["id"],
+                             "first_ok": ok_first[t["id"]],
+                             "verifier_class": t.get("_class"),
+                             "retry_verifier_ok": chk_retry.get(t["id"]),
+                             "kept": keep[t["id"]],
+                             "strict": kb_ok[t["id"]]})
+    for name, rows in (("%s-merged-answers.jsonl" % CONTRACT, merged),
+                       ("%s-verdicts.jsonl" % CONTRACT, verdict_rows)):
+        (out / name).write_text("\n".join(json.dumps(r, ensure_ascii=False, sort_keys=True)
+                                          for r in rows) + "\n")
+        (out / (name + ".sha16")).write_text(
+            hashlib.sha1((out / name).read_bytes()).hexdigest()[:16] + "\n")
+    ptok = sum(r.get("ptok") or 0 for r in stored.values())
+    ctok = sum(r.get("ctok") or 0 for r in stored.values())
+    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha16(a.tasks),
+           "first_arm_pass": n_first,
+           "asked_stored": len(chk_retry), "asked_unrun": len(asked) - len(chk_retry),
+           "asked_by_class": dict(sorted(by_class.items())),
+           "retry_passes_verifier": sum(1 for v in chk_retry.values() if v),
+           "retry_fails_verifier": sum(1 for v in chk_retry.values() if not v),
+           "converted": len(fixed), "converted_ids": sorted(fixed),
+           "converted_by_class": dict(sorted(fixed_by_class.items())),
+           "worse": len(worse), "worse_ids": sorted(worse),
+           "keep_best_equals_retry_only_by_construction": bool(ro == kb),
+           "sign_test_keepbest_vs_first_p": p_kb, "sign_test_retryonly_vs_first_p": p_ro,
+           "keep_best": kb, "retry_only": ro,
+           "redraw_control": control,
+           "validator": "bfcl-ast-v1 (verdict only: class named, no gold name, no gold count)",
+           "checker": B.BFCL_CHECKER,
+           "call": {"temp": TEMP, "max_tokens": max_tokens,
+                    "first_arm_max_tokens": first_budget},
+           "retry_calls": len(stored),
+           "retry_ceiling_hits": sum(1 for r in stored.values()
+                                     if r.get("api_finish") == "length"),
+           "retry_prompt_tokens": ptok, "retry_completion_tokens": ctok,
+           "wall_s": round(time.time() - t0, 1), "transport_errors": n_bad,
+           "first_answers_sha16": sha16(a.first_answers)}
+    (out / ("pub-repair-%s-census.json" % CONTRACT)).write_text(json.dumps(cen, indent=2) + "\n")
+    print("census: asked %d/%d | retry passes verifier %d | converted %d (%s) | worse %d | "
+          "unrun %d | redraw control converts %s"
+          % (len(chk_retry), len(asked), cen["retry_passes_verifier"], len(fixed),
+             ", ".join("%s %d" % kv for kv in sorted(fixed_by_class.items())), len(worse),
+             len(asked) - len(chk_retry), control["redraw_keep_conversions"]))
+    print("%s keep-best %d/%d = %.1f %% | retry-only %d/%d = %.1f %% | first arm was "
+          "%d/%d = %.1f %%" % (CONTRACT, kb, n, 100.0 * kb / n, ro, n, 100.0 * ro / n,
+                               n_first, n, 100.0 * n_first / n))
+    if len(chk_retry) != len(asked):
+        print("PARTIAL: %d re-asks still missing - no digest row written"
+              % (len(asked) - len(chk_retry)))
+        return 1
+
+    if a.merge or a.no_digest:
+        print("--merge / --no-digest: artifacts written, no digest row")
+        return 0
+    dig = HERE.parent / "benchmarks" / "public" / "PUB-DIGEST.md"
+    import pub_bench_score as pbs                          # noqa: E402
+    bench = tasks[0]["bench"]
+    tasks_cell = hashlib.sha256(open(a.tasks, "rb").read()).hexdigest()[:16]
+    model_label = "%s+%s(keep-best)" % (model or first_model, CONTRACT)
+    key_cell = "\n| %s | %s | %d | %s |" % (bench, model_label, n, tasks_cell)
+    body = dig.read_text() if dig.exists() else ""
+    if key_cell in body:
+        print("digest row already present - not duplicated")
+    else:
+        line = ("| %s | %s | %d | %s | validator = the pinned %s verdict, CLASS ONLY "
+                "(no gold call name, no expected count), scorer = the same %s (this set has no "
+                "held-out verifier - pre-registered negative control): %d re-asks (%s), "
+                "%d pass the verifier after repair, converted %d, worse %d (sign test p=%.2g); "
+                "redraw control from published bytes converts %s; same %s, temp %.1f, "
+                "retry max_tokens %d (first arm %d); keep-best = retry-only here by construction "
+                "| %d/%d = **%.1f%%** |"
+                % (bench, model_label, n, tasks_cell, B.BFCL_CHECKER, B.BFCL_CHECKER,
+                   len(chk_retry),
+                   ", ".join("%s %d" % kv for kv in sorted(by_class.items())),
+                   cen["retry_passes_verifier"], len(fixed), len(worse), p_kb,
+                   control["redraw_keep_conversions"], B.BFCL_CHECKER, TEMP, max_tokens,
+                   first_budget, kb, n, 100.0 * kb / n))
         pbs.write_digest(line, str(dig))
         print("digest row appended")
     return 0
@@ -415,14 +732,20 @@ def main():
     ap.add_argument("--out", default=None)
     ap.add_argument("--merge", action="store_true",
                     help="no model call: re-score the stored retries and write the merged arm bytes")
-    ap.add_argument("--validator", choices=("ifeval", "lcb-public"), default="ifeval",
+    ap.add_argument("--validator", choices=("ifeval", "lcb-public", "bfcl"), default="ifeval",
                     help="which validator drives the loop (lcb-public = the question's public "
-                         "sample tests; the hidden battery only scores)")
+                         "sample tests; the hidden battery only scores; bfcl = the pinned AST "
+                         "checker itself, named as a failure CLASS only, pre-registered "
+                         "negative control)")
     ap.add_argument("--hidden", default=None,
                     help="lcb: hidden-test sidecar used ONLY for scoring, never by the loop")
     ap.add_argument("--verdicts-ref", default=None,
-                    help="lcb: published verdict rows the first-arm hidden pass must match "
+                    help="lcb/bfcl: published verdict rows the first-arm pass must match "
                          "cell for cell before any model call")
+    ap.add_argument("--control-verdicts", default=None,
+                    help="bfcl: a published same-brain same-shape arm's verdict rows; the cells "
+                         "where that plain second draw turned a first-arm failure into a pass are "
+                         "the redraw control published beside the row (never read by the loop)")
     ap.add_argument("--dry-run", action="store_true",
                     help="validate + count the headroom, no model call")
     ap.add_argument("--no-digest", action="store_true",
@@ -445,6 +768,8 @@ def main():
 
     if a.validator == "lcb-public":
         return run_lcb(a, tasks, first, first_rows)
+    if a.validator == "bfcl":
+        return run_bfcl(a, tasks, first, first_rows)
 
     import pub_bench_ifeval as pifev                       # noqa: E402
     ev = pifev.load_vendor()
