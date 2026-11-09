@@ -85,18 +85,52 @@ def api_call(url, key, model, prompt, max_tokens):
 
 # ------------------------------------------------------------- lcb-public validator
 # Contract `lcb-public-v1`: the repair loop's validator is the question's OWN PUBLIC sample tests
-# (tracked bytes of the pinned tasks file). The hidden battery (`lcb-exec-v1`) only scores: the
-# loop names public inputs/expected outputs it already ships in the prompt, never a hidden byte.
+# (tracked bytes of the pinned tasks file), executed through the same pinned contract that scores
+# (`lcb-exec-v2`: `run_stdin` for stdin tasks, the functional driver for functional tasks). The
+# hidden battery only scores, offline, after the arm: the loop names public inputs/expected
+# outputs it already ships in the prompt, never a hidden byte. Blind spots are published
+# honestly: a hidden failure whose PUBLIC tests pass is invisible to the loop by construction.
 
 def public_verdict(lcb, task, answer):
     """Run the question's public sample tests over the extracted code.
-    -> (passed, fails) with fails = [(idx, verdict, test)] up to the first three."""
+    -> (passed, fails) with fails = [(idx, verdict, test)] up to the first three.
+    stdin regime: one `run_stdin` child per public test. functional regime (lcb-exec-v2):
+    the same driver over the question's PUBLIC functional cases — stub gives the signature,
+    the case gives the args — so the validator sees public sample bytes only in both regimes;
+    the hidden battery never enters this function."""
     code = lcb.extract_code(answer)
     if not code.strip():
         return False, [(None, "empty_code", None)]
     fails = []
+    tests = task.get("public_tests") or []
+    if task.get("testtype") == "functional":
+        sig = lcb.stub_signature(task.get("starter_code") or "")
+        seen, cases = [], []
+        if sig is None:
+            return True, []                                # validator blind: no fake fail, no ask
+        meth, npar = sig
+        for i, test in enumerate(tests):
+            args = lcb.func_args(test["input"], npar)
+            exp = None
+            try:
+                exp = json.loads(test["output"])
+            except ValueError:
+                args = None
+            if args is None:
+                return True, []                            # malformed public bytes: blind, not fail
+            cases.append((args, exp))
+            seen.append(test)
+        if not cases:
+            return True, []
+        with tempfile.TemporaryDirectory(prefix="lcbpubf-") as wd:
+            with open(os.path.join(wd, "_driver.py"), "w", encoding="utf-8") as fh:
+                fh.write(lcb._DRIVER_SRC)
+            for f in lcb.run_functional(code, cases, meth, wd)[:3]:
+                i = int(f.partition(":")[0][4:])
+                fails.append((i, f.partition(":")[2], seen[i]))
+        return not fails, fails
     with tempfile.TemporaryDirectory(prefix="lcbpub-") as wd:
-        for i, test in enumerate(task.get("public_tests") or []):
+        for i, test in enumerate(tests):
             v = lcb.run_stdin(code, test, wd)
             if v != "ok":
                 fails.append((i, v, test))
@@ -117,6 +151,14 @@ def build_prompt_lcb(task, prev):
     cut = prev if len(prev) <= MAX_PREV_CHARS_CODE \
         else prev[:MAX_PREV_CHARS_CODE] + "\n[truncated]"
     task["_prev_truncated"] = len(prev) > MAX_PREV_CHARS_CODE
+    if task.get("testtype") == "functional":
+        body = ("%s\n\nStarter signature:\n```python\n%s```\n\n%s\n\nRejected attempt:\n%s\n\n"
+                "Write the complete corrected solution for the task above: one Python class "
+                "`Solution` implementing the method from the starter signature. The tests call "
+                "the method directly with the arguments shown in the sample tests; do not read "
+                "from standard input. Output only the class, in one Python code block."
+                % (task["prompt"], task.get("starter_code") or "", "\n".join(lines), cut))
+        return body
     return ("%s\n\n%s\n\nRejected attempt:\n%s\n\n"
             "Write the complete corrected program for the task above. It must read from standard "
             "input and print to standard output in exactly the format the sample tests show. "
@@ -134,7 +176,7 @@ def run_lcb(a, tasks, first, first_rows):
     import pub_bench_lcb as lcb                            # noqa: E402
     import gzip as _gzip
     if not lcb.selftest():
-        sys.exit("REFUSING TO RUN: lcb-exec-v1 checker gate failed")
+        sys.exit("REFUSING TO RUN: %s checker gate failed" % lcb.LCB_CONTRACT)
     if not a.hidden:
         sys.exit("REFUSING TO RUN: --hidden <sidecar.gz> is required for --validator lcb-public")
     hidden = {}
@@ -164,8 +206,6 @@ def run_lcb(a, tasks, first, first_rows):
     # cell, or this script is mis-wired and nothing may run.
     hv_first, asked = {}, []
     for t in tasks:
-        if t["testtype"] != "stdin":
-            continue
         if t["id"] not in hidden:
             sys.exit("REFUSING TO RUN: no hidden payload row for %s" % t["id"])
         v, _why = lcb.score_question(t, hidden[t["id"]], first[t["id"]])
@@ -177,10 +217,11 @@ def run_lcb(a, tasks, first, first_rows):
         if not passed:
             asked.append(t)
     n_first = sum(1 for ok in hv_first.values() if ok)
-    print("first arm hidden %d/%d | public validator rejects %d stdin tasks -> %d re-asks "
-          "(functional %d unscored, validator blind by regime)"
-          % (n_first, len(hv_first), len(asked), len(asked),
-             sum(1 for t in tasks if t["testtype"] != "stdin")), flush=True)
+    print("first arm hidden %d/%d (all %d regimes scored by %s) | public validator rejects %d "
+          "tasks (%d stdin, %d functional) -> %d re-asks"
+          % (n_first, len(hv_first), len(tasks), lcb.LCB_CONTRACT, len(asked),
+             sum(1 for t in asked if t["testtype"] == "stdin"),
+             sum(1 for t in asked if t["testtype"] == "functional"), len(asked)), flush=True)
     if a.verdicts_ref:
         ref = {}
         for line in pathlib.Path(a.verdicts_ref).read_text().splitlines():
@@ -266,8 +307,6 @@ def run_lcb(a, tasks, first, first_rows):
             pub_ok[t["id"]] = public_verdict(lcb, t, stored[t["id"]]["answer"])[0]
     hv_merged, hv_retry_only = {}, {}
     for t in tasks:
-        if t["testtype"] != "stdin":
-            continue
         keep = "retry" if pub_ok.get(t["id"]) is True else "first"
         ans_m = stored[t["id"]]["answer"] if (t["id"] in stored and keep == "retry") \
             else first[t["id"]]
@@ -312,7 +351,7 @@ def run_lcb(a, tasks, first, first_rows):
     ptok = sum(r.get("ptok") or 0 for r in stored.values())
     ctok = sum(r.get("ctok") or 0 for r in stored.values())
     cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha16(a.tasks),
-           "unscored_functional": sum(1 for t in tasks if t["testtype"] != "stdin"),
+           "functional_tasks": sum(1 for t in tasks if t["testtype"] != "stdin"),
            "first_arm_hidden": n_first, "asked_stored": len(pub_ok),
            "asked_unrun": len(asked) - len(pub_ok),
            "retry_passes_public": sum(1 for ok in pub_ok.values() if ok),
