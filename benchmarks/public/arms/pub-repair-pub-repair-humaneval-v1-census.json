@@ -1,0 +1,61 @@
+{
+  "contract": "pub-repair-humaneval-v1",
+  "tasks": 164,
+  "task_sha16": "99469b778fc8fd4f",
+  "first_arm_pass": 159,
+  "asked_stored": 5,
+  "asked_unrun": 0,
+  "asked_by_class": {
+    "wrong_value": 5
+  },
+  "retry_passes_checker": 2,
+  "retry_fails_checker": 3,
+  "converted": 2,
+  "converted_ids": [
+    "humaneval-0134",
+    "humaneval-0147"
+  ],
+  "converted_by_class": {
+    "wrong_value": 2
+  },
+  "worse": 0,
+  "worse_ids": [],
+  "keep_best_equals_retry_only_by_construction": true,
+  "sign_test_keepbest_vs_first_p": 0.5,
+  "sign_test_retryonly_vs_first_p": 0.5,
+  "keep_best": 161,
+  "retry_only": 161,
+  "ceiling_pp": 3.05,
+  "pre_registered": {
+    "headroom_cells": 5,
+    "control_conversions": 2,
+    "best_possible_sign_test_p": 0.0625,
+    "status": "written 2026-11-09 23:58 CET, before this code existed"
+  },
+  "redraw_control": {
+    "file": "humaneval-contour-matched-verdicts-v2.jsonl",
+    "file_sha16": "6c960e9cc7d8a394",
+    "control_arm_pass": 157,
+    "redraw_keep_conversions": 2,
+    "converted_ids": [
+      "humaneval-0134",
+      "humaneval-0147"
+    ],
+    "redraw_keep_pp": 1.22
+  },
+  "validator": "pytest-v2 (verdict only: coarse class, no test body, no gold value, no example pair, no exception-class name)",
+  "checker": "pytest-v2",
+  "call": {
+    "temp": 0.7,
+    "max_tokens": 1200,
+    "first_arm_max_tokens": 1200
+  },
+  "retry_calls": 5,
+  "retry_ceiling_hits": 1,
+  "retry_seconds_median": 8.78,
+  "retry_prompt_tokens": 2796,
+  "retry_completion_tokens": 4444,
+  "wall_s": 49.2,
+  "transport_errors": 0,
+  "first_answers_sha16": "c86d13dbc301ccca"
+}

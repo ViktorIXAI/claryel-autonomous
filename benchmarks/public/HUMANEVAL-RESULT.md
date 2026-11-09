@@ -254,3 +254,51 @@ Ladder item 5 is a verdict-only repair pass over the bare arm's failures. Everyt
 * **Next tick:** ship the `humaneval` validator branch in `scripts/pub_bench_repair.py` and run the
   5-cell arm (plus the 2 control conversions from the same rule), with the same artifact set
   (retry rows, census, merged answers, verdict rows) and the same byte-pinned publication path.
+
+## Repair arm `pub-repair-humaneval-v1` (2026-11-10 00:09–00:10 CET): the pre-registered null, and it is a perfect one
+
+The arm ran exactly as pre-registered above: 5 verdict-only re-asks over the bare arm's failures, at
+the first arm's 1200-token budget, coarse failure class only, no test body, no gold value, no example
+pair, no exception-class name. Wiring guard first: the branch reproduced the **published** bare-arm
+verdict rows cell for cell (**164/164 ids**) before any model call, and the checker self-test
+(`pytest-v2`) ran before scoring.
+
+| arm | verdict | redraw-conversions of the bare arm's 5 failures |
+|---|---|---|
+| bare first arm (published) | **159/164 = 97.0 %** | — |
+| redraw control — contour-0.0.2.56 bare-matched arm, no feedback | 157/164 overall | **2** (`-0134`, `-0147`) |
+| `pub-repair-humaneval-v1`, keep-best = retry-only | **161/164 = 98.2 %** | **2** (`-0134`, `-0147`) |
+
+**The two sets are identical.** The repair converted exactly the cells a plain second draw already
+converts: repair-only **0**, control-only **0**, both 2 → matched sign test **0/0, p = 1.0**. Against
+the first arm the arm-level move is 2/0, p = 0.5 — not significant, as pre-registered (the best this
+arm could ever reach on 5 discordant cells was p = 0.0625). The +1.2 pp on the percent **is** the
+redraw floor, nothing more. Every asked cell was in the `wrong_value` class, and that class tells the
+model nothing it did not already have: a bare "your program returned a wrong value" is not a repair
+signal on a set that ships no public tests, which is the opposite of the BFCL result where naming
+call-count vs unmatched-call moved 45/124 and beat the redraw 23/7.
+
+*Cost, published because this is what a wiring measurement is for:* 5 calls, all `finish=ok`,
+**1 ceiling hit at the inherited 1200-token budget** (the thinking block eats the budget before the
+code does — the same ceiling the BFCL arm hit once in 124), 2 796 prompt + 4 444 completion tokens,
+median **8.78 s** per call, ask phase wall **49.2 s**, 0 transport errors. Sampled GPU energy
+**1.51 Wh** over the 48 s window (20 samples at 2 s, mean 113.3 W, GPU busy 0.85); a window this short
+is a per-call cost figure, not a run-level one, and the endpoint is the fleet's main brain.
+
+*What this arm certifies.* Nothing about capability. It certifies that the repair loop runs honestly
+on an **execution** set — the checker gates before and after, the wiring guard matches published
+verdict bytes, keep-best never adopted a worse answer (0 cells made worse), and the merged arm
+re-scores to its published percent from the shipped bytes. It also certifies the negative: **a repair
+pass is not automatically a mechanism**; on a set whose only feedback channel is "wrong", it is a
+second draw with extra tokens. The ladder keeps the LCB pattern (public tests in the validator slot)
+as the only code-set repair that showed a real effect.
+
+*Artifacts* (`benchmarks/public/arms/`, SHA-1/16 sidecars, and no scanner exception needed — these
+answer bytes are clean code, the infra scan is 0 findings):
+`pub-repair-pub-repair-humaneval-v1.jsonl` (`f8a5792dc4ae00e0`, 5 retry rows),
+`pub-repair-pub-repair-humaneval-v1-census.json` (`ed7937b51eb16f70`, carries the pre-registration
+numbers inside it), `pub-repair-humaneval-v1-merged-answers.jsonl` (`5064a5e658289487`),
+`pub-repair-humaneval-v1-verdicts.jsonl` (`647b5a0992ea3f1f`), plus the redraw-control sidecar
+`humaneval-contour-matched-verdicts-v2.jsonl` (`84949a2520f4fdf3`, generated offline from the
+published contour-matched answers by `pytest-v2`, scorer-only — never shown to any model). The digest
+row names the SHA-256/16 `971d976289cd9357` of the pinned task file, unchanged.

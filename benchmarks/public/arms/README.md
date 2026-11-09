@@ -81,6 +81,11 @@ exactly — asserted for every arm below.
 | humaneval-contour-matched-ws-identity.json | 41 | `764603500d76ec7d` |
 | humaneval-basalt-answers.jsonl | 164 | `4f61b87d5e8d130b` |
 | humaneval-basalt-verdicts.jsonl | 164 | `6878c8b128c3c05d` |
+| humaneval-contour-matched-verdicts-v2.jsonl | 164 | `84949a2520f4fdf3` |
+| pub-repair-pub-repair-humaneval-v1.jsonl (5 retry rows) | 5 | `f8a5792dc4ae00e0` |
+| pub-repair-pub-repair-humaneval-v1-census.json | 66 | `ed7937b51eb16f70` |
+| pub-repair-humaneval-v1-merged-answers.jsonl | 164 | `5064a5e658289487` |
+| pub-repair-humaneval-v1-verdicts.jsonl | 164 | `647b5a0992ea3f1f` |
 | mmlu-pro-contour-matched-results.jsonl | 500 | `43130af5cab85a87` |
 | mmlu-pro-contour-matched-ledger.jsonl | 500 | `b17635f6716ed8dc` |
 | mmlu-pro-contour-matched-answers.jsonl | 500 | `e15ba1bba5204f49` |
@@ -293,6 +298,19 @@ output, verdict rows regenerated from the shipped answers by `pytest-v2` (159 pa
 reproduced; the published contour copy re-scores to its own 157/164 in the same session). These two
 pins are SHA-256/16, the convention this publisher prints; the four repair-arm pins above are SHA-1/16
 because the scanner binds on that. Both are named in the row text so no pin is ambiguous.
+
+Repair arm `pub-repair-humaneval-v1` (2026-11-10, leg 00:09 → 00:10 CET, 5 calls, 0 transport errors):
+the pre-registered **wiring/cost null** on an execution-graded set. Census fixed before the code
+existed: 5 first-arm failures, all `wrong_value`, ceiling 3.05 pp, redraw control converts 2. The arm
+converted **exactly those same 2 cells** (`humaneval-0134`, `-0147`) — repair-only 0, control-only 0,
+matched sign test 0/0 p = 1.0 — so the feedback added nothing over a plain second draw; keep-best
+= retry-only = **161/164 = 98.2 %** vs first arm 159/164 = 97.0 %, 0 cells made worse. Cost: 2 796
+prompt + 4 444 completion tokens, 1 ceiling hit at the inherited 1200 tokens, median 8.78 s/call,
+wall 49.2 s, 1.51 Wh sampled GPU energy over a 48 s window. The shipped merged copy re-scores to
+161/164 through `pytest-v2` (self-test asserted at re-score time).
+`humaneval-contour-matched-verdicts-v2.jsonl` is the **redraw-control sidecar**: execution verdicts
+generated offline from the published contour-matched answer bytes by the pinned checker, used only to
+compute the control count, never shown to any model.
 
 Repair arm `pub-repair-bfcl-v1` (2026-11-09, leg 23:26 → 23:46 CET, 124 calls, 0 transport errors):
 the pre-registered **negative control** on the set where the pinned AST verifier is also the scorer.
