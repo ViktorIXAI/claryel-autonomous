@@ -83,7 +83,14 @@ def call_label(rows, temp):
     if note:
         return note
     if temp is not None:
-        return "temp %s, max_tokens 1200" % temp
+        # Read the budget the rows actually carry: a long-form leg (IFEval) runs at a pinned
+        # ceiling above the classic 1200, and printing 1200 there would be a fabricated pin.
+        mts = sorted({r.get("max_tokens") for r in rows if r.get("max_tokens")})
+        if not mts:
+            return "temp %s, max_tokens 1200 (runner default, not recorded per row)" % temp
+        if len(mts) == 1:
+            return "temp %s, max_tokens %s" % (temp, mts[0])
+        return "temp %s, max_tokens MIXED %s (arm is not a single pinned call)" % (temp, mts)
     tr = next((str(r.get("transport")) for r in rows if r.get("transport")), "")
     if tr:
         return "%s CLI (sampling params not exposed by the transport)" % tr
@@ -189,6 +196,10 @@ def selftest():
            if check(ck, gold, ans) is not exp]
     labels = [
         ([{"transport": "x"}], 0.7, lambda s: "temp 0.7" in s and "None" not in s),
+        ([{"transport": "x", "max_tokens": 2400}], 0.7,
+         lambda s: "max_tokens 2400" in s and "1200" not in s),
+        ([{"transport": "x", "max_tokens": 1200}, {"transport": "x", "max_tokens": 2400}], 0.7,
+         lambda s: "MIXED" in s),
         ([{"transport": "codex-cli 0.166.0"}], None,
          lambda s: "codex-cli" in s and "not exposed" in s and "None" not in s),
         ([], None, lambda s: "not recorded" in s and "None" not in s),

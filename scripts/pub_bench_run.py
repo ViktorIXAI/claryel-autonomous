@@ -19,7 +19,13 @@ import time
 import urllib.request
 
 TEMP = 0.7
-MAX_TOKENS = 1200
+# The pinned call budget is 1200 for the classic answer-graded sets. Long-form sets (IFEval) need
+# a larger ceiling: measured on the endpoint 2026-11-09, a 1200-token budget returns
+# finish_reason=length on 300-word tasks because the serve's default thinking state bills the chain
+# of thought against the same budget, so a 1200-row IFEval arm would grade truncation as an
+# instruction-following failure. PARB_MAX_TOKENS pins the budget per leg and the value is written
+# into every row, so a row can never wear another leg's call label.
+MAX_TOKENS = int(os.environ.get("PARB_MAX_TOKENS", "1200"))
 AUTH_PREFIX = "Bearer"
 
 
@@ -80,6 +86,10 @@ def main():
                 ch = (r.get("choices") or [{}])[0]
                 rec["answer"] = (ch.get("message") or {}).get("content") or ""
                 rec["finish"] = "ok" if rec["answer"].strip() else "empty"
+                # The engine's own stop reason: `length` means the answer was cut at the pinned
+                # budget, which is a request-shape cost that must be counted, not folded into a
+                # model verdict. Older rows lack this field; a report must say so.
+                rec["api_finish"] = ch.get("finish_reason")
                 u = r.get("usage") or {}
                 rec["ptok"], rec["ctok"] = u.get("prompt_tokens"), u.get("completion_tokens")
             except Exception as exc:                      # noqa: BLE001 - store, do not hide
