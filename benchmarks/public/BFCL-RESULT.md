@@ -21,7 +21,7 @@ the second set (after IFEval) where a harness has a real validator slot to sit i
 |---|---|---|---|---|
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | 1240 (full set) | `00b74e037240792d` | temp 0.7, `max_tokens` 1200, one request per task, no request seed, serve-default thinking; checker `bfcl-ast-v1` | **1116/1240 = 90.0 %** |
 | contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `bfcl-ast-v1`) | 1240 (full set) | `00b74e037240792d` | same shape as the bare arm by the parity shape rule: one 1200-token rung = one request per task, temp 0.7, no request seed | **1122/1240 = 90.5 %** |
-| codex `gpt-6.1-sol` (subscription CLI) | 1240 | `00b74e037240792d` | transport does not expose sampling params | not started: the ChatGPT subscription hit its usage limit at 12:39 CET on 2026-11-09 while the IFEval codex leg was in flight (see `LEG-INCIDENTS.md`); a 1240-prompt cloud leg is not launched into an exhausted quota |
+| codex `gpt-6.1-sol` (subscription CLI) | 1240 | `00b74e037240792d` | transport does not expose sampling params | not started: the ChatGPT subscription hit its usage limit at 12:39 CET on 2026-11-09 while the IFEval codex leg was in flight (see `LEG-INCIDENTS.md`); a 1240-prompt cloud leg is not launched into an exhausted quota. The quota window reopened at 13:32 and the IFEval leg was resumed at 13:34, so this leg is queued behind it |
 | grok-4.7 | 1240 | `00b74e037240792d` | — | suspended by owner quota, resumes 2026-11-12 |
 
 Cross-arm standard for this window is three arms (bare local / contour matched shape / ChatGPT

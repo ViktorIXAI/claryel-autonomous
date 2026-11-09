@@ -87,3 +87,23 @@ masks on that file), every artifact line parses, and the PUBLISHED answers file 
 the published **1122/1240** with the shipped checker. The first attempt's files were replaced before
 any commit and are kept locally as `*.first-attempt.bak` with zero credit; the already-published bare
 arm's files were checked and are unaffected (they re-score to 1116/1240).
+
+## 2026-11-09 12:39 → 13:34 CET — ChatGPT usage limit stops the IFEval codex leg, and its 3 failed rows carried another task's answer (IFEval, codex arm)
+
+* `parb-pub-ifeval-codex` (started 08:24:06) stopped at **440 ok rows of 541**: `codex exec` exited 1
+  with its own limit message (`You've hit your usage limit … or try again at 1:32 PM`) on three
+  consecutive tasks, which is the line's fail-closed trigger. A one-line probe at 13:08 reproduced the
+  same message, so the transport was out of quota, not misconfigured. No IFEval codex percent exists.
+* Defect found in the stopped file: the three `rc1` rows are not empty — each carries **1493 bytes
+  byte-identical to the answer of a different, already-recorded task** (`ifeval-3315`, sha256/12
+  `5e95398fc181`), for ids `ifeval-332`, `ifeval-3323`, `ifeval-3324`. Cause: `codex exec
+  --output-last-message FILE` writes the file only on success, so a failed call leaves the previous
+  successful answer in place and the runner stored it under the failed task's id. Because the public
+  scorer keeps the FIRST row per id, those rows would have outlived any retry and scored as answers
+  the model never gave for those tasks.
+* Handling: the three rows were purged to `pub-codex.rc1-stale.bak` (zero credit, never scored; the
+  pre-purge file is kept as `pub-codex.jsonl.pre-purge.bak`), and `pub_bench_cloud.ask()` now deletes
+  the last-message file before every codex call so a failed call cannot inherit one. The leg was
+  resumed at 13:34 as `parb-pub-ifeval-codex-resume` after the quota window reopened; the resumed file
+  audits clean — 454 rows, 454 unique ids, 0 empty answers, and 0 answers duplicated across ids.
+  The partial still publishes no percent: it is 454/541 until the leg ends.
