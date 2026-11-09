@@ -1,0 +1,175 @@
+{"id": "lcb-abc387_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc387_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc387_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc387_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc392_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc392_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc392_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc392_d", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-abc392_f", "ok": false, "why": "test14:runtime_error:rc1,test23:runtime_error:rc1"}
+{"id": "lcb-abc392_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_g", "ok": true, "why": "hidden 33/33"}
+{"id": "lcb-abc396_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_e", "ok": false, "why": "test1:wrong_answer,test2:wrong_answer,test11:wrong_answer,test12:wrong_answer"}
+{"id": "lcb-abc396_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_d", "ok": false, "why": "test38:wrong_answer"}
+{"id": "lcb-abc397_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc399_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc399_d", "ok": true, "why": "hidden 1/1"}
+{"id": "lcb-abc399_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc399_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc399_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc399_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_e", "ok": true, "why": "hidden 4/4"}
+{"id": "lcb-abc400_g", "ok": true, "why": "hidden 4/4"}
+{"id": "lcb-arc190_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc190_a", "ok": false, "why": "test1:wrong_answer,test4:wrong_answer,test8:wrong_answer,test9:wrong_answer"}
+{"id": "lcb-arc190_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc191_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc191_c", "ok": true, "why": "hidden 1/1"}
+{"id": "lcb-arc191_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc192_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc192_b", "ok": false, "why": "test17:wrong_answer"}
+{"id": "lcb-arc192_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc192_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc193_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc193_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc193_d", "ok": true, "why": "hidden 1/1"}
+{"id": "lcb-arc194_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc194_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc194_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc194_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc194_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc195_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc195_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc195_c", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-arc195_d", "ok": true, "why": "hidden 1/1"}
+{"id": "lcb-arc195_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc196_b", "ok": true, "why": "hidden 1/1"}
+{"id": "lcb-arc196_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc196_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc196_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-3708", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3677", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3720", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3674", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3731", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3714", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3737", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3725", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3704", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3721", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3751", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3753", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3754", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3697", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3748", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3760", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3696", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3762", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3709", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3779", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3771", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3733", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3768", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3764", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3781", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3705", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3786", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3722", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3770", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3759", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3791", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3789", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3788", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3750", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3795", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3801", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3817", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3809", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3794", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3744", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3832", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3793", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3717", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3773", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3777", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3747", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3687", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3739", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3736", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3743", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3701", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3723", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3763", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3692", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3778", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3785", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3776", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3783", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3799", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3784", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3811", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3805", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3765", "ok": true, "why": "functional hidden 40/40"}

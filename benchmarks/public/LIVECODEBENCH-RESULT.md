@@ -11,7 +11,12 @@ This is the line's **contamination-aware code set**: it is the only code set her
 post-date the base model family's public era, and the only one whose validator runs a **hidden**
 battery rather than the public samples the prompt already shows.
 
-## Checker contract `lcb-exec-v1` (`scripts/pub_bench_lcb.py`, checker sha16 `0430437a774eb39d`)
+## Checker contract `lcb-exec-v2` (`scripts/pub_bench_lcb.py`, checker sha16 `68a0a39a6aec46a3`)
+
+The in-force contract; the earlier `lcb-exec-v1` bytes (`0430437a774eb39d`) stay pinned in
+`MANIFEST.json` → `checker_history`, and the 112-denominator arm tables below this line keep the
+verdicts those bytes published, superseded by dated pointer (the release section at the end
+carries the 175-denominator re-score of the identical stored bytes).
 
 * Verdict: **every hidden test must pass**. Stdin regime executed in an `rlimit`'d child
   (1 GiB address space, 20 s/test, 600 s/question budget).
@@ -27,15 +32,19 @@ battery rather than the public samples the prompt already shows.
 * The upstream hidden tests arrive as base64 → zlib → **pickle**. The decoder refuses **every**
   global class (`find_globals` raises); that refusal is proven by a control payload that would
   otherwise call `os.system`, and all 175 real rows decode as pure JSON data under the guard.
-* Contract self-test **10/10** re-run inside the scoring call (the scorer refuses to score if it
+* Contract self-test **18/18** re-run inside the scoring call (the scorer refuses to score if it
   fails): reference passes, wrong completion fails, crash fails, infinite loop → TLE loss, empty
-  answer fails, payload-pin mismatch → UNSCORED, functional regime named unscored, over-byte-cap →
-  loss, pickler guard both ways.
+  answer fails, payload-pin mismatch → UNSCORED, over-byte-cap → loss, pickler guard both ways;
+  the v2 functional driver adds reference/wrong/exception-anatomy, bare-method shim, float
+  tolerance inside and outside, malformed case bytes → UNSCORED, per-case 20 s TLE, and the
+  one-try typing-prelude rescue that is adopted only on strict improvement.
 
-**Scope honesty — the denominator is 112, not 175.** The 112 AtCoder `stdin` questions score
-today. The 63 LeetCode `functional` questions stay **UNSCORED** — the driver that builds an
-executable from each case's own type list is not in this contract — and are excluded from the
-denominator, printed beside every percent. They are not counted as losses.
+**Scope honesty — the denominator was 112 and is now 175 (same day, dated correction).** At
+first publication the 63 LeetCode `functional` questions were **UNSCORED** (no driver in
+`lcb-exec-v1`), excluded from the denominator, printed beside every percent, never counted as
+losses. The same-day `lcb-exec-v2` release closed the gap by driving those questions from their
+own pinned bytes and re-scoring the **stored** answer files — zero paid re-runs; the full
+corrected table is in “Checker release `lcb-exec-v2`” at the end of this document.
 
 ## Arms
 
@@ -45,6 +54,11 @@ denominator, printed beside every percent. They are not counted as losses.
 | contour 0.0.2.56, matched shape (first rung 2400 = the bare arm's ceiling, no seed, serve-default thinking, validator slot = `lcb-exec-v1`) | **112 of 175** (same 63 unscored) | `8da729553c7c5710` | leg 16:31:23 → 17:35:06 CET, 175/175 rows, 176 model calls, 1 gate fix, 0 ladder steps, 35 truncations, 3438 s engine time, 131.88 Wh; shape proven from the rows (`request_shape = bare-matched`, `first_rungs = [2400]`) | **54/112 = 48.2 %** |
 | codex `gpt-6.1-sol` | **112 of 175** (same 63 unscored) | `8da729553c7c5710` | `codex exec` 0.166.0 (xhigh reasoning; sampling params hidden by the transport; stdin-only prompt; read-only sandbox), leg 16:59:27 → 19:36:36 CET (`parb-pub-lcb-codex`), 175/175 `finish=ok`, 0 empty, 0 duplicate ids, wall 9429 s (median 19.9 s/task, max 529 s); rollout audit: 0 tool calls; checker `lcb-exec-v1` | **105/112 = 93.8 %** |
 | grok-4.7 | 175 | `8da729553c7c5710` | — | suspended by owner quota, resumes 2026-11-12 |
+
+*Pointer (2026-11-09): the three strict percents above are the `lcb-exec-v1` verdicts as first
+published, denominator 112. Same-day contract `lcb-exec-v2` re-scored the identical stored bytes
+over all 175 (see the dated release section at the end); these rows are superseded by that
+pointer, their bytes are not edited.*
 
 Cross-arm standard for this window is three arms (bare local / contour matched shape / ChatGPT
 codex). Note the parity shape rule binds **2400** on this set, not 1200: the bare arm's
@@ -217,3 +231,66 @@ and no verdict moved — a table row was eaten, and the next digest write would 
 contour row the same way. Fixed in the same commit (header/separator matched by **shape**, writer
 fails closed on any unexpected row loss) and pinned by `harness/pub_digest_row_test.py`
 (7 checks, with a control that reproduces the old filter's row loss).
+
+## Checker release `lcb-exec-v2` (2026-11-09, 20:35–20:50 CET): the 175-denominator verdict
+
+Queue item "close the scorer driver gap" from PUB-PLAN, executed as a checker release: no new
+model call, no new leg — the driver was built and the **stored** answer bytes of all three arms
+were re-scored offline. This is why the earlier tables keep their bytes and only gain a pointer.
+
+*The driver, derived from the question's own pinned bytes only:* the method name and parameter
+count come from the question's `starter_code` stub; each case's single `input` string is parsed
+as exactly that many sequential JSON values (`raw_decode`; a leftover token or a short count is
+MALFORMED → **UNSCORED**, never guessed — measured: 2367/2367 shipped functional cases decode
+clean); the expected value is one JSON value compared with 1e-6 absolute+relative numeric
+tolerance (1 of 63 questions returns float), `bool` never equals `int`, lists element-wise;
+execution is one `rlimit`'d child per question (same 1 GiB rule as the stdin regime) with a
+per-case 20 s SIGALRM and a question-total CPU cap, `Solution` instantiated or a bare function of
+the stub name used, and a single `typing`-prelude retry for completions that copy the stub's
+unimported annotations, adopted only on strict improvement (a rescue, never a reroll).
+
+*Release gates, all green before any row landed:* self-test **18/18**; **0 stdin verdict diffs**
+per arm across v1→v2 on all 112 stdin ids (the stdin path is byte-identical — every change lands
+in the added functional cells); the **published** codex answers file (`d0955383a7aa66d0`)
+re-scored from the repo copy reproduces the total to the digit; checker bytes
+`0430437a774eb39d → 68a0a39a6aec46a3` recorded in `MANIFEST.json` → `checker_history`.
+
+*The corrected table (same stored bytes, full denominator 175, tasks sha16 `8da729553c7c5710`):*
+
+| arm | lcb-exec-v1 (112, superseded) | functional now | stdin (identical) | **lcb-exec-v2 (175)** |
+|---|---|---|---|---|
+| bare local brain | 60/112 = 53.6 % | 41/63 | 60/112 | **101/175 = 57.7 %** |
+| contour 0.0.2.56 matched shape | 54/112 = 48.2 % | 45/63 | 54/112 | **99/175 = 56.6 %** |
+| codex `gpt-6.1-sol` | 105/112 = 93.8 % | **63/63** | 105/112 | **168/175 = 96.0 %** |
+| grok-4.7 | suspended by owner quota, resumes 2026-11-12 | — | — | suspended by owner quota, resumes 2026-11-12 |
+
+*Paired sign tests on the full matched 175 (exact two-sided):* bare vs contour **12W/10L,
+p = 0.83** — a 2-cell delta between same-line arms sits inside the line's ~1.4-task flip noise
+even at 175 cells, published as unresolvable, not as a win; bare vs codex **0W/67L**, contour vs
+codex **0W/69L** (p < 1e-12). Codex's dominance strengthens rather than dilutes with the wider
+denominator.
+
+*What the functional block shows:* the regime is not where the cloud brain stumbles — codex is
+perfect on it, and all **7** codex losses on 175 are `stdin` cells (6 hard + 1 medium), every one
+of them a cell both local arms also fail. The local functional split (41/63 bare, 45/63 contour)
+carries the same ceiling confound: the bare arm's 38 truncations at 2400 tokens split **22 stdin
+/ 16 functional** — the functional half was invisible in the v1-era tables — and codex's
+transport has no pinned ceiling (the contour leg's 35 truncations are counted in its stats
+sidecar without a per-regime split). Contour's +4 on functional against −6 on stdin versus bare
+is noise-level in both directions and no contour hypothesis is opened on it.
+
+*Artifacts shipped with the release* (`benchmarks/public/arms/`, sha16-verified, leak grep clean;
+the v1 verdict files stay published unchanged):
+
+| file | rows | sha16 |
+|---|---|---|
+| `livecodebench-bare-answers.jsonl` | 175 | `ff3e16209ae155d7` |
+| `livecodebench-bare-verdicts.jsonl` (`lcb-exec-v2`) | 175 | `40a412a8e47f357e` |
+| `livecodebench-contour-matched-answers.jsonl` | 175 | `d33da04ea0b43c80` |
+| `livecodebench-contour-matched-verdicts.jsonl` (`lcb-exec-v2`) | 175 | `d0e3271e8924f970` |
+| `livecodebench-contour-matched-stats.json` (gate/tokens/energy sidecar) | — | `36d6c656d487c19a` |
+| `livecodebench-codex-verdicts-v2.jsonl` | 175 | `a53590d48b86dbb8` |
+
+*Caveat added with the release:* functional scores are **retro-scores of stored bytes**, not new
+measurements — same single draw per task, same contamination state, same ceiling confound. The
+resolution floor caveat (§ Caveats) applies to the 175-cell sign tests unchanged.

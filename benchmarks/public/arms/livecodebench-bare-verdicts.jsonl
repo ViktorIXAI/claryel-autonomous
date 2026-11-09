@@ -1,0 +1,175 @@
+{"id": "lcb-abc387_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc387_f", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc387_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc387_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_d", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-abc388_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_g", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc388_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc388_f", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc388_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc389_g", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc389_f", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc389_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_g", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc390_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc390_f", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test3:wrong_answer,test4:wrong_answer"}
+{"id": "lcb-abc390_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_d", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc391_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_e", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc391_g", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc391_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc392_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc392_g", "ok": false, "why": "test0:tle,test8:tle,test15:tle,test19:tle"}
+{"id": "lcb-abc392_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc392_d", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-abc392_f", "ok": false, "why": "test14:runtime_error:rc1,test23:runtime_error:rc1"}
+{"id": "lcb-abc392_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc393_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_c", "ok": false, "why": "test0:wrong_answer,test3:wrong_answer,test6:wrong_answer,test7:wrong_answer"}
+{"id": "lcb-abc394_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_f", "ok": false, "why": "test2:wrong_answer,test3:wrong_answer,test4:wrong_answer,test5:wrong_answer"}
+{"id": "lcb-abc394_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_g", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc394_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc394_e", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test3:wrong_answer,test6:wrong_answer"}
+{"id": "lcb-abc395_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc395_e", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_g", "ok": true, "why": "hidden 33/33"}
+{"id": "lcb-abc396_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_e", "ok": false, "why": "test1:wrong_answer,test2:wrong_answer,test11:wrong_answer,test12:wrong_answer"}
+{"id": "lcb-abc396_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc396_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_d", "ok": false, "why": "test38:wrong_answer"}
+{"id": "lcb-abc397_f", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc397_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_g", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc397_e", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-abc397_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc397_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc398_g", "ok": false, "why": "test7:wrong_answer"}
+{"id": "lcb-abc399_e", "ok": false, "why": "test28:wrong_answer"}
+{"id": "lcb-abc399_d", "ok": false, "why": "test0:wrong_answer"}
+{"id": "lcb-abc399_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc399_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc399_f", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc399_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_c", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_d", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_b", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-abc400_e", "ok": true, "why": "hidden 4/4"}
+{"id": "lcb-abc400_g", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc190_c", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc190_a", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc190_d", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc191_d", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc191_c", "ok": false, "why": "test0:wrong_answer"}
+{"id": "lcb-arc191_a", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-arc192_e", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc192_b", "ok": false, "why": "test0:wrong_answer,test2:wrong_answer,test5:wrong_answer,test8:wrong_answer"}
+{"id": "lcb-arc192_d", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc192_a", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-arc193_b", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-arc193_a", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc193_d", "ok": false, "why": "test0:wrong_answer"}
+{"id": "lcb-arc194_c", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc194_b", "ok": false, "why": "test1:wrong_answer,test2:wrong_answer,test3:wrong_answer,test4:wrong_answer"}
+{"id": "lcb-arc194_e", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc194_a", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-arc194_d", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc195_e", "ok": false, "why": "test0:wrong_answer,test2:wrong_answer,test3:wrong_answer,test4:wrong_answer"}
+{"id": "lcb-arc195_b", "ok": false, "why": "test0:tle,test6:tle,test9:tle,test13:tle"}
+{"id": "lcb-arc195_c", "ok": false, "why": "test0:wrong_answer,test1:wrong_answer,test2:wrong_answer,test3:wrong_answer"}
+{"id": "lcb-arc195_d", "ok": false, "why": "test0:wrong_answer"}
+{"id": "lcb-arc195_a", "ok": true, "why": "hidden 40/40"}
+{"id": "lcb-arc196_b", "ok": false, "why": "test0:wrong_answer"}
+{"id": "lcb-arc196_c", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-arc196_a", "ok": false, "why": "test1:wrong_answer,test5:wrong_answer,test6:wrong_answer,test7:wrong_answer"}
+{"id": "lcb-arc196_d", "ok": false, "why": "test0:runtime_error:rc1,test1:runtime_error:rc1,test2:runtime_error:rc1,test3:runtime_error:rc1"}
+{"id": "lcb-3708", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3677", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3720", "ok": false, "why": "case0:exception:NameError,case1:exception:NameError,case2:exception:NameError,case3:exception:NameError,case4:exception:NameError,case5:exception:NameError"}
+{"id": "lcb-3674", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3731", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3714", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3737", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3725", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3704", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3721", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3751", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3753", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3754", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3697", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3748", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3760", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3696", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3762", "ok": false, "why": "case0:wrong_answer,case1:wrong_answer,case2:wrong_answer,case3:wrong_answer,case4:wrong_answer,case5:wrong_answer"}
+{"id": "lcb-3709", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3779", "ok": false, "why": "case0:wrong_answer,case12:wrong_answer,case13:wrong_answer,case23:wrong_answer,case27:wrong_answer,case28:wrong_answer"}
+{"id": "lcb-3771", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3733", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3768", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3764", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3781", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3705", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3786", "ok": false, "why": "case0:wrong_answer,case6:wrong_answer,case7:wrong_answer,case11:wrong_answer,case12:wrong_answer,case17:wrong_answer"}
+{"id": "lcb-3722", "ok": false, "why": "case0:wrong_answer,case1:wrong_answer,case2:wrong_answer,case3:wrong_answer,case4:wrong_answer,case5:wrong_answer"}
+{"id": "lcb-3770", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3759", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3791", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3789", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3788", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3750", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3795", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3801", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3817", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3809", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3794", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3744", "ok": false, "why": "case7:wrong_answer,case19:wrong_answer,case38:wrong_answer"}
+{"id": "lcb-3832", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3793", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3717", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3773", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3777", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3747", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3687", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3739", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3736", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3743", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3701", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3723", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3763", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3692", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3778", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3785", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3776", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3783", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3799", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3784", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}
+{"id": "lcb-3811", "ok": true, "why": "functional hidden 31/31"}
+{"id": "lcb-3805", "ok": true, "why": "functional hidden 40/40"}
+{"id": "lcb-3765", "ok": false, "why": "case0:exec_error:SyntaxError,case1:missing,case2:missing,case3:missing,case4:missing,case5:missing"}

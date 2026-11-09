@@ -104,6 +104,12 @@ exactly — asserted for every arm below.
 | bfcl-codex-verdicts.jsonl | 300 | `30895bf48007c6e0` |
 | livecodebench-codex-answers.jsonl | 175 | `d0955383a7aa66d0` |
 | livecodebench-codex-verdicts.jsonl | 112 | `f5cc854453597bdb` |
+| livecodebench-codex-verdicts-v2.jsonl | 175 | `a53590d48b86dbb8` |
+| livecodebench-bare-answers.jsonl | 175 | `ff3e16209ae155d7` |
+| livecodebench-bare-verdicts.jsonl | 175 | `40a412a8e47f357e` |
+| livecodebench-contour-matched-answers.jsonl | 175 | `d33da04ea0b43c80` |
+| livecodebench-contour-matched-verdicts.jsonl | 175 | `d0e3271e8924f970` |
+| livecodebench-contour-matched-stats.json | 33 | `36d6c656d487c19a` |
 | bfcl-basalt-answers.jsonl | 1240 | `4ac238d09babcb45` |
 | bfcl-basalt-verdicts.jsonl | 1240 | `389aed67b18d0d58` |
 | bfcl-contour-matched-answers.jsonl | 1240 | `ed8b58a224521f39` |
@@ -233,6 +239,19 @@ this leg: 176 session rollouts in the 16:59-19:36 CET window contain **0 tool ca
 any workdir artifact path — the arm is pure generation, and the audit is stated here so the claim is
 checkable rather than assumed. Verification re-score of the published copy: **105/112 = 93.8 %**,
 byte-deterministic (unlike IFEval's `langdetect`, `lcb-exec-v1` reproduces to the digit).
+
+Checker release `lcb-exec-v2` (2026-11-09, same day, offline rescore of the SAME stored bytes — no
+new leg, no paid call): the functional driver closed the 63-question gap, so the whole 175-question
+set now scores. Every one of the 112 stdin verdict cells is identical under v1 and v2 for all three
+arms (the stdin path is byte-identical), which is what makes the new totals a pure denominator
+change and not a re-measurement. New totals: bare **101/175 = 57.7 %**, contour-0.0.2.56
+**99/175 = 56.6 %**, codex **168/175 = 96.0 %** (codex passes 63/63 functional; all 7 of its losses
+are stdin cells both local arms also fail). The v1 verdict artifacts stay published unchanged; the
+`-v2` verdict files and the bare/contour answer+verdict+stats files in the index above ship the
+full-denominator record, and the re-score of the published codex copy from the repo file reproduces
+168/175 to the digit. Sign tests on the full 175: bare-vs-contour 12W/10L (p = 0.83, unresolvable),
+bare-vs-codex 0W/67L, contour-vs-codex 0W/69L. Checker bytes `0430437a774eb39d →
+68a0a39a6aec46a3` are pinned in `MANIFEST.json` → `checker_history` beside the reason.
 
 Verified re-score of the published copies:
 

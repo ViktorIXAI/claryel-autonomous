@@ -100,11 +100,17 @@
       "tasks_sha16": "2c672531577dcc33"
     },
     "livecodebench": {
-      "checker": "lcb-exec-v1",
+      "checker": "lcb-exec-v2",
       "checker_files": {
-        "scripts/pub_bench_lcb.py": "0430437a774eb39d"
+        "scripts/pub_bench_lcb.py": "68a0a39a6aec46a3"
       },
-      "checker_gates": "self-test 10/10: pickler decodes pure data, pickler REFUSES a payload that references a global class (control payload), reference solution passes, wrong completion fails, crash fails, infinite loop -> TLE loss, empty answer fails, payload-pin mismatch fails closed as UNSCORED, functional regime named as unscored, over-byte-cap test is a loss not a skip",
+      "checker_history": [
+        {
+          "sha16": "0430437a774eb39d",
+          "note": "bytes of `lcb-exec-v1`, the contract the three published LiveCodeBench arms were first scored under (stdin-only, 63 functional questions named unscored). v2 adds the functional driver and leaves the stdin path byte-identical; at the release all three arms were rescored from the stored bytes: all 112 stdin verdict cells identical under v1 and v2 (0 diffs per arm), new totals 101/175 bare, 99/175 contour-0.0.2.56, 168/175 codex, self-test 18/18. The v1 verdict artifacts stay published unchanged; the v1 digest rows are superseded by dated pointer, never edited."
+        }
+      ],
+      "checker_gates": "self-test 18/18: pickler decodes pure data, pickler REFUSES a payload that references a global class (control payload), reference solution passes, wrong completion fails, crash fails, infinite loop -> TLE loss, empty answer fails, payload-pin mismatch fails closed as UNSCORED, over-byte-cap test is a loss not a skip; functional driver: reference passes, wrong fails, exception anatomy named, bare-method completion shims onto the stub name, float 1e-6 tolerance inside and outside, malformed case bytes UNSCORED never guessed, per-case 20 s TLE, unimported typing names rescued by one prelude retry adopted only on strict improvement; every shipped functional case (2367) decodes under the argument parser",
       "difficulty_split": {
         "easy": 43,
         "hard": 80,

@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 """LiveCodeBench `test6` slice: pin it, decode its hidden tests, score code by execution.
 
-Contract `lcb-exec-v1` (this file is the contract; any change means a new contract id).
+Contract `lcb-exec-v2` (this file is the contract; any change means a new contract id).
+`lcb-exec-v1` scored only the `stdin` regime and named the 63 functional questions unscored;
+v2 adds the functional driver below and leaves the stdin path byte-identical, so every
+published stdin cell must re-score to the same verdict under v2 (a rescore check ships with
+the release in MANIFEST.json `checker_history`).
 
 Why a separate contract: the answer-graded checkers in `pub_bench_score.py` compare a final
 answer, and the HumanEval contract `pytest-v2` runs the upstream `check()` of a fixed file.
@@ -44,9 +48,26 @@ total 29.9 MB):
   per-question wall clock       600 s      over -> the remaining tests are recorded as TLE
 Verdict rule: a question passes only if EVERY hidden test passes. Public tests are never the
 verdict — they are the validator slot a harness may iterate against; scoring uses hidden tests.
-`functional` (LeetCode, 63 questions) needs a driver generated from the case's own type list;
-that driver is NOT part of this contract yet, so those questions are UNSCORED and stay out of
-the denominator, and every print names the unscored count.
+`functional` (LeetCode, 63 questions) — the v2 driver, all of it derived from the question's
+own pinned bytes, never from the prompt prose:
+  signature     method name + parameter count parsed from the question's own `starter_code`
+                stub (the empty stub body gets a `pass` for parsing only)
+  case decoding one input string -> exactly that many JSON values, parsed sequentially with
+                raw_decode (newline-separated or pretty-printed); a leftover token or a short
+                count is MALFORMED -> UNSCORED, never guessed. Measured on the shipped
+                payload: 2367/2367 hidden functional cases decode clean.
+  expected      one JSON value per case; numbers compared with absolute/relative 1e-6
+                tolerance (float-return questions exist; 1 of 63), bool never equals int,
+                lists compared element-wise with the same rule, everything else exact
+  execution     ONE child per question: the extracted code is exec'd; `Solution` is
+                instantiated, or a bare function of the stub's name is used (completion style
+                varies); per-case SIGALRM at the 20 s test budget, child rlimits identical to
+                the stdin regime (1 GiB AS, question-total CPU cap), recursion limit raised
+                because the LC environment is not CPython's default. A typing-name NameError
+                at exec (the stub itself writes `List[int]` unimported) re-runs the question
+                ONCE with a `typing` prelude, adopted only if it strictly reduces failures.
+  verdict       every hidden case must pass, same rule as stdin. A driver crash is a loss,
+                never a pass, and the anatomy names the first failing cases.
 
 usage:
   pub_bench_lcb.py selftest                       # contract tests on synthetic tasks
@@ -54,6 +75,7 @@ usage:
   pub_bench_lcb.py score <tasks.jsonl> <answers.jsonl> --hidden F.gz [--verdicts OUT]
 """
 import argparse
+import ast
 import base64
 import gzip
 import hashlib
@@ -68,7 +90,7 @@ import tempfile
 import time
 import zlib
 
-LCB_CONTRACT = "lcb-exec-v1"
+LCB_CONTRACT = "lcb-exec-v2"
 TEST6_RAW_SHA16 = "bb4c364f71921c44"
 INPUT_CAP = 8 * 1024 * 1024
 OUTPUT_CAP = 8 * 1024 * 1024
@@ -231,10 +253,191 @@ def run_stdin(code, test, workdir):
     return "wrong_answer"
 
 
+# ------------------------------------------------- functional driver (v2)
+
+FUNC_PRELUDE = "from typing import List, Optional, Tuple, Dict, Set, Union, Deque, DefaultDict, Any\n"
+
+_DRIVER_SRC = r'''import json, signal, sys, importlib.util
+sys.setrecursionlimit(10 ** 6)
+
+def close(a, b):
+    if isinstance(a, bool) or isinstance(b, bool):
+        return isinstance(a, bool) and isinstance(b, bool) and a == b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) <= 1e-6 + 1e-6 * max(abs(a), abs(b))
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(close(x, y) for x, y in zip(a, b))
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(close(a[k], b[k]) for k in a)
+    return type(a) == type(b) and a == b
+
+class _TLE(Exception):
+    pass
+
+def _alrm(s, f):
+    raise _TLE()
+
+signal.signal(signal.SIGALRM, _alrm)
+spec = importlib.util.spec_from_file_location("_answer", "_answer.py")
+mod = importlib.util.module_from_spec(spec)
+try:
+    spec.loader.exec_module(mod)
+except BaseException as exc:
+    print("case0:exec_error:%s" % type(exc).__name__)
+    sys.exit(0)
+meth = sys.argv[1]
+fn = None
+if hasattr(mod, "Solution"):
+    try:
+        fn = getattr(mod.Solution(), meth)
+    except BaseException:
+        fn = None
+if fn is None:
+    fn = getattr(mod, meth, None)
+if fn is None:
+    print("case0:no_solution_method")
+    sys.exit(0)
+for i, c in enumerate(json.load(open("fcases.json"))):
+    signal.alarm(20)
+    try:
+        res = fn(*c["a"])
+        print("case%d:%s" % (i, "ok" if close(res, c["e"]) else "wrong_answer"), flush=True)
+    except _TLE:
+        print("case%d:tle" % i, flush=True)
+    except BaseException as exc:
+        print("case%d:exception:%s" % (i, type(exc).__name__), flush=True)
+    signal.alarm(0)
+'''
+
+
+def _preexec_func():
+    res = _limits()
+    res.setrlimit(res.RLIMIT_AS, (MEM_LIMIT, MEM_LIMIT))
+    res.setrlimit(res.RLIMIT_CPU, (int(QUESTION_TIMEOUT) + 4, int(QUESTION_TIMEOUT) + 6))
+    res.setrlimit(res.RLIMIT_FSIZE, (16 * 1024 * 1024, 16 * 1024 * 1024))
+
+
+def _stub_patch(src):
+    """Give every body-less stub method a `pass` so the starter parses."""
+    lines = src.split("\n")
+    out = []
+    for i, l in enumerate(lines):
+        out.append(l)
+        if l.rstrip().endswith(":"):
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            ind = len(l) - len(l.lstrip())
+            if j >= len(lines) or (len(lines[j]) - len(lines[j].lstrip())) <= ind:
+                out.append(" " * (ind + 4) + "pass")
+    return "\n".join(out)
+
+
+def stub_signature(starter):
+    """(method_name, n_params) from the question's own stub; None if not one method."""
+    try:
+        tree = ast.parse(_stub_patch(starter))
+    except SyntaxError:
+        return None
+    defs = [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
+    if len(defs) != 1:
+        return None
+    return defs[0].name, len([a for a in defs[0].args.args if a.arg != "self"])
+
+
+def func_args(input_str, n):
+    """One input string -> exactly n sequential JSON values, or None (malformed)."""
+    dec = json.JSONDecoder()
+    vals, i = [], 0
+    while len(vals) < n:
+        while i < len(input_str) and input_str[i] in " \n\r\t":
+            i += 1
+        try:
+            v, i = dec.raw_decode(input_str, i)
+        except ValueError:
+            return None
+        vals.append(v)
+    return None if input_str[i:].strip() else vals
+
+
+def run_functional(code, cases, meth, workdir):
+    """cases: [(args, expected)]. -> list of 'case<i>:<why>' failures ([] == all pass)."""
+    def attempt(src):
+        with open(os.path.join(workdir, "_answer.py"), "w", encoding="utf-8") as fh:
+            fh.write(src)
+        with open(os.path.join(workdir, "fcases.json"), "w", encoding="utf-8") as fh:
+            json.dump([{"a": a, "e": e} for a, e in cases], fh)
+        try:
+            p = subprocess.run([sys.executable, os.path.join(workdir, "_driver.py"), meth],
+                               capture_output=True, timeout=QUESTION_TIMEOUT + 10,
+                               preexec_fn=_preexec_func, cwd=workdir)
+        except subprocess.TimeoutExpired:
+            return ["process_tle_budget"]
+        except Exception as exc:                                            # noqa: BLE001
+            return ["driver_spawn_error:%s" % type(exc).__name__]
+        lines = [ln for ln in p.stdout.decode("utf-8", "replace").splitlines()
+                 if ln.startswith("case")]
+        if p.returncode != 0:
+            # a killed child is a loss, never a pass: attribute the cases it did not answer
+            got = {int(ln.partition(":")[0][4:]) for ln in lines}
+            return (["case%d:killed_rc%s" % (i, p.returncode) for i in range(len(cases))
+                     if i not in got] or ["driver_crashed:rc%s" % p.returncode])
+        fails = []
+        got = {}
+        for ln in lines:
+            head, _, why = ln.partition(":")
+            got[int(head[4:])] = why
+        for i in range(len(cases)):
+            w = got.get(i)
+            if w is None:
+                fails.append("case%d:missing" % i)
+            elif w != "ok":
+                fails.append("case%d:%s" % (i, w))
+        return fails
+
+    fails = attempt(code)
+    if fails and any("exception:NameError" in f or "exec_error:NameError" in f for f in fails) \
+            and FUNC_PRELUDE not in code:
+        # the stub itself writes `List[int]` unimported; retry with typing names only, and
+        # adopt ONLY if it strictly reduces failures (a rescue, never a reroll)
+        retry = attempt(FUNC_PRELUDE + code)
+        if len(retry) < len(fails):
+            fails = retry
+    return fails
+
+
+def _score_functional(task, hidden_tests, code):
+    sig = stub_signature(task.get("starter_code") or "")
+    if sig is None:
+        return "unscored", "starter stub is not a single parseable method"
+    meth, npar = sig
+    cases = []
+    for i, t in enumerate(hidden_tests):
+        if t.get("testtype") != "functional":
+            return "unscored", "case %d has testtype %r" % (i, t.get("testtype"))
+        if len(t["input"]) > INPUT_CAP or len(t["output"]) > OUTPUT_CAP:
+            return "fail", "test%d:over_byte_cap" % i
+        args = func_args(t["input"], npar)
+        if args is None:
+            return "unscored", "case %d input does not decode to %d JSON arguments" % (i, npar)
+        try:
+            exp = json.loads(t["output"])
+        except ValueError:
+            return "unscored", "case %d output is not JSON" % i
+        cases.append((args, exp))
+    with tempfile.TemporaryDirectory(prefix="lcbf-") as wd:
+        with open(os.path.join(wd, "_driver.py"), "w", encoding="utf-8") as fh:
+            fh.write(_DRIVER_SRC)
+        fails = run_functional(code, cases, meth, wd)
+    if fails:
+        return "fail", ",".join(fails[:6])
+    return "ok", "functional hidden %d/%d" % (len(cases), len(cases))
+
+
 def score_question(task, hidden_tests, answer):
     """-> (verdict, detail). verdict in ok / fail / unscored."""
-    if task["testtype"] != "stdin":
-        return "unscored", "driver for testtype=functional is not in %s" % LCB_CONTRACT
+    if task["testtype"] not in ("stdin", "functional"):
+        return "unscored", "unknown testtype %r" % task["testtype"]
     if len(hidden_tests) != task["hidden_count"] or sha16(canon_json(hidden_tests)) != task["hidden_sha16"]:
         return "unscored", "hidden payload does not match the pinned hidden_sha16"
     total = sum(len(t["input"]) + len(t["output"]) for t in hidden_tests)
@@ -243,6 +446,8 @@ def score_question(task, hidden_tests, answer):
     code = extract_code(answer)
     if not code.strip():
         return "fail", "empty_answer"
+    if task["testtype"] == "functional":
+        return _score_functional(task, hidden_tests, code)
     fails = []
     started = time.time()
     with tempfile.TemporaryDirectory(prefix="lcb-") as wd:
@@ -312,10 +517,54 @@ def selftest():
     chk(v == "fail" and "tle" in d and time.time() - t0 < TEST_TIMEOUT + 8, "infinite_loop_tle")
     v, d = score_question(task, tests, "")
     chk(v == "fail" and d == "empty_answer", "empty_answer_fails")
-    # 3. the functional regime is refused out loud, never silently scored.
-    v, d = score_question({"id": "y", "testtype": "functional", "hidden_count": 1,
-                           "hidden_sha16": sha16(canon_json(tests))}, tests, "print(1)")
-    chk(v == "unscored" and "functional" in d, "functional_unscored_named")
+    # 3. functional driver (lcb-exec-v2): the stub gives the signature, the case's single
+    #    input string gives the arguments, and only the pinned bytes decide.
+    ftests = [{"input": "2\n3", "output": "5", "testtype": "functional"},
+              {"input": "[1, 2, 3]\n2", "output": "[2, 4, 6]", "testtype": "functional"},
+              {"input": '"hi"\n3', "output": '"hihihi"', "testtype": "functional"}]
+    ftask = {"id": "lcb-synthetic-f", "testtype": "functional",
+             "starter_code": "class Solution:\n    def mix(self, a, b):\n         ",
+             "hidden_count": len(ftests), "hidden_sha16": sha16(canon_json(ftests))}
+    fgood = ("class Solution:\n    def mix(self, a, b):\n"
+             "        if isinstance(a, int):\n            return a + b\n"
+             "        if isinstance(a, list):\n            return [x * b for x in a]\n"
+             "        return a * b\n")
+    v, d = score_question(ftask, ftests, "```python\n%s```" % fgood)
+    chk(v == "ok", "functional_reference_passes")
+    v, d = score_question(ftask, ftests, "```python\nclass Solution:\n    def mix(self, a, b):\n        return 0\n```")
+    chk(v == "fail" and "wrong_answer" in d, "functional_wrong_fails")
+    v, d = score_question(ftask, ftests, "```python\nclass Solution:\n    def mix(self, a, b):\n        return a + b\n```")
+    chk(v == "fail" and "exception" in d, "functional_exception_anatomy")
+    shim = ("def mix(a, b):\n    if isinstance(a, int):\n        return a + b\n"
+            "    if isinstance(a, list):\n        return [x * b for x in a]\n    return a * b\n")
+    v, d = score_question(ftask, ftests, "```python\n%s```" % shim)
+    chk(v == "ok", "functional_bare_method_shim")
+    ft2 = [{"input": "1", "output": "0.5", "testtype": "functional"}]
+    ftask2 = {"id": "lcb-synthetic-f2", "testtype": "functional",
+              "starter_code": "class Solution:\n    def half(self, x: int) -> float:\n         ",
+              "hidden_count": 1, "hidden_sha16": sha16(canon_json(ft2))}
+    v, d = score_question(ftask2, ft2, "```python\nclass Solution:\n    def half(self, x):\n        return x / 2.0 - 1e-9\n```")
+    chk(v == "ok", "functional_float_tolerance")
+    v, d = score_question(ftask2, ft2, "```python\nclass Solution:\n    def half(self, x):\n        return 0.51\n```")
+    chk(v == "fail" and "wrong_answer" in d, "functional_float_out_of_tol_fails")
+    fbad = [{"input": "1\n", "output": "1", "testtype": "functional"}]  # mix takes 2 args
+    ftask3 = dict(ftask, hidden_count=1, hidden_sha16=sha16(canon_json(fbad)))
+    v, d = score_question(ftask3, fbad, "```python\n%s```" % fgood)
+    chk(v == "unscored" and "decode" in d, "functional_malformed_input_unscored")
+    ft4 = [{"input": "5\n2", "output": "7", "testtype": "functional"},
+           {"input": "1\n1", "output": "2", "testtype": "functional"}]
+    ftask4 = dict(ftask, hidden_count=2, hidden_sha16=sha16(canon_json(ft4)))
+    t0 = time.time()
+    v, d = score_question(ftask4, ft4, "```python\nclass Solution:\n    def mix(self, a, b):\n        if a == 5:\n            while True:\n                pass\n        return a + b\n```")
+    chk(v == "fail" and "tle" in d and time.time() - t0 < TEST_TIMEOUT + 25, "functional_case_tle")
+    # a completion using the stub's unimported List[int] is rescued by the typing prelude
+    ft5 = [{"input": "[3, 1]", "output": "[1, 3]", "testtype": "functional"}]
+    ftask5 = {"id": "lcb-synthetic-f5", "testtype": "functional",
+              "starter_code": "class Solution:\n    def up(self, a: List[int]) -> List[int]:\n         ",
+              "hidden_count": 1, "hidden_sha16": sha16(canon_json(ft5))}
+    typed = "class Solution:\n    def up(self, a: List[int]) -> List[int]:\n        return sorted(a)\n"
+    v, d = score_question(ftask5, ft5, "```python\n%s```" % typed)
+    chk(v == "ok", "functional_typing_prelude_rescue")
     # 4. over-cap test input is a REJECT, not a skip.
     big = {"input": "9" * (INPUT_CAP + 10), "output": "0", "testtype": "stdin"}
     v, d = score_question({"id": "z", "testtype": "stdin", "hidden_count": 1,
