@@ -15,6 +15,40 @@ same model  ·  same frozen task prompts  ·  same seeds
         only the software around the model changes
 ```
 
+## Documentation audit clarification — 2026-11-09 (issue #25)
+
+**Current-facing reading guide, not an independently reproduced benchmark result.**
+The public four-arm table below is an **archived 2026-11-08 escalation-shape
+snapshot**, not the latest cross-arm leaderboard. It must not be read as
+current matched-request evidence. The [public result digest](benchmarks/public/PUB-DIGEST.md)
+now lists six public task sets: GSM8K, ARC-Easy, ARC-Challenge, HumanEval,
+GPQA-Diamond and MMLU-Pro. In particular, the subsequently published
+**bare-matched-request contour 0.0.2.56** arms report GSM8K 294/300 (98.0%),
+ARC-Easy 289/300 (96.3%), ARC-Challenge 291/300 (97.0%), GPQA-Diamond
+139/198 (70.2%), and MMLU-Pro 429/500 (85.8%). These are reported scores,
+not independent re-scores by this documentation audit. The older contour rows
+remain in the digest with their original call parameters and provenance.
+
+HumanEval's earlier **refused** contour row below describes an earlier decision,
+not the subsequently published run. The [HumanEval report](benchmarks/public/HUMANEVAL-RESULT.md)
+records the matched-request contour result of 155/164 (94.5%) under the
+original **pytest-v1** checker. A later, separately labeled **pytest-v2**
+offline re-score of *preserved answer bytes* reports contour 157/164 (95.7%)
+and local bare 159/164 (97.0%); the original v1 scores remain published.
+The checker change is not a new model run or proof of checker independence.
+
+**Comparison limitations:** equal task-file hashes do not by themselves establish
+identical scored task IDs or invocation conditions. The bare local GSM8K,
+ARC-Easy and ARC-Challenge aggregate rows use larger denominators than the
+300-task contour subsets; no paired gain/loss should be inferred by subtracting
+those aggregate percentages. Cloud transports do not expose all sampling
+parameters. Check per-arm task IDs, call shape, raw outputs, scorer version,
+provenance and [testing philosophy](docs/TESTING-PHILOSOPHY.md) before making
+causal, superiority, energy or cost claims. The [ongoing audit](https://github.com/ViktorIXAI/claryel-autonomous/issues/25)
+has **not** verified exhaustive repository coverage, independent scoring or
+successful documentation/link CI. The historical table and text below are
+retained unchanged to preserve their dated context.
+
 **Status 2026-11-08 21:55 CET: hard-bank contour development is frozen at the measured stamp
 `0.0.2.56` (97.4 % of the 77-task hard bank v6.6, `5c86252b2ef2f422`; full history in
 `benchmarks/hard/v6-results/VERSION-LADDER-PERCENT.md`). The active line is the public
