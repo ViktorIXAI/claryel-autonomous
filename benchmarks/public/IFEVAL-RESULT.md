@@ -16,16 +16,62 @@ answer-graded sets cannot.
 |---|---|---|---|---|---|---|
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | 541 (full set) | `2c672531577dcc33` | temp 0.7, `max_tokens` 1200, one request per task, no request seed, serve-default thinking | **467/541 = 86.3 %** | 481/541 = 88.9 % | 751/834 = 90.0 % |
 | contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `pub-ifeval-v1`) | 541 (full set) | `2c672531577dcc33` | same shape as the bare arm by the parity shape rule: one 1200-token rung = one request per task, temp 0.7 | **462/541 = 85.4 %** | 477/541 = 88.2 % | 743/834 = 89.1 % |
-| codex `gpt-6.1-sol` xhigh (subscription CLI, stdin transport) | 541 (full set) | `2c672531577dcc33` | transport does not expose sampling params | **no percent published: the arm is incomplete.** The leg ran 08:24 → 12:39 CET and stopped by its own fail-closed transport rule after 440 ok rows; the ChatGPT subscription hit its usage limit (CLI: `You've hit your usage limit … or try again at 1:32 PM`). The 440 stored rows stay on disk and the leg is resumable by id. Resumed 13:34 after the quota window reopened; 3 `rc1` rows that carried another task's answer bytes were purged with zero credit first (`LEG-INCIDENTS.md`), and the transport now clears the CLI's last-message file before each call | — | — |
+| codex `gpt-6.1-sol` xhigh (subscription CLI, stdin transport) | 541 (full set) | `2c672531577dcc33` | transport does not expose sampling params; one leg split by the owner-side usage window — 08:24 → 12:39 (440 ok rows, 15 333 s), quota window, resumed 13:34 → 14:41 (101 ok rows, 3467 s); 3 stale `rc1` rows purged with zero credit before the resume (`LEG-INCIDENTS.md`) | **515/541 = 95.2 %** | 526/541 = 97.2 % | 807/834 = 96.8 % |
 | grok-4.7 | 541 | `2c672531577dcc33` | — | suspended by owner quota, resumes 2026-11-12 | — | — |
 
 Cross-arm standard for this window is three arms (bare local / contour matched shape / ChatGPT
 codex): the Grok quota ran dry on the owner side on 2026-11-09 and no Grok percent is produced for
-this set before 2026-11-12. As of 12:39 CET the same is true of the ChatGPT side for THIS set — the
-codex leg stopped at 440/541 rows on the subscription usage limit, so the IFEval cross-arm comparison
-is currently **two arms** and no ChatGPT IFEval number exists in this repository. The stopped leg and
-its purged rows are recorded in `LEG-INCIDENTS.md`; the arm is resumable by task id and a completed
-arm will be scored with the same `pub-ifeval-v1` contract.
+this set before 2026-11-12. The ChatGPT leg stopped at 440/541 rows at 12:39 on the subscription
+usage limit, resumed at 13:34 when the window reopened and **completed 541/541 at 14:41 CET**, so
+the IFEval comparison is three arms. Paired sign tests over the same 541 ids (strict axis, exact
+McNemar): codex vs bare **61W/13L, p = 1.4e-8**; codex vs contour matched **62W/9L, p = 7.3e-11**;
+bare vs contour stays the previously published **16W/21L, p = 0.511** measured null. The codex gain
+is a model+transport effect on a set with no seed and no exposed sampling parameters — the cloud
+arm gets xhigh reasoning by default, the local arms get one 1200-token request.
+
+Discordant ids (strict axis; numeric-suffix form of `ifeval-<n>`, regenerable from the shipped
+`*-verdicts.jsonl` files):
+
+* codex-only passes vs bare (61): `013, 016, 019, 030, 152, 179, 201, 292, 321, 1069, 1122, 1129,
+  1130, 1216, 1236, 1258, 1300, 1307, 1367, 1402, 1498, 1546, 1643, 1653, 1686, 1691, 1759, 1779,
+  1781, 1813, 1880, 1944, 1964, 2041, 2275, 2284, 2305, 2359, 2381, 2416, 2605, 2739, 2751, 2857,
+  3048, 3089, 3114, 3223, 3326, 3329, 3345, 3407, 3424, 3425, 3429, 3456, 3505, 3506, 3538, 3572,
+  3633`
+* bare-only passes (13): `1392, 1645, 1897, 1954, 2216, 2422, 2571, 2616, 2736, 2765, 2790, 2844,
+  3617`
+* codex-only passes vs contour matched (62): `013, 016, 019, 030, 152, 179, 321, 1069, 1122, 1130,
+  1203, 1216, 1258, 1300, 1325, 1367, 1389, 1402, 1446, 1498, 1546, 1643, 1686, 1691, 1781, 1880,
+  1883, 1944, 1964, 2209, 2246, 2247, 2273, 2284, 2292, 2305, 2359, 2381, 2416, 2471, 2591, 2739,
+  2751, 2857, 2871, 2904, 3063, 3089, 3091, 3114, 3223, 3326, 3329, 3407, 3425, 3429, 3456, 3505,
+  3506, 3538, 3572, 3633`
+* contour-matched-only passes (9): `1897, 2250, 2422, 2571, 2616, 2736, 2765, 2790, 2844`
+
+## codex arm — provenance and cost
+
+* Audit before scoring: 541 rows, 541 unique ids, `finish=ok` on every row, 0 empty answers. Two
+  clusters of byte-identical answers exist across ids (`ifeval-227/3749/3754` all
+  `My answer is maybe.`, `ifeval-3753/3755/3756` all `My answer is no.`); inspected against the
+  task prompts — those tasks force exactly one of three fixed phrases, so the identity is the
+  permitted phrase verbatim, not the stale-last-message defect recorded earlier the same day. The
+  transport fix (delete the CLI last-message file before every call) shipped in the same commit as
+  the incident.
+* Wall: 15 333 s (440 rows, 34.8 s/task) + 3467 s (101 rows, 34.3 s/task) = 18 800 s of call time
+  across two segments; no GPU energy applies to a cloud arm (wall time only, per the line rules).
+* Published bytes: `arms/ifeval-codex-answers.jsonl` (541 lines, sha16 `fc2650b08fb87bef`,
+  scrub masked nothing — bytes byte-identical to the runner output, and the stdin transport gives
+  the CLI no file tools, so no local-path disclosure is possible) and the scorer's verdict rows
+  `arms/ifeval-codex-verdicts.jsonl` (541 lines, sha16 `838f55ca6a6a24fc`, sidecar SHA-1/16
+  `8ca486048c590276`).
+* Verification rescore of the **published** answers with `pub-ifeval-v1`: 514/541 = 95.0 % strict —
+  one cell different (`ifeval-1122`) from the shipped verdict rows. That is the documented
+  `langdetect` flake (the checker flips ~1 task per run over identical bytes) and is exactly why
+  the published percent is pinned by the shipped verdict sidecar, and why IFEval deltas under
+  0.5 pp are never quoted as effects.
+* Hardest instruction classes for this model: `change_case:english_capital` 5,
+  `change_case:english_lowercase` 5, `punctuation:no_comma` 3,
+  `detectable_format:number_highlighted_sections` 3, `combination:repeat_prompt` 3,
+  `length_constraints:nth_paragraph_first_word` 2 failures — a different failure profile from the
+  local arms (which lose mostly on `length_constraints:number_words` and `keywords:letter_frequency`).
 
 ## Bare arm — provenance and cost
 

@@ -107,3 +107,14 @@ arm's files were checked and are unaffected (they re-score to 1116/1240).
   resumed at 13:34 as `parb-pub-ifeval-codex-resume` after the quota window reopened; the resumed file
   audits clean — 454 rows, 454 unique ids, 0 empty answers, and 0 answers duplicated across ids.
   The partial still publishes no percent: it is 454/541 until the leg ends.
+
+### Resolution, 2026-11-09 14:41 CET (same incident)
+
+The resumed leg `parb-pub-ifeval-codex-resume` finished at 14:41: 541 rows, 541 unique ids,
+`finish=ok` on every row, 0 empty answers, exit 0 (`ok=101 bad=0` for the resume segment, 3467 s).
+The final audit found two clusters of byte-identical answers across ids; each was inspected against
+its task prompt and is a permitted fixed phrase of a `two_answer`/phrase-choice task (16–19 bytes,
+verbatim one of the three allowed options), not a stale-file carry — the stale-carry defect class
+was already closed by the transport fix above. Scored with `pub-ifeval-v1`: **515/541 = 95.2 %
+strict (526/541 loose)**, published in `PUB-DIGEST.md` and `IFEVAL-RESULT.md` with the answer and
+verdict bytes shipped in `arms/` (see `arms/README.md`, "First cloud-arm artifacts").

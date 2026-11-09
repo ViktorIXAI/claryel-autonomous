@@ -98,6 +98,8 @@ exactly — asserted for every arm below.
 | ifeval-contour-matched-plan.json | 1 | `9c505e0d46010d59` |
 | ifeval-contour-matched-bank-version.json | 6 | `18ea68bc69082099` |
 | ifeval-contour-matched-ws-identity.json | 43 | `e190c300652007a2` |
+| ifeval-codex-answers.jsonl | 541 | `fc2650b08fb87bef` |
+| ifeval-codex-verdicts.jsonl | 541 | `838f55ca6a6a24fc` |
 | bfcl-basalt-answers.jsonl | 1240 | `4ac238d09babcb45` |
 | bfcl-basalt-verdicts.jsonl | 1240 | `389aed67b18d0d58` |
 | bfcl-contour-matched-answers.jsonl | 1240 | `ed8b58a224521f39` |
@@ -118,6 +120,14 @@ outside reader needs both the stored answers and the scorer's verdict rows to re
 `publish_pub_arms.py` (one sanitizer, not two) and refuses partial arms. Nothing was masked in these
 two files: the scrubbed bytes are byte-identical to the runner/scorer output, which is also why the
 scorer's own verdict sidecar (SHA-1/16 `af8969ac6e95422f`) still names the same bytes.
+
+First **cloud-arm** artifacts (2026-11-09): `ifeval-codex-*` (541 rows each). The scrub masked
+nothing: the codex transport is stdin-only (the CLI gets no file tools, so local-path disclosure is
+mechanically impossible) and the shipped bytes are byte-identical to the runner and scorer output.
+Verification rescore of the published answers under `pub-ifeval-v1`: 514/541 = 95.0 % strict, one
+cell (`ifeval-1122`) different from the shipped verdict rows — inside the documented checker-noise
+band, so the published 515/541 = 95.2 % is pinned by the shipped verdict sidecar (SHA-1/16
+`8ca486048c590276`), exactly as the flake rule in `IFEVAL-RESULT.md` requires.
 
 Second bare arm (2026-11-09): `bfcl-basalt-*` (1240 rows each, answers byte-identical to the runner
 output, verdicts byte-identical to the scorer's output). This arm needed one new sanitizer rule, and
