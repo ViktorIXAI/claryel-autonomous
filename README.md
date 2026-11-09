@@ -15,6 +15,24 @@ same model  ·  same frozen task prompts  ·  same seeds
         only the software around the model changes
 ```
 
+## Documentation audit update — 2026-11-09 13:22 CET (issue #25)
+
+**Current-facing index correction, not a new benchmark or independent validation.**
+At this observation, the [public result digest](benchmarks/public/PUB-DIGEST.md)
+contains scored rows for **eight distinct task sets**: GSM8K, ARC-Easy,
+ARC-Challenge, HumanEval, GPQA-Diamond, MMLU-Pro, IFEval and BFCL. The
+six-set count in the earlier dated clarification below reflects an older
+publication snapshot; the digest, not a static README count, is the source
+for subsequent updates. BFCL currently has a published **bare local** row
+(1116/1240, 90.0%, checker `bfcl-ast-v1`); the [BFCL result](benchmarks/public/BFCL-RESULT.md)
+and digest must be checked for a subsequently completed contour arm. The
+reported 2026-11-09 11:59 CET start of a contour run is **not** a scored result.
+All numbers are repository-reported, not independently replayed in this audit.
+Identical task-file hashes do not alone establish matched invocation or
+scoring conditions. Historical rows and earlier dated explanations below are
+intentionally preserved; see [issue #25](https://github.com/ViktorIXAI/claryel-autonomous/issues/25)
+for outstanding verification and CI limitations.
+
 ## Documentation audit clarification — 2026-11-09 (issue #25)
 
 **Current-facing reading guide, not an independently reproduced benchmark result.**
