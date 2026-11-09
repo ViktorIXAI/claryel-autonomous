@@ -43,7 +43,7 @@ denominator, printed beside every percent. They are not counted as losses.
 |---|---|---|---|---|
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | **112 of 175** (63 functional unscored) | `8da729553c7c5710` | temp 0.7, `max_tokens` 2400, one request per task, no request seed, serve-default thinking; checker `lcb-exec-v1` | **60/112 = 53.6 %** |
 | contour 0.0.2.56, matched shape (first rung 2400 = the bare arm's ceiling, no seed, serve-default thinking, validator slot = `lcb-exec-v1`) | **112 of 175** (same 63 unscored) | `8da729553c7c5710` | leg 16:31:23 → 17:35:06 CET, 175/175 rows, 176 model calls, 1 gate fix, 0 ladder steps, 35 truncations, 3438 s engine time, 131.88 Wh; shape proven from the rows (`request_shape = bare-matched`, `first_rungs = [2400]`) | **54/112 = 48.2 %** |
-| codex `gpt-6.1-sol` | 175 | `8da729553c7c5710` | leg running from 16:59 CET (`parb-pub-lcb-codex`) — a partial arm publishes no percent | pending |
+| codex `gpt-6.1-sol` | **112 of 175** (same 63 unscored) | `8da729553c7c5710` | `codex exec` 0.166.0 (xhigh reasoning; sampling params hidden by the transport; stdin-only prompt; read-only sandbox), leg 16:59:27 → 19:36:36 CET (`parb-pub-lcb-codex`), 175/175 `finish=ok`, 0 empty, 0 duplicate ids, wall 9429 s (median 19.9 s/task, max 529 s); rollout audit: 0 tool calls; checker `lcb-exec-v1` | **105/112 = 93.8 %** |
 | grok-4.7 | 175 | `8da729553c7c5710` | — | suspended by owner quota, resumes 2026-11-12 |
 
 Cross-arm standard for this window is three arms (bare local / contour matched shape / ChatGPT
@@ -119,6 +119,47 @@ codex). Note the parity shape rule binds **2400** on this set, not 1200: the bar
 * Scoring cost: the 4170 hidden tests of the 112 stdin questions ran in **273 s** on the local
   host, and the verdicts file is deterministic — a second pass under the same contract reproduces
   it cell for cell (see the call-label correction below).
+
+## Codex arm (gpt-6.1-sol) — the cloud reference and the three-arm verdict
+
+* One clean leg, unit `parb-pub-lcb-codex`, started 16:59:27 CET by an earlier tick of this line
+  and finished **19:36:36 CET** (`codex done: ok=175 bad=0 wall 9429 s`); this tick scored and
+  published it. 175 rows, 175 unique ids, `finish=ok` on every row, **0 empty answers, 0
+  duplicates**, no restart, no quarantined file — `LEG-INCIDENTS.md` carries no entry for this arm.
+* **Transport disclosure, audited rather than assumed.** `codex exec -s read-only` is an agent
+  CLI: the request advertises tool definitions and a read-only sandbox, and the leg's cwd
+  (`~/pub-bench/livecodebench`) held the local arms' stored answer files. An earlier arms' README
+  said the codex transport "gets no file tools" — that was only ever true by behaviour. For this
+  leg it is checked: the 176 session rollout logs in the leg window contain **0 tool calls**
+  (`exec_command`, `function_call`, `local_shell`, `apply_patch` counts all zero) and **no
+  reference of any kind** to the workdir artifact paths. The arm is pure single-pass generation.
+  No token ceiling exists in the CLI transport (no `api_finish` field), which matters below.
+* **105/112 = 93.8 % strict** under `lcb-exec-v1` (the same battery, the same caps; the 63
+  `functional` questions unscored for every arm). Difficulty split **easy 26/26, medium 25/26,
+  hard 54/60**. Wall: mean 53.9 s/task, median 19.9 s, worst 529 s; cloud arm, no energy column.
+* **Three-arm paired verdict on the 112 scored ids** (`scripts/pub_bench_verdict_sign.py`, then
+  recomputed independently from the shipped verdict rows — the two counts agree):
+
+  | pair | discordant cells | exact two-sided sign test |
+  |---|---|---|
+  | bare 60 vs codex 105 | **0 bare-only, 45 codex-only** | p = 5.7e-14 |
+  | contour 54 vs codex 105 | **0 contour-only, 51 codex-only** | p = 8.9e-16 |
+  | bare 60 vs contour 54 | 8 bare-only, 2 contour-only | p = 0.109 (above, published null) |
+
+  Neither local arm passes a single cell codex fails: codex strictly dominates on this set, and
+  the 45-cell and 51-cell deltas sit ~40× above the set's ~2-cell single-draw resolution band, so
+  this is the line's first **measured non-null** cross-arm delta — the nulls on the contour axis
+  were about the harness, not about the model ceiling.
+* Codex's 7 losses are the **same hard cells every local arm also fails** (`lcb-abc392_d`,
+  `lcb-abc392_f`, `lcb-abc396_e`, `lcb-abc397_d`, `lcb-arc190_a`, `lcb-arc192_b`, `lcb-arc195_c`
+  — 1 medium, 6 hard): the set's genuine residual difficulty, not a codex-specific gap.
+* **Budget confound, stated:** the local arms spend 21 (bare) and 26 (contour) hard losses as
+  truncations at the pinned 2400-token ceiling, while the CLI transport has no ceiling the line
+  pinned. So the 40.2 pp bare-vs-codex gap is part model class and part the local budget — the
+  honest split is not measured on this leg and no decomposition is claimed. What is NOT the gap's
+  cause: harness (contour-vs-codex is strictly worse than bare-vs-codex, 51 vs 45), and
+  contamination asymmetry cannot be excluded in either direction — the window post-dates the local
+  model's public era, but no training cutoff is published for any brain here.
 
 ## Where the losses are
 
