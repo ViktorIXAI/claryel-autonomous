@@ -29,6 +29,12 @@
         "instructions_test.py": "d5258d03277cd333",
         "instructions_util.py": "8ad230f0b60767b4"
       },
+      "pin_history": [
+        {
+          "note": "first pin lacked the bench field the arm runner requires; corrected before any arm ran, no answer bytes exist against the old bytes",
+          "tasks_sha16": "f6fa761e8e85efa9"
+        }
+      ],
       "reference_response_file": {
         "name": "gpt4_sample.jsonl",
         "sha16": "ff57ec6d17688771"
@@ -43,7 +49,7 @@
         "python": "venv"
       },
       "tasks": 541,
-      "tasks_sha16": "f6fa761e8e85efa9"
+      "tasks_sha16": "2c672531577dcc33"
     },
     "mmlu-pro": {
       "tasks": 500,
