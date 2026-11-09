@@ -20,9 +20,17 @@
     "gpqa-diamond": {
       "url": "HF fingertap/GPQA-Diamond (mirror of Idavidrein/gpqa)",
       "raw_sha16": "71991ea576f83033"
+    },
+    "mmlu-pro": {
+      "url": "HF TIGER-Lab/MMLU-Pro test (500-row pre-registered stride-24 subset of 12032)",
+      "raw_sha16": "21420424edfbbbc2"
     }
   },
   "benches": {
+    "simplebench": {
+      "tasks": 0,
+      "fetch_error": "HTTP Error 401: Unauthorized"
+    },
     "ifeval": {
       "tasks": 0,
       "fetch_error": "HTTP Error 401: Unauthorized"
@@ -46,6 +54,10 @@
     "gpqa-diamond": {
       "tasks": 198,
       "tasks_sha16": "af73cc064d4d8529"
+    },
+    "mmlu-pro": {
+      "tasks": 500,
+      "tasks_sha16": "c64264aede2498c7"
     }
   }
 }
