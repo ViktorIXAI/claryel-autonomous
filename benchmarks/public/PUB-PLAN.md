@@ -171,3 +171,13 @@ still ship, because measurement honesty is not model development.
 * Scheduling effect: the deferred Grok queue (mmlu-pro 500, ifeval 541) frees the Grok transport and
   removes the serialization constraint on cloud legs; the local endpoint is unaffected, so bare and
   contour legs keep running at full rate during the window.
+
+## Deployment hold — issue #43 (2026-11-09 10:10 CET → 2026-11-10 10:10 CET)
+
+The owner mandated a 24-hour architecture deployment freeze (issue #43). This line honors it: no
+topology changes, no privilege/network/firewall changes, no container-VM migrations, no system-service
+configuration changes, and no restart of another profile's units. Issue #43 itself states the hold is
+not a blanket suspension of benchmark work, so benchmark legs keep running under their own existing
+policy: a leg unit is a transient user-scoped process this line starts and stops for its own arm, and
+it leaves no configuration behind. Anything that would change the architecture waits for the explicit
+owner go/no-go after 2026-11-10 10:10 CET; time expiry alone does not authorize it.
