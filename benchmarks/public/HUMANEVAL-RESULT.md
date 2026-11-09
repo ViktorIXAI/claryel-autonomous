@@ -143,6 +143,59 @@ room and all three became format-level losses, which is a call-parameter effect,
    answer fields give 0 leakage hits (the single pattern match is the word *bank* inside a restated
    task about a bank account).
 
+## Checker correction: contract `pytest-v2` (2026-11-09) — corrected re-score of all three arms; the grok arm will be scored at v2
+
+**Trigger (measured, not assumed).** During the in-flight grok leg (81/164 rows at write time), a
+dry run of the partial answers showed 14 of the 80 present rows failing with `SyntaxError`, and the
+failing rows were **correct Python wrapped in un-fenced prose** (grok answers in Russian with
+non-ASCII punctuation `—` and `→` around the code). Under pytest-v1 the extraction is "fenced
+blocks, else the whole text", so the prose was compiled as code. That is an extraction artifact,
+not a model result; scoring the grok arm at v1 would have published a number that measures the
+transport's answer style.
+
+**The new contract (versioned, never patched in place).** `scripts/pub_bench_exec.py` now ships
+`pytest-v2`: the v1 extraction stands whenever it composes to a syntactically valid program — so
+**every v1 pass stays a pass byte-identically** (monotone by construction; flips can only be 0→1).
+Only a syntactically broken v1 text triggers the window scan: the largest contiguous line window
+that (a) contains the task's `def <entry>` and (b) composes to a valid program. It is purely
+structural — gold is never read, the test suite is never used as extraction feedback — and
+fail-closed: no parseable entry-containing window means the v1 bytes stand, i.e. the original loss
+stands. Boundary, stated: a body-only completion wrapped in prose stays a loss (no `def` anchor to
+search around). The checker self-test now pins all four properties before any percent prints:
+prose-wrapped correct code passes, prose-wrapped wrong code still fails, v1-clean answers extract
+identically, prose without any entry def fails.
+
+**A/B re-score on the same stored answer bytes** (`scripts/pub_exec_v2_ab.py`, zero model calls,
+task sha unchanged `971d976289cd9357`):
+
+| arm | pytest-v1 (as-run, rows above stay published) | pytest-v2 (corrected) | flips (0→1 only) |
+|---|---|---|---|
+| brain-basalt | 158/164 = 96.3 % | **159/164 = 97.0 %** | `0124` (fenced answer carried a stray fence marker that broke v1 compilation; the function itself was complete and green) |
+| codex | 163/164 = 99.4 % | 163/164 = 99.4 % | none |
+| contour-0.0.2.56 matched | 155/164 = 94.5 % | **157/164 = 95.7 %** | `0064`, `0100` |
+
+**Corrected paired tables at v2** (exact two-sided sign test over discordant cells):
+
+| pair (v2) | W/L | discordant ids | p |
+|---|---|---|---|
+| codex vs basalt | 5W / 1L | codex-only `0032,0132,0134,0145,0147`; basalt-only `0064` | 0.219 |
+| basalt vs contour (parity) | 4W / 2L | basalt-only `0067,0094,0103,0130`; contour-only `0134,0147` | 0.688 |
+
+No verdict changes: the cloud-vs-local gap and the parity null were and stay inside the resolution
+floor; the correction moves the local numbers by at most one or two tasks. The v1 rows above and
+in `PUB-DIGEST.md` remain published **as-run** (bytes never edited); the corrected percents are
+added as new digest rows labelled `checker pytest-v2 (corrected offline rescore)`. The codex row
+needed no corrected digest row (identical number). Future contour arms stage the v2 checker bytes
+into the validator slot; published workspaces keep their pinned v1 copies, which is why their
+as-run numbers can still be reproduced exactly.
+
+**Sequencing correction.** The grok leg for HumanEval started at 04:07 CET on 2026-11-09, **in
+parallel** with the still-running GPQA grok leg on the same transport (not strictly behind it as
+the earlier Next section said); the parallelism costs throughput (~2× per-row time) and is stated
+here because cross-arm cost numbers are only valid inside one transport window. The grok arm will
+be published at `pytest-v2` (the v1 number for that arm would be a style artifact), with the
+transport caveat (prose-wrapped answers) named next to the percent.
+
 ## Next
 
 * grok leg (full 164) queued behind the GPQA grok leg on the same transport; its row and a

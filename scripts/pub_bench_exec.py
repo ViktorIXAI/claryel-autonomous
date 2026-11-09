@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""HumanEval execution checker (contract `pytest` v1) for the public benchmark line.
+"""HumanEval execution checker (contract `pytest-v2`) for the public benchmark line.
 
 Scoring is by running the model's code against the upstream `check(candidate)` tests inside a
 resource-limited child process (address, CPU, file-size and process-count rlimits, wall timeout,
@@ -10,6 +10,21 @@ result doc, not hidden. A task passes only if the child exits 0.
 The file refuses to score anything until its own self-test passes: the reference solution for
 HumanEval/0 must pass and a deliberately wrong completion must fail. A checker that cannot
 discriminate right from wrong is not allowed to publish a percent.
+
+Contract history (versioned, never patched in place):
+  pytest-v1 (2026-11-08): code extraction = fenced blocks, else the WHOLE answer text.
+  pytest-v2 (2026-11-09): v1 extraction is kept whenever it composes to a syntactically valid
+      program (so every v1 pass stays a pass, byte-identical extraction). Only when the v1 text
+      is syntactically broken does the checker look for the largest CONTIGUOUS line window of the
+      (fence-stripped) answer that still composes to a valid program AND contains the task's
+      entry-point definition. Motivation: the grok arm answers HumanEval with correct Python
+      wrapped in un-fenced prose (several non-ASCII punctuation chars), which v1 compiled as one
+      blob and scored as SyntaxError losses. The switch is purely structural - it never reads
+      gold, never uses the test suite as feedback, and fail-closes (no parseable entry-containing
+      window means the v1 bytes stand, i.e. the original loss stands). Body-only completions are
+      NOT prose-stripped: a window must contain `def <entry>`, so prose around a body-only answer
+      stays a loss. v1 percents stay published as-run; the v2 A/B rescore table lives in
+      benchmarks/public/HUMANEVAL-RESULT.md.
 
 Usage:
   pub_bench_exec.py selftest
@@ -25,7 +40,7 @@ import sys
 import tempfile
 
 TIMEOUT = 25
-EXEC_CHECKER = "pytest-v1"      # named in the digest row: this percent is not `number`/`letter`
+EXEC_CHECKER = "pytest-v2"      # named in the digest row: this percent is not `number`/`letter`
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pub_bench_score import call_label, digest_row, write_digest  # noqa: E402  (one digest format)
@@ -56,6 +71,43 @@ def compose(prompt, completion, entry):
     else:
         body = "\n".join(("    " + l if l.strip() else l) for l in lines)
     return "%s\n%s\n" % (prompt, body)
+
+
+def _compiles(src):
+    try:
+        compile(src, "<answer>", "exec")
+        return True
+    except (SyntaxError, ValueError):
+        return False
+
+
+def extract_code(ans, prompt, entry):
+    """pytest-v2 extraction, monotone over pytest-v1.
+
+    v1 bytes (fenced blocks, else whole text) stand whenever they compose to a syntactically
+    valid program. Only a syntactically broken v1 text triggers the window scan: the largest
+    contiguous line window that (a) contains `def <entry>` and (b) composes to a valid program.
+    Deterministic: windows are tried by descending width, ties by ascending start. Fail-closed:
+    no such window means the v1 bytes stand, so a v1 SyntaxError loss that carries no parseable
+    entry-containing window stays a loss."""
+    base = strip_code(ans)
+    if _compiles(compose(prompt, base, entry)):
+        return base
+    lines = base.splitlines()
+    n = len(lines)
+    anchor = re.compile(r"(?m)^\s*def\s+%s\b" % re.escape(entry or ""))
+    hits = [i for i, l in enumerate(lines) if anchor.match(l)]
+    if not hits:
+        return base
+    for width in range(n, 0, -1):
+        for i in range(0, n - width + 1):
+            j = i + width
+            if not any(i <= k < j for k in hits):
+                continue
+            cand = "\n".join(lines[i:j])
+            if _compiles(compose(prompt, cand, entry)):
+                return cand
+    return base
 
 
 def run_case(prompt, completion, test, entry):
@@ -96,8 +148,29 @@ def selftest():
     good, e1 = run_case(t["prompt"], gold, meta["test"], entry)
     bad, e2 = run_case(t["prompt"], "def has_close_elements(numbers, threshold):\n    return False",
                        meta["test"], entry)
-    print("selftest entry=%s reference_passes=%s wrong_passes=%s" % (entry, good, bad))
-    if good and not bad:
+    # pytest-v2 extraction pins (structural only; no gold text is used as an oracle here):
+    # 1. correct code wrapped in un-fenced prose carrying non-ASCII punctuation must still pass;
+    # 2. the same prose around a WRONG completion must still fail (no invented correctness);
+    # 3. monotone: a v1-clean answer must extract to byte-identical v1 bytes;
+    # 4. fail-closed: prose with no entry-point def anywhere extracts to the v1 bytes (loss).
+    wrong_src = "def has_close_elements(numbers, threshold):\n    return False"
+    # `gold` is a body-only completion; the v2 window anchor is the entry def, so build the
+    # full-function shape (stub line + body) the way real chat answers deliver it.
+    stub = "def has_close_elements(numbers, threshold):"
+    full_gold = stub + "\n" + gold.lstrip("\n")
+    wrap = ("The scan is pairwise — O(n^2) worst case; the fast path -> the code below.\n\n%s\n\n"
+            "Done — that is the whole function." % "%s")
+    p_g, _ = run_case(t["prompt"], extract_code(wrap % full_gold, t["prompt"], entry),
+                      meta["test"], entry)
+    p_b, _ = run_case(t["prompt"], extract_code(wrap % wrong_src, t["prompt"], entry),
+                      meta["test"], entry)
+    mono = extract_code(gold, t["prompt"], entry) == strip_code(gold)
+    closed = extract_code("prose only — no code", t["prompt"], entry) == strip_code("prose only — no code")
+    pins = p_g and not p_b and mono and closed
+    print("selftest entry=%s reference_passes=%s wrong_passes=%s "
+          "v2_pins(prose_pass=%s prose_wrong_fails=%s monotone=%s fail_closed=%s)"
+          % (entry, good, bad, p_g, not p_b, mono, closed))
+    if good and not bad and pins:
         print("checker self-test OK")
         return 0
     print("checker self-test FAILED: ref_err=%r wrong_err=%r" % (e1, e2))
@@ -137,7 +210,8 @@ def main():
             n += 1
             continue
         n += 1
-        passed, err = run_case(t["prompt"], strip_code(a["answer"]), meta["test"], entry)
+        passed, err = run_case(t["prompt"], extract_code(a["answer"], t["prompt"], entry),
+                               meta["test"], entry)
         ok += int(passed)
         if not passed:
             fails.append((tid, err))
