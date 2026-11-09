@@ -26,6 +26,9 @@ EXTRA_SCRIPTS = [
     # the scanner's vendored-file exception: byte-pinned upstream data may be excepted only for
     # metadata rules, only at the manifest-pinned sha16, and never for a credential rule
     "scripts/qa/secret_scan_exception_test.py",
+    # the publication scrub: masking must never edit a scored answer byte or break the JSON of the
+    # line it touched, and a path token proven from the pinned task file must survive verbatim
+    "scripts/qa/publish_scrub_test.py",
 ]
 EXTRA_ARG_SCRIPTS = [
     ["scripts/qa/docs_policy.py", "--push"],

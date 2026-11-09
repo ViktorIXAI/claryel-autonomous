@@ -100,6 +100,15 @@ exactly — asserted for every arm below.
 | ifeval-contour-matched-ws-identity.json | 43 | `e190c300652007a2` |
 | bfcl-basalt-answers.jsonl | 1240 | `4ac238d09babcb45` |
 | bfcl-basalt-verdicts.jsonl | 1240 | `389aed67b18d0d58` |
+| bfcl-contour-matched-answers.jsonl | 1240 | `ed8b58a224521f39` |
+| bfcl-contour-matched-verdicts.jsonl | 1240 | `b6945dd3616dff85` |
+| bfcl-contour-matched-results.jsonl | 1240 | `ce492b95c4565391` |
+| bfcl-contour-matched-ledger.jsonl | 1240 | `440433ec40a72e09` |
+| bfcl-contour-matched-stats.json | 28 | `17a16a334e8c18cc` |
+| bfcl-contour-matched-run-record.json | 45 | `8681385387e50f51` |
+| bfcl-contour-matched-plan.json | 1 | `53d9b22ba9d9a311` |
+| bfcl-contour-matched-bank-version.json | 6 | `f62925e5dfecc270` |
+| bfcl-contour-matched-ws-identity.json | 42 | `5cebff43c0f71fff` |
 
 First **bare-arm** artifacts (2026-11-09): `ifeval-basalt-*`. A bare arm has no ledger, and IFEval's
 percent is produced by the vendored upstream checker rather than by a number/letter match, so an
@@ -121,6 +130,15 @@ syntax and fails to parse, so the shipped arm would have stopped reproducing its
 contract test is `python3 scripts/publish_pub_bare_arm.py --selftest` (4 assertions: pinned token
 kept with the proof, same token still masked without it, a machine path still masked with it,
 hostname/key masking unchanged).
+
+Correction to that paragraph, measured the same day: the proof lived in the **bare-arm** publisher
+only. `publish_pub_arms.py` imported the same `scrub()` but never passed it the keep-set, so the first
+BFCL contour publication masked the token anyway and the swallow of `\"` made one published line
+unparseable. That attempt never reached a commit; the arm was re-published with `--tasks` wired into
+`publish_pub_arms.py` too, and the shared sanitizer now has its own contract test,
+`scripts/qa/publish_scrub_test.py` (13 checks, enrolled in `scripts/qa/static_checks.py`, with a
+control that shows the old pattern really did break the JSON). Full entry: `LEG-INCIDENTS.md`,
+"the publication scrub edited a scored answer".
 
 Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
 
@@ -148,10 +166,13 @@ Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
   same bytes is `068d359eb0af79b1`). Validator contract `bfcl-ast-v1`
   (`scripts/pub_bench_bfcl.py`, SHA-256/16 `7e6042ce813a2779` per `MANIFEST.json`
   -> `benches.bfcl.checker_files`), gold files pinned per category in the same manifest entry. Bare
-  arm only at the time of writing; its matched-shape contour leg is staged at
-  `~/parb-pub-contour/bfcl-matched` (ws bank sha16 `28dec47661235b11`, plan sha16
-  `d1c794bc40b9ed28`) through the builder's `validator=bfcl` slot and runs from 11:59 CET; its
-  artifacts land here under the same naming when the arm completes.
+  arm **1116/1240 = 90.0 %**; matched-shape contour arm **1122/1240 = 90.5 %** (sign test 29W/23L,
+  p=0.489 — a measured null), staged at `~/parb-pub-contour/bfcl-matched` (ws bank sha16
+  `28dec47661235b11`, plan sha16 `d1c794bc40b9ed28`) through the builder's `validator=bfcl` slot, leg
+  11:58:21 → 12:51:42 CET. The contour arm's `verdicts.jsonl` is not written by the publisher; it was
+  regenerated from the **published** answers file with the shipped checker and is byte-identical to
+  the arm's original verdict rows, which is the assertion that the shipped bytes still produce the
+  published percent.
 
 Index correction 2026-11-09, no measurement changes: the `arc-easy` and `gsm8k` lines above used to
 carry the sha16 of each arm's `*-bank-version.json` **file** (`055b650afd938842`,

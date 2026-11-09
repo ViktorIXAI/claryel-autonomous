@@ -16,12 +16,16 @@ answer-graded sets cannot.
 |---|---|---|---|---|---|---|
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | 541 (full set) | `2c672531577dcc33` | temp 0.7, `max_tokens` 1200, one request per task, no request seed, serve-default thinking | **467/541 = 86.3 %** | 481/541 = 88.9 % | 751/834 = 90.0 % |
 | contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `pub-ifeval-v1`) | 541 (full set) | `2c672531577dcc33` | same shape as the bare arm by the parity shape rule: one 1200-token rung = one request per task, temp 0.7 | **462/541 = 85.4 %** | 477/541 = 88.2 % | 743/834 = 89.1 % |
-| codex `gpt-6.1-sol` xhigh (subscription CLI, stdin transport) | 541 (full set) | `2c672531577dcc33` | transport does not expose sampling params | leg in flight, resumable by id | — | — |
+| codex `gpt-6.1-sol` xhigh (subscription CLI, stdin transport) | 541 (full set) | `2c672531577dcc33` | transport does not expose sampling params | **no percent published: the arm is incomplete.** The leg ran 08:24 → 12:39 CET and stopped by its own fail-closed transport rule after 440 ok rows; the ChatGPT subscription hit its usage limit (CLI: `You've hit your usage limit … or try again at 1:32 PM`). The 440 stored rows stay on disk and the leg is resumable by id | — | — |
 | grok-4.7 | 541 | `2c672531577dcc33` | — | suspended by owner quota, resumes 2026-11-12 | — | — |
 
 Cross-arm standard for this window is three arms (bare local / contour matched shape / ChatGPT
 codex): the Grok quota ran dry on the owner side on 2026-11-09 and no Grok percent is produced for
-this set before 2026-11-12.
+this set before 2026-11-12. As of 12:39 CET the same is true of the ChatGPT side for THIS set — the
+codex leg stopped at 440/541 rows on the subscription usage limit, so the IFEval cross-arm comparison
+is currently **two arms** and no ChatGPT IFEval number exists in this repository. The stopped leg and
+its purged rows are recorded in `LEG-INCIDENTS.md`; the arm is resumable by task id and a completed
+arm will be scored with the same `pub-ifeval-v1` contract.
 
 ## Bare arm — provenance and cost
 

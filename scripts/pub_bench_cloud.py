@@ -35,6 +35,15 @@ def cli_version(prog):
 def ask(arm, prompt, cwd):
     if arm == "codex":
         last = os.path.join(cwd, ".last-pub-codex.txt")
+        # Remove the previous call's output file BEFORE the call. `codex --output-last-message`
+        # only writes on a successful run, so a call that dies (rc!=0) would otherwise let this
+        # function read the PREVIOUS task's answer and store it under the current task's id.
+        # Measured 09.11 on the IFEval codex leg at 12:39: three rows came back `rc1` carrying the
+        # answer bytes of an earlier task (1493 chars, identical). They were flagged not-ok so no
+        # percent was affected, and they were purged before any resume (the public scorer keeps the
+        # FIRST row per id, so a poisoned row left in place would outlive the retry).
+        if os.path.exists(last):
+            os.remove(last)
         cmd = ["codex", "exec", "--skip-git-repo-check", "-s", "read-only",
                "-c", "model_reasoning_effort=xhigh", "-m", "gpt-6.1-sol",
                "--output-last-message", last, "-"]

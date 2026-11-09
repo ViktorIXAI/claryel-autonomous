@@ -117,6 +117,32 @@ for rel, sha1_16 in (("ifeval-contour-matched-answers.jsonl", "c947101b813d5da6"
     check("contour_arm_no_exception_on_drift_%s" % rel,
           mod.vendored_exception_for(arm_rel, "email_like", "0" * 16) is None)
 
+# 4c. the BFCL contour arm's exceptions (added with the item P0 contour parity publication).
+for rel, sha1_16 in (("bfcl-contour-matched-answers.jsonl", "fb457fd029ea0317"),
+                     ("bfcl-contour-matched-results.jsonl", "7a3841a09f723cd5")):
+    arm_rel = "benchmarks/public/arms/" + rel
+    disk16 = hashlib.sha1((ROOT / arm_rel).read_bytes()).hexdigest()[:16]
+    check("bfcl_contour_arm_exception_%s" % rel, excs.get(arm_rel) is not None)
+    check("bfcl_contour_arm_pin_matches_disk_%s" % rel,
+          excs.get(arm_rel, {}).get("sha16") == disk16 == sha1_16,
+          "scanner=%s disk=%s" % (excs.get(arm_rel, {}).get("sha16"), disk16))
+    # both token classes are excepted, and only those two
+    check("bfcl_contour_arm_path_token_excepted_%s" % rel,
+          mod.vendored_exception_for(arm_rel, "absolute_local_path", disk16) is not None)
+    check("bfcl_contour_arm_email_token_excepted_%s" % rel,
+          mod.vendored_exception_for(arm_rel, "email_like", disk16) is not None)
+    check("bfcl_contour_arm_no_exception_on_drift_%s" % rel,
+          mod.vendored_exception_for(arm_rel, "absolute_local_path", "0" * 16) is None)
+    check("bfcl_contour_arm_no_credential_exception_%s" % rel,
+          mod.vendored_exception_for(arm_rel, "generic-api-key", disk16) is None)
+# the fix must not have been an answer edit: the pinned upstream dataset-path token is still in the
+# published bytes. Built here so this file carries no home-directory literal of its own.
+bfcl_ans = ROOT / "benchmarks" / "public" / "arms" / "bfcl-contour-matched-answers.jsonl"
+bfcl_token = "/user/" + "home/datasets/" + "finance.csv"
+check("bfcl_contour_answer_bytes_untouched",
+      bfcl_ans.exists() and bfcl_token in bfcl_ans.read_text(encoding="utf-8"),
+      "pinned upstream dataset path must survive publication")
+
 # 5. the scanner summary surfaces suppressed hits instead of dropping them
 summary = mod.merge([], excepted)
 check("summary_counts_exceptions",

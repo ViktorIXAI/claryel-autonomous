@@ -38,3 +38,52 @@ later without invalidating anything already stored, because a rescore reads stor
 
 Effect on published tables: GPQA-Diamond and HumanEval stay three-arm (bare / contour matched shape /
 ChatGPT) until the Grok legs resume; the queued Grok legs (mmlu-pro 500, ifeval 541) are deferred.
+
+## 2026-11-09 12:39–12:40 CET — ChatGPT codex IFEval leg stopped by the subscription usage limit
+
+The IFEval codex leg (unit `parb-pub-ifeval-codex`, started 08:24:06) stopped by itself after
+**440 ok rows of 541**: three consecutive calls returned rc=1 with stderr
+`ERROR: You've hit your usage limit … or try again at 1:32 PM`, which is the fail-closed transport
+rule firing, not a model or scoring event. A probe at 13:08 reproduced the same error, so the
+subscription is out of quota for this window.
+
+Findings and handling:
+
+* **Three rows were poisoned and were purged.** `codex exec --output-last-message F` only writes the
+  output file on a successful call, and the runner read that file unconditionally, so the three rc=1
+  rows carried the *previous* task's answer bytes (1493 chars, byte-identical to `ifeval-3315`'s
+  answer) under their own ids. They were flagged `rc1` (not `ok`), so no percent was ever computed
+  from them, but leaving them in the file would have been a live trap: the public scorer keeps the
+  **first** row per id, so a later successful retry would have lost to the poisoned row. The three
+  rows were moved to `~/pub-bench/ifeval/pub-codex.rc1-stale.bak` (zero credit, never scored) and the
+  answer file now holds exactly the 440 `finish=ok` rows (backup `pub-codex.jsonl.pre-purge.bak`).
+* **Tooling fix in the same commit**: `scripts/pub_bench_cloud.ask()` now deletes the last-message
+  file before each codex call, so a failed call can never store another task's answer bytes.
+* The leg stays **resumable by id** (the runner's done-set skips only `finish=ok` ids, and the 440 ok
+  rows are untouched). No IFEval codex percent exists in this repository, and the IFEval cross-arm
+  table stays two-arm (bare / contour matched shape) until the leg finishes.
+* BFCL's codex arm was not started after this point: launching a 1240-prompt cloud leg into an
+  exhausted subscription would burn the endpoint window for nothing.
+
+## 2026-11-09 13:05–13:15 CET — the publication scrub edited a scored answer (caught pre-commit)
+
+The first publication of the BFCL contour arm ran `scripts/publish_pub_arms.py` with no pinned-task
+proof, so the scrub masked the upstream fake dataset path carried **inside an answer value**
+(`parallel_167`, the argument value `bfcl-ast-v1` matched against). Two harms, both real:
+
+* it edited the exact bytes the published checker verdict was computed from (AGENTS.md rule: answer
+  text is never edited), and
+* the path character class `[^\s",]*` also swallowed the JSON escape `\"` that closes the value, so
+  one published line stopped being parseable JSON at all — an auditor re-scoring the published
+  answers file would have hit a decode error on line 768 and lost a row.
+
+Handling: the regex class now stops at a backslash, `--tasks <pinned file>` was wired to the
+`pinned_path_tokens()` proof that already existed but was never called (the proof keeps a token that
+occurs verbatim in the byte-pinned task file, which no machine path can satisfy), and
+`scripts/qa/publish_scrub_test.py` (13 checks, enrolled in `scripts/qa/static_checks.py`) pins all
+four obligations plus a non-vacuity control that re-runs the old pattern and shows it really breaks
+the JSON. The arm was re-published with the proof (`upstream_pinned_path` ×4 masked-kept, 0 local-path
+masks on that file), every artifact line parses, and the PUBLISHED answers file re-scores to exactly
+the published **1122/1240** with the shipped checker. The first attempt's files were replaced before
+any commit and are kept locally as `*.first-attempt.bak` with zero credit; the already-published bare
+arm's files were checked and are unaffected (they re-score to 1116/1240).

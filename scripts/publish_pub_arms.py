@@ -11,6 +11,12 @@ paths -> <LOCAL_PATH>, key/endpoint material -> [REDACTED]. Answer text is never
 infrastructure fields are masked, and the script prints what it masked.
 
 Usage: publish_pub_arms.py <ws-dir> <arm-label> [--bench <bench>]
+                           [--srcset matched|frozen] [--tasks <pinned-file>]...
+
+`--tasks` names the byte-pinned task/bank file(s) behind the arm. A path-shaped token that occurs
+in them verbatim (a fake dataset path under a home directory, carried as an upstream function
+argument) is KEPT, because masking it would edit the exact bytes the published checker verdict was
+computed from. Its contract is `scripts/qa/publish_scrub_test.py`.
 """
 import hashlib
 import json
@@ -24,7 +30,13 @@ OUT_DIR = os.path.join(REPO, "benchmarks", "public", "arms")
 HOST = re.compile(r'"hostname"\s*:\s*"[^"]*"')
 LAN = re.compile(r'\b(?:10(?:\.[0-9]{1,3}){3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|'
                  r'172\.(?:1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3})\b')
-PATH = re.compile(r'(?:/home|/Users|/mnt|/srv|/opt)/[^\s",]*')
+# The class stops at a backslash as well as at a quote/comma/space. Inside a JSONL line an
+# answer is JSON-escaped, so a path in an answer value is followed by `\"` - without the
+# backslash in the class the match eats that escape and the replacement DELETES the closing
+# quote of the answer field, i.e. one published line stops being parseable JSON at all
+# (measured 09.11 on the BFCL contour arm, where the swallowed escape broke line 768 of the
+# published answers file and mangled the scored bytes of task `parallel_167`).
+PATH = re.compile(r'(?:/home|/Users|/mnt|/srv|/opt)/[^\s",\\]*')
 # Whole path-shaped token, prefix included: a token is only ever kept when THIS exact string
 # (e.g. a fake dataset path with a `/user` prefix) also occurs in the byte-pinned task file.
 # The leading `/?` is deliberate: without it the scan starts at `user` and the pin loses the
@@ -91,6 +103,16 @@ def main():
     srcset = "matched"
     if "--srcset" in sys.argv:
         srcset = sys.argv[sys.argv.index("--srcset") + 1]
+    # `--tasks <file>` (repeatable): the byte-pinned task/bank files behind this arm. A path-shaped
+    # token that occurs in them verbatim is an upstream data value, not a machine path: masking it
+    # would edit the bytes the published checker verdict was computed from. Without this proof the
+    # scrub masks it, which is what mangled `parallel_167` in the first BFCL contour publication.
+    task_files = [os.path.expanduser(sys.argv[i + 1])
+                  for i, a in enumerate(sys.argv) if a == "--tasks" and i + 1 < len(sys.argv)]
+    keep = pinned_path_tokens(*task_files) if task_files else ()
+    if keep:
+        print("pinned upstream path tokens kept: %d (%s)"
+              % (len(keep), ", ".join(sorted(keep)[:4]) + (" ..." if len(keep) > 4 else "")))
     ws = os.path.expanduser(ws)
     os.makedirs(OUT_DIR, exist_ok=True)
     rec_glob = ("run-record-pub-%s-contour-matched.json" % (bench or "*") if srcset == "matched"
@@ -126,7 +148,7 @@ def main():
         with open(out, "w", encoding="utf-8") as fh:
             for p in paths:
                 for line in open(p, encoding="utf-8"):
-                    s, hits = scrub(line.rstrip("\n"))
+                    s, hits = scrub(line.rstrip("\n"), keep)
                     for h in hits:
                         masked[h] = masked.get(h, 0) + 1
                     fh.write(s + "\n")

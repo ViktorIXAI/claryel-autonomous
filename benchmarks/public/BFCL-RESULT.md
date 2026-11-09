@@ -20,8 +20,8 @@ the second set (after IFEval) where a harness has a real validator slot to sit i
 | arm | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | 1240 (full set) | `00b74e037240792d` | temp 0.7, `max_tokens` 1200, one request per task, no request seed, serve-default thinking; checker `bfcl-ast-v1` | **1116/1240 = 90.0 %** |
-| contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `bfcl-ast-v1`) | 1240 | `00b74e037240792d` | same shape as the bare arm by the parity shape rule | leg in flight from 11:59 CET (unit `parb-pub-contour-bfcl-matched`, ws bank sha16 `28dec47661235b11`); no percent published from an unfinished arm |
-| codex `gpt-6.1-sol` (subscription CLI) | 1240 | `00b74e037240792d` | transport does not expose sampling params | not started (the codex slot is on the IFEval leg) |
+| contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `bfcl-ast-v1`) | 1240 (full set) | `00b74e037240792d` | same shape as the bare arm by the parity shape rule: one 1200-token rung = one request per task, temp 0.7, no request seed | **1122/1240 = 90.5 %** |
+| codex `gpt-6.1-sol` (subscription CLI) | 1240 | `00b74e037240792d` | transport does not expose sampling params | not started: the ChatGPT subscription hit its usage limit at 12:39 CET on 2026-11-09 while the IFEval codex leg was in flight (see `LEG-INCIDENTS.md`); a 1240-prompt cloud leg is not launched into an exhausted quota |
 | grok-4.7 | 1240 | `00b74e037240792d` | — | suspended by owner quota, resumes 2026-11-12 |
 
 Cross-arm standard for this window is three arms (bare local / contour matched shape / ChatGPT
@@ -91,13 +91,25 @@ applies here.
 ```
 python3 scripts/pub_bench_bfcl.py benchmarks/public/bfcl.tasks.jsonl \
         benchmarks/public/arms/bfcl-basalt-answers.jsonl
+python3 scripts/pub_bench_bfcl.py benchmarks/public/bfcl.tasks.jsonl \
+        benchmarks/public/arms/bfcl-contour-matched-answers.jsonl
 ```
 
-Shipped artifacts (`benchmarks/public/arms/`): `bfcl-basalt-answers.jsonl` (1240 rows, SHA-256/16
-`4ac238d09babcb45`) and `bfcl-basalt-verdicts.jsonl` (1240 rows, SHA-256/16 `389aed67b18d0d58`,
-byte-identical to the scorer's own output). The answers file is byte-identical to the runner's
-output; both are asserted at publish time by `scripts/publish_pub_bare_arm.py`, which refuses
-partial arms.
+Shipped artifacts (`benchmarks/public/arms/`): bare arm `bfcl-basalt-answers.jsonl` (1240 rows,
+SHA-256/16 `4ac238d09babcb45`) and `bfcl-basalt-verdicts.jsonl` (1240 rows, SHA-256/16
+`389aed67b18d0d58`, byte-identical to the scorer's own output). The answers file is byte-identical
+to the runner's output; both are asserted at publish time by `scripts/publish_pub_bare_arm.py`,
+which refuses partial arms.
+
+Contour arm (`bfcl-contour-matched-*`, published by `scripts/publish_pub_arms.py` with the
+`--tasks benchmarks/public/bfcl.tasks.jsonl` proof): `answers.jsonl` 1240 rows SHA-256/16
+`ed8b58a224521f39`, `verdicts.jsonl` 1240 rows `b6945dd3616dff85`, `results.jsonl` 1240 rows
+`ce492b95c4565391` (carries `gen.request_shape` on every row), `ledger.jsonl` 1240 rows
+`440433ec40a72e09`, `stats.json` `17a16a334e8c18cc`, `run-record.json` `8681385387e50f51`,
+`plan.json` `53d9b22ba9d9a311`, `bank-version.json` `f62925e5dfecc270`, `ws-identity.json`
+`5cebff43c0f71fff`. Both reproduce commands were run against the PUBLISHED files: they print
+1116/1240 and 1122/1240, and the published contour answers regenerate the shipped verdicts file
+byte-for-byte.
 
 One privacy note that is a byte fact, not an omission: one answer echoes a **fake dataset path
 carried by the pinned upstream task bytes themselves** (it is the argument value the gold requires
@@ -133,9 +145,79 @@ none is allowed"). It also shows the contour did **not** repair the three count 
 sample: at the matched shape the generic ladder does not re-draft a call list, so the parity row is
 expected to be near the bare row, and only the paired sign test will say whether it moves at all.
 
-The full 1240-id matched-shape leg started 11:59 CET (unit `parb-pub-contour-bfcl-matched`, GPU
-sampler `parb-pub-contour-bfcl-matched-samp` writing `gpu-power-pub-contour-bfcl-matched.csv`). No
-percent is published from an unfinished arm.
+The full 1240-id matched-shape leg ran 11:58:21 → 12:51:42 CET (unit `parb-pub-contour-bfcl-matched`,
+GPU sampler `parb-pub-contour-bfcl-matched-samp`), finished by itself with
+`PGR finished: records 1240, duration 3201 s, stop reason: none`, and is scored below.
+
+## Contour parity — measured (matched shape, the admissible row)
+
+Run record `pub-bfcl-contour-matched`, stamp `0.0.2.56` / contour behavior `2.56`, ws bank sha16
+`28dec47661235b11` (`pub-bfcl-1240`), plan sha16 `d1c794bc40b9ed28`, 1240 plan rows at rep 0 with the
+sp1 seed formula, harness git sha `b11e827a725ccc1034d3a167c8c60e0ce089b1d9`, `gen.request_shape` =
+`bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve
+default thinking)` on **all 1240 rows**, `first_rung` 1200, ladder `[1200]`.
+
+| quantity | bare arm | contour 0.0.2.56 (matched shape) |
+|---|---|---|
+| strict (checker `bfcl-ast-v1`) | 1116/1240 = 90.0 % | **1122/1240 = 90.5 %** |
+| rows / empty answers / truncations | 1240 / 0 / 0 | 1240 / 0 / 0 |
+| requests actually sent | 1240 (one per task) | 1240 (`model_calls` 1240 + `ladder_steps` 0) |
+| contour/repair events | n/a | **0** (0 gate fires, 0 fixes, 0 blocks, 0 ladder steps, `rows_with_any_event` = 0) |
+| prompt tokens | 482 672 | 482 672 (identical prompt bytes — the parity check on the input side) |
+| completion tokens | 227 379 | 224 470 (−1.3 %) |
+| summed engine seconds | 3075.1 | 3152.8 (+2.5 %, endpoint state, not harness work) |
+| wall window | 10:53:33 → 11:44:48 (3075 s) | 11:58:21 → 12:51:42 (3201 s) |
+| sampled GPU energy | 106.7 Wh (1213 samples / 3070 s) | 108.65 Wh (1262 samples / 3194 s, mean 122.5 W, GPU busy 0.88) |
+
+**Paired sign test over the matched ids: 29 contour wins / 23 contour losses, n = 52 discordant
+cells, exact two-sided p = 0.489.** 52 of 1240 cells (4.2 %) changed verdict between two arms of the
+same brain at the same shape and temperature, so the +6-cell (+0.5 pp) difference sits far inside
+this arm-to-arm noise: **the parity verdict on this set is a measured null, not a contour gain.**
+
+Per-category paired deltas (contour − bare): `irrelevance` +4 (208 vs 204), `multiple` +4 (188 vs
+184), `parallel_multiple` +3 (168 vs 165), `parallel` +1 (187 vs 186), `simple_python` −6 (371 vs
+377) — i.e. the sign of the category deltas is not consistent, which is what a noise-dominated null
+looks like.
+
+Discordant ids (W = contour-only pass, L = bare-only pass), with the loser's checker note:
+
+```
+W irrelevance_101(calls=12 gold=0)  W irrelevance_126(3/0)  W irrelevance_133(1/0)  W irrelevance_144(1/0)
+W irrelevance_164(1/0)  W irrelevance_183(1/0)  W irrelevance_32(1/0)  W irrelevance_99(1/0)
+L irrelevance_109(1/0)  L irrelevance_172(1/0)  L irrelevance_222(1/0)  L irrelevance_43(1/0)
+W multiple_10  W multiple_136  W multiple_153  W multiple_177  W multiple_52  W multiple_58  W multiple_68
+L multiple_164  L multiple_186  L multiple_40(calls=0 gold=1)
+W parallel_105  W parallel_119          L parallel_19
+W parallel_multiple_145  W parallel_multiple_153  W parallel_multiple_185  W parallel_multiple_31
+W parallel_multiple_33  W parallel_multiple_36  W parallel_multiple_43  W parallel_multiple_54
+L parallel_multiple_157  L parallel_multiple_177(calls=2 gold=3)  L parallel_multiple_32
+L parallel_multiple_53  L parallel_multiple_72(calls=0 gold=4)
+W simple_python_158  W simple_python_389  W simple_python_395  W simple_python_58
+L simple_python_152  L simple_python_166  L simple_python_177(calls=0 gold=1)  L simple_python_202
+L simple_python_235  L simple_python_270  L simple_python_283  L simple_python_285  L simple_python_331
+L simple_python_361
+```
+(For `W` rows the note is the bare arm's failure reason, for `L` rows the contour arm's. Every
+`unmatched gold call …` note means the required function name never appeared in the answer; the
+`calls=N gold=M` notes are call-count mismatches, and `gold=0` is the irrelevance shape "emitted a
+call where none is allowed".)
+
+What this row does and does not show:
+
+* **The harness did nothing, on purpose and verifiably.** Public tasks are category `P`; the contour
+  grammars are keyed to hard-bank families A–K, so the only path reachable is the generic token
+  ladder, and with the first rung at the bare arm's ceiling the ladder never escalates. Zero events
+  over 1240 rows is the census proof, not a claim.
+* **The harness cost is therefore near-zero but not zero.** Requests are identical (1240), prompt
+  tokens identical, completion tokens 1.3 % lower, sampled energy +1.8 % and summed engine time
+  +2.5 % — a second leg on the same box in a different window, so the honest reading is "cost not
+  measurable above endpoint-state noise", not "+1.8 % harness overhead".
+* **No repair was attempted on the 118 failing cells.** The failures are wrong function names, wrong
+  argument values and wrong call counts; at the matched shape nothing in the frozen runtime re-drafts
+  a call list against the task's own `functions` docs, so the contour cannot move this class. That is
+  the finding a contour round would have to attack (a docs-grounded call-list re-check would be a
+  new feature, and the hard-bank line is frozen — so it stays a stated gap, not something built
+  here).
 
 ## Honest caveats
 
@@ -144,9 +226,11 @@ percent is published from an unfinished arm.
   compliance of this brain today, not a held-out capability.
 * **Saturation is partial.** 90.0 % overall, but no category is at the ceiling, so headroom is
   measurable here — unlike ARC/GSM8K, where the ceiling hides the contour effect.
-* **Resolution floor.** At n=1240 one cell is 0.08 pp, so percent differences of one or two cells
-  between the contour and bare arms will be meaningless; the paired sign test over the matched
-  (task, id) cells with the discordant ids listed is the instrument for the contour row.
+* **Resolution floor — now measured, not assumed.** The two matched-shape arms of this brain
+  disagree on 52 of 1240 cells (4.2 %): that is this set's single-draw noise floor at temp 0.7, and
+  it is 8.7× the +6-cell contour delta. Any BFCL claim smaller than ~1 pp at n=1240 is noise; the
+  paired sign test with the discordant ids listed above is the instrument, and the honest verdict on
+  this set is a null.
 * **Request-shape confound.** Only a matched-shape contour leg (first rung 1200, serve-default
   thinking, temp 0.7, same seed policy) is admissible beside this row; an escalation-shape contour
   row would be a request-shape cost, not a contour effect, and would be marked superseded.

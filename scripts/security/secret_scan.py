@@ -124,6 +124,38 @@ VENDOR_EXCEPTIONS = [
                "matches. (Record does not quote the tokens.)",
     },
     {
+        # Published ARM bytes (contour leg), same token classes as the bare arm above: model output
+        # that echoes the pinned upstream task data verbatim as argument VALUES the checker matched.
+        # Added with the BFCL contour publication (2026-11-09): the answers file of that arm re-scores
+        # to the published 1122/1240, which is only true because these bytes were NOT sanitized.
+        "path": "benchmarks/public/arms/bfcl-contour-matched-answers.jsonl",
+        "sha16": "fb457fd029ea0317",
+        "rules": ("absolute_local_path", "email_like"),
+        "pin": "benchmarks/public/arms/README.md index row `bfcl-contour-matched-answers.jsonl` "
+               "(that index prints SHA-256/16 ed8b58a224521f39; this pin is SHA-1/16, the "
+               "convention this scanner uses - both name the same bytes)",
+        "why": "the contour arm's answers are model output on the same pinned BFCL v4 tasks, so they "
+               "carry the same upstream placeholder mailboxes and the same fake dataset path under a "
+               "home directory (proved by the publisher's `--tasks` proof: each token also occurs in "
+               "benchmarks/public/bfcl.tasks.jsonl, SHA-1/16 068d359eb0af79b1). Masking them would "
+               "edit the bytes the published 1122/1240 verdicts were computed from. No "
+               "credential-class rule matches. (Record does not quote the tokens.)",
+    },
+    {
+        # The same arm's results file: it carries the same answer bytes plus the harness accounting,
+        # which is what makes the row's shape auditable, so it ships unsanitized in the answer field.
+        "path": "benchmarks/public/arms/bfcl-contour-matched-results.jsonl",
+        "sha16": "7a3841a09f723cd5",
+        "rules": ("absolute_local_path", "email_like"),
+        "pin": "benchmarks/public/arms/README.md index row `bfcl-contour-matched-results.jsonl` "
+               "(that index prints SHA-256/16 ce492b95c4565391; this pin is SHA-1/16, the "
+               "convention this scanner uses - both name the same bytes)",
+        "why": "same token classes as the answers file of the same arm (the results row carries the "
+               "answer alongside the gate/token accounting and `gen.request_shape`); the two "
+               "occurrences are the pinned upstream placeholder mailbox and the pinned upstream "
+               "dataset path. No credential-class rule matches. (Record does not quote the tokens.)",
+    },
+    {
         # Published ARM bytes (contour leg): model output, not vendored data.
         "path": "benchmarks/public/arms/ifeval-contour-matched-answers.jsonl",
         "sha16": "c947101b813d5da6",

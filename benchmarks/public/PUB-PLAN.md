@@ -111,12 +111,26 @@ the wrong thing.
 
 * **brain-basalt** — our stable local stack: `qwen3.8-flash-next-iq3_s-basalt` on P2005 (24 GB
   class GPU, IQ3_S quant), no contour (contour gates are keyed to hard-bank task classes).
-* **codex** — ChatGPT `gpt-6.1-sol`, xhigh reasoning, via the documented CLI transport.
+* **codex** — ChatGPT `gpt-6.1-sol`, xhigh reasoning, via the documented CLI transport. Availability
+  measured 2026-11-09 12:39 CET: the subscription hit its usage limit mid-leg (CLI says retry at
+  13:32 CET), the IFEval leg stopped at 440/541 rows and stays resumable by id with no percent. A
+  cloud arm is never launched into an exhausted subscription; when a codex leg stops that way it is
+  recorded in `LEG-INCIDENTS.md` like any other leg stop.
 * **grok** — `grok-4.7` via the documented CLI transport.
 * **contour-0.0.2.56** — the frozen runtime, run as the item P0 parity arm on **every** published
   set (owner request 2026-11-08, which supersedes the earlier plan to restrict it to the
   format/protocol-sensitive sets 4 and 9). On the answer-graded classic sets the parity row is
   expected to show a harness that never fires; the accounting beside the percent is the finding.
+  **Status 2026-11-09: item P0 is complete for every set that carries a bare row** — gsm8k, arc-easy,
+  arc-challenge, gpqa-diamond, humaneval, mmlu-pro, ifeval and bfcl each have a matched-shape contour
+  row. Every paired verdict on the line is a measured null: `bare vs contour (matched shape)` gives
+  gsm8k 2W/1L p=1.000, arc-easy 1 discordant id p=1.000, arc-challenge 3W/1L p=0.625, gpqa-diamond
+  16W/28L (+6.1 pp for the contour leg, the largest delta on the line) p=0.096, humaneval 6W/3L
+  p=0.508, mmlu-pro 17W/14L p=0.720, ifeval 16W/21L p=0.511, bfcl 29W/23L p=0.489. The contour event
+  census is 0 on every public set, so the frozen harness changes nothing on public tasks by
+  construction; what changes a public-set percent on this endpoint is the REQUEST SHAPE (GPQA +24.2 pp,
+  ARC-Challenge +2.7 pp between shapes), which is why shape parity, not contour gain, is the finding
+  this line owns. Next work is the ladder (LiveCodeBench), not another parity leg.
 
 ## First measured row
 
