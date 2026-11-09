@@ -38,7 +38,7 @@ def sha16(path):
     return hashlib.sha256(open(path, "rb").read()).hexdigest()[:16]
 
 
-def publish(src, dst):
+def publish(src, dst, keep=()):
     """Scrub line by line; report what was masked. Refuses a file with blank answer rows."""
     masked, kept, blank = {}, 0, 0
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -46,7 +46,7 @@ def publish(src, dst):
         for line in open(src, encoding="utf-8"):
             if not line.strip():
                 continue
-            clean, hits = scrub(line.rstrip("\n"))
+            clean, hits = scrub(line.rstrip("\n"), keep)
             for h in hits:
                 masked[h] = masked.get(h, 0) + 1
             out.write(clean + "\n")
@@ -54,13 +54,66 @@ def publish(src, dst):
     return kept, masked
 
 
+def selftest():
+    """The keep-list must be a proof, not an off switch (contract test, no network).
+
+    Both path literals are built by concatenation on purpose: a sanitizer test that carries the
+    pattern itself trips the very rule it documents (the same reason `secret_scan.py`'s exception
+    records do not quote the token they suppress).
+    """
+    upstream = "/user" + "/home" + "/datasets/finance.csv"     # the token pinned in bfcl.tasks.jsonl
+    machine = "/" + "home" + "/someone/notes.txt"              # a real machine path shape
+    keep = {upstream}
+    bad = []
+
+    a, ha = scrub('{"answer": "f(p=\\"%s\\")"}' % upstream, keep)
+    if upstream not in a or "<LOCAL_PATH>" in a or "upstream_pinned_path" not in ha:
+        bad.append("pinned upstream token was not kept: %r" % a)
+
+    b, hb = scrub('{"answer": "f(p=\\"%s\\")"}' % upstream)
+    if upstream in b or "local_path" not in hb:
+        bad.append("without --tasks proof the token must still be masked: %r" % b)
+
+    c, hc = scrub('{"answer": "see %s"}' % machine, keep)
+    if machine in c or "local_path" not in hc:
+        bad.append("a machine path was NOT masked while a keep-list was active: %r" % c)
+
+    d, hd = scrub('{"hostname": "box1", "api_key": "abc"}', keep)
+    if "<HOST>" not in d or "[REDACTED]" not in d:
+        bad.append("infrastructure fields stopped being masked: %r" % d)
+
+    pinned = _ppa.pinned_path_tokens(os.path.join(REPO, "benchmarks", "public",
+                                                  "bfcl.tasks.jsonl"))
+    if upstream not in pinned:
+        bad.append("the pinned task file no longer carries the upstream token the keep-list claims")
+
+    print("BARE-ARM SANITIZER SELFTEST %s" % ("PASS" if not bad else "FAIL"))
+    for m in bad:
+        print("  " + m)
+    return not bad
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("answers")
-    ap.add_argument("label")
+    ap.add_argument("answers", nargs="?")
+    ap.add_argument("label", nargs="?")
     ap.add_argument("--verdicts")
     ap.add_argument("--min-rows", type=int, default=1)
+    ap.add_argument("--tasks", action="append", default=[],
+                    help="byte-pinned task file; a path token that occurs in it is upstream "
+                         "benchmark data (an argument value the checker matched), not a machine "
+                         "path, so it is kept and reported instead of masked")
+    ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
+    if a.selftest:
+        return 0 if selftest() else 1
+    if not (a.answers and a.label):
+        print(__doc__)
+        return 2
+    keep = _ppa.pinned_path_tokens(*[os.path.expanduser(t) for t in a.tasks]) if a.tasks else ()
+    if keep:
+        print("upstream-pinned path tokens admitted: %d (proven from %s)"
+              % (len(keep), ", ".join(os.path.basename(t) for t in a.tasks)))
 
     rows = [json.loads(l) for l in open(a.answers, encoding="utf-8") if l.strip()]
     ids = [r.get("id") for r in rows]
@@ -78,13 +131,15 @@ def main():
         sys.exit("REFUSING: %d/%d rows did not finish ok" % (bad, len(rows)))
 
     dst = os.path.join(OUT_DIR, "%s-answers.jsonl" % a.label)
-    kept, masked = publish(a.answers, dst)
-    print("wrote %s lines=%d sha16=%s masked=%s" % (dst, kept, sha16(dst), masked or "nothing"))
+    kept, masked = publish(a.answers, dst, keep)
+    same_a = (open(dst, "rb").read() == open(a.answers, "rb").read())
+    print("wrote %s lines=%d sha16=%s masked=%s bytes_identical_to_runner_output=%s"
+          % (dst, kept, sha16(dst), masked or "nothing", same_a))
     outs = [(dst, kept)]
 
     if a.verdicts:
         vdst = os.path.join(OUT_DIR, "%s-verdicts.jsonl" % a.label)
-        vkept, vmasked = publish(a.verdicts, vdst)
+        vkept, vmasked = publish(a.verdicts, vdst, keep)
         same = (open(vdst, "rb").read() == open(a.verdicts, "rb").read())
         print("wrote %s lines=%d sha16=%s masked=%s bytes_identical_to_scorer_output=%s"
               % (vdst, vkept, sha16(vdst), vmasked or "nothing", same))

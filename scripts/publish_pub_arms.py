@@ -25,9 +25,35 @@ HOST = re.compile(r'"hostname"\s*:\s*"[^"]*"')
 LAN = re.compile(r'\b(?:10(?:\.[0-9]{1,3}){3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|'
                  r'172\.(?:1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3})\b')
 PATH = re.compile(r'(?:/home|/Users|/mnt|/srv|/opt)/[^\s",]*')
+# Whole path-shaped token, prefix included: a token is only ever kept when THIS exact string
+# (e.g. a fake dataset path with a `/user` prefix) also occurs in the byte-pinned task file.
+# The leading `/?` is deliberate: without it the scan starts at `user` and the pin loses the
+# leading slash, so the arm's token and the pinned token would not be the same string.
+PATH_TOKEN = re.compile(r'/?[A-Za-z0-9_.\-]*(?:/home|/Users|/mnt|/srv|/opt)/[^\s",\\]*')
 
 
-def scrub(line):
+def pinned_path_tokens(*files):
+    """Path-shaped tokens that live in byte-pinned upstream data (task/bank files).
+
+    Why this exists: pinned public benchmark data carries fake paths (an upstream function
+    argument like a dataset path under a home directory), and an arm's answer can echo that token
+    verbatim as an argument value. Masking it would edit the exact bytes the published checker
+    verdict was computed from, and a masked token is not valid call syntax, so the published arm
+    would stop reproducing its own percent. A token is admissible here only if the pinned file
+    itself contains it — a machine path can never satisfy that test.
+    """
+    out = set()
+    for f in files:
+        text = open(f, encoding="utf-8", errors="replace").read()
+        out.update(PATH_TOKEN.findall(text))
+    return {t for t in out if t}
+
+
+def scrub(line, keep=()):
+    """Mask infrastructure fields. `keep` = tokens proven to be pinned upstream data.
+
+    Kept tokens are reported as `upstream_pinned_path` so a scan never silently loses one.
+    """
     hits = []
     if HOST.search(line):
         hits.append("hostname")
@@ -35,9 +61,19 @@ def scrub(line):
     if LAN.search(line):
         hits.append("lan_ip")
         line = LAN.sub("<LAN_IP>", line)
+    restored = []
+    for i, tok in enumerate(sorted(keep, key=len, reverse=True)):
+        n = line.count(tok)
+        if n:
+            hits.extend(["upstream_pinned_path"] * n)
+            ph = "\x00KEEP%d\x00" % i
+            line = line.replace(tok, ph)
+            restored.append((ph, tok))
     if PATH.search(line):
         hits.append("local_path")
         line = PATH.sub("<LOCAL_PATH>", line)
+    for ph, tok in restored:
+        line = line.replace(ph, tok)
     line = re.sub(r'("api_key"\s*:\s*)"[^"]*"', r'\1"[REDACTED]"', line)
     return line, hits
 

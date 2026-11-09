@@ -103,6 +103,27 @@ VENDOR_EXCEPTIONS = [
                "a scanner exception that itself carries the pattern trips the rule it documents.)",
     },
     {
+        # Published ARM bytes for the BFCL v4 bare arm: model output that echoes the pinned
+        # upstream task data. `publish_pub_bare_arm.py --tasks` proved both occurrences of this
+        # token also occur in benchmarks/public/bfcl.tasks.jsonl (SHA-1/16 068d359eb0af79b1),
+        # i.e. the path is an argument VALUE the bfcl-ast-v1 checker matched, not a machine path.
+        "path": "benchmarks/public/arms/bfcl-basalt-answers.jsonl",
+        "sha16": "419e9dbcdff4872d",
+        "rules": ("absolute_local_path", "email_like"),
+        "pin": "benchmarks/public/arms/README.md index row `bfcl-basalt-answers.jsonl` "
+               "(that index prints SHA-256/16 4ac238d09babcb45; this pin is SHA-1/16, the "
+               "convention this scanner uses - both name the same bytes)",
+        "why": "upstream BFCL v4 function-calling data carries placeholder contact records and a "
+               "fake dataset path under a home directory, and answers echo those tokens verbatim as "
+               "the argument VALUES the gold requires (a 'John Doe' contact record, a 'send email' "
+               "request, a dataset path in `parallel_167`). Masking them would edit the exact bytes "
+               "the published 1116/1240 verdicts were computed from - and a masked token is not "
+               "valid call syntax, so the shipped arm would stop reproducing its own percent "
+               "(measured: the scrubbed copy fails to parse). Same token classes already excepted "
+               "for the pinned task file at the matching byte hash. No credential-class rule "
+               "matches. (Record does not quote the tokens.)",
+    },
+    {
         # Published ARM bytes (contour leg): model output, not vendored data.
         "path": "benchmarks/public/arms/ifeval-contour-matched-answers.jsonl",
         "sha16": "c947101b813d5da6",

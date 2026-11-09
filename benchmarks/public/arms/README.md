@@ -98,6 +98,8 @@ exactly — asserted for every arm below.
 | ifeval-contour-matched-plan.json | 1 | `9c505e0d46010d59` |
 | ifeval-contour-matched-bank-version.json | 6 | `18ea68bc69082099` |
 | ifeval-contour-matched-ws-identity.json | 43 | `e190c300652007a2` |
+| bfcl-basalt-answers.jsonl | 1240 | `4ac238d09babcb45` |
+| bfcl-basalt-verdicts.jsonl | 1240 | `389aed67b18d0d58` |
 
 First **bare-arm** artifacts (2026-11-09): `ifeval-basalt-*`. A bare arm has no ledger, and IFEval's
 percent is produced by the vendored upstream checker rather than by a number/letter match, so an
@@ -107,6 +109,18 @@ outside reader needs both the stored answers and the scorer's verdict rows to re
 `publish_pub_arms.py` (one sanitizer, not two) and refuses partial arms. Nothing was masked in these
 two files: the scrubbed bytes are byte-identical to the runner/scorer output, which is also why the
 scorer's own verdict sidecar (SHA-1/16 `af8969ac6e95422f`) still names the same bytes.
+
+Second bare arm (2026-11-09): `bfcl-basalt-*` (1240 rows each, answers byte-identical to the runner
+output, verdicts byte-identical to the scorer's output). This arm needed one new sanitizer rule, and
+it is a **proof, not an off switch**: the publisher takes `--tasks <pinned task file>` and keeps a
+path-shaped token only when that exact token also occurs in the byte-pinned task file — i.e. when it
+is upstream benchmark data (an argument value the `bfcl-ast-v1` checker matched) rather than a
+machine path. Kept tokens are reported as `upstream_pinned_path`, never silently. Measured reason it
+matters: masking that token in `parallel_167` produced `/user<LOCAL_PATH>`, which is not valid call
+syntax and fails to parse, so the shipped arm would have stopped reproducing its own 1116/1240. The
+contract test is `python3 scripts/publish_pub_bare_arm.py --selftest` (4 assertions: pinned token
+kept with the proof, same token still masked without it, a machine path still masked with it,
+hostname/key masking unchanged).
 
 Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
 
@@ -130,6 +144,11 @@ Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
   `benchmarks/public/MANIFEST.json`. No contour arm for this set yet at the time of the bare-arm
   publication; its matched-shape leg runs 2026-11-09 from 08:55 CET (ws bank sha16
   `283616a959c7df24`) and its artifacts land here under the same naming.
+* `bfcl` 1240 ids `00b74e037240792d` (SHA-256/16, the digest column's convention; SHA-1/16 of the
+  same bytes is `068d359eb0af79b1`). Validator contract `bfcl-ast-v1`
+  (`scripts/pub_bench_bfcl.py`, SHA-256/16 `7e6042ce813a2779` per `MANIFEST.json`
+  -> `benches.bfcl.checker_files`), gold files pinned per category in the same manifest entry. Bare
+  arm only at the time of writing; its matched-shape contour leg needs the `validator=bfcl` slot.
 
 Index correction 2026-11-09, no measurement changes: the `arc-easy` and `gsm8k` lines above used to
 carry the sha16 of each arm's `*-bank-version.json` **file** (`055b650afd938842`,

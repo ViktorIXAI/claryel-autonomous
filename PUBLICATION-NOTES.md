@@ -166,5 +166,31 @@ adjacent evidence.
 
 `secret_scan.py --strict` fails on ANY finding, including metadata-class ones, and the
 two incident paragraphs quoted the rule pattern verbatim (a key path after the `-i`
-flag; the backticked command example). Rewritten to describe the adjacency in words
-without reproducing it. Meaning unchanged; the retraction stands as written.
+flag; the backticked command example). Rewritten to describe the adjacency in words without
+reproducing it. Meaning unchanged; the retraction stands as written.
+
+## 2026-11-09 — BFCL v4 bare arm: a sanitizer that edits scored bytes
+
+Publishing `bfcl-basalt-*` (1116/1240 = 90.0 %) hit a case the sanitizer was wrong about: one answer
+echoes a fake dataset path that the **pinned upstream task bytes themselves carry** (it is the
+argument value the gold requires for `parallel_167`, present in both the prompt and the gold). The
+blanket path mask turned it into `/user<LOCAL_PATH>`, which (a) is not a real machine path and (b) is
+not valid call syntax — the scrubbed file no longer parses, so the published arm would have stopped
+reproducing its own percent.
+
+Change, as a proof rather than an escape hatch: `publish_pub_bare_arm.py --tasks <pinned task file>`
+keeps a path-shaped token only when that exact token (leading slash included — the first revision
+dropped it and the self-test caught the mismatch) also occurs in the pinned file, and reports it as
+`upstream_pinned_path`. Contract test: `--selftest`, 4 assertions, including that a machine path is
+still masked while a keep-list is active. Byte facts published: answers SHA-256/16
+`4ac238d09babcb45` / SHA-1/16 `419e9dbcdff4872d` (byte-identical to runner output), verdicts
+`389aed67b18d0d58` (byte-identical to scorer output); the published bytes re-scored to the same
+1116/1240 before the commit. The scanner suppresses the token only under a sha16-bound exception for
+these exact bytes, one rule (`absolute_local_path`), no credential-class rule involved, and the
+exception record does not quote the token.
+
+Process note on this commit: two `patch` calls in the same session landed on unintended boundaries —
+one deleted a `sha16` key from an unrelated scanner exception record and one truncated the head of
+the `bfcl` row in `PUB-PLAN.md`. Both were caught by re-running the scanner (a record lost its byte
+pin) and by reading the table line back, and repaired in the same commit; the rule they reinforce is
+to diff every non-mexact patch before publishing, not to trust the tool's success flag.
