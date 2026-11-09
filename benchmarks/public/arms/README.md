@@ -148,7 +148,10 @@ Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
   same bytes is `068d359eb0af79b1`). Validator contract `bfcl-ast-v1`
   (`scripts/pub_bench_bfcl.py`, SHA-256/16 `7e6042ce813a2779` per `MANIFEST.json`
   -> `benches.bfcl.checker_files`), gold files pinned per category in the same manifest entry. Bare
-  arm only at the time of writing; its matched-shape contour leg needs the `validator=bfcl` slot.
+  arm only at the time of writing; its matched-shape contour leg is staged at
+  `~/parb-pub-contour/bfcl-matched` (ws bank sha16 `28dec47661235b11`, plan sha16
+  `d1c794bc40b9ed28`) through the builder's `validator=bfcl` slot and runs from 11:59 CET; its
+  artifacts land here under the same naming when the arm completes.
 
 Index correction 2026-11-09, no measurement changes: the `arc-easy` and `gsm8k` lines above used to
 carry the sha16 of each arm's `*-bank-version.json` **file** (`055b650afd938842`,

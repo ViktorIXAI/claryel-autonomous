@@ -19,7 +19,7 @@ loaded by path), i.e. the same bytes that decided the bare row. If the frozen ru
 serve a public class at all, that refusal is the published finding — no contour row is faked.
 
 Usage: pub_bench_contour_ws.py <bench> <limit> [shape=frozen|bare] [out-dir]
-                               [validator=score|exec|ifeval]
+                               [validator=score|exec|ifeval|bfcl]
 
 `validator=exec` puts the pytest-v1 execution checker (scripts/pub_bench_exec.py) in the validator
 slot, which is what HumanEval's bare row was scored with; the builder runs that checker's self-test
@@ -27,7 +27,10 @@ and refuses to stage if it fails. `validator=ifeval` puts the IFEval contract `p
 (scripts/pub_bench_ifeval.py + the vendored upstream checker) in the slot, which is what IFEval's
 bare row is scored with: the builder runs that checker's own two gates (41-test upstream unit suite
 + the recorded reference band) through the pinned venv interpreter and refuses to stage if they
-fail. Default `score` keeps `pub-checkers-v2`.
+fail. `validator=bfcl` puts the BFCL contract `bfcl-ast-v1` (scripts/pub_bench_bfcl.py) in the slot,
+which is what BFCL's bare row is scored with; its self-test is re-run at staging time and the
+task's own `functions` docs and `gold` calls are carried into every bank row, because the AST
+matcher scores against them. Default `score` keeps `pub-checkers-v2`.
 """
 import hashlib
 import json
@@ -181,6 +184,44 @@ CHECK["P"] = check_public
 '''
 
 
+# Variant for function-calling sets (BFCL v4). The validator slot must hold the SAME bytes that
+# scored the bare arm: the AST matcher over the task's own `functions` docs and `gold` call list.
+# The task's docs and gold therefore have to reach the shim, which is why the staging builder
+# carries `functions` and `category` through into every bank row for this contract.
+SHIM_BFCL = '''
+
+# ---- public-benchmark validator shim, BFCL variant (workspace-only, written by
+# ---- pub_bench_contour_ws.py). Contract: bfcl-ast-v1 (scripts/pub_bench_bfcl.py). ----
+# Category "P" is a public benchmark task: gate_run's contour routing is keyed to the hard-bank
+# families A..K, so a "P" task reaches only the generic ladder path and no family grammar is
+# grafted onto a public prompt. The verdict is the SAME AST match that scored the bare arm:
+# `score_entry(task, answer)` over the task's own `functions` docs and `gold` call list.
+# format_ok is fixed to 1 because the public contract has no separate format axis, so the harness
+# strict rule (content == 1.0 and format_ok) is exactly the checker's verdict.
+import hashlib as _shim_hashlib
+import importlib.util as _shim_ilu
+_BFCL_PATH = @@PUBPATH@@
+_spec = _shim_ilu.spec_from_file_location("pub_bench_bfcl_shim", _BFCL_PATH)
+PBFCL = _shim_ilu.module_from_spec(_spec)
+_spec.loader.exec_module(PBFCL)
+PUB_CHECKER_CONTRACT = PBFCL.BFCL_CHECKER
+PUB_SCORER_SHA16 = _shim_hashlib.sha256(open(_BFCL_PATH, "rb").read()).hexdigest()[:16]
+
+
+def check_public(t, text):
+    """AST-match verdict mapped onto the harness score slots (documented above)."""
+    if not t.get("functions"):
+        return None, None, ["pub_unscored_checker:no_functions"]
+    ok, why = PBFCL.score_entry(t, text or "")
+    if ok:
+        return 1.0, 1, ["pub:bfcl_ast_match"]
+    return 0.0, 1, ["pub:bfcl_ast_fail:%s" % str(why)[:160]]
+
+
+CHECK["P"] = check_public
+'''
+
+
 def sha16(path):
     return hashlib.sha256(open(path, "rb").read()).hexdigest()[:16]
 
@@ -201,16 +242,23 @@ def main():
     # answer-graded sets that is the number/letter/exact contract; for HumanEval it is the
     # pytest-v1 execution checker, which is a different module and a different contract id.
     validator = (sys.argv[5] if len(sys.argv) > 5 else "score").strip().lower()
-    if validator not in ("score", "exec", "ifeval"):
-        sys.exit("validator must be 'score', 'exec' or 'ifeval', got %r" % validator)
+    if validator not in ("score", "exec", "ifeval", "bfcl"):
+        sys.exit("validator must be 'score', 'exec', 'ifeval' or 'bfcl', got %r" % validator)
     pub_mod = {"exec": "pub_bench_exec.py",
-               "ifeval": "pub_bench_ifeval.py"}.get(validator, "pub_bench_score.py")
+               "ifeval": "pub_bench_ifeval.py",
+               "bfcl": "pub_bench_bfcl.py"}.get(validator, "pub_bench_score.py")
     if validator == "exec":
         r = subprocess.run([sys.executable, os.path.join(REPO, "scripts", "pub_bench_exec.py"),
                             "selftest"], capture_output=True, text=True)
         print((r.stdout or "").strip() or (r.stderr or "").strip())
         if r.returncode != 0:
             sys.exit("EXEC CHECKER SELF-TEST FAILED - refusing to stage an execution-validated ws")
+    if validator == "bfcl":
+        r = subprocess.run([sys.executable, os.path.join(REPO, "scripts", "pub_bench_bfcl.py"),
+                            "selftest"], capture_output=True, text=True)
+        print((r.stdout or "").strip() or (r.stderr or "").strip())
+        if r.returncode != 0:
+            sys.exit("BFCL AST CHECKER SELF-TEST FAILED - refusing to stage a bfcl-validated ws")
     # IFEval's contract is the vendored upstream checker, whose runtime deps (absl, langdetect,
     # immutabledict, NLTK words) live in a pinned venv, never in the system interpreter. The gate
     # is the checker's own two self-tests (41 upstream unit tests + the recorded reference band),
@@ -244,7 +292,8 @@ def main():
         if "SHAPE_BARE" not in gr:
             sys.exit("SHAPE SWITCH MISSING: this harness has no PARB_SHAPE switch; a 'bare' "
                      "parity workspace would silently re-measure the escalation shape")
-    shim = {"exec": SHIM_EXEC, "ifeval": SHIM_IFEVAL}.get(validator, SHIM)
+    shim = {"exec": SHIM_EXEC, "ifeval": SHIM_IFEVAL,
+            "bfcl": SHIM_BFCL}.get(validator, SHIM)
     shim = shim.replace("@@PUBPATH@@", json.dumps(os.path.join(REPO, "scripts", pub_mod)))
     shim = shim.replace("@@VENDOR@@",
                         json.dumps(os.path.join(REPO, "benchmarks", "public", "vendor")))
@@ -265,7 +314,9 @@ def main():
              "seed": int(hashlib.sha256(t["id"].encode()).hexdigest()[:6], 16)}
             for t in rows]
     for b, t in zip(bank, rows):
-        for extra in ("instruction_id_list", "kwargs"):
+        # `functions`/`category` must reach the validator shim for function-calling sets: the AST
+        # matcher scores against the task's own docs, and `category` is what the report splits by.
+        for extra in ("instruction_id_list", "kwargs", "functions", "category"):
             if extra in t:
                 b[extra] = t[extra]
     json.dump(bank, open(os.path.join(out, "bank.json"), "w", encoding="utf-8"),
@@ -302,6 +353,23 @@ def main():
                               "gates": "41-test upstream unit suite + reference band "
                                        "(strict 416/540, loose 431/540) passed at staging "
                                        "time through the pinned venv interpreter"}
+    elif validator == "bfcl":
+        # Contract id is read from the checker module, never retyped here: a checker bump must not
+        # be able to leave a stale label in a workspace identity file.
+        _cid = subprocess.run(
+            [sys.executable, "-c",
+             "import importlib.util as u;s=u.spec_from_file_location('b',%r);"
+             "m=u.module_from_spec(s);s.loader.exec_module(m);print(m.BFCL_CHECKER)"
+             % os.path.join(REPO, "scripts", "pub_bench_bfcl.py")],
+            capture_output=True, text=True)
+        validator_identity = {"contract": (_cid.stdout or "").strip() or "bfcl-ast-v1",
+                              "module": "scripts/pub_bench_bfcl.py",
+                              "sha16": sha16(os.path.join(REPO, "scripts",
+                                                           "pub_bench_bfcl.py")),
+                              "gates": "22-case self-test re-run at staging time (refuses on "
+                                       "failure); gold-as-answer 1240/1240 and perturbed-gold "
+                                       "control 1000/1000 rejected were recorded when the checker "
+                                       "shipped, and the pinned task bytes have not moved"}
     else:
         validator_identity = {"contract": "pub-checkers-v2",
                               "module": "scripts/pub_bench_score.py",

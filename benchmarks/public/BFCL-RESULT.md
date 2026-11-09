@@ -20,7 +20,7 @@ the second set (after IFEval) where a harness has a real validator slot to sit i
 | arm | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | 1240 (full set) | `00b74e037240792d` | temp 0.7, `max_tokens` 1200, one request per task, no request seed, serve-default thinking; checker `bfcl-ast-v1` | **1116/1240 = 90.0 %** |
-| contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `bfcl-ast-v1`) | 1240 | `00b74e037240792d` | same shape as the bare arm by the parity shape rule | next leg (staging the `validator=bfcl` workspace) |
+| contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `bfcl-ast-v1`) | 1240 | `00b74e037240792d` | same shape as the bare arm by the parity shape rule | leg in flight from 11:59 CET (unit `parb-pub-contour-bfcl-matched`, ws bank sha16 `28dec47661235b11`); no percent published from an unfinished arm |
 | codex `gpt-6.1-sol` (subscription CLI) | 1240 | `00b74e037240792d` | transport does not expose sampling params | not started (the codex slot is on the IFEval leg) |
 | grok-4.7 | 1240 | `00b74e037240792d` | — | suspended by owner quota, resumes 2026-11-12 |
 
@@ -105,6 +105,37 @@ for `parallel_167`). Masking it would edit scored bytes and break the call synta
 kept, proven from the pinned task file by the publisher's `--tasks` proof and reported as
 `upstream_pinned_path`, and the scanner suppresses it only under a sha16-bound exception for these
 exact bytes.
+
+## Contour parity: what the wiring smoke proved (no percent)
+
+Workspace `~/parb-pub-contour/bfcl-matched`, stamp `0.0.2.56`, ws bank sha16 `28dec47661235b11`,
+tasks-file sha16 `00b74e037240792d` (identical to the bare arm's task file — the same pinned bytes,
+not a re-normalised copy), plan 1240 rows at rep 0 with the sp1 seed formula, validator slot holding
+the same `scripts/pub_bench_bfcl.py` bytes that scored the bare row (SHA-256/16 `7e6042ce813a2779`,
+recorded in `WS-IDENTITY.json`). The staging builder re-ran the checker's 22-case self-test and
+refuses to stage if it fails.
+
+Wiring smoke on 4 task ids (no percent, not a result — three of the four ids were chosen from the
+bare arm's failure list on purpose, to see whether the contour path can reach them at all):
+
+```
+simple_python_0    c=1.00 f=1 fin=stop calls=1 lad=0  pub:bfcl_ast_match
+multiple_7         c=0.00 f=1 fin=stop calls=1 lad=0  pub:bfcl_ast_fail:calls=2 gold=1
+parallel_9         c=0.00 f=1 fin=stop calls=1 lad=0  pub:bfcl_ast_fail:calls=1 gold=2
+irrelevance_16     c=0.00 f=1 fin=stop calls=1 lad=0  pub:bfcl_ast_fail:calls=1 gold=0
+```
+
+What that proves: the frozen runtime runs this public class without a hard-bank-specific assumption
+(no refusal), the request shape is the bare arm's (`calls=1`, `lad=0` — one 1200-token rung, one
+request per task, no escalation, no request seed), and the verdict comes from the public checker
+(the notes carry its own `why` strings, including the `gold=0` shape that means "emitted a call where
+none is allowed"). It also shows the contour did **not** repair the three count mismatches in this
+sample: at the matched shape the generic ladder does not re-draft a call list, so the parity row is
+expected to be near the bare row, and only the paired sign test will say whether it moves at all.
+
+The full 1240-id matched-shape leg started 11:59 CET (unit `parb-pub-contour-bfcl-matched`, GPU
+sampler `parb-pub-contour-bfcl-matched-samp` writing `gpu-power-pub-contour-bfcl-matched.csv`). No
+percent is published from an unfinished arm.
 
 ## Honest caveats
 
