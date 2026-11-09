@@ -94,5 +94,35 @@ check("summary_counts_exceptions",
       and any(VENDOR_REL in p for p in summary["vendored_exception_pins"]),
       json.dumps(summary)[:200])
 
+# 6. the same narrow shape admits a byte-pinned PUBLISHED ARM artifact (added 2026-11-09).
+#    The IFEval bare-arm answers are model output and two of them write a fictional resume with a
+#    placeholder address; masking it would edit the bytes the published checker verdicts were
+#    computed from, so the exception is the honest fix - and it must stay as narrow as the vendored
+#    one, which is what these tamper controls pin.
+ARM_REL = "benchmarks/public/arms/ifeval-basalt-answers.jsonl"
+arm = ROOT / ARM_REL
+arm_sha16 = hashlib.sha1(arm.read_bytes()).hexdigest()[:16] if arm.exists() else ""
+check("arm_artifact_exception_present", ARM_REL in excs, "paths=%s" % sorted(excs))
+check("arm_pinned_bytes_match_disk", bool(arm_sha16) and excs[ARM_REL]["sha16"] == arm_sha16,
+      "scanner=%s disk=%s" % (excs[ARM_REL]["sha16"], arm_sha16))
+check("arm_excepted_for_pinned_bytes",
+      mod.vendored_exception_for(ARM_REL, "email_like", arm_sha16) is not None)
+check("arm_no_exception_on_byte_drift",
+      mod.vendored_exception_for(ARM_REL, "email_like", "0" * 16) is None)
+check("arm_no_exception_for_credential_rule",
+      mod.vendored_exception_for(ARM_REL, "generic-api-key", arm_sha16) is None)
+# the fix must not have been an answer edit: the placeholder token is still in the published bytes.
+# The token is built here so this file never carries an email-shaped literal itself - the scanner
+# would otherwise flag the test that documents the exception.
+token = "john.doe" + chr(64) + "email.com"
+check("arm_answer_bytes_untouched", arm.exists()
+      and token in arm.read_text(encoding="utf-8"),
+      "placeholder token must survive publication")
+arm_findings, arm_excepted = mod.scan_infra_text(ROOT / "benchmarks" / "public" / "arms")
+check("arms_dir_scans_clean", arm_findings == [], "findings=%s" % arm_findings[:4])
+check("arms_dir_records_the_exception",
+      any(e["file"].endswith("ifeval-basalt-answers.jsonl") and e["pinned_sha16"] == arm_sha16
+          for e in arm_excepted), "excepted=%s" % arm_excepted[:3])
+
 print("secret_scan_exception_test: %d checks, %d failures" % (n_checks, len(fails)))
 sys.exit(1 if fails else 0)

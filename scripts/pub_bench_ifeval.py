@@ -170,16 +170,21 @@ def main():
 
     dig = HERE.parent / "benchmarks" / "public" / "PUB-DIGEST.md"
     task_sha = sha16(a.tasks)
-    line = ("| %s | %s | %d | %s | %s; checker %s | %d/%d = **%.1f%%** strict (%d/%d loose) |\n"
+    # One writer, one format: the row goes through `pub_bench_score.write_digest`, which owns the
+    # table header, the newest-first order and the separator line. The partition hack that used to
+    # live here inserted the row ABOVE the `|---|` separator (a table GitHub renders as prose) and
+    # let the header drift from the contract in force.
+    if str(HERE) not in sys.path:
+        sys.path.insert(0, str(HERE))
+    import pub_bench_score as pbs                                # noqa: E402
+    line = ("| %s | %s | %d | %s | %s; checker %s | %d/%d = **%.1f%%** strict (%d/%d loose) |"
             % (a.bench, a.model, n, task_sha, a.call, CHECKER, st, n, 100.0 * st / n, ls, n))
-    text = dig.read_text()
-    head, sep, body = text.partition("| strict |\n")
-    if len(line.split("|")[3].strip()) != len(a.tasks):
-        pass
-    if ("\n| %s | %s | %d | %s |" % (a.bench, a.model, n, task_sha)) in body:
+    key = "\n| %s | %s | %d | %s |" % (a.bench, a.model, n, task_sha)
+    body = dig.read_text() if dig.exists() else ""
+    if key in body:
         print("digest row already present - not duplicated")
     else:
-        dig.write_text(head + sep + line + body)
+        pbs.write_digest(line, str(dig))
         print("digest row appended")
 
 

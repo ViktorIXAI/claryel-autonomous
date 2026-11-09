@@ -6,6 +6,7 @@ Supersession pointers (parity shape rule, 2026-11-08; never an edit of old bytes
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| ifeval | qwen3.8-flash-next-iq3_s-basalt | 541 | 2c672531577dcc33 | temp 0.7, max_tokens 1200, one leg 07:35-08:47 after the duplicated-leg quarantine; checker pub-ifeval-v1 | 467/541 = **86.3%** strict (481/541 loose) |
 | humaneval | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 164 | 971d976289cd9357 | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking), ladder rungs 1200, first rung 1200; checker pytest-v2 (corrected offline rescore, stored bytes) | 157/164 = **95.7%** |
 | humaneval | qwen3.8-flash-next-iq3_s-basalt | 164 | 971d976289cd9357 | temp 0.7, max_tokens 1200; checker pytest-v2 (corrected offline rescore of the 2026-11-08 arm, stored bytes) | 159/164 = **97.0%** |
 | mmlu-pro | gpt-6.1-sol | 500 | c64264aede2498c7 | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport) | 462/500 = **92.4%** |

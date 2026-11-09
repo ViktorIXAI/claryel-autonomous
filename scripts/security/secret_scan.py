@@ -67,6 +67,24 @@ VENDOR_EXCEPTIONS = [
                "inside generated answer text, and these exact bytes are what the pub-ifeval-v1 "
                "reference-band gate scores (strict 416/540, loose 431/540)",
     },
+    {
+        # Not vendored data: a PUBLISHED ARM artifact. The same admission shape applies, because the
+        # rule is the same and the bytes are pinned by publication (the sha16 is printed in
+        # benchmarks/public/arms/README.md and IFEVAL-RESULT.md as the row's provenance).
+        "path": "benchmarks/public/arms/ifeval-basalt-answers.jsonl",
+        "sha16": "543eb8621087e552",
+        "rules": ("email_like",),
+        "pin": "benchmarks/public/arms/README.md index row `ifeval-basalt-answers.jsonl` "
+               "(that index prints SHA-256/16 445dfa2eba3d12aa; this pin is SHA-1/16, the "
+               "convention this scanner uses - both name the same bytes)",
+        "why": "IFEval answers are model output, and two answers write a fictional resume whose "
+               "contact line uses a placeholder mailbox (a 'John Doe' record) because the task asks "
+               "for placeholders. These are placeholder tokens inside scored answer bytes: masking "
+               "them would edit the exact bytes the pub-ifeval-v1 checker verdicts were computed "
+               "from, and no credential-class rule matches them. (This record deliberately does not "
+               "quote the token: a scanner exception that itself carries the pattern trips the "
+               "rule it documents.)",
+    },
 ]
 
 

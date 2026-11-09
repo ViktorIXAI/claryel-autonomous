@@ -87,6 +87,18 @@ exactly — asserted for every arm below.
 | mmlu-pro-contour-matched-plan.json | 1 | `cd7361fc7bded818` |
 | mmlu-pro-contour-matched-bank-version.json | 6 | `c446b2252edd3a27` |
 | mmlu-pro-contour-matched-ws-identity.json | 41 | `9e7100ecc1dc71bb` |
+| ifeval-basalt-answers.jsonl | 541 | `445dfa2eba3d12aa` |
+| ifeval-basalt-verdicts.jsonl | 541 | `1884989e822f21e3` |
+
+First **bare-arm** artifacts (2026-11-09): `ifeval-basalt-*`. A bare arm has no ledger, and IFEval's
+percent is produced by the vendored upstream checker rather than by a number/letter match, so an
+outside reader needs both the stored answers and the scorer's verdict rows to re-check
+467/541 = 86.3 % — the answers alone cannot be re-scored with `pub-checkers-v2`. Written by
+`scripts/publish_pub_bare_arm.py`, which **imports the same scrub function** as
+`publish_pub_arms.py` (one sanitizer, not two) and refuses partial arms. Nothing was masked in these
+two files: the scrubbed bytes are byte-identical to the runner/scorer output, which is also why the
+scorer's own verdict sidecar (SHA-1/16 `af8969ac6e95422f`) still names the same bytes.
+
 Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
 
 * `gpqa-diamond` 198 ids `af73cc064d4d8529`, ws bank sha16 `1b30f3cc51204d03`
@@ -101,6 +113,14 @@ Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
   was kept, repaired or re-drafted because a test passed.
 * `mmlu-pro` 500 ids `c64264aede2498c7`, ws bank sha16 `a6327955170bf637` (the 500-row pinned
   stride-24 subset; matched-shape leg only — this set never had an escalation-shape arm)
+* `ifeval` all 541 ids `2c672531577dcc33` (SHA-1/16, the digest column's convention; SHA-256/16 of
+  the same bytes is `e09a5cab3782ed5b`). Validator contract `pub-ifeval-v1`
+  (`scripts/pub_bench_ifeval.py`, SHA-256/16 `94f82f607f8ab091` — the version with the documented
+  `SUITE_ATTEMPTS` gate retry), verdicts produced by the vendored upstream modules in
+  `benchmarks/public/vendor/instruction_following_eval/` with per-file pins in
+  `benchmarks/public/MANIFEST.json`. No contour arm for this set yet at the time of the bare-arm
+  publication; its matched-shape leg runs 2026-11-09 from 08:55 CET (ws bank sha16
+  `283616a959c7df24`) and its artifacts land here under the same naming.
 
 Index correction 2026-11-09, no measurement changes: the `arc-easy` and `gsm8k` lines above used to
 carry the sha16 of each arm's `*-bank-version.json` **file** (`055b650afd938842`,
