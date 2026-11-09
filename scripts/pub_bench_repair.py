@@ -88,6 +88,8 @@ def main():
                     help="no model call: re-score the stored retries and write the merged arm bytes")
     ap.add_argument("--dry-run", action="store_true",
                     help="validate + count the headroom, no model call")
+    ap.add_argument("--no-digest", action="store_true",
+                    help="write the artifacts without appending a digest row")
     a = ap.parse_args()
 
     if str(HERE) not in sys.path:
@@ -116,10 +118,14 @@ def main():
     if len(budgets) != 1:
         sys.exit("REFUSING TO RUN: first arm mixes call budgets %s" % sorted(map(str, budgets)))
     max_tokens = int(budgets.pop())
+    first_budget = max_tokens
     env_budget = os.environ.get("PARB_MAX_TOKENS")
     if env_budget and int(env_budget) != max_tokens:
-        print("note: PARB_MAX_TOKENS overrides the first arm budget %d -> %d"
-              % (max_tokens, int(env_budget)))
+        global CONTRACT           # a different retry budget is a different contract,
+        CONTRACT = "pub-repair-v2"  # never an edit of the v1 row or the v1 artifacts
+        print("note: PARB_MAX_TOKENS overrides the first arm budget %d -> %d; "
+              "this arm runs under contract %s"
+              % (max_tokens, int(env_budget), CONTRACT), flush=True)
         max_tokens = int(env_budget)
     temps = {r.get("temp") for r in first_rows if r.get("temp") is not None}
     if temps and temps != {TEMP}:
@@ -252,7 +258,8 @@ def main():
            "first_arm_strict": n_first, "asked_stored": asked_ran, "asked_unrun": len(asked) - asked_ran,
            "retry_fixed": fixed, "retry_still_failing": still,
            "keep_best_strict": kb, "retry_only_strict": retry_only,
-           "checker": pifev.CHECKER, "call": {"temp": TEMP, "max_tokens": max_tokens},
+           "checker": pifev.CHECKER, "call": {"temp": TEMP, "max_tokens": max_tokens,
+                                             "first_arm_max_tokens": first_budget},
            "wall_s": round(time.time() - t0, 1), "transport_errors": n_bad,
            "first_answers_sha16": sha16(a.first_answers)}
     (out / ("pub-repair-%s-census.json" % CONTRACT)).write_text(json.dumps(cen, indent=2) + "\n")
@@ -271,7 +278,7 @@ def main():
     dig = HERE.parent / "benchmarks" / "public" / "PUB-DIGEST.md"
     import pub_bench_score as pbs                          # noqa: E402
     bench = tasks[0]["bench"]
-    model_label = "%s+pub-repair-v1(keep-best)" % (model or first_model)
+    model_label = "%s+%s(keep-best)" % (model or first_model, CONTRACT)
     key = "\n| %s | %s | %d | %s |" % (bench, model_label, n, sha16(a.tasks))
     body = dig.read_text() if dig.exists() else ""
     if key in body:
@@ -279,9 +286,10 @@ def main():
     else:
         line = ("| %s | %s | %d | %s | validator-driven one-shot repair over the stored first-arm "
                 "bytes: %d re-asks, %d fixed, %d still failing; same pinned checker %s, temp %.1f, "
-                "max_tokens %d; retry-only variant %d/%d = %.1f%% | %d/%d = **%.1f%%** |"
+                "retry max_tokens %d (first arm %d); retry-only variant %d/%d = %.1f%% | %d/%d = **%.1f%%** |"
                 % (bench, model_label, n, sha16(a.tasks), asked_ran, fixed, still, pifev.CHECKER,
-                   TEMP, max_tokens, retry_only, n, 100.0 * retry_only / n, kb, n, 100.0 * kb / n))
+                   TEMP, max_tokens, first_budget, retry_only, n, 100.0 * retry_only / n, kb, n,
+                   100.0 * kb / n))
         pbs.write_digest(line, str(dig))
         print("digest row appended")
     return 0
