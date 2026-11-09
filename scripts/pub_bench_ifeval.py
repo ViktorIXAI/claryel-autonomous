@@ -110,6 +110,9 @@ def main():
     ap.add_argument("bench"); ap.add_argument("model"); ap.add_argument("call")
     ap.add_argument("--out", default=None)
     ap.add_argument("--selftest-only", action="store_true")
+    # A merged/derived answer set may need its verdict sidecar shipped as re-scorable bytes without
+    # becoming a percent row (the arm row is written once, by the arm that produced it).
+    ap.add_argument("--no-digest", action="store_true")
     a = ap.parse_args()
 
     if str(VENDOR) not in sys.path:
@@ -181,7 +184,9 @@ def main():
             % (a.bench, a.model, n, task_sha, a.call, CHECKER, st, n, 100.0 * st / n, ls, n))
     key = "\n| %s | %s | %d | %s |" % (a.bench, a.model, n, task_sha)
     body = dig.read_text() if dig.exists() else ""
-    if key in body:
+    if a.no_digest:
+        print("--no-digest: verdict sidecar written, no digest row")
+    elif key in body:
         print("digest row already present - not duplicated")
     else:
         pbs.write_digest(line, str(dig))

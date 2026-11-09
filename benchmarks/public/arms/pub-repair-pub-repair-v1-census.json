@@ -1,0 +1,20 @@
+{
+  "contract": "pub-repair-v1",
+  "tasks": 541,
+  "task_sha16": "2c672531577dcc33",
+  "first_arm_strict": 469,
+  "asked_stored": 72,
+  "asked_unrun": 0,
+  "retry_fixed": 28,
+  "retry_still_failing": 44,
+  "keep_best_strict": 497,
+  "retry_only_strict": 497,
+  "checker": "pub-ifeval-v1",
+  "call": {
+    "temp": 0.7,
+    "max_tokens": 1200
+  },
+  "wall_s": 0.0,
+  "transport_errors": 0,
+  "first_answers_sha16": "543eb8621087e552"
+}

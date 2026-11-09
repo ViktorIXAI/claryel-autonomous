@@ -246,3 +246,49 @@ the digest carries exactly one `ifeval / qwen3.8-flash-next-iq3_s-basalt / 541` 
 * **The 1200-token ceiling is shared by both local arms.** If the contour leg escalates on a
   truncated answer it has no higher rung to go to under the matched shape, so both arms pay the same
   ceiling and the truncation count is part of every comparison here.
+
+## `pub-repair-v1` — the validator in the loop instead of beside it (2026-11-09 18:24 CET)
+
+The contour rows above are nulls, and the census said why: its gates watch request/response shape and
+the first public answer is already well-formed, so the repair path never opens. This section measures the
+missing loop at arm level (`scripts/pub_bench_repair.py`, contract `pub-repair-v1`): the pinned first-arm
+answer bytes are read (no paid re-run), the pinned `pub-ifeval-v1` validator names the violated checks
+and their pinned kwargs, and the task is re-asked **once**. A retry replaces the first answer only if it
+strictly passes (`keep-best`); `retry-only` shows what an unconditional second try would score. The
+frozen `0.0.2.56` rows and the bare row are untouched, byte for byte.
+
+| arm | n | request shape | strict | instruction checks |
+|---|---|---|---|---|
+| first arm, bare bytes, re-scored in this same scorer pass | 541 | temp 0.7, `max_tokens` 1200 | 469/541 = 86.7 % | 748/834 = 89.7 % |
+| **`pub-repair-v1` keep-best** | 541 | same shape + 72 one-shot re-asks | **497/541 = 91.9 %** | 783/834 = 93.9 % |
+| `pub-repair-v1` retry-only | 541 | second answer always taken | 497/541 = 91.9 % | — |
+| ChatGPT `gpt-6.1-sol`, single pass (published row) | 541 | transport hides sampling params | 515/541 = 95.2 % | — |
+
+Census and statistics:
+
+* validator rejected 72 of 541 first answers; one re-ask each → **28 fixed, 44 still failing, 0 made
+  worse** (a passing task is never asked). Exact two-sided sign test over the 28 discordant tasks:
+  **p = 7.5e-09**. The honest caveat next to that p: this compares a two-attempt protocol against a
+  one-attempt protocol, not one model against another, so it measures the loop, not the brain.
+* gap recovery in this pass: first arm 86.7 %, ChatGPT 95.2 % → the repair took **+5.2 pp of the 8.5 pp
+  gap (61 %)** for 72 extra calls.
+* cost, measured not modelled: 72 calls, 101,470 tokens (29,179 prompt + 72,291 completion), 779 s of
+  call time, GPU sampler 310 samples over 780 s at a mean 131.0 W → **28.4 Wh**, i.e. **1.01 Wh and
+  ~3.6k tokens per fixed task**.
+* recorded confound that makes the number a lower bound: **34 of 72 retries ended `api_finish=length`**
+  at the inherited 1200-token budget, and a truncated retry is scored as a failed repair rather than
+  excused. A 2400-token variant (`pub-repair-v2`) is queued; until it runs, this row understates the
+  mechanism.
+* checker noise applies to this set as documented above: the published bare row is 467/541, while this
+  scorer pass re-scored the same bytes at 469/541 (468 in an earlier pass the same day) — the upstream
+  checker's `langdetect` call flips one or two tasks per run, so only deltas above ~0.5 pp are read as
+  differences. The 30-task move here is far outside that band.
+
+Residual hardest checks after repair: `length_constraints:number_words` 13, `detectable_format:json_format`
+6, `keywords:letter_frequency` 5, `length_constraints:number_sentences` 5, `startend:quotation` 4,
+`combination:repeat_prompt` 3 — the same surface families, now down roughly two-to-one.
+
+Reproducibility: `arms/pub-repair-v1-merged-answers.jsonl` (sha16 in the sidecar) holds the answer the
+repaired arm actually gives, `arms/pub-repair-v1-verdicts.jsonl` records per task whether the kept answer
+came from the first attempt or the retry, and both re-score offline with `pub-ifeval-v1` to 497/541 with
+zero model calls. `arms/pub-repair-pub-repair-v1-census.json` carries the same census the scorer printed.

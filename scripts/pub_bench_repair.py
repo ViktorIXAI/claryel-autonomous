@@ -84,6 +84,8 @@ def main():
     ap.add_argument("first_answers")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--merge", action="store_true",
+                    help="no model call: re-score the stored retries and write the merged arm bytes")
     ap.add_argument("--dry-run", action="store_true",
                     help="validate + count the headroom, no model call")
     a = ap.parse_args()
@@ -142,12 +144,15 @@ def main():
     if a.dry_run:
         return 0
 
-    url = os.environ.get("PARB_API")
-    key_file = os.environ.get("PARB_KEY_FILE")
-    model = os.environ.get("PARB_MODEL")
-    if not (url and key_file and model):
-        raise SystemExit("PARB_API, PARB_KEY_FILE and PARB_MODEL are required")
-    key = json.load(open(key_file, encoding="utf-8"))["api_key"]
+    if a.merge:
+        url = key_file = key = model = None
+    else:
+        url = os.environ.get("PARB_API")
+        key_file = os.environ.get("PARB_KEY_FILE")
+        model = os.environ.get("PARB_MODEL")
+        if not (url and key_file and model):
+            raise SystemExit("PARB_API, PARB_KEY_FILE and PARB_MODEL are required")
+        key = json.load(open(key_file, encoding="utf-8"))["api_key"]
 
     out = pathlib.Path(a.out or str(pathlib.Path(a.first_answers).parent))
     dst = out / ("pub-repair-%s.jsonl" % CONTRACT)
@@ -160,6 +165,8 @@ def main():
     queue = [t for t in asked if t["id"] not in done]
     if a.limit:
         queue = queue[:a.limit]
+    if a.merge:
+        queue = []
     print("asked=%d already stored=%d to run=%d" % (len(asked), len(done), len(queue)), flush=True)
 
     t0, n_bad = time.time(), 0
@@ -220,6 +227,27 @@ def main():
     # retry-only: every asked task takes the retry answer, pass or fail (what a naive harness scores)
     retry_only = sum(1 for t in scored if (t["_retry_strict"] if t["_retry_strict"] is not None
                                            else t["_first_strict"]))
+    # Merged arm bytes: the answer the repaired arm actually gives, plus the per-task keep/retry
+    # decision, so the percent can be re-scored later with zero model calls.
+    first_model = first_rows[0].get("model")
+    merged, verdict_rows = [], []
+    for t in scored:
+        kept = "retry" if t["_retry_strict"] is True else "first"
+        merged.append({"id": t["id"], "bench": t["bench"], "arm": "%s-merged" % CONTRACT,
+                       "model": first_model, "temp": TEMP, "max_tokens": max_tokens,
+                       "finish": "ok", "kept": kept,
+                       "answer": stored[t["id"]]["answer"] if kept == "retry" else first[t["id"]]})
+        verdict_rows.append({"id": t["id"], "first_strict": t["_first_strict"],
+                             "retry_strict": t["_retry_strict"], "kept": kept,
+                             "strict": bool(t["_first_strict"] or t["_retry_strict"] is True)})
+    for name, rows in (("%s-merged-answers.jsonl" % CONTRACT, merged),
+                       ("%s-verdicts.jsonl" % CONTRACT, verdict_rows)):
+        (out / name).write_text("\n".join(json.dumps(r, ensure_ascii=False, sort_keys=True)
+                                          for r in rows) + "\n")
+        (out / (name + ".sha16")).write_text(
+            hashlib.sha1((out / name).read_bytes()).hexdigest()[:16] + "\n")
+    print("merged arm bytes -> %s | verdicts -> %s"
+          % (out / ("%s-merged-answers.jsonl" % CONTRACT), out / ("%s-verdicts.jsonl" % CONTRACT)))
     cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha16(a.tasks),
            "first_arm_strict": n_first, "asked_stored": asked_ran, "asked_unrun": len(asked) - asked_ran,
            "retry_fixed": fixed, "retry_still_failing": still,
@@ -237,10 +265,13 @@ def main():
         print("PARTIAL: %d re-asks still missing - no digest row written" % (len(asked) - asked_ran))
         return 1
 
+    if a.merge or a.no_digest:
+        print("--merge / --no-digest: artifacts written, no digest row")
+        return 0
     dig = HERE.parent / "benchmarks" / "public" / "PUB-DIGEST.md"
     import pub_bench_score as pbs                          # noqa: E402
     bench = tasks[0]["bench"]
-    model_label = "%s+pub-repair-v1(keep-best)" % model
+    model_label = "%s+pub-repair-v1(keep-best)" % (model or first_model)
     key = "\n| %s | %s | %d | %s |" % (bench, model_label, n, sha16(a.tasks))
     body = dig.read_text() if dig.exists() else ""
     if key in body:
