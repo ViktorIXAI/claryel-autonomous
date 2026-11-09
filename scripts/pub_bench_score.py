@@ -129,7 +129,11 @@ def digest_head():
             "gpqa-diamond 46.0 %% -> 70.2 %%, arc-challenge 94.3 %% -> 97.0 %%, "
             "arc-easy 96.7 %% -> 96.3 %%, gsm8k-300 96.7 %% -> 98.0 %%. "
             "HumanEval rows labelled `checker pytest-v1` are superseded as verdicts by the "
-            "`pytest-v2` rows scored from the same stored answer bytes. Each "
+            "`pytest-v2` rows scored from the same stored answer bytes. "
+            "LiveCodeBench rows labelled `checker lcb-exec-v1` are superseded as verdicts, for all "
+            "three arms, by the `lcb-exec-v2` rows scored from the same stored answer bytes "
+            "(2026-11-09 release closing the functional-driver gap: 112-denominator -> "
+            "175-denominator, every stdin verdict cell identical under both contracts). Each "
             "`<BENCH>-RESULT.md` carries the dated pointer and the reason.\n\n"
             % (EXEC_CHECKER, CHECKER_CONTRACT))
 
@@ -159,8 +163,21 @@ def write_digest(row, dst=None):
         sys.stderr.write("DIGEST ROW COUNT MISMATCH: %d table lines, %d kept, expected %d\n"
                          % (len(prev), len(body), len(prev) - 1))
         raise SystemExit(2)
+    # Published prose above the table is append-only. `digest_head()` regenerates the head on every
+    # write, and that is exactly how the published LiveCodeBench v1 -> v2 supersession sentence
+    # vanished from the digest on the next scoring pass (measured 2026-11-09: no row and no verdict
+    # changed, a published pointer simply disappeared; caught in review, sentence restored in the
+    # template). A head that no longer reproduces published prose now fails the write closed.
+    head = digest_head()
+    old_prose = old.split("| bench |")[0] if "| bench |" in old else old
+    lost = [p.strip() for p in old_prose.split("\n\n")
+            if p.strip() and not p.strip().startswith("#") and p.strip() not in head]
+    if lost:
+        sys.stderr.write("DIGEST POINTER LOSS: the regenerated head drops published prose: %s\n"
+                         % " || ".join(p[:140] for p in lost))
+        raise SystemExit(2)
     with open(dst, "w", encoding="utf-8") as fh:
-        fh.write(digest_head() + hdr + "\n" + "\n".join([row] + body) + "\n")
+        fh.write(head + hdr + "\n" + "\n".join([row] + body) + "\n")
     return dst
 
 
