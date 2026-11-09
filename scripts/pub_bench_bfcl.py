@@ -43,6 +43,12 @@ Contract `bfcl-ast-v1` (this file is the contract; a change means a new contract
 The file refuses to score anything until its self-test passes. Usage:
   pub_bench_bfcl.py selftest
   pub_bench_bfcl.py <tasks.jsonl> <answers.jsonl> [--verdicts OUT.jsonl]
+                                        [--limit N] [--offset N] [--call-note TEXT]
+`--limit/--offset` select the pre-registered cross-arm slice from the SAME pinned task file, so
+the digest row keeps the full-file tasks sha16 (a sliced task file would silently mint a second
+bench id; `pub_bench_score.py` uses the same convention). Selection only - it cannot move a
+verdict. `--call-note` names the slice in the row's call column, because a head slice of this
+file is category-pure and that has to be visible next to the percent.
 """
 import ast
 import hashlib
@@ -454,6 +460,16 @@ def main():
         print("refusing to score: checker self-test failed")
         sys.exit(1)
     tasks = [json.loads(l) for l in open(sys.argv[1], encoding="utf-8") if l.strip()]
+    limit, offset = None, 0
+    for i, a in enumerate(sys.argv):
+        if a == "--limit":
+            limit = int(sys.argv[i + 1])
+        elif a == "--offset":
+            offset = int(sys.argv[i + 1])
+    if offset or limit is not None:
+        tasks = tasks[offset:(offset + limit) if limit is not None else None]
+        print("slice: offset %d, limit %s -> %d tasks of the pinned file"
+              % (offset, limit, len(tasks)))
     ans = {}
     for l in open(sys.argv[2], encoding="utf-8"):
         if not l.strip():
@@ -489,8 +505,10 @@ def main():
     sha = hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest()[:16]
     model = next((a.get("model") for a in ans.values() if a.get("model")), "unknown")
     temp = next((a.get("temp") for a in ans.values() if a.get("temp") is not None), None)
+    note = sys.argv[sys.argv.index("--call-note") + 1] if "--call-note" in sys.argv else ""
+    note = ("; " + note) if note else ""
     row = digest_row("bfcl", model, len(tasks), sha,
-                     "%s; checker %s" % (call_label(list(ans.values()), temp), BFCL_CHECKER),
+                     "%s%s; checker %s" % (call_label(list(ans.values()), temp), note, BFCL_CHECKER),
                      ok, n)
     print("-> %s" % os.path.basename(write_digest(row)))
 

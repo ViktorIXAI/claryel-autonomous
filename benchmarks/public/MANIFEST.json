@@ -18,7 +18,22 @@
       },
       "checker": "bfcl-ast-v1",
       "checker_files": {
-        "scripts/pub_bench_bfcl.py": "7e6042ce813a2779"
+        "scripts/pub_bench_bfcl.py": "02cc555963de7dac"
+      },
+      "checker_history": [
+        {
+          "note": "bytes the BFCL contour arm was staged and scored with (WS-IDENTITY.json of that arm pins this value); the 02cc555963de7dac revision adds --limit/--offset/--call-note selection only, and both published full-set arms re-score to 1116/1240 and 1122/1240 under the new bytes (self-test 22/22)",
+          "sha16": "7e6042ce813a2779"
+        }
+      ],
+      "cross_arm_slice": {
+        "answer_files": "bfcl-codex-* (300 rows)",
+        "categories": {
+          "simple_python": 300
+        },
+        "note": "rule 4's pre-registered slice: first 300 ids of the pinned file in file order; this file is ordered by category, so the slice is category-pure and the skew is stated in BFCL-RESULT.md rather than re-cut after seeing scores",
+        "percent": "codex 281/300 = 93.7 %; bare 285/300 and contour 279/300 on the same ids",
+        "tasks_sha16": "00b74e037240792d"
       },
       "gold_files": {
         "BFCL_v4_multiple.json": "244e00ce9395df94",

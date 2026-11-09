@@ -6,6 +6,7 @@ Supersession pointers (parity shape rule, 2026-11-08; never an edit of old bytes
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| bfcl | gpt-6.1-sol | 300 | 00b74e037240792d | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport); codex leg 14:37-15:07 CET, 300/300 finish=ok, wall 1807 s (6.0 s/task); cross-arm slice = first 300 ids of the pinned file in file order, which is category-pure simple_python (stated skew); checker bfcl-ast-v1 | 281/300 = **93.7%** |
 | ifeval | gpt-6.1-sol | 541 | 2c672531577dcc33 | codex codex-cli 0.166.0 CLI (sampling params not exposed by the transport); leg stopped 440/541 by owner-side usage limit 12:39, resumed 13:34, completed 14:41; checker pub-ifeval-v1 | 515/541 = **95.2%** strict (526/541 loose) |
 | bfcl | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 1240 | 00b74e037240792d | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking), ladder rungs 1200, first rung 1200; checker bfcl-ast-v1 | 1122/1240 = **90.5%** |
 | bfcl | qwen3.8-flash-next-iq3_s-basalt | 1240 | 00b74e037240792d | temp 0.7, max_tokens 1200; checker bfcl-ast-v1 | 1116/1240 = **90.0%** |

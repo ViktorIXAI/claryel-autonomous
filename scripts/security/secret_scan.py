@@ -142,6 +142,27 @@ VENDOR_EXCEPTIONS = [
                "credential-class rule matches. (Record does not quote the tokens.)",
     },
     {
+        # Cloud-arm bytes for the same pinned BFCL v4 set (2026-11-09, codex arm, 300-id cross-arm
+        # slice). Same admission shape as the two local BFCL arms above: the answers echo the pinned
+        # upstream placeholder contact records verbatim as argument VALUES the checker matched -
+        # both mailbox tokens occur verbatim in benchmarks/public/bfcl.tasks.jsonl (SHA-1/16
+        # 068d359eb0af79b1), and one of them is the gold value of the task it appears in - so
+        # masking would edit scored bytes. Only the email-like metadata rule fires here: this arm's
+        # answers contain no path-shaped token at all.
+        "path": "benchmarks/public/arms/bfcl-codex-answers.jsonl",
+        "sha16": "234766f13fea120f",
+        "rules": ("email_like",),
+        "pin": "benchmarks/public/arms/README.md index row `bfcl-codex-answers.jsonl` "
+               "(that index prints SHA-256/16 08ce765f1f145d7c; this pin is SHA-1/16, the "
+               "convention this scanner uses - both name the same bytes)",
+        "why": "model output on the pinned upstream BFCL v4 tasks, which carry placeholder contact "
+               "records; the answers echo those tokens verbatim as the argument values the "
+               "bfcl-ast-v1 checker matched (proved against the pinned task file, where both tokens "
+               "occur and one is the entry's own gold). Masking them would edit the exact bytes the "
+               "published 281/300 verdicts were computed from. No credential-class rule matches. "
+               "(Record does not quote the tokens.)",
+    },
+    {
         # The same arm's results file: it carries the same answer bytes plus the harness accounting,
         # which is what makes the row's shape auditable, so it ships unsanitized in the answer field.
         "path": "benchmarks/public/arms/bfcl-contour-matched-results.jsonl",
