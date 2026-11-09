@@ -292,3 +292,56 @@ Reproducibility: `arms/pub-repair-v1-merged-answers.jsonl` (sha16 in the sidecar
 repaired arm actually gives, `arms/pub-repair-v1-verdicts.jsonl` records per task whether the kept answer
 came from the first attempt or the retry, and both re-score offline with `pub-ifeval-v1` to 497/541 with
 zero model calls. `arms/pub-repair-pub-repair-v1-census.json` carries the same census the scorer printed.
+
+**Resolved 2026-11-09 19:15 CET:** the queued 2400-token variant ran — see `pub-repair-v2` below. The v1
+numbers above stand unchanged as the 1200-token-retry arm; an offline re-score of the published merged
+copy today gives 495/541, inside the documented ±1–2 task checker-flake band around the published 497.
+
+## `pub-repair-v2` — the same loop with a 2400-token retry budget (2026-11-09 19:15 CET)
+
+The understatement recorded in v1 is now measured out. Same protocol, same pinned validator
+(`pub-ifeval-v1`), same stored first-arm answer bytes (first-arm answers sha16 `543eb8621087e552`),
+same re-ask wording — only the retry `max_tokens` is overridden from 1200 to 2400, and that moves the
+contract id to `pub-repair-v2` (tooling commit `1cdc353`); the v1 row, artifacts and bytes are untouched.
+
+| arm | n | request shape | strict |
+|---|---|---|---|
+| first arm, re-scored in this pass | 541 | temp 0.7, `max_tokens` 1200 | 467/541 = 86.3 % |
+| `pub-repair-v1` (retry 1200, published above) | 541 | + 72 one-shot re-asks at 1200 | 497/541 = 91.9 % |
+| **`pub-repair-v2` keep-best (retry 2400)** | 541 | + 74 one-shot re-asks at 2400 | **509/541 = 94.1 %** |
+| `pub-repair-v2` retry-only | 541 | second answer always taken | 509/541 = 94.1 % |
+| ChatGPT `gpt-6.1-sol`, single pass (published row) | 541 | transport hides sampling params | 515/541 = 95.2 % |
+
+Census (census file sha16 `79cd33edad21f86d`):
+
+* This pass the validator rejected 74 first answers, not 72: the first arm re-scored at 467/541
+  instead of 469/541, and two tasks that passed in the v1 pass fell inside the documented
+  langdetect flake band. The census records the re-asks this pass actually made, not the v1 set.
+* 74 re-asks → **42 fixed, 32 still failing, 0 made worse** (retry-only equals keep-best again —
+  a passing task is never asked and no retry replaces a passing answer). Sign test over 42/0:
+  p = 4.5e-13.
+* **The budget swap measured directly**, on the 72 tasks both passes re-asked: 14 pass at 2400 that
+  failed at 1200, and one the other way (`ifeval-3572` — a retry is a fresh sample, not a replay of
+  the first draw, so single-cell flips in both directions are re-draw variance). 14W/1L, p = 0.001.
+  The 1200-token ceiling was exactly what made v1 a lower bound; removing it moved keep-best
+  497 → 509 (+12 tasks).
+* Truncation census: 24/74 retries hit the 2400 ceiling (34/72 hit 1200). Of the 34 tasks that
+  truncated at 1200, **15 pass at 2400 and 19 still fail with double the budget** — those 19 are
+  genuine checker-level failures, not budget starvation.
+* Cost, measured not modelled: 74 calls, 173,074 tokens (29,591 prompt + 143,483 completion),
+  1272.7 s of call time; GPU sampler 489 samples over 1234 s at a mean 138.1 W → **47.32 Wh**, i.e.
+  **1.13 Wh and ~4.1k tokens per fixed task** (v1: 28.4 Wh, 1.01 Wh). Doubling the retry budget
+  doubles the energy and lifts the fix rate 28/72 → 42/74 (39 % → 57 %).
+* Gap framing for this set: first arm 467, ChatGPT single pass 515 → the repair loop at 2400 closes
+  the 48-task gap to 6 tasks (94.1 % vs 95.2 %).
+* Caveats, carried and new: the two-attempt-vs-one-attempt caveat from v1 still frames the p-value;
+  the first-arm baseline moves 467–469 per scorer pass (checker band ±2 tasks), so 497 → 509 is a
+  real +12 outside the band but the two arms are not byte-matched pairs; an independent re-score of
+  the published merged copy gives 510/541, inside the documented flake band around the census's 509 —
+  no byte drift.
+
+Reproducibility: `arms/pub-repair-v2-merged-answers.jsonl` (sha16 `ee4728cc10e4498f`),
+`arms/pub-repair-v2-verdicts.jsonl` (sha16 `47281abd5357f0c0`), the 74 stored retry rows in
+`arms/pub-repair-pub-repair-v2.jsonl` (sha16 `49e27893c44c9b0d`) and
+`arms/pub-repair-pub-repair-v2-census.json`; the percent re-scores offline with `pub-ifeval-v1`
+and zero model calls.

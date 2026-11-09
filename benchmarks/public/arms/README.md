@@ -236,3 +236,35 @@ Reproduce one row:
 python3 scripts/pub_bench_score.py benchmarks/public/gpqa-diamond.tasks.jsonl \
        benchmarks/public/arms/gpqa-diamond-contour-matched-answers.jsonl
 ```
+
+### Validator-repair arm artifacts (`pub-repair-v1` / `pub-repair-v2`, 2026-11-09)
+
+These arms are **not** contour-arm files and are **not** scored by `pub-checkers-v2`: the arm is scored
+by the vendored IFEval checker (`pub-ifeval-v1`, `scripts/pub_bench_ifeval.py`), so re-scoring them
+means running that scorer over the merged answer files with zero model calls. Copied verbatim from
+the arm directories by the session that ran them (the same zero-hit privacy grep as the pipeline
+arms: only English words containing "bank" match the pattern in the answer bytes — no bank, gold,
+path, IP or key material). Because the upstream checker itself calls stochastic `langdetect`, the
+re-score reproduces the census percent **within the documented ±1–2 task flake band**, not to the
+exact digit: v1 merged re-scored 497 published → 495 offline; v2 merged 509 census → 510 offline.
+
+| arm file | lines | sha16 |
+|---|---|---|
+| pub-repair-pub-repair-v1.jsonl (72 retry rows, 1200-token retries) | 72 | `2b5d183a95aa5062` |
+| pub-repair-pub-repair-v1-census.json | 20 | `a4c9273043f3b19d` |
+| pub-repair-v1-merged-answers.jsonl | 541 | `639332eea931294f` |
+| pub-repair-v1-verdicts.jsonl | 541 | `569df2fa669a3dca` |
+| pub-repair-pub-repair-v2.jsonl (74 retry rows, 2400-token retries) | 74 | `49e27893c44c9b0d` |
+| pub-repair-pub-repair-v2-census.json | 21 | `79cd33edad21f86d` |
+| pub-repair-v2-merged-answers.jsonl | 541 | `ee4728cc10e4498f` |
+| pub-repair-v2-verdicts.jsonl | 541 | `47281abd5357f0c0` |
+
+Reproduce one percent:
+
+```
+# any interpreter with the pinned IFEval deps (absl 2.5.1, langdetect 1.0.9,
+# immutabledict 4.3.1, NLTK words) will do
+python scripts/pub_bench_ifeval.py \
+    benchmarks/public/arms/pub-repair-v2-merged-answers.jsonl \
+    benchmarks/public/ifeval.tasks.jsonl ifeval pub-repair-v2 re-score --no-digest
+```

@@ -6,6 +6,7 @@ Supersession pointers (parity shape rule, 2026-11-08; never an edit of old bytes
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| ifeval | qwen3.8-flash-next-iq3_s-basalt+pub-repair-v2(keep-best) | 541 | 2c672531577dcc33 | validator-driven one-shot repair over the stored first-arm bytes: 74 re-asks, 42 fixed, 32 still failing; same pinned checker pub-ifeval-v1, temp 0.7, retry max_tokens 2400 (first arm 1200); retry-only variant 509/541 = 94.1% | 509/541 = **94.1%** |
 | ifeval | qwen3.8-flash-next-iq3_s-basalt+pub-repair-v1(keep-best) | 541 | 2c672531577dcc33 | validator-driven one-shot repair over the stored first-arm bytes: 72 re-asks, 28 fixed, 44 still failing; same pinned checker pub-ifeval-v1, temp 0.7, max_tokens 1200; retry-only variant 497/541 = 91.9% | 497/541 = **91.9%** |
 | livecodebench | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 112 | 8da729553c7c5710 | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched shape (first rung 2400 = the bare arm's max_tokens, serve-default thinking, no request seed), 175 ids file order, 176 model calls, 1 gate fix, 0 ladder steps, 35 truncated at the ceiling; checker lcb-exec-v1; 63 unscored (driver gap), hidden tests by sha16; checker lcb-exec-v1 | 54/112 = **48.2%** |
 | livecodebench | qwen3.8-flash-next-iq3_s-basalt | 112 | 8da729553c7c5710 | temp 0.7, max_tokens 2400, one request per task; 38/175 rows api_finish=length (ctok>=2400) (2400-token ceiling); 63 unscored (driver gap), hidden tests by sha16; checker lcb-exec-v1 | 60/112 = **53.6%** |
