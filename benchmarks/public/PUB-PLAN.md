@@ -241,7 +241,7 @@ rows, `temp 0.7 / max_tokens 1200`. The retry inherits that budget, so a retry c
 counted as a failed repair, not excused — the arm is deliberately conservative and reports its own
 `api_finish=length` census.
 
-## Next candidate after this: doc-grounding validator (`house-ground-v1`, private set)
+## Next candidate after this: doc-grounding validator (`house-ground-v1`, private set) — **ON HOLD by owner decision 2026-11-09, see issue #44**
 
 The open owner question is whether a harness can beat the bare model or ChatGPT on **personal** data,
 for example a new private document. That is a different axis from contour parity: it is not more
@@ -256,3 +256,5 @@ No arm may run until the grounding checker ships with a self-test over positive 
 (a real span passes; a plausible paraphrase with an invented number fails). Until then the honest answer
 to "does a harness make the model smarter about my data" is: **unmeasured**, and the answer-graded public
 sets on this line say the effect of the current contour alone is zero.
+
+Status note (2026-11-09 18:45 CET): the owner paused the personal-document line until he names the documents; a reminder fires 2026-11-10 09:00 CET and issue #44 carries the full proposal, the measured basis (`pub-repair-v1` +5.2 pp) and the publication rules. No document is fetched, pinned or scored before his decision.
