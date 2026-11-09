@@ -67,6 +67,23 @@ for e in mod.VENDOR_EXCEPTIONS:
     check("exception_lists_only_metadata_rules_%s" % e["path"].rsplit("/", 1)[-1],
           all(not mod.is_credential_rule(r) for r in e["rules"]), "rules=%s" % (e["rules"],))
 
+# 2c. the BFCL pinned-task exception: scanner pin == manifest pin == on-disk bytes
+BFCL_REL = "benchmarks/public/bfcl.tasks.jsonl"
+bfcl = excs.get(BFCL_REL)
+check("bfcl_exception_present", bfcl is not None)
+if bfcl:
+    bfcl_sha1 = (hashlib.sha1((ROOT / BFCL_REL).read_bytes()).hexdigest()[:16]
+                 if (ROOT / BFCL_REL).exists() else "")
+    check("bfcl_pinned_bytes_match_disk", bool(bfcl_sha1) and bfcl["sha16"] == bfcl_sha1,
+          "scanner=%s disk=%s" % (bfcl["sha16"], bfcl_sha1))
+    check("bfcl_scanner_pin_matches_manifest",
+          man["benches"]["bfcl"]["tasks_sha1_16"] == bfcl["sha16"],
+          "manifest=%s scanner=%s" % (man["benches"]["bfcl"]["tasks_sha1_16"], bfcl["sha16"]))
+    check("bfcl_excepted_for_pinned_bytes",
+          mod.vendored_exception_for(BFCL_REL, "email_like", bfcl_sha1) is not None)
+    check("bfcl_no_exception_on_byte_drift",
+          mod.vendored_exception_for(BFCL_REL, "absolute_local_path", "0" * 16) is None)
+
 # 3. narrowness (tamper controls)
 check("excepted_for_pinned_bytes",
       mod.vendored_exception_for(VENDOR_REL, "email_like", disk_sha16) is not None)

@@ -85,6 +85,23 @@ VENDOR_EXCEPTIONS = [
                "quote the token: a scanner exception that itself carries the pattern trips the "
                "rule it documents.)",
     },
+    {
+        # Not vendored data: a PINNED PUBLIC TASK FILE. Same admission shape: metadata-class
+        # rule only, bytes pinned in MANIFEST.json, every suppressed hit counted.
+        "path": "benchmarks/public/bfcl.tasks.jsonl",
+        "sha16": "068d359eb0af79b1",
+        "rules": ("email_like", "absolute_local_path"),
+        "pin": "benchmarks/public/MANIFEST.json -> benches.bfcl.tasks_sha1_16 (that entry also "
+               "carries the SHA-256/16 the digest rows print; this pin is the SHA-1/16 this "
+               "scanner's byte-binding uses - both name the same bytes)",
+        "why": "upstream Apache-2.0 BFCL v4 function-calling data (pinned at the gorilla repo "
+               "commit 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8): upstream sample function "
+               "arguments carry placeholder mailboxes (a 'Jane Doe' contact record) and a fake "
+               "dataset path under a home directory. Editing them would break the gold calls the "
+               "bfcl-ast-v1 checker matches against these exact bytes, so the file is pinned by "
+               "sha16 instead of sanitized. (This record deliberately does not quote the tokens: "
+               "a scanner exception that itself carries the pattern trips the rule it documents.)",
+    },
 ]
 
 

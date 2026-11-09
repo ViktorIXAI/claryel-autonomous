@@ -8,6 +8,39 @@
       "tasks": 2376,
       "tasks_sha16": "cac604a076e8b00a"
     },
+    "bfcl": {
+      "categories": {
+        "irrelevance": 240,
+        "multiple": 200,
+        "parallel": 200,
+        "parallel_multiple": 200,
+        "simple_python": 400
+      },
+      "checker": "bfcl-ast-v1",
+      "checker_files": {
+        "scripts/pub_bench_bfcl.py": "7e6042ce813a2779"
+      },
+      "gold_files": {
+        "BFCL_v4_multiple.json": "244e00ce9395df94",
+        "BFCL_v4_parallel.json": "8a6aa19c1adddc6a",
+        "BFCL_v4_parallel_multiple.json": "5ebf24f458c1f163",
+        "BFCL_v4_simple_python.json": "90cd5bc653690ee8"
+      },
+      "gold_note": "irrelevance carries no possible_answer file upstream BY DESIGN: the expected behaviour is to emit no call",
+      "hash_note": "tasks_sha16 is SHA-256/16 (the digest-row convention); tasks_sha1_16 is SHA-1/16, the byte hash the repo security scanner binds its vendored exception to",
+      "naming_note": "the ladder line said 'BFCL v3'; the maintained suite carries the BFCL_v4_* prefix; multi-turn/memory/web-search categories are outside this item's question-only scope and are not pinned",
+      "source": "github.com/ShishirPatil/gorilla (the standalone berkeley-nest repo is gone), berkeley-function-call-leaderboard/bfcl_eval/data/ at commit 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8; the same checkpoint an independent external harness byte-pins as current upstream",
+      "source_files": {
+        "BFCL_v4_irrelevance.json": "2b6ed4c2e992cdcf",
+        "BFCL_v4_multiple.json": "aef168155ebd74b7",
+        "BFCL_v4_parallel.json": "19f51a82eff42e5d",
+        "BFCL_v4_parallel_multiple.json": "8863ea8433239f55",
+        "BFCL_v4_simple_python.json": "82dd63ba502eb252"
+      },
+      "tasks": 1240,
+      "tasks_sha16": "00b74e037240792d",
+      "tasks_sha1_16": "068d359eb0af79b1"
+    },
     "gpqa-diamond": {
       "tasks": 198,
       "tasks_sha16": "af73cc064d4d8529"
