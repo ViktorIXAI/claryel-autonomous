@@ -114,6 +114,10 @@ exactly — asserted for every arm below.
 | pub-repair-pub-repair-lcb-v1-census.json | 40 | `f2346467bc26f8db` |
 | pub-repair-lcb-v1-merged-answers.jsonl | 175 | `96e7a62330e8aa90` |
 | pub-repair-lcb-v1-verdicts.jsonl | 175 | `1fc8d792711a62c7` |
+| pub-repair-pub-repair-bfcl-v1.jsonl (124 retry rows) | 124 | `3f5376495bf06e6c` |
+| pub-repair-pub-repair-bfcl-v1-census.json | 94 | `0070564d01b48301` |
+| pub-repair-bfcl-v1-merged-answers.jsonl | 1240 | `897462ba2e7c2d58` |
+| pub-repair-bfcl-v1-verdicts.jsonl | 1240 | `26eeab2051755ec8` |
 | bfcl-basalt-answers.jsonl | 1240 | `4ac238d09babcb45` |
 | bfcl-basalt-verdicts.jsonl | 1240 | `389aed67b18d0d58` |
 | bfcl-contour-matched-answers.jsonl | 1240 | `ed8b58a224521f39` |
@@ -270,6 +274,37 @@ keep-best **108/175 = 61.7 %** (7 fixed, 0 net worse, exact sign test p = 0.0156
 a summary-print KeyError **after** all artifacts were written; the deterministic `--merge`
 re-score reproduced the merged bytes byte for byte (dated `LEG-INCIDENTS.md` entry), and the
 published census is the live-run one with its honest `wall_s`.
+
+Audit of that arm from the published side (2026-11-09 23:4x, a second session): the pinned bare-arm
+answers and verdicts were re-scored from the **published** copies (`livecodebench-bare-answers.jsonl`
+-> hidden 101/175, verdict rows identical cell for cell over 175 ids), and the stored retry rows in
+`pub-repair-pub-repair-lcb-v1.jsonl` were re-merged with `--merge` (zero model calls) into a scratch
+directory: merged answers `96e7a62330e8aa90` and verdicts `1fc8d792711a62c7` came out **byte for byte
+identical** to the files in this index, at keep-best 108/175 = 61.7 % and retry-only 107/175.
+
+Repair arm `pub-repair-bfcl-v1` (2026-11-09, leg 23:26 → 23:46 CET, 124 calls, 0 transport errors):
+the pre-registered **negative control** on the set where the pinned AST verifier is also the scorer.
+The re-ask names only the failure **class** (call-count mismatch / a call that does not match the
+docs) — no gold call name, no expected call count, no parameter value — and the retry prompt prefix
+is the pinned task `prompt` field verbatim, so only the feedback block is new. Wiring guard first:
+the first arm reproduced the published bare-arm verdict rows cell for cell (1240/1240). Census: 124
+first-arm failures (46 call-count class, 78 unmatched-call class), 45 retries pass the verifier,
+**45 conversions, 0 worse**, keep-best = retry-only = **1161/1240 = 93.6 %** (by construction on a
+set where every asked cell is already a failure); redraw control computed from published bytes of the
+same brain at the same shape converts 29 of the same 124, and the matched sign test over those cells
+is **23/7, p = 0.0052**. 71 489 prompt + 86 666 completion tokens, median 8.0 s per call, wall
+1194.3 s, 42.27 Wh sampled GPU energy. The published merged-answer copy re-scores to 1161/1240
+through `bfcl-ast-v1` (self-test 22/22 asserted at re-score time).
+
+Hash convention in the four rows above: those artifact pins are **SHA-1/16**, the binding
+`scripts/security/secret_scan.py` uses for its byte-pinned exceptions; the digest rows for the same
+set print **SHA-256/16** (`00b74e037240792d` for `bfcl.tasks.jsonl`, `8da729553c7c5710` for
+`livecodebench.tasks.jsonl`). Both name the same bytes, and the repair-arm answer files carry the
+same upstream placeholder tokens as the pinned task files, so they ship unsanitized under new
+byte-pinned scanner exceptions (5 records, metadata-class rules only, provenance proved against the
+pinned task file and the already-excepted arm bytes) rather than with edited answers — which is also
+what brought the repo infra scanner back to 0 findings / exit 0 after two published IFEval repair
+files had been sitting unexcepted.
 
 Verified re-score of the published copies:
 

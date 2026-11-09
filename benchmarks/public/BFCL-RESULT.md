@@ -325,3 +325,77 @@ current file is `02cc555963de7dac` and `MANIFEST.json` now names that with this 
 * **Irrelevance has no gold file upstream.** Its verdict is "no call to a provided function", so
   prose is correct by construction; a model that abstains in prose is never penalised, which is
   the right shape but means the category measures over-calling only.
+
+## Repair arm `pub-repair-bfcl-v1` (2026-11-09, 23:26 → 23:46 CET): the pre-registered negative control, and the expectation is refuted
+
+Queue item 4: a validator-driven repair pass on the set the plan picked as a **negative control**,
+run anyway, with the pre-registered expectation published beside the result.
+
+*What the loop is allowed to see.* On this set the pinned verifier (`bfcl-ast-v1`) **is** the scorer,
+so there is no held-out signal to accuse the loop of reading — and no proxy either. Two rails keep
+the row honest:
+
+1. the re-ask names only the failure **class** — "the answer did not contain exactly the number of
+   calls the request implies" or "at least one call does not match the request: re-check the
+   function name, every parameter name and every value/type against the docs" — **never a gold call
+   name, never an expected call count, never a parameter value**;
+2. the retry request prefix is the pinned task `prompt` field verbatim (the exact bytes
+   `pub_bench_run.py` sent), so the retry differs from the bare call only by the appended feedback
+   block, and the wiring guard reproduced the published bare-arm verdict rows cell for cell
+   (**1240/1240 ids**) before any model call.
+
+*Pre-registration, and what was wrong in it.* `PUB-PLAN.md` item 4 pre-registered **≤0.5 pp** on the
+strength of a headroom line reading "gate-addressable failures are 2 of 1240 cells". That number is
+**not** a failure census: in the checker's own text it is the count of entries whose gold parameter
+is absent from its own docs and is therefore skipped as unverifiable. The census computed from
+stored bytes at 23:25 CET, **before the first re-ask**, is: 124 first-arm failures = **46 call-count
+class + 78 unmatched-call class**. The pre-registered judgment rule used here: a repair pass is
+claimed only **above a plain second draw**, and that control is computed from published bytes of the
+same brain at the same shape — the contour-0.0.2.56 matched arm converts **29 of the same 124
+failures (2.34 pp)** with no feedback at all.
+
+*Result.* **keep-best = retry-only = 1161/1240 = 93.6 %** vs the first arm **1116/1240 = 90.0 %**:
+**45 conversions, 0 cells made worse**, exact sign test p = 5.7e-14 against the first arm. The two
+percents coincide **by construction** here: every asked cell is already a first-arm failure, so a
+failed retry replaces an already-failing answer. The pre-registered ≤0.5 pp is **refuted by a factor
+of seven**, and per the plan's own wording that is the finding: the headroom analysis was wrong.
+
+*The number that decides the mechanism, not the draw.* Matched against the redraw control over the
+same 124 cells: repair-only **23**, control-only **7**, both 22 → exact sign test **23/7,
+p = 0.0052**. So a verdict-only re-ask beats a plain second draw (net +16 cells = **+1.3 pp** above
+the redraw floor), and the arm-level +3.6 pp must be read as +2.3 pp of redraw luck plus +1.3 pp of
+feedback effect. Conversions by class: **32 of 78** in the unmatched-call class, **13 of 46** in the
+call-count class — naming the class is enough to fix nearly half of the semantic-looking failures,
+which is the part the earlier analysis denied.
+
+| category | first-arm failures | repaired | (repaired by the redraw control) |
+|---|---|---|---|
+| irrelevance | 36 | 8 | 8 |
+| multiple | 16 | 9 | 7 |
+| parallel | 14 | 3 | 2 |
+| parallel_multiple | 35 | 12 | 8 |
+| simple_python | 23 | 13 | 4 |
+
+*Cost, published beside the percent.* 124 re-asks, all `finish=ok`, 1 ceiling hit at the inherited
+1200-token budget, 0 transport errors, 0 previous-answer truncations; 71 489 prompt + 86 666
+completion tokens; per-call seconds median **8.0** (range 2.9–25.6); ask phase wall **1194.3 s**;
+sampled GPU energy **42.27 Wh** over the window 23:26:31→23:46:16 (470 samples at 2 s, mean 128.4 W,
+GPU busy 0.91). The endpoint is the fleet's main brain, so the wall/energy side carries that shared
+load and is not a clean single-arm window; the conversion counts are unaffected (the checker is
+deterministic and re-scoring identical bytes reproduces the identical verdict vector).
+
+*What this arm is and is not.* It is **arm-level**, the frozen contour stays `0.0.2.56` with its
+bytes untouched, and nothing here registers a stamp; the repair loop is a candidate mechanism, not a
+shipped feature. It converts 45 of 124 failures with **one** re-ask at the first arm's budget; the
+remaining 79 are still failing after a feedback-driven second attempt, and 22 of the 45
+conversions are cells a plain redraw would also have fixed. No gold byte entered the prompt, and the
+published retry/merged artifacts re-score to the published percents.
+
+*Artifacts* (`benchmarks/public/arms/`): `pub-repair-pub-repair-bfcl-v1.jsonl` (124 retry rows,
+`3f5376495bf06e6c`), `pub-repair-pub-repair-bfcl-v1-census.json` (`0070564d01b48301`),
+`pub-repair-bfcl-v1-merged-answers.jsonl` (`897462ba2e7c2d58`),
+`pub-repair-bfcl-v1-verdicts.jsonl` (`26eeab2051755ec8`) — SHA-1/16, the scanner's byte-binding
+convention; the digest row for the set names the SHA-256/16 `00b74e037240792d` of the pinned task
+file, unchanged. The answer bytes carry the same upstream placeholder tokens as the pinned BFCL task
+file (proved against it, and against the already-excepted bare arm at `419e9dbcdff4872d`), so the
+arm ships unsanitized under byte-pinned scanner exceptions rather than with edited answers.

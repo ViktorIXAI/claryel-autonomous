@@ -180,3 +180,18 @@ verdict bytes shipped in `arms/` (see `arms/README.md`, "First cloud-arm artifac
   byte-identical to the bare arm's call and only the feedback block is appended. A 3-call smoke
   came back `finish=ok` at 7.2-9.1 s/task with real answers; the full leg relaunched at 23:26 CET
   under the same unit name with a fresh output directory.
+
+## 2026-11-09 23:46 CET — the running BFCL arm rewrote the digest header with the pre-fix code and ate the restored supersession pointer again
+
+* The pointer-preservation guard landed in the repo at 23:33, but the BFCL repair leg had started at
+  23:26 and had already imported the old `write_digest`, which regenerates the digest head from the
+  template. When the arm appended its row at 23:46 it wrote the head without the
+  `checker lcb-exec-v1` -> `lcb-exec-v2` pointer sentence that had just been restored. No row and no
+  verdict moved; one published pointer was gone.
+* Handling: the sentence is restored again in the commit that publishes the BFCL repair row, the
+  digest table is byte-checked row by row (44 table lines, one new row, nothing else changed), and
+  every write from now on runs the guard, which fails closed with `DIGEST POINTER LOSS` (its
+  tamper control exits 2 on a copy with one extra pointer sentence). Lesson recorded for the line:
+  a leg imports its tooling at start, so a tooling fix landing mid-leg does not apply to that leg —
+  relaunch it (the runners resume free from their stored rows) or expect the old behaviour at the
+  end of the run.

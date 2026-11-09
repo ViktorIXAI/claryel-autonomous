@@ -201,6 +201,57 @@ VENDOR_EXCEPTIONS = [
                "mailbox token as the answers file, scored bytes untouched. (Record does not quote "
                "the token.)",
     },
+    # ---- repair-arm artifacts (added with pub-repair-v1/v2 and pub-repair-lcb-v1 /
+    # pub-repair-bfcl-v1). Same admission shape as the arms above: these are ANSWER bytes that
+    # re-score to a published percent, so they may not be sanitized, and only metadata-class rules
+    # fire on them. Each token's provenance is checked against an already-pinned byte source.
+    {
+        "path": "benchmarks/public/arms/pub-repair-v1-merged-answers.jsonl",
+        "sha16": "639332eea931294f",
+        "rules": ("email_like",),
+        "pin": "benchmarks/public/arms/README.md index row `pub-repair-v1-merged-answers.jsonl`",
+        "why": "IFEval repair-arm merged answers: the merged file inherits the pinned bare arm's "
+               "answer bytes verbatim for every task the repair did not convert, so the same "
+               "placeholder mailbox found in the already-excepted `ifeval-basalt-answers.jsonl` "
+               "(proved: the token occurs there at the same task id) appears here too. Masking it "
+               "would edit the bytes the pub-repair-v1 verdicts were computed from. No "
+               "credential-class rule matches. (Record does not quote the token.)",
+    },
+    {
+        "path": "benchmarks/public/arms/pub-repair-v2-merged-answers.jsonl",
+        "sha16": "ee4728cc10e4498f",
+        "rules": ("email_like",),
+        "pin": "benchmarks/public/arms/README.md index row `pub-repair-v2-merged-answers.jsonl`",
+        "why": "same provenance as the pub-repair-v1 merged file (the retry@2400 arm's merged bytes "
+               "carry the pinned bare arm's answer for the same task id, where the placeholder "
+               "mailbox already exists in the excepted `ifeval-basalt-answers.jsonl`). No "
+               "credential-class rule matches. (Record does not quote the token.)",
+    },
+    {
+        "path": "benchmarks/public/arms/pub-repair-pub-repair-bfcl-v1.jsonl",
+        "sha16": "3f5376495bf06e6c",
+        "rules": ("email_like",),
+        "pin": "benchmarks/public/arms/README.md index row `pub-repair-pub-repair-bfcl-v1.jsonl`",
+        "why": "the BFCL repair arm's retry rows are model output on the pinned BFCL v4 tasks, and "
+               "one retry echoes the pinned upstream placeholder mailbox verbatim as the argument "
+               "value the bfcl-ast-v1 checker matched (proved: that token occurs in "
+               "benchmarks/public/bfcl.tasks.jsonl, SHA-1/16 068d359eb0af79b1, already excepted at "
+               "that hash). Masking it would edit scored bytes. No credential-class rule matches. "
+               "(Record does not quote the token.)",
+    },
+    {
+        "path": "benchmarks/public/arms/pub-repair-bfcl-v1-merged-answers.jsonl",
+        "sha16": "897462ba2e7c2d58",
+        "rules": ("email_like", "absolute_local_path"),
+        "pin": "benchmarks/public/arms/README.md index row `pub-repair-bfcl-v1-merged-answers.jsonl`",
+        "why": "merged arm bytes: for unconverted tasks they are the pinned bare arm's answer bytes "
+               "verbatim (already excepted at SHA-1/16 419e9dbcdff4872d), and the converted retries "
+               "carry the same two upstream token classes - the placeholder mailbox and the fake "
+               "dataset path under a home directory, both present in "
+               "benchmarks/public/bfcl.tasks.jsonl (SHA-1/16 068d359eb0af79b1) as gold argument "
+               "values. Masking them would edit the bytes the 1161/1240 verdicts were computed from. "
+               "No credential-class rule matches. (Record does not quote the tokens.)",
+    },
 ]
 
 

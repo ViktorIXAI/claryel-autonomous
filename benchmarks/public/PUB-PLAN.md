@@ -305,3 +305,23 @@ hidden failures published, 59.7 Wh sampled; the print-crash after the measuremen
 control, pre-registered expectation ≤ 0.5 pp on 1240 — publish the expectation beside the
 result), then item 5 (HumanEval repair, small-sample warning mandatory). Codex transport still
 healthy as of 19:36; grok stays suspended until 12 Nov.
+
+**Queue status 2026-11-09 23:55 CET (tick 4):** item 4 **closed, expectation refuted** —
+`pub-repair-bfcl-v1` ran verdict-only over all 124 first-arm failures (46 call-count class, 78
+unmatched-call class; that census came from stored bytes at 23:25, before the first call):
+**45 conversions, 0 worse, keep-best = retry-only = 1161/1240 = 93.6 %** vs first arm 90.0 %. The
+pre-registered ≤0.5 pp was based on a mis-citation ("2 of 1240" is the checker's count of
+*unverifiable gold parameters*, not a failure census) — per the plan's own wording, the wrong
+headroom analysis is the finding. Against the redraw control computed from published bytes
+(contour-0.0.2.56 matched arm converts 29 of the same 124 = 2.34 pp) the matched sign test is
+**23/7, p = 0.0052**: the feedback adds +1.3 pp above a plain second draw. Tooling shipped with it:
+the repair digest rows now write the same SHA-256/16 tasks cell as the other rows of the set;
+`write_digest` fails closed if its regenerated head drops published prose (the LCB v1→v2
+supersession sentence had been eaten by a digest rewrite, restored twice, guard proven with a tamper
+control); the infra scanner is green again (0 findings) after 5 byte-pinned exception records for
+repair-arm answer bytes, 2 of which were pre-existing gaps on published IFEval files. Leg incidents:
+the first BFCL attempt died on a tooling `KeyError` before any endpoint call (zero calls burned,
+attempt kept aside), and the 23:26 leg rewrote the digest head with pre-fix code. **Next in force:
+item 5** — `pub-repair-v1` on HumanEval (5-ish strict failures, ceiling ~3 %, small-sample warning
+mandatory: nothing under ~2 pp on 164 tasks is resolvable), with the redraw control published beside
+it the same way. Codex transport healthy; grok suspended until 12 Nov.
