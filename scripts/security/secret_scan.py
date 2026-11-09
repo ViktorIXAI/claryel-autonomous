@@ -13,6 +13,7 @@ Modes:
 """
 import argparse
 import collections
+import hashlib
 import json
 import os
 import re
@@ -48,6 +49,40 @@ CREDENTIAL_RULES = {
     "pypi-token", "dockerhub-token", "huggingface-access-token",
 }
 
+# Vendored upstream files whose BYTES are pinned in a published manifest and are themselves input
+# to a scored gate. Such a file cannot be sanitized: editing it moves the pin and changes the data
+# a published reference band is computed from. An exception is therefore admissible only in this
+# explicit shape: exact repo-relative path + the exact sha16 the manifest pins + the exact
+# metadata-class rules it tolerates. Credential-class rules are never excepted (enforced in
+# `vendored_exception_for`), and every suppressed hit is counted in the summary under
+# `vendored_metadata_exceptions`, so a scan never silently loses one. A file that drifts from the
+# pinned sha16 gets no exception at all: the exception is bound to the bytes, not to the filename.
+VENDOR_EXCEPTIONS = [
+    {
+        "path": "benchmarks/public/vendor/instruction_following_eval/data/gpt4_sample.jsonl",
+        "sha16": "ff57ec6d17688771",
+        "rules": ("email_like",),
+        "pin": "benchmarks/public/MANIFEST.json -> benches.ifeval.reference_response_file",
+        "why": "upstream Apache-2.0 GPT-4 reference responses: third-party email-like tokens occur "
+               "inside generated answer text, and these exact bytes are what the pub-ifeval-v1 "
+               "reference-band gate scores (strict 416/540, loose 431/540)",
+    },
+]
+
+
+def is_credential_rule(rule):
+    return rule in CREDENTIAL_RULES or bool(re.search(r"api|token|key|secret|password", rule, re.I))
+
+
+def vendored_exception_for(rel_path, rule, file_sha16):
+    """Return the exception record if this hit is covered by a byte-pinned vendored file, else None."""
+    if is_credential_rule(rule):
+        return None
+    for e in VENDOR_EXCEPTIONS:
+        if e["path"] == rel_path and rule in e["rules"] and e["sha16"] == file_sha16:
+            return e
+    return None
+
 def parse_report(path):
     data = json.load(open(path, encoding="utf-8"))
     rows = []
@@ -82,7 +117,8 @@ def run_gitleaks(mode, target, report, extra=None):
 
 
 def scan_infra_text(target):
-    findings = []
+    """Audit-pattern hits (findings) plus hits covered by a byte-pinned vendored exception."""
+    findings, excepted = [], []
     p = Path(target)
     skip = {".git", ".venv", "__pycache__"}
     paths = [p] if p.is_file() else [f for f in p.rglob("*") if f.is_file() and not (skip & set(f.parts))]
@@ -91,15 +127,28 @@ def scan_infra_text(target):
             data = f.read_text(encoding="utf-8", errors="ignore")
         except Exception:
             continue
+        rel = sha = None                      # only paid for on an actual hit
         for name, pat in INFRA_PATTERNS.items():
             for lineno, line in enumerate(data.splitlines(), 1):
                 if pat.search(line) and "gitleaks:allow" not in line:
-                    findings.append({"rule": name, "file": str(f), "line": lineno})
+                    if rel is None:
+                        try:
+                            rel = str(f.resolve().relative_to(REPO.resolve()))
+                        except (ValueError, OSError):
+                            rel = str(f)
+                        sha = hashlib.sha1(f.read_bytes()).hexdigest()[:16]
+                    exc = vendored_exception_for(rel, name, sha)
+                    if exc:
+                        # Report path + rule + pinned sha16, never the matched value.
+                        excepted.append({"rule": name, "file": rel, "line": lineno,
+                                         "pinned_sha16": sha, "pin": exc["pin"]})
+                    else:
+                        findings.append({"rule": name, "file": str(f), "line": lineno})
                     break
-    return findings
+    return findings, excepted
 
 
-def merge(rows):
+def merge(rows, excepted=None):
     counts = collections.Counter(f"{r['rule']}|{'credential' if r['rule'] in CREDENTIAL_RULES or re.search(r'api|token|key|secret|password', r['rule'], re.I) else 'metadata'}" for r in rows)
     files = collections.Counter()
     for r in rows:
@@ -110,17 +159,22 @@ def merge(rows):
         "total_findings": len(rows),
         "by_rule": dict(counts),
         "credential_like": len(credential),
+        # Suppressed hits are counted, never dropped: a reader of the summary can see that a
+        # byte-pinned vendored file matched a metadata rule and under which sha16 pin.
+        "vendored_metadata_exceptions": len(excepted or []),
+        "vendored_exception_pins": sorted({f"{e['file']}@{e['pinned_sha16']}" for e in (excepted or [])}),
         "top_files": files.most_common(20),
     }
 
 
-def emit(report_path, rows):
+def emit(report_path, rows, excepted=None):
     if report_path:
         Path(report_path).parent.mkdir(parents=True, exist_ok=True)
         # Secret field from Gitleaks should already be redacted; defensively remove.
         safe = [{k: v for k, v in r.items() if k != "secret"} for r in rows]
-        json.dump(safe, open(report_path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
-    print(json.dumps(merge(rows), indent=1, ensure_ascii=False))
+        json.dump({"findings": safe, "vendored_exceptions": list(excepted or [])},
+                  open(report_path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    print(json.dumps(merge(rows, excepted), indent=1, ensure_ascii=False))
 
 
 def selftest(tmp):
@@ -143,18 +197,20 @@ def main():
     args = ap.parse_args()
 
     tmp = tempfile.mkdtemp(prefix="sah-secret-scan-")
-    rows = []
+    rows, excepted = [], []
     try:
         if args.selftest:
             target = selftest(tmp)
             rows += run_gitleaks("dir", target, os.path.join(tmp, "canary.json"))
-            rows += scan_infra_text(target)
-            emit(args.report, rows)
+            f, e = scan_infra_text(target)
+            rows += f; excepted += e
+            emit(args.report, rows, excepted)
             return 0 if rows else 1
 
         if args.dir:
             rows += run_gitleaks("dir", args.dir, os.path.join(tmp, "dir.json"))
-            rows += scan_infra_text(args.dir)
+            f, e = scan_infra_text(args.dir)
+            rows += f; excepted += e
         if args.git:
             rows += run_gitleaks("git", args.git, os.path.join(tmp, "git.json"))
         if args.pre_publish:
@@ -162,11 +218,13 @@ def main():
                 p = PUB / name
                 if p.exists():
                     rows += run_gitleaks("dir", p, os.path.join(tmp, f"pub-{name}.json"))
-                    rows += scan_infra_text(p)
+                    f, e = scan_infra_text(p)
+                    rows += f; excepted += e
         if not (args.dir or args.git or args.pre_publish):
             rows += run_gitleaks("dir", ".", os.path.join(tmp, "repo.json"))
-            rows += scan_infra_text(".")
-        emit(args.report, rows)
+            f, e = scan_infra_text(".")
+            rows += f; excepted += e
+        emit(args.report, rows, excepted)
         bad = any(r["rule"] in CREDENTIAL_RULES or re.search(r"api|token|key|secret|password", r["rule"], re.I) for r in rows)
         if args.strict and rows:
             return 1
