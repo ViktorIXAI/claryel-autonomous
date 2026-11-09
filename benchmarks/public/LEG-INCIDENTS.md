@@ -118,3 +118,24 @@ verbatim one of the three allowed options), not a stale-file carry — the stale
 was already closed by the transport fix above. Scored with `pub-ifeval-v1`: **515/541 = 95.2 %
 strict (526/541 loose)**, published in `PUB-DIGEST.md` and `IFEVAL-RESULT.md` with the answer and
 verdict bytes shipped in `arms/` (see `arms/README.md`, "First cloud-arm artifacts").
+
+## 2026-11-09 16:28 → 16:45 CET — the digest writer ate a published row (LiveCodeBench, tooling defect, no measurement lost)
+
+* The LiveCodeBench bare arm was scored twice. The first pass ran while the leg still had two rows
+  pending, so its call column said `37/175 rows api_finish=length`; the finished file holds **38**,
+  so the scorer was re-run against the **identical answer bytes** with the corrected label. The two
+  verdicts files are byte-identical (`md5 eedbc49e2fc79a452408251d2071bbe6`), the percent is
+  unchanged at **60/112 = 53.6 %**, and the first pass's uncommitted row is superseded, not edited.
+* The defect: the second write removed the first pass's row from `PUB-DIGEST.md` instead of
+  prepending above it. `write_digest` recognised the header row with the substring test
+  `"bench |" not in line`, which also matches every **`livecodebench`** data row
+  (`…codebench | …`). Every future digest write would have silently deleted the LCB rows, including
+  the contour parity row as soon as it landed. Nothing was scored differently and no answer byte
+  moved — a published table row was eaten.
+* Fix, same commit as this entry: the header/separator are matched by **shape**
+  (`| bench |` prefix / pipe-dash-only line), and the writer fails closed
+  (`DIGEST ROW COUNT MISMATCH`, exit 2) whenever its filter would drop more than the single header
+  line. Contract test `harness/pub_digest_row_test.py` — **7 checks green**, with a tamper control
+  that reproduces the old filter losing the row, so the test is not vacuous.
+* Table state after the fix: one LCB row (the corrected-label row), 35 percent rows in total, no
+  duplicate `bench+model+tasks+contract` cell anywhere in the digest.

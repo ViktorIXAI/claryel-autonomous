@@ -19,7 +19,7 @@ loaded by path), i.e. the same bytes that decided the bare row. If the frozen ru
 serve a public class at all, that refusal is the published finding — no contour row is faked.
 
 Usage: pub_bench_contour_ws.py <bench> <limit> [shape=frozen|bare] [out-dir]
-                               [validator=score|exec|ifeval|bfcl]
+                               [validator=score|exec|ifeval|bfcl|lcb]
 
 `validator=exec` puts the pytest-v1 execution checker (scripts/pub_bench_exec.py) in the validator
 slot, which is what HumanEval's bare row was scored with; the builder runs that checker's self-test
@@ -52,6 +52,16 @@ MODULES = ("gate_run.py", "gate_versioning.py", "gate_engine_guard.py", "gate_j_
            "gate_c_ground.py", "gate_fixers.py", "gate_scorer_contract.py",
            "gate_bank_versions.py", "os_record.py", "parb_check.py", "parb_check_v6.py",
            "parb_check_v6_2.py", "parb_loop.py", "e_sandbox.py")
+
+# Task-file fields the validator shim needs but the generic bank row does not carry by default.
+# Kept as a table so a new contract adds fields without touching the row builder.
+EXTRA_FIELDS = {"lcb": ("testtype", "hidden_count", "hidden_sha16", "platform", "difficulty")}
+
+# The token ceiling the BARE arm of this set used, so a `bare`-shape ws states the ladder it must
+# be launched with. The parity rule pins the contour leg's FIRST RUNG to the bare arm's
+# max_tokens; that number is per-set (1200 on the classic sets, 2400 on LiveCodeBench), so it is
+# read from the environment instead of being hardcoded here.
+BARE_MAX_TOKENS = int(os.environ.get("PUB_BARE_MAX_TOKENS", "1200"))
 
 SHIM = '''
 
@@ -221,6 +231,66 @@ def check_public(t, text):
 CHECK["P"] = check_public
 '''
 
+# Variant for hidden-test code sets (LiveCodeBench). The verdict is not answer matching and not a
+# public-test run: `lcb-exec-v1` (scripts/pub_bench_lcb.py) runs the question's HIDDEN battery and
+# requires every test to pass, after verifying the battery against the pinned per-question
+# hidden_sha16. The hidden payload is an untracked sidecar (the decoded battery is 289 MB, far too
+# large for a tracked file), so the shim reads it from the path the builder stamps here and the
+# checker re-derives the pin per question — a payload swap fails closed as UNSCORED, never as a
+# guess. The same module, the same caps and the same rlimit'd child decide the bare row and the
+# contour row, which is what makes the two rows comparable. `testtype`/`hidden_count`/
+# `hidden_sha16` therefore have to reach the shim, so the builder carries them into the bank rows.
+SHIM_LCB = '''
+
+# ---- public-benchmark validator shim, LCB variant (workspace-only, written by
+# ---- pub_bench_contour_ws.py). Contract: lcb-exec-v1 (scripts/pub_bench_lcb.py). ----
+# Category "P" is a public benchmark task: gate_run's contour routing is keyed to the hard-bank
+# families A..K, so a "P" task reaches only the generic ladder path and no family grammar is
+# grafted onto a public prompt. format_ok is fixed to 1 because the public contract has no separate
+# format axis, so the harness strict rule (content == 1.0 and format_ok) is exactly the checker's
+# verdict. A `functional` question has no shipped driver in this contract and stays UNSCORED
+# (content None), exactly as it does for the bare arm — never a zero.
+import gzip as _shim_gzip
+import hashlib as _shim_hashlib
+import importlib.util as _shim_ilu
+_LCB_PATH = @@PUBPATH@@
+_LCB_HIDDEN_PATH = @@LCBHIDDEN@@
+_spec = _shim_ilu.spec_from_file_location("pub_bench_lcb_shim", _LCB_PATH)
+PLCB = _shim_ilu.module_from_spec(_spec)
+_spec.loader.exec_module(PLCB)
+PUB_CHECKER_CONTRACT = PLCB.LCB_CONTRACT
+PUB_SCORER_SHA16 = _shim_hashlib.sha256(open(_LCB_PATH, "rb").read()).hexdigest()[:16]
+_LCB_BATTERY = {}
+
+
+def _lcb_battery():
+    """Load the pinned hidden battery once; the per-question sha16 check is inside score_question."""
+    if not _LCB_BATTERY:
+        _opener = _shim_gzip.open if _LCB_HIDDEN_PATH.endswith(".gz") else open
+        with _opener(_LCB_HIDDEN_PATH, "rt", encoding="utf-8") as _fh:
+            for _l in _fh:
+                if _l.strip():
+                    _h = json.loads(_l)
+                    _LCB_BATTERY[_h["id"]] = _h["tests"]
+    return _LCB_BATTERY
+
+
+def check_public(t, text):
+    """Hidden-battery verdict mapped onto the harness score slots (documented above)."""
+    _tests = _lcb_battery().get(t.get("id"))
+    if _tests is None:
+        return None, None, ["pub_unscored_checker:no_hidden_payload"]
+    _v, _d = PLCB.score_question(t, _tests, text or "")
+    if _v == "ok":
+        return 1.0, 1, ["pub:lcb_exec_ok:%s" % str(_d)[:80]]
+    if _v == "unscored":
+        return None, None, ["pub_unscored_checker:%s" % str(_d)[:120]]
+    return 0.0, 1, ["pub:lcb_exec_fail:%s" % str(_d)[:160]]
+
+
+CHECK["P"] = check_public
+'''
+
 
 def sha16(path):
     return hashlib.sha256(open(path, "rb").read()).hexdigest()[:16]
@@ -242,13 +312,23 @@ def main():
     # answer-graded sets that is the number/letter/exact contract; for HumanEval it is the
     # pytest-v1 execution checker, which is a different module and a different contract id.
     validator = (sys.argv[5] if len(sys.argv) > 5 else "score").strip().lower()
-    if validator not in ("score", "exec", "ifeval", "bfcl"):
-        sys.exit("validator must be 'score', 'exec', 'ifeval' or 'bfcl', got %r" % validator)
+    if validator not in ("score", "exec", "ifeval", "bfcl", "lcb"):
+        sys.exit("validator must be 'score', 'exec', 'ifeval', 'bfcl' or 'lcb', got %r" % validator)
     pub_mod = {"exec": "pub_bench_exec.py",
                "ifeval": "pub_bench_ifeval.py",
-               "bfcl": "pub_bench_bfcl.py"}.get(validator, "pub_bench_score.py")
-    if validator == "exec":
-        r = subprocess.run([sys.executable, os.path.join(REPO, "scripts", "pub_bench_exec.py"),
+               "bfcl": "pub_bench_bfcl.py",
+               "lcb": "pub_bench_lcb.py"}.get(validator, "pub_bench_score.py")
+    # The LCB verdict comes from the question's hidden battery, which is an untracked sidecar by
+    # design (289 MB decoded). Staging without it would score every row UNSCORED, so the builder
+    # resolves and verifies the sidecar before it reserves anything.
+    lcb_hidden = None
+    if validator == "lcb":
+        lcb_hidden = os.environ.get("PUB_LCB_HIDDEN") or os.path.expanduser(
+            "~/pub-bench/lcb/livecodebench.hidden.jsonl.gz")
+        if not os.path.exists(lcb_hidden):
+            sys.exit("LCB validator needs the pinned hidden sidecar, missing: %s" % lcb_hidden)
+    if validator in ("exec", "lcb"):
+        r = subprocess.run([sys.executable, os.path.join(REPO, "scripts", pub_mod),
                             "selftest"], capture_output=True, text=True)
         print((r.stdout or "").strip() or (r.stderr or "").strip())
         if r.returncode != 0:
@@ -293,8 +373,9 @@ def main():
             sys.exit("SHAPE SWITCH MISSING: this harness has no PARB_SHAPE switch; a 'bare' "
                      "parity workspace would silently re-measure the escalation shape")
     shim = {"exec": SHIM_EXEC, "ifeval": SHIM_IFEVAL,
-            "bfcl": SHIM_BFCL}.get(validator, SHIM)
+            "bfcl": SHIM_BFCL, "lcb": SHIM_LCB}.get(validator, SHIM)
     shim = shim.replace("@@PUBPATH@@", json.dumps(os.path.join(REPO, "scripts", pub_mod)))
+    shim = shim.replace("@@LCBHIDDEN@@", json.dumps(lcb_hidden or ""))
     shim = shim.replace("@@VENDOR@@",
                         json.dumps(os.path.join(REPO, "benchmarks", "public", "vendor")))
     with open(os.path.join(out, "parb_check.py"), "a", encoding="utf-8") as fh:
@@ -316,7 +397,11 @@ def main():
     for b, t in zip(bank, rows):
         # `functions`/`category` must reach the validator shim for function-calling sets: the AST
         # matcher scores against the task's own docs, and `category` is what the report splits by.
-        for extra in ("instruction_id_list", "kwargs", "functions", "category"):
+        # `testtype`/`hidden_count`/`hidden_sha16` must reach it for hidden-battery sets: the
+        # checker refuses to run a battery whose bytes do not match the pinned hash, and the
+        # difficulty/platform columns are what the result doc splits by.
+        extra_fields = list(EXTRA_FIELDS.get(validator, ()))
+        for extra in ("instruction_id_list", "kwargs", "functions", "category") + tuple(extra_fields):
             if extra in t:
                 b[extra] = t[extra]
     json.dump(bank, open(os.path.join(out, "bank.json"), "w", encoding="utf-8"),
@@ -370,6 +455,22 @@ def main():
                                        "failure); gold-as-answer 1240/1240 and perturbed-gold "
                                        "control 1000/1000 rejected were recorded when the checker "
                                        "shipped, and the pinned task bytes have not moved"}
+    elif validator == "lcb":
+        _cid = subprocess.run(
+            [sys.executable, "-c",
+             "import importlib.util as u;s=u.spec_from_file_location('l',%r);"
+             "m=u.module_from_spec(s);s.loader.exec_module(m);print(m.LCB_CONTRACT)"
+             % os.path.join(REPO, "scripts", "pub_bench_lcb.py")],
+            capture_output=True, text=True)
+        validator_identity = {"contract": (_cid.stdout or "").strip() or "lcb-exec-v1",
+                              "module": "scripts/pub_bench_lcb.py",
+                              "sha16": sha16(os.path.join(REPO, "scripts", "pub_bench_lcb.py")),
+                              "hidden_sidecar": lcb_hidden,
+                              "hidden_sidecar_sha16": sha16(lcb_hidden),
+                              "gates": "10-case contract self-test re-run at staging time "
+                                       "(refuses on failure); the checker verifies every "
+                                       "question's hidden battery against the pinned "
+                                       "hidden_sha16 before running it"}
     else:
         validator_identity = {"contract": "pub-checkers-v2",
                               "module": "scripts/pub_bench_score.py",
@@ -385,10 +486,13 @@ def main():
                                if shape == "bare" else
                                "sp1 (gseed = int(sha256(task|rep)[:8],16) % 999983)"),
              "request_shape": ({"mode": "bare-matched",
-                                "launch_env_required": "PARB_SHAPE=bare PARB_LADDER=1200",
-                                "why": ("parity with the bare arm: first token rung = the bare "
-                                        "arm's max_tokens, serve-default thinking (no "
-                                        "chat_template_kwargs), temperature 0.7, no request seed")
+                                "bare_max_tokens": BARE_MAX_TOKENS,
+                                "launch_env_required": "PARB_SHAPE=bare PARB_LADDER=%d"
+                                                       % BARE_MAX_TOKENS,
+                                "why": ("parity with the bare arm: first rung = the bare "
+                                        "arm's max_tokens (%d), serve-default thinking (no "
+                                        "chat_template_kwargs), temperature 0.7, no request "
+                                        "seed" % BARE_MAX_TOKENS)
                                 } if shape == "bare" else
                                {"mode": "frozen-contour",
                                 "why": ("published shape: first rung 512 escalating to the "
@@ -402,7 +506,8 @@ def main():
           "tasks", len(bank), "bank", bank_sha,
           "tasks-file", ident["tasks_file_sha16"], "harness", sha[:12])
     if shape == "bare":
-        print("launch this ws with: PARB_SHAPE=bare PARB_LADDER=1200 (the bare arm's shape)")
+        print("launch this ws with: PARB_SHAPE=bare PARB_LADDER=%d (the bare arm's shape)"
+              % BARE_MAX_TOKENS)
     return 0
 
 

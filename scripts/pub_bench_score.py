@@ -148,8 +148,17 @@ def write_digest(row, dst=None):
     hdr = ("| bench | model | tasks | tasks sha16 | call | strict |\n"
            "|---|---|---|---|---|---|")
     old = open(dst, encoding="utf-8").read() if os.path.exists(dst) else ""
-    body = [l for l in old.splitlines() if l.startswith("| ") and "bench |" not in l
-            and not set(l) <= set("|- ")]
+    prev = [l for l in old.splitlines() if l.startswith("| ")]
+    # The header/separator rows must be recognised by their SHAPE, not by a substring: the old
+    # filter dropped any row whose bench name contains "bench |" — which is every
+    # `livecodebench` row — so each later digest write silently DELETED the published
+    # LiveCodeBench rows (measured 2026-11-09: the second LCB scoring pass rewrote the table
+    # without the first LCB row). Nothing was scored differently; a row was just eaten.
+    body = [l for l in prev if not l.startswith("| bench |") and not set(l) <= set("|- ")]
+    if prev and len(body) != len(prev) - 1:  # header accounted for exactly once: fail closed
+        sys.stderr.write("DIGEST ROW COUNT MISMATCH: %d table lines, %d kept, expected %d\n"
+                         % (len(prev), len(body), len(prev) - 1))
+        raise SystemExit(2)
     with open(dst, "w", encoding="utf-8") as fh:
         fh.write(digest_head() + hdr + "\n" + "\n".join([row] + body) + "\n")
     return dst
