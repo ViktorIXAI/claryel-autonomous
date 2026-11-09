@@ -263,3 +263,32 @@ to "does a harness make the model smarter about my data" is: **unmeasured**, and
 sets on this line say the effect of the current contour alone is zero.
 
 Status note (2026-11-09 18:45 CET): the owner paused the personal-document line until he names the documents; a reminder fires 2026-11-10 09:00 CET and issue #44 carries the full proposal, the measured basis (`pub-repair-v1` +5.2 pp) and the publication rules. No document is fetched, pinned or scored before his decision.
+
+## Overnight queue 2026-11-09 → 10 (ordered; a tick must pick the first incomplete item, never end idle while one is open)
+
+1. **`lcb-exec-v2` — close the scorer driver gap.** LiveCodeBench left 63 of 175 tasks UNSCORED because
+   the runner did not drive some task templates. Fix the driver, re-score the **stored** answer bytes
+   offline (zero paid re-runs), publish the corrected rows over the full denominator and mark the
+   112-denominator rows `superseded` with dated pointers instead of editing them. Done when: the checker
+   self-test is green, the UNSCORED count is reported per arm, and new digest rows exist.
+2. **`pub-repair-v2` on IFEval — retry at `max_tokens` 2400.** The v1 census showed 34 of 72 retries cut
+   at the inherited 1200-token budget, so v1 is a lower bound. The first arm stays the pinned 1200-byte
+   arm; the row must be labelled `pub-repair-v2 (retry@2400)` so nobody reads it as the same request
+   shape. Publish census, both percents (`keep-best` and `retry-only`) and sampled energy.
+3. **`pub-repair-v1` on LiveCodeBench.** Execution against the hidden tests is a real verifier, and after
+   item 1 it covers the whole set: re-ask once per failing task, naming the failing test and the exception,
+   keep-best rule, census + energy. This is the strongest prior for a real gain on code.
+4. **`pub-repair-v1` on BFCL as a pre-registered negative control.** The headroom analysis says
+   gate-addressable failures are 2 of 1240 cells, so the pre-registered expectation is **≤0.5 pp**. Run it
+   anyway and publish the expectation next to the result: if it moves more, the headroom analysis was wrong
+   and that is the finding.
+5. **`pub-repair-v1` on HumanEval.** Only ~5 strict failures, so the ceiling is ~3 %, but it is cheap and
+   it tests repair on code generation where the verifier is the same vendored `pytest-v2` execution.
+   Small-sample warning must be published: anything under ~2 pp on 164 tasks is not resolvable.
+6. **Not queued, on the record:** GPQA-Diamond and MMLU-Pro get no repair arm — they have no verifier, and
+   their failures are knowledge errors. Writing this down before the fact is what keeps the later claim
+   honest.
+
+Standing limits for every item: no Grok arm before 2026-11-12; issue #43 architecture hold until
+2026-11-10 10:10 CET; frozen contour stays `0.0.2.56` with its bytes untouched; a partial arm publishes no
+percent; sanitization before push; verdicts and arm bytes shipped so every percent re-scores offline.
