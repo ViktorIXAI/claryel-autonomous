@@ -110,6 +110,10 @@ exactly — asserted for every arm below.
 | livecodebench-contour-matched-answers.jsonl | 175 | `d33da04ea0b43c80` |
 | livecodebench-contour-matched-verdicts.jsonl | 175 | `d0e3271e8924f970` |
 | livecodebench-contour-matched-stats.json | 33 | `36d6c656d487c19a` |
+| pub-repair-pub-repair-lcb-v1.jsonl (67 retry rows) | 67 | `db0d8823d8b1e9b6` |
+| pub-repair-pub-repair-lcb-v1-census.json | 40 | `f2346467bc26f8db` |
+| pub-repair-lcb-v1-merged-answers.jsonl | 175 | `96e7a62330e8aa90` |
+| pub-repair-lcb-v1-verdicts.jsonl | 175 | `1fc8d792711a62c7` |
 | bfcl-basalt-answers.jsonl | 1240 | `4ac238d09babcb45` |
 | bfcl-basalt-verdicts.jsonl | 1240 | `389aed67b18d0d58` |
 | bfcl-contour-matched-answers.jsonl | 1240 | `ed8b58a224521f39` |
@@ -252,6 +256,20 @@ full-denominator record, and the re-score of the published codex copy from the r
 168/175 to the digit. Sign tests on the full 175: bare-vs-contour 12W/10L (p = 0.83, unresolvable),
 bare-vs-codex 0W/67L, contour-vs-codex 0W/69L. Checker bytes `0430437a774eb39d →
 68a0a39a6aec46a3` are pinned in `MANIFEST.json` → `checker_history` beside the reason.
+
+Repair arm `pub-repair-lcb-v1` (2026-11-09, leg 21:02→21:41 CET, 67 calls, 0 transport errors):
+the first code-set repair loop on the line. Validator = the question's own PUBLIC sample tests
+through the same pinned `lcb-exec-v2` (stdin child / functional driver), scorer = the hidden
+battery, scorer-only; the wiring guard matched the first-arm hidden pass against the published
+bare verdict rows cell for cell (175/175) before any model call. Census and result: 74 hidden
+failures, 67 visible to the public validator (8 blind by construction, ids published in
+`LIVECODEBENCH-RESULT.md`), only 9/67 retries sample-valid, 36/67 hit the 2400 ceiling;
+keep-best **108/175 = 61.7 %** (7 fixed, 0 net worse, exact sign test p = 0.0156), retry-only
+107/175 — the one asked hidden-pass cell survives only under the keep rule. 95 768 prompt +
+154 322 completion tokens, 59.7 Wh sampled GPU energy over the leg window. The unit exited 1 on
+a summary-print KeyError **after** all artifacts were written; the deterministic `--merge`
+re-score reproduced the merged bytes byte for byte (dated `LEG-INCIDENTS.md` entry), and the
+published census is the live-run one with its honest `wall_s`.
 
 Verified re-score of the published copies:
 

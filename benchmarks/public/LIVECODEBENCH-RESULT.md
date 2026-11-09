@@ -294,3 +294,63 @@ the v1 verdict files stay published unchanged):
 *Caveat added with the release:* functional scores are **retro-scores of stored bytes**, not new
 measurements — same single draw per task, same contamination state, same ceiling confound. The
 resolution floor caveat (§ Caveats) applies to the 175-cell sign tests unchanged.
+
+## Repair arm `pub-repair-lcb-v1` (2026-11-09, 21:02 → 21:41 CET): a public-validator-driven retry over the full set
+
+Queue item 3, run now that item 1 made the whole 175 scoreable. One re-ask per
+task the **PUBLIC sample tests** reject, keep-best adoption, hidden battery as scorer.
+
+*Design and honesty rails:* the validator slot runs the question's own public
+tests through the same pinned `lcb-exec-v2` (a `run_stdin` child for stdin
+tasks, the functional driver for functional tasks); the retry prompt names only
+bytes the prompt already ships — the failing sample's input and expected output
+(capped at 700 chars each), the rejected attempt (capped at 4000 chars), and for
+functional tasks the starter signature. The hidden battery enters **after** the
+arm, scoring only. Before any model call, the first-arm hidden pass must
+reproduce the published bare-arm verdict rows cell for cell — it did, **175/175
+ids** (`ff3e16209ae155d7` answers, `40a412a8e47f357e` verdicts).
+
+*Headroom, named before the calls:* 74 tasks fail the hidden battery; the
+public validator sees 67 of them (45 stdin + 22 functional). **8 hidden
+failures pass every public sample and are never asked — blind by construction**
+(`lcb-3779`, `lcb-abc392_d`, `lcb-abc392_f`, `lcb-abc396_e`, `lcb-abc397_d`,
+`lcb-abc398_g`, `lcb-abc399_e`, `lcb-arc195_b`); five of those are also codex
+loss cells.
+
+*Calls and cost:* 67 re-asks, temp 0.7, `max_tokens` 2400 inherited from the
+first arm (same budget → same contract, no silent shape change), 0 transport
+errors, 95 768 prompt + 154 322 completion tokens, ask phase 2217.7 s (~21.6
+s/task), sampled GPU energy **59.7 Wh** over the leg window (mean 83.7 W, mean
+utilization 56.3 %, 2 s sampler).
+
+*Result:* **keep-best 108/175 = 61.7 %** (first arm 101/175 = 57.7 %), retry-only
+107/175 = 61.1 %. Exact paired sign test on the stored bytes: **7 fixed / 0
+worse, p = 0.0156** — the line's first significant repair gain on a code set.
+Conversions: `lcb-abc388_d`, `lcb-abc390_f`, `lcb-abc391_e`, `lcb-abc394_f`
+(stdin) and `lcb-3720`, `lcb-3744`, `lcb-3786` (functional). One asked cell was
+a hidden **pass** the validator rejected; keep-best kept it, retry-only would
+have lost it — the first live demonstration on this line that the
+validator-driven keep rule, not the retry itself, is what pays for the exposure.
+
+*The number that bounds everything:* only **9 of 67** retries produced a program
+that passes its own task's public samples, and **36 of 67** hit the 2400-token
+ceiling. When the public validator does accept a retry, it converts 7 of 9
+times. The loop is not bottlenecked on retry budget but on first-shot code
+quality and the token ceiling — the same ceiling that caused many of the
+first-arm losses still caps the repair.
+
+*Honest scale:* the codex reference (168/175 = 96.0 %) sits 67 cells above the
+bare local arm; one validator-driven repair pass closed **7 of those 67**, +4.0
+pp, p = 0.0156. Direction established at n = 7 discordant pairs, magnitude not:
+the line's ~2-cell flip floor leaves room for ± noise, and single draws per task
+remain the rule on this set. Contamination state unchanged by the repair (the
+retry saw no external bytes).
+
+*Artifacts* (`benchmarks/public/arms/`): `pub-repair-pub-repair-lcb-v1.jsonl`
+(67 retry rows, 0 error rows), `pub-repair-pub-repair-lcb-v1-census.json`,
+`pub-repair-lcb-v1-merged-answers.jsonl` (`96e7a62330e8aa90`),
+`pub-repair-lcb-v1-verdicts.jsonl` (`1fc8d792711a62c7`). The arm's unit exited 1
+on a summary-print `KeyError` **after** all measurement artifacts were written;
+the deterministic re-score of the stored retries reproduced the merged bytes
+byte for byte, and `LEG-INCIDENTS.md` carries the dated entry. The merged arm
+re-scores to 108/175 through `lcb-exec-v2` like every other row here.

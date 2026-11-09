@@ -1,0 +1,40 @@
+{
+  "contract": "pub-repair-lcb-v1",
+  "tasks": 175,
+  "task_sha16": "572c76cf72de552e",
+  "functional_tasks": 63,
+  "first_arm_hidden": 101,
+  "asked_stored": 67,
+  "asked_unrun": 0,
+  "retry_passes_public": 9,
+  "retry_fails_public": 58,
+  "hidden_fixed": 7,
+  "hidden_fixed_ids": [
+    "lcb-3720",
+    "lcb-3744",
+    "lcb-3786",
+    "lcb-abc388_d",
+    "lcb-abc390_f",
+    "lcb-abc391_e",
+    "lcb-abc394_f"
+  ],
+  "hidden_worse": 0,
+  "hidden_worse_ids": [],
+  "sign_test_keepbest_vs_first_p": 0.015625,
+  "keep_best_hidden": 108,
+  "retry_only_hidden": 107,
+  "validator": "lcb-public-v1 (public sample tests only)",
+  "checker": "lcb-exec-v2",
+  "hidden_sidecar_sha16": "ebee6f527521d84c",
+  "call": {
+    "temp": 0.7,
+    "max_tokens": 2400,
+    "first_arm_max_tokens": 2400
+  },
+  "retry_calls": 67,
+  "retry_prompt_tokens": 95768,
+  "retry_completion_tokens": 154322,
+  "wall_s": 2217.7,
+  "transport_errors": 0,
+  "first_answers_sha16": "ff3e16209ae155d7"
+}

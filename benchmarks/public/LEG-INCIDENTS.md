@@ -139,3 +139,44 @@ verdict bytes shipped in `arms/` (see `arms/README.md`, "First cloud-arm artifac
   that reproduces the old filter losing the row, so the test is not vacuous.
 * Table state after the fix: one LCB row (the corrected-label row), 35 percent rows in total, no
   duplicate `bench+model+tasks+contract` cell anywhere in the digest.
+
+## 2026-11-09 21:41 → 22:05 CET — the LCB repair arm finished its measurement and then died on a print (tooling KeyError, zero measurement lost)
+
+* What happened: `parb-pub-lcb-repair` (the `pub-repair-lcb-v1` arm on
+  `livecodebench`, 67 re-asks) completed every model call, wrote its retry rows,
+  merged-answer file, verdict rows and census — and then crashed in the **final
+  summary print** with `KeyError: 'unscored_functional'`: the same commit that
+  renamed that census key to `functional_tasks` for the full-set contract left one
+  stale reference in the print block. Unit exit 1, no digest row, no published
+  byte moved.
+* Recovery, zero credit for nothing discarded: a deterministic re-score of the
+  SAME stored retry bytes (`--merge`, no model call) reproduced the merged
+  answers (`96e7a62330e8aa90`) and verdict rows (`1fc8d792711a62c7`) **byte for
+  byte**, which is also the determinism proof for the arm. The real census (with
+  its honest `wall_s` of 2217.7 s from the live ask phase) was copied aside and
+  is the one published; the re-score census is not.
+* Also fixed in this pass, before any row landed: the digest row for this set
+  now names the **SHA-256/16** tasks cell the other LiveCodeBench rows use
+  (`8da729553c7c5710`) — the repair script's local hash was SHA-1/16, which
+  would have made the arm look incomparable in the digest table; the census
+  names its SHA-1/16 (`572c76cf72de552e`) beside the same bytes.
+
+## 2026-11-09 23:25 CET — the first BFCL repair attempt died before a single endpoint call (tooling `KeyError`, zero model calls burned)
+
+* What happened: the new `pub-repair-bfcl-v1` loop built its retry prompt from
+  `task["request"]`, a field the pinned BFCL tasks file does not have (the file ships one
+  assembled `prompt` field, which is what `scripts/pub_bench_run.py` actually sent). Every one of
+  the 124 re-asks raised `KeyError: 'request'` **before** the HTTP call, wrote an `finish=error`
+  row at 0.0 s, and the unit exited 1 in two seconds. Zero endpoint calls, zero tokens, no digest
+  row, no published byte moved.
+* What the dead attempt still proves: its guard phase ran first and printed the whole pre-arm
+  record — checker self-test 22/22, first arm **1116/1240 = 90.0 %**, verifier rejects **124**
+  tasks (46 call-count class, 78 unmatched-call class), first-arm verdicts identical to the
+  published reference over **1240 ids**, redraw control **29 conversions (2.34 pp)**. Those numbers
+  came from stored bytes and are the pre-registration census.
+* Recovery, zero credit for nothing discarded: the attempt directory is kept aside as
+  `bfcl-repair.dead1-2325/` (retry rows, merged bytes, verdicts — all unscored, none published).
+  The retry builder now uses the pinned `prompt` field verbatim, so the retry request prefix is
+  byte-identical to the bare arm's call and only the feedback block is appended. A 3-call smoke
+  came back `finish=ok` at 7.2-9.1 s/task with real answers; the full leg relaunched at 23:26 CET
+  under the same unit name with a fresh output directory.

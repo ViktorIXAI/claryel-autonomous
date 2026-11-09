@@ -292,3 +292,16 @@ Status note (2026-11-09 18:45 CET): the owner paused the personal-document line 
 Standing limits for every item: no Grok arm before 2026-11-12; issue #43 architecture hold until
 2026-11-10 10:10 CET; frozen contour stays `0.0.2.56` with its bytes untouched; a partial arm publishes no
 percent; sanitization before push; verdicts and arm bytes shipped so every percent re-scores offline.
+
+**Queue status 2026-11-09 22:10 CET (tick 3):** item 1 **closed** — `lcb-exec-v2`
+(checker `68a0a39a6aec46a3`, v1 bytes in `checker_history`) rescored the stored bytes offline;
+all three arms now publish over the full 175 (bare 101/175, contour 99/175, codex 168/175 =
+96.0 %), every stdin verdict cell identical under v1 and v2, v1 rows superseded by dated
+pointers. Item 2 had closed at 19:4 CET with the `pub-repair-v2` rows. Item 3 **closed** —
+`pub-repair-lcb-v1`: 67 public-validator-driven re-asks over the full set, keep-best
+**108/175 = 61.7 %** vs first arm 101/175 (7W/0L, p = 0.0156), retry-only 107/175, 8 blind
+hidden failures published, 59.7 Wh sampled; the print-crash after the measurement is a dated
+`LEG-INCIDENTS.md` entry. **Next in force: item 4** (BFCL repair as pre-registered negative
+control, pre-registered expectation ≤ 0.5 pp on 1240 — publish the expectation beside the
+result), then item 5 (HumanEval repair, small-sample warning mandatory). Codex transport still
+healthy as of 19:36; grok stays suspended until 12 Nov.
