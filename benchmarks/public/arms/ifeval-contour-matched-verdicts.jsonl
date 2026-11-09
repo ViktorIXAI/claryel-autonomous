@@ -1,0 +1,541 @@
+{"id": "ifeval-1000", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1001", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1005", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1012", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1019", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-102", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1021", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1040", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1051", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1069", "loose": false, "per_instruction": [true, false, true], "strict": false}
+{"id": "ifeval-1072", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1075", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1082", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1087", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1092", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1094", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1098", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1107", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1108", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1122", "loose": true, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-1127", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1128", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1129", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1130", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1131", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1132", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1137", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1139", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1147", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1148", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1153", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1154", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1162", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1174", "loose": true, "per_instruction": [false, true, true], "strict": false}
+{"id": "ifeval-1180", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1187", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1203", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-1216", "loose": false, "per_instruction": [false, false], "strict": false}
+{"id": "ifeval-1217", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1219", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-122", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1220", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1233", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1236", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1237", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1242", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1246", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1248", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1251", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1258", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1259", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1262", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1265", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1268", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-127", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1281", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1286", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1287", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-013", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1300", "loose": false, "per_instruction": [true, false, true], "strict": false}
+{"id": "ifeval-1305", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1307", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1314", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1322", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1325", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-1332", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1342", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1348", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-136", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1361", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1367", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1372", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1375", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1377", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1379", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1381", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1389", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-1392", "loose": false, "per_instruction": [true, true, false], "strict": false}
+{"id": "ifeval-1393", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1402", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-1418", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-142", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-143", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1436", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1446", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1466", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1476", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1477", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1480", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1481", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1498", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1508", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1512", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1516", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1518", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-152", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-1531", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1535", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1537", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1546", "loose": true, "per_instruction": [false, false], "strict": false}
+{"id": "ifeval-1548", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1551", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1561", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1566", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1571", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1580", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1582", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1591", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1592", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1593", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-016", "loose": true, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-1601", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1609", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1619", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1620", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1627", "loose": false, "per_instruction": [true, true, false], "strict": false}
+{"id": "ifeval-1629", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-163", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1634", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-164", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1643", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-1644", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1645", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1646", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1653", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1656", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1658", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1659", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1667", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-167", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1670", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1675", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-168", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1686", "loose": true, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1691", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-1705", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1713", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1730", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1733", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1738", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1739", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1746", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1759", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1773", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1776", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1779", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1781", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-179", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1793", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1800", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1802", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-181", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1813", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1823", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1825", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1834", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1837", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1843", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-1845", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1857", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1858", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1879", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1880", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-1883", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-1886", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1893", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1897", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-019", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-1902", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1906", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1908", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1922", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1927", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1928", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1934", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1936", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1939", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1943", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1944", "loose": true, "per_instruction": [false, false], "strict": false}
+{"id": "ifeval-1954", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-1964", "loose": false, "per_instruction": [false, false], "strict": false}
+{"id": "ifeval-1967", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-1980", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-1996", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-1999", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-201", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2010", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2015", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-202", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2023", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2028", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2034", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2035", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2041", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2063", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2069", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2070", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2071", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2078", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2084", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-209", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2097", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2100", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2107", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2118", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2136", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2139", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2142", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2143", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2162", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2164", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2169", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-218", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2180", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-219", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2192", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2195", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2207", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2209", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2215", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2216", "loose": false, "per_instruction": [true, true, false], "strict": false}
+{"id": "ifeval-2225", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2229", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2230", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2239", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2243", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2245", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2246", "loose": false, "per_instruction": [true, false, false], "strict": false}
+{"id": "ifeval-2247", "loose": true, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2250", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2253", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2265", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2266", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2268", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-227", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2273", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2275", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2284", "loose": false, "per_instruction": [false, true, true], "strict": false}
+{"id": "ifeval-2292", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2299", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2303", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2304", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2305", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-2309", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2311", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2314", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2323", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2324", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2328", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2337", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2341", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2350", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2355", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2357", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2359", "loose": true, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2362", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2372", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2374", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2380", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2381", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2383", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2386", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2391", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2392", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2395", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2396", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2398", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-024", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-240", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2404", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2416", "loose": false, "per_instruction": [false, true, true], "strict": false}
+{"id": "ifeval-2417", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2422", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2432", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2436", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2439", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2441", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2447", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2449", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2457", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2464", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2465", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2467", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-247", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2471", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-2475", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2482", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2485", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2497", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2505", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-251", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2515", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2517", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2531", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2532", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2534", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2549", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2563", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2567", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2571", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2577", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2583", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2585", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2589", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2590", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2591", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-2596", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-260", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2602", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2605", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2616", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2617", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2622", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2628", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2637", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2649", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2653", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2662", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2667", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2674", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2677", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2683", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2685", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2691", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2704", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2713", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2716", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2724", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2728", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2736", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2739", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-2749", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2751", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-2752", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2759", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2765", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2768", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2779", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2780", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2785", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2787", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-279", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2790", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2798", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2801", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2807", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-281", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2811", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2817", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2820", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2825", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2828", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2829", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2832", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2844", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2849", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2853", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2857", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2859", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-286", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2870", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2871", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-288", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2880", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2887", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2889", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2904", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-2905", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2908", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2909", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2912", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-2918", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-292", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2921", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2925", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2929", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2941", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2943", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-295", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2957", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-296", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-2969", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2977", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2985", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-2997", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-030", "loose": false, "per_instruction": [false, false, false], "strict": false}
+{"id": "ifeval-3001", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-301", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3025", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3035", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3041", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3048", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3057", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3063", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-3069", "loose": true, "per_instruction": [true, false, true], "strict": false}
+{"id": "ifeval-3071", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3073", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3079", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3081", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3084", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3089", "loose": false, "per_instruction": [false, true, true], "strict": false}
+{"id": "ifeval-3091", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-3098", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3109", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3112", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3114", "loose": false, "per_instruction": [false, true, false], "strict": false}
+{"id": "ifeval-3126", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3130", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3131", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3150", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3156", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3166", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3186", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3188", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3191", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3195", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3198", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-032", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3203", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3204", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-321", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-322", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3221", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3223", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-3224", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3241", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3243", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3245", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3256", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3263", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3272", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3276", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3280", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3281", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3287", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3294", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3305", "loose": true, "per_instruction": [true, false, true], "strict": false}
+{"id": "ifeval-331", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3311", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3315", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-332", "loose": true, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-3323", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3324", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3326", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-3327", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3329", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-3335", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-334", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3345", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3350", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3351", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3362", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3367", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3369", "loose": true, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-337", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3371", "loose": true, "per_instruction": [true, true, false], "strict": false}
+{"id": "ifeval-3376", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3380", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3386", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-340", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3401", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3407", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-3409", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3414", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3415", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3424", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3425", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-3428", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3429", "loose": false, "per_instruction": [false, false], "strict": false}
+{"id": "ifeval-343", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3434", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3439", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3442", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3445", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3453", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3455", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3456", "loose": false, "per_instruction": [false, false], "strict": false}
+{"id": "ifeval-3478", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3479", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3484", "loose": true, "per_instruction": [false], "strict": false}
+{"id": "ifeval-349", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3494", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3502", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3505", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-3506", "loose": false, "per_instruction": [false, true], "strict": false}
+{"id": "ifeval-3513", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3518", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3534", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3536", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3538", "loose": false, "per_instruction": [false, false], "strict": false}
+{"id": "ifeval-3540", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3549", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3557", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3563", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3565", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3567", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3569", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-357", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3572", "loose": false, "per_instruction": [false], "strict": false}
+{"id": "ifeval-3595", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3606", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3608", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3615", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3617", "loose": true, "per_instruction": [false], "strict": false}
+{"id": "ifeval-3619", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3623", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3624", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3629", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3631", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3633", "loose": false, "per_instruction": [true, false], "strict": false}
+{"id": "ifeval-3644", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3653", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3669", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3672", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3680", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3682", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3690", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3691", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3697", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3703", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3709", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-371", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3710", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3718", "loose": false, "per_instruction": [true, true, false], "strict": false}
+{"id": "ifeval-3719", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3724", "loose": true, "per_instruction": [true, true, true], "strict": true}
+{"id": "ifeval-3732", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3739", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-374", "loose": false, "per_instruction": [false, false], "strict": false}
+{"id": "ifeval-3743", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3744", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3748", "loose": true, "per_instruction": [true, true], "strict": true}
+{"id": "ifeval-3749", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3750", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3751", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3752", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3753", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3754", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3755", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3756", "loose": true, "per_instruction": [true], "strict": true}
+{"id": "ifeval-3757", "loose": true, "per_instruction": [true], "strict": true}

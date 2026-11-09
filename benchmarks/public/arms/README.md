@@ -89,6 +89,15 @@ exactly — asserted for every arm below.
 | mmlu-pro-contour-matched-ws-identity.json | 41 | `9e7100ecc1dc71bb` |
 | ifeval-basalt-answers.jsonl | 541 | `445dfa2eba3d12aa` |
 | ifeval-basalt-verdicts.jsonl | 541 | `1884989e822f21e3` |
+| ifeval-contour-matched-answers.jsonl | 541 | `e611e76ebdd808cf` |
+| ifeval-contour-matched-verdicts.jsonl | 541 | `c0e732166d9441ef` |
+| ifeval-contour-matched-results.jsonl | 541 | `d8a519a5f9b07c18` |
+| ifeval-contour-matched-ledger.jsonl | 541 | `13c467d36c61d183` |
+| ifeval-contour-matched-stats.json | 28 | `54aa65eb78feb3b4` |
+| ifeval-contour-matched-run-record.json | 45 | `d4a3dc5fbb9481d4` |
+| ifeval-contour-matched-plan.json | 1 | `9c505e0d46010d59` |
+| ifeval-contour-matched-bank-version.json | 6 | `18ea68bc69082099` |
+| ifeval-contour-matched-ws-identity.json | 43 | `e190c300652007a2` |
 
 First **bare-arm** artifacts (2026-11-09): `ifeval-basalt-*`. A bare arm has no ledger, and IFEval's
 percent is produced by the vendored upstream checker rather than by a number/letter match, so an

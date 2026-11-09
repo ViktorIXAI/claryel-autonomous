@@ -15,7 +15,7 @@ answer-graded sets cannot.
 | arm | tasks | tasks sha16 | call | strict | loose | instruction checks |
 |---|---|---|---|---|---|---|
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | 541 (full set) | `2c672531577dcc33` | temp 0.7, `max_tokens` 1200, one request per task, no request seed, serve-default thinking | **467/541 = 86.3 %** | 481/541 = 88.9 % | 751/834 = 90.0 % |
-| contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `pub-ifeval-v1`) | 541 (full set) | `2c672531577dcc33` | same shape as the bare arm by the parity shape rule | leg in flight (started 08:55 CET) | — | — |
+| contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `pub-ifeval-v1`) | 541 (full set) | `2c672531577dcc33` | same shape as the bare arm by the parity shape rule: one 1200-token rung = one request per task, temp 0.7 | **462/541 = 85.4 %** | 477/541 = 88.2 % | 743/834 = 89.1 % |
 | codex `gpt-6.1-sol` xhigh (subscription CLI, stdin transport) | 541 (full set) | `2c672531577dcc33` | transport does not expose sampling params | leg in flight, resumable by id | — | — |
 | grok-4.7 | 541 | `2c672531577dcc33` | — | suspended by owner quota, resumes 2026-11-12 | — | — |
 
@@ -79,6 +79,46 @@ the vendor's code. The full matched-shape leg will publish its fire/edit/truncat
 census beside its percent; if that census is zero, the honest reading is a harness that costs calls
 and changes nothing on this set — that is the finding, not a defect to hide.
 
+## Contour arm — the matched-shape percent and the repair-event census (2026-11-09)
+
+Leg `pub-ifeval-contour-matched`, workspace `~/parb-pub-contour/ifeval-matched`, stamp `0.0.2.56`
+(behavior 2.56), ws bank `pub-ifeval-541`, one leg 08:55:22 → 10:12:52 CET (77.5 min wall),
+541/541 rows, 0 empty answers, 0 engine-stalled rows, no incident.
+
+**The census is the number this set was put on the ladder for, and it is zero:**
+
+| quantity | value |
+|---|---|
+| ledger rows with any contour/fix event | **0 / 541** |
+| gate fires, gate fixes, gate blocks | **0, 0, 0** |
+| ladder steps (extra requests) | **0** — `model_calls` 541 = exactly one request per task, the same request count as the bare arm |
+| answers edited or replaced by the harness | 0 (no event, no replacement — the validator slot scores the model's own bytes) |
+| prompt tokens / completion tokens | 53 378 / 362 290, overhead tokens 0 |
+| truncations at the 1200 ceiling | **72/541 = 13.3 %** (bare arm: 62/541 = 11.5 %; same ceiling, the difference is sampling, not harness — the harness added no budget and no steps) |
+| summed engine time | 4629.6 s (bare arm: 4622 s) |
+| GPU energy (2 Hz sampler, 1835 samples, mean 128.1 W, busy fraction 0.89) | **165.29 Wh** (bare arm: 163.8 Wh, +0.9 %) |
+
+Paired per-task join over all 541 ids (`ifeval-pub-ifeval-v1-verdicts.jsonl` for each arm):
+strict 16 wins / 21 losses for contour, exact sign test **p = 0.511**; loose 16/20, p = 0.618.
+The two arms disagree on 37/541 = 6.8 % of cells at identical shape and temperature 0.7 — that
+is this set's resolution floor, and the −0.9 pp strict / −0.7 pp loose nominal delta sits under
+it: **no measurable contour effect on IFEval, at matched shape, with zero extra cost beyond
+sampling variance.** Discordance is truncation-shaped in both directions: 10 of the 21 contour
+losses are rows where the contour arm itself hit the ceiling, and 5 of the 16 contour wins are
+rows where the bare arm hit it. The strict loss ids: `ifeval-1203, 1325, 1389, 1392, 1446, 1645,
+1883, 1954, 2209, 2216, 2246, 2247, 2273, 2292, 2471, 2591, 2871, 2904, 3063, 3091, 3617`;
+the wins: `ifeval-1129, 1236, 1307, 1653, 1759, 1779, 1813, 201, 2041, 2250, 2275, 2605, 292,
+3048, 3345, 3424`.
+
+Scoring gates were green at scoring time: upstream unit suite 41/41 on the first attempt,
+reference responses strict 415/540 and loose 431/540 inside the recorded band (±2.0 pp); the
+checker-noise rule stands — deltas under ~0.5 pp on this set are the checker, not the model.
+
+**Verdict for item P0 on IFEval:** the frozen contour runtime over a public set with a real
+validator neither fires nor helps: 0 events, 0 repairs, 0 extra requests, 165 Wh for the same 541
+calls, percent indistinguishable from the bare arm. A harness that never fires on a format set
+where it has a validator slot is a measured null, published as such.
+
 ## Reproduce (verified 2026-11-09 from the published copies, not from the local workspace)
 
 Published arm bytes (`benchmarks/public/arms/`, SHA-256/16):
@@ -101,6 +141,27 @@ python3 <ifeval-venv>/bin/python scripts/pub_bench_ifeval.py \
         benchmarks/public/ifeval.tasks.jsonl \
         ifeval qwen3.8-flash-next-iq3_s-basalt "verification re-score" --out /tmp/ifeval-check
 ```
+
+Contour arm bytes (published 2026-11-09 after the matched-shape leg; SHA-256/16):
+
+| file | lines | sha16 |
+|---|---|---|
+| `ifeval-contour-matched-answers.jsonl` | 541 | `e611e76ebdd808cf` |
+| `ifeval-contour-matched-verdicts.jsonl` | 541 | `c0e732166d9441ef` |
+| `ifeval-contour-matched-results.jsonl` | 541 | `d8a519a5f9b07c18` |
+| `ifeval-contour-matched-ledger.jsonl` | 541 | `13c467d36c61d183` |
+| `ifeval-contour-matched-stats.json` | 28 | `54aa65eb78feb3b4` |
+| `ifeval-contour-matched-run-record.json` | 45 | `d4a3dc5fbb9481d4` |
+| `ifeval-contour-matched-plan.json` | 1 | `9c505e0d46010d59` |
+| `ifeval-contour-matched-bank-version.json` | 6 | `18ea68bc69082099` |
+| `ifeval-contour-matched-ws-identity.json` | 43 | `e190c300652007a2` |
+
+Re-scoring the PUBLISHED copy (same command as above with `ifeval-contour-matched-answers.jsonl`
+in place of the basalt file, run 2026-11-09): strict reproduces exactly at 462/541 = 85.4 %;
+loose came back 476 vs the arm's 477 — one `langdetect` flip inside the documented checker noise.
+The publisher masked 1082 `hostname` fields and 1 LAN address in the run record/results rows;
+answer text is unedited. The zero-event census in the table above is checkable directly from
+`ifeval-contour-matched-ledger.jsonl` (empty events column on all 541 rows).
 
 Run on the published copies it reproduced the digest row exactly: strict **467/541 = 86.3 %**, loose
 **481/541 = 88.9 %**, instruction checks 751/834 = 90.0 %, same hardest-check list. Its own gate run

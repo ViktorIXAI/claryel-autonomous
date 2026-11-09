@@ -1,0 +1,28 @@
+{
+  "contour_stamp": "0.0.2.56",
+  "contour_behavior": "2.56",
+  "rows": 541,
+  "answers_present": 541,
+  "answers_empty": 0,
+  "truncations": 72,
+  "rows_with_any_event": 0,
+  "rows_with_contour_or_fix_event": 0,
+  "gate_fire_events": {},
+  "all_events": {},
+  "model_calls_total": 541,
+  "gate_fixes_total": 0,
+  "gate_blocks_total": 0,
+  "ladder_steps_total": 0,
+  "ptok_total": 53378,
+  "ctok_total": 362290,
+  "useful_tokens_total": 362290,
+  "overhead_tokens_total": 0,
+  "engine_seconds_total": 4629.6,
+  "engine_stalled_rows": 0,
+  "request_shapes": [
+    "bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking)"
+  ],
+  "first_rungs": [
+    1200
+  ]
+}
