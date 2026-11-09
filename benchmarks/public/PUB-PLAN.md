@@ -134,3 +134,21 @@ match gold); the full 1319-task GSM8K arm is running as a systemd user unit and 
 the stamp, the adopted-line map, the pair verdict docs and the ladder stay published, and no new
 contour feature is registered while the PUB line runs. Tooling fixes (scorers, runners, reports)
 still ship, because measurement honesty is not model development.
+
+## Arm availability policy — Grok suspension (owner decision, 2026-11-09)
+
+* No Grok arm may be launched between 2026-11-09 and 2026-11-12: the owner-side Grok subscription
+  quota is exhausted. Both in-flight Grok legs were stopped at 07:57 CET with `finish=ok` on their
+  last rows, so this is an availability window, not a transport defect.
+* Partial Grok arms stay on disk and resumable by task id (gpqa-diamond 139/198, humaneval 120/164).
+  A partial arm publishes no percent, and no percent computed from it exists in this repository.
+* Grok rows completed before the suspension stay in force and comparable, same pinned ids and
+  checkers: gsm8k-300 96.0 %, arc-easy-300 96.3 %, arc-challenge-300 96.0 %, hard-bank cadence
+  134/183 on bank v6.6.
+* Until 2026-11-12 the cross-arm standard on this line is three arms: **bare local brain / contour
+  `0.0.2.56` at matched request shape / ChatGPT `gpt-6.1-sol`**. An unavailable Grok cell is always
+  written as "suspended by owner quota, resumes 2026-11-12" — never blank, never zero, never called a
+  transport failure.
+* Scheduling effect: the deferred Grok queue (mmlu-pro 500, ifeval 541) frees the Grok transport and
+  removes the serialization constraint on cloud legs; the local endpoint is unaffected, so bare and
+  contour legs keep running at full rate during the window.

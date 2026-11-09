@@ -25,3 +25,16 @@ Effect and handling:
 Rule going forward: before launching any local leg, `systemctl --user list-units 'parb-pub-*'` and
 `pgrep -f pub_bench_run.py` must both be clear for that endpoint. A manual operator launch must
 name the unit it uses, so a tick can recognise it.
+
+## 2026-11-09 07:57 CET — Grok arms stopped mid-leg by owner-side quota (gpqa-diamond, humaneval)
+
+Two Grok legs were in flight when the owner reported the Grok subscription quota is exhausted until
+2026-11-12: `parb-pub-gpqa-grok` at 139/198 and `parb-pub-humaneval-grok` at 120/164. The last rows of
+both files were `finish=ok` with no transport error — the stop was a quota decision, not a failure.
+
+Handling: both units stopped, partial answer files left in place and resumable by task id (pinned ids,
+pinned call parameters), and no percent is published for a partial arm. The two arms can be rejoined
+later without invalidating anything already stored, because a rescore reads stored answer bytes only.
+
+Effect on published tables: GPQA-Diamond and HumanEval stay three-arm (bare / contour matched shape /
+ChatGPT) until the Grok legs resume; the queued Grok legs (mmlu-pro 500, ifeval 541) are deferred.
