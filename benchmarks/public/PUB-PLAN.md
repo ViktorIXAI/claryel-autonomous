@@ -222,3 +222,37 @@ the energy next to the untouched 0.0.2.56 rows. Expected ceiling: +12.6 pp on IF
 failure were fixable, realistically +3 to +6 pp, ~+0.2 pp on BFCL, zero on the answer-graded sets where
 no validator exists. Run it only on the sets with teeth (IFEval, then LiveCodeBench once the exec
 checker has a public-test validator slot), and it never replaces the frozen 0.0.2.56 rows.
+
+## `pub-repair-v1` — running now (2026-11-09 18:1x CET)
+
+Contract `pub-repair-v1` (`scripts/pub_bench_repair.py`) is an **arm-level** experiment, not a contour
+change: the frozen runtime stays `0.0.2.56` and its stored rows stay byte-for-byte. If a future contour
+stamp ever contains a repair gate, that is a new version (`0.0.2.57`) with a new stamp and its own pair,
+never a silent edit of these bytes.
+
+Mechanism: read the pinned first-arm answer bytes, run the pinned validator, and for a rejected task
+re-ask **once**, naming the violated check ids with their pinned kwargs and showing the rejected attempt.
+Two percents are published side by side so the number cannot be cherry-picked: `keep-best` (a retry only
+replaces the first answer when it strictly passes) and `retry-only` (what a naive always-take-the-second
+harness would score). The scorer refuses a digest row while any re-ask is missing.
+
+Pinned first arm: `benchmarks/public/arms/ifeval-basalt-answers.jsonl`, sha16 `543eb8621087e552`, 541
+rows, `temp 0.7 / max_tokens 1200`. The retry inherits that budget, so a retry cut at 1200 tokens is
+counted as a failed repair, not excused — the arm is deliberately conservative and reports its own
+`api_finish=length` census.
+
+## Next candidate after this: doc-grounding validator (`house-ground-v1`, private set)
+
+The open owner question is whether a harness can beat the bare model or ChatGPT on **personal** data,
+for example a new private document. That is a different axis from contour parity: it is not more
+computing, it is a verifier over grounding. The only version of it this line can honestly measure is one
+where the check is mechanical: every claim, number, name and quote in the answer must be traceable to a
+span of the pinned document, the pinned checker decides, and a failed check is what a repair gate would
+get to act on.
+
+Rules for that set before any arm exists: the tasks are built from house documents, they stay **local**,
+and nothing personal is ever pushed — GitHub gets the task-file sha16, the counts and the percents only.
+No arm may run until the grounding checker ships with a self-test over positive and negative examples
+(a real span passes; a plausible paraphrase with an invented number fails). Until then the honest answer
+to "does a harness make the model smarter about my data" is: **unmeasured**, and the answer-graded public
+sets on this line say the effect of the current contour alone is zero.
