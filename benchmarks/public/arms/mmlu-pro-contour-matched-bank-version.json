@@ -1,0 +1,6 @@
+{
+  "bank_version": "pub-mmlu-pro-500",
+  "ws_bank_sha16": "a6327955170bf637",
+  "source": "benchmarks/public/mmlu-pro.tasks.jsonl (first 500 ids, file order)",
+  "written": "2026-11-09T01:45:10Z"
+}

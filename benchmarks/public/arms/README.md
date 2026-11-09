@@ -79,6 +79,14 @@ exactly — asserted for every arm below.
 | humaneval-contour-matched-run-record.json | 45 | `325f1294c01333ef` |
 | humaneval-contour-matched-stats.json | 28 | `1f444883941d10bd` |
 | humaneval-contour-matched-ws-identity.json | 41 | `764603500d76ec7d` |
+| mmlu-pro-contour-matched-results.jsonl | 500 | `43130af5cab85a87` |
+| mmlu-pro-contour-matched-ledger.jsonl | 500 | `b17635f6716ed8dc` |
+| mmlu-pro-contour-matched-answers.jsonl | 500 | `e15ba1bba5204f49` |
+| mmlu-pro-contour-matched-stats.json | 28 | `f42675bfc629d074` |
+| mmlu-pro-contour-matched-run-record.json | 45 | `b397bf642c844cb1` |
+| mmlu-pro-contour-matched-plan.json | 1 | `cd7361fc7bded818` |
+| mmlu-pro-contour-matched-bank-version.json | 6 | `c446b2252edd3a27` |
+| mmlu-pro-contour-matched-ws-identity.json | 41 | `9e7100ecc1dc71bb` |
 Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
 
 * `gpqa-diamond` 198 ids `af73cc064d4d8529`, ws bank sha16 `1b30f3cc51204d03`
@@ -91,6 +99,8 @@ Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
   mechanical, not rhetorical: the shipped ledger shows `model_calls == 1`, `ladder_steps == 0`,
   `gate_fixes == 0`, `gate_blocks == 0` and an empty events column on all 164 rows, so no answer
   was kept, repaired or re-drafted because a test passed.
+* `mmlu-pro` 500 ids `c64264aede2498c7`, ws bank sha16 `a6327955170bf637` (the 500-row pinned
+  stride-24 subset; matched-shape leg only — this set never had an escalation-shape arm)
 
 Index correction 2026-11-09, no measurement changes: the `arc-easy` and `gsm8k` lines above used to
 carry the sha16 of each arm's `*-bank-version.json` **file** (`055b650afd938842`,
@@ -119,6 +129,7 @@ arc-easy         matched 289/300 = 96.3 %   escalation 290/300 = 96.7 %
 gsm8k            matched 294/300 = 98.0 %   escalation 290/300 = 96.7 %
 humaneval        matched 155/164 = 94.5 %   (no escalation arm for this set; scored by
                                              scripts/pub_bench_exec.py, contract pytest-v1)
+mmlu-pro         matched 429/500 = 85.8 %   (no escalation arm for this set)
 ```
 
 Reproduce one row:

@@ -4,6 +4,7 @@ One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. R
 
 | bench | model | tasks | tasks sha16 | call | strict |
 |---|---|---|---|---|---|
+| mmlu-pro | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 500 | c64264aede2498c7 | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking), ladder rungs 1200, first rung 1200 | 429/500 = **85.8%** |
 | mmlu-pro | qwen3.8-flash-next-iq3_s-basalt | 500 | c64264aede2498c7 | temp 0.7, max_tokens 1200 | 432/500 = **86.4%** |
 | humaneval | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 164 | 971d976289cd9357 | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking), ladder rungs 1200, first rung 1200; checker pytest-v1 | 155/164 = **94.5%** |
 | gsm8k | qwen3.8-flash-next-iq3_s-basalt+contour-0.0.2.56 | 300 | 7dd0080ff23b8bc3 | frozen contour runtime 0.0.2.56 (behavior 2.56): bare-matched: first rung = LADDER[0], no seed, no reasoning_effort, no chat_template_kwargs (serve default thinking), ladder rungs 1200, first rung 1200 | 294/300 = **98.0%** |
