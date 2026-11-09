@@ -202,3 +202,55 @@ transport caveat (prose-wrapped answers) named next to the percent.
   three-arm paired table land when it scores.
 * LiveCodeBench (post-cutoff window) is the contamination-aware replacement for this set and is
   queued on the ladder, not tonight.
+
+## Grok status on this set (2026-11-09, supersedes the grok bullet above)
+
+Owner quota decision 2026-11-09: no grok arm launches before **2026-11-12**. The humaneval grok leg
+that was running was stopped at 07:57 CET with **120 of 164** rows stored; those partials are kept
+intact and resumable by id, and **no percent is published for them**. The grok cell in any table on
+this set reads "suspended by owner quota, resumes 2026-11-12". The `pytest-v2` re-score of that arm
+happens only on the completed set.
+
+## Published answer bytes of the bare arm (2026-11-09 23:5x CET): a completeness gap on this set, closed
+
+Until now this set published the contour arm's answer bytes but **not the bare arm's**, so the bare
+row (159/164, `pytest-v2`) could not be re-checked by anyone outside the machine that ran it. Shipped
+through `scripts/publish_pub_bare_arm.py`, which prints its own index lines and refuses partial arms:
+
+| file | rows | SHA-256/16 |
+|---|---|---|
+| `arms/humaneval-basalt-answers.jsonl` | 164 | `4f61b87d5e8d130b` |
+| `arms/humaneval-basalt-verdicts.jsonl` | 164 | `6878c8b128c3c05d` |
+
+Nothing masked (164 of 164 rows byte-identical to the runner output), and the verdict rows were
+regenerated from the shipped answers by `pytest-v2` — 159 pass, reproducing the digest row exactly.
+The published contour-matched copy was re-scored the same way in the same session: **157/164**, which
+is also what its digest row says.
+
+## Repair arm `pub-repair-humaneval-v1` — pre-registration, written before any call exists
+
+Ladder item 5 is a verdict-only repair pass over the bare arm's failures. Everything below is fixed
+**before** the arm runs, so the judgment cannot be chosen after the result.
+
+* **Headroom census, computed from stored bytes (zero model calls, `pytest-v2` self-test asserted
+  first):** the bare arm fails **5 of 164** cells — `humaneval-0032`, `-0132`, `-0134`, `-0145`,
+  `-0147`. All five are **wrong-value** failures (an assertion in the hidden battery fires); **none**
+  is a syntax error, a crash class or a parse failure. Ceiling for a repair pass on this set is
+  therefore **5 cells = 3.05 pp**, and the failure class is the one a verdict-only re-ask is weakest
+  on: "your program returned a wrong value" carries no information the model did not already have.
+* **Redraw control, from published bytes of the same brain:** the contour-0.0.2.56
+  bare-matched arm passes **2 of those same 5 cells** (`humaneval-0134`, `-0147`) with no feedback at
+  all — 1.22 pp of the 3.05 pp ceiling is a plain second draw.
+* **Decision rule:** the repair percent is reported **only** beside the redraw control, and the
+  mechanism claim requires the matched sign test on the 5 shared cells. On this set a verdict-only
+  re-ask names only the class ("the program returned a wrong value on the hidden tests" / "crashed" /
+  "did not compile") — no test body, no gold value, no example input/output, because HumanEval ships
+  no public tests and the verifier here **is** the scorer.
+* **Small-sample warning, mandatory and pre-registered:** at 164 tasks the resolution floor is ~2 pp
+  (≈3 tasks); with 5 discordant cells the *best possible* exact sign test result is 5/0, p = 0.0625,
+  i.e. **this arm cannot reach p < 0.05 even by fixing every failure**, and any 1-vs-2 outcome is
+  noise. It is worth running only as a wiring/cost measurement on a code set, and it will be
+  published as such whatever it returns.
+* **Next tick:** ship the `humaneval` validator branch in `scripts/pub_bench_repair.py` and run the
+  5-cell arm (plus the 2 control conversions from the same rule), with the same artifact set
+  (retry rows, census, merged answers, verdict rows) and the same byte-pinned publication path.

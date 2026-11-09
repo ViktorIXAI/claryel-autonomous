@@ -325,3 +325,20 @@ attempt kept aside), and the 23:26 leg rewrote the digest head with pre-fix code
 item 5** — `pub-repair-v1` on HumanEval (5-ish strict failures, ceiling ~3 %, small-sample warning
 mandatory: nothing under ~2 pp on 164 tasks is resolvable), with the redraw control published beside
 it the same way. Codex transport healthy; grok suspended until 12 Nov.
+
+**Item 5 pre-registered 2026-11-09 23:58 CET (tick 4b, no repair call made yet).** Headroom census
+from stored bytes with `pytest-v2` (self-test asserted first): the bare HumanEval arm fails **5/164**
+cells — `humaneval-0032`, `-0132`, `-0134`, `-0145`, `-0147` — and **all five are wrong-value
+assertion failures**, no syntax or crash class, so a verdict-only repair ceilings at **5 cells =
+3.05 pp**. The redraw control from published bytes (contour-0.0.2.56 bare-matched arm, no feedback)
+already converts **2 of those 5** (`-0134`, `-0147`), so 1.22 pp of that ceiling is a plain second
+draw. Pre-registered null wording: with 5 discordant cells the best possible exact sign test is 5/0,
+**p = 0.0625**, so the arm cannot reach significance even by fixing everything — it is a wiring and
+cost measurement on a code set and will be published as such whatever it returns. Re-ask wording is
+fixed in advance: class only ("the program returned a wrong value on the hidden tests"), never a test
+body, gold value or example pair, because HumanEval ships no public tests and the verifier here is the
+scorer. Also closed a gap found while preparing it: the HumanEval **bare** arm's answer bytes had
+never been published, so its percent was not externally re-checkable — now
+`arms/humaneval-basalt-answers.jsonl` (`4f61b87d5e8d130b`) plus verdict rows
+(`6878c8b128c3c05d`); re-scoring the shipped copies reproduces 159/164 (bare) and 157/164 (contour),
+matching the digest rows.

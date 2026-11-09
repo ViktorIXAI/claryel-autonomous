@@ -79,6 +79,8 @@ exactly — asserted for every arm below.
 | humaneval-contour-matched-run-record.json | 45 | `325f1294c01333ef` |
 | humaneval-contour-matched-stats.json | 28 | `1f444883941d10bd` |
 | humaneval-contour-matched-ws-identity.json | 41 | `764603500d76ec7d` |
+| humaneval-basalt-answers.jsonl | 164 | `4f61b87d5e8d130b` |
+| humaneval-basalt-verdicts.jsonl | 164 | `6878c8b128c3c05d` |
 | mmlu-pro-contour-matched-results.jsonl | 500 | `43130af5cab85a87` |
 | mmlu-pro-contour-matched-ledger.jsonl | 500 | `b17635f6716ed8dc` |
 | mmlu-pro-contour-matched-answers.jsonl | 500 | `e15ba1bba5204f49` |
@@ -281,6 +283,16 @@ answers and verdicts were re-scored from the **published** copies (`livecodebenc
 `pub-repair-pub-repair-lcb-v1.jsonl` were re-merged with `--merge` (zero model calls) into a scratch
 directory: merged answers `96e7a62330e8aa90` and verdicts `1fc8d792711a62c7` came out **byte for byte
 identical** to the files in this index, at keep-best 108/175 = 61.7 % and retry-only 107/175.
+
+Completeness fix on HumanEval (2026-11-09, 23:5x): this set shipped the contour arm's answer bytes
+but **not** the bare arm's, so its `pytest-v2` row (159/164) was not re-checkable outside this
+machine. `arms/humaneval-basalt-answers.jsonl` (`4f61b87d5e8d130b`) and
+`arms/humaneval-basalt-verdicts.jsonl` (`6878c8b128c3c05d`) close it — published through
+`scripts/publish_pub_bare_arm.py`, nothing masked, 164 of 164 rows byte-identical to the runner
+output, verdict rows regenerated from the shipped answers by `pytest-v2` (159 pass, the digest row
+reproduced; the published contour copy re-scores to its own 157/164 in the same session). These two
+pins are SHA-256/16, the convention this publisher prints; the four repair-arm pins above are SHA-1/16
+because the scanner binds on that. Both are named in the row text so no pin is ambiguous.
 
 Repair arm `pub-repair-bfcl-v1` (2026-11-09, leg 23:26 → 23:46 CET, 124 calls, 0 transport errors):
 the pre-registered **negative control** on the set where the pinned AST verifier is also the scorer.
