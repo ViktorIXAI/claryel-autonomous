@@ -6,7 +6,10 @@ plus keyword arguments, and the verdict is the conjunction of per-instruction ch
 vendor's own code may produce that verdict, so this wrapper imports the vendored modules and refuses
 to score anything until two self-tests pass:
 
-  1. the upstream unit suite (`instructions_test.py`, 41 tests) runs green in this environment;
+  1. the upstream unit suite (`instructions_test.py`, 41 tests) runs green in this environment,
+     within `SUITE_ATTEMPTS` = 3 attempts — one vendor test (`test_english_capital_checker`) is
+     nondeterministic because the checker it exercises calls langdetect; the retry and the measured
+     flake rate are documented on `SUITE_ATTEMPTS`;
   2. the upstream reference responses (the GPT-4 sample shipped next to the data) score at the
      recorded band: strict 416/540 = 77.0 % and loose 431/540 = 79.8 %.
 
@@ -32,6 +35,15 @@ HERE = pathlib.Path(__file__).resolve().parent
 VENDOR = HERE.parent / "benchmarks" / "public" / "vendor"
 REF_STRICT, REF_LOOSE, REF_N = 416, 431, 540
 REF_BAND_PP = 2.0  # recorded reference may drift only inside this band, else the env is broken
+# Gate 1 is retried, and the reason is published, because the vendor's own suite is not
+# deterministic. Measured 2026-11-09, eight suite runs in the pinned venv: 2 failed on exactly one
+# test, `test_english_capital_checker`, with the environment intact (the reference band scored
+# 417/540 strict in the same session). Root cause is in the vendor's code, not ours:
+# `instructions.CapitalLettersEnglishChecker` calls langdetect, which is stochastic on short or
+# ambiguous text, so the same bytes can pass or fail that test. The band gate below stays a single
+# pass, because a real environment break (missing NLTK word list, dead detector) moves the reference
+# score by far more than one flaky unit test ever could.
+SUITE_ATTEMPTS = 3
 # Measured drift of the vendor checker itself, three runs over identical bytes on 2026-11-09:
 # strict 416, 417, 417; loose 431, 430, 431. The upstream checker calls langdetect, which is
 # stochastic on ambiguous text, so IFEval carries about one flipping task per 540 runs: any IFEval
@@ -51,13 +63,24 @@ def load_vendor():
 
 def selftest(ev):
     """Both gates must pass; returns (ok, reason)."""
-    proc = subprocess.run([sys.executable, "-m", "unittest",
-                           "instruction_following_eval.instructions_test", "-v"],
-                          cwd=str(VENDOR), capture_output=True, text=True)
-    tail = (proc.stderr or proc.stdout).strip().splitlines()
-    ran = next((l for l in tail if l.startswith("Ran ")), "Ran ?")
-    if proc.returncode != 0:
-        return False, "upstream unit suite failed: %s | %s" % (ran, tail[-1] if tail else "")
+    suite_note, last_fail = "", ""
+    suite_ok = False
+    for attempt in range(1, SUITE_ATTEMPTS + 1):
+        proc = subprocess.run([sys.executable, "-m", "unittest",
+                               "instruction_following_eval.instructions_test", "-v"],
+                              cwd=str(VENDOR), capture_output=True, text=True)
+        tail = (proc.stderr or proc.stdout).strip().splitlines()
+        ran = next((l for l in tail if l.startswith("Ran ")), "Ran ?")
+        if proc.returncode == 0:
+            suite_ok = True
+            suite_note = ("unit suite %s, green on attempt %d of %d" % (ran, attempt, SUITE_ATTEMPTS)
+                          if attempt > 1 else "unit suite %s" % ran)
+            break
+        names = [l.split(" ")[1] for l in tail if l.startswith("FAIL:")]
+        last_fail = "%s | %s" % (", ".join(names) or (tail[-1] if tail else ""), ran)
+    if not suite_ok:
+        return False, ("upstream unit suite failed on all %d attempts: %s"
+                       % (SUITE_ATTEMPTS, last_fail))
     data = VENDOR / "instruction_following_eval" / "data"
     tasks = [json.loads(l) for l in (data / "input_data.jsonl").read_text().splitlines()]
     ref_path = data / "gpt4_sample.jsonl"
@@ -78,7 +101,7 @@ def selftest(ev):
         if abs(100.0 * (got - want) / n) > REF_BAND_PP:
             return False, "reference %s moved: %d/%d = %.1f %% vs recorded %d/%d = %.1f %%" % (
                 name, got, n, 100.0 * got / n, want, n, 100.0 * want / n)
-    return True, "unit suite %s; reference strict %d/%d, loose %d/%d" % (ran, s, n, lo, n)
+    return True, "%s; reference strict %d/%d, loose %d/%d" % (suite_note, s, n, lo, n)
 
 
 def main():
