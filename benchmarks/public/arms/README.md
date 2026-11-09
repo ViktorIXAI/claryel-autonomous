@@ -71,12 +71,26 @@ exactly — asserted for every arm below.
 | gsm8k-contour-matched-run-record.json | 45 | `1d260013ceb354e1` |
 | gsm8k-contour-matched-stats.json | 28 | `1eef1c20e0b26658` |
 | gsm8k-contour-matched-ws-identity.json | 41 | `175da640f32b9fbd` |
+| humaneval-contour-matched-answers.jsonl | 164 | `a454fe78f78ba257` |
+| humaneval-contour-matched-bank-version.json | 6 | `4e0aba1d01c5c547` |
+| humaneval-contour-matched-ledger.jsonl | 164 | `e7090c15878a2566` |
+| humaneval-contour-matched-plan.json | 1 | `52bf38656a449d2c` |
+| humaneval-contour-matched-results.jsonl | 164 | `c591d87470f83cef` |
+| humaneval-contour-matched-run-record.json | 45 | `325f1294c01333ef` |
+| humaneval-contour-matched-stats.json | 28 | `1f444883941d10bd` |
+| humaneval-contour-matched-ws-identity.json | 41 | `764603500d76ec7d` |
 Task-file pins (from `benchmarks/public/<bench>.tasks.jsonl`):
 
 * `gpqa-diamond` 198 ids `af73cc064d4d8529`, ws bank sha16 `1b30f3cc51204d03`
 * `arc-challenge` first 300 of 1172 ids `523af08216f14256`, ws bank sha16 `e56146d09263ca89`
 * `arc-easy` first 300 of 2376 ids `cac604a076e8b00a`, ws bank sha16 `6c473c1f8dc4469f`
 * `gsm8k` first 300 of 1319 ids `7dd0080ff23b8bc3`, ws bank sha16 `ea10c530de68db21`
+* `humaneval` all 164 ids `971d976289cd9357`, ws bank sha16 `c0b6d759ef6d8d5f`, validator contract
+  `pytest-v1` (`scripts/pub_bench_exec.py`, module sha16 `dce154f6c02b24fd`) — the only arm here
+  whose validator **executes** the task's own tests. Why that is not an oracle leak here is
+  mechanical, not rhetorical: the shipped ledger shows `model_calls == 1`, `ladder_steps == 0`,
+  `gate_fixes == 0`, `gate_blocks == 0` and an empty events column on all 164 rows, so no answer
+  was kept, repaired or re-drafted because a test passed.
 
 Index correction 2026-11-09, no measurement changes: the `arc-easy` and `gsm8k` lines above used to
 carry the sha16 of each arm's `*-bank-version.json` **file** (`055b650afd938842`,
@@ -84,8 +98,10 @@ carry the sha16 of each arm's `*-bank-version.json` **file** (`055b650afd938842`
 workspace files (escalation and matched ws agree per set, and every `*-bank-version.json` shipped
 here names the same hash), so escalation and matched legs of one set are cell-comparable.
 
-All arms: contour stamp `0.0.2.56` (behavior 2.56), checker contract `pub-checkers-v2`, endpoint
-`<LAN_IP>:8080`.
+All arms: contour stamp `0.0.2.56` (behavior 2.56), endpoint `<LAN_IP>:8080`. The validator contract
+is `pub-checkers-v2` for the answer-graded arms and `pytest-v1` for the humaneval arm (the same
+bytes that scored its bare row); every `WS-IDENTITY.json` names its own validator module and sha16,
+and that module's sha16 is what an outside reader needs to re-score the arm.
 
 `-escalation` = the original item-P0 arms (first rung 512, pinned sp1 request seed,
 `enable_thinking:false`). `-matched` = the parity re-runs at the bare arm's request shape
@@ -101,6 +117,8 @@ gpqa-diamond     matched 139/198 = 70.2 %   escalation 91/198 = 46.0 %
 arc-challenge    matched 291/300 = 97.0 %   escalation 283/300 = 94.3 %
 arc-easy         matched 289/300 = 96.3 %   escalation 290/300 = 96.7 %
 gsm8k            matched 294/300 = 98.0 %   escalation 290/300 = 96.7 %
+humaneval        matched 155/164 = 94.5 %   (no escalation arm for this set; scored by
+                                             scripts/pub_bench_exec.py, contract pytest-v1)
 ```
 
 Reproduce one row:
