@@ -91,17 +91,40 @@ def call_label(rows, temp):
 
 
 def digest_head():
-    """The digest header is regenerated on every write so the contract in force is never stale."""
+    """The digest header is regenerated on every write so the contract in force is never stale.
+
+    Two corrections (2026-11-09), both audit-driven, neither a scoring change:
+    * the execution-checker id is read from `pub_bench_exec.EXEC_CHECKER` instead of being
+      hardcoded here, which is how the header ended up naming `pytest-v1` after `pytest-v2`
+      superseded it - the header claimed to track the contract in force and did not;
+    * the superseded-shape pointers are stated in the table header, because the digest keeps
+      both the escalation-shape contour rows and their matched-shape replacements for the same
+      bench and model, and a reader who only opens the digest would otherwise compare 46.0 %
+      with 70.2 % and call the difference a contour effect. Old rows and old bytes stay put.
+    """
+    try:
+        from pub_bench_exec import EXEC_CHECKER       # deferred: that module imports this one
+    except Exception:                                 # a bare score run must still work
+        EXEC_CHECKER = "pytest-v2"
     return ("# Public benchmark percent digest\n\n"
             "One row per scored arm, newest first, written by `scripts/pub_bench_score.py`. "
             "Rows are only comparable when the task-file sha16 and the call parameters match. "
-            "Deterministic checkers live here; the HumanEval `pytest-v1` execution checker "
-            "lives in `scripts/pub_bench_exec.py` and names itself in the call column; an "
-            "unshipped checker keeps its tasks out of the denominator and says so. "
+            "Deterministic checkers live here; the HumanEval execution checker lives in "
+            "`scripts/pub_bench_exec.py` (contract `%s`) and names itself in the call column; "
+            "an unshipped checker keeps its tasks out of the denominator and says so. "
             "Checker contract in force: `%s` - the scorer refuses to publish while its own "
             "self-test fails, and a gold the contract cannot parse is scored as UNSCORED, never "
             "guessed. A row re-scored under another contract id is a new row, not an edit.\n\n"
-            % CHECKER_CONTRACT)
+            "Supersession pointers (parity shape rule, 2026-11-08; never an edit of old bytes): "
+            "a contour row whose call column says `ladder rungs 512,1200, enable_thinking off` "
+            "is a request-shape cost, not a contour effect, and is superseded as a parity row by "
+            "the matched-shape row (`first rung 1200`) for the same bench and model - "
+            "gpqa-diamond 46.0 %% -> 70.2 %%, arc-challenge 94.3 %% -> 97.0 %%, "
+            "arc-easy 96.7 %% -> 96.3 %%, gsm8k-300 96.7 %% -> 98.0 %%. "
+            "HumanEval rows labelled `checker pytest-v1` are superseded as verdicts by the "
+            "`pytest-v2` rows scored from the same stored answer bytes. Each "
+            "`<BENCH>-RESULT.md` carries the dated pointer and the reason.\n\n"
+            % (EXEC_CHECKER, CHECKER_CONTRACT))
 
 
 def digest_row(bench, model, n_tasks, tasks_sha16, call, ok, scored):
@@ -185,7 +208,18 @@ def selftest():
                     if l.startswith("| ") and "bench |" not in l and not set(l) <= set("|- ")]
         if rows_out != [r2, r1] or CHECKER_CONTRACT not in txt or txt.count("# Public") != 1:
             bad.append(("digest_writer", repr(rows_out), "newest-first, one header", txt[:160]))
-    print("selftest cases=%d failures=%d" % (len(cases) + len(labels) + 1, len(bad)))
+    # The header is what makes two rows for the same bench+model readable: it must name the
+    # execution contract actually in force (not a hardcoded older one) and carry the
+    # supersession pointers, or a 46.0 % escalation-shape row and a 70.2 % matched-shape row
+    # sit in one table looking like a contour effect.
+    try:
+        from pub_bench_exec import EXEC_CHECKER as _ec
+    except Exception:
+        _ec = "?"
+    head = digest_head()
+    if _ec not in head or "Supersession pointers" not in head or "512,1200" not in head:
+        bad.append(("digest_head", head[:120], "names %r + supersession pointers" % _ec, ""))
+    print("selftest cases=%d failures=%d" % (len(cases) + len(labels) + 2, len(bad)))
     for b in bad:
         print("  FAIL %s gold=%r expected=%r got=%r" % b)
     if bad:
