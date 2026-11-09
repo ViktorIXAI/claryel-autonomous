@@ -102,6 +102,31 @@ VENDOR_EXCEPTIONS = [
                "sha16 instead of sanitized. (This record deliberately does not quote the tokens: "
                "a scanner exception that itself carries the pattern trips the rule it documents.)",
     },
+    {
+        # Published ARM bytes (contour leg): model output, not vendored data.
+        "path": "benchmarks/public/arms/ifeval-contour-matched-answers.jsonl",
+        "sha16": "c947101b813d5da6",
+        "rules": ("email_like",),
+        "pin": "benchmarks/public/arms/README.md index row `ifeval-contour-matched-answers.jsonl` "
+               "(that index prints SHA-256/16 e611e76ebdd808cf; this pin is SHA-1/16, the "
+               "convention this scanner uses - both name the same bytes)",
+        "why": "the contour arm's answers are model output on IFEval tasks that ASK for drafted "
+               "emails, so placeholder mailboxes appear inside scored answer bytes; masking them "
+               "would edit the exact bytes the pub-ifeval-v1 verdicts were computed from. No "
+               "credential-class rule matches. (Record does not quote the token.)",
+    },
+    {
+        # Same arm, sibling results file: carries the same answer bytes.
+        "path": "benchmarks/public/arms/ifeval-contour-matched-results.jsonl",
+        "sha16": "c52ccca353d4c8d9",
+        "rules": ("email_like",),
+        "pin": "benchmarks/public/arms/README.md index row `ifeval-contour-matched-results.jsonl` "
+               "(that index prints SHA-256/16 d8a519a5f9b07c18; this pin is SHA-1/16, the "
+               "convention this scanner uses - both name the same bytes)",
+        "why": "the results rows carry the arm's answer bytes for re-scoring; the same placeholder "
+               "mailbox token as the answers file, scored bytes untouched. (Record does not quote "
+               "the token.)",
+    },
 ]
 
 

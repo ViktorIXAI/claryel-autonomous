@@ -104,6 +104,19 @@ check("call_site_records_exception",
           for e in excepted),
       "excepted=%s" % excepted[:3])
 
+# 4b. the contour-arm exceptions: pin == disk, works on pinned bytes, dies on drift
+for rel, sha1_16 in (("ifeval-contour-matched-answers.jsonl", "c947101b813d5da6"),
+                     ("ifeval-contour-matched-results.jsonl", "c52ccca353d4c8d9")):
+    arm_rel = "benchmarks/public/arms/" + rel
+    disk16 = hashlib.sha1((ROOT / arm_rel).read_bytes()).hexdigest()[:16]
+    check("contour_arm_exception_%s" % rel, excs.get(arm_rel) is not None)
+    check("contour_arm_pin_matches_disk_%s" % rel, excs.get(arm_rel, {}).get("sha16") == disk16 == sha1_16,
+          "scanner=%s disk=%s" % (excs.get(arm_rel, {}).get("sha16"), disk16))
+    check("contour_arm_excepted_for_pinned_bytes_%s" % rel,
+          mod.vendored_exception_for(arm_rel, "email_like", disk16) is not None)
+    check("contour_arm_no_exception_on_drift_%s" % rel,
+          mod.vendored_exception_for(arm_rel, "email_like", "0" * 16) is None)
+
 # 5. the scanner summary surfaces suppressed hits instead of dropping them
 summary = mod.merge([], excepted)
 check("summary_counts_exceptions",

@@ -160,8 +160,11 @@ Re-scoring the PUBLISHED copy (same command as above with `ifeval-contour-matche
 in place of the basalt file, run 2026-11-09): strict reproduces exactly at 462/541 = 85.4 %;
 loose came back 476 vs the arm's 477 — one `langdetect` flip inside the documented checker noise.
 The publisher masked 1082 `hostname` fields and 1 LAN address in the run record/results rows;
-answer text is unedited. The zero-event census in the table above is checkable directly from
-`ifeval-contour-matched-ledger.jsonl` (empty events column on all 541 rows).
+answer text is unedited. Two placeholder-mailbox tokens inside the drafted-email answers are
+suppressed by sha16-bound metadata-class exception records in the repo scanner (counted, never
+dropped: `...-answers.jsonl@...c947101b`, `...-results.jsonl@...c52ccca3`, SHA-1/16), because
+masking them would edit the scored bytes. The zero-event census in the table above is checkable
+directly from `ifeval-contour-matched-ledger.jsonl` (empty events column on all 541 rows).
 
 Run on the published copies it reproduced the digest row exactly: strict **467/541 = 86.3 %**, loose
 **481/541 = 88.9 %**, instruction checks 751/834 = 90.0 %, same hardest-check list. Its own gate run
