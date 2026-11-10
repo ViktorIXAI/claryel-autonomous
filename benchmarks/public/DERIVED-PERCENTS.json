@@ -4,7 +4,7 @@
   "checker": "scripts/pub_derived_percent_check.py",
   "test": "harness/pub_derived_percent_test.py",
   "why": "PUB-DIGEST.md is the only table this line machine-checks against shipped bytes. The result documents also quote percents that are NOT digest rows: pre-registered slice scores, per-category and per-difficulty breakdowns, truncation censuses, and paired-join conversion rates. Tick 9 proved every digest percent re-scores from shipped bytes; this registry proves the other class, so a quoted number cannot drift away from the bytes that produced it. Every entry is recomputed offline from tracked artifacts with the pinned checker; the declared fraction must also still appear in the named document.",
-  "entry_shape": "kind = subset | category | field_count | join; see the checker docstring for the fields each kind reads",
+  "entry_shape": "kind = subset | category | field_count | join; join modes symmetric_flip | flip_gain | keep_best_union | directional_sign (the repair-family split, added 2026-11-10)",
   "entries": [
     {
       "id": "gsm8k-bare-slice300",
@@ -128,7 +128,9 @@
       "verdicts": "arms/livecodebench-bare-verdicts.jsonl",
       "field": "difficulty",
       "value": "easy",
-      "filter": {"testtype": "stdin"},
+      "filter": {
+        "testtype": "stdin"
+      },
       "expect": "26/26 = 100.0 %"
     },
     {
@@ -141,7 +143,9 @@
       "verdicts": "arms/livecodebench-bare-verdicts.jsonl",
       "field": "difficulty",
       "value": "medium",
-      "filter": {"testtype": "stdin"},
+      "filter": {
+        "testtype": "stdin"
+      },
       "expect": "18/26 = 69.2 %"
     },
     {
@@ -154,7 +158,9 @@
       "verdicts": "arms/livecodebench-bare-verdicts.jsonl",
       "field": "difficulty",
       "value": "hard",
-      "filter": {"testtype": "stdin"},
+      "filter": {
+        "testtype": "stdin"
+      },
       "expect": "16/60 = 26.7 %"
     },
     {
@@ -232,20 +238,416 @@
       "other": "arms/livecodebench-contour-matched-verdicts.jsonl",
       "other_key": "ok",
       "expect": "111/175 = 63.4 %"
+    },
+    {
+      "id": "ifeval-v1-redraw-converts",
+      "bench": "ifeval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-v1: matched redraw (the contour-matched second draw) converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/ifeval-basalt-verdicts.jsonl",
+      "base_key": "strict",
+      "other": "arms/ifeval-contour-matched-verdicts.jsonl",
+      "other_key": "strict",
+      "expect": "16/74 = 21.6 %"
+    },
+    {
+      "id": "ifeval-v1-feedback-converts",
+      "bench": "ifeval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-v1: feedback arm converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/ifeval-basalt-verdicts.jsonl",
+      "base_key": "strict",
+      "other": "arms/pub-repair-v1-verdicts.jsonl",
+      "other_key": "strict",
+      "expect": "30/74 = 40.5 %"
+    },
+    {
+      "id": "ifeval-v1-feedback-only",
+      "bench": "ifeval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-v1: cells ONLY the feedback arm converts (the sign-test winner side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/ifeval-basalt-verdicts.jsonl",
+      "base_key": "strict",
+      "control": "arms/ifeval-contour-matched-verdicts.jsonl",
+      "control_key": "strict",
+      "arm": "arms/pub-repair-v1-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "arm_only",
+      "expect": "20/74 = 27.0 %"
+    },
+    {
+      "id": "ifeval-v1-redraw-only",
+      "bench": "ifeval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-v1: cells ONLY the matched redraw converts (the sign-test loser side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/ifeval-basalt-verdicts.jsonl",
+      "base_key": "strict",
+      "control": "arms/ifeval-contour-matched-verdicts.jsonl",
+      "control_key": "strict",
+      "arm": "arms/pub-repair-v1-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "control_only",
+      "expect": "6/74 = 8.1 %"
+    },
+    {
+      "id": "ifeval-v2-redraw-converts",
+      "bench": "ifeval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-v2: matched redraw (the contour-matched second draw) converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/ifeval-basalt-verdicts.jsonl",
+      "base_key": "strict",
+      "other": "arms/ifeval-contour-matched-verdicts.jsonl",
+      "other_key": "strict",
+      "expect": "16/74 = 21.6 %"
+    },
+    {
+      "id": "ifeval-v2-feedback-converts",
+      "bench": "ifeval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-v2: feedback arm converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/ifeval-basalt-verdicts.jsonl",
+      "base_key": "strict",
+      "other": "arms/pub-repair-v2-verdicts.jsonl",
+      "other_key": "strict",
+      "expect": "42/74 = 56.8 %"
+    },
+    {
+      "id": "ifeval-v2-feedback-only",
+      "bench": "ifeval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-v2: cells ONLY the feedback arm converts (the sign-test winner side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/ifeval-basalt-verdicts.jsonl",
+      "base_key": "strict",
+      "control": "arms/ifeval-contour-matched-verdicts.jsonl",
+      "control_key": "strict",
+      "arm": "arms/pub-repair-v2-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "arm_only",
+      "expect": "28/74 = 37.8 %"
+    },
+    {
+      "id": "ifeval-v2-redraw-only",
+      "bench": "ifeval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-v2: cells ONLY the matched redraw converts (the sign-test loser side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/ifeval-basalt-verdicts.jsonl",
+      "base_key": "strict",
+      "control": "arms/ifeval-contour-matched-verdicts.jsonl",
+      "control_key": "strict",
+      "arm": "arms/pub-repair-v2-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "control_only",
+      "expect": "2/74 = 2.7 %"
+    },
+    {
+      "id": "bfcl-bfclv1-redraw-converts",
+      "bench": "bfcl",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-bfcl-v1: matched redraw (the contour-matched second draw) converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/bfcl-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "other": "arms/bfcl-contour-matched-verdicts.jsonl",
+      "other_key": "ok",
+      "expect": "29/124 = 23.4 %"
+    },
+    {
+      "id": "bfcl-bfclv1-feedback-converts",
+      "bench": "bfcl",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-bfcl-v1: feedback arm converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/bfcl-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "other": "arms/pub-repair-bfcl-v1-verdicts.jsonl",
+      "other_key": "strict",
+      "expect": "45/124 = 36.3 %"
+    },
+    {
+      "id": "bfcl-bfclv1-feedback-only",
+      "bench": "bfcl",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-bfcl-v1: cells ONLY the feedback arm converts (the sign-test winner side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/bfcl-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "control": "arms/bfcl-contour-matched-verdicts.jsonl",
+      "control_key": "ok",
+      "arm": "arms/pub-repair-bfcl-v1-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "arm_only",
+      "expect": "23/124 = 18.5 %"
+    },
+    {
+      "id": "bfcl-bfclv1-redraw-only",
+      "bench": "bfcl",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-bfcl-v1: cells ONLY the matched redraw converts (the sign-test loser side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/bfcl-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "control": "arms/bfcl-contour-matched-verdicts.jsonl",
+      "control_key": "ok",
+      "arm": "arms/pub-repair-bfcl-v1-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "control_only",
+      "expect": "7/124 = 5.6 %"
+    },
+    {
+      "id": "humaneval-humanevalv1-redraw-converts",
+      "bench": "humaneval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-humaneval-v1: matched redraw (the contour-matched second draw) converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/humaneval-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "other": "arms/humaneval-contour-matched-verdicts-v2.jsonl",
+      "other_key": "ok",
+      "expect": "2/5 = 40.0 %"
+    },
+    {
+      "id": "humaneval-humanevalv1-feedback-converts",
+      "bench": "humaneval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-humaneval-v1: feedback arm converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/humaneval-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "other": "arms/pub-repair-humaneval-v1-verdicts.jsonl",
+      "other_key": "strict",
+      "expect": "2/5 = 40.0 %"
+    },
+    {
+      "id": "humaneval-humanevalv1-feedback-only",
+      "bench": "humaneval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-humaneval-v1: cells ONLY the feedback arm converts (the sign-test winner side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/humaneval-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "control": "arms/humaneval-contour-matched-verdicts-v2.jsonl",
+      "control_key": "ok",
+      "arm": "arms/pub-repair-humaneval-v1-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "arm_only",
+      "expect": "0/5 = 0.0 %"
+    },
+    {
+      "id": "humaneval-humanevalv1-redraw-only",
+      "bench": "humaneval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-humaneval-v1: cells ONLY the matched redraw converts (the sign-test loser side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/humaneval-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "control": "arms/humaneval-contour-matched-verdicts-v2.jsonl",
+      "control_key": "ok",
+      "arm": "arms/pub-repair-humaneval-v1-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "control_only",
+      "expect": "0/5 = 0.0 %"
+    },
+    {
+      "id": "humaneval-humanevalv2-redraw-converts",
+      "bench": "humaneval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-humaneval-v2: matched redraw (the contour-matched second draw) converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/humaneval-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "other": "arms/humaneval-contour-matched-verdicts-v2.jsonl",
+      "other_key": "ok",
+      "expect": "2/5 = 40.0 %"
+    },
+    {
+      "id": "humaneval-humanevalv2-feedback-converts",
+      "bench": "humaneval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-humaneval-v2: feedback arm converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/humaneval-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "other": "arms/pub-repair-humaneval-v2-verdicts.jsonl",
+      "other_key": "strict",
+      "expect": "4/5 = 80.0 %"
+    },
+    {
+      "id": "humaneval-humanevalv2-feedback-only",
+      "bench": "humaneval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-humaneval-v2: cells ONLY the feedback arm converts (the sign-test winner side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/humaneval-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "control": "arms/humaneval-contour-matched-verdicts-v2.jsonl",
+      "control_key": "ok",
+      "arm": "arms/pub-repair-humaneval-v2-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "arm_only",
+      "expect": "2/5 = 40.0 %"
+    },
+    {
+      "id": "humaneval-humanevalv2-redraw-only",
+      "bench": "humaneval",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-humaneval-v2: cells ONLY the matched redraw converts (the sign-test loser side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/humaneval-basalt-verdicts.jsonl",
+      "base_key": "ok",
+      "control": "arms/humaneval-contour-matched-verdicts-v2.jsonl",
+      "control_key": "ok",
+      "arm": "arms/pub-repair-humaneval-v2-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "control_only",
+      "expect": "0/5 = 0.0 %"
+    },
+    {
+      "id": "livecodebench-lcbv1-redraw-converts",
+      "bench": "livecodebench",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-lcb-v1: matched redraw (the contour-matched second draw) converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/livecodebench-bare-verdicts.jsonl",
+      "base_key": "ok",
+      "other": "arms/livecodebench-contour-matched-verdicts.jsonl",
+      "other_key": "ok",
+      "expect": "10/74 = 13.5 %"
+    },
+    {
+      "id": "livecodebench-lcbv1-feedback-converts",
+      "bench": "livecodebench",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-lcb-v1: feedback arm converts inside the first-arm failure universe",
+      "kind": "join",
+      "mode": "flip_gain",
+      "base": "arms/livecodebench-bare-verdicts.jsonl",
+      "base_key": "ok",
+      "other": "arms/pub-repair-lcb-v1-verdicts.jsonl",
+      "other_key": "strict",
+      "expect": "7/74 = 9.5 %"
+    },
+    {
+      "id": "livecodebench-lcbv1-feedback-only",
+      "bench": "livecodebench",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-lcb-v1: cells ONLY the feedback arm converts (the sign-test winner side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/livecodebench-bare-verdicts.jsonl",
+      "base_key": "ok",
+      "control": "arms/livecodebench-contour-matched-verdicts.jsonl",
+      "control_key": "ok",
+      "arm": "arms/pub-repair-lcb-v1-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "arm_only",
+      "expect": "3/74 = 4.1 %"
+    },
+    {
+      "id": "livecodebench-lcbv1-redraw-only",
+      "bench": "livecodebench",
+      "doc": "PUB-PLAN.md",
+      "quote": "pub-repair-lcb-v1: cells ONLY the matched redraw converts (the sign-test loser side)",
+      "kind": "join",
+      "mode": "directional_sign",
+      "base": "arms/livecodebench-bare-verdicts.jsonl",
+      "base_key": "ok",
+      "control": "arms/livecodebench-contour-matched-verdicts.jsonl",
+      "control_key": "ok",
+      "arm": "arms/pub-repair-lcb-v1-verdicts.jsonl",
+      "arm_key": "strict",
+      "which": "control_only",
+      "expect": "6/74 = 8.1 %"
     }
   ],
   "not_recomputable_in_ci": [
-    {"fraction": "481/541", "bench": "ifeval", "reason": "loose column: needs the vendored pub-ifeval scorer, whose langdetect path flips ~1 task per run over identical bytes (documented +-1 band); the value is pinned by the shipped verdict sidecar and re-proven by dated multi-pass records, so it is not CI-asserted at an exact number"},
-    {"fraction": "477/541", "bench": "ifeval", "reason": "loose column, same stochastic-scorer exclusion"},
-    {"fraction": "526/541", "bench": "ifeval", "reason": "loose column, same stochastic-scorer exclusion"},
-    {"fraction": "514/541", "bench": "ifeval", "reason": "verification rescore quoted in the document and labelled there as the documented langdetect flake (one cell different from the shipped verdict sidecar, the cell named)"},
-    {"fraction": "469/541", "bench": "ifeval", "reason": "pub-ifeval-v2 corrected cell: three independent passes recorded in IFEVAL-RESULT.md and MANIFEST.json; CI does not re-assert a stochastic scorer at an exact count"},
-    {"fraction": "463/541", "bench": "ifeval", "reason": "pub-ifeval-v2 corrected cell, same exclusion"},
-    {"fraction": "510/541", "bench": "ifeval", "reason": "pub-ifeval-v2 corrected cell, same exclusion"},
-    {"fraction": "751/834", "bench": "ifeval", "reason": "instruction-check aggregate (strict+loose instruction pairs) of the stochastic scorer"},
-    {"fraction": "743/834", "bench": "ifeval", "reason": "instruction-check aggregate of the stochastic scorer"},
-    {"fraction": "748/834", "bench": "ifeval", "reason": "instruction-check aggregate of the stochastic scorer"},
-    {"fraction": "783/834", "bench": "ifeval", "reason": "instruction-check aggregate of the stochastic scorer"},
-    {"fraction": "807/834", "bench": "ifeval", "reason": "instruction-check aggregate of the stochastic scorer"}
+    {
+      "fraction": "481/541",
+      "bench": "ifeval",
+      "reason": "loose column: needs the vendored pub-ifeval scorer, whose langdetect path flips ~1 task per run over identical bytes (documented +-1 band); the value is pinned by the shipped verdict sidecar and re-proven by dated multi-pass records, so it is not CI-asserted at an exact number"
+    },
+    {
+      "fraction": "477/541",
+      "bench": "ifeval",
+      "reason": "loose column, same stochastic-scorer exclusion"
+    },
+    {
+      "fraction": "526/541",
+      "bench": "ifeval",
+      "reason": "loose column, same stochastic-scorer exclusion"
+    },
+    {
+      "fraction": "514/541",
+      "bench": "ifeval",
+      "reason": "verification rescore quoted in the document and labelled there as the documented langdetect flake (one cell different from the shipped verdict sidecar, the cell named)"
+    },
+    {
+      "fraction": "469/541",
+      "bench": "ifeval",
+      "reason": "pub-ifeval-v2 corrected cell: three independent passes recorded in IFEVAL-RESULT.md and MANIFEST.json; CI does not re-assert a stochastic scorer at an exact count"
+    },
+    {
+      "fraction": "463/541",
+      "bench": "ifeval",
+      "reason": "pub-ifeval-v2 corrected cell, same exclusion"
+    },
+    {
+      "fraction": "510/541",
+      "bench": "ifeval",
+      "reason": "pub-ifeval-v2 corrected cell, same exclusion"
+    },
+    {
+      "fraction": "751/834",
+      "bench": "ifeval",
+      "reason": "instruction-check aggregate (strict+loose instruction pairs) of the stochastic scorer"
+    },
+    {
+      "fraction": "743/834",
+      "bench": "ifeval",
+      "reason": "instruction-check aggregate of the stochastic scorer"
+    },
+    {
+      "fraction": "748/834",
+      "bench": "ifeval",
+      "reason": "instruction-check aggregate of the stochastic scorer"
+    },
+    {
+      "fraction": "783/834",
+      "bench": "ifeval",
+      "reason": "instruction-check aggregate of the stochastic scorer"
+    },
+    {
+      "fraction": "807/834",
+      "bench": "ifeval",
+      "reason": "instruction-check aggregate of the stochastic scorer"
+    }
   ]
 }

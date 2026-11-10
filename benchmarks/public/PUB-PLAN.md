@@ -1101,3 +1101,98 @@ line; it is not a PUB leg event and no arm incident occurred this tick.
 resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
 percent.
+
+
+**Queue status 2026-11-10 16:24 CET (tick 19):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick; the local endpoint
+was read but not touched (`/health` 200, GPU **0 % util / 36.9 W / 23.5 GiB** resident). The idle-spin
+condition ticks 13–17 noted and tick 18 left unconfirmed **is confirmed again this tick**: engine pid
+3284575 at **637 % CPU with the GPU at 0 % utilization**, 59.2 GiB RSS, 43.8 h of process uptime, load
+average 15.4 on a 32-core box. The pre-flight engine restart cure still waits, because it is an
+infrastructure action on the box that hosts this session's live brain — owner decision, this tick
+started and stopped nothing. The two partial Grok arms were re-verified intact a thirteenth time
+(gpqa-diamond **139 unique ids / 139 `finish=ok` / 0 empty**, last id `gpqa-138`, 59 of 198 to go;
+humaneval **120 / 120**, last id `humaneval-0119`, 44 of 164 to go; both files untouched since
+2026-11-09 07:56), still unshipped and unscored by rule.
+
+**The tick went at the repair-family class sentence, and the finding is that it was already false on
+the day it was written.** `LIVECODEBENCH-RESULT.md` (and the tick-6 queue block) states that the
+validator-feedback effect "is measured significantly **only on IFEval**". That sentence was committed
+at **01:46 CET on 2026-11-10**, one hour fifty-three minutes **after** `pub-repair-bfcl-v1` published
+(2026-11-09 23:53 CET) a second significant positive on exactly the same question — BFCL feedback-only
+**23** cells against redraw-only **7**, p = 0.0052 — and the census it presents simply omitted it.
+Recomputed from the shipped verdict sidecars alone (zero model calls, no answer byte touched), the
+repair family over four sets and seven arms is **two positive, one null, one null-to-negative**:
+
+| set / arm | what its validator checks | first-arm failures | matched redraw converts | feedback arm converts | **feedback-only** | redraw-only | exact sign test |
+|---|---|---|---|---|---|---|---|
+| IFEval `pub-repair-v1` (retry@1200) | 25 instruction/format rules | 74 | 16/74 = 21.6 % | 30/74 = 40.5 % | 20/74 = 27.0 % | 6/74 = 8.1 % | 20/6, p = 0.0094 |
+| IFEval `pub-repair-v2` (retry@2400) | the same 25 rules | 74 | 16/74 = 21.6 % | 42/74 = 56.8 % | 28/74 = 37.8 % | 2/74 = 2.7 % | 28/2, p = 8.7e-7 |
+| BFCL `pub-repair-bfcl-v1` | AST match of the call protocol | 124 | 29/124 = 23.4 % | 45/124 = 36.3 % | 23/124 = 18.5 % | 7/124 = 5.6 % | 23/7, p = 0.0052 |
+| HumanEval `pub-repair-humaneval-v1` (@1200) | `pytest-v2` execution | 5 | 2/5 = 40.0 % | 2/5 = 40.0 % | 0/5 = 0.0 % | 0/5 = 0.0 % | no discordance |
+| HumanEval `pub-repair-humaneval-v2` (@2400) | `pytest-v2` execution | 5 | 2/5 = 40.0 % | 4/5 = 80.0 % | 2/5 = 40.0 % | 0/5 = 0.0 % | 2/0, p = 0.5 (n = 2) |
+| LiveCodeBench `pub-repair-lcb-v1` | hidden-test execution | 74 | 10/74 = 13.5 % | 7/74 = 9.5 % | 3/74 = 4.1 % | 6/74 = 8.1 % | 3/6, p = 0.508 |
+
+The universe of every row is the ids **its first arm failed**, read from that arm's verdict sidecar;
+"matched redraw" is the frozen contour-`0.0.2.56` matched-shape arm, an independent second draw of the
+same ids at the same request shape with no feedback; `feedback-only` and `redraw-only` are the two
+discordant classes the sign test is built from, and the percents are of each row's own failure
+universe, never of the set. `both` cells are 10 / 14 / 22 / 2 / 2 / 4 in row order.
+
+**Corrected class statement (dated, replaces "only on IFEval"; no published percent, verdict row or arm
+byte moved):** naming the violated check pays above a blind second draw where the failing verdict names
+a **class the model can re-target inside the same solution** — an instruction/format rule (IFEval, at
+both token budgets) or a call-protocol shape (BFCL: call count, function name) — and it does not pay
+where satisfying the verdict needs a different program (LiveCodeBench null-to-negative; HumanEval a
+null at n = 5, and its 2/0 at 2400 tokens is inside the second-draw floor and unresolvable at that
+sample size). The "textual vs program execution" wording in the LCB document is replaced by
+**re-targetable class vs new algorithm**: BFCL is the row that breaks the old dichotomy, because its
+check is neither — it is an AST structural match.
+
+Robustness of the IFEval half, measured on the same bytes: two of the 74 cells (`ifeval-1122`,
+`ifeval-1129`) are the vendored `letter_frequency` coin flips the `pub-ifeval-v2` contract fixes, so
+they can land on either side. Excluding both, the IFEval margins become **19/6, p = 0.015** (v1) and
+**28/2, p = 8.7e-7** (v2) — still significant, so the corrected statement does not rest on the two RNG
+cells. The same two cells are why the sidecar count of v1 conversions (30) sits two above the arm's own
+recorded `retry_fixed` (28): they were never asked and pass today's read. The census figures in the
+digest rows stay exactly as published; the two numbers answer different questions and both are labelled
+here.
+
+Tooling and pins added (zero model calls, zero published measurement bytes moved):
+
+* `scripts/pub_derived_percent_check.py` gained join mode `directional_sign` — first-arm failure
+  universe from `base`, second draw from `control`, feedback arm from `arm`, `which = arm_only |
+  control_only`. No previous mode could express the split: `flip_gain` returns a total, and a total
+  hides which side of the discordance moved, which is exactly the number the class claim rests on.
+* `benchmarks/public/DERIVED-PERCENTS.json`: **24 new entries** (six rows x redraw-converts,
+  feedback-converts, feedback-only, redraw-only), so every cell of the table above is recomputed from
+  shipped verdict sidecars in CI and each declared fraction must still appear in this document.
+  Registry now **42 entries, 0 findings**; 41 digest citations, 169 document citations, 0 uncovered.
+* `harness/pub_derived_percent_test.py` requires `directional_sign` to be exercised by an entry, so the
+  new mode cannot rot into dead code.
+* `LIVECODEBENCH-RESULT.md` carries a dated correction note beside the stale sentence; the sentence
+  itself is untouched, per the append-only rule.
+
+Gates run before the push (tracked tree, zero model calls): `scripts/pub_derived_percent_check.py`
+42 recomputed, 0 findings; `harness/pub_derived_percent_test.py` **41 checks, 0 failed** (39 before
+this tick: the new mode-coverage check plus the redraw-control flip control); the five PUB gates
+through `scripts/push_ready.sh` (arms index, derived percents, Grok cells, superseded cells, digest
+rows) plus manifest, links, docs policy and `scripts/security/secret_scan.py --dir . --strict`.
+
+Ops state read this tick (no action): local `main` equals `origin/main` (0 ahead / 0 behind) before
+this tick's commit; two sibling docs commits landed since tick 18 (`4caafa8`, `cb9d510`, Bedrock/credit
+notes from the parallel docs agent) and this tick fast-forwarded onto them. The newest sibling push
+`cb9d510` is green on `secret-scan` and `contour self-tests`, with `devsecops`, the hard-v6 scoring
+contracts and the pages build still running at read time. `docs-freshness` still records its last
+scheduled run at **2026-11-10 11:24:43 UTC (failed)** — the stale-status-date finding on the pre-fix
+SHA that ticks 15–18 recorded; no scheduled run has fired against the fixed tree since, and
+`scripts/qa/docs_policy.py --daily` prints PASS on the current tree, so the brief's "errors daily
+because the tree is dirty" line remains unreproduced. `LEG-INCIDENTS.md` gains no new 2026-11-10 PUB
+entry — no leg started, stopped or restarted this tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
+percent.

@@ -11,13 +11,15 @@ What it pins:
   1. the tracked tree passes: every registry entry recomputes from the shipped
      artifacts and every percent quoted in a result document is covered by a
      digest row, a registry entry, or an exclusion that states a reason;
-  2. the rule is not vacuous — six tamper controls each redden it:
+  2. the rule is not vacuous — seven tamper controls each redden it:
        a. a declared count moved by one cell,
        b. the quoted fraction deleted from its document,
        c. a registry entry deleted, leaving its citation uncovered,
        d. one shipped verdict row flipped in a sidecar,
        e. a brand-new unexplained percent inserted into a document,
-       f. a registry artifact deleted (structural fail-closed, exit 2);
+       f. a registry artifact deleted (structural fail-closed, exit 2),
+       g. one REDRAW-CONTROL verdict flipped inside the first-arm failure universe,
+          which moves only the `directional_sign` counts (the repair-family split);
   3. every derivation kind the checker implements is exercised by at least one
      entry, so a kind cannot rot into dead code;
   4. every exclusion record carries a reason, and the excluded class is exactly
@@ -101,7 +103,7 @@ def main() -> int:
     for k in ("subset", "category", "field_count", "join"):
         check("kind %s exercised by an entry" % k, k in kinds)
     join_modes = {e.get("mode") for e in entries if e["kind"] == "join"}
-    for m in ("symmetric_flip", "flip_gain", "keep_best_union"):
+    for m in ("symmetric_flip", "flip_gain", "keep_best_union", "directional_sign"):
         check("join mode %s exercised" % m, m in join_modes)
 
     # 4. exclusions carry reasons and stay inside the stochastic-scorer class
@@ -167,6 +169,33 @@ def main() -> int:
         rc, out = run(td)
         check("tamper reddens it: shipped verdict row flipped", rc != 0 and "COUNT MISMATCH" in out,
               "rc=%d" % rc)
+
+    # g. one redraw-control verdict flipped inside the first-arm failure universe:
+    #    only the `directional_sign` counts can move, so this is the non-vacuity
+    #    proof for the mode the repair-family census is built from.
+    with tempfile.TemporaryDirectory() as td:
+        mirror_pub(td)
+        base_p = os.path.join(PUB, "arms", "bfcl-basalt-verdicts.jsonl")
+        fails = {json.loads(l)["id"] for l in open(base_p, encoding="utf-8") if l.strip()
+                 if not json.loads(l)["ok"]}
+        src_p = os.path.join(PUB, "arms", "bfcl-contour-matched-verdicts.jsonl")
+        p = os.path.join(td, "arms", "bfcl-contour-matched-verdicts.jsonl")
+        os.unlink(p)
+        rows = [json.loads(l) for l in open(src_p, encoding="utf-8") if l.strip()]
+        flipped = 0
+        for r in rows:
+            if r["ok"] and r["id"] in fails and flipped < 1:
+                r["ok"] = False
+                flipped += 1
+        if flipped != 1:
+            FAILS.append("tamper (g) flipped nothing - the redraw-control sidecar shape changed")
+        with open(p, "w", encoding="utf-8") as fh:
+            for r in rows:
+                fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+        rc, out = run(td)
+        check("tamper reddens it: redraw-control verdict flipped (directional_sign)",
+              rc != 0 and "COUNT MISMATCH" in out
+              and "redraw-only" in out, "rc=%d" % rc)
 
     # f. registry artifact deleted -> structural fail-closed
     with tempfile.TemporaryDirectory() as td:

@@ -26,9 +26,14 @@ Kinds and the fields each reads:
               -> count passing verdict rows of that task group
   field_count rows, field, value
               -> count rows whose field equals value, over the rows in the file
-  join        mode = symmetric_flip | flip_gain | keep_best_union
+  join        mode = symmetric_flip | flip_gain | keep_best_union | directional_sign
                base, base_key, other, other_key, optional restrict_ids
               -> paired-join conversion counts over shipped verdict sidecars
+              directional_sign additionally reads control/control_key, arm/arm_key
+              and which = arm_only | control_only: over the universe where the
+              BASE (first) arm failed, it counts the cells only the feedback arm
+              converts and the cells only the matched redraw converts. That split
+              is the repair-family census; the totals alone hide which side moved.
 
 Nothing here writes a digest row, touches an arm byte, or calls a model. Exit 0
 clean, 1 findings, 2 structural failure (missing artifact, unknown kind, checker
@@ -164,7 +169,7 @@ def k_field_count(e):
 def k_join(e):
     mode = e.get("mode")
     base = verdict_map(os.path.join(PUB, e["base"]), e["base_key"])
-    other = verdict_map(os.path.join(PUB, e["other"]), e["other_key"])
+    other = verdict_map(os.path.join(PUB, e["other"]), e["other_key"]) if e.get("other") else {}
     restrict = None
     if e.get("restrict_ids"):
         restrict = {r["id"] for r in jl(os.path.join(PUB, e["restrict_ids"]))}
@@ -181,6 +186,19 @@ def k_join(e):
         return sum(1 for i in target if other.get(i)), len(target)
     if mode == "keep_best_union":
         return sum(1 for i in base if base[i] or other.get(i)), len(base)
+    if mode == "directional_sign":
+        ctrl = verdict_map(os.path.join(PUB, e["control"]), e["control_key"])
+        arm = verdict_map(os.path.join(PUB, e["arm"]), e["arm_key"])
+        fails = {i for i in base if not base[i]}
+        target = (fails & restrict) if restrict is not None else fails
+        if not target:
+            die("%s: empty first-arm failure universe" % e["id"])
+        which = e.get("which", "arm_only")
+        if which == "arm_only":
+            return sum(1 for i in target if arm.get(i) and not ctrl.get(i)), len(target)
+        if which == "control_only":
+            return sum(1 for i in target if ctrl.get(i) and not arm.get(i)), len(target)
+        die("unknown directional_sign which=%r in %s" % (which, e["id"]))
     die("unknown join mode %r in %s" % (mode, e.get("id")))
 
 

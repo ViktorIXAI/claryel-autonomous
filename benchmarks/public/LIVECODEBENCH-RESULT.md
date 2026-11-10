@@ -414,6 +414,21 @@ null-to-negative here (3/5, p = 0.73). Where the check is textual and cheap to s
 violated check pays; where the check is program execution, a blind second draw is as good as the
 feedback.
 
+*(corrected 2026-11-10 16:24 CET, cross-set census; the sentence above stays exactly as published.)*
+That census sentence was committed at 01:46 CET on 2026-11-10, **one hour fifty-three minutes after**
+`pub-repair-bfcl-v1` published its own answer to the same question (2026-11-09 23:53 CET), and it left
+that row out: on BFCL — an AST structural match, neither textual wording nor program execution — a
+verdict-only re-ask beat the matched redraw **23 to 7, p = 0.0052**. The repair family across four sets
+is therefore **two positive (IFEval at both budgets, BFCL), one null (HumanEval, n = 5) and one
+null-to-negative (LiveCodeBench)**, not "only IFEval". The mechanism line also changes: what predicts a
+feedback gain is not *textual vs executable* but whether the failing verdict names a **class the model
+can re-target inside the same solution** (a format/instruction rule, a call count, a function name) or
+whether satisfying it requires a different program. The per-set table, recomputed from the shipped
+verdict sidecars with zero model calls, is in `PUB-PLAN.md` (queue status 2026-11-10 16:24 CET) and every
+cell of it is pinned in `DERIVED-PERCENTS.json`. The LiveCodeBench verdict in this section is unchanged:
+whole-set discordance is 3 to 6 (p = 0.508), the asked-subset cut 3 to 5 (p = 0.727) — the negative half
+of the corrected class statement still rests on this set.
+
 *What the repair arm demonstrably buys is the adoption rule, not the prompt.* A blind redraw re-draws
 all 175 cells and loses 12 of them (net −2 on the set); the feedback arm re-asked 67 and regressed 0.
 Applying the arm's own keep rule to the blind draw would put it at **111/175 = 63.4 %**, 3 cells
