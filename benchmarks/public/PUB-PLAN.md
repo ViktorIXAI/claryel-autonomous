@@ -1273,3 +1273,90 @@ entry: no leg started, stopped or restarted this tick.
 resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
 percent.
+
+
+**Queue status 2026-11-10 19:30 CET (tick 22):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+0 drift; `pub_arms_index.py --pins` **manifest pin drift: 0** (the checker/tool SHA-1 pins with their
+labelled SHA-256 twins and the `checker_history` byte checks against `git show`);
+`pub_derived_percent_check.py` 42 derivations recomputed from shipped bytes, 41 digest + 169 document
+citations, 0 uncovered; `pub_grok_cell_check.py` 9 documents, 0 findings;
+`pub_superseded_cell_check.py` 9 documents, 0 findings; `pub_digest_row_check.py` 46 rows, 0 findings,
+23/23 pre-rule exceptions used.
+
+Two integrity reads that are new this tick, both zero model calls:
+
+* **The LiveCodeBench hidden battery still reproduces its pin.** The untracked sidecar
+  `livecodebench.hidden.jsonl.gz` measures 100 111 386 B and hashes to SHA-256/16
+  `86f92ab37602195a`, byte-identical to `MANIFEST.json -> benches.livecodebench.hidden_payload`
+  (175 question rows, 6537 hidden tests, 289 489 972 decoded bytes). That is what keeps the three
+  in-force `lcb-exec-v2` rows (bare 101/175, contour 99/175, codex 168/175) re-scorable on this box;
+  an outside reader can still verify the per-question `hidden_sha16` pins but cannot re-run the
+  battery, because shipping this payload as a release asset is an owner decision and no decision has
+  been made.
+* **The one digest promise that could have hung was checked and is closed.** The digest head says a
+  `pytest-v1` HumanEval row is superseded by the `pytest-v2` rescore "of the same stored answer
+  bytes", and the only HumanEval row still labelled `pytest-v1` is the codex row (163/164 = 99.4 %).
+  `HUMANEVAL-RESULT.md` carries the corrected A/B table (codex `pytest-v1` 163/164 -> `pytest-v2`
+  163/164, zero flips, "so no corrected digest row was needed") and the codex bytes themselves are
+  shipped as `arms/humaneval-codex-answers.jsonl` + `-verdicts.jsonl`, so the promise resolves
+  instead of pointing at a row that does not exist. Publication-completeness census from the index:
+  **161 artifacts + 35 `.sha16` sidecars = 196 index rows**, 35 bare answer files (every in-force
+  bench x arm whose arm completed), the two partial Grok legs deliberately unshipped.
+
+Grok partials re-verified intact a sixteenth time, with the exact resume point now recorded from the
+pinned task files rather than from row counts: gpqa-diamond **139 rows / 139 unique ids / 139
+`finish=ok` / 0 empty**, SHA-256/16 `cde63378fa1633c5`, first id `gpqa-000`, last id `gpqa-138`, and
+the 59 ids missing from the pinned file order start at **`gpqa-139`**; humaneval **120 / 120 / 120 /
+0 empty**, SHA-256/16 `a7c741de0d6ace8c` — identical to the value recorded at tick 21, first
+`humaneval-0000`, last
+`humaneval-0119`, the 44 missing ids start at **`humaneval-0120`**. Both files untouched since
+2026-11-09 07:56, still unscored and unshipped by rule.
+
+**11-12 pre-flight record (no script written, nothing launched):** of the four resumption legs in the
+pinned order, two launchers exist and carry the PATH/`command -v` fail-closed guard
+(`go_cloud_gpqa_grok.sh`, `go_cloud_humaneval_grok.sh`); the two deferred legs — **mmlu-pro 500 and
+ifeval 541 — have no Grok go-script at all**, so 12 Nov needs them written first. They are not
+written in advance on purpose: the ceiling has to match each set's own in-force rows (mmlu-pro bare
+and matched ran at `max_tokens 1200`; the IFEval bare/matched/codex rows are a `pub-ifeval-v1`
+1200-token family and a 2400-token IFEval Grok row would not be comparable to them), and an
+unverified launcher sitting next to an endpoint is how the shape-confounded rows got published in
+the first place.
+
+Local endpoint read-only, and the pre-flight risk is unchanged: box RAM 47.5 GiB used of 60.5 GiB
+(`free -m`: 48 622 of 61 953 MiB) with **swap 8143 MiB of 8191 MiB used (`SwapFree: 48 044 kB`)**;
+the serving engine (pid 3284575, up 1 d 22 h) holds `VmRSS` 56.6 GiB and `VmSwap` 6.5 GiB, the
+largest swapper on the box, at **617 % CPU with
+the GPU at 0 % utilization / 36.7 W / 23 563 MiB resident**, load average 15.6 / 8.7 / 6.2 on a
+32-core box, `/health` 200. Same idle-spin condition as ticks 13, 19, 20, 21 with the swap now at its
+last 48 MiB, so this line launches no local leg into it; the pre-flight engine restart cure stays an
+owner decision because that engine serves this session's brain. The 2026-11-12 Grok resumption is
+cloud-side and does not depend on this endpoint. (`Committed_AS` 63.2 GB decimal against 65.0 GB
+decimal of physical RAM is NOT oversubscribed — the pressure is the resident engine plus its swapped
+share on a full swap device, not a commit-charge overrun.)
+
+Ops state read this tick (no action): `HEAD` == `origin/main` == `9dadd65`, working tree clean, and
+that push is **green on all five jobs** (secret-scan, devsecops, contour self-tests, hard-v6 scoring
+contracts, pages) at 18:12 UTC. The failure on the previous commit (`98b61b7`, secret-scan, 18:06
+UTC) was the docs agent's quoted-provider-error false positive and was closed by `9dadd65` itself —
+not a PUB finding. `scripts/qa/docs_policy.py --daily` prints **PASS** on the current tree, and
+`docs_freshness_daily.sh` still records its last scheduled run as the 2026-11-10 03:00 CET
+pre-fix-worktree failure described in `LEG-INCIDENTS.md`; the next scheduled run (2026-11-11 02:00
+UTC) is the first against the retargeted path. `LEG-INCIDENTS.md` gains no new 2026-11-10 PUB entry:
+no leg started, stopped or restarted this tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond from `gpqa-139`, 59 ids; humaneval from `humaneval-0120`, 44 ids; then the deferred
+mmlu-pro 500 and ifeval 541, which need their Grok go-scripts written first), each resumable by id
+and scored only when complete. Standing limits unchanged: no Grok arm before 2026-11-12; frozen
+contour `0.0.2.56`; sanitization before every push; a partial arm publishes no percent.
+
+*Correction with a date (unit arithmetic in a tick's prose, no percent row touched):* the tick-21
+sentence "`Committed_AS` 62.6 GB above the 62 GB of RAM" compared a decimal-GB value against a
+MiB-read total, so it implied a commit-charge overrun that the bytes do not show. Correct reading of
+the same `/proc/meminfo` shape: `Committed_AS` 63.2 GB decimal against 65.0 GB decimal of physical
+RAM (61 953 MiB) — not oversubscribed. The real risk recorded in both ticks stands and is the full
+swap device plus a 56.6 GiB-resident / 6.5 GiB-swapped engine.
