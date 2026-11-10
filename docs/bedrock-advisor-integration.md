@@ -1,6 +1,11 @@
 # Amazon Bedrock / Claude Fable 5.2 advisor lane
 
-Status: **prepared, not live**. Written 2026-11-10 after an infrastructure pass.
+Status: **wired on the AWS side, model access still gated**. Written 2026-11-10 after an
+infrastructure pass. The dated section at the end of this file (same day, account pass through
+CloudShell) supersedes the "nothing was applied" framing of the paragraph below: an IAM user, a
+least-privilege policy and one access key in the Hermes profile env file now exist, and real
+invoke attempts were made — they all stop at the Anthropic agreement gate, so no model output
+has been produced and no percentage is quotable.
 Nothing in this document was applied to the running brain: no credentials, no
 `.env` edit, no `config.yaml` change, no LiteLLM route change, no Bedrock API
 call, no gateway restart. The only state change made on the controller host is
@@ -145,3 +150,61 @@ Requested pattern: routine steps cheap, planning/debug steps expensive.
   under discussion; the private-data line stays on hold (issue #44).
 * Do not report a Fable percentage before a matched-shape arm exists; the
   published arms keep one request shape for every column.
+
+## Account pass, 2026-11-10 13:20–13:45 CET (account `claryel`, us-east-1)
+
+Everything in this section is read from live AWS calls, not from documentation. The Bedrock and
+IAM console sub-routes render only the shell with "Unable to load content" — their bundle assets
+come back HTTP 403 from `a.b.cdn.console.awsstatic.com` with `server: AmazonS3`, which is an
+AWS-side bundle problem, not our network (clearing console storage and switching to eu-west-1 do
+not change it). The console shell and **CloudShell** work, so the work ran through the CLI.
+
+Applied on the account:
+
+* IAM user `hermes-bedrock`, inline policy `bedrock-invoke-three-claude-profiles`:
+  `bedrock:InvokeModel`, `bedrock:InvokeModelForInferenceProfiles`,
+  `bedrock:GetInferenceProfile` on the three inference-profile ARNs in us-east-1 plus the
+  matching foundation-model ARNs. The ARN shape matters and cost two iterations: a
+  `global.anthropic.*` profile authorizes against `arn:aws:bedrock:::foundation-model/<fm>`
+  (empty region and account), and a `us.anthropic.*` profile fans out across regions (the
+  us-east-1 profile resolved to a us-east-2 foundation-model ARN), so the policy uses
+  `arn:aws:bedrock:*::foundation-model/anthropic.claude-<model>` for the named models only.
+* One access key for that user, written into the Hermes profile env file with 0600 permissions.
+  The secret value never entered this repository, a chat message, or a log. Two earlier keys were
+  created and deleted when the capture step failed; `list-access-keys` now reports exactly one.
+* Hermes profile `bedrock` pins `global.anthropic.claude-haiku-5-5` with `reasoning_effort: low`
+  and `delegation.reasoning_effort: low`; `model.key_env` is unset so the AWS SDK chain is used.
+
+Verified state (the four gates read off `get-foundation-model-availability`, for
+`anthropic.claude-haiku-5-5`, `anthropic.claude-haiku-4-5-20251001-v1:0` and
+`anthropic.claude-fable-5-2`): `authorizationStatus AUTHORIZED`, `entitlementAvailability
+AVAILABLE`, `regionAvailability AVAILABLE`, `agreementAvailability NOT_AVAILABLE`. Every invoke
+fails with `anthropic.claude-<model> is not available for this account`, and the older models
+instead report `Model use case details have not been submitted for this account`, confirmed by
+`get-use-case-for-model-access` → `ResourceNotFoundException: You have not filled out the request
+form`.
+
+So the single blocker is paper, not plumbing:
+
+1. The Anthropic first-time-use form (`put-use-case-for-model-access`) has never been filed for
+   this account. Its content **is shared with Anthropic**, so filing it is an owner disclosure
+   decision, not a configuration step; the draft text is in issue #55 and has not been sent.
+2. After the form, the SaaS agreement is auto-created by the **first invoke from an identity that
+   holds `aws-marketplace:Subscribe` / `ViewSubscriptions`** (the console identity here). The
+   invoke-only user starts working after that, no policy change needed.
+
+Retention, checked rather than assumed: `get-account-data-retention` returns `mode: inherit`, and
+the only lever is `put-account-data-retention`, which is **account-wide**. The
+`anthropic.claude-fable-5-2` model card states that using it requires opting in to AWS review
+(`aws_review`); the Haiku 5.5 card has no such clause. `aws_review` was not enabled.
+
+Cost re-quote, because availability changes the cheap lane: if Haiku 5.5 ($0.10/$0.50 per MTok)
+stays unentitled on this account, the nearest Claude that only needs the form is Haiku 4.5 at
+$1.00/$5.00 per MTok — $11.64 for the published public-suite token mix (1 443 741 in / 2 040 042
+out), against 0.64 kWh of measured local GPU energy for the same work, i.e. €0.16 at the owner's
+0.25 €/kWh tariff. The ranking (electricity ≪ cheap cloud ≪ mid ≪ frontier) does not change;
+the gap to the cheap lane goes from ~6× to ~70×.
+
+Not done, and deliberately left for the owner: filing the form, `aws_review`, and the gateway
+restart that lets the running brain see boto3 (the process predates the PM environment that
+carries it — see the environment mismatch note above).
