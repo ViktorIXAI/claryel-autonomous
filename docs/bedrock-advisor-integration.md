@@ -556,3 +556,75 @@ Availability measured on this account (control plane, 2026-11-10):
 No inference ran on any of them: the GLM and Kimi ids were probed once
 with a one-character prompt, both were refused, spend stayed
 `0 tokens` / `$0.00`.
+(Part of this paragraph is superseded by the section below: after the
+identification step the owner completed on the AWS side, the same pings
+succeeded. Kept as written for the audit trail.)
+
+## Gate opened: measured state 2026-11-10 21:15–21:45 CET
+
+The owner passed an AWS identification step and reported a letter saying
+models became available. Re-ran the whole lane set with one-character
+prompts (8–64 output tokens each). Everything below is measured output,
+not inference.
+
+Anthropic, `us-east-1`, cross-region profiles:
+
+| Lane | Console identity | Hermes IAM user | Note |
+|---|---|---|---|
+| `global.anthropic.claude-haiku-5-5` | INVOKE_OK (19 in / 3 out) | INVOKE_OK | live lane |
+| `global.anthropic.claude-sonnet-5-5` | INVOKE_OK (19 in / 3 out) | INVOKE_OK | live mid lane |
+| `global.anthropic.claude-opus-5-5` | INVOKE_OK (19 in / 3 out) | AccessDenied (not in policy) | deliberate: contracted, not cleared |
+| `global.anthropic.claude-fable-5-2` | ValidationException: `data retention mode 'default' is not a…` | not invoked | access is fine, retention blocks it: needs the `aws_review` account-level retention setting, which is an owner decision |
+| `anthropic.claude-haiku-4-5-20251001-v1:0` | not invoked | not invoked | owner barred inference on this lane |
+
+Third-party lanes, `eu-west-1` (Ireland):
+
+| Model id used | Result |
+|---|---|
+| `eu.amazon.nova-2-lite-v1:0` | INVOKE_OK (53 in / 4 out) |
+| `eu.amazon.nova-lite-v1:0` | INVOKE_OK (7 in / 2 out) |
+| `mistral.devstral-2-123b` | INVOKE_OK (10 in / 2 out) |
+| `qwen.qwen3-next-80b-a3b` | INVOKE_OK (15 in / 2 out) |
+| `openai.gpt-oss-120b-1:0` | INVOKE_OK (74 in / 32 out) |
+| `zai.glm-4.7-flash` | INVOKE_OK (12 in / 2 out) |
+| `global.moonshotai.kimi-k3.1` | INVOKE_OK (92 in / 31 out) |
+| `global.xai.grok-4.7` | INVOKE_OK (38 in / 32 out) |
+| `global.moonshotai.kimi-k3` | `ServiceUnavailableException` after retries — reachable, capacity flaky |
+| `global.zai.glm-5.3` | `AccessDeniedException: zai.glm-5.3 is not available for this account` — the enterprise-eligibility gate, unchanged |
+
+Two facts that changed versus earlier the same day:
+
+- Account capacity is no longer zero. `list-service-quotas --service-code
+  bedrock --region eu-west-1` now reports **772 non-zero quota records and
+  none at `0.0`**, where earlier every relevant record read `0.0`.
+- The model ids matter: `xai.grok-4-7` is invalid, the profile is
+  `global.xai.grok-4.7` (dotted minor version). `list-inference-profiles`
+  in this CLI version returns the key `inferenceProfileSummaries`, not
+  `inferenceProfiles`, which is why an earlier filter looked empty.
+
+Two harness fixes found by these pings:
+
+- The gate monitor sent `temperature: 0`, and the Claude 5 families reject
+  `temperature`/`top_p`: the monitor reported `ValidationException` while
+  the lane was actually open. Dropped the parameter; the monitor line is
+  now `claude-haiku-5-5=INVOKE_OK`.
+- The Hermes `bedrock` profile uses the streaming API, so the IAM user also
+  needs `bedrock:InvokeModelWithResponseStream` on the inference-profile
+  ARNs. Added as a second inline policy on the same two cheap lanes only
+  (Haiku 5.5, Sonnet 5.5), keeping the same narrow resource shapes. The
+  expensive lanes stay outside the agent policy on purpose.
+  End-to-end check after the fix: `hermes chat -p bedrock -q 'Reply with
+  exactly one character: A' --oneshot` returned `A` in 12 s.
+
+Cost of the whole status pass: roughly 400 input and 120 output tokens on
+refused-plus-successful pings, plus one agent turn on Haiku. Estimated
+spend ≈ `$0.002` — well under one US cent of the `$1000` Activate credit.
+No benchmark arm, no suite, no stored answer bytes were produced by this
+pass.
+
+Not done on purpose: Sonnet/Opus/Fable remain switchable through
+`bedrock_lane.sh` but the live lane stays `haiku-low`; Opus and Fable are
+not in the agent's IAM policy; Fable additionally needs the retention
+decision; the third-party EU lanes are live at account level but are not
+in the agent's policy yet, so switching them on is a one-line IAM change
+plus an owner decision about spend.
