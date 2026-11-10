@@ -26,6 +26,26 @@ bytes, one percent row per run.
    every row says which model produced it.
 6. Energy and wall time are recorded per arm like on the hard bank (GPU sampler for local legs;
    wall time only for cloud legs).
+7. A local leg may only start after `scripts/pub_preflight.py` exits 0 on a fresh reading of the
+   endpoint box. The rule is mechanical since 2026-11-10 (see "Standing local-leg preflight" below);
+   cloud legs are not gated by it.
+
+## Standing local-leg preflight (2026-11-10, tick 23)
+
+The machine note for this line says swap saturation on the P2005 endpoint box can restart the engine
+mid-leg. Ticks 13, 19, 20, 21 and 22 of 2026-11-10 each decided "no local leg today" by reading
+`free -m`, `ps`, `nvidia-smi` and `/health` by hand and writing the numbers into prose. Five hand
+readings is a rule, so it is now a gate: `scripts/pub_preflight.py READINGS.TXT` prints the readings
+and exits **0 = GO**, **3 = NO-GO** (exhausted swap, low MemAvailable, an engine stuck in
+uninterruptible I/O, the idle-spin pair "engine > 200 % CPU at 0 % GPU", `/health` not 200, or a
+foreign leg on the same endpoint), **1 = input gap** — a missing or unreadable reading is never
+treated as healthy. The readings come from a one-line remote read over the repo-standard key; that
+command stays untracked so no connection material lands in this repo, and the tool takes a plain
+`key=value` file. Contract test: `harness/pub_preflight_test.py` (20 checks, CI-enrolled by the
+`harness/*test.py` glob) — one healthy set goes, six independent tampers each turn NO-GO, two
+non-vacuity controls (a busy GPU at high engine CPU, 1 GiB of swap free) still go, and both input-gap
+classes fail closed. Threshold constants in the file carry the measurements that set them. The gate
+registers no contour feature and moves no published byte.
 
 ## Benchmark ladder, cheapest first
 
@@ -1360,3 +1380,63 @@ MiB-read total, so it implied a commit-charge overrun that the bytes do not show
 the same `/proc/meminfo` shape: `Committed_AS` 63.2 GB decimal against 65.0 GB decimal of physical
 RAM (61 953 MiB) — not oversubscribed. The real risk recorded in both ticks stands and is the full
 swap device plus a 56.6 GiB-resident / 6.5 GiB-swapped engine.
+
+**Queue status 2026-11-10 21:5x CET (tick 23):** nothing launched — the queue stays empty and item 8
+(the Grok resumption: gpqa-diamond from `gpqa-139`, humaneval from `humaneval-0120`, then the two
+deferred sets) remains gated to 2026-11-12 by the owner quota window. `systemctl --user list-units
+'parb-pub-*'` is empty, no `pub_bench_run`/`pub_bench_cloud`/`gate_run` process anywhere, zero
+endpoint calls, zero cloud calls this tick.
+
+**What changed this tick is tooling only** (allowed by the 0.0.2.56 freeze: no stamp, no feature,
+no arm, no bank byte, no published percent moved). The endpoint pre-flight that ticks 13, 19, 20, 21
+and 22 each performed by hand is now a gate: **`scripts/pub_preflight.py`** with contract test
+**`harness/pub_preflight_test.py`, 20/20 green** (one healthy reading set exits 0; six independent
+tampers — exhausted swap, low MemAvailable, engine in `D` state, the idle-spin pair, `/health` 503,
+a foreign leg — each exit 3 and name their reason; a missing reading and an unreadable number exit 1
+instead of passing; two non-vacuity controls — high engine CPU *with a busy GPU*, and 1 GiB of swap
+free — still exit 0, which is what keeps the two numeric thresholds honest). It is enrolled in CI by
+the `harness/*test.py` glob through `scripts/qa/static_checks.py`; `MANIFEST.json` checker pins did
+not move, because this tool scores nothing. Writing it also caught a live bug in the new file on the
+first LSP pass (`num(vals["engine_pcpu"])` — a two-argument call written with one); the contract test
+reddens on that shape, because the healthy case then dies with a `TypeError` instead of printing GO.
+
+**The first real reading through the gate is NO-GO (exit 3), and it is worse than tick 22's reading.**
+Same box, 21:47 CET: **swap free 0 MiB of 8 191 MiB** (tick 22 recorded 48 MiB free 25 minutes
+earlier — the device is now completely exhausted), MemAvailable 14 047 MiB of 61 953 MiB, engine RSS
+**57 935 MiB at 602 % CPU with the GPU at 0 % utilization / 36.9 W / 23 563 MiB resident**, load
+average 15.1, `/health` 200, **0 foreign legs**. An earlier read of the same process in the same
+minute showed it in state **`Dl`** — uninterruptible I/O, the thrashing signature — so the state
+reading flickers between `Sl` and `Dl` rather than being stable, and both NO-GO reasons that fired
+(swap, idle-spin) hold on every reading. Consequence stated plainly: **this line launches no local
+leg into that state**, the cure (engine restart or parking the keep-up load) is an owner decision
+because the same engine serves this session's brain, and the 2026-11-12 Grok resumption is cloud-side
+and unaffected by the endpoint condition.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+**index drift: 0**; `pub_derived_percent_check.py` **42 recomputed, 0 findings**;
+`pub_grok_cell_check.py` 9 documents, **0 findings**; `pub_superseded_cell_check.py` 9 documents,
+**0 findings**; `pub_digest_row_check.py` **46 rows, 0 findings**. `HEAD` == `origin/main` ==
+`2b4f04d`, working tree clean at the start of the tick, and that commit is **green on every job**
+(secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts, pages, run 20:07 UTC).
+
+Grok partials re-verified intact again, zero model calls and still unscored/unshipped by rule:
+`gpqa-diamond/pub-grok.jsonl` SHA-256/16 **`cde63378fa1633c5`**, **139 rows**, and
+`humaneval/pub-grok.jsonl` SHA-256/16 **`a7c741de0d6ace8c`**, **120 rows** — both byte-identical to
+the values recorded at ticks 21 and 22, last modified 2026-11-09 07:56, resume points `gpqa-139` and
+`humaneval-0120` unchanged. The 11-12 launcher gap is also unchanged by decision: the two deferred
+legs (**mmlu-pro 500, ifeval 541**) still have no Grok go-script, and none is written in advance,
+because each ceiling must match its own in-force family (mmlu-pro 1200; IFEval's `pub-ifeval-v1`
+1200-token family) and an unverified launcher beside an endpoint is how the shape-confounded rows got
+published.
+
+Daily docs job (report only, not fixed by committing in-flight work): `hermes cron list` shows
+`GitHub docs freshness daily` scheduled `0 2 * * *`, **next run 2026-11-11T02:00:00+00:00**, last run
+`2026-11-10T03:00` **error: "repo is dirty; refusing daily docs refresh"** — that is the stale
+second-worktree symptom recorded in `LEG-INCIDENTS.md` at 14:45 CET and repaired there (both the
+scripts and the worktree layout are now single-writer on `~/sah-main`). Tomorrow's run is the first
+against the retargeted path with a clean tree.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, each
+leg resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; a local leg now also needs `pub_preflight.py` exit 0;
+sanitization before every push; a partial arm publishes no percent.
