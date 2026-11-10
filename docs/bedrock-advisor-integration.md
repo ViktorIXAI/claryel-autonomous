@@ -629,6 +629,59 @@ decision; the third-party EU lanes are live at account level but are not
 in the agent's policy yet, so switching them on is a one-line IAM change
 plus an owner decision about spend.
 
+## The model-id form trap — root cause of "my agent does not answer"
+
+Reproduced with the user's own model string: a session in the `bedrock`
+profile whose model is the catalogue/LiteLLM form `anthropic/claude-haiku-5.5`
+answers
+
+```
+AWS Bedrock rejected this request as malformed, so the model didn't answer.
+Provider said: An error occurred (ValidationException) when calling the
+ConverseStream operation: The provided model identifier is invalid.
+```
+
+and nothing is billed (the session's `billing_provider` stays empty, so the
+credit balance never moves). Bedrock accepts only its own inference-profile
+ids, hyphenated, e.g. `global.anthropic.claude-haiku-5-5`. The profile pin is
+already that id, so a fresh session in the `bedrock` profile answers on the
+first try.
+
+Rules that follow: never put a slash form into a Bedrock profile; pick the
+model from the Bedrock list (display name "Global Anthropic Claude Haiku 5.5")
+or leave the profile default. A profile config/.env change needs no gateway
+restart — the multiplexer re-scans the profile — but an existing chat keeps its
+own model override, so switching model inside a live chat needs a new session.
+
+## Fable 5.2 connected on owner instruction
+
+Owner instruction was explicit: connect Fable 5.2, pay only for actual
+consumption, nothing up front. Two blockers, both cleared:
+
+1. Retention. The account read `mode = inherit`, and the model refuses it
+   (`data retention mode 'default' is not allowed`). Modes offered by this SDK
+   build: `default`, `none`, `aws_review`, `provider_data_share`, `inherit`.
+   Set the account to `aws_review` — the least-sharing mode this enterprise
+   lane accepts. Stated plainly: with `aws_review` AWS may review inference
+   content. Reverting is one call: `put-account-data-retention --mode inherit`.
+2. IAM. New inline policy `bedrock-invoke-fable-52` on the agent user, limited
+   to `bedrock:InvokeModel` + `bedrock:InvokeModelWithResponseStream` on the
+   Fable 5.2 foundation-model and inference-profile ARNs. Opus 5.5 remains
+   outside the agent policy on purpose.
+
+Verified with one 8-token request per lane:
+
+| Lane | Result | Tokens | Estimated cost |
+|---|---|---|---|
+| `global.anthropic.claude-fable-5-2` | `INVOKE_OK` | 19 in / 8 out | `$0.000472` |
+| `global.anthropic.claude-haiku-5-5` | `INVOKE_OK`, reply `A` | 19 in / 3 out | `$0.000003` |
+
+The Fable reply text was empty because the whole 8-token budget went into
+reasoning — real Fable use needs `max_tokens` headroom, otherwise a "successful"
+call looks like a silent one. Live lane is unchanged (`haiku-low`); switching to
+Fable is `bedrock_lane.sh fable-high --i-know`, and the guard is deliberate:
+Fable costs 80× Haiku per output token. Total spend of this step: `$0.0005`.
+
 One more discriminator learned the same evening: control-plane
 `agreementAvailability = AVAILABLE` for `zai.glm-5.3` while its invoke still
 answers `AccessDeniedException … is not available for this account`, and the
