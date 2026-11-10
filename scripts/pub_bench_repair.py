@@ -772,9 +772,18 @@ def he_class(err):
     return stem, HE_CLASS_TEXT[stem]
 
 
+def redraw_control():
+    """PARB_REDRAW_CONTROL=1 turns the same loop into a REDRAW CONTROL: the re-ask is the bare task
+    prompt verbatim, with no verdict block and no previous answer, so the only difference from the
+    repair arm is the feedback itself. Published as a sidecar/census, never as a digest row."""
+    return os.environ.get("PARB_REDRAW_CONTROL") == "1"
+
+
 def build_prompt_humaneval(task, prev):
     """Retry PREFIX = `task["prompt"]` verbatim (exactly the bytes `pub_bench_run.py` sends for a
     code set), so the retry differs from the bare call only by the appended verdict block."""
+    if redraw_control():
+        return task["prompt"]
     stem, text = he_class(task["_why"])
     truncated = len(prev or "") > MAX_PREV_CHARS_CODE
     return ("%s\n\n### Verifier feedback on your previous answer\n"
@@ -793,6 +802,7 @@ def run_humaneval(a, tasks, first, first_rows):
     """pub-repair-humaneval-v1: verdict-only re-ask over the pytest-v2 execution failures."""
     global CONTRACT
     CONTRACT = "pub-repair-humaneval-v1"
+    redraw = redraw_control()
     if str(HERE) not in sys.path:
         sys.path.insert(0, str(HERE))
     import pub_bench_exec as E                            # noqa: E402
@@ -806,10 +816,16 @@ def run_humaneval(a, tasks, first, first_rows):
     first_budget = max_tokens
     env_budget = os.environ.get("PARB_MAX_TOKENS")
     if env_budget and int(env_budget) != max_tokens:
-        CONTRACT = "pub-repair-humaneval-v2"
-        print("note: PARB_MAX_TOKENS overrides the first arm budget %d -> %d; this arm runs "
-              "under contract %s" % (max_tokens, int(env_budget), CONTRACT), flush=True)
+        if not redraw:
+            CONTRACT = "pub-repair-humaneval-v2"
         max_tokens = int(env_budget)
+    if redraw:
+        CONTRACT = "pub-redraw-humaneval-%d" % max_tokens
+    print("note: prompt mode = %s; contract %s (first arm budget %d, this arm %d)"
+          % ("REDRAW CONTROL — the re-ask is the bare task prompt verbatim, no verdict block, "
+             "no previous answer" if redraw else
+             "repair — verdict class + the previous answer",
+             CONTRACT, first_budget, max_tokens), flush=True)
     temps = {r.get("temp") for r in first_rows if r.get("temp") is not None}
     temps.discard(None)
     if temps and temps != {TEMP}:
@@ -914,9 +930,14 @@ def run_humaneval(a, tasks, first, first_rows):
                    "first_answer_sha16": hashlib.sha1(first[t["id"]].encode()).hexdigest()[:16],
                    "verifier_class": t["_class"], "validator": "%s (verdict only)" % E.EXEC_CHECKER,
                    "prev_truncated": len(first[t["id"]] or "") > MAX_PREV_CHARS_CODE}
+            rec["verifier_class"] = t["_class"] if not redraw else "not-shown (redraw control)"
+            prompt = build_prompt_humaneval(t, first[t["id"]])
+            if redraw and ("Verifier feedback" in prompt
+                           or (first[t["id"]] or "")[:200] in prompt):
+                sys.exit("REFUSING TO RUN: the redraw-control prompt is not the bare prompt")
             st = time.time()
             try:
-                r = api_call(url, key, model, build_prompt_humaneval(t, first[t["id"]]), max_tokens)
+                r = api_call(url, key, model, prompt, max_tokens)
                 ch = (r.get("choices") or [{}])[0]
                 rec["answer"] = (ch.get("message") or {}).get("content") or ""
                 rec["finish"] = "ok" if rec["answer"].strip() else "empty"
@@ -1011,6 +1032,11 @@ def run_humaneval(a, tasks, first, first_rows):
                               "best_possible_sign_test_p": 0.0625,
                               "status": "written 2026-11-09 23:58 CET, before this code existed"},
            "redraw_control": control,
+           "prompt_mode": ("redraw control — the re-ask is the bare task prompt verbatim, no "
+                           "verdict block, no previous answer (guard: a prompt containing the "
+                           "verdict header or the previous answer aborts the run)"
+                           if redraw else
+                           "repair — verdict CLASS + the previous answer"),
            "validator": "%s (verdict only: coarse class, no test body, no gold value, no example "
                         "pair, no exception-class name)" % E.EXEC_CHECKER,
            "checker": E.EXEC_CHECKER,

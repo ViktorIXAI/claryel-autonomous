@@ -83,9 +83,17 @@ exactly — asserted for every arm below.
 | humaneval-basalt-verdicts.jsonl | 164 | `6878c8b128c3c05d` |
 | humaneval-contour-matched-verdicts-v2.jsonl | 164 | `84949a2520f4fdf3` |
 | pub-repair-pub-repair-humaneval-v1.jsonl (5 retry rows) | 5 | `f8a5792dc4ae00e0` |
-| pub-repair-pub-repair-humaneval-v1-census.json | 66 | `ed7937b51eb16f70` |
+| pub-repair-pub-repair-humaneval-v1-census.json | 61 | `ed7937b51eb16f70` |
 | pub-repair-humaneval-v1-merged-answers.jsonl | 164 | `5064a5e658289487` |
 | pub-repair-humaneval-v1-verdicts.jsonl | 164 | `647b5a0992ea3f1f` |
+| pub-repair-pub-repair-humaneval-v2.jsonl (5 retry rows, retry@2400) | 5 | `d04cbd44cab50133` |
+| pub-repair-pub-repair-humaneval-v2-census.json | 63 | `506acf41b499386a` |
+| pub-repair-humaneval-v2-merged-answers.jsonl | 164 | `de1bfeb8b7f658b0` |
+| pub-repair-humaneval-v2-verdicts.jsonl | 164 | `820de9e186579895` |
+| pub-repair-pub-redraw-humaneval-2400.jsonl (5 redraw-control rows) | 5 | `f72175d8bfb6fc67` |
+| pub-repair-pub-redraw-humaneval-2400-census.json | 62 | `7cb74bc109a9b193` |
+| pub-redraw-humaneval-2400-merged-answers.jsonl | 164 | `16ff67099a3c944c` |
+| pub-redraw-humaneval-2400-verdicts.jsonl | 164 | `647b5a0992ea3f1f` |
 | mmlu-pro-contour-matched-results.jsonl | 500 | `43130af5cab85a87` |
 | mmlu-pro-contour-matched-ledger.jsonl | 500 | `b17635f6716ed8dc` |
 | mmlu-pro-contour-matched-answers.jsonl | 500 | `e15ba1bba5204f49` |
@@ -298,6 +306,22 @@ output, verdict rows regenerated from the shipped answers by `pytest-v2` (159 pa
 reproduced; the published contour copy re-scores to its own 157/164 in the same session). These two
 pins are SHA-256/16, the convention this publisher prints; the four repair-arm pins above are SHA-1/16
 because the scanner binds on that. Both are named in the row text so no pin is ambiguous.
+
+Repair arms `pub-repair-humaneval-v2` and the redraw control `pub-redraw-humaneval-2400`
+(2026-11-10, legs 00:48 → 00:50 and 00:52 → 00:54 CET, 5 calls each, 0 transport errors): the budget
+split of the HumanEval repair result. Both re-ask the **same 5** first-arm failures at temp 0.7 with
+retry `max_tokens` 2400; the first arm stays the pinned 1200-byte arm. The repair arm names the
+verdict class; the control sends the **bare task prompt verbatim** — no verdict block, no previous
+answer — and the runner aborts if a control prompt contains the verdict header or the first 200 chars
+of the previous answer. Result: repair converts 4 (`-0032`, `-0132`, `-0134`, `-0147`), keep-best =
+retry-only = **163/164 = 99.4 %** (4W/0L vs the first arm, p = 0.125, 0 worse); the control converts
+exactly 2 (`-0134`, `-0147`) and its verdict map is **byte-identical** to the repair@1200 map (both
+sha16 `647b5a0992ea3f1f`), so the doubled budget moved no verdict by itself, while at matched shape the
+feedback is worth 2 cells (2/0, p = 0.50 — directional on 5 discordant cells). The control publishes no
+digest row by design; it is a sidecar whose only job is to keep the repair claim honest. Cost: repair
+2 796 prompt + 10 031 completion tokens, 0 ceiling hits, median 19.84 s/call, 3.72 Wh sampled; control
+1 084 + 10 387 tokens, 1 ceiling hit, median 19.51 s, 3.65 Wh. Index line-counts are measured
+(`pub-repair-pub-repair-humaneval-v1-census.json` 66 → **61**, measured 2026-11-10; no pin changed).
 
 Repair arm `pub-repair-humaneval-v1` (2026-11-10, leg 00:09 → 00:10 CET, 5 calls, 0 transport errors):
 the pre-registered **wiring/cost null** on an execution-graded set. Census fixed before the code

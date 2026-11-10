@@ -342,3 +342,40 @@ never been published, so its percent was not externally re-checkable — now
 `arms/humaneval-basalt-answers.jsonl` (`4f61b87d5e8d130b`) plus verdict rows
 (`6878c8b128c3c05d`); re-scoring the shipped copies reproduces 159/164 (bare) and 157/164 (contour),
 matching the digest rows.
+
+**Queue status 2026-11-10 01:05 CET (tick 5):** item 5 **closed** — `pub-repair-humaneval-v1`
+published exactly as pre-registered: 5 verdict-only re-asks, it converts **exactly** the 2 cells a
+plain redraw already converts (repair-only 0, control-only 0, matched 0/0 p = 1.0),
+keep-best = retry-only **161/164 = 98.2 %**, 0 cells made worse, 2 796 + 4 444 tokens, 1.51 Wh.
+Provenance: the 00:07–00:11 tick ran the leg and never committed; this tick picked the tree up and
+published it only after an independent re-score (shipped merged copy → 161/164 through `pytest-v2`,
+all five sha16 sidecars reproduce, `secret_scan --strict` 0 findings, `push_ready.sh` green).
+Then the follow-up the v1 row demanded (retry@1200 was published as a lower bound): `pub-repair-humaneval-v2`
+(retry@2400) converts **4 of 5** → **163/164 = 99.4 %** (4W/0L p = 0.125, 0 worse), and the new
+**matched redraw control** `pub-redraw-humaneval-2400` (bare prompt verbatim, prompt guard + unit
+proof, sidecar only, no digest row) converts exactly the same 2 cells as the @1200 control, its verdict
+map byte-identical. So on HumanEval: the budget alone moves no verdict, the feedback is worth 2/0
+(p = 0.50, directional on 5 cells). Same question asked of the biggest repair claim on the line, at
+zero cost: the IFEval repair rows now have a redraw control computed from **published bytes**
+(the contour-matched arm is an independent matched-shape draw) — a plain redraw converts 16 of the 74
+bare failures, `pub-repair-v1` converts 30 at the same shape, discordance 20/6 p = 0.0094, and
+`pub-repair-v2` converts 42 (28/2, p = 8.7e-7). The IFEval repair gain is not a second-draw floor;
+raising the retry budget also helps at scale (repair@1200 vs @2400, 2/14, p = 0.004).
+**Next in force, pre-registered before any call:**
+7. **LiveCodeBench repair rows need the same control, and it is free.** `pub-repair-lcb-v1`
+(keep-best 108/175, 7W/0L, p = 0.0156) has no redraw control quoted. The published
+`livecodebench-contour-matched` arm (99/175, same 175 ids, same matched shape, retry ceiling 2400) is
+an independent second draw, so the join is the same zero-call command as IFEval
+(`scripts/pub_bench_verdict_sign.py` over the verdict files, restricted to the 74 first-arm failures).
+Reading rule fixed now: if the redraw converts within 2 cells of the repair arm's conversions, the
++7 cells are the redraw floor and the LCB row text gets a dated pointer saying so; if the repair keeps
+a ≥6-cell margin, the feedback claim stands on the execution sets as a class (IFEval + HumanEval + LCB).
+8. **2026-11-12: Grok resumes.** Queue in this order, resumable by id: gpqa-diamond (59 ids left of
+198), humaneval (44 of 164), then the deferred grok legs mmlu-pro 500 and ifeval 541. No percent is
+computed from the partial files while they are partial.
+9. **Unchanged, on the record:** no repair arm for GPQA-Diamond or MMLU-Pro (no verifier, knowledge
+errors). No repair arm for the MCQ sets.
+Standing limits unchanged: no Grok arm before 2026-11-12; the issue #43 architecture hold runs to
+2026-11-10 10:10 CET and this line changed no topology, service or firewall setting (a leg unit is a
+transient user-scoped process); frozen contour stays `0.0.2.56` with its bytes untouched; partial arms
+publish no percent; sanitization before every push; every percent re-scores offline from shipped bytes.

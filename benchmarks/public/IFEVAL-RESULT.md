@@ -345,3 +345,52 @@ Reproducibility: `arms/pub-repair-v2-merged-answers.jsonl` (sha16 `ee4728cc10e44
 `arms/pub-repair-pub-repair-v2.jsonl` (sha16 `49e27893c44c9b0d`) and
 `arms/pub-repair-pub-repair-v2-census.json`; the percent re-scores offline with `pub-ifeval-v1`
 and zero model calls.
+
+## Redraw control from stored bytes (2026-11-10 01:00 CET): the repair gain is not a second-draw floor
+
+Why this check exists: the HumanEval arms measured the same question with a paid control
+(`pub-repair-humaneval-v1` converts exactly the cells a plain redraw converts), so every repair row on
+this line has to say how much of its gain a second draw would have produced anyway. On IFEval the
+control was already on disk — the published **contour-matched arm is an independent second draw of the
+same 541 ids at the same request shape with no feedback** — so this costs zero model calls.
+
+Generated from the four shipped verdict files (`bare`, `redraw = ifeval-contour-matched`,
+`repair1200 = pub-repair-v1`, `repair2400 = pub-repair-v2`):
+
+```
+python3 scripts/pub_bench_verdict_sign.py benchmarks/public/ifeval.tasks.jsonl \
+  bare=arms/ifeval-basalt-verdicts.jsonl redraw=arms/ifeval-contour-matched-verdicts.jsonl \
+  repair1200=arms/pub-repair-v1-verdicts.jsonl repair2400=arms/pub-repair-v2-verdicts.jsonl
+```
+
+| pair (541 common ids) | W/L | p | delta |
+|---|---|---|---|
+| bare vs redraw (no feedback, matched shape) | 21/16 | 0.511 | +0.9 pp (noise) |
+| bare vs repair@1200 (`pub-repair-v1`) | 0/30 | 1.9e-9 | −5.5 pp |
+| bare vs repair@2400 (`pub-repair-v2`) | 0/42 | 4.6e-13 | −7.8 pp |
+| redraw vs repair@1200 | 6/41 | 1.8e-7 | −6.5 pp |
+| redraw vs repair@2400 | 2/49 | 1.2e-12 | −8.7 pp |
+| repair@1200 vs repair@2400 | 2/14 | 0.004 | −2.2 pp |
+
+The mechanism comparison is the one restricted to the **same 74 first-arm failures**, because a repair
+arm cannot lose a cell by construction while a redraw can (the redraw lost 21 cells elsewhere on the
+set — that is draw noise, not an argument):
+
+| arm | conversions of the 74 bare failures | repair-only vs redraw | redraw-only | exact sign test |
+|---|---|---|---|---|
+| redraw (contour-matched, no feedback) | **16** (2.96 pp) | — | — | — |
+| `pub-repair-v1` (retry@1200) | **30** (5.55 pp) | 20 | 6 | 20/6, p = 0.0094 |
+| `pub-repair-v2` (retry@2400) | **42** (7.76 pp) | 28 | 2 | 28/2, p = 8.7e-7 |
+
+*Verdict.* On IFEval the repair gain is **not** the second-draw floor: a plain matched redraw converts
+16 of 74, the feedback arm converts 30 at the same request shape, and the discordance is significant
+(20/6, p = 0.0094). The redraw-only ids are `ifeval-201`, `ifeval-292`, `ifeval-1307`, `ifeval-1759`,
+`ifeval-1813`, `ifeval-2275`; the 20 repair-only ids are printed by the command above and live in the
+two verdict files, so an auditor recomputes them from shipped bytes.
+*Second, consistent with HumanEval:* raising the retry budget from 1200 to 2400 converts 14 more cells
+and loses 2 (p = 0.004). The feedback is used better when the retry has room to think — the same
+direction the HumanEval control measured, and here it is significant at n=16 instead of n=2.
+*Caveats, unchanged:* the `pub-ifeval-v1` checker flips ±1 task per pass (`langdetect`), the first-arm
+baseline moves 467–469 per scorer pass, so all of the above sits far outside checker noise except the
+bare-vs-redraw pair, which is exactly inside it; the arms are not byte-matched pairs and this section
+adds no percent — the published rows keep their bytes and their wording.

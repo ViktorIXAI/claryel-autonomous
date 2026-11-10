@@ -302,3 +302,70 @@ numbers inside it), `pub-repair-humaneval-v1-merged-answers.jsonl` (`5064a5e6582
 `humaneval-contour-matched-verdicts-v2.jsonl` (`84949a2520f4fdf3`, generated offline from the
 published contour-matched answers by `pytest-v2`, scorer-only — never shown to any model). The digest
 row names the SHA-256/16 `971d976289cd9357` of the pinned task file, unchanged.
+
+## Budget-matched control (2026-11-10 00:48–00:54 CET): at 1200 the ceiling, not the feedback, was the limit
+
+The v1 row reported **1 ceiling hit of 5 retries**, so 161/164 was published as a lower bound. Two more
+arms ran over the **same 5 first-arm failures** at the same temperature; the first arm stays the pinned
+1200-byte arm and none of its bytes moved:
+
+* `pub-repair-humaneval-v2` — identical wording, retry budget **2400** (`PARB_MAX_TOKENS=2400` renames
+  the contract; a different request shape is never the same contract);
+* `pub-redraw-humaneval-2400` — the **matched redraw control**: the re-ask is the bare task prompt
+  verbatim, no verdict block, no previous answer. Guard pinned before the leg: a control prompt
+  containing the verdict header or the first 200 chars of the previous answer aborts the run, and a
+  unit check proves both branches (repair prompt ≠ bare prompt, control prompt == bare prompt).
+
+| arm (5 re-asks over the same cells) | re-ask shape | conversions | which cells | keep-best |
+|---|---|---|---|---|
+| first arm (published) | — | — | — | 159/164 = 97.0 % |
+| redraw control @1200 (the published contour-matched arm) | 1200, no feedback | 2 | `-0134`, `-0147` | 157/164 overall |
+| `pub-repair-humaneval-v1` @1200 | 1200 + verdict class | 2 | `-0134`, `-0147` | 161/164 = 98.2 % |
+| `pub-redraw-humaneval-2400` | 2400, no feedback | 2 | `-0134`, `-0147` | 161/164 = 98.2 % |
+| `pub-repair-humaneval-v2` | 2400 + verdict class | **4** | `-0032`, `-0132`, `-0134`, `-0147` | **163/164 = 99.4 %** |
+
+Two effects come apart cleanly now, and the numbers are generated from the shipped verdict files by
+`scripts/pub_bench_verdict_sign.py` (one sign-test source, key aliases `ok` / `strict`):
+
+* **the budget alone moves no verdict.** the redraw@2400 verdict map is *byte-identical* to the
+  repair@1200 map (both sha16 `647b5a0992ea3f1f`) — same two cells, 0 worse, 0.0 pp;
+* **at a matched request shape the feedback converts 2 cells a plain redraw does not**: repair-only
+  `-0032` and `-0132`, control-only none, 0 cells made worse → **2/0, p = 0.50**. Directional only:
+  with 5 discordant cells this set cannot reach significance (the pre-registered best case was
+  p = 0.0625), and it is the same direction the BFCL arm measured at scale (23/7, p = 0.0052).
+* against the first arm, v2 is **4W/0L, p = 0.125**.
+
+Whole-set pairings between independent draws are *not* the mechanism test and are published with their
+noise named: the contour-matched control vs `repair@1200` puts 4 extra wins on cells the **first arm
+already passed** (`-0067`, `-0094`, `-0103`, `-0130`) — those are the control's own draw losses.
+
+*Cost, published per arm.* v2: 2 796 prompt + 10 031 completion tokens, **0 ceiling hits at 2400**,
+median 19.84 s/call, ask-phase wall 108.6 s, sampled GPU energy **3.72 Wh** (43 samples at 2 s, mean
+125.2 W, GPU busy 0.91, window 00:48:18→00:50:05). Control: 1 084 prompt + 10 387 completion tokens,
+1 ceiling hit, median 19.51 s, wall 103.6 s, **3.65 Wh** (41 samples, mean 129.0 W, busy 0.95). The
+feedback costs ~1.7k prompt tokens per re-ask.
+
+*What this corrects, by addition rather than by editing.* The v1 reading ("the feedback converts
+nothing") was a **budget artifact**: at 1200 the retry spends ~889 completion tokens on average and one
+retry is cut mid-thinking, so the verdict text never gets used; at 2400 every retry finishes naturally
+(~2000 tokens) and the verdict does get used. The v1 row and its artifacts stay published byte-for-byte;
+this section is the dated correction. The repair number to quote for HumanEval is now **163/164 =
+99.4 %**, with the honest bracket that a matched redraw at the same shape scores 161/164 = 98.2 %.
+
+*Honesty about order.* The control was launched **after** the v2 row, so the budget-vs-feedback
+hypothesis is post-hoc with respect to v2. It is matched in shape and prompt-guarded, and it could only
+shrink a claim, not inflate one — here it shrank the budget claim to zero and left the feedback claim at
+2/0. The tooling that made it possible ships in the same commit as the arm (`PARB_REDRAW_CONTROL=1` in
+the HumanEval branch of `scripts/pub_bench_repair.py`, plus the verdict-key aliases in
+`pub_bench_verdict_sign.py`); a control is published as a sidecar + census, never as a digest row.
+
+*Artifacts* (`benchmarks/public/arms/`, SHA-1/16 sidecars, scanner-clean, 0 exception records):
+`pub-repair-pub-repair-humaneval-v2.jsonl` (`d04cbd44cab50133`, 5 retry rows),
+`pub-repair-pub-repair-humaneval-v2-census.json` (`506acf41b499386a`),
+`pub-repair-humaneval-v2-merged-answers.jsonl` (`de1bfeb8b7f658b0`, re-scored to 163/164 from the
+shipped copy with the pinned checker, the only failing cell `-0145`),
+`pub-repair-humaneval-v2-verdicts.jsonl` (`820de9e186579895`);
+`pub-repair-pub-redraw-humaneval-2400.jsonl` (`f72175d8bfb6fc67`),
+`pub-repair-pub-redraw-humaneval-2400-census.json` (`7cb74bc109a9b193`),
+`pub-redraw-humaneval-2400-merged-answers.jsonl` (`16ff67099a3c944c`),
+`pub-redraw-humaneval-2400-verdicts.jsonl` (`647b5a0992ea3f1f`).

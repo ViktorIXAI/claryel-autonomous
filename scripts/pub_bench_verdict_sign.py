@@ -26,14 +26,19 @@ from pub_bench_compare import sign_test                          # noqa: E402  (
 
 def load_verdicts(path):
     """Keep the FIRST row per id - the same rule the public scorers use, so a quarantined
-    duplicate row cannot flip a paired cell differently than the published percent did."""
+    duplicate row cannot flip a paired cell differently than the published percent did.
+    Key aliases on this line: a checker verdict row carries `ok`; a repair/redraw arm verdict row
+    carries the keep-best flag as `strict` (plus `first_ok`, `retry_verifier_ok`, `kept`)."""
     out = {}
     for line in open(path, encoding="utf-8"):
         if not line.strip():
             continue
         r = json.loads(line)
+        ok = r["ok"] if "ok" in r else r.get("strict")
+        if ok is None:
+            continue
         if r["id"] not in out:
-            out[r["id"]] = bool(r["ok"])
+            out[r["id"]] = bool(ok)
     return out
 
 
