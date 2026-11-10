@@ -360,6 +360,37 @@ running for the 5-generation models, or (b) their per-model token quota is provi
 way 4.5's was. The next cheap discriminator is a quota read per model (control plane, free) plus the
 periodic re-probe; if the quota reads a real default, (b) is dead and only time is left.
 
+**Discriminator read at `19:0x CET` — the two layers are now separated.** Invoking Haiku 5.5 from the
+**CloudShell admin identity** (the same identity that creates IAM users, keys and budgets, so it cannot be
+an IAM problem) returns the model-level sentence:
+
+```
+AccessDeniedException: anthropic.claude-haiku-5-5 is not available for this account.
+You can explore other available models on Amazon Bedrock. For additional access options, contact AWS Sales
+```
+
+while Haiku 4.5 — whose agreement is older — returns `ThrottlingException: Too many tokens per day`. Those
+two sentences are different layers: **throttle = access granted, capacity zero; not-available = access not
+served yet.** Consequences that follow directly from the readings:
+
+- The `10,000,000 TPM` figure is a **rate ceiling, not an allowance or a balance**. A model can have a
+  healthy ceiling and still be unreachable (Haiku 5.5), and a model can be reachable and still unusable
+  because its ceiling is `0.0` (Haiku 4.5). Raising quotas cannot fix a `not available` error.
+- Conversely the models whose quota reads null/unknown are not "out of tokens" — their quota simply is not
+  provisioned until AWS serves the entitlement, which is why the number never appeared.
+- `list-marketplace-model-endpoints` returns `[]` and Haiku 4.5 invokes without one, so a Marketplace model
+  **endpoint** is not the missing piece either — and creating one would mean a dedicated (paid) deployment,
+  so that path stays closed.
+- No other enablement verb exists in this API surface (`create/delete-foundation-model-agreement`,
+  `list-foundation-model-agreement-offers`, use-case form, availability read, inference profiles,
+  marketplace endpoints). Filing the agreement is the whole CLI-side sequence; the rest is AWS-side.
+
+So the remaining lever is time plus AWS itself: if the runtime flag has not caught up by the next morning
+(~15 h after acceptance), the ask goes to AWS Support/Sales, which cannot be filed from this CLI (`support
+describe-creates` is absent in this build, so category codes are unavailable) and the Support console page is
+another broken micro-frontend — the case text is ready in `~/.hermes/cache/scratch/c53.txt` for the owner to
+paste. Every denied attempt costs **$0**, so waiting is free.
+
 ## Credential hygiene: what must never reach GitHub
 
 The lane credentials are exactly the thing that must not leak into a repository, an issue comment or a
