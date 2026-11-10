@@ -421,6 +421,50 @@ screenshot. Standing rules, in force for every Bedrock step on this account:
 7. `model.key_env` stays unset for the `bedrock` provider: the profile authenticates through the AWS
    credential chain, so no Strata or gateway key is ever attached to a Bedrock lane.
 
+## What the EU regions actually offer, and why nothing runs yet (`19:2x CET`)
+
+EU catalogue (`eu-west-1` 74 models, `eu-central-1` 57). Unlike Anthropic rows, these need **no agreement** —
+`agreementAvailability` already reads `AVAILABLE`:
+
+| Family | EU models on the account | Notes |
+|---|---|---|
+| Amazon Nova | `nova-2-lite`, `nova-lite`, `nova-pro`, `nova-micro`, `rerank-v1`, `titan-embed-*` | cheapest first-party, billed under Amazon Bedrock |
+| Mistral | `devstral-2-123b` (agentic coding), `ministral-3-{3,8,14}b`, `magistral-small-2509`, `pixtral-large`, `voxtral-{mini,small}`, `mistral-large-2402` | EU vendor, open weights |
+| Qwen | `qwen3-next-80b-a3b`, `qwen3-coder-30b-a3b`, `qwen3-32b`, `qwen3-vl-235b-a22b` | |
+| Z.ai | `glm-5.3`, `glm-4.7-flash` | |
+| Moonshot | `kimi-k3`, `kimi-k3.1` | |
+| NVIDIA | `nemotron-super-3-120b`, `nemotron-nano-{9b,12b,3-30b}` | |
+| OpenAI (open weights) | `gpt-oss-120b`, `gpt-oss-20b`, `gpt-oss-safeguard-*` | hosted in `eu-west-1` only |
+| xAI | `grok-4.6`, `grok-4.7` | `eu-west-1` only |
+| OpenAI (closed) | `gpt-5.4/5.5/5.6-*/6-*/6.1-*` listed, all `NOT_AVAILABLE` | same Marketplace-style gate as Anthropic |
+| Cohere | `embed-v4`, `rerank-v3-5` listed, `NOT_AVAILABLE` | needs enablement |
+
+The blocker is **inference capacity on this account, not permissions**. Evidence from one-character pings in
+`eu-west-1` (admin identity):
+
+- `eu.amazon.nova-lite-v1:0`, `eu.amazon.nova-2-lite-v1:0`, `qwen.qwen3-next-80b-a3b`,
+  `mistral.devstral-2-123b`, `openai.gpt-oss-120b-1:0` → `ThrottlingException: Too many tokens per day`
+  (i.e. entitled, capacity zero).
+- `zai.glm-5.3`, `moonshotai.kimi-k3` → `AccessDeniedException` (not enabled for the account).
+- Quota rows: `On-demand … tokens per minute` for Qwen3 Next 80B (`L-37AB702E`), GPT OSS 120B (`L-9DC5F595`),
+  GLM-4.7 Flash (`L-B40F2E56`), Devstral 2 123b (`L-904A6762`), Ministral 3/8/14B — all `0.0` and
+  **`Adjustable=false`**; `Cross-region … requests per minute` for Nova Micro (`L-3F110E0F`) and Nova Lite
+  (`L-89F8391A`) also `0.0`, the latter not adjustable.
+- Self-service does work where AWS marks the quota adjustable: a request for Nova Micro cross-region TPM
+  (`L-DC7FF66C`, `Adjustable=true`) to 1,000,000 was accepted (`REQUESTEDQUOTA`). It has not lifted the
+  throttle, because the matching **requests-per-minute** cap stays at `0.0` and is not adjustable.
+- Raw model ids are not invocable for Nova at all: on-demand throughput for `amazon.nova-2-lite-v1:0` is
+  rejected, only the `eu.`/`global.` inference-profile form is accepted. `eu.` profiles do not exist for
+  Mistral/Qwen rows, so those must be called by raw id.
+
+Conclusion for lane planning: credits can only be spent on Bedrock once AWS grants capacity, and the grant
+is an AWS-side action (support/account team), not something the CLI can finish — the request path is closed
+by `Adjustable=false`. A Support ask should name the two error classes, the zero quota codes above, and the
+fact that one adjustable request was already accepted without effect. Non-marketplace models (Nova, Mistral,
+Qwen, GLM, Kimi, Nemotron, gpt-oss) are also the credit-safe targets, since they bill under the
+`Amazon Bedrock` / `AmazonBedrockFoundationModels` lines that are on the credit's applicable-products list,
+while Anthropic bills under a provider line that is not on it.
+
 Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
 (`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
 `hermes-gateway` service was restarted (old main PID 519209 from 03:03 ran on a superseded
