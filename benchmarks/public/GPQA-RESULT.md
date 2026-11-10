@@ -15,7 +15,7 @@ can** — and it does.
 | brain-basalt | `qwen3.8-flash-next-iq3_s-basalt`, IQ3_S on a 24 GB-class GPU, no contour | 198/198 | **127/198 = 64.1 %** | 1785 s (9.0 s/task), one draw per task | temp 0.7, max_tokens 1200, single seed pass |
 | codex | `gpt-6.1-sol`, codex-cli 0.166.0, reasoning xhigh, read-only sandbox, prompt via STDIN | 198/198 | **192/198 = 97.0 %** | 3553 s (17.9 s/task) | sampling parameters not exposed by the transport |
 | contour-0.0.2.56 (item P0) | the FROZEN contour runtime `0.0.2.56` on the same endpoint model, category `P`, public checkers in the validator slot, token ladder 512→1200 | 198/198 | **91/198 = 46.0 %** | 2187 s leg wall, 1367.2 s measured engine time | streamed request, `request_seed` pinned (sp1), ladder 512→1200, `enable_thinking` off — NOT the bare arm's request shape; see the parity section |
-| grok | `grok-4.7`, hermes one-shot, toolsets off | **suspended by owner quota, resumes 2026-11-12** (leg ran to 139/198 stored rows, stopped 07:57 CET 2026-11-09; 59 ids to go, resumable by id) | no percent for a partial arm | — | — |
+| grok | `grok-4.7`, hermes one-shot, toolsets off | **suspended by owner quota, resumes 2026-11-12** (leg ran to 139 of 198 rows stored, stopped 07:57 CET 2026-11-09; 59 ids to go, resumable by id — a stored-row count, not a score; it coincidentally equals the contour arm's 139/198) | no percent for a partial arm | — | — |
 
 198/198 answered in every completed arm, 0 empty, 0 transport failures; the join dropped no ids.
 
