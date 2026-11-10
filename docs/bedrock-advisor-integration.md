@@ -628,3 +628,14 @@ not in the agent's IAM policy; Fable additionally needs the retention
 decision; the third-party EU lanes are live at account level but are not
 in the agent's policy yet, so switching them on is a one-line IAM change
 plus an owner decision about spend.
+
+One more discriminator learned the same evening: control-plane
+`agreementAvailability = AVAILABLE` for `zai.glm-5.3` while its invoke still
+answers `AccessDeniedException … is not available for this account`, and the
+same flag reads AVAILABLE for the lanes that now work (Haiku 5.5, Fable 5.2,
+Nova 2 Lite, Kimi K3.1). So for enterprise-gated third-party models the
+control-plane flag only says the paperwork is settled — it never predicts
+invokability. Note also that this SDK build takes `modelId` on
+`get_foundation_model_availability`; passing `foundationModelId` raises
+`ParamValidationError`, which a monitor that swallows exception classes
+renders as a fake permission error.
