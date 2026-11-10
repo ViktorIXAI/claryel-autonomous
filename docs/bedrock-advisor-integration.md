@@ -257,6 +257,29 @@ for both. Note the shape difference in the errors: from our invoke-only key, a c
 inference-profile ARNs the policy does not list fails as an IAM denial naming the user ARN, while the
 model gate fails naming the model — the two must not be conflated when reading a probe.
 
+## The missing step: the model offer has to be accepted explicitly
+
+The whole blocker was one API call we had not made. Bedrock publishes a paid-model **offer** per
+foundation model and the account must accept it:
+
+```bash
+aws bedrock list-foundation-model-agreement-offers --model-id anthropic.claude-haiku-5-5
+# -> offerId offer-u3aih6zr7uw5u + an opaque offerToken
+aws bedrock create-foundation-model-agreement --model-id anthropic.claude-haiku-5-5 \
+    --offer-token "$(jq -r '.offers[0].offerToken' offers.json)"
+```
+
+Observed at `16:3x CET`: filing the use-case form alone did nothing for **3+ hours**; accepting the
+offer flipped `agreementAvailability` `NOT_AVAILABLE -> PENDING -> AVAILABLE` inside a few minutes.
+`anthropic.claude-haiku-4-5-20251001-v1:0` already had its agreement because the same offer had been
+accepted earlier (that is the AWS e-mail the owner saw). Service Quotas then stopped reporting `0.0`
+for the Haiku 5.5 cross-region token quota — the quota only becomes visible/requestable after the
+agreement exists, and its default turned out to be **10,000,000 TPM**, so no quota request is needed.
+Sequence for any future Bedrock model on this account: use-case form (once) -> list offers ->
+`create-foundation-model-agreement` -> wait for `AVAILABLE` -> only then talk about quotas or cost.
+Invoke still returned `AccessDeniedException` minutes after the flip, i.e. entitlement propagation
+lags the control-plane flag; re-probe before concluding anything is broken.
+
 Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
 (`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
 `hermes-gateway` service was restarted (old main PID 519209 from 03:03 ran on a superseded
