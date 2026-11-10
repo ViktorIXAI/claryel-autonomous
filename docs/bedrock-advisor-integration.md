@@ -493,3 +493,66 @@ the gap to the cheap lane goes from ~6× to ~70×.
 Not done, and deliberately left for the owner: filing the form, `aws_review`, and the gateway
 restart that lets the running brain see boto3 (the process predates the PM environment that
 carries it — see the environment mismatch note above).
+
+## Price card for the EU open-weight tier, in our own workload units
+
+Rates are USD per 1,000,000 tokens, Standard tier, Global CRIS routing.
+Kimi K3, Kimi K3.1 and Grok 4.7 rows were read from the AWS Bedrock model
+cards on 2026-11-10. The GLM-5.3 card publishes no price table and the AWS
+Price List API has no SKU for it, so that row is quoted from the AWS
+Bedrock pricing page as mirrored by independent trackers — confirm it in
+the console before any spend. US CRIS routing costs 10% more; Priority
+tier is 1.75x; Flex and Batch are 0.5x.
+
+| Model | Input | Output | Cache read | Cache write (30 min) |
+|---|---:|---:|---:|---:|
+| `moonshotai.kimi-k3` | $3.00 | $15.00 | $0.30 | $3.75 |
+| `moonshotai.kimi-k3.1` (Pro Highspeed) | $4.00 | $20.00 | $0.20 | $5.00 |
+| `xai.grok-4-7` (Global CRIS) | $2.00 | $6.00 | $0.50 | not published |
+| `zai.glm-5.3` (Global CRIS) | $1.68 | $5.28 | $0.312 | $2.10 |
+| `global.anthropic.claude-haiku-5-5` | $0.10 | $0.50 | - | - |
+| `global.anthropic.claude-opus-5-5` | $4.00 | $20.00 | - | - |
+
+Applied to the token mix of our public suite (1,443,741 input and
+2,040,042 output tokens, from `PUB-DIGEST.md`):
+
+| Model | One full public suite | Same suite at Flex | Suites bought by the $1000 credit |
+|---|---:|---:|---:|
+| `zai.glm-5.3` | $13.20 | $6.60 | 75 |
+| `xai.grok-4-7` | $15.13 | $7.56 | 66 |
+| `global.anthropic.claude-sonnet-5-5` | $23.29 | $11.64 | 42 |
+| `moonshotai.kimi-k3` | $34.93 | $17.47 | 28 |
+| `moonshotai.kimi-k3.1` and `global.anthropic.claude-opus-5-5` | $46.58 | $23.29 | 21 |
+| `global.anthropic.claude-fable-5-2` | $93.15 | $46.58 | 10 |
+| `global.anthropic.claude-haiku-5-5` | $1.16 | $0.58 | 858 |
+
+Reference point: the same suite on the local quantized brain costs
+`€0.160` of electricity at the `0.25 €/kWh` tariff. GLM-5.3 through
+Bedrock is about `11x` that bill, Grok 4.7 about `13x`, Kimi K3 about
+`30x`, Kimi K3.1 about `40x`. These are bought as reference-quality
+opponents for the benchmark table, not as a cheap lane.
+
+Availability measured on this account (control plane, 2026-11-10):
+
+- `eu-west-1` (Ireland) carries all four: `moonshotai.kimi-k3`,
+  `moonshotai.kimi-k3.1`, `zai.glm-5.3`, `zai.glm-4.7-flash`,
+  `xai.grok-4-6`, `xai.grok-4-7`.
+- `eu-central-1` (Frankfurt) carries Kimi and GLM but **no xAI**, so the
+  Grok lane exists only in Ireland.
+- All four showed `agreementAvailability = AVAILABLE` with no model offer
+  to accept: the Marketplace paperwork that blocked Claude does not apply
+  to these vendors.
+- Invoke results were still negative. `zai.glm-5.3` returned
+  `AccessDeniedException`, and the AWS launch post for GLM 5.3 states
+  access is limited to eligible enterprise customers — the same
+  account-level entitlement gate, not an IAM problem. Other EU pings
+  returned capacity errors (`Too many tokens per day`).
+- GLM 5.3 is cross-Region only: replace the base id `zai.glm-5.3` with
+  `global.zai.glm-5.3` or `us.zai.glm-5.3`.
+- Grok over Bedrock is a separate route from the personal Grok
+  subscription that is paused until 2026-11-12; it would not consume that
+  subscription, and a full Grok comparison column would cost $15.13.
+
+No inference ran on any of them: the GLM and Kimi ids were probed once
+with a one-character prompt, both were refused, spend stayed
+`0 tokens` / `$0.00`.
