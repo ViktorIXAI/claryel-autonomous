@@ -308,9 +308,35 @@ calls a model:
 
 `bedrock_lane.sh fable-*` exits `3` with a warning unless `--i-know` is passed after the owner clears
 Fable; that guard exists because Fable is 80× Haiku 5.5 per token and also rejects our benchmark request
-shape (`temperature=1.0` or omitted, never 0.7). The **Sonnet 5.5 contract has deliberately not been
-accepted yet** — it is one `list-foundation-model-agreement-offers` + `create-foundation-model-agreement`
-pair away whenever the owner wants the middle lane.
+shape (`temperature=1.0` or omitted, never 0.7). The middle lane (Sonnet 5.5) was accepted right after —
+see the contract table below — and the older/other Anthropic rows are listed there with their live flags.
+
+**Update `18:3x CET`: the Sonnet 5.5 contract has since been accepted** (`offer-5fu2rhus3byrs`), its flag
+went straight to `AVAILABLE`. It is still not used: the pinned lane remains `haiku-low`, the monitor only
+reads its control-plane flag, and clearing a lane for inference stays an owner decision.
+
+### Anthropic catalogue on this account (16 models, live agreement flags, 18:37 CET)
+
+Contracts cost nothing until a token is generated; the flag below says only whether the paperwork exists.
+
+| Model | Agreement | $/1M in-out (published rates) |
+|---|---|---|
+| `claude-haiku-5-5` | **AVAILABLE** (lane pin, effort low) | 0.10 / 0.50 |
+| `claude-haiku-4-5-20251001-v1:0` | AVAILABLE — owner bars all inference, EOL past | 1.00 / 5.00 |
+| `claude-sonnet-5-5` | **AVAILABLE** (contracted, not cleared) | 2.00 / 10.00 |
+| `claude-fable-5-2` | **AVAILABLE** (contracted, not cleared, needs `aws_review`) | 8.00 / 40.00 |
+| `claude-sonnet-5` | NOT_AVAILABLE (no contract) | 2.00 / 10.00 |
+| `claude-sonnet-4-6`, `claude-sonnet-4-5-20250929-v1:0` | NOT_AVAILABLE | 3.00 / 15.00 (4.6) |
+| `claude-opus-5-5`, `claude-opus-5` | NOT_AVAILABLE | 4.00 / 20.00, 5.00 / 25.00 |
+| `claude-opus-4-8`, `-4-7`, `-4-6-v1`, `-4-5`, `-4-1` | NOT_AVAILABLE | 5.00 / 25.00 (4.8) |
+| `claude-fable-5`, `claude-fable-5-1` | NOT_AVAILABLE | 10.00 / 50.00 (5.1) |
+
+Catalogue-wide the account can see **126 foundation models**: `amazon` 21 (Nova), `anthropic` 16,
+`openai` 14, `stability` 13, `mistral` 13, `meta` 7, `cohere` 6, `qwen` 5, `zai` 4 (GLM), `twelvelabs` 4,
+`nvidia` 3, `writer` 3. Non-Anthropic rows generally need no Marketplace contract, so a cheap second
+opinion lane (Qwen / GLM / gpt-oss / Nova) is an availability question, not a paperwork question. Rates
+for Anthropic rows come from the model cards plus published Bedrock rate tables; treat them as quoted
+until a real invoice confirms them.
 
 Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
 (`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
