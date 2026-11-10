@@ -407,3 +407,27 @@ touched no topology, service or firewall setting.
 humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each arm resumable by id and scored
 only when complete. `house-ground-v1` stays the owner's call (issue #44, reminder 2026-11-10 09:00 CET):
 no document is fetched, pinned or scored before he names them.
+
+**Queue status 2026-11-10 02:45 CET (tick 7):** nothing launched. The next queue item (8, the Grok
+resumption) is gated to 2026-11-12 by the owner quota window, and no unqueued arm has a
+pre-registered hypothesis, so the endpoint stayed idle (0 leg units, GPU parked at 0 % util). The
+tick went at the standing rule **"every percent re-scores offline from shipped bytes"**, which 14
+published rows were violating: the gsm8k / arc-easy / arc-challenge / gpqa-diamond / mmlu-pro **bare**
+arms, their **codex** legs, the three **complete grok** legs and the HumanEval **codex** arm had no
+answer bytes in `benchmarks/public/arms/`. Shipped 14 answer files + 1 verdict sidecar through
+`scripts/publish_pub_bare_arm.py` (`--min-rows` per arm, partial files refused); scrub masked
+nothing, all files byte-identical to the runner/scorer output, privacy grep 3 hits (all the English
+word "bank" in GSM8K prose), hostname 0 hits. Re-score of the **shipped copies** (self-test 22/22,
+zero model calls) reproduces all 14 published percents exactly — 1284/1319, 293/300, 288/300,
+2261/2376, 290/300, 289/300, 1129/1172, 290/300, 288/300, 127/198, 192/198, 432/500, 462/500,
+163/164 — so no digest row changed and no number was re-measured. The two **partial** grok legs stay
+unshipped while partial (139/198, 120/164, resumable by id) and still publish no percent; both files
+re-verified intact this tick (139 unique ids / 139 `finish=ok`; 120 / 120). Pins and the reproduction
+block are in `arms/README.md`; a dated provenance paragraph landed in `GSM8K-RESULT.md`,
+`ARC-EASY-RESULT.md`, `ARC-CHALLENGE-RESULT.md`, `GPQA-RESULT.md`, `MMLU-PRO-RESULT.md` and
+`HUMANEVAL-RESULT.md`. **Next in force is unchanged: item 8, the Grok resumption 2026-11-12** in the
+pinned order (gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541).
+Standing limits unchanged: no Grok arm before 2026-11-12; the issue #43 architecture hold runs to
+2026-11-10 10:10 CET and this tick started and stopped no unit and touched no topology, service or
+firewall setting; the frozen contour stays `0.0.2.56` with its bytes untouched; sanitization before
+every push.

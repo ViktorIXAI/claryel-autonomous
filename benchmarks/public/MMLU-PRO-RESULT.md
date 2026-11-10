@@ -107,3 +107,12 @@ no per-request mechanism left to attribute it to.
 `scripts/gpu_energy.py` over the leg csv windows for the energy rows. Published arm artifacts
 (results/ledger/answers/stats/run-record/plan per arm) ship under `arms/` via
 `scripts/publish_pub_arms.py`.
+
+## Answer bytes for the MMLU-Pro bare and codex arms are now published (2026-11-10 02:40 CET)
+
+The two non-contour rows in `PUB-DIGEST.md` (bare 432/500 = 86.4 %, codex 462/500 = 92.4 %) had no
+stored answers. Shipped now: `arms/mmlu-pro-basalt-answers.jsonl` (500 rows, `fc9e8741edfec51e`) and
+`arms/mmlu-pro-codex-answers.jsonl` (500, `17230236196545a4`). Re-score from the shipped copies under
+`pub-checkers-v2` (self-test 22/22, zero model calls): 432/500 and 462/500, exactly as published.
+Scrub masked nothing; zero path/IP/key hits. The grok leg on this set was never started (deferred by
+the owner quota window), so there is nothing to ship for it.

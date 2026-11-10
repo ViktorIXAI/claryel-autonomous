@@ -167,3 +167,14 @@ contour wins `gpqa-011, 015, 018, 021, 033, 040, 049, 058, 060, 069, 083, 089, 0
 3. Both matched legs ran back-to-back on the endpoint after the 20:36 CET restart, at comparable
    load (the grok cloud leg does not touch the endpoint), so the two matched rows are at least
    mutually comparable.
+
+## Answer bytes for the GPQA bare and codex arms are now published (2026-11-10 02:40 CET)
+
+The GPQA rows in `PUB-DIGEST.md` carried answer bytes for both contour legs but not for the bare
+(127/198 = 64.1 %) or codex (192/198 = 97.0 %) arms. Shipped now:
+`arms/gpqa-diamond-basalt-answers.jsonl` (198 rows, `4126971be625719b`) and
+`arms/gpqa-diamond-codex-answers.jsonl` (198, `2b8f5ca4b7ffd8de`). Re-score from the shipped copies
+under `pub-checkers-v2` (self-test 22/22, zero model calls): 127/198 and 192/198, exactly the
+published numbers. Scrub masked nothing; zero path/IP/key hits. The grok leg on this set is a
+**partial** (139/198, owner quota window until 2026-11-12), so its bytes are deliberately not
+published and no percent exists for it.

@@ -369,3 +369,14 @@ shipped copy with the pinned checker, the only failing cell `-0145`),
 `pub-repair-pub-redraw-humaneval-2400-census.json` (`7cb74bc109a9b193`),
 `pub-redraw-humaneval-2400-merged-answers.jsonl` (`16ff67099a3c944c`),
 `pub-redraw-humaneval-2400-verdicts.jsonl` (`647b5a0992ea3f1f`).
+
+## Codex answer bytes for this set are now published (2026-11-10 02:45 CET)
+
+The `pytest-v2` correction table above rescored all three arms, but only the bare and contour answer
+bytes were shipped, so the codex row (163/164 = 99.4 %) was still re-checkable only on this machine.
+Shipped now: `arms/humaneval-codex-answers.jsonl` (164 rows, `d660e00fa0cfeb1b`) plus verdict rows
+`arms/humaneval-codex-verdicts.jsonl` (164, `714a4005f8defed2`, checker `pytest-v2`, self-test
+asserted at re-score time). Re-score of the shipped copies: **163/164 = 99.4 %**, the single loss
+`humaneval-0064` — the same cell the corrected paired table lists as basalt-only, so the table
+above needs no edit. Scrub masked nothing; bytes byte-identical to the runner output, zero
+path/IP/key hits.

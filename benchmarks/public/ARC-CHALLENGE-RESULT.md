@@ -172,3 +172,13 @@ stays frozen), workspace `pub-arc-challenge-contour-matched`, bank sha16 `e56146
   the bare arm's 0.053 Wh/task on the same ids — the +21 % is the contour arm's streamed transport
   and the check pass, not extra model calls; the superseded thinking-off leg cost only 15.0 mWh/task precisely
   because it stopped the brain from reasoning, which is the same effect that cost it 2.7 pp.
+
+## Answer bytes for the ARC-Challenge arms are now published (2026-11-10 02:40 CET)
+
+The four ARC-Challenge rows in `PUB-DIGEST.md` (bare 1129/1172 = 96.3 %, codex 290/300 = 96.7 %,
+grok 288/300 = 96.0 %, plus the contour arms already shipped) had their bare and cloud answer bytes
+missing. Shipped now: `arms/arc-challenge-basalt-answers.jsonl` (1172 rows, `7aa4ab5630aabbc0`),
+`arms/arc-challenge-codex-answers.jsonl` (300, `a9a9c62d9593bf18`),
+`arms/arc-challenge-grok-answers.jsonl` (300, `d224bded5c104df7`). Re-score from the shipped copies
+under `pub-checkers-v2` (self-test 22/22, zero model calls): 1129/1172, 290/300, 288/300 — exact.
+Scrub masked nothing; bytes byte-identical to the runner output, zero path/IP/key hits.

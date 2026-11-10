@@ -241,3 +241,15 @@ artifact is draw-dependent, not a stable cell defect.
    `scripts/publish_pub_arms.py`) were re-scored from the published copy with `pub_bench_score.check`
    and reproduce **294/300**; the answer fields contain 0 hits for
    `bank|answer_key|expected_|/home/|/Users/|192.168|api_key`.
+
+## Answer bytes for the GSM8K arms are now published (2026-11-10 02:40 CET)
+
+The three GSM8K rows in `PUB-DIGEST.md` (bare 1284/1319 = 97.3 %, codex 293/300 = 97.7 %, grok
+288/300 = 96.0 %) had no stored answer bytes in `arms/`, so an outside reader could not re-check
+them. Shipped now: `arms/gsm8k-basalt-answers.jsonl` (1319 rows, `f3dedf9d7055876b`),
+`arms/gsm8k-codex-answers.jsonl` (300, `a9a4725fa3a916ce`), `arms/gsm8k-grok-answers.jsonl`
+(300, `760a704e9868bff1`). Re-scored from the shipped copies with the pinned
+`pub-checkers-v2` scorer (self-test 22/22, zero model calls): 1284/1319, 293/300, 288/300 —
+every published percent reproduced exactly. The scrub masked nothing: the shipped lines are
+byte-identical to the runner output, and the only privacy-pattern hits are the English word
+"bank" inside three GSM8K word problems. No percent and no digest row changed.

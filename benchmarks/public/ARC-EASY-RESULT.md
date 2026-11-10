@@ -159,3 +159,13 @@ tasks at 17–27 s), and the sampled per-task energy is therefore 111 mWh agains
 tail is endpoint state (this P2005 box had been swapping since the GPQA leg), not harness work.
 The escalation leg's 12.3 mWh/task is not cheaper harness work either — it is the price of not
 reasoning. Quoted cost comparisons on this box are only valid inside one endpoint window.
+
+## Answer bytes for the ARC-Easy arms are now published (2026-11-10 02:40 CET)
+
+The three ARC-Easy rows in `PUB-DIGEST.md` (bare 2261/2376 = 95.2 %, codex 290/300 = 96.7 %, grok
+289/300 = 96.3 %) had no stored answer bytes. Shipped now: `arms/arc-easy-basalt-answers.jsonl`
+(2376 rows, `3450700e985bce95`), `arms/arc-easy-codex-answers.jsonl` (300, `b126e410e2d95f91`),
+`arms/arc-easy-grok-answers.jsonl` (300, `94295e1012c346b0`). Re-score of the shipped copies under
+`pub-checkers-v2` (self-test 22/22, zero model calls) reproduces 2261/2376, 290/300 and 289/300
+exactly. Scrub masked nothing — shipped bytes byte-identical to the runner output, zero path/IP/key
+hits. The cloud arms keep the matched-300 denominator; no percent and no digest row changed.

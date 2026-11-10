@@ -144,6 +144,21 @@ exactly — asserted for every arm below.
 | bfcl-contour-matched-plan.json | 1 | `53d9b22ba9d9a311` |
 | bfcl-contour-matched-bank-version.json | 6 | `f62925e5dfecc270` |
 | bfcl-contour-matched-ws-identity.json | 42 | `5cebff43c0f71fff` |
+| gsm8k-basalt-answers.jsonl | 1319 | `f3dedf9d7055876b` |
+| gsm8k-codex-answers.jsonl | 300 | `a9a4725fa3a916ce` |
+| gsm8k-grok-answers.jsonl | 300 | `760a704e9868bff1` |
+| arc-easy-basalt-answers.jsonl | 2376 | `3450700e985bce95` |
+| arc-easy-codex-answers.jsonl | 300 | `b126e410e2d95f91` |
+| arc-easy-grok-answers.jsonl | 300 | `94295e1012c346b0` |
+| arc-challenge-basalt-answers.jsonl | 1172 | `7aa4ab5630aabbc0` |
+| arc-challenge-codex-answers.jsonl | 300 | `a9a9c62d9593bf18` |
+| arc-challenge-grok-answers.jsonl | 300 | `d224bded5c104df7` |
+| gpqa-diamond-basalt-answers.jsonl | 198 | `4126971be625719b` |
+| gpqa-diamond-codex-answers.jsonl | 198 | `2b8f5ca4b7ffd8de` |
+| mmlu-pro-basalt-answers.jsonl | 500 | `fc9e8741edfec51e` |
+| mmlu-pro-codex-answers.jsonl | 500 | `17230236196545a4` |
+| humaneval-codex-answers.jsonl | 164 | `d660e00fa0cfeb1b` |
+| humaneval-codex-verdicts.jsonl | 164 | `714a4005f8defed2` |
 
 First **bare-arm** artifacts (2026-11-09): `ifeval-basalt-*`. A bare arm has no ledger, and IFEval's
 percent is produced by the vendored upstream checker rather than by a number/letter match, so an
@@ -371,6 +386,41 @@ humaneval        matched 155/164 = 94.5 %   (no escalation arm for this set; sco
                                              scripts/pub_bench_exec.py, contract pytest-v1)
 mmlu-pro         matched 429/500 = 85.8 %   (no escalation arm for this set)
 ```
+
+### The remaining in-force percent rows: bare and cloud answer bytes shipped (2026-11-10 02:40 CET)
+
+Until now this index covered every **contour** arm, the two IFEval/BFCL/LCB bare arms and the
+IFEval/BFCL/LCB codex arms. The classic-set rows in `PUB-DIGEST.md` for the **bare local brain**, the
+**codex** cloud arm and the three **complete grok** legs (gsm8k, arc-easy, arc-challenge, 300 ids
+each) had no shipped bytes at all — 14 published percents that only this machine could re-check.
+That closes here: 14 answer files plus the HumanEval codex verdict sidecar, listed in the index
+above, published through `scripts/publish_pub_bare_arm.py` with `--min-rows` set to each arm's full
+row count (a partial file is refused).
+
+Verification is a re-score of the **shipped copies**, `pub-checkers-v2` self-test 22/22 first, zero
+model calls, scored over each arm's own id set:
+
+```
+gsm8k          basalt 1284/1319   codex 293/300   grok 288/300
+arc-easy       basalt 2261/2376   codex 290/300   grok 289/300
+arc-challenge  basalt 1129/1172   codex 290/300   grok 288/300
+gpqa-diamond   basalt 127/198     codex 192/198
+mmlu-pro       basalt 432/500     codex 462/500
+humaneval      codex  163/164     (checker pytest-v2, self-test asserted at re-score time;
+                                   the single loss is humaneval-0064)
+```
+
+Every line matches its published digest row exactly, so no percent and no digest row changed — this
+is provenance, not a re-measurement. The scrub masked nothing in any of the 15 files
+(`bytes_identical_to_runner_output=True` on all 14 answer files, `..._scorer_output=True` on the
+verdict file), and the privacy grep over them (`bank|answer_key|expected_|/home/|/Users/|<LAN
+prefix>|api_key|ssh -i|Authorization`) returns 3 hits, all the English word "bank" inside GSM8K
+word problems (`The first bank gave $4,000`, `Sally's bank account`, `power bank`) — the same benign
+class the IFEval and BFCL notes above already record. Hostname: 0 hits.
+
+The two **partial grok legs** (gpqa-diamond 139/198, humaneval 120/164, owner quota window until
+2026-11-12) are deliberately **not** shipped: a partial arm publishes no percent, and shipping its
+bytes would invite one. They resume by id on 2026-11-12 and ship complete or not at all.
 
 Reproduce one row:
 
