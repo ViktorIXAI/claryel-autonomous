@@ -506,3 +506,16 @@ a source-path config change), not an edit to tracked bytes.
 Also on record, checked not assumed: today's 03:00 CET `docs-freshness` cron **errored**
 (exit 1, "repo is dirty; refusing daily docs refresh") while the `pub-ifeval-v2` work was in flight;
 the tree is clean now and tomorrow's run starts from a clean checkout.
+
+**Corrections to the paragraph above, same tick, before anyone repeats it.** (a) The claim
+"unpublished (HTTP 404) since 02:41 UTC" was NOT established: the root URL `…/claryel-autonomous/`
+answers 404 even on a healthy build because the tracked tree ships no `index.html` — the root is not
+a health probe — and no content URL was probed during the errored window, so whether site content
+actually went down between 02:41 and the 04:27 UTC green build can no longer be reconstructed.
+(b) The census snapshot in the paragraph was taken mid-window; the final count to 04:45 UTC is
+**7 errored / 5 built since 22:35 UTC**, and the failure signature is not one thing: five failures
+are the ~11-minute `syncing_files` timeout, two (04:23:02 and 04:23:51 UTC) are fast-fails at 49 s
+and 3 s. What is measured: the latest-build API status stood `errored` from 02:41 until a built
+entry at 04:27:28 UTC, and as of 04:45 UTC every probed content URL returns 200 and serves `HEAD`
+— `PUB-PLAN.md` served from the site already carries the tick-7 marker. Health probe for this
+surface going forward: a pinned content URL, never the root.
