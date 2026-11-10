@@ -682,6 +682,36 @@ call looks like a silent one. Live lane is unchanged (`haiku-low`); switching to
 Fable is `bedrock_lane.sh fable-high --i-know`, and the guard is deliberate:
 Fable costs 80× Haiku per output token. Total spend of this step: `$0.0005`.
 
+## Profiles per lane — so the operator never types a model id
+
+Because the failure above came from a model id chosen in the UI, the lanes are
+now pre-built as Hermes profiles instead of asking the operator to pick a
+model. Each profile clones the `bedrock` profile (same IAM user, same `.env`
+mode 600) and pins the Bedrock id in `model.default`, so a new chat answers
+with no further choice:
+
+| Profile | Pinned model | Effort | Measured one-shot verification |
+|---|---|---|---|
+| `bedrock` | `global.anthropic.claude-haiku-5-5` | low | reply `A`, cost estimate `unknown` |
+| `claude-sonnet` | `global.anthropic.claude-sonnet-5-5` | medium | reply `A`, cost estimate `unknown` |
+| `claude-fable` | `global.anthropic.claude-fable-5-2` | medium | reply `A`, `$0.187072` |
+
+The gateway picked both new profiles up without a restart (`Now serving profile
+'claude-sonnet'`, `… 'claude-fable'`).
+
+Two numbers worth writing down, from the profile `session_model_usage` rows of
+those single one-character calls:
+
+- A Hermes session carries a ~19 K-token prompt, and it lands in the prompt
+  cache as a **cache write**. On Fable that single write was `18,692` tokens =
+  `$0.187` — i.e. the first call of a Fable session costs about `$0.19` before
+  the answer itself, and follow-up calls in the same session are the cheap
+  cache reads. That is the real per-session price of the expensive lane, not the
+  per-token headline rate.
+- The app's own cost estimate reads `cost_status = unknown` (`0.0`) for the
+  Haiku and Sonnet Bedrock ids: Hermes has no rate card for those Bedrock
+  profile ids. On Bedrock, trust AWS Cost Explorer, not the in-app estimate.
+
 One more discriminator learned the same evening: control-plane
 `agreementAvailability = AVAILABLE` for `zai.glm-5.3` while its invoke still
 answers `AccessDeniedException … is not available for this account`, and the
