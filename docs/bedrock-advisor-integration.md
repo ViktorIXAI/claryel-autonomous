@@ -365,8 +365,10 @@ periodic re-probe; if the quota reads a real default, (b) is dead and only time 
 an IAM problem) returns the model-level sentence:
 
 ```
-AccessDeniedException: anthropic.claude-haiku-5-5 is not available for this account.
-You can explore other available models on Amazon Bedrock. For additional access options, contact AWS Sales
+AccessDeniedException when calling the Converse operation:
+  model `anthropic.claude-haiku-5-5` is not available for this account.
+  You can explore other available models on Amazon Bedrock. For additional access options,
+  contact AWS Sales
 ```
 
 while Haiku 4.5 — whose agreement is older — returns `ThrottlingException: Too many tokens per day`. Those
