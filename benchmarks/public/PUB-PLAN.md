@@ -486,3 +486,23 @@ line is no longer true and should not be repeated without checking.
 (gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each resumable
 by id and scored only when complete. `house-ground-v1` stays the owner's call (issue #44, reminder
 2026-11-10 09:00 CET).
+
+**Queue status 2026-11-10 05:30 CET (tick 7):** queue empty, legs empty — no unit, no process, no
+endpoint call this tick; the P2005 idle-spin note above stays on record and untouched (the engine
+serves this session, restart waits). The new finding is publication infrastructure, not a leg: the
+GitHub Pages site (`viktorixai.github.io/claryel-autonomous`, legacy branch-source build of `main` at
+`/`) is **unpublished (HTTP 404) since 02:41 UTC** — the legacy pipeline unpublishes the site when a
+build errors, and every build since 22:35 UTC is a coin flip (census 22:35–04:23 UTC: 6 errored, 4
+built; all six failures are the same `syncing_files` timeout at ~11 min, the successes are 49–95 s
+incremental syncs). The tree is inside every soft limit (125 MB / 2165 tracked files, largest file
+9.4 MB) and the identical content built green at 01:29 UTC, so this is a flaky sync, not a content
+defect; GitHub's status page reports Pages operational with no incidents. The CI action's own rerun
+and three manual `POST /pages/builds` retries (03:58, 04:11, 04:23 UTC) all drew the failure side.
+Impact on this line is zero: every verification URL in the publication procedure is
+`raw.githubusercontent.com` at a pinned SHA — spot-checked 200 at `HEAD` for `PUB-DIGEST.md` and
+`IFEVAL-RESULT.md` — and no tracked document links the github.io surface. If the flap persists, the
+lever is a Pages-surface decision for the owner (take the 125 MB data tree out of the Pages source,
+a source-path config change), not an edit to tracked bytes.
+Also on record, checked not assumed: today's 03:00 CET `docs-freshness` cron **errored**
+(exit 1, "repo is dirty; refusing daily docs refresh") while the `pub-ifeval-v2` work was in flight;
+the tree is clean now and tomorrow's run starts from a clean checkout.
