@@ -247,6 +247,16 @@ Explorer. Provider line charged as cash = the credit does not reach Claude, and 
 spent on EC2/S3 instead. Re-checked at `15:46 CET` after the owner confirmed the payment method:
 Haiku 5.5 still answers `AccessDeniedException`, so that test cannot run yet.
 
+Payment and gate state after the owner re-verified the card (a 1 EUR hold that returned, so the
+payment method is live): `agreementAvailability` for `anthropic.claude-haiku-5-5` is `NOT_AVAILABLE`
+in **us-east-1, us-east-2, eu-west-1 and eu-central-1** — the block is account-wide, not a regional
+rollout, so switching region or endpoint shape will not fix it. In the same window
+`anthropic.claude-haiku-4-5-20251001-v1:0` reads `AVAILABLE`, which proves the account can hold an
+Anthropic agreement; the Claude 5 family is the part AWS has not opened. Cross-region TPM stays `0.0`
+for both. Note the shape difference in the errors: from our invoke-only key, a call in a region whose
+inference-profile ARNs the policy does not list fails as an IAM denial naming the user ARN, while the
+model gate fails naming the model — the two must not be conflated when reading a probe.
+
 Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
 (`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
 `hermes-gateway` service was restarted (old main PID 519209 from 03:03 ran on a superseded
