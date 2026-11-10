@@ -231,6 +231,22 @@ Cost Explorer still reports **no spend in the trailing 90 days**, and the monthl
 it were rejected by the CLI (subscriber verification is owner-side), so the alarm is dashboard-only
 until the owner attaches a verified address.
 
+Credit applicability, read from the account rather than from the rules text: the Activate grant's
+"Applicable products" list was scrolled to completion in the console (the widget virtualizes its
+list, so a copy/paste of it reads alphabetically truncated and can look like it is missing lines —
+the owner's paste started mid-alphabet). Full list: **267 entries**, containing `Amazon Bedrock`,
+`Amazon Bedrock Service`, `AmazonBedrockFoundationModels`, `Amazon Bedrock AgentCore`,
+`Amazon Bedrock Managed Knowledge Base`, and **no** entry for `Anthropic`, `Claude` or
+`AWS Marketplace`. Read of that fact: the list authorises the Bedrock service lines but names
+neither the provider nor Marketplace, while Anthropic models on Bedrock are sold as a Marketplace
+product and appear on the bill under the provider. Activate terms do allow that spend ("Bedrock 3P
+Model Spend"), so the coverage question is settled only empirically: after the first paid call on
+`bedrock-runtime` (not `bedrock-mantle`, which bills in Consumption Units and is not named in the
+terms), check the next day whether *Credits Applied* reduces the **provider** line in Cost
+Explorer. Provider line charged as cash = the credit does not reach Claude, and the credit should be
+spent on EC2/S3 instead. Re-checked at `15:46 CET` after the owner confirmed the payment method:
+Haiku 5.5 still answers `AccessDeniedException`, so that test cannot run yet.
+
 Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
 (`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
 `hermes-gateway` service was restarted (old main PID 519209 from 03:03 ran on a superseded
