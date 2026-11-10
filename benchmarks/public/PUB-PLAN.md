@@ -379,3 +379,31 @@ Standing limits unchanged: no Grok arm before 2026-11-12; the issue #43 architec
 2026-11-10 10:10 CET and this line changed no topology, service or firewall setting (a leg unit is a
 transient user-scoped process); frozen contour stays `0.0.2.56` with its bytes untouched; partial arms
 publish no percent; sanitization before every push; every percent re-scores offline from shipped bytes.
+
+
+**Queue status 2026-11-10 01:50 CET (tick 6):** item 7 **closed, and it cuts against the repair line**
+— the free LiveCodeBench redraw control (published bytes, **zero model calls**) converts **10 of the 74
+first-arm failures** against the feedback arm's 7; restricted to the 66 cells the arm was allowed to
+ask, a blind draw converts 9/66 = 13.6 % versus feedback 7/66 = 10.6 %, discordance 3/5, p = 0.727.
+Per the pre-registered reading rule the `pub-repair-lcb-v1` row keeps its bytes, its 61.7 % and its
+7W/0L p = 0.0156 against the first arm, and carries a dated pointer: on execution-checked code the
+repair gain is **inside the second-draw floor**. The class statement is corrected accordingly —
+validator feedback is measured above a matched redraw **only on IFEval** (20/6 p = 0.0094 at 1200,
+28/2 p = 8.7e-7 at 2400); it is a null on HumanEval and null-to-negative on LiveCodeBench. The one
+thing the repair mechanism demonstrably buys is keep-best adoption (0 regressions in 67 re-asks where a
+blind redraw regresses 12), and the public-validator gate itself caps the arm at 66 of 74 failures —
+the blind draw converts one of the 8 cells the gate can never ask. Full join, ids and cost contrast in
+`LIVECODEBENCH-RESULT.md`.
+Item 8 preconditions verified with no model call: the two resumable Grok partials are intact —
+`gpqa-diamond` 139 unique ids, 139 `finish=ok`, last id `gpqa-138` (59 to go of 198); `humaneval` 120
+unique ids, 120 `finish=ok`, last id `humaneval-0119` (44 to go of 164) — so the 12 Nov resumption
+continues by id and still computes no percent while partial.
+**The queue is now empty**: items 1–5 and 7 are closed, item 6 stays on the record, item 8 is gated to
+2026-11-12 by the owner quota window, item 9 unchanged. Nothing was launched this tick — an unqueued arm
+has no pre-registered hypothesis, so it would burn endpoint time and energy for an unframed number. The
+issue #43 architecture hold runs to 2026-11-10 10:10 CET and this tick started and stopped no unit and
+touched no topology, service or firewall setting.
+**Next in force:** item 8, the Grok resumption on 2026-11-12 in the pinned order (gpqa-diamond 59 ids,
+humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each arm resumable by id and scored
+only when complete. `house-ground-v1` stays the owner's call (issue #44, reminder 2026-11-10 09:00 CET):
+no document is fetched, pinned or scored before he names them.

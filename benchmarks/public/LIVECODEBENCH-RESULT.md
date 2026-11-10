@@ -354,3 +354,88 @@ on a summary-print `KeyError` **after** all measurement artifacts were written;
 the deterministic re-score of the stored retries reproduced the merged bytes
 byte for byte, and `LEG-INCIDENTS.md` carries the dated entry. The merged arm
 re-scores to 108/175 through `lcb-exec-v2` like every other row here.
+
+### Pointer added to the repair row (2026-11-10 01:45 CET, zero model calls)
+
+The `pub-repair-lcb-v1` row above stays published exactly as measured (108/175 = 61.7 %, 7 fixed /
+0 worse, p = 0.0156 against the first arm). The pre-registered control that row demanded — "how much
+of that +7 would a second draw have produced anyway?" — now exists and **refutes the gain as a
+feedback effect**: a blind matched redraw from published bytes converts **10** of the same 74 first-arm
+failures, three more than the feedback arm. Full accounting in the section below.
+
+## Redraw control for the repair row (2026-11-10 01:45 CET, queue item 7, zero model calls)
+
+Queue item 7 was pre-registered at 01:05 CET with the reading rule fixed in advance: *"if the redraw
+converts within 2 cells of the repair arm's conversions, the +7 cells are the redraw floor and the LCB
+row text gets a dated pointer saying so; if the repair keeps a ≥6-cell margin, the feedback claim
+stands on the execution sets as a class"*. The control costs nothing because the second draw was
+already paid for by the item P0 parity leg: `livecodebench-contour-matched` is an independent draw of
+the same 175 ids at the same matched request shape with **no validator feedback**.
+
+```
+python3 scripts/pub_bench_verdict_sign.py benchmarks/public/livecodebench.tasks.jsonl \
+  bare=arms/livecodebench-bare-verdicts.jsonl \
+  redraw=arms/livecodebench-contour-matched-verdicts.jsonl \
+  repair=arms/pub-repair-lcb-v1-verdicts.jsonl
+```
+
+Whole set (175 common ids, `lcb-exec-v2` verdict rows, first row per id — the scorer's own rule):
+
+| arm | hidden passes | pair | W/L | p | delta |
+|---|---|---|---|---|---|
+| bare (first arm) | 101/175 = 57.7 % | bare vs redraw | 12/10 | 0.832 | +1.1 pp |
+| redraw (contour-matched, no feedback) | 99/175 = 56.6 % | bare vs repair | 0/7 | 0.016 | −4.0 pp |
+| `pub-repair-lcb-v1` (keep-best) | 108/175 = 61.7 % | redraw vs repair | 6/15 | 0.078 | −5.1 pp |
+
+The mechanism comparison is the one restricted to the **74 first-arm failures**, because a keep-best
+arm cannot lose a cell by construction while a redraw can:
+
+| arm | conversions of the 74 bare failures | repair-only | redraw-only | exact sign test |
+|---|---|---|---|---|
+| redraw (no feedback, matched shape) | **10** (5.7 pp) | — | — | — |
+| `pub-repair-lcb-v1` (feedback, retry@2400) | **7** (4.0 pp) | 3 | 6 | 3/6, p = 0.508 |
+
+* 4 of the repair arm's 7 conversions (`lcb-3720`, `lcb-3744`, `lcb-abc388_d`, `lcb-abc390_f`) are
+  cells a blind redraw already converts; repair-only ids are `lcb-3786`, `lcb-abc391_e`,
+  `lcb-abc394_f`; redraw-only ids are `lcb-3692`, `lcb-3722`, `lcb-3725`, `lcb-3765`, `lcb-3776`,
+  `lcb-3779`.
+* Restricted further to the **66 cells the repair arm was allowed to ask** (the public validator
+  rejected them; 8 hidden failures are blind by construction and 1 asked cell was a hidden pass), the
+  feedback arm converts **7/66 = 10.6 %** and the blind redraw converts **9/66 = 13.6 %**, discordance
+  3/5, p = 0.727.
+
+*Verdict, against the pre-registered rule:* neither branch fits as written, because the control
+converts **more** than the arm (margin −3 on the 74-failure census, −2 on the asked subset), so the
+first branch applies with force: **the +7 cells are inside the second-draw floor**, not above it. The
+"feedback works on execution-checked code as a class" claim is therefore **not established**: the
+feedback effect is measured significantly only on IFEval (20/6, p = 0.0094 at 1200 and 28/2,
+p = 8.7e-7 at 2400), is a null on HumanEval (repair-only 0, control-only 0, 5 cells), and is
+null-to-negative here (3/5, p = 0.73). Where the check is textual and cheap to satisfy, naming the
+violated check pays; where the check is program execution, a blind second draw is as good as the
+feedback.
+
+*What the repair arm demonstrably buys is the adoption rule, not the prompt.* A blind redraw re-draws
+all 175 cells and loses 12 of them (net −2 on the set); the feedback arm re-asked 67 and regressed 0.
+Applying the arm's own keep rule to the blind draw would put it at **111/175 = 63.4 %**, 3 cells
+*above* the feedback arm — that number is oracle adoption in both cases (the repair arm's keep rule
+reads the hidden battery too), so it is quoted as an upper bound on what the extra calls bought, not
+as a publishable arm. The implementable always-take-the-second variant is the honest pair: repair-only
+107/175 = 61.1 % against the blind redraw's own 99/175 = 56.6 %, a comparison confounded by which
+cells each arm was allowed to touch (targeting 67 vs re-drawing 175), which is why the restricted
+table above is the one that settles the mechanism.
+
+*Structural cost of the targeting rule, quantified:* the public-validator gate caps the repair arm at
+66 of the 74 failures by construction — 8 hidden failures pass every public sample and can never be
+asked — and the blind draw converts one of exactly those cells (`lcb-3779`). The gate that makes the
+arm cheap is also the gate that costs it headroom.
+
+*Cost contrast, stated beside the number:* the feedback arm spent 67 calls, 95 768 prompt +
+154 322 completion tokens, 2217.7 s and 59.7 Wh sampled to convert 7 cells; this control spent **0
+model calls** (its redraw bytes were already shipped for item P0) and converts 10.
+
+*No percent, no digest row, no byte moved:* this section is a join of four shipped verdict files
+(`40a412a8e47f357e`, `d0e3271e8924f970`, `1fc8d792711a62c7` and the bare answers `ff3e16209ae155d7`),
+reproducible with the command above. Caveats unchanged: one draw per task per arm, the ~2-cell flip
+floor on 175 cells makes a 3-vs-5 discordance unresolvable by construction — which is exactly why the
+repair row was published as "direction established, magnitude not" — and the LCB contamination window
+applies to every arm here equally.
