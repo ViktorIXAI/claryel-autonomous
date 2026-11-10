@@ -1232,3 +1232,44 @@ unreproduced; the next scheduled run is expected tomorrow. `LEG-INCIDENTS.md` ga
 resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
 percent.
+
+
+**Queue status 2026-11-10 18:55 CET (tick 21):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick.
+
+New this tick — a read-only pre-flight reading of the local endpoint, and it is a **tight** one. The
+box's swap device is now fully consumed (**8 GiB of 8 GiB used, `SwapFree: 0 kB`**) and the serving
+engine (pid 3284575, up 46 h) holds **56.6 GiB RSS plus 6.5 GiB swapped out** — 93.5 % of a 60 GiB
+box, with `Committed_AS` 62.6 GB above the 62 GB of RAM. Load average read **18.2 / 6.7 / 3.8**
+while the GPU sat at **0 % utilization / 36.4 W / 23 563 MiB resident** and `/health` answered 200,
+i.e. the same idle-spin condition as ticks 13, 19 and 20 (engine ~618 % CPU with no request in
+flight) plus a swap that is now exhausted rather than merely used. This is exactly the condition this
+line's machine note says can restart the engine mid-leg, so it is recorded as a pre-flight risk for
+any local leg, not as a measurement: nothing was restarted (the engine hosts this session's live
+brain, so a restart is an owner decision) and nothing was launched. The 2026-11-12 Grok resumption is
+cloud-side and does not depend on this endpoint.
+
+Standing verification re-run on the tracked tree, zero model calls, all green:
+`pub_arms_index.py --check` 0 drift; `pub_derived_percent_check.py` 42 derivations recomputed from
+shipped bytes, 41 digest + 169 document citations, 0 uncovered; `pub_grok_cell_check.py` 9 documents,
+0 findings; `pub_superseded_cell_check.py` 9 documents, 0 findings; `pub_digest_row_check.py` 46 rows,
+0 findings, 23/23 pre-rule exceptions used. The two partial Grok arms were re-verified intact a
+fifteenth time (gpqa-diamond **139 unique ids / 139 `finish=ok` / 0 empty**, last id `gpqa-138`, 59 of
+198 to go, SHA-256/16 of the stored file `cde63378fa1633c5`; humaneval **120 / 120**, last id
+`humaneval-0119`, 44 of 164 to go, `a7c741de0d6ace8c`; both unmodified since 2026-11-09 07:56), still
+unshipped and unscored by rule.
+
+Ops state read this tick (no action): `HEAD` == `origin/main` == `2215414`, working tree clean, and
+that push is green on all four jobs plus the pages build (17:37 UTC). `docs_freshness_daily.sh` still
+records its last scheduled run as a failure — 2026-11-10 03:00 CET, `repo is dirty; refusing daily
+docs refresh` — which is the pre-fix worktree symptom described in `LEG-INCIDENTS.md` at 14:45 CET;
+that run predates the retarget, the tree is clean now, and the next scheduled run (2026-11-11 02:00
+UTC) is the first one against the corrected path. `LEG-INCIDENTS.md` gains no new 2026-11-10 PUB
+entry: no leg started, stopped or restarted this tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
+percent.
