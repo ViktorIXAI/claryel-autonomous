@@ -17,7 +17,7 @@ and 86 of the 91 source subcategories. Checker contract in force: `pub-checkers-
 | brain-basalt | `qwen3.8-flash-next-iq3_s-basalt`, IQ3_S on a 24 GB-class GPU, no contour | 500/500 | **432/500 = 86.4 %** | 2027 s (4.05 s/task), one draw per task | temp 0.7, max_tokens 1200, unseeded |
 | contour-0.0.2.56 (item P0, matched shape) | the FROZEN contour runtime `0.0.2.56` on the same endpoint model, category `P`, public checkers in the validator slot | 500/500 | **429/500 = 85.8 %** | 2633 s leg wall, 2611.7 s measured engine time | bare-matched request shape: one 1200-token rung, unseeded, no `chat_template_kwargs`, no `reasoning_effort` (serve-default thinking), temp 0.7 |
 | codex | `gpt-6.1-sol`, codex-cli 0.166.0, reasoning xhigh, read-only sandbox, prompt via STDIN | 500/500 | **462/500 = 92.4 %** | 3827 s (7.7 s/task) | sampling parameters not exposed by the transport |
-| grok | `grok-4.7`, hermes one-shot, toolsets off | not started (grok legs are serialized on the transport; the GPQA and HumanEval grok legs are in flight at publish time) | pending — no percent for a partial arm | — | — |
+| grok | `grok-4.7`, hermes one-shot, toolsets off | **suspended by owner quota, resumes 2026-11-12** (never started on this set; it sits behind the two resumable partials in the deferred grok queue) | no percent for a partial arm | — | — |
 
 500/500 answered in every completed arm, 0 empty, 0 transport failures; the join dropped no ids
 (`scripts/pub_bench_compare.py`, re-score of the stored answer bytes reproduces every digest row).
@@ -96,9 +96,10 @@ no per-request mechanism left to attribute it to.
 4. **Guessing floor.** 10-option MCQ gives a 10 % floor; not binding at these scores.
 5. **Cloud transports hide sampling parameters** (codex row); grok row will carry the same
    caveat.
-6. **Open item:** the grok arm for this set is not started (transport serialization behind the
-   GPQA/HumanEval grok legs); the set is therefore incomplete on the four-arm template, stated
-   rather than hidden.
+6. **Open item:** the grok arm for this set is not started; the set is therefore incomplete on the
+   four-arm template, stated rather than hidden. *(Reason corrected 2026-11-10: it is the owner
+   quota suspension — no grok arm launches before 2026-11-12 — not transport serialization behind
+   the GPQA/HumanEval legs, which was the wording when this table was written.)*
 
 ## Reproduce
 

@@ -18,7 +18,7 @@ the flips auditable.
 | brain-basalt | `qwen3.8-flash-next-iq3_s-basalt`, IQ3_S on a 24 GB-class GPU, no contour | 164/164 | **158/164 = 96.3 %** | 1697 s (10.3 s/task) | temp 0.7, max_tokens 1200, single seed pass |
 | codex | `gpt-6.1-sol`, codex-cli 0.166.0, reasoning xhigh, read-only sandbox, prompt via STDIN | 164/164 | **163/164 = 99.4 %** | 1484 s (9.0 s/task) | sampling parameters not exposed by the transport |
 | contour-0.0.2.56, matched shape (item P0, 2026-11-09) | the FROZEN contour runtime `0.0.2.56` on the same endpoint model, category `P` (no hard-bank family scaffolding), validator slot = the `pytest-v1` execution checker that scored the bare row | 164/164 | **155/164 = 94.5 %** | 1190 s wall, 1175 s measured engine time (mean 7.16 / median 7.38 s/task) | temp 0.7, first rung 1200 (single rung), serve-default thinking, no request seed — the bare arm's call shape; see the parity section |
-| grok | `grok-4.7`, hermes one-shot, toolsets off | not started yet (grok legs are serialized on the transport; its slot is after the GPQA grok leg) | pending — no percent published for a partial arm | — | — |
+| grok | `grok-4.7`, hermes one-shot, toolsets off | **suspended by owner quota, resumes 2026-11-12** (leg ran from 04:07 CET 2026-11-09, stopped 07:57 CET with 120/164 stored rows; 44 ids to go, resumable by id) | no percent for a partial arm | — | — |
 
 The matched set is the **full 164-task file** (`--limit` unused): cross-arm comparison on this
 set needs no subset, and no ids were dropped in any completed arm (164/164 answered, 0 empty).

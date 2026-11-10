@@ -15,7 +15,7 @@ can** — and it does.
 | brain-basalt | `qwen3.8-flash-next-iq3_s-basalt`, IQ3_S on a 24 GB-class GPU, no contour | 198/198 | **127/198 = 64.1 %** | 1785 s (9.0 s/task), one draw per task | temp 0.7, max_tokens 1200, single seed pass |
 | codex | `gpt-6.1-sol`, codex-cli 0.166.0, reasoning xhigh, read-only sandbox, prompt via STDIN | 198/198 | **192/198 = 97.0 %** | 3553 s (17.9 s/task) | sampling parameters not exposed by the transport |
 | contour-0.0.2.56 (item P0) | the FROZEN contour runtime `0.0.2.56` on the same endpoint model, category `P`, public checkers in the validator slot, token ladder 512→1200 | 198/198 | **91/198 = 46.0 %** | 2187 s leg wall, 1367.2 s measured engine time | streamed request, `request_seed` pinned (sp1), ladder 512→1200, `enable_thinking` off — NOT the bare arm's request shape; see the parity section |
-| grok | `grok-4.7`, hermes one-shot, toolsets off | in flight (12/198 at publish time; ~2–3 min per task on this set) | pending — no percent for a partial arm | — | — |
+| grok | `grok-4.7`, hermes one-shot, toolsets off | **suspended by owner quota, resumes 2026-11-12** (leg ran to 139/198 stored rows, stopped 07:57 CET 2026-11-09; 59 ids to go, resumable by id) | no percent for a partial arm | — | — |
 
 198/198 answered in every completed arm, 0 empty, 0 transport failures; the join dropped no ids.
 
@@ -76,6 +76,9 @@ parity, not patched tonight (the hard line is frozen at `0.0.2.56`; no new stamp
   answer on public sets, and on GPQA its token ladder is actively the wrong shape.
 * The grok leg lands late tonight (2–3 min per task through the reasoning transport); its row
   joins this table when scored — no partial percent published.
+  *(Corrected 2026-11-10: it did not land. The leg was stopped by the owner quota suspension at
+  07:57 CET 2026-11-09 with 139/198 rows stored; see "Grok status on this set" at the end of this
+  document.)*
 
 ## Honest caveats
 
@@ -178,3 +181,13 @@ under `pub-checkers-v2` (self-test 22/22, zero model calls): 127/198 and 192/198
 published numbers. Scrub masked nothing; zero path/IP/key hits. The grok leg on this set is a
 **partial** (139/198, owner quota window until 2026-11-12), so its bytes are deliberately not
 published and no percent exists for it.
+
+## Grok status on this set (2026-11-10, supersedes the "lands late tonight" bullet above)
+
+Owner quota decision 2026-11-09: no grok arm launches before **2026-11-12**. The GPQA grok leg that
+was running was stopped at 07:57 CET with **139 of 198** rows stored (last id `gpqa-138`, 59 ids to
+go, 139 unique ids and 139 `finish=ok` verified again at the 2026-11-10 tick); the file stays intact
+and resumable by id, and **no percent is published while the arm is partial**. The grok cell in any
+table on this set reads "suspended by owner quota, resumes 2026-11-12" — never a blank, never a zero,
+never a transport failure. This set is first in the 12 Nov resumption queue (gpqa-diamond 59 ids,
+then humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541).

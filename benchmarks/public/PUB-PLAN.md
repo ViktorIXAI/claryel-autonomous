@@ -669,3 +669,68 @@ One naming defect recorded, deliberately not fixed: `scripts/pub_bench_run.py` w
 It is a label defect in shipped result rows, never used as a hash by any verifier (no reader of that
 key exists in the repo — checked), and renaming it would break the row schema of already-published
 arms. Left as-is with this note; a fix would be a new row schema, not an in-place rename.
+
+**Queue status 2026-11-10 08:05 CET (tick 11):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick; the local endpoint
+was read but not touched (`/health` 200, GPU 0 % util / 36.5 W). The P2005 idle-spin note persists:
+the engine holds **695 % CPU at 0 % GPU utilization for 1 d 11.5 h with 56.0 GiB resident** (load
+average 14.1 on a 32-core box). The pre-flight restart cure stays queued behind the issue #43 hold
+(lifts 10:10 CET today) and behind the fact that this engine hosts the live brain; no action taken.
+The two partial Grok arms were re-verified intact a fifth time — gpqa-diamond **139 unique ids / 139
+`finish=ok` / 0 empty answers**, last id `gpqa-138`, 59 of 198 to go; humaneval **120 / 120**, last id
+`humaneval-0119`, 44 of 164 to go — still unshipped and unscored by rule.
+
+**The tick went at the Grok availability cells in the result tables, and three of them were stale.**
+The owner rule says a Grok cell for an incomplete set must read "suspended by owner quota, resumes
+2026-11-12", never a blank that reads as a zero and never a transport failure. Measured on the tracked
+bytes 25 h after the legs were stopped: `GPQA-RESULT.md` still said **"in flight (12/198 at publish
+time)"**, `HUMANEVAL-RESULT.md` still said **"not started yet (grok legs are serialized on the
+transport)"** — which its own "Grok status on this set" section contradicts, because that leg ran from
+04:07 to 07:57 CET and stored 120 rows — and `MMLU-PRO-RESULT.md` attributed its missing Grok arm to
+**transport serialization** rather than to the quota window. Prose in all three documents carried the
+correct status; only the table cells — the part people quote — had frozen at publish time. No number
+was affected: none of those cells carried a percent, so no digest row and no published arm byte is
+touched by this fix.
+
+Fixes, documents and tooling only (zero model calls):
+
+* the three Grok cells now carry the suspension wording plus the measured stored counts
+  (GPQA 139/198 with 59 ids to go, HumanEval 120/164 with 44 to go, MMLU-Pro never started and queued
+  behind the two resumable partials), each labelled resumable by id with **no percent for a partial
+  arm**;
+* the stale prose is corrected by dated supersession rather than silent rewrite: the GPQA
+  "lands late tonight" bullet and the MMLU-Pro "open item" reason each carry a *(corrected
+  2026-11-10 …)* note, and `GPQA-RESULT.md` gained the "Grok status on this set" section
+  `HUMANEVAL-RESULT.md` already had;
+* the rule now has a checker: `scripts/pub_grok_cell_check.py` scans every
+  `benchmarks/public/*-RESULT.md` arm table and requires each Grok row to either publish a percent
+  (arm completed) or carry the suspension sentence verbatim, and rejects the stale-marker class
+  ("in flight", "not started", "pending", "queued", "serialized") on any Grok row that publishes no
+  percent — a Grok row deleted from a set's table is also a finding, because a silently dropped
+  fourth arm is the same failure class as a stale cell. Scope is stated in the checker: the digest
+  table (rows exist only for complete arms) and the audit-frozen README four-arm table are not
+  scanned;
+* `harness/pub_grok_cell_test.py` (21 checks, CI-enrolled by the `harness/*test.py` glob, no workflow
+  edit) proves the checker is not vacuous: on the pre-fix `HEAD` bytes of the three documents it
+  reports **12 findings**, on the fixed tree **0**; a synthesized stale cell, a blank cell and a
+  deleted Grok row each redden it, while a completed Grok row with a percent passes.
+
+Ops state read this tick (no action): tick 10's push (`db6b832`) is **green on all four jobs**
+(secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts) and the Pages build for it
+completed in 29 s. Pages health read honestly this time: the build list is newest-first, so the
+latest entry is `2026-11-10T06:16:45Z built`; the four latest builds (04:33, 05:15, 06:10, 06:16 UTC)
+all `built`, **10 of the last 30** builds in the API window errored (all in the 22:35–04:23 UTC window
+tick 7 documented), and both probed content URLs return **200** — the flap has not recurred since
+04:33 UTC. `docs-freshness` is scheduled `cron: 20 3 * * *` (03:20 UTC); no run was recorded for
+today at 06:57 UTC and the tree was clean, the last recorded scheduled run being 2026-11-09 11:50 UTC
+(green), so the brief's "errors daily because the tree is dirty" line is still not reproducing — this
+is GitHub scheduled-workflow delivery delay, not a repo failure, and it is re-checked next tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each resumable
+by id and scored only when complete. The new checker is the machine-checkable form of the resumption
+rule: after 12 Nov a Grok cell must either publish a percent from a complete arm or keep the
+suspension wording — nothing in between. `house-ground-v1` stays the owner's call (issue #44).
+Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; sanitization
+before every push; a partial arm publishes no percent.
