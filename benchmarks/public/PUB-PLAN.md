@@ -1485,3 +1485,54 @@ clean tree.
 leg resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 and the endpoint
 is not there yet; sanitization before every push; a partial arm publishes no percent.
+
+**Queue status 2026-11-10 23:37 CET (tick 25):** nothing launched — the queue stays empty and item 8
+(the Grok resumption: gpqa-diamond from `gpqa-139`, humaneval from `humaneval-0120`, then the two
+deferred sets) remains gated to 2026-11-12 by the owner quota window. 0 `parb-pub-*` units, no
+`pub_bench_run`/`pub_bench_cloud`/`gate_run` process on the host, 0 foreign legs on the endpoint;
+zero model calls and zero cloud calls this tick.
+
+**The standing preflight gate reads NO-GO a third time, and the swap finally moved off zero.**
+Same box, 23:33 CET: **swap free 247 MiB of 8 191 MiB** — the device was pinned at 0 MiB free at
+ticks 23 (21:47) and 24 (22:29), so this is the first non-zero reading since, but it is still below
+the gate's 256 MiB threshold. MemAvailable 15 662 MiB of 61 953 MiB (up from 13 990 at tick 24).
+Engine pid 3284575 up **51.0 h**, state `Sl`, **596 % CPU with the GPU at 0 % utilization /
+36.4 W**, RSS 57 444 MiB, load average 9.5 (down from 13.9). Both NO-GO reasons reproduce verbatim
+(swap exhaustion, idle-spin pair), exit 3, and the line launches no local leg into that state. The
+cure (engine restart or parking the keep-up load) stays an owner decision because the same engine
+serves this session's brain; the 2026-11-12 Grok resumption is cloud-side and unaffected. The
+gate's own contract test was re-run: `harness/pub_preflight_test.py` **20/20 green**.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+**index drift: 0**; `pub_arms_index.py --pins` **manifest pin drift: 0**;
+`pub_derived_percent_check.py` registry `pub-derived-percents-v1` **42 entries recomputed, 0
+findings** (41 digest + 169 document citations, 0 uncovered; checker self-tests green inside the
+gate); `pub_grok_cell_check.py` 9 documents, **0 findings**; `pub_superseded_cell_check.py` 9
+documents, **0 findings**; `pub_digest_row_check.py` **46 rows, 0 findings**, 23/23 pre-rule
+exceptions used.
+
+Grok partials re-verified intact again (eighteenth verification), zero model calls and still
+unscored/unshipped by rule: `gpqa-diamond/pub-grok.jsonl` SHA-256/16 **`cde63378fa1633c5`**,
+**139 rows**, and `humaneval/pub-grok.jsonl` SHA-256/16 **`a7c741de0d6ace8c`**, **120 rows** —
+byte-identical to ticks 21–24, last modified 2026-11-09 07:56, resume points `gpqa-139` and
+`humaneval-0120` unchanged. New this tick, a zero-call readiness check of the resumption wiring:
+the two resumable launchers (`go_cloud_gpqa_grok.sh`, `go_cloud_humaneval_grok.sh`) were confirmed
+to carry the `command -v` fail-closed PATH guard on disk. The launcher gap for the two deferred
+legs (**mmlu-pro 500, ifeval 541**) stands by decision: their Grok go-scripts are written at launch
+time with ceilings matched to each set's in-force family (mmlu-pro 1200; IFEval `pub-ifeval-v1`
+1200), not pre-written.
+
+Ops state read this tick (no action): `HEAD` == `origin/main` == `8cfccfa`, working tree clean, and
+that push is **green** (all recorded CI runs `success`, read 23:35 CET). Daily docs job (report
+only): `GitHub docs freshness daily` (`0 2 * * *`) last run **2026-11-10T03:00 error: script exited
+with code 1** — the stale second-worktree symptom recorded and repaired in `LEG-INCIDENTS.md` at
+14:45 CET — **next run 2026-11-11T02:00:00+00:00**, the first against the retargeted `~/sah-main`
+path with a clean tree, so the brief's "errors daily because the tree is dirty" line gets its first
+chance to resolve or persist tomorrow morning. `LEG-INCIDENTS.md` gains no new 2026-11-10 PUB
+entry: no leg started, stopped or restarted this tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, each
+leg resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (the third
+consecutive NO-GO reading keeps that moot); sanitization before every push; a partial arm publishes
+no percent.
