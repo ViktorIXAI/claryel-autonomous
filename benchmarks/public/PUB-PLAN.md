@@ -911,3 +911,36 @@ repo failure.
 resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
 percent.
+
+**Queue status 2026-11-10 13:02 CET (tick 15):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick; the local endpoint
+was read but not touched (`/health` 200, GPU 0 % util / 32.4 W). The P2005 idle-spin note persists:
+the engine holds **647 % CPU at 0 % GPU utilization with 47.2 GiB resident**; the pre-flight engine
+restart cure still waits, because it is an infrastructure action on the box that hosts this
+session's live brain — owner decision, nothing was started or stopped by this tick.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+0 drift; `pub_derived_percent_check.py` 18 derivations recomputed from shipped bytes, 169 document
+citations, 0 uncovered; `pub_grok_cell_check.py` 9 documents, 0 findings;
+`pub_superseded_cell_check.py` 9 documents, 0 findings. The two partial Grok arms were re-verified
+intact a ninth time (gpqa-diamond **139 unique ids / 139 `finish=ok` / 0 empty**, last id
+`gpqa-138`, 59 of 198 to go; humaneval **120 / 120**, last id `humaneval-0119`, 44 of 164 to go),
+still unshipped and unscored by rule.
+
+Ops state read this tick (no action): the docs-freshness schedule **did fire today** — run
+42807245078 at **11:24:43 UTC, failed in 10 s** with the single finding
+`README status date is stale: 2026-11-08 is 2 days old` on the pre-fix SHA. The fix (`5fefb60`,
+README status date re-stamped from fresh verification) landed **two minutes later** at 11:26:50 UTC
+and that push is green on all four jobs with the Pages build in 2 m 4 s; `python
+scripts/qa/docs_policy.py --daily` on the current tree now prints **PASS**, so the next scheduled
+run is expected green. Two corrections to the standing ops note: the failure cause is a stale
+status date, **not** a dirty working tree (the tree was clean at run time), and the schedule fires
+around 10:30-11:50 UTC on the observed runs, not at 03:00 — the brief's "errors daily because the
+tree is dirty during its 03:00 run" line remains unreproduced for a sixth tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
+percent.
