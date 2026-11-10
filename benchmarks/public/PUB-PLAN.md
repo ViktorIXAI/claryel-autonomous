@@ -944,3 +944,37 @@ tree is dirty during its 03:00 run" line remains unreproduced for a sixth tick.
 resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
 percent.
+
+
+**Queue status 2026-11-10 14:05 CET (tick 16):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick; the local endpoint
+was read but not touched (`/health` 200, GPU 0 % util / 36.2 W, engine resident 23.6 GiB VRAM). The
+P2005 idle-spin note persists: the engine holds **638 % CPU at 0 % GPU utilization with 55.5 GiB RAM
+resident** on 1 d 17.5 h of process uptime (same condition as ticks 13–15, RAM share up from
+47.2 GiB); the pre-flight engine restart cure still waits, because it is an infrastructure action
+on the box that hosts this session's live brain — owner decision, nothing was started or stopped by
+this tick.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+0 drift; `pub_derived_percent_check.py` 18 derivations recomputed from shipped bytes, 41 digest +
+169 document citations, 0 uncovered; `pub_grok_cell_check.py` 9 documents, 0 findings;
+`pub_superseded_cell_check.py` 9 documents, 0 findings. The two partial Grok arms were re-verified
+intact a tenth time (gpqa-diamond **139 unique ids / 139 `finish=ok` / 0 empty**, last id
+`gpqa-138`, 59 of 198 to go; humaneval **120 / 120**, last id `humaneval-0119`, 44 of 164 to go),
+still unshipped and unscored by rule.
+
+Ops state read this tick (no action): the working tree is clean and local `main` equals
+`origin/main` (0 ahead / 0 behind); no new upstream commit since tick 15. `docs-freshness` fired
+once today — run 42807245078 at **11:24:43 UTC, failed** with the stale-status-date finding on the
+pre-fix SHA (the same run tick 15 recorded); the date fix landed two minutes later and **no
+scheduled run has fired against the fixed tree since**, so today's green confirmation is still
+open — the next scheduled run is expected tomorrow. `python scripts/qa/docs_policy.py --daily` on
+the current tree prints **PASS**. `LEG-INCIDENTS.md` carries no entry for 2026-11-10 and no new
+incident occurred this tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
+percent.
