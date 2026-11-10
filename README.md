@@ -97,7 +97,7 @@ The operator set objectives, constraints, publication scope and final adoption
 decisions. The agent's own work is itemized in [`docs/autonomy.md`](docs/autonomy.md);
 its limits are in [`docs/limitations.md`](docs/limitations.md).
 
-Status checked: 2026-11-08 (historical snapshot; version and run status require fresh verification)
+Status checked: 2026-11-10 (historical snapshot; version and run status require fresh verification)
 
 The next stamp `0.0.2.57` (loop claim-family selection re-arm) is FROZEN UNMEASURED to
 exactly 2.57 (2026-11-08, pair-257: the loop claim family's per-draw base rate is ~2.9%,
