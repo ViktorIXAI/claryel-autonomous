@@ -230,10 +230,14 @@ the only lever is `put-account-data-retention`, which is **account-wide**. The
 `anthropic.claude-fable-5-2` model card states that using it requires opting in to AWS review
 (`aws_review`); the Haiku 5.5 card has no such clause. `aws_review` was not enabled.
 
-Cost re-quote, because availability changes the cheap lane: if Haiku 5.5 ($0.10/$0.50 per MTok)
-stays unentitled on this account, the nearest Claude that only needs the form is Haiku 4.5 at
-$1.00/$5.00 per MTok — $11.64 for the published public-suite token mix (1 443 741 in / 2 040 042
-out), against 0.64 kWh of measured local GPU energy for the same work, i.e. €0.16 at the owner's
+Cost re-quote, because availability changes the cheap lane: the pinned default stays
+`global.anthropic.claude-haiku-5-5` at $0.10/$0.50 per MTok — the cheapest Claude on the lane, with
+`reasoning_effort: low`. Haiku 4.5 is **not** the connected model and was never configured as one;
+it only appears in probes and in this re-quote because AWS answers 5.5 with "not available for this
+account", and 4.5 is the nearest Claude whose gate is the use-case form alone. If 4.5 ever becomes
+the lane, it costs 10x per token, not less. The two numbers for the published public-suite token
+mix (1 443 741 in / 2 040 042 out): Haiku 5.5 $1.16, Haiku 4.5 $11.64 — against 0.64 kWh of measured
+local GPU energy for the same work, i.e. €0.16 at the owner's
 0.25 €/kWh tariff. The ranking (electricity ≪ cheap cloud ≪ mid ≪ frontier) does not change;
 the gap to the cheap lane goes from ~6× to ~70×.
 

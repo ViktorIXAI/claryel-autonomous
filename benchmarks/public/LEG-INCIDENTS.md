@@ -195,3 +195,23 @@ verdict bytes shipped in `arms/` (see `arms/README.md`, "First cloud-arm artifac
   a leg imports its tooling at start, so a tooling fix landing mid-leg does not apply to that leg —
   relaunch it (the runners resume free from their stored rows) or expect the old behaviour at the
   end of the run.
+
+## 2026-11-10 14:45 CET — two worktrees held branch `main`; the daily jobs pointed at the wrong one
+
+* `git worktree list` showed `~/projects/strata-autonomous-harness` and
+  `~/sah-main` **both on `main`** — the first is the clone's main working tree, so the
+  two shared `refs/heads/main`. Any commit staged in the unused tree moved the delivery branch.
+  The daily docs job and the publication watchdog (`docs_freshness_daily.sh`,
+  `sah_publish_watch.sh`, cron `ef7ea47ff99b` / `a53734cc5d97`) both `cd` into that unused tree,
+  which is how 250+ staged deletions of published arms sat in an index that a watchdog commits
+  automatically, and why the daily docs refresh failed with "repo is dirty" since 03:00.
+* Recovered before cleaning: five hardware snapshots (`os-snapshots/2026-11-06..10.json`) existed
+  only as untracked files in that tree; they are now published (`649bf7e`), secret-scanned, and
+  `latest.json` was byte-identical to the live one.
+* Handling: reset that tree, `git checkout --detach` so it can no longer move `main`, deleted the
+  leftover detached `sah-bedrock` worktree, and retargeted both scripts to `~/sah-main`. Verified:
+  `git worktree list` now shows exactly one `[main]` (`~/sah-main`), and the docs refresh runs green
+  from the new path. Untracked scratch under `benchmarks/public/raw/` in the detached tree
+  (`arceasy-test.jsonl`, `ifeval-input.jsonl`, `x.bin`) is not read by any scorer and was left
+  unpublished. Rule for the line: one worktree holds `main`; anything that commits must name
+  `~/sah-main`.
