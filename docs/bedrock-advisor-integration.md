@@ -209,12 +209,27 @@ AWS Sales step for the Claude 5 family), not our IAM, network, SDK or routing. T
 re-check (`get-foundation-model-availability` plus a 1-token `converse`); until it clears, the
 local brain stays the production lane and no Bedrock arm is published.
 
-Billing state, read rather than assumed: Cost Explorer reports **no spend in the trailing 90 days**
-and the account has **no budget alarms**; a `claryel-monthly-cost` COST budget (monthly, $100) was
-created so the first real metering is visible. Email notifications for it were rejected by the CLI
-(subscriber verification is owner-side), so the alarm is dashboard-only until the owner attaches a
-verified address. The account balance/credit itself is not readable through the CLI and was not
-verified.
+Later the same day (`2026-11-10 15:40 CET`), after the owner reported an AWS e-mail confirming a
+signed model agreement, the control-plane read moved: **Haiku 4.5 `agreement: AVAILABLE`**, Haiku
+5.5 still `NOT_AVAILABLE`, and the effective cross-region TPM is still `0.0` for **both**, including
+the model whose agreement just opened (quota codes `L-58BE175A`/`L-9A11C666` for 4.5,
+`L-47520EB7` for 5.5). Owner decision recorded with that read: **no benchmark arm, smoke test or
+any inference workload runs on the 4.5 lane** — the pin stays Haiku 5.5, and the cheaper model is
+never swapped in to make a number.
+
+Money state, read from the live console Credits page (the Credits widget renders even though other
+billing sub-pages do not): credit `10069304379`, type **AWS Activate — FOUNDERS**, **$1,000.00**,
+valid `10/01/2026 → 10/31/2028`, status **Active**, used **$0.00**, remaining **$1,000.00**; total
+remaining $1,000.00, total used $0.00. So the block is not "no money": the money is there and
+unspent. The one payment input we still cannot read is the attached payment method — the Payments
+sub-page returns "Unable to load content" like the other broken micro-frontends, and no CLI verb in
+CloudShell's `aws-cli/2.39.5` exposes it. An account holding only Activate credits and no payment
+method would explain the pattern we saw (agreement `AVAILABLE`, TPM `0.0`, invoke throttled with
+"Too many tokens per day"), and it is owner-checkable in a minute at Billing → Payments.
+Cost Explorer still reports **no spend in the trailing 90 days**, and the monthly COST budget
+`claryel-monthly-cost` ($100) exists so the first real metering is visible. Email notifications for
+it were rejected by the CLI (subscriber verification is owner-side), so the alarm is dashboard-only
+until the owner attaches a verified address.
 
 Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
 (`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
