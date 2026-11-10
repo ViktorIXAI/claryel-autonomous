@@ -253,3 +253,10 @@ them. Shipped now: `arms/gsm8k-basalt-answers.jsonl` (1319 rows, `f3dedf9d705587
 every published percent reproduced exactly. The scrub masked nothing: the shipped lines are
 byte-identical to the runner output, and the only privacy-pattern hits are the English word
 "bank" inside three GSM8K word problems. No percent and no digest row changed.
+
+The 2026-11-08 **smoke row** (25 tasks, 24/25 = 96.0 %, the digest's plumbing-proof first row) was
+the last percent in the digest table without shipped bytes; it now has them too —
+`arms/gsm8k-smoke-answers.jsonl` (25 lines, `0c062902777556de`, bytes identical to the runner
+output), and the shipped copy re-scores to 24/25 with the single loss `gsm8k-0012`
+(`pub-checkers-v2`, self-test 22/22, zero model calls, 2026-11-10 06:15 CET). The row stays a
+plumbing proof, not a measurement claim; the set's percents are carried by the full arms above.

@@ -147,6 +147,7 @@ exactly — asserted for every arm below.
 | gsm8k-basalt-answers.jsonl | 1319 | `f3dedf9d7055876b` |
 | gsm8k-codex-answers.jsonl | 300 | `a9a4725fa3a916ce` |
 | gsm8k-grok-answers.jsonl | 300 | `760a704e9868bff1` |
+| gsm8k-smoke-answers.jsonl | 25 | `0c062902777556de` |
 | arc-easy-basalt-answers.jsonl | 2376 | `3450700e985bce95` |
 | arc-easy-codex-answers.jsonl | 300 | `b126e410e2d95f91` |
 | arc-easy-grok-answers.jsonl | 300 | `94295e1012c346b0` |
@@ -460,3 +461,28 @@ python scripts/pub_bench_ifeval.py \
     benchmarks/public/arms/pub-repair-v2-merged-answers.jsonl \
     benchmarks/public/ifeval.tasks.jsonl ifeval pub-repair-v2 re-score --no-digest
 ```
+
+### Dated recheck of the remaining digest rows (2026-11-10 06:15 CET, zero model calls)
+
+The tick-7 and tick-8 passes covered the 14 classic-set rows and the six repair rows. This pass
+re-scored the **remaining 17 percent rows** from the shipped bytes in this directory (scorer
+self-test 22/22 first); every one reproduced its published percent exactly:
+
+```
+contour arms rescored from answers (pub-checkers-v2):
+  gsm8k      matched 294/300   escalation 290/300
+  arc-easy   matched 289/300   escalation 290/300
+  arc-chal.  matched 291/300   escalation 283/300
+  gpqa       matched 139/198   escalation  91/198
+  mmlu-pro   matched 429/500
+verdict-sidecar counts:
+  humaneval  contour-v2 157/164
+  lcb        contour 99/175    bare 101/175    codex-v2 168/175
+  bfcl       contour 1122/1240
+  ifeval     contour 462/541   bare 467/541    codex 515/541   (strict, pub-ifeval-v1 sidecars)
+```
+
+Plus the gsm8k smoke row shipped above. With that, **no percent row in the digest table is left
+without shipped bytes**. The two **partial** grok arms (139/198, 120/164) publish no percent and
+their bytes stay unshipped by rule; both partial files were re-verified intact at this pass
+(139 unique ids / 139 `finish=ok`; 120 / 120).

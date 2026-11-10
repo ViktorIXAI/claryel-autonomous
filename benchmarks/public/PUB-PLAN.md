@@ -519,3 +519,39 @@ and 3 s. What is measured: the latest-build API status stood `errored` from 02:4
 entry at 04:27:28 UTC, and as of 04:45 UTC every probed content URL returns 200 and serves `HEAD`
 — `PUB-PLAN.md` served from the site already carries the tick-7 marker. Health probe for this
 surface going forward: a pinned content URL, never the root.
+
+**Queue status 2026-11-10 06:15 CET (tick 9):** nothing launched — the queue stays empty and the
+only open item (8, the Grok resumption) is gated to 2026-11-12 by the owner quota window. 0 leg
+units, no `pub_bench_run`/`gate_run` process; the local endpoint was read but not touched
+(`/health` 200, GPU 0 % util / 32.5 W). The P2005 idle-spin note from tick 8 is re-confirmed and
+unchanged: the engine has run ~708 % CPU at zero request load for 1 d 09 h (59 GiB resident) — the
+pre-flight restart cure stays queued behind the issue #43 hold (lifts 10:10 CET today) and behind
+the fact that this engine hosts the live brain; no action taken.
+
+The tick went at the standing rule **"every percent re-scores offline from shipped bytes"**, closing
+the audit the tick-7 and tick-8 passes had left open. **The remaining 17 digest percents re-scored
+from shipped bytes, zero model calls, scorer self-test 22/22 first:** the nine contour answer arms
+under `pub-checkers-v2` (gsm8k 294/300 matched + 290/300 escalation, arc-easy 289/290,
+arc-challenge 291/283, gpqa-diamond 139/91, mmlu-pro contour 429/500) and the eight verdict-sidecar
+rows (humaneval contour-v2 157/164, LCB contour 99 / bare 101 / codex-v2 168 of 175, BFCL contour
+1122/1240, IFEval contour 462 / bare 467 / codex 515 of 541 strict). All seventeen reproduce their
+published percents exactly — no digest row changed. **One gap closed:** the 2026-11-08 gsm8k
+**smoke** row (25 tasks, 24/25, plumbing proof) was the last percent in the table with no shipped
+bytes; the runner's file still exists and re-scored 24/25 (single loss `gsm8k-0012`), so it now
+ships as `arms/gsm8k-smoke-answers.jsonl` (25 lines, `0c062902777556de`, byte-identical to runner
+output, privacy grep 0 hits). With that row, **no percent in the digest table is left without
+shipped, re-scorable bytes**; the two partial grok arms stay unshipped by rule and were re-verified
+intact a third time (gpqa-diamond 139 unique ids / 139 `finish=ok`, humaneval 120 / 120).
+Digest-head guard checked, not assumed: generated `digest_head()` == file head (3/3 paragraphs).
+
+Ops state read this tick (no action): the last push (04:33 UTC) is green on all five jobs, the
+Pages flap has not recurred — the two latest builds (04:27:29 and 04:33:37 UTC) both `built` in
+under 30 s and the Pages build for this commit will show the same; `docs-freshness` has **no
+scheduled run recorded after 2026-11-09 11:50 UTC (green)** — GitHub has not delivered today's run
+at the time of writing and the tree is clean, so the daily-error claim is still not true today.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. `house-ground-v1` stays the owner's call (issue #44,
+reminder fired 09:00 CET window). Standing limits unchanged: no Grok arm before 2026-11-12; frozen
+contour `0.0.2.56`; sanitization before every push.
