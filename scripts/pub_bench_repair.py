@@ -49,8 +49,29 @@ TEMP = 0.7
 AUTH_PREFIX = "Bearer"
 
 
-def sha16(p):
+def sha1_16(p):
+    """SHA-1/16. This is what the pre-2026-11-10 census keys named `*_sha16` actually carry, and
+    it is also the byte-binding convention of `scripts/security/secret_scan.py` (MANIFEST.json ->
+    benches.bfcl.hash_note names both conventions)."""
     return hashlib.sha1(pathlib.Path(p).read_bytes()).hexdigest()[:16]
+
+
+def sha256_16(p):
+    """SHA-256/16: the artifact-pin convention of this line (the digest tasks cell of every set
+    except ifeval, and every `.sha16` sidecar shipped from 2026-11-10 on)."""
+    return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()[:16]
+
+
+def sha1_16_text(s):
+    return hashlib.sha1(s.encode()).hexdigest()[:16]
+
+
+def sha256_16_text(s):
+    return hashlib.sha256(s.encode()).hexdigest()[:16]
+
+
+PIN_HASH_NOTE = ("pins named *_sha256_16 are SHA-256/16 (the digest-row convention); pins named "
+                 "*_sha16 or *_sha1_16 are SHA-1/16 - the two are never interchangeable")
 
 
 def check_text(task, idx):
@@ -268,8 +289,9 @@ def run_lcb(a, tasks, first, first_rows):
         for i, t in enumerate(queue):
             rec = {"id": t["id"], "bench": t["bench"], "arm": CONTRACT, "model": model,
                    "temp": TEMP, "max_tokens": max_tokens,
-                   "task_sha16": sha16(a.tasks), "first_answer_sha16":
-                   hashlib.sha1(first[t["id"]].encode()).hexdigest()[:16],
+                   "task_sha16": sha1_16(a.tasks), "first_answer_sha16":
+                   sha1_16_text(first[t["id"]]),
+                   "first_answer_sha256_16": sha256_16_text(first[t["id"]]),
                    "failed_samples": ["test%d:%s" % (ix, v) for ix, v, _ in t["_fails"]],
                    "validator": "lcb-public-v1", "prev_truncated": False}
             st = time.time()
@@ -347,11 +369,10 @@ def run_lcb(a, tasks, first, first_rows):
                        ("%s-verdicts.jsonl" % CONTRACT, verdict_rows)):
         (out / name).write_text("\n".join(json.dumps(r, ensure_ascii=False, sort_keys=True)
                                           for r in rows) + "\n")
-        (out / (name + ".sha16")).write_text(
-            hashlib.sha1((out / name).read_bytes()).hexdigest()[:16] + "\n")
+        (out / (name + ".sha16")).write_text(sha256_16(out / name) + "\n")
     ptok = sum(r.get("ptok") or 0 for r in stored.values())
     ctok = sum(r.get("ctok") or 0 for r in stored.values())
-    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha16(a.tasks),
+    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha1_16(a.tasks),
            "functional_tasks": sum(1 for t in tasks if t["testtype"] != "stdin"),
            "first_arm_hidden": n_first, "asked_stored": len(pub_ok),
            "asked_unrun": len(asked) - len(pub_ok),
@@ -363,13 +384,16 @@ def run_lcb(a, tasks, first, first_rows):
            "keep_best_hidden": kb, "retry_only_hidden": ro,
            "validator": "lcb-public-v1 (public sample tests only)",
            "checker": lcb.LCB_CONTRACT,
-           "hidden_sidecar_sha16": sha16(a.hidden),
+           "hidden_sidecar_sha16": sha1_16(a.hidden),
+           "hidden_sidecar_sha256_16": sha256_16(a.hidden),
            "call": {"temp": TEMP, "max_tokens": max_tokens,
                     "first_arm_max_tokens": first_budget},
            "retry_calls": len(stored), "retry_prompt_tokens": ptok,
            "retry_completion_tokens": ctok,
            "wall_s": round(time.time() - t0, 1), "transport_errors": n_bad,
-           "first_answers_sha16": sha16(a.first_answers)}
+           "first_answers_sha16": sha1_16(a.first_answers),
+           "first_answers_sha256_16": sha256_16(a.first_answers),
+           "pin_hash_convention": PIN_HASH_NOTE}
     (out / ("pub-repair-%s-census.json" % CONTRACT)).write_text(json.dumps(cen, indent=2) + "\n")
     print("census: asked %d/%d | retry passes public %d | hidden fixed %d | hidden worse %d | "
           "unrun %d" % (len(pub_ok), len(asked), cen["retry_passes_public"], len(fixed),
@@ -390,7 +414,9 @@ def run_lcb(a, tasks, first, first_rows):
     bench = tasks[0]["bench"]
     # the tasks cell must name the SAME sha the scorer rows for this set use (SHA-256/16), or
     # digest rows for one set would not be comparable; the census names SHA-1/16 beside it
-    tasks_cell = hashlib.sha256(open(a.tasks, "rb").read()).hexdigest()[:16]
+    # READ the published pin from MANIFEST.json instead of re-hashing it here: one
+    # pinned task file must carry exactly one tasks cell in the digest table.
+    tasks_cell = pbs.manifest_tasks_cell(bench, a.tasks)
     model_label = "%s+%s(keep-best)" % (model or first_model, CONTRACT)
     key_cell = "\n| %s | %s | %d | %s |" % (bench, model_label, n, tasks_cell)
     body = dig.read_text() if dig.exists() else ""
@@ -532,7 +558,8 @@ def run_bfcl(a, tasks, first, first_rows):
                      % (len(cv), len(ok_first)))
         conv = [i for i in ok_first if not ok_first[i] and cv[i]]
         control = {"file": str(pathlib.Path(a.control_verdicts).name),
-                   "file_sha16": sha16(a.control_verdicts),
+                   "file_sha16": sha1_16(a.control_verdicts),
+                   "file_sha256_16": sha256_16(a.control_verdicts),
                    "control_arm_pass": sum(1 for v in cv.values() if v),
                    "redraw_keep_conversions": len(conv),
                    "redraw_keep_pp": round(100.0 * len(conv) / len(ok_first), 2)}
@@ -574,8 +601,9 @@ def run_bfcl(a, tasks, first, first_rows):
         for i, t in enumerate(queue):
             rec = {"id": t["id"], "bench": t["bench"], "arm": CONTRACT, "model": model,
                    "temp": TEMP, "max_tokens": max_tokens,
-                   "task_sha16": sha16(a.tasks),
-                   "first_answer_sha16": hashlib.sha1(first[t["id"]].encode()).hexdigest()[:16],
+                   "task_sha16": sha1_16(a.tasks),
+                   "first_answer_sha16": sha1_16_text(first[t["id"]]),
+                   "first_answer_sha256_16": sha256_16_text(first[t["id"]]),
                    "verifier_class": t["_class"], "validator": "bfcl-ast-v1 (verdict only)",
                    "prev_truncated": len(first[t["id"]] or "") > MAX_PREV_CHARS_CODE}
             st = time.time()
@@ -654,11 +682,10 @@ def run_bfcl(a, tasks, first, first_rows):
                        ("%s-verdicts.jsonl" % CONTRACT, verdict_rows)):
         (out / name).write_text("\n".join(json.dumps(r, ensure_ascii=False, sort_keys=True)
                                           for r in rows) + "\n")
-        (out / (name + ".sha16")).write_text(
-            hashlib.sha1((out / name).read_bytes()).hexdigest()[:16] + "\n")
+        (out / (name + ".sha16")).write_text(sha256_16(out / name) + "\n")
     ptok = sum(r.get("ptok") or 0 for r in stored.values())
     ctok = sum(r.get("ctok") or 0 for r in stored.values())
-    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha16(a.tasks),
+    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha1_16(a.tasks),
            "first_arm_pass": n_first,
            "asked_stored": len(chk_retry), "asked_unrun": len(asked) - len(chk_retry),
            "asked_by_class": dict(sorted(by_class.items())),
@@ -680,7 +707,9 @@ def run_bfcl(a, tasks, first, first_rows):
                                      if r.get("api_finish") == "length"),
            "retry_prompt_tokens": ptok, "retry_completion_tokens": ctok,
            "wall_s": round(time.time() - t0, 1), "transport_errors": n_bad,
-           "first_answers_sha16": sha16(a.first_answers)}
+           "first_answers_sha16": sha1_16(a.first_answers),
+           "first_answers_sha256_16": sha256_16(a.first_answers),
+           "pin_hash_convention": PIN_HASH_NOTE}
     (out / ("pub-repair-%s-census.json" % CONTRACT)).write_text(json.dumps(cen, indent=2) + "\n")
     print("census: asked %d/%d | retry passes verifier %d | converted %d (%s) | worse %d | "
           "unrun %d | redraw control converts %s"
@@ -701,7 +730,9 @@ def run_bfcl(a, tasks, first, first_rows):
     dig = HERE.parent / "benchmarks" / "public" / "PUB-DIGEST.md"
     import pub_bench_score as pbs                          # noqa: E402
     bench = tasks[0]["bench"]
-    tasks_cell = hashlib.sha256(open(a.tasks, "rb").read()).hexdigest()[:16]
+    # READ the published pin from MANIFEST.json instead of re-hashing it here: one
+    # pinned task file must carry exactly one tasks cell in the digest table.
+    tasks_cell = pbs.manifest_tasks_cell(bench, a.tasks)
     model_label = "%s+%s(keep-best)" % (model or first_model, CONTRACT)
     key_cell = "\n| %s | %s | %d | %s |" % (bench, model_label, n, tasks_cell)
     body = dig.read_text() if dig.exists() else ""
@@ -883,7 +914,8 @@ def run_humaneval(a, tasks, first, first_rows):
                      % (len(cv), len(ok_first)))
         conv = [i for i in ok_first if not ok_first[i] and cv[i]]
         control = {"file": str(pathlib.Path(a.control_verdicts).name),
-                   "file_sha16": sha16(a.control_verdicts),
+                   "file_sha16": sha1_16(a.control_verdicts),
+                   "file_sha256_16": sha256_16(a.control_verdicts),
                    "control_arm_pass": sum(1 for v in cv.values() if v),
                    "redraw_keep_conversions": len(conv),
                    "converted_ids": sorted(conv),
@@ -926,8 +958,9 @@ def run_humaneval(a, tasks, first, first_rows):
         for i, t in enumerate(queue):
             rec = {"id": t["id"], "bench": t["bench"], "arm": CONTRACT, "model": model,
                    "temp": TEMP, "max_tokens": max_tokens,
-                   "task_sha16": sha16(a.tasks),
-                   "first_answer_sha16": hashlib.sha1(first[t["id"]].encode()).hexdigest()[:16],
+                   "task_sha16": sha1_16(a.tasks),
+                   "first_answer_sha16": sha1_16_text(first[t["id"]]),
+                   "first_answer_sha256_16": sha256_16_text(first[t["id"]]),
                    "verifier_class": t["_class"], "validator": "%s (verdict only)" % E.EXEC_CHECKER,
                    "prev_truncated": len(first[t["id"]] or "") > MAX_PREV_CHARS_CODE}
             rec["verifier_class"] = t["_class"] if not redraw else "not-shown (redraw control)"
@@ -1010,12 +1043,11 @@ def run_humaneval(a, tasks, first, first_rows):
                        ("%s-verdicts.jsonl" % CONTRACT, verdict_rows)):
         (out / name).write_text("\n".join(json.dumps(r, ensure_ascii=False, sort_keys=True)
                                           for r in rows) + "\n")
-        (out / (name + ".sha16")).write_text(
-            hashlib.sha1((out / name).read_bytes()).hexdigest()[:16] + "\n")
+        (out / (name + ".sha16")).write_text(sha256_16(out / name) + "\n")
     ptok = sum(r.get("ptok") or 0 for r in stored.values())
     ctok = sum(r.get("ctok") or 0 for r in stored.values())
     sec = sorted(r.get("seconds") or 0.0 for r in stored.values())
-    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha16(a.tasks),
+    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha1_16(a.tasks),
            "first_arm_pass": n_first,
            "asked_stored": len(chk_retry), "asked_unrun": len(asked) - len(chk_retry),
            "asked_by_class": dict(sorted(by_class.items())),
@@ -1048,7 +1080,9 @@ def run_humaneval(a, tasks, first, first_rows):
            "retry_seconds_median": (sec[len(sec) // 2] if sec else None),
            "retry_prompt_tokens": ptok, "retry_completion_tokens": ctok,
            "wall_s": round(time.time() - t0, 1), "transport_errors": n_bad,
-           "first_answers_sha16": sha16(a.first_answers)}
+           "first_answers_sha16": sha1_16(a.first_answers),
+           "first_answers_sha256_16": sha256_16(a.first_answers),
+           "pin_hash_convention": PIN_HASH_NOTE}
     (out / ("pub-repair-%s-census.json" % CONTRACT)).write_text(json.dumps(cen, indent=2) + "\n")
     print("census: asked %d/%d | retry passes checker %d | converted %d (%s) | worse %d | "
           "unrun %d | redraw control converts %s"
@@ -1069,7 +1103,9 @@ def run_humaneval(a, tasks, first, first_rows):
     dig = HERE.parent / "benchmarks" / "public" / "PUB-DIGEST.md"
     import pub_bench_score as pbs                          # noqa: E402
     bench = tasks[0]["bench"]
-    tasks_cell = hashlib.sha256(open(a.tasks, "rb").read()).hexdigest()[:16]
+    # READ the published pin from MANIFEST.json instead of re-hashing it here: one
+    # pinned task file must carry exactly one tasks cell in the digest table.
+    tasks_cell = pbs.manifest_tasks_cell(bench, a.tasks)
     model_label = "%s+%s(keep-best)" % (model or first_model, CONTRACT)
     key_cell = "\n| %s | %s | %d | %s |" % (bench, model_label, n, tasks_cell)
     body = dig.read_text() if dig.exists() else ""
@@ -1222,8 +1258,9 @@ def main():
         for i, t in enumerate(queue):
             rec = {"id": t["id"], "bench": t["bench"], "arm": CONTRACT, "model": model,
                    "temp": TEMP, "max_tokens": max_tokens,
-                   "task_sha16": sha16(a.tasks), "first_answer_sha16":
-                   hashlib.sha1(first[t["id"]].encode()).hexdigest()[:16],
+                   "task_sha16": sha1_16(a.tasks), "first_answer_sha16":
+                   sha1_16_text(first[t["id"]]),
+                   "first_answer_sha256_16": sha256_16_text(first[t["id"]]),
                    "violated": [c for c, _ in t["_failed_checks"]],
                    "prev_truncated": False}
             st = time.time()
@@ -1292,18 +1329,19 @@ def main():
                        ("%s-verdicts.jsonl" % CONTRACT, verdict_rows)):
         (out / name).write_text("\n".join(json.dumps(r, ensure_ascii=False, sort_keys=True)
                                           for r in rows) + "\n")
-        (out / (name + ".sha16")).write_text(
-            hashlib.sha1((out / name).read_bytes()).hexdigest()[:16] + "\n")
+        (out / (name + ".sha16")).write_text(sha256_16(out / name) + "\n")
     print("merged arm bytes -> %s | verdicts -> %s"
           % (out / ("%s-merged-answers.jsonl" % CONTRACT), out / ("%s-verdicts.jsonl" % CONTRACT)))
-    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha16(a.tasks),
+    cen = {"contract": CONTRACT, "tasks": n, "task_sha16": sha1_16(a.tasks),
            "first_arm_strict": n_first, "asked_stored": asked_ran, "asked_unrun": len(asked) - asked_ran,
            "retry_fixed": fixed, "retry_still_failing": still,
            "keep_best_strict": kb, "retry_only_strict": retry_only,
            "checker": pifev.CHECKER, "call": {"temp": TEMP, "max_tokens": max_tokens,
                                              "first_arm_max_tokens": first_budget},
            "wall_s": round(time.time() - t0, 1), "transport_errors": n_bad,
-           "first_answers_sha16": sha16(a.first_answers)}
+           "first_answers_sha16": sha1_16(a.first_answers),
+           "first_answers_sha256_16": sha256_16(a.first_answers),
+           "pin_hash_convention": PIN_HASH_NOTE}
     (out / ("pub-repair-%s-census.json" % CONTRACT)).write_text(json.dumps(cen, indent=2) + "\n")
     print("census: asked %d/%d | retry fixed %d | still failing %d | unrun %d"
           % (asked_ran, len(asked), fixed, still, len(asked) - asked_ran))
@@ -1321,7 +1359,7 @@ def main():
     import pub_bench_score as pbs                          # noqa: E402
     bench = tasks[0]["bench"]
     model_label = "%s+%s(keep-best)" % (model or first_model, CONTRACT)
-    key = "\n| %s | %s | %d | %s |" % (bench, model_label, n, sha16(a.tasks))
+    key = "\n| %s | %s | %d | %s |" % (bench, model_label, n, pbs.manifest_tasks_cell(bench, a.tasks))
     body = dig.read_text() if dig.exists() else ""
     if key in body:
         print("digest row already present - not duplicated")
@@ -1329,7 +1367,7 @@ def main():
         line = ("| %s | %s | %d | %s | validator-driven one-shot repair over the stored first-arm "
                 "bytes: %d re-asks, %d fixed, %d still failing; same pinned checker %s, temp %.1f, "
                 "retry max_tokens %d (first arm %d); retry-only variant %d/%d = %.1f%% | %d/%d = **%.1f%%** |"
-                % (bench, model_label, n, sha16(a.tasks), asked_ran, fixed, still, pifev.CHECKER,
+                % (bench, model_label, n, pbs.manifest_tasks_cell(bench, a.tasks), asked_ran, fixed, still, pifev.CHECKER,
                    TEMP, max_tokens, first_budget, retry_only, n, 100.0 * retry_only / n, kb, n,
                    100.0 * kb / n))
         pbs.write_digest(line, str(dig))

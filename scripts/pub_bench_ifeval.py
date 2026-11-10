@@ -51,8 +51,16 @@ SUITE_ATTEMPTS = 3
 # environment break (missing NLTK word list, dead language detector) moves far more and is refused.
 
 
-def sha16(p):
+def sha1_16(p):
+    """SHA-1/16. The PUBLISHED IFEval task pin (2c672531577dcc33, printed by every ifeval digest
+    row) is the SHA-1/16 of `ifeval.tasks.jsonl`; its SHA-256/16 (e09a5cab3782ed5b) is labelled
+    `tasks_sha256_16` in MANIFEST.json. Never cross-compare the two."""
     return hashlib.sha1(pathlib.Path(p).read_bytes()).hexdigest()[:16]
+
+
+def sha256_16(p):
+    """SHA-256/16: the artifact-pin convention of this line (`.sha16` sidecars)."""
+    return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()[:16]
 
 
 def load_vendor():
@@ -169,10 +177,9 @@ def main():
     (out / ("%s-%s-verdicts.jsonl" % (a.bench, CHECKER))).write_text(
         "\n".join(json.dumps(r, sort_keys=True) for r in rows) + "\n")
     (out / ("%s-%s-verdicts.sha16" % (a.bench, CHECKER))).write_text(
-        hashlib.sha1((out / ("%s-%s-verdicts.jsonl" % (a.bench, CHECKER))).read_bytes()).hexdigest()[:16] + "\n")
+        sha256_16(out / ("%s-%s-verdicts.jsonl" % (a.bench, CHECKER))) + "\n")
 
     dig = HERE.parent / "benchmarks" / "public" / "PUB-DIGEST.md"
-    task_sha = sha16(a.tasks)
     # One writer, one format: the row goes through `pub_bench_score.write_digest`, which owns the
     # table header, the newest-first order and the separator line. The partition hack that used to
     # live here inserted the row ABOVE the `|---|` separator (a table GitHub renders as prose) and
@@ -180,6 +187,10 @@ def main():
     if str(HERE) not in sys.path:
         sys.path.insert(0, str(HERE))
     import pub_bench_score as pbs                                # noqa: E402
+    # READ the published pin: it is SHA-1/16 for ifeval while the other sets are
+    # SHA-256/16, and a second value for one pinned file would put two incomparable
+    # tasks cells on one set inside the table.
+    task_sha = pbs.manifest_tasks_cell(a.bench, a.tasks)
     line = ("| %s | %s | %d | %s | %s; checker %s | %d/%d = **%.1f%%** strict (%d/%d loose) |"
             % (a.bench, a.model, n, task_sha, a.call, CHECKER, st, n, 100.0 * st / n, ls, n))
     key = "\n| %s | %s | %d | %s |" % (a.bench, a.model, n, task_sha)

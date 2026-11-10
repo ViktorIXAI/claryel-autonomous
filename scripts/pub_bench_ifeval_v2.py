@@ -58,6 +58,10 @@ def tasks_sha16(p):
     return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()[:16]
 
 
+def tasks_sha256_16(p):
+    return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()[:16]
+
+
 def assert_vendor_pins():
     """The vendored modules are byte-pinned in MANIFEST.json; refuse before scoring anything."""
     pins = json.loads(MANIFEST.read_text(encoding="utf-8"))["benches"]["ifeval"]["checker_files"]
@@ -301,14 +305,16 @@ def main():
     side = out / ("%s-%s-verdicts.jsonl" % (a.bench, CHECKER))
     side.write_text("\n".join(json.dumps(r, sort_keys=True) for r in rows) + "\n")
     (out / ("%s-%s-verdicts.sha16" % (a.bench, CHECKER))).write_text(
-        hashlib.sha1(side.read_bytes()).hexdigest()[:16] + "\n")
+        tasks_sha256_16(side) + "\n")
     if a.no_digest:
         print("--no-digest: verdict sidecar written (%s), no digest row" % side)
         return
     if str(HERE) not in sys.path:
         sys.path.insert(0, str(HERE))
     import pub_bench_score as pbs                                # noqa: E402
-    tsha = tasks_sha16(a.tasks)
+    # READ the published pin (SHA-1/16 for ifeval): writing a SHA-256/16 cell here
+    # would mint a second tasks cell for one pinned file and break row comparability.
+    tsha = pbs.manifest_tasks_cell(a.bench, a.tasks)
     line = ("| %s | %s | %d | %s | %s; checker %s | %d/%d = **%.1f%%** strict (%d/%d loose) |"
             % (a.bench, a.model, n, tsha, a.call, CHECKER, st, n, 100.0 * st / n, lo, n))
     key = "\n| %s | %s | %d | %s |" % (a.bench, a.model, n, tsha)

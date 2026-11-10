@@ -460,3 +460,62 @@ ids are named here instead of averaged into the band.
 Reproduce: `python <ifeval-venv>/bin/python scripts/pub_bench_ifeval_v2.py benchmarks/public/arms/<arm-answers>.jsonl benchmarks/public/ifeval.tasks.jsonl ifeval <model> "<call>" --out <dir> --no-digest`
 (the scorer never adds a digest row for a row already published under `pub-ifeval-v1`; the corrected
 numbers live in this table). The self-test alone: same command with `--selftest-only`.
+
+## The IFEval tasks pin is SHA-1/16 — labelled 2026-11-10 (pin audit, no measurement moved)
+
+The pin audit that fixed the artifact index (`arms/README.md`, "Index pins were ambiguous") found the
+same ambiguity one level up, on this set's **task file**. Every published IFEval row in
+`PUB-DIGEST.md` prints the tasks cell `2c672531577dcc33`, and `MANIFEST.json` called it
+`tasks_sha16`. It is the **SHA-1/16** of `benchmarks/public/ifeval.tasks.jsonl`: `scripts/pub_bench_ifeval.py`
+hashed the tasks file with SHA-1 before any other set existed, and the value was copied into every
+row and into the manifest ever since. The **SHA-256/16** of the identical 541 rows is
+`e09a5cab3782ed5b`.
+
+Consequence, stated plainly: an auditor who verifies this page the way every other set is verified —
+`sha256sum benchmarks/public/ifeval.tasks.jsonl | cut -c1-16` — got `e09a5cab3782ed5b`, did not find
+it in the table, and was entitled to conclude the task file had moved under the published rows. It had
+not moved: both hashes name the same bytes, and the pin was simply produced with the other function.
+
+What changed, all of it metadata and plumbing:
+
+* `MANIFEST.json -> benches.ifeval` now carries `tasks_sha1_16` (the published pin),
+  `tasks_sha256_16` (`e09a5cab3782ed5b`) and a `hash_note`; the manifest also gained a top-level
+  `hash_conventions` key naming the two conventions repo-wide, because
+  `scripts/security/secret_scan.py` binds its byte-pinned exceptions with SHA-1/16 on purpose;
+* `scripts/pub_bench_score.manifest_tasks_cell(bench, tasks)` is now the single source for a digest
+  row's tasks cell: it **reads** the published pin and refuses (exit 2) a task file that matches
+  neither label, or a SHA-1-era pin that is not labelled. The IFEval scorers and the repair runner
+  call it instead of re-hashing, so a second tasks cell for one pinned file cannot be minted —
+  `pub_bench_ifeval_v2.py` previously would have printed `e09a5cab3782ed5b` in a new row while the
+  published rows print `2c672531577dcc33`, i.e. one set with two identities in one table;
+* `harness/pub_arms_index_test.py` (30 checks, CI-enrolled by the `harness/*test.py` glob) pins both
+  refusals with tamper controls, and re-verifies all nine task pins reproduce at current bytes.
+
+Nothing was re-measured. The 541-row task file, the answer bytes, the verdict files and the published
+percents (bare 467/541 = 86.3 % strict as-run, contour-matched 462/541, codex 515/541,
+`pub-repair-v1` 497/541, `pub-repair-v2` 509/541, and the corrected `pub-ifeval-v2` table above) are
+byte-unchanged; a re-run of the corrected scorer through the patched writer after the change gave
+469, 497 and 510 of 541 — the same three numbers as the pre-change pin audit.
+
+**The checker files themselves were pinned with the other function (same audit).** The five vendored
+files this contract re-asserts at run time — and the `gpt4_sample.jsonl` reference response — are
+pinned in `MANIFEST.json` by **SHA-1/16** (`evaluation_lib.py` `e0b6db8fcbb9005c`,
+`instructions.py` `0408215285bf39f6`, `instructions_registry.py` `85d6360b7709934f`,
+`instructions_test.py` `d5258d03277cd333`, `instructions_util.py` `8ad230f0b60767b4`,
+`gpt4_sample.jsonl` `ff57ec6d17688771`), so the documented verification path
+(`sha256sum … | cut -c1-16`) mismatches them and reads as a tampered checker. The SHA-256/16 twins
+are now published next to them (`35decc0600071848`, `60e086f5342a03ce`, `ec92d72c264f6d90`,
+`e677c190c393162f`, `a73797261eee5bf4`, `0cff1d1469b774e8`), the entry's `hash_note` names the
+convention, and `python3 scripts/pub_arms_index.py --pins` fails closed on any pin that stops
+resolving under its named convention. **No vendored byte was touched** — the scorer still re-asserts
+the five SHA-1/16 values it has always asserted.
+
+**One pin this commit moved, recorded rather than hidden:**
+`benches.ifeval.checker_history[0].sha256_16` for `scripts/pub_bench_ifeval_v2.py` was
+`b4a089bc7bb3b212` — the bytes published at 04:33 UTC today, the bytes every rescore above was run
+against. The pin-audit edit renamed that module's hash helpers and routed its tasks cell through
+`manifest_tasks_cell`, so the file bytes moved to `affc8151363d633a`. The old value is kept as a
+nested `pin_history` record in the manifest. Proof that the edit moved no verdict, run after the
+edit with zero model calls: bare 469, `pub-repair-v1` 497, `pub-repair-v2` 510 of 541 strict under
+`pub-ifeval-v2` — identical to the pre-edit pin-audit re-scores — and the scorer self-test stayed
+22/22 (`selftest cases=22 failures=0`).

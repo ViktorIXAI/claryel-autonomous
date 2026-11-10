@@ -6,160 +6,201 @@ rules; **answer text is never edited**. Re-scoring a published `*-answers.jsonl`
 `scripts/pub_bench_score.py` (contract `pub-checkers-v2`) reproduces the published percent
 exactly — asserted for every arm below.
 
-| arm file | lines | sha16 |
-| arc-challenge-contour-escalation-answers.jsonl | 300 | `90bf60cc70007866` |
-| arc-challenge-contour-escalation-bank-version.json | 6 | `845cdf76a755ec50` |
-| arc-challenge-contour-escalation-ledger.jsonl | 300 | `0e4eae97bdb7ebf5` |
-| arc-challenge-contour-escalation-plan.json | 1 | `2025e06b43582822` |
-| arc-challenge-contour-escalation-results.jsonl | 300 | `1b205f13fbb9d213` |
-| arc-challenge-contour-escalation-run-record.json | 40 | `cde6c60ea9b13b4c` |
-| arc-challenge-contour-escalation-stats.json | 24 | `86cf050bdbc3052c` |
-| arc-challenge-contour-escalation-ws-identity.json | 36 | `7ec628b3206b6468` |
-| arc-challenge-contour-matched-answers.jsonl | 300 | `9be65d62b734a93c` |
-| arc-challenge-contour-matched-bank-version.json | 6 | `8fdd7e82405d3475` |
-| arc-challenge-contour-matched-ledger.jsonl | 300 | `14bff207380e4735` |
-| arc-challenge-contour-matched-plan.json | 1 | `2025e06b43582822` |
-| arc-challenge-contour-matched-results.jsonl | 300 | `e8a19fe4c79a8420` |
-| arc-challenge-contour-matched-run-record.json | 45 | `49a67ae9735a35f7` |
-| arc-challenge-contour-matched-stats.json | 28 | `39fca8a2b2762039` |
-| arc-challenge-contour-matched-ws-identity.json | 41 | `bcd8a97b65c83447` |
-| arc-easy-contour-escalation-answers.jsonl | 300 | `e2407d5cb745a05a` |
-| arc-easy-contour-escalation-bank-version.json | 6 | `055b650afd938842` |
-| arc-easy-contour-escalation-ledger.jsonl | 300 | `6f4eace44fc97190` |
-| arc-easy-contour-escalation-plan.json | 1 | `e1638a6a84d969f7` |
-| arc-easy-contour-escalation-results.jsonl | 300 | `7c916c24b4cb3564` |
-| arc-easy-contour-escalation-run-record.json | 40 | `9b30f05be12c9d29` |
-| arc-easy-contour-escalation-stats.json | 22 | `fc788d183fd5cc58` |
-| arc-easy-contour-escalation-ws-identity.json | 36 | `1491da4724a0ecf7` |
-| arc-easy-contour-matched-answers.jsonl | 300 | `1f0bffde0a8e8133` |
-| arc-easy-contour-matched-bank-version.json | 6 | `35f62500bfc27f93` |
-| arc-easy-contour-matched-ledger.jsonl | 300 | `11f24b49d972096c` |
-| arc-easy-contour-matched-plan.json | 1 | `e1638a6a84d969f7` |
-| arc-easy-contour-matched-results.jsonl | 300 | `7c5981b5350fcd61` |
-| arc-easy-contour-matched-run-record.json | 45 | `5281b896bea709cf` |
-| arc-easy-contour-matched-stats.json | 28 | `e17486d3bdbed2cb` |
-| arc-easy-contour-matched-ws-identity.json | 41 | `1d6eaf5cddd81e57` |
-| gpqa-diamond-contour-escalation-answers.jsonl | 198 | `b28ab5ac6f562ee8` |
-| gpqa-diamond-contour-escalation-bank-version.json | 6 | `330a74aeec4a8240` |
-| gpqa-diamond-contour-escalation-ledger.jsonl | 198 | `f8b46c25e51ff0a7` |
-| gpqa-diamond-contour-escalation-plan.json | 1 | `3d91a5f23ee84222` |
-| gpqa-diamond-contour-escalation-results.jsonl | 198 | `d92f4e27dd452a5f` |
-| gpqa-diamond-contour-escalation-run-record.json | 40 | `d8d71a0c7740f895` |
-| gpqa-diamond-contour-escalation-stats.json | 25 | `d8ed89a24812f8c2` |
-| gpqa-diamond-contour-escalation-ws-identity.json | 36 | `1c5913d87ad68258` |
-| gpqa-diamond-contour-matched-answers.jsonl | 198 | `07132245ccef4880` |
-| gpqa-diamond-contour-matched-bank-version.json | 6 | `7e98b4233a3c32cc` |
-| gpqa-diamond-contour-matched-ledger.jsonl | 198 | `dfeac925340b8cdf` |
-| gpqa-diamond-contour-matched-plan.json | 1 | `3d91a5f23ee84222` |
-| gpqa-diamond-contour-matched-results.jsonl | 198 | `8e48383694510f79` |
-| gpqa-diamond-contour-matched-run-record.json | 45 | `9c928083666372b3` |
-| gpqa-diamond-contour-matched-stats.json | 30 | `833b21dcb4e1fdaa` |
-| gpqa-diamond-contour-matched-ws-identity.json | 41 | `4a9b5fc0d4126116` |
-| gsm8k-contour-escalation-answers.jsonl | 300 | `3f294f62a4ee0c0a` |
-| gsm8k-contour-escalation-bank-version.json | 6 | `d0f6180e96b14c44` |
-| gsm8k-contour-escalation-ledger.jsonl | 300 | `b86aee72840a9cb0` |
-| gsm8k-contour-escalation-plan.json | 1 | `8d98d11112bb738b` |
-| gsm8k-contour-escalation-results.jsonl | 300 | `a4f9cc49b6f90b87` |
-| gsm8k-contour-escalation-run-record.json | 40 | `c04c6872de8ee3d2` |
-| gsm8k-contour-escalation-stats.json | 24 | `1bbfa5f23461a217` |
-| gsm8k-contour-escalation-ws-identity.json | 36 | `678a8d65b6d7040c` |
-| gsm8k-contour-matched-answers.jsonl | 300 | `f171767f0848d1c5` |
-| gsm8k-contour-matched-bank-version.json | 6 | `e5d1738b14ffc4e5` |
-| gsm8k-contour-matched-ledger.jsonl | 300 | `c036d32b5e5bac1a` |
-| gsm8k-contour-matched-plan.json | 1 | `8d98d11112bb738b` |
-| gsm8k-contour-matched-results.jsonl | 300 | `eb9660c74b337484` |
-| gsm8k-contour-matched-run-record.json | 45 | `1d260013ceb354e1` |
-| gsm8k-contour-matched-stats.json | 28 | `1eef1c20e0b26658` |
-| gsm8k-contour-matched-ws-identity.json | 41 | `175da640f32b9fbd` |
-| humaneval-contour-matched-answers.jsonl | 164 | `a454fe78f78ba257` |
-| humaneval-contour-matched-bank-version.json | 6 | `4e0aba1d01c5c547` |
-| humaneval-contour-matched-ledger.jsonl | 164 | `e7090c15878a2566` |
-| humaneval-contour-matched-plan.json | 1 | `52bf38656a449d2c` |
-| humaneval-contour-matched-results.jsonl | 164 | `c591d87470f83cef` |
-| humaneval-contour-matched-run-record.json | 45 | `325f1294c01333ef` |
-| humaneval-contour-matched-stats.json | 28 | `1f444883941d10bd` |
-| humaneval-contour-matched-ws-identity.json | 41 | `764603500d76ec7d` |
-| humaneval-basalt-answers.jsonl | 164 | `4f61b87d5e8d130b` |
-| humaneval-basalt-verdicts.jsonl | 164 | `6878c8b128c3c05d` |
-| humaneval-contour-matched-verdicts-v2.jsonl | 164 | `84949a2520f4fdf3` |
-| pub-repair-pub-repair-humaneval-v1.jsonl (5 retry rows) | 5 | `f8a5792dc4ae00e0` |
-| pub-repair-pub-repair-humaneval-v1-census.json | 61 | `ed7937b51eb16f70` |
-| pub-repair-humaneval-v1-merged-answers.jsonl | 164 | `5064a5e658289487` |
-| pub-repair-humaneval-v1-verdicts.jsonl | 164 | `647b5a0992ea3f1f` |
-| pub-repair-pub-repair-humaneval-v2.jsonl (5 retry rows, retry@2400) | 5 | `d04cbd44cab50133` |
-| pub-repair-pub-repair-humaneval-v2-census.json | 63 | `506acf41b499386a` |
-| pub-repair-humaneval-v2-merged-answers.jsonl | 164 | `de1bfeb8b7f658b0` |
-| pub-repair-humaneval-v2-verdicts.jsonl | 164 | `820de9e186579895` |
-| pub-repair-pub-redraw-humaneval-2400.jsonl (5 redraw-control rows) | 5 | `f72175d8bfb6fc67` |
-| pub-repair-pub-redraw-humaneval-2400-census.json | 62 | `7cb74bc109a9b193` |
-| pub-redraw-humaneval-2400-merged-answers.jsonl | 164 | `16ff67099a3c944c` |
-| pub-redraw-humaneval-2400-verdicts.jsonl | 164 | `647b5a0992ea3f1f` |
-| mmlu-pro-contour-matched-results.jsonl | 500 | `43130af5cab85a87` |
-| mmlu-pro-contour-matched-ledger.jsonl | 500 | `b17635f6716ed8dc` |
-| mmlu-pro-contour-matched-answers.jsonl | 500 | `e15ba1bba5204f49` |
-| mmlu-pro-contour-matched-stats.json | 28 | `f42675bfc629d074` |
-| mmlu-pro-contour-matched-run-record.json | 45 | `b397bf642c844cb1` |
-| mmlu-pro-contour-matched-plan.json | 1 | `cd7361fc7bded818` |
-| mmlu-pro-contour-matched-bank-version.json | 6 | `c446b2252edd3a27` |
-| mmlu-pro-contour-matched-ws-identity.json | 41 | `9e7100ecc1dc71bb` |
-| ifeval-basalt-answers.jsonl | 541 | `445dfa2eba3d12aa` |
-| ifeval-basalt-verdicts.jsonl | 541 | `1884989e822f21e3` |
-| ifeval-contour-matched-answers.jsonl | 541 | `e611e76ebdd808cf` |
-| ifeval-contour-matched-verdicts.jsonl | 541 | `c0e732166d9441ef` |
-| ifeval-contour-matched-results.jsonl | 541 | `d8a519a5f9b07c18` |
-| ifeval-contour-matched-ledger.jsonl | 541 | `13c467d36c61d183` |
-| ifeval-contour-matched-stats.json | 28 | `54aa65eb78feb3b4` |
-| ifeval-contour-matched-run-record.json | 45 | `d4a3dc5fbb9481d4` |
-| ifeval-contour-matched-plan.json | 1 | `9c505e0d46010d59` |
-| ifeval-contour-matched-bank-version.json | 6 | `18ea68bc69082099` |
-| ifeval-contour-matched-ws-identity.json | 43 | `e190c300652007a2` |
-| ifeval-codex-answers.jsonl | 541 | `fc2650b08fb87bef` |
-| ifeval-codex-verdicts.jsonl | 541 | `838f55ca6a6a24fc` |
-| bfcl-codex-answers.jsonl | 300 | `08ce765f1f145d7c` |
-| bfcl-codex-verdicts.jsonl | 300 | `30895bf48007c6e0` |
-| livecodebench-codex-answers.jsonl | 175 | `d0955383a7aa66d0` |
-| livecodebench-codex-verdicts.jsonl | 112 | `f5cc854453597bdb` |
-| livecodebench-codex-verdicts-v2.jsonl | 175 | `a53590d48b86dbb8` |
-| livecodebench-bare-answers.jsonl | 175 | `ff3e16209ae155d7` |
-| livecodebench-bare-verdicts.jsonl | 175 | `40a412a8e47f357e` |
-| livecodebench-contour-matched-answers.jsonl | 175 | `d33da04ea0b43c80` |
-| livecodebench-contour-matched-verdicts.jsonl | 175 | `d0e3271e8924f970` |
-| livecodebench-contour-matched-stats.json | 33 | `36d6c656d487c19a` |
-| pub-repair-pub-repair-lcb-v1.jsonl (67 retry rows) | 67 | `db0d8823d8b1e9b6` |
-| pub-repair-pub-repair-lcb-v1-census.json | 40 | `f2346467bc26f8db` |
-| pub-repair-lcb-v1-merged-answers.jsonl | 175 | `96e7a62330e8aa90` |
-| pub-repair-lcb-v1-verdicts.jsonl | 175 | `1fc8d792711a62c7` |
-| pub-repair-pub-repair-bfcl-v1.jsonl (124 retry rows) | 124 | `3f5376495bf06e6c` |
-| pub-repair-pub-repair-bfcl-v1-census.json | 94 | `0070564d01b48301` |
-| pub-repair-bfcl-v1-merged-answers.jsonl | 1240 | `897462ba2e7c2d58` |
-| pub-repair-bfcl-v1-verdicts.jsonl | 1240 | `26eeab2051755ec8` |
-| bfcl-basalt-answers.jsonl | 1240 | `4ac238d09babcb45` |
-| bfcl-basalt-verdicts.jsonl | 1240 | `389aed67b18d0d58` |
-| bfcl-contour-matched-answers.jsonl | 1240 | `ed8b58a224521f39` |
-| bfcl-contour-matched-verdicts.jsonl | 1240 | `b6945dd3616dff85` |
-| bfcl-contour-matched-results.jsonl | 1240 | `ce492b95c4565391` |
-| bfcl-contour-matched-ledger.jsonl | 1240 | `440433ec40a72e09` |
-| bfcl-contour-matched-stats.json | 28 | `17a16a334e8c18cc` |
-| bfcl-contour-matched-run-record.json | 45 | `8681385387e50f51` |
-| bfcl-contour-matched-plan.json | 1 | `53d9b22ba9d9a311` |
-| bfcl-contour-matched-bank-version.json | 6 | `f62925e5dfecc270` |
-| bfcl-contour-matched-ws-identity.json | 42 | `5cebff43c0f71fff` |
-| gsm8k-basalt-answers.jsonl | 1319 | `f3dedf9d7055876b` |
-| gsm8k-codex-answers.jsonl | 300 | `a9a4725fa3a916ce` |
-| gsm8k-grok-answers.jsonl | 300 | `760a704e9868bff1` |
-| gsm8k-smoke-answers.jsonl | 25 | `0c062902777556de` |
-| arc-easy-basalt-answers.jsonl | 2376 | `3450700e985bce95` |
-| arc-easy-codex-answers.jsonl | 300 | `b126e410e2d95f91` |
-| arc-easy-grok-answers.jsonl | 300 | `94295e1012c346b0` |
-| arc-challenge-basalt-answers.jsonl | 1172 | `7aa4ab5630aabbc0` |
-| arc-challenge-codex-answers.jsonl | 300 | `a9a9c62d9593bf18` |
-| arc-challenge-grok-answers.jsonl | 300 | `d224bded5c104df7` |
-| gpqa-diamond-basalt-answers.jsonl | 198 | `4126971be625719b` |
-| gpqa-diamond-codex-answers.jsonl | 198 | `2b8f5ca4b7ffd8de` |
-| mmlu-pro-basalt-answers.jsonl | 500 | `fc9e8741edfec51e` |
-| mmlu-pro-codex-answers.jsonl | 500 | `17230236196545a4` |
-| humaneval-codex-answers.jsonl | 164 | `d660e00fa0cfeb1b` |
-| humaneval-codex-verdicts.jsonl | 164 | `714a4005f8defed2` |
+**How to verify a row (and why there are two hash columns).** The table is generated by
+`scripts/pub_arms_index.py` and CI runs it with `--check`, so a pin, a line count or a missing row
+fails the build instead of quietly drifting. Each row pins the same bytes under both conventions
+this repo uses: `sha256/16` is the digest-row convention (`sha256sum <file> | cut -c1-16`, the one
+every `PUB-DIGEST.md` tasks cell and `MANIFEST.json -> tasks_sha16` uses) and `sha1/16` is the
+convention the repo security scanner binds its byte-pinned exceptions to
+(`MANIFEST.json -> benches.bfcl.hash_note`). Every shipped `<file>.sha16` sidecar carries the
+**`sha256/16`** value of `<file>` — one line, and the row above it names both.
+
+| arm file | lines | sha1/16 | sha256/16 |
+|---|---|---|---|
+| arc-challenge-contour-escalation-answers.jsonl | 300 | `bd2cfcbe6c25341a` | `90bf60cc70007866` |
+| arc-challenge-contour-escalation-bank-version.json | 6 | `157aff749154f176` | `845cdf76a755ec50` |
+| arc-challenge-contour-escalation-ledger.jsonl | 300 | `d0a465e82662198a` | `0e4eae97bdb7ebf5` |
+| arc-challenge-contour-escalation-plan.json | 1 | `6c2500589c9a3b5f` | `2025e06b43582822` |
+| arc-challenge-contour-escalation-results.jsonl | 300 | `12f5b433e0e680c3` | `1b205f13fbb9d213` |
+| arc-challenge-contour-escalation-run-record.json | 40 | `b39d348558a419f7` | `cde6c60ea9b13b4c` |
+| arc-challenge-contour-escalation-stats.json | 24 | `1b6a2003f3c857a0` | `86cf050bdbc3052c` |
+| arc-challenge-contour-escalation-ws-identity.json | 36 | `3455a3431e5c26ad` | `7ec628b3206b6468` |
+| arc-challenge-contour-matched-answers.jsonl | 300 | `95e4845fe8067923` | `9be65d62b734a93c` |
+| arc-challenge-contour-matched-bank-version.json | 6 | `1c0e90e2eec7597e` | `8fdd7e82405d3475` |
+| arc-challenge-contour-matched-ledger.jsonl | 300 | `b280a77f040f8d77` | `14bff207380e4735` |
+| arc-challenge-contour-matched-plan.json | 1 | `6c2500589c9a3b5f` | `2025e06b43582822` |
+| arc-challenge-contour-matched-results.jsonl | 300 | `26494be40e340ec9` | `e8a19fe4c79a8420` |
+| arc-challenge-contour-matched-run-record.json | 45 | `1d5361c8344c2dbb` | `49a67ae9735a35f7` |
+| arc-challenge-contour-matched-stats.json | 28 | `1cf868908d796324` | `39fca8a2b2762039` |
+| arc-challenge-contour-matched-ws-identity.json | 41 | `d039c7e9ef2ea478` | `bcd8a97b65c83447` |
+| arc-easy-contour-escalation-answers.jsonl | 300 | `eedbde5bc97834a4` | `e2407d5cb745a05a` |
+| arc-easy-contour-escalation-bank-version.json | 6 | `c4e6b63cf68435a4` | `055b650afd938842` |
+| arc-easy-contour-escalation-ledger.jsonl | 300 | `8dde3731c1cfd9ad` | `6f4eace44fc97190` |
+| arc-easy-contour-escalation-plan.json | 1 | `acbc9d0180fcbefa` | `e1638a6a84d969f7` |
+| arc-easy-contour-escalation-results.jsonl | 300 | `ef61f6f931981a8d` | `7c916c24b4cb3564` |
+| arc-easy-contour-escalation-run-record.json | 40 | `a58c53fd3ce65765` | `9b30f05be12c9d29` |
+| arc-easy-contour-escalation-stats.json | 22 | `f7ef6e8bc0e1cab8` | `fc788d183fd5cc58` |
+| arc-easy-contour-escalation-ws-identity.json | 36 | `5a14b5fc3f0d7458` | `1491da4724a0ecf7` |
+| arc-easy-contour-matched-answers.jsonl | 300 | `73c263b60db941f3` | `1f0bffde0a8e8133` |
+| arc-easy-contour-matched-bank-version.json | 6 | `4abd9e8752a9bdc4` | `35f62500bfc27f93` |
+| arc-easy-contour-matched-ledger.jsonl | 300 | `7f2f1390f4151860` | `11f24b49d972096c` |
+| arc-easy-contour-matched-plan.json | 1 | `acbc9d0180fcbefa` | `e1638a6a84d969f7` |
+| arc-easy-contour-matched-results.jsonl | 300 | `9811477d5e614297` | `7c5981b5350fcd61` |
+| arc-easy-contour-matched-run-record.json | 45 | `48b20541a9f3fce5` | `5281b896bea709cf` |
+| arc-easy-contour-matched-stats.json | 28 | `c0d542deec08ee2c` | `e17486d3bdbed2cb` |
+| arc-easy-contour-matched-ws-identity.json | 41 | `944fbf24ba435ccd` | `1d6eaf5cddd81e57` |
+| gpqa-diamond-contour-escalation-answers.jsonl | 198 | `b622e49bbf9ae7fa` | `b28ab5ac6f562ee8` |
+| gpqa-diamond-contour-escalation-bank-version.json | 6 | `32d9476b52b2277e` | `330a74aeec4a8240` |
+| gpqa-diamond-contour-escalation-ledger.jsonl | 198 | `beac8ea6be7e9b4f` | `f8b46c25e51ff0a7` |
+| gpqa-diamond-contour-escalation-plan.json | 1 | `b94028addcba1342` | `3d91a5f23ee84222` |
+| gpqa-diamond-contour-escalation-results.jsonl | 198 | `7f028862d3c5f0f7` | `d92f4e27dd452a5f` |
+| gpqa-diamond-contour-escalation-run-record.json | 40 | `837ddb394f90f393` | `d8d71a0c7740f895` |
+| gpqa-diamond-contour-escalation-stats.json | 25 | `b0ffbc977cb027a9` | `d8ed89a24812f8c2` |
+| gpqa-diamond-contour-escalation-ws-identity.json | 36 | `d18ac3362c17d86f` | `1c5913d87ad68258` |
+| gpqa-diamond-contour-matched-answers.jsonl | 198 | `d855bb82b1badde9` | `07132245ccef4880` |
+| gpqa-diamond-contour-matched-bank-version.json | 6 | `f7774d5249393a68` | `7e98b4233a3c32cc` |
+| gpqa-diamond-contour-matched-ledger.jsonl | 198 | `2638f009ed5e5bc5` | `dfeac925340b8cdf` |
+| gpqa-diamond-contour-matched-plan.json | 1 | `b94028addcba1342` | `3d91a5f23ee84222` |
+| gpqa-diamond-contour-matched-results.jsonl | 198 | `463e7bfd58ab508d` | `8e48383694510f79` |
+| gpqa-diamond-contour-matched-run-record.json | 45 | `c3b3b4cd6b6f3f8e` | `9c928083666372b3` |
+| gpqa-diamond-contour-matched-stats.json | 30 | `44e4281f767cce5f` | `833b21dcb4e1fdaa` |
+| gpqa-diamond-contour-matched-ws-identity.json | 41 | `45191ff52f2a1099` | `4a9b5fc0d4126116` |
+| gsm8k-contour-escalation-answers.jsonl | 300 | `a157bd1bb3f23293` | `3f294f62a4ee0c0a` |
+| gsm8k-contour-escalation-bank-version.json | 6 | `b4c206fa3852124a` | `d0f6180e96b14c44` |
+| gsm8k-contour-escalation-ledger.jsonl | 300 | `bf2c78efc77ed912` | `b86aee72840a9cb0` |
+| gsm8k-contour-escalation-plan.json | 1 | `3e115aff0a0fa973` | `8d98d11112bb738b` |
+| gsm8k-contour-escalation-results.jsonl | 300 | `5d7703fa38b3be2b` | `a4f9cc49b6f90b87` |
+| gsm8k-contour-escalation-run-record.json | 40 | `61eb7680d4516caa` | `c04c6872de8ee3d2` |
+| gsm8k-contour-escalation-stats.json | 24 | `da3dc6d1c03ef198` | `1bbfa5f23461a217` |
+| gsm8k-contour-escalation-ws-identity.json | 36 | `def3f01c2f4e2ea0` | `678a8d65b6d7040c` |
+| gsm8k-contour-matched-answers.jsonl | 300 | `dc882274634eea00` | `f171767f0848d1c5` |
+| gsm8k-contour-matched-bank-version.json | 6 | `f0c693368846d9c6` | `e5d1738b14ffc4e5` |
+| gsm8k-contour-matched-ledger.jsonl | 300 | `6cb00ac79e4b2c5b` | `c036d32b5e5bac1a` |
+| gsm8k-contour-matched-plan.json | 1 | `3e115aff0a0fa973` | `8d98d11112bb738b` |
+| gsm8k-contour-matched-results.jsonl | 300 | `a0961c02ec5ae1f4` | `eb9660c74b337484` |
+| gsm8k-contour-matched-run-record.json | 45 | `43b77143bade00db` | `1d260013ceb354e1` |
+| gsm8k-contour-matched-stats.json | 28 | `4c52c6e522039245` | `1eef1c20e0b26658` |
+| gsm8k-contour-matched-ws-identity.json | 41 | `22526cadf49db9f8` | `175da640f32b9fbd` |
+| humaneval-contour-matched-answers.jsonl | 164 | `5fa7e6ceaf2248fe` | `a454fe78f78ba257` |
+| humaneval-contour-matched-bank-version.json | 6 | `b61b99d4718d3279` | `4e0aba1d01c5c547` |
+| humaneval-contour-matched-ledger.jsonl | 164 | `f2b671023ba54697` | `e7090c15878a2566` |
+| humaneval-contour-matched-plan.json | 1 | `2e29651e68f5849e` | `52bf38656a449d2c` |
+| humaneval-contour-matched-results.jsonl | 164 | `963304f0bb06a33f` | `c591d87470f83cef` |
+| humaneval-contour-matched-run-record.json | 45 | `15c959e4ce7b676f` | `325f1294c01333ef` |
+| humaneval-contour-matched-stats.json | 28 | `e66e9bc7bf76c8b1` | `1f444883941d10bd` |
+| humaneval-contour-matched-ws-identity.json | 41 | `eca2dece071fd05e` | `764603500d76ec7d` |
+| humaneval-basalt-answers.jsonl | 164 | `c86d13dbc301ccca` | `4f61b87d5e8d130b` |
+| humaneval-basalt-answers.jsonl.sha16 | 1 | `b930f18bd88d9b95` | `e870585a303cdc7a` |
+| humaneval-basalt-verdicts.jsonl | 164 | `19dcf4703c33ad30` | `6878c8b128c3c05d` |
+| humaneval-basalt-verdicts.jsonl.sha16 | 1 | `53b64fafb3dbbb87` | `1376b5add81491b0` |
+| humaneval-contour-matched-verdicts-v2.jsonl | 164 | `6c960e9cc7d8a394` | `84949a2520f4fdf3` |
+| humaneval-contour-matched-verdicts-v2.jsonl.sha16 | 1 | `72791a1fd83251e1` | `950b2ac5c55bd64b` |
+| pub-repair-pub-repair-humaneval-v1.jsonl (5 retry rows) | 5 | `f8a5792dc4ae00e0` | `52e2a872db572dd3` |
+| pub-repair-pub-repair-humaneval-v1.jsonl.sha16 | 1 | `3028446394e3336a` | `2c76af1e0b00a37f` |
+| pub-repair-pub-repair-humaneval-v1-census.json | 61 | `ed7937b51eb16f70` | `e380bbaa3876b0bc` |
+| pub-repair-pub-repair-humaneval-v1-census.json.sha16 | 1 | `254e79ec29eb9ef1` | `3dd31906379e388c` |
+| pub-repair-humaneval-v1-merged-answers.jsonl | 164 | `5064a5e658289487` | `1a854d56d153b4db` |
+| pub-repair-humaneval-v1-merged-answers.jsonl.sha16 | 1 | `dd1bee0d112fab46` | `51bdbbda4ab9ab77` |
+| pub-repair-humaneval-v1-verdicts.jsonl | 164 | `647b5a0992ea3f1f` | `362bb3ff5c23bc7d` |
+| pub-repair-humaneval-v1-verdicts.jsonl.sha16 | 1 | `81bf97c4043ac284` | `9a5bb66e53a2f1bb` |
+| pub-repair-pub-repair-humaneval-v2.jsonl (5 retry rows, retry@2400) | 5 | `d04cbd44cab50133` | `d5417be811a8c81b` |
+| pub-repair-pub-repair-humaneval-v2.jsonl.sha16 | 1 | `eed78c4c84a4e521` | `f9e3c89bd13fc427` |
+| pub-repair-pub-repair-humaneval-v2-census.json | 63 | `506acf41b499386a` | `f48abf7dbb377cb4` |
+| pub-repair-pub-repair-humaneval-v2-census.json.sha16 | 1 | `a5d9ff03644bd6e8` | `6f08d25f6fafb19e` |
+| pub-repair-humaneval-v2-merged-answers.jsonl | 164 | `de1bfeb8b7f658b0` | `159d14c91765d9a7` |
+| pub-repair-humaneval-v2-merged-answers.jsonl.sha16 | 1 | `c27079341888a2bd` | `40a29848d4c04fb6` |
+| pub-repair-humaneval-v2-verdicts.jsonl | 164 | `820de9e186579895` | `8968e8e8d9420c33` |
+| pub-repair-humaneval-v2-verdicts.jsonl.sha16 | 1 | `3273d5ceef4df842` | `96f7d1199e1df8ab` |
+| pub-repair-pub-redraw-humaneval-2400.jsonl (5 redraw-control rows) | 5 | `f72175d8bfb6fc67` | `9146bb4c628ac5b0` |
+| pub-repair-pub-redraw-humaneval-2400.jsonl.sha16 | 1 | `e4c93f1a9b83d1a5` | `b48158fc543db21b` |
+| pub-repair-pub-redraw-humaneval-2400-census.json | 62 | `7cb74bc109a9b193` | `e6c3017c5e74b215` |
+| pub-repair-pub-redraw-humaneval-2400-census.json.sha16 | 1 | `a980f6eb1dd85f1e` | `05cb99c1c0a330f5` |
+| pub-redraw-humaneval-2400-merged-answers.jsonl | 164 | `16ff67099a3c944c` | `c878db4b14bd972c` |
+| pub-redraw-humaneval-2400-merged-answers.jsonl.sha16 | 1 | `0a79cdd7cec9c930` | `9c1b20ae679d76e1` |
+| pub-redraw-humaneval-2400-verdicts.jsonl | 164 | `647b5a0992ea3f1f` | `362bb3ff5c23bc7d` |
+| pub-redraw-humaneval-2400-verdicts.jsonl.sha16 | 1 | `81bf97c4043ac284` | `9a5bb66e53a2f1bb` |
+| mmlu-pro-contour-matched-results.jsonl | 500 | `ac020e452dc52e97` | `43130af5cab85a87` |
+| mmlu-pro-contour-matched-ledger.jsonl | 500 | `901a2bb49bde26c3` | `b17635f6716ed8dc` |
+| mmlu-pro-contour-matched-answers.jsonl | 500 | `e72a29ba869a53e6` | `e15ba1bba5204f49` |
+| mmlu-pro-contour-matched-stats.json | 28 | `b1f475dd37eeab50` | `f42675bfc629d074` |
+| mmlu-pro-contour-matched-run-record.json | 45 | `f4a2842d10713319` | `b397bf642c844cb1` |
+| mmlu-pro-contour-matched-plan.json | 1 | `d6b903457fbcfa6c` | `cd7361fc7bded818` |
+| mmlu-pro-contour-matched-bank-version.json | 6 | `ff2798d1254a6a63` | `c446b2252edd3a27` |
+| mmlu-pro-contour-matched-ws-identity.json | 41 | `6d076f04322738c2` | `9e7100ecc1dc71bb` |
+| ifeval-basalt-answers.jsonl | 541 | `543eb8621087e552` | `445dfa2eba3d12aa` |
+| ifeval-basalt-verdicts.jsonl | 541 | `af8969ac6e95422f` | `1884989e822f21e3` |
+| ifeval-contour-matched-answers.jsonl | 541 | `c947101b813d5da6` | `e611e76ebdd808cf` |
+| ifeval-contour-matched-verdicts.jsonl | 541 | `5ea93c4ea4669d08` | `c0e732166d9441ef` |
+| ifeval-contour-matched-results.jsonl | 541 | `c52ccca353d4c8d9` | `d8a519a5f9b07c18` |
+| ifeval-contour-matched-ledger.jsonl | 541 | `ecb953d608a16610` | `13c467d36c61d183` |
+| ifeval-contour-matched-stats.json | 28 | `162ad24ee019f651` | `54aa65eb78feb3b4` |
+| ifeval-contour-matched-run-record.json | 45 | `3ee16079acccfdb1` | `d4a3dc5fbb9481d4` |
+| ifeval-contour-matched-plan.json | 1 | `31871b3e1c760564` | `9c505e0d46010d59` |
+| ifeval-contour-matched-bank-version.json | 6 | `c8fc7aa6aa51d629` | `18ea68bc69082099` |
+| ifeval-contour-matched-ws-identity.json | 43 | `9881d49e24c91c99` | `e190c300652007a2` |
+| ifeval-codex-answers.jsonl | 541 | `f66c242c4147b15d` | `fc2650b08fb87bef` |
+| ifeval-codex-verdicts.jsonl | 541 | `8ca486048c590276` | `838f55ca6a6a24fc` |
+| bfcl-codex-answers.jsonl | 300 | `234766f13fea120f` | `08ce765f1f145d7c` |
+| bfcl-codex-verdicts.jsonl | 300 | `800d257537c0b8fd` | `30895bf48007c6e0` |
+| livecodebench-codex-answers.jsonl | 175 | `d0955383a7aa66d0` | `72dba5d7404e2d09` |
+| livecodebench-codex-answers.jsonl.sha16 | 1 | `d07ed6929f12aa0d` | `d709becc61a01be9` |
+| livecodebench-codex-verdicts.jsonl | 112 | `f5cc854453597bdb` | `32b3e6b0cf5bb32f` |
+| livecodebench-codex-verdicts.jsonl.sha16 | 1 | `63485855ad0ab056` | `466aaca5702b83ef` |
+| livecodebench-codex-verdicts-v2.jsonl | 175 | `a53590d48b86dbb8` | `33631a7df1eb4f5c` |
+| livecodebench-codex-verdicts-v2.jsonl.sha16 | 1 | `ac2dea680e941f59` | `bad37be60f877acc` |
+| livecodebench-bare-answers.jsonl | 175 | `ff3e16209ae155d7` | `9f1534c178ae8a14` |
+| livecodebench-bare-answers.jsonl.sha16 | 1 | `2cee17dc4b096444` | `9d5b5f99a8f10e7b` |
+| livecodebench-bare-verdicts.jsonl | 175 | `40a412a8e47f357e` | `caf9eb225c1f472b` |
+| livecodebench-bare-verdicts.jsonl.sha16 | 1 | `cc1430b0f1d1de53` | `229fe37f536a0a8a` |
+| livecodebench-contour-matched-answers.jsonl | 175 | `d33da04ea0b43c80` | `a9868091939a579d` |
+| livecodebench-contour-matched-answers.jsonl.sha16 | 1 | `3867f0da2e3efb30` | `a6e3390776d7c974` |
+| livecodebench-contour-matched-verdicts.jsonl | 175 | `d0e3271e8924f970` | `372ed0a0599e57ab` |
+| livecodebench-contour-matched-verdicts.jsonl.sha16 | 1 | `f905a539b508a5a8` | `44f2313ed03447a7` |
+| livecodebench-contour-matched-stats.json | 34 | `36d6c656d487c19a` | `22076827d41de778` |
+| livecodebench-contour-matched-stats.json.sha16 | 1 | `0b802e96f5af6f7c` | `1526c2c07f1f9f81` |
+| pub-repair-pub-repair-lcb-v1.jsonl (67 retry rows) | 67 | `db0d8823d8b1e9b6` | `956187c9d3b6ec54` |
+| pub-repair-pub-repair-lcb-v1.jsonl.sha16 | 1 | `acd6c7f12300fe74` | `902e68db1f16d9cd` |
+| pub-repair-pub-repair-lcb-v1-census.json | 40 | `f2346467bc26f8db` | `316b148264a13db1` |
+| pub-repair-pub-repair-lcb-v1-census.json.sha16 | 1 | `411efdba2aeac7b5` | `f54d8141ac167cee` |
+| pub-repair-lcb-v1-merged-answers.jsonl | 175 | `96e7a62330e8aa90` | `1a8f57b8a4071cc4` |
+| pub-repair-lcb-v1-merged-answers.jsonl.sha16 | 1 | `427961bc85b8ce94` | `08a3b903c177f727` |
+| pub-repair-lcb-v1-verdicts.jsonl | 175 | `1fc8d792711a62c7` | `7ca6aaa8434d5211` |
+| pub-repair-lcb-v1-verdicts.jsonl.sha16 | 1 | `40430b55a0a3e86e` | `0a7025cff2d95af6` |
+| pub-repair-pub-repair-bfcl-v1.jsonl (124 retry rows) | 124 | `3f5376495bf06e6c` | `f023a9709a529913` |
+| pub-repair-pub-repair-bfcl-v1.jsonl.sha16 | 1 | `6015830b3ff17d20` | `cc90e0d15cd2e2a8` |
+| pub-repair-pub-repair-bfcl-v1-census.json | 94 | `0070564d01b48301` | `e038017ecb4bcbcd` |
+| pub-repair-pub-repair-bfcl-v1-census.json.sha16 | 1 | `e73d5f2ba401796a` | `b344cd58adae7012` |
+| pub-repair-bfcl-v1-merged-answers.jsonl | 1240 | `897462ba2e7c2d58` | `cda18359ac2620a1` |
+| pub-repair-bfcl-v1-merged-answers.jsonl.sha16 | 1 | `cc3a263890df822b` | `cd847303c4735398` |
+| pub-repair-bfcl-v1-verdicts.jsonl | 1240 | `26eeab2051755ec8` | `168b42a5769d8572` |
+| pub-repair-bfcl-v1-verdicts.jsonl.sha16 | 1 | `0a6c1547cc51a4cb` | `68f55666657a38e1` |
+| bfcl-basalt-answers.jsonl | 1240 | `419e9dbcdff4872d` | `4ac238d09babcb45` |
+| bfcl-basalt-verdicts.jsonl | 1240 | `de6f58b9586b60c4` | `389aed67b18d0d58` |
+| bfcl-contour-matched-answers.jsonl | 1240 | `fb457fd029ea0317` | `ed8b58a224521f39` |
+| bfcl-contour-matched-verdicts.jsonl | 1240 | `9747db37202ccbde` | `b6945dd3616dff85` |
+| bfcl-contour-matched-results.jsonl | 1240 | `7a3841a09f723cd5` | `ce492b95c4565391` |
+| bfcl-contour-matched-ledger.jsonl | 1240 | `8ba9a6e14eb0e1c7` | `440433ec40a72e09` |
+| bfcl-contour-matched-stats.json | 28 | `a1b74c3ca93aa101` | `17a16a334e8c18cc` |
+| bfcl-contour-matched-run-record.json | 45 | `a4247ee638e4a910` | `8681385387e50f51` |
+| bfcl-contour-matched-plan.json | 1 | `8c243fadf0c624f1` | `53d9b22ba9d9a311` |
+| bfcl-contour-matched-bank-version.json | 6 | `9082f6032d79d763` | `f62925e5dfecc270` |
+| bfcl-contour-matched-ws-identity.json | 42 | `f9a98e1d9552f651` | `5cebff43c0f71fff` |
+| gsm8k-basalt-answers.jsonl | 1319 | `92cd7b0cf37c02d7` | `f3dedf9d7055876b` |
+| gsm8k-codex-answers.jsonl | 300 | `7cb830d17ae7df90` | `a9a4725fa3a916ce` |
+| gsm8k-grok-answers.jsonl | 300 | `43ce1cf866cc97dd` | `760a704e9868bff1` |
+| gsm8k-smoke-answers.jsonl | 25 | `e2c38e8691184555` | `0c062902777556de` |
+| arc-easy-basalt-answers.jsonl | 2376 | `0fd78672f52ed4f8` | `3450700e985bce95` |
+| arc-easy-codex-answers.jsonl | 300 | `c21037d7539b0c2d` | `b126e410e2d95f91` |
+| arc-easy-grok-answers.jsonl | 300 | `8241d40feff8b1f3` | `94295e1012c346b0` |
+| arc-challenge-basalt-answers.jsonl | 1172 | `80efbf52ed87d8ad` | `7aa4ab5630aabbc0` |
+| arc-challenge-codex-answers.jsonl | 300 | `3894fc3a0632dbdb` | `a9a9c62d9593bf18` |
+| arc-challenge-grok-answers.jsonl | 300 | `9f462f936a48fb13` | `d224bded5c104df7` |
+| gpqa-diamond-basalt-answers.jsonl | 198 | `cafb605c921a4c3e` | `4126971be625719b` |
+| gpqa-diamond-codex-answers.jsonl | 198 | `1054cb4bc26b2d5e` | `2b8f5ca4b7ffd8de` |
+| mmlu-pro-basalt-answers.jsonl | 500 | `9089ff194dc21f74` | `fc9e8741edfec51e` |
+| mmlu-pro-codex-answers.jsonl | 500 | `681ffe375a800426` | `17230236196545a4` |
+| humaneval-codex-answers.jsonl | 164 | `5f8fc9fd3de212ae` | `d660e00fa0cfeb1b` |
+| humaneval-codex-verdicts.jsonl | 164 | `4b815578e7227a09` | `714a4005f8defed2` |
 
 First **bare-arm** artifacts (2026-11-09): `ifeval-basalt-*`. A bare arm has no ledger, and IFEval's
 percent is produced by the vendored upstream checker rather than by a number/letter match, so an
@@ -441,16 +482,20 @@ path, IP or key material). Because the upstream checker itself calls stochastic 
 re-score reproduces the census percent **within the documented ±1–2 task flake band**, not to the
 exact digit: v1 merged re-scored 497 published → 495 offline; v2 merged 509 census → 510 offline.
 
-| arm file | lines | sha16 |
-|---|---|---|
-| pub-repair-pub-repair-v1.jsonl (72 retry rows, 1200-token retries) | 72 | `2b5d183a95aa5062` |
-| pub-repair-pub-repair-v1-census.json | 20 | `a4c9273043f3b19d` |
-| pub-repair-v1-merged-answers.jsonl | 541 | `639332eea931294f` |
-| pub-repair-v1-verdicts.jsonl | 541 | `569df2fa669a3dca` |
-| pub-repair-pub-repair-v2.jsonl (74 retry rows, 2400-token retries) | 74 | `49e27893c44c9b0d` |
-| pub-repair-pub-repair-v2-census.json | 21 | `79cd33edad21f86d` |
-| pub-repair-v2-merged-answers.jsonl | 541 | `ee4728cc10e4498f` |
-| pub-repair-v2-verdicts.jsonl | 541 | `47281abd5357f0c0` |
+| arm file | lines | sha1/16 | sha256/16 |
+|---|---|---|---|
+| pub-repair-pub-repair-v1.jsonl (72 retry rows, 1200-token retries) | 72 | `2b5d183a95aa5062` | `7f3307ad1c8b067f` |
+| pub-repair-pub-repair-v1-census.json | 20 | `a4c9273043f3b19d` | `26dcf4e02f36dfb9` |
+| pub-repair-v1-merged-answers.jsonl | 541 | `639332eea931294f` | `6927ac023fd39e59` |
+| pub-repair-v1-merged-answers.jsonl.sha16 | 1 | `ccdaaf75c5c9b742` | `1d3df551537d71de` |
+| pub-repair-v1-verdicts.jsonl | 541 | `569df2fa669a3dca` | `37733498c5d20d20` |
+| pub-repair-v1-verdicts.jsonl.sha16 | 1 | `c5abd060da224cb1` | `82cc57f95818cd18` |
+| pub-repair-pub-repair-v2.jsonl (74 retry rows, 2400-token retries) | 74 | `49e27893c44c9b0d` | `89eebb5db75edc04` |
+| pub-repair-pub-repair-v2-census.json | 21 | `79cd33edad21f86d` | `f904e49dc7a7355f` |
+| pub-repair-v2-merged-answers.jsonl | 541 | `ee4728cc10e4498f` | `9877edc0ee5ab9fe` |
+| pub-repair-v2-merged-answers.jsonl.sha16 | 1 | `eec313c12a5f1806` | `1d14ae9c5588788d` |
+| pub-repair-v2-verdicts.jsonl | 541 | `47281abd5357f0c0` | `231c0fecda12c7c9` |
+| pub-repair-v2-verdicts.jsonl.sha16 | 1 | `a0520e56e684d6cc` | `278989cc6506e4e3` |
 
 Reproduce one percent:
 
@@ -486,3 +531,99 @@ Plus the gsm8k smoke row shipped above. With that, **no percent row in the diges
 without shipped bytes**. The two **partial** grok arms (139/198, 120/164) publish no percent and
 their bytes stay unshipped by rule; both partial files were re-verified intact at this pass
 (139 unique ids / 139 `finish=ok`; 120 / 120).
+
+### Index pins were ambiguous: one column, two hash functions (corrected 2026-11-10 07:00 CET, zero model calls)
+
+The audit that closed the last percent-without-bytes gap (previous section) then asked the obvious
+next question — could an outsider actually *use* the pins? Measured on the shipped files, not on
+the prose:
+
+* the index printed **one** column called `sha16`, and that column mixed two functions:
+  **125 rows pinned SHA-256/16** (the digest-row convention) and **36 rows pinned SHA-1/16**, with
+  nothing on the page saying which. An auditor following the documented convention
+  (`sha256sum … | cut -c1-16`) got a mismatch on those 36 rows and would reasonably conclude the
+  shipped bytes had been edited after publication. They had not: every one of the 36 values is
+  still the SHA-1/16 of the same file, so the mismatch was a tooling bug, not a byte change;
+* the same ambiguity sat in the shipped **`.sha16` sidecar files**: all **35** of them carried
+  SHA-1/16, and a check that recomputed SHA-256/16 (the convention `MANIFEST.json` calls `sha16`)
+  failed on every one;
+* the 35 sidecar files had **no index row at all**, so the "file index" covered 161 of 196 shipped
+  files;
+* **one line count was stale** — `livecodebench-contour-matched-stats.json` indexed at 33 lines,
+  actually 34: the file legitimately gained a field in the documented `lcb-exec-v1` → `lcb-exec-v2`
+  offline rescore and nobody re-measured the index;
+* the main index table had **no GFM delimiter row**, so GitHub rendered its 161 rows as prose —
+  the same failure class this line already fixed once for a digest row (see the `|---|` entry in
+  `LEG-INCIDENTS.md`).
+
+Root cause, named at the line where it lives: `scripts/pub_bench_repair.py`,
+`scripts/pub_bench_ifeval.py` and `scripts/pub_bench_ifeval_v2.py` each defined a local
+`sha16()` on top of `hashlib.sha1`, and every pin those scripts printed inherited it — including
+the census keys named `task_sha16` / `first_answer_sha16`, whose values are SHA-1/16 while the
+digest row of the *same arm* prints SHA-256/16 for the same tasks file. Cross-checking a published
+census against its digest row therefore failed by construction. (The IFEval v2 contract already
+names its two helpers `sha1_16` and `tasks_sha16`; that naming is now the pattern.)
+
+Fix, all tooling and pins, no measurement byte touched:
+
+* the index is generated by `scripts/pub_arms_index.py` and pins **both** conventions per file;
+  `--check` fails closed on a stale pin, a stale line count, a missing row, an extra row, an
+  untracked artifact, a sidecar that does not carry SHA-256/16 of its target, and a table without
+  its delimiter row;
+* the 35 sidecars were rewritten to SHA-256/16 (the old SHA-1 values remain published, in the
+  `sha1/16` column of the row above each sidecar);
+* the three writers now compute artifact pins with a helper named for the algorithm and label the
+  hash convention inside the bytes they write (`pin_hash_convention`), so a future census cannot
+  be read with the wrong function;
+* `harness/pub_arms_index_test.py` pins the guard with tamper controls.
+
+Nothing was re-measured by this correction: no leg ran, no answer byte moved, and every published
+percent keeps its published number. The `sha1/16` values quoted in `LIVECODEBENCH-RESULT.md`,
+`HUMANEVAL-RESULT.md` and `LEG-INCIDENTS.md` (for example `ff3e16209ae155d7`, `96e7a62330e8aa90`,
+`1fc8d792711a62c7`, `897462ba2e7c2d58`) are left untouched on purpose — they are correct SHA-1/16
+pins of the same files and now resolve against a labelled column instead of an ambiguous one.
+
+**The audit did not stop at artifact pins: the manifest's *tool* pins mixed the same two functions
+(same day).** Of the seven checker/tool pins in `MANIFEST.json`, **six are SHA-1/16** — the five
+vendored IFEval checker files and the LiveCodeBench checker `scripts/pub_bench_lcb.py`
+`68a0a39a6aec46a3` — while the BFCL checker pin is SHA-256/16. Every value and its twin is in the
+table at the end of this section. Inside the single `livecodebench` entry, `checker_files` printed
+SHA-1/16 for
+`pub_bench_lcb.py` while `checker_history[0].sha16` printed **SHA-256/16 of the same file name** (the
+superseded `lcb-exec-v1` bytes at commit `91f33c5`, verified against `git show`). So the sentence
+"the checker that scored this row is byte-pinned" was verifiable in two different ways, and an
+auditor using the documented `sha256sum` path got a mismatch on the *tool*, which reads as
+tampering with a checker.
+
+Nothing was re-minted. Each entry now carries the SHA-256/16 twin next to the published value plus a
+`hash_note` naming the convention, and every `checker_history` entry declares
+`pin_hash_convention` with `pinned_at_commit`/`pinned_file` so the claim is checked against git
+bytes, not trusted:
+
+| pin | published value | convention | SHA-256/16 twin |
+|---|---|---|---|
+| `benches.ifeval.checker_files[evaluation_lib.py]` | `e0b6db8fcbb9005c` | SHA-1/16 | `35decc0600071848` |
+| `benches.ifeval.checker_files[instructions.py]` | `0408215285bf39f6` | SHA-1/16 | `60e086f5342a03ce` |
+| `benches.ifeval.checker_files[instructions_registry.py]` | `85d6360b7709934f` | SHA-1/16 | `ec92d72c264f6d90` |
+| `benches.ifeval.checker_files[instructions_test.py]` | `d5258d03277cd333` | SHA-1/16 | `e677c190c393162f` |
+| `benches.ifeval.checker_files[instructions_util.py]` | `8ad230f0b60767b4` | SHA-1/16 | `a73797261eee5bf4` |
+| `benches.ifeval.reference_response_file.sha16` | `ff57ec6d17688771` | SHA-1/16 | `0cff1d1469b774e8` |
+| `benches.livecodebench.checker_files[scripts/pub_bench_lcb.py]` | `68a0a39a6aec46a3` | SHA-1/16 | `55a215140f207dde` |
+| `benches.bfcl.checker_files[scripts/pub_bench_bfcl.py]` | `02cc555963de7dac` | SHA-256/16 | (itself) |
+
+`python3 scripts/pub_arms_index.py --pins` audits all of it and `--check` now runs it too: a pin that
+resolves under neither convention, a SHA-1 pin without a labelled twin, a `hash_note` that does not
+name the convention, or a history pin that does not match the bytes at the commit it names → exit 3.
+Before this labelling it reported **16 drift lines**, after: **0**. `harness/pub_arms_index_test.py`
+adds three tamper controls for it (edited checker pin, deleted twin, history pin pointed at the
+wrong commit), 34 checks in total.
+
+**This commit also moved one tool pin of its own, and says so rather than letting it drift.** The
+`pub-ifeval-v2` contract bytes pinned as `checker_history[0].sha256_16 = b4a089bc7bb3b212` changed,
+because the pin-audit edit renamed that module's hash helpers and routed its digest tasks cell
+through `pub_bench_score.manifest_tasks_cell`. The old value is kept as a nested `pin_history`
+record with the reason and the proof that no verdict moved: re-scoring the three re-scorable IFEval
+arms from shipped bytes after the edit gave the same totals as before it (bare 469, `pub-repair-v1`
+497, `pub-repair-v2` 510 of 541 strict) and the scorer self-test stayed 22/22. Documents citing
+`b4a089bc7bb3b212` describe the run made against those bytes and stay true of that run; the current
+bytes are `affc8151363d633a`.

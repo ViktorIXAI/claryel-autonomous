@@ -555,3 +555,117 @@ at the time of writing and the tree is clean, so the daily-error claim is still 
 resumable by id and scored only when complete. `house-ground-v1` stays the owner's call (issue #44,
 reminder fired 09:00 CET window). Standing limits unchanged: no Grok arm before 2026-11-12; frozen
 contour `0.0.2.56`; sanitization before every push.
+
+**Queue status 2026-11-10 07:55 CET (tick 10):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process (the single `pgrep` hit this tick was the session's own command
+wrapper, checked not assumed); the local endpoint was read but not touched (`/health` 200, GPU 0 %
+util / 37 W). The P2005 idle-spin note persists and is now measured harder: the engine has held
+**704 % CPU at 0 % GPU utilization for 1 d 10 h with 57.6 GiB resident** (load average 14.2 on a
+32-core box). The pre-flight restart cure stays queued behind the issue #43 hold (lifts 10:10 CET
+today) and behind the fact that this engine hosts the live brain; no action taken. The two partial
+grok arms were re-verified intact a fourth time (gpqa-diamond 139 unique ids / 139 `finish=ok`,
+humaneval 120 / 120), still unshipped and unscored by rule.
+
+**The tick went at verification integrity, and it found a defect class this line had not audited:
+the pins themselves were ambiguous.** `benchmarks/public/arms/README.md` is the file index every
+re-scoring instruction in this repo points at. Measured on the shipped files, not on the prose: its
+**161 rows printed one hash column called `sha16`, and that column mixed two functions — 125 rows
+pinned SHA-256/16, 36 rows pinned SHA-1/16**; all **35** shipped `.sha16` sidecar files carried
+SHA-1/16; **35 of 196** artifacts had no index row at all; the LiveCodeBench contour `stats.json`
+row printed **33 lines for a 34-line file**; and the main table had **no GFM delimiter row**, so
+GitHub rendered all 161 rows as prose. Root cause is in three writers, not in the artifacts:
+`scripts/pub_bench_repair.py`, `pub_bench_ifeval.py` and `pub_bench_ifeval_v2.py` each defined a
+local `sha16()` on `hashlib.sha1`. **No published artifact byte was edited** — every one of the 36
+SHA-1 values is still the SHA-1/16 of the same file, so an auditor who verified the page the
+documented way (`sha256sum … | cut -c1-16`) hit a false tamper alarm, which is exactly the failure
+this line exists to prevent.
+
+The same ambiguity existed one level up, on a **task file** pin: every published IFEval row prints
+tasks cell `2c672531577dcc33`, and that is the **SHA-1/16** of
+`benchmarks/public/ifeval.tasks.jsonl`; the SHA-256/16 of the identical 541 rows is
+`e09a5cab3782ed5b`. Verified for all nine in-force sets: **eight pins reproduce as SHA-256/16,
+IFEval is the sole SHA-1/16 pin** and is now labelled (`tasks_sha1_16` / `tasks_sha256_16` /
+`hash_note`, plus a top-level `hash_conventions` key naming both conventions repo-wide — the
+security scanner binds its byte-pinned exceptions to SHA-1/16 on purpose, and
+`scripts/security/secret_scan.py` exception pins were audited against current bytes as part of the
+same pass).
+
+Fix, tooling and pins only:
+
+* `scripts/pub_arms_index.py` (new) generates and verifies that index: two pin columns per row
+  (`sha256/16` + `sha1/16`), full coverage, and `--check` **fails closed** on a stale pin, stale
+  line count, missing row, extra row, untracked artifact, bad header, missing delimiter row or a
+  sidecar that does not carry SHA-256/16 of its target. Re-run against the pre-rewrite index at
+  `HEAD` it reports **233 drift lines — 161 ambiguous pins (one per indexed row), 35 files with no
+  row, 35 sidecars in the wrong convention, 1 stale line count, 1 missing delimiter row — and 0
+  after** (196 rows / 196 files);
+* the 35 sidecars were rewritten to SHA-256/16 — the old SHA-1 values stay published, in the
+  `sha1/16` column of the row above each sidecar;
+* the three writers now name their hash helper (`sha1_16` / `sha256_16` / `sha256_16_text`), their
+  census keys are renamed (`task_sha1_16`, `task_sha256_16`, `first_answer_sha1_16`,
+  `first_answer_sha256_16`), and each carries a `pin_hash_convention` note;
+* **a digest row's tasks cell is read from `MANIFEST.json`** through the new
+  `scripts/pub_bench_score.manifest_tasks_cell(bench, tasks)` instead of being re-hashed by
+  whichever helper the caller had: it refuses (exit 2) a task file matching neither label or a
+  SHA-1-era pin that is not labelled, so one pinned file can never carry two identities in one
+  table — `pub_bench_ifeval_v2.py` would otherwise have minted `e09a5cab3782ed5b` rows beside the
+  published `2c672531577dcc33` rows;
+* `harness/pub_arms_index_test.py` (34 checks, CI-enrolled by the `harness/*test.py` glob, so no
+  workflow edit was needed) pins all of it with tamper controls: an edited artifact, a SHA-1 value
+  in the SHA-256 column, a SHA-1 sidecar, an artifact without a row, a stale line count and a table
+  without its delimiter row each redden CI; the three MANIFEST refusals are proven the same way.
+
+**No percent moved.** The IFEval scorers were re-run over the shipped answer bytes *after* the writer
+edits, zero model calls, in the pinned venv: bare **469**, `pub-repair-v1` **497**, `pub-repair-v2`
+**510** of 541 under `pub-ifeval-v2` — identical to the pre-change pin-audit re-scores, and matching
+the published corrected table. `pub_bench_score` self-test 22/22. Digest head regenerated and
+byte-checked against `digest_head()` with zero published prose lost; 47 table lines unchanged.
+IFEval's `2c672531577dcc33` cells and every other tasks cell in `PUB-DIGEST.md` stay exactly as
+published — the audit labels how to read them, it does not restate them.
+
+Ops state read this tick (no action): tick 9's push (`1155889`) is **green on all five jobs**
+(secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts, pages) at 05:15-05:22 UTC,
+and the Pages flap has not recurred — the three latest builds (04:27:28, 04:33:36, 05:15:13 UTC) all
+`built`, latest status `built`. `docs-freshness` still has no scheduled run recorded after
+2026-11-09 11:50 UTC (green): GitHub had not delivered today's 03:00 CET run at the time of writing
+and the tree was clean, so the daily-error note in the prompt is still not true today.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Local, arm-free work next tick: nothing is queued on
+the checker side — every in-force set's checker ships with a self-test and its task pin now
+reproduces — so the queue is genuinely empty until 11-12 apart from the standing verification passes.
+`house-ground-v1` stays the owner's call (issue #44, reminder 09:00 CET window). Standing limits
+unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push.
+
+**The same ambiguity was one layer deeper, in the pins that certify the *checkers* (same tick).** Of
+the seven checker/tool pins in `MANIFEST.json`, **six are SHA-1/16** — the five vendored IFEval
+checker files and the LiveCodeBench checker `scripts/pub_bench_lcb.py` (`68a0a39a6aec46a3`) — while
+the BFCL checker pin is SHA-256/16. The `livecodebench` entry mixes both conventions on one file
+name: `checker_files` prints SHA-1/16 for the current bytes and `checker_history[0].sha16` prints
+SHA-256/16 of the superseded `lcb-exec-v1` bytes at commit `91f33c5`. An auditor following the
+documented `sha256sum` path therefore got a false tamper alarm on the tool that scored the row, on
+six of seven tools. Published values were **not** re-minted: each entry now carries the SHA-256/16
+twin beside the published value, a `hash_note` naming the convention, and every `checker_history`
+entry declares `pin_hash_convention` plus `pinned_at_commit`/`pinned_file`, so the claim is checked
+against `git show` bytes rather than trusted. `python3 scripts/pub_arms_index.py --pins` audits all
+of it (and `--check` runs it too): **16 drift lines before the labelling, 0 after**; the contract
+test adds three tamper controls (edited checker pin, deleted twin, history pin aimed at the wrong
+commit). Full pin/twin table is in `benchmarks/public/arms/README.md`.
+
+**This commit moved one tool pin of its own, and records it instead of letting it drift silently**:
+`benches.ifeval.checker_history[0].sha256_16` for `scripts/pub_bench_ifeval_v2.py` moved from
+`b4a089bc7bb3b212` (the bytes published at 04:33 UTC, the bytes every rescore in `IFEVAL-RESULT.md`
+was run against) to `affc8151363d633a`, because the pin-audit edit renamed that module's hash helpers
+and routed its tasks cell through `manifest_tasks_cell`. The old value stays in a nested
+`pin_history` record with the reason and the zero-movement proof (post-edit re-scores from shipped
+bytes: bare 469, `pub-repair-v1` 497, `pub-repair-v2` 510 of 541 — identical to the pre-edit pass;
+`selftest cases=22 failures=0`). That is the pattern this line owes its own edits: name the changed
+bytes, prove the arithmetic did not move, keep the old citation true of the run that used it.
+
+One naming defect recorded, deliberately not fixed: `scripts/pub_bench_run.py` writes
+`rec["task_sha16"] = t.get("id")` — a field whose name says hash and whose value is the **task id**.
+It is a label defect in shipped result rows, never used as a hash by any verifier (no reader of that
+key exists in the repo — checked), and renaming it would break the row schema of already-published
+arms. Left as-is with this note; a fix would be a new row schema, not an in-place rename.

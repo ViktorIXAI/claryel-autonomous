@@ -31,6 +31,48 @@ PLAIN_GOLD = re.compile(r"^-?\d[\d,]*(?:\.\d+)?$")
 CHECKER_CONTRACT = "pub-checkers-v2"
 
 
+MANIFEST_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir,
+                             "benchmarks", "public", "MANIFEST.json")
+
+
+def manifest_tasks_cell(bench, tasks_path):
+    """The tasks cell a digest row must print for this pinned task file.
+
+    It is READ from `MANIFEST.json`, never re-hashed by whichever convention a caller's local
+    helper happens to use. The two conventions this line carries are not interchangeable: every
+    set's published `tasks_sha16` is SHA-256/16 except ifeval, whose published pin
+    (2c672531577dcc33) is the SHA-1/16 of the same 541 rows. Minting a second hash value for one
+    pinned file would put two incomparable tasks cells on one set inside the digest table.
+    Fails closed when the bytes match neither published pin, and when a SHA-1-era pin is not
+    labelled with the SHA-256/16 of the same file.
+    """
+    with open(MANIFEST_PATH, encoding="utf-8") as fh:
+        entry = ((json.load(fh).get("benches") or {}).get(bench))
+    if not entry or not entry.get("tasks_sha16"):
+        sys.stderr.write("MANIFEST GUARD: benchmarks/public/MANIFEST.json has no tasks_sha16 "
+                         "pin for bench %r - refuse to write a tasks cell\n" % bench)
+        raise SystemExit(2)
+    with open(tasks_path, "rb") as fh:
+        data = fh.read()
+    s1 = hashlib.sha1(data).hexdigest()[:16]
+    s2 = hashlib.sha256(data).hexdigest()[:16]
+    pin = entry["tasks_sha16"]
+    if pin == s2:
+        return pin
+    if pin == s1:
+        if entry.get("tasks_sha256_16") != s2 or not entry.get("hash_note"):
+            sys.stderr.write(
+                "MANIFEST GUARD: bench %r is pinned by its SHA-1/16 (%s) but MANIFEST does not "
+                "label the SHA-256/16 (%s) with a hash_note - a reader cannot tell which "
+                "convention the digest cell uses\n" % (bench, pin, s2))
+            raise SystemExit(2)
+        return pin
+    sys.stderr.write("MANIFEST GUARD: %s does not match its published tasks pin %s "
+                     "(sha1/16=%s sha256/16=%s) - the tasks file moved, this is a new version\n"
+                     % (tasks_path, pin, s1, s2))
+    raise SystemExit(2)
+
+
 def norm_number(s):
     m = NUM.findall(str(s or ""))
     if not m:
@@ -139,6 +181,16 @@ def digest_head():
             "re-drawing the literal `letter` kwarg at random in 2 of 541 cells) lives in "
             "`IFEVAL-RESULT.md`, beside the cells it moves. Each "
             "`<BENCH>-RESULT.md` carries the dated pointer and the reason.\n\n"
+            "Tasks-cell convention (pin audit 2026-11-10, no row or byte moved): a tasks cell "
+            "names the pinned task file, and the two hash conventions in this repo are not "
+            "interchangeable. Every set prints SHA-256/16 except IFEval, whose published pin "
+            "`2c672531577dcc33` is the **SHA-1/16** of the same 541 rows (SHA-256/16 "
+            "`e09a5cab3782ed5b`) - `MANIFEST.json -> benches.ifeval.hash_note` labels both, and "
+            "`scripts/pub_bench_score.manifest_tasks_cell` reads that pin instead of re-hashing, "
+            "so one pinned task file can never carry two different tasks cells in this table. "
+            "The artifact index `benchmarks/public/arms/README.md` now pins both conventions per "
+            "row and `scripts/pub_arms_index.py --check` fails closed if any pin, line count or "
+            "sidecar drifts.\n\n"
             % (EXEC_CHECKER, CHECKER_CONTRACT))
 
 

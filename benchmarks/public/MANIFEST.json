@@ -23,7 +23,10 @@
       "checker_history": [
         {
           "note": "bytes the BFCL contour arm was staged and scored with (WS-IDENTITY.json of that arm pins this value); the 02cc555963de7dac revision adds --limit/--offset/--call-note selection only, and both published full-set arms re-score to 1116/1240 and 1122/1240 under the new bytes (self-test 22/22)",
-          "sha16": "7e6042ce813a2779"
+          "sha16": "7e6042ce813a2779",
+          "pin_hash_convention": "sha256/16",
+          "pinned_at_commit": "946d158",
+          "pinned_file": "scripts/pub_bench_bfcl.py"
         }
       ],
       "cross_arm_slice": {
@@ -42,7 +45,7 @@
         "BFCL_v4_simple_python.json": "90cd5bc653690ee8"
       },
       "gold_note": "irrelevance carries no possible_answer file upstream BY DESIGN: the expected behaviour is to emit no call",
-      "hash_note": "tasks_sha16 is SHA-256/16 (the digest-row convention); tasks_sha1_16 is SHA-1/16, the byte hash the repo security scanner binds its vendored exception to",
+      "hash_note": "tasks_sha16 is SHA-256/16 (the digest-row convention); tasks_sha1_16 is SHA-1/16, the byte hash the repo security scanner binds its vendored exception to. Pin audit 2026-11-10: `checker_files[scripts/pub_bench_bfcl.py]` is SHA-256/16 and `checker_history[0].sha16` (the `bfcl-ast-v1` bytes at commit 946d158) is also SHA-256/16 — verified against git bytes, not assumed.",
       "naming_note": "the ladder line said 'BFCL v3'; the maintained suite carries the BFCL_v4_* prefix; multi-turn/memory/web-search categories are outside this item's question-only scope and are not pinned",
       "source": "github.com/ShishirPatil/gorilla (the standalone berkeley-nest repo is gone), berkeley-function-call-leaderboard/bfcl_eval/data/ at commit 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8; the same checkpoint an independent external harness byte-pins as current upstream",
       "source_files": {
@@ -81,8 +84,16 @@
         {
           "contract": "pub-ifeval-v2",
           "file": "scripts/pub_bench_ifeval_v2.py",
-          "sha256_16": "b4a089bc7bb3b212",
-          "note": "corrected contract shipped 2026-11-10 without touching any vendored byte. The vendored `LetterFrequencyChecker.build_description` replaces a `letter` kwarg outside a-z with `random.choice(string.ascii_letters)`, so the two pinned cells whose ask is punctuation (`ifeval-1122` = '#', `ifeval-1129` = '!') were decided by a coin flip under `pub-ifeval-v1` (measured strict pass 4/12 and 7/12 over 12 draws of byte-identical shipped answers). v2 restores the pinned literal character on the built instruction and counts it as-is; it re-asserts the five SHA-1/16 vendored pins above on every run and refuses to score if they move, pins determinism (20 identical draws per affected cell), and fails closed if v1 and v2 differ on more than those 2 cells. All five published IFEval arms were rescored from the shipped answer bytes (three independent scorer passes each); the per-arm corrections, the recomputed paired tests and the residual langdetect band are in IFEVAL-RESULT.md. The published `pub-ifeval-v1` rows and verdict files stay published unchanged."
+          "sha256_16": "affc8151363d633a",
+          "note": "corrected contract shipped 2026-11-10 without touching any vendored byte. The vendored `LetterFrequencyChecker.build_description` replaces a `letter` kwarg outside a-z with `random.choice(string.ascii_letters)`, so the two pinned cells whose ask is punctuation (`ifeval-1122` = '#', `ifeval-1129` = '!') were decided by a coin flip under `pub-ifeval-v1` (measured strict pass 4/12 and 7/12 over 12 draws of byte-identical shipped answers). v2 restores the pinned literal character on the built instruction and counts it as-is; it re-asserts the five SHA-1/16 vendored pins above on every run and refuses to score if they move, pins determinism (20 identical draws per affected cell), and fails closed if v1 and v2 differ on more than those 2 cells. All five published IFEval arms were rescored from the shipped answer bytes (three independent scorer passes each); the per-arm corrections, the recomputed paired tests and the residual langdetect band are in IFEVAL-RESULT.md. The published `pub-ifeval-v1` rows and verdict files stay published unchanged.",
+          "pin_hash_convention": "sha256/16",
+          "pin_history": [
+            {
+              "sha256_16": "b4a089bc7bb3b212",
+              "moved_at": "2026-11-10 08:35 CET",
+              "note": "bytes of `pub-ifeval-v2` as published on 2026-11-10 at 04:33 UTC. The pin-audit commit renamed the module's hash helpers (`sha1_16` / `sha256_16` / `tasks_sha256_16`) and routed the digest tasks cell through `pub_bench_score.manifest_tasks_cell`; no scoring path, checker call or rounding changed. Proof, run after the edit with zero model calls: all three re-scorable IFEval arms re-scored from the shipped answer bytes gave the same totals as before the edit — bare 469, `pub-repair-v1` 497, `pub-repair-v2` 510 of 541 strict under `pub-ifeval-v2` — and the scorer self-test stayed 22/22. Documents citing the old value (`IFEVAL-RESULT.md`, `PUB-PLAN.md`) refer to the run made against those bytes and stay true of that run."
+            }
+          ]
         }
       ],
       "pin_history": [
@@ -105,7 +116,18 @@
         "python": "venv"
       },
       "tasks": 541,
-      "tasks_sha16": "2c672531577dcc33"
+      "tasks_sha16": "2c672531577dcc33",
+      "tasks_sha1_16": "2c672531577dcc33",
+      "tasks_sha256_16": "e09a5cab3782ed5b",
+      "hash_note": "IFEval is the one set whose published tasks pin is SHA-1/16: `scripts/pub_bench_ifeval.py` hashed the tasks file with SHA-1 before any other set existed, and every published ifeval digest row prints that value. The SHA-256/16 of the identical 541 rows is labelled `tasks_sha256_16`, so an outside check with `sha256sum benchmarks/public/ifeval.tasks.jsonl | cut -c1-16` resolves to it instead of looking like a moved task file. Nothing was re-measured by this label: the task file, the verdict files and the digest rows are byte-unchanged. `scripts/pub_bench_score.manifest_tasks_cell` now reads this pin instead of re-hashing, and refuses to write a digest cell for a file that matches neither label. Convention of this entry's tool pins (pin audit 2026-11-10): the published `checker_files` values and `reference_response_file.sha16` are SHA-1/16 (that is what the scorer re-asserts at run time), so the `*_sha256_16` twins added here are what `sha256sum <file> | cut -c1-16` gives. Both name identical bytes; neither pin was re-minted.",
+      "checker_files_sha256_16": {
+        "evaluation_lib.py": "35decc0600071848",
+        "instructions.py": "60e086f5342a03ce",
+        "instructions_registry.py": "ec92d72c264f6d90",
+        "instructions_test.py": "e677c190c393162f",
+        "instructions_util.py": "a73797261eee5bf4"
+      },
+      "reference_response_file_sha256_16": "0cff1d1469b774e8"
     },
     "livecodebench": {
       "checker": "lcb-exec-v2",
@@ -115,7 +137,10 @@
       "checker_history": [
         {
           "sha16": "0430437a774eb39d",
-          "note": "bytes of `lcb-exec-v1`, the contract the three published LiveCodeBench arms were first scored under (stdin-only, 63 functional questions named unscored). v2 adds the functional driver and leaves the stdin path byte-identical; at the release all three arms were rescored from the stored bytes: all 112 stdin verdict cells identical under v1 and v2 (0 diffs per arm), new totals 101/175 bare, 99/175 contour-0.0.2.56, 168/175 codex, self-test 18/18. The v1 verdict artifacts stay published unchanged; the v1 digest rows are superseded by dated pointer, never edited."
+          "note": "bytes of `lcb-exec-v1`, the contract the three published LiveCodeBench arms were first scored under (stdin-only, 63 functional questions named unscored). v2 adds the functional driver and leaves the stdin path byte-identical; at the release all three arms were rescored from the stored bytes: all 112 stdin verdict cells identical under v1 and v2 (0 diffs per arm), new totals 101/175 bare, 99/175 contour-0.0.2.56, 168/175 codex, self-test 18/18. The v1 verdict artifacts stay published unchanged; the v1 digest rows are superseded by dated pointer, never edited.",
+          "pin_hash_convention": "sha256/16",
+          "pinned_at_commit": "91f33c5",
+          "pinned_file": "scripts/pub_bench_lcb.py"
         }
       ],
       "checker_gates": "self-test 18/18: pickler decodes pure data, pickler REFUSES a payload that references a global class (control payload), reference solution passes, wrong completion fails, crash fails, infinite loop -> TLE loss, empty answer fails, payload-pin mismatch fails closed as UNSCORED, over-byte-cap test is a loss not a skip; functional driver: reference passes, wrong fails, exception anatomy named, bare-method completion shims onto the stub name, float 1e-6 tolerance inside and outside, malformed case bytes UNSCORED never guessed, per-case 20 s TLE, unimported typing names rescued by one prelude retry adopted only on strict improvement; every shipped functional case (2367) decodes under the argument parser",
@@ -155,7 +180,11 @@
       "tasks": 175,
       "tasks_sha16": "8da729553c7c5710",
       "tasks_sha1_16": "572c76cf72de552e",
-      "window": "contest dates 2025-01-04T00:00:00 .. 2025-04-06T00:00:00 (post-cutoff window, which is why this item exists)"
+      "window": "contest dates 2025-01-04T00:00:00 .. 2025-04-06T00:00:00 (post-cutoff window, which is why this item exists)",
+      "checker_files_sha256_16": {
+        "scripts/pub_bench_lcb.py": "55a215140f207dde"
+      },
+      "hash_note": "Pin audit 2026-11-10: `checker_files[scripts/pub_bench_lcb.py]` = 68a0a39a6aec46a3 is the **SHA-1/16** of the current checker bytes (SHA-256/16 = 55a215140f207dde), while `checker_history[0].sha16` = 0430437a774eb39d is the **SHA-256/16** of the superseded `lcb-exec-v1` bytes at commit 91f33c5. One entry, two conventions — both verified against bytes, neither value changed; `scripts/pub_arms_index.py --pins` fails closed if any of them stops resolving under its named convention."
     },
     "mmlu-pro": {
       "tasks": 500,
@@ -166,6 +195,7 @@
       "tasks": 0
     }
   },
+  "hash_conventions": "Two hash conventions appear in this repo and they are not interchangeable. `tasks_sha16`/`raw_sha16`/`sha16` in a digest row or in `checker_files` is SHA-256/16 (`sha256sum F | cut -c1-16`) for every set EXCEPT ifeval, whose published tasks pin is SHA-1/16 and is labelled here with `tasks_sha1_16` + `tasks_sha256_16` + `hash_note`. `scripts/security/secret_scan.py` binds its byte-pinned exceptions with SHA-1/16. The file index in `benchmarks/public/arms/README.md` pins BOTH conventions per row and `scripts/pub_arms_index.py --check` fails closed if a sidecar stops carrying SHA-256/16 of its target. Tool and checker pins are now labelled per entry and audited by `python3 scripts/pub_arms_index.py --pins`: a pin that resolves under neither convention, or under SHA-1/16 without a labelled SHA-256/16 twin and a naming `hash_note`, fails the check.",
   "schema": "pub-bench-v1",
   "sources": {
     "arc-challenge": {
