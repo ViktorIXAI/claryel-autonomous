@@ -218,7 +218,7 @@ any inference workload runs on the 4.5 lane** — the pin stays Haiku 5.5, and t
 never swapped in to make a number.
 
 Money state, read from the live console Credits page (the Credits widget renders even though other
-billing sub-pages do not): credit `10069304379`, type **AWS Activate — FOUNDERS**, **$1,000.00**,
+billing sub-pages do not): credit (id withheld), type **AWS Activate — FOUNDERS**, **$1,000.00**,
 valid `10/01/2026 → 10/31/2028`, status **Active**, used **$0.00**, remaining **$1,000.00**; total
 remaining $1,000.00, total used $0.00. So the block is not "no money": the money is there and
 unspent. The one payment input we still cannot read is the attached payment method — the Payments
