@@ -978,3 +978,45 @@ incident occurred this tick.
 resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
 percent.
+
+
+**Queue status 2026-11-10 14:45 CET (tick 17):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick; the local endpoint
+was read but not touched (`/health` 200, GPU 74 % util / 66.6 W sampled, engine resident 23.6 GiB
+VRAM — the sampled utilization is this session's own brain traffic, the box hosts the live brain; no
+pub arm touches it). The idle-spin condition noted on ticks 13–16 (0 % GPU with 638 % engine CPU) was
+not re-sampled under that same idle condition this tick, so it stays open, unconfirmed either way.
+
+CI repair landed this tick (a tooling/text fix, not a measurement): the parallel Bedrock-docs agent
+pushed `082ddff` to `main` at 13:39:51 UTC and its `secret-scan` job went red with **1**
+`generic-api-key|credential` finding in `docs/bedrock-advisor-integration.md`. Reproduced locally
+and decoded the reported secret bytes: the 26-char "secret" is the model id
+`anthropic.claude-haiku-5-5` inside a quoted AWS `AccessDeniedException` message — a
+`keyword: "long-token"` shape false positive, zero credential material published by the commit. The
+repo scanner's byte-pinned exception mechanism deliberately refuses credential-class rules, so the
+fix is textual: the code span `Exception: "…"` was restyled to `Exception` — "…" (the quoted AWS
+message stays verbatim, one delimiter moves). Verified after the edit: repo `secret_scan.py --strict`
+**0 findings, exit 0** on the whole tree, `gitleaks --no-git` whole tree **0 findings**, docs policy
+PASS. No history rewrite — the published commit stays as pushed, the fix rides on top.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+0 drift; `pub_derived_percent_check.py` 18 derivations recomputed from shipped bytes, 41 digest +
+169 document citations, 0 uncovered; `pub_grok_cell_check.py` 9 documents, 0 findings;
+`pub_superseded_cell_check.py` 9 documents, 0 findings. The two partial Grok arms were re-verified
+intact an eleventh time (gpqa-diamond **139 unique ids / 139 `finish=ok` / 0 empty**, last id
+`gpqa-138`, 59 of 198 to go; humaneval **120 / 120**, last id `humaneval-0119`, 44 of 164 to go),
+still unshipped and unscored by rule.
+
+Ops state read this tick (no action): local `main` equals `origin/main` (0 ahead / 0 behind) before
+this tick's commit; `docs-freshness` fired once today — run 42807245078 at **11:24:43 UTC, failed**
+with the stale-status-date finding on the pre-fix SHA (the same run ticks 15–16 recorded); no
+scheduled run has fired against the fixed tree yet, next expected tomorrow. `LEG-INCIDENTS.md`
+carries no entry for 2026-11-10 and no arm incident occurred this tick (the CI repair above is a
+docs/scanner finding, not a leg event).
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
+percent.

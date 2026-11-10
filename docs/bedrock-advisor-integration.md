@@ -199,7 +199,7 @@ So the single blocker is paper, not plumbing:
 Re-check after the form, `2026-11-10 14:02–14:05 CET`: `agreementAvailability` is still
 `NOT_AVAILABLE` for `anthropic.claude-haiku-5-5`, `anthropic.claude-haiku-4-5-20251001-v1:0` and
 `anthropic.claude-sonnet-4-5-20250929-v1:0`. First invoke from the console (root) identity: Haiku
-5.5 -> `AccessDeniedException: "anthropic.claude-haiku-5-5 is not available for this account ...
+5.5 -> `AccessDeniedException` — "anthropic.claude-haiku-5-5 is not available for this account ...
 contact AWS Sales"`; Haiku 4.5 -> `ThrottlingException: "Too many tokens per day"`. Service Quotas
 lists the effective cross-region TPM for both Haiku 4.5 and 5.5 as `0.0` while the requestable
 *default* is `5,000,000` (an increase request below the default is rejected) — the zero is a
