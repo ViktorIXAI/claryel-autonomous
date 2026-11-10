@@ -280,6 +280,38 @@ Sequence for any future Bedrock model on this account: use-case form (once) -> l
 Invoke still returned `AccessDeniedException` minutes after the flip, i.e. entitlement propagation
 lags the control-plane flag; re-probe before concluding anything is broken.
 
+## Contracted but not cleared: Claude Fable 5.2
+
+The owner's rule for the expensive lane: **заключаем договор, но не подключаем** — accept the offer so
+the contract exists, keep the model out of any runtime path until he clears it. Done at `18:1x CET`:
+
+```bash
+aws bedrock list-foundation-model-agreement-offers --model-id anthropic.claude-fable-5-2   # offer-agsprgw6z3dg6
+aws bedrock create-foundation-model-agreement --model-id anthropic.claude-fable-5-2 --offer-token "$TOK"
+```
+
+`agreementAvailability` reached `AVAILABLE`. Nothing else was touched: **no invoke, no smoke call, no
+endpoint, no quota request**, and the account data-retention mode stays `inherit` — Fable's model card
+requires opting into `aws_review` (30-day review-required retention, an account-wide lever), which is an
+owner decision and has not been made. The gate monitor now reads the Fable flag from the control plane
+(`control_only/agreement=...`, zero tokens) so a flip is visible without spending anything.
+
+Lanes are pre-wired but inert — `~/.hermes/scripts/bedrock_lane.sh` writes profile config only, it never
+calls a model:
+
+| Lane | Model ID | Effort | Price $/1M in-out | Full public suite (1.44M in / 2.04M out) |
+|---|---|---|---|---|
+| `haiku-low` (pinned default) | `global.anthropic.claude-haiku-5-5` | low | 0.10 / 0.50 | $1.16 |
+| `haiku-high` | same | high | 0.10 / 0.50 | ~$3.20 (thinking ≈ ×3 output) |
+| `sonnet-low` / `sonnet-high` | `global.anthropic.claude-sonnet-5-5` | low/high | 2.00 / 10.00 | $23.29 / ~$64 |
+| `fable-low` / `fable-high` | `global.anthropic.claude-fable-5-2` | low/high | 8.00 / 40.00 | $93.15 / ~$256 |
+
+`bedrock_lane.sh fable-*` exits `3` with a warning unless `--i-know` is passed after the owner clears
+Fable; that guard exists because Fable is 80× Haiku 5.5 per token and also rejects our benchmark request
+shape (`temperature=1.0` or omitted, never 0.7). The **Sonnet 5.5 contract has deliberately not been
+accepted yet** — it is one `list-foundation-model-agreement-offers` + `create-foundation-model-agreement`
+pair away whenever the owner wants the middle lane.
+
 Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
 (`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
 `hermes-gateway` service was restarted (old main PID 519209 from 03:03 ran on a superseded
