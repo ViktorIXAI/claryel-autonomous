@@ -806,3 +806,76 @@ on record.
 (gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each resumable
 by id and scored only when complete. Standing limits unchanged: no Grok arm before 2026-11-12; frozen
 contour `0.0.2.56`; sanitization before every push; a partial arm publishes no percent.
+
+**Queue status 2026-11-10 11:05 CET (tick 13):** nothing launched — the queue stays empty and item 8
+remains gated to 2026-11-12 by the owner quota window. 0 leg units, no `pub_bench_run`/`gate_run`
+process, no endpoint call and no cloud call this tick; the local endpoint was read but not touched
+(`/health` 200, GPU 0 % util / 36.8 W). The P2005 idle-spin note persists: the engine has held
+**664 % CPU at 0 % GPU utilization for 38.3 h with 58.7 GiB resident**. The issue #43 architecture
+hold expired at 10:10 CET today and this tick recorded that fact rather than acting on it: an engine
+restart is an infrastructure action on the box that serves this session's brain, so it stays an owner
+decision and no unit was started or stopped. The two partial Grok arms were re-verified intact a
+seventh time (gpqa-diamond **139 unique ids / 139 `finish=ok` / 0 empty**, last id `gpqa-138`;
+humaneval **120 / 120**, last id `humaneval-0119`), still unshipped and unscored by rule.
+
+**The tick went at the percents that are *not* in the digest table, and the audit found no wrong
+number — it found that 33 of them had no machine check at all.** `PUB-DIGEST.md` is the one table this
+line re-scores from shipped bytes (tick 9 closed that audit for all 46 rows). The result documents
+quote **169** `N/M = P %` citations; **136** of them are digest rows, and **33** carry no digest row
+anywhere: pre-registered slice scores, per-category and per-difficulty breakdowns, truncation censuses
+and paired-join conversion rates. Those are exactly as quotable as a digest cell and were maintained
+by hand. Measured on the tracked bytes and recomputed offline with the pinned checkers (zero model
+calls), **every one reproduced** — no published percent, verdict file or arm byte moved.
+
+Shipped as tooling and pins:
+
+* `benchmarks/public/DERIVED-PERCENTS.json` — the registry: **18 derivations** (kind = `subset`,
+  `category`, `field_count`, `join`) and **12 exclusion records**, each naming its fraction and a
+  reason. The excluded class is exactly the stochastic `pub-ifeval` scorer: the loose columns
+  (481/541, 477/541, 526/541), the instruction-check aggregates (denominator 834), the
+  `pub-ifeval-v2` corrected cells (469, 463, 510) and the verification-rescore citation 514/541 that
+  the document already labels as the documented `langdetect` flake. None of them is CI-asserted at an
+  exact count, because the upstream checker itself flips ~1 task per run — the same ±0.5 pp band this
+  line publishes; each value stays pinned by its shipped verdict sidecar and by dated multi-pass
+  records instead.
+* `scripts/pub_derived_percent_check.py` — recomputes every entry from tracked artifacts (asserting
+  the pinned checker ids `pub-checkers-v2` / `bfcl-ast-v1` have not moved and running their
+  self-tests first), requires the declared fraction to still appear in the named document, refuses a
+  derived percent over a denominator with any UNSCORED cell, and then runs the opposite direction:
+  **any citation in a result document that is neither a digest row, nor a registry entry, nor an
+  exclusion with a reason is a finding**. Census on the tracked tree: 169 citations, 41 distinct
+  digest fractions, **0 uncovered**.
+* `harness/pub_derived_percent_test.py` — **39 checks, 0 failed**, enrolled by the `harness/*test.py`
+  glob. Non-vacuity, six tamper classes: a declared count moved by one cell, the quoted fraction
+  deleted from its document, a registry entry deleted so its citation is uncovered, **one shipped
+  verdict row flipped in a sidecar**, a fabricated citation inserted into a document, and a missing
+  artifact (exit 2, fail-closed).
+
+What the pass therefore proves for the first time, from shipped bytes alone: the four cross-arm slice
+percents (gsm8k bare **295/300**, arc-challenge bare **293/300**, bfcl bare **285/300** and
+contour-matched **279/300**); the whole BFCL per-category anatomy table (377/400, 186/200, 184/200,
+165/200, 204/240 — 1116 of 1240 total); the LiveCodeBench `Where the losses are` split
+(26/26 easy, 18/26 medium, 16/60 hard, i.e. the 112 stdin cells of the bare arm, which is what that
+table's column header claims); the IFEval truncation censuses (62/541 bare, 72/541 contour) and the
+bare-vs-contour strict disagreement 37/541; and **the whole item-7 LiveCodeBench control join**,
+recomputed from the shipped sidecars with zero model calls — target set 66 cells (asked ∩ first-arm
+hidden failures), blind redraw converts 9, feedback converts 7, the blind draw converts 1 of the 8
+cells the public gate can never ask, and the oracle keep-best of a blind redraw is 111/175.
+
+Gates run before the push: `scripts/pub_arms_index.py --check` 0 drift; the three publication
+contract tests green (`pub_arms_index` 34, `pub_grok_cell` 21, `pub_superseded_cell` 31);
+`scripts/security/secret_scan.py --dir . --strict` exit 0 with 0 findings.
+
+Ops state read this tick (no action): the tick-12 push (`ba8267c`) is **green on all four jobs** and
+its `pages-build-deployment` succeeded; the Grok partials were re-verified a seventh time as recorded
+above.
+`docs-freshness` still records its last scheduled run at **2026-11-09 11:50 UTC (green)** — at
+09:56 UTC GitHub had delivered no scheduled run for 2026-11-10 and the tree was clean, so the brief's
+"the docs job errors daily because the tree is dirty" line remains unreproduced for a fourth tick;
+the last red scheduled runs on record are 2026-11-07 and 2026-11-08.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
+percent.
