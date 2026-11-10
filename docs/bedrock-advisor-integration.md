@@ -122,7 +122,7 @@ Requested pattern: routine steps cheap, planning/debug steps expensive.
 3. Bedrock console / API: enable model access for product
    `prod-m733do2vrmi3o`, then set the account/project data-retention mode to
    `aws_review`. Step 3 is the point of no return for privacy and must be an
-   explicit owner decision (GitHub issue #45).
+   explicit owner decision (GitHub issue #55).
 4. `hermes config set bedrock.region <region>`; do not switch
    `model.provider` before a smoke call passes.
 5. Restart the gateway so the runtime picks the environment that contains boto3
