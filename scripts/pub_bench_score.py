@@ -133,7 +133,11 @@ def digest_head():
             "LiveCodeBench rows labelled `checker lcb-exec-v1` are superseded as verdicts, for all "
             "three arms, by the `lcb-exec-v2` rows scored from the same stored answer bytes "
             "(2026-11-09 release closing the functional-driver gap: 112-denominator -> "
-            "175-denominator, every stdin verdict cell identical under both contracts). Each "
+            "175-denominator, every stdin verdict cell identical under both contracts). "
+            "IFEval rows keep their published `checker pub-ifeval-v1` verdicts; the 2026-11-10 "
+            "corrected table under contract `pub-ifeval-v2` (which stops the vendored checker "
+            "re-drawing the literal `letter` kwarg at random in 2 of 541 cells) lives in "
+            "`IFEVAL-RESULT.md`, beside the cells it moves. Each "
             "`<BENCH>-RESULT.md` carries the dated pointer and the reason.\n\n"
             % (EXEC_CHECKER, CHECKER_CONTRACT))
 

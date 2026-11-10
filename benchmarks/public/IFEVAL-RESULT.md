@@ -394,3 +394,69 @@ direction the HumanEval control measured, and here it is significant at n=16 ins
 baseline moves 467–469 per scorer pass, so all of the above sits far outside checker noise except the
 bare-vs-redraw pair, which is exactly inside it; the arms are not byte-matched pairs and this section
 adds no percent — the published rows keep their bytes and their wording.
+
+## Where the ±1 actually comes from, and contract `pub-ifeval-v2` (2026-11-10 04:20 CET, zero model calls)
+
+The sentence above attributes the whole ±1-task drift to `langdetect`. Half of it is something else,
+and it is not noise — it is a coin flip inside the vendored checker.
+
+**Mechanism.** `LetterFrequencyChecker.build_description`
+(`benchmarks/public/vendor/instruction_following_eval/instructions.py`) rejects a `letter` kwarg whose
+lower-case code point falls outside a-z and replaces it with `random.choice(string.ascii_letters)`.
+Two pinned tasks ask for a punctuation character, so the check that decides those cells is re-drawn on
+every scorer pass over byte-identical answers:
+
+| cell | what the prompt asks | pinned kwargs | strict verdict over 12 draws of the shipped bare-arm bytes |
+|---|---|---|---|
+| `ifeval-1122` | "Include at least 4 hashtags, starting with '#'" | `letter='#'`, at least 4 | pass **4/12** |
+| `ifeval-1129` | "Contain 6 or more exclamation marks" | `letter='!'`, at least 6 | pass **7/12** |
+
+The other 31 of the set's 33 `keywords:letter_frequency` cells carry an alphabetic `letter` and are
+unaffected. So for these two ids the published verdict was never reproducible: a stored answer holding
+exactly four `#` failed `ifeval-1122` on some passes and passed it on others.
+
+**The correction ships as a new contract, never an edit.** `scripts/pub_bench_ifeval_v2.py`
+(contract `pub-ifeval-v2`, SHA-256/16 `b4a089bc7bb3b212`) mirrors the v1 path and restores the pinned
+literal character on the built instruction instead of letting the vendor randomize it, then counts it
+as-is (`check_following` lower-cases the response, so `#` and `!` count correctly). No vendored file
+moved: the scorer re-asserts the five `MANIFEST.json` sha16 pins on every run and refuses to score if
+they changed. Self-test at ship time, in the pinned venv: vendor pins 5/5, upstream unit suite green,
+six literal-character checks (enough of the required character passes, one short of it fails, and an
+answer carrying a long run of some other letter plus a single required character fails — that last one
+is exactly the v1 coin flip), both affected cells identical across
+20 repeated draws, reference responses 417/540 strict and 431/540 loose inside the recorded band, and
+a scope bound that refuses the run if v1 and v2 differ on more than the 2 affected cells.
+
+**Corrected percents, three independent scorer passes over the shipped answer bytes.** The published
+`pub-ifeval-v1` rows and their verdict files are untouched; this table is additive.
+
+| arm | as-run strict (`pub-ifeval-v1`) | corrected strict (`pub-ifeval-v2`, 3 passes) | cells the contract moved |
+|---|---|---|---|
+| bare local brain | 467/541 = 86.3 % | 469, 469, 470/541 = 86.7–86.9 % | `ifeval-1122`, `ifeval-1129` False→True |
+| contour 0.0.2.56 matched (also the redraw control) | 462/541 = 85.4 % | 463, 463, 463/541 = 85.6 % | `ifeval-1122` False→True |
+| codex `gpt-6.1-sol` | 515/541 = 95.2 % | 515, 515, 515/541 = 95.2 % | none |
+| `pub-repair-v1` (keep-best) | 497/541 = 91.9 % | 497, 497, 497/541 = 91.9 % | none |
+| `pub-repair-v2` (keep-best) | 509/541 = 94.1 % | 510, 510, 510/541 = 94.3 % | `ifeval-1122` False→True |
+
+**What this does not change.** Every paired verdict on this page survives the corrected contract, with
+slightly smaller margins, recomputed rather than asserted:
+
+| comparison | as-run (`pub-ifeval-v1`) | corrected (`pub-ifeval-v2`) |
+|---|---|---|
+| bare vs contour parity (whole set) | 16W/21L, p = 0.511 | 15W/23L, p = 0.256 — still a measured null |
+| bare strict failures (the mechanism cut) | 74 cells | 71 cells |
+| redraw converts / `pub-repair-v1` converts | 16 / 30 | 15 / 27 |
+| `pub-repair-v1` vs redraw | 20/6, p = 0.0094 | 18/6, p = 0.0227 |
+| `pub-repair-v2` vs redraw | 28/2, p = 8.7e-7 | 27/2, p = 1.6e-6 |
+
+**Residual noise, now that the RNG is gone.** The `langdetect` path inside the `change_case:*` checkers
+stays exactly as published: across three passes of identical bytes the strict total moved by one cell on
+the bare arm (469, 469, 470) and the loose totals moved by one on bare (484, 483, 483) and codex
+(526, 527, 528), while contour, `pub-repair-v1` and `pub-repair-v2` were identical in all three. So the
+±1-task-per-pass band and the "any IFEval delta under ~0.5 pp is checker noise" rule both stand — what
+changed is that two cells went from unreproducible coin flips to fixed points, which is why the affected
+ids are named here instead of averaged into the band.
+
+Reproduce: `python <ifeval-venv>/bin/python scripts/pub_bench_ifeval_v2.py benchmarks/public/arms/<arm-answers>.jsonl benchmarks/public/ifeval.tasks.jsonl ifeval <model> "<call>" --out <dir> --no-digest`
+(the scorer never adds a digest row for a row already published under `pub-ifeval-v1`; the corrected
+numbers live in this table). The self-test alone: same command with `--selftest-only`.

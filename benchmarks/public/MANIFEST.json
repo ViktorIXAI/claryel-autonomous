@@ -77,6 +77,14 @@
         "instructions_test.py": "d5258d03277cd333",
         "instructions_util.py": "8ad230f0b60767b4"
       },
+      "checker_history": [
+        {
+          "contract": "pub-ifeval-v2",
+          "file": "scripts/pub_bench_ifeval_v2.py",
+          "sha256_16": "b4a089bc7bb3b212",
+          "note": "corrected contract shipped 2026-11-10 without touching any vendored byte. The vendored `LetterFrequencyChecker.build_description` replaces a `letter` kwarg outside a-z with `random.choice(string.ascii_letters)`, so the two pinned cells whose ask is punctuation (`ifeval-1122` = '#', `ifeval-1129` = '!') were decided by a coin flip under `pub-ifeval-v1` (measured strict pass 4/12 and 7/12 over 12 draws of byte-identical shipped answers). v2 restores the pinned literal character on the built instruction and counts it as-is; it re-asserts the five SHA-1/16 vendored pins above on every run and refuses to score if they move, pins determinism (20 identical draws per affected cell), and fails closed if v1 and v2 differ on more than those 2 cells. All five published IFEval arms were rescored from the shipped answer bytes (three independent scorer passes each); the per-arm corrections, the recomputed paired tests and the residual langdetect band are in IFEVAL-RESULT.md. The published `pub-ifeval-v1` rows and verdict files stay published unchanged."
+        }
+      ],
       "pin_history": [
         {
           "note": "first pin lacked the bench field the arm runner requires; corrected before any arm ran, no answer bytes exist against the old bytes",

@@ -431,3 +431,58 @@ Standing limits unchanged: no Grok arm before 2026-11-12; the issue #43 architec
 2026-11-10 10:10 CET and this tick started and stopped no unit and touched no topology, service or
 firewall setting; the frozen contour stays `0.0.2.56` with its bytes untouched; sanitization before
 every push.
+
+**Queue status 2026-11-10 04:25 CET (tick 8):** nothing launched, and nothing was needed — the queue
+stays empty and the only open item (8, the Grok resumption) is gated to 2026-11-12 by the owner quota
+window. 0 leg units, no `pub_bench_run`/`gate_run` process, the local endpoint idle (GPU 0 % util,
+36.7 W, `/health` 200) and untouched by this tick; the two partial Grok files were re-verified intact
+again (139 unique ids / 139 `finish=ok`; 120 / 120) and still publish no percent.
+
+The tick went at the standing rule **"every percent re-scores offline from shipped bytes"**, which the
+tick-7 pass had only applied to the 14 classic-set rows. **All six repair rows re-verified from the
+shipped bytes, zero model calls:** the shipped verdict sidecars count to the published percents
+exactly (`pub-repair-v1` 497/541, `pub-repair-v2` 509/541, `pub-repair-bfcl-v1` 1161/1240,
+`pub-repair-humaneval-v1` 161/164, `-v2` 163/164, `pub-repair-lcb-v1` 108/175), and an independent
+re-run of each pinned checker over the shipped merged answer files reproduces them too
+(`bfcl-ast-v1` self-test 22/22 then 1161/1240; `pytest-v2` self-test green then 161/164 with losses
+`-0032 -0132 -0145`, and 163/164 with the single loss `-0145`). The execution-graded one was pushed
+all the way: the **whole hidden battery** was re-run over the shipped LCB repair bytes (sidecar file
+SHA-256/16 `86f92ab37602195a` reproduced, 0 hidden-pin mismatches, 175 questions, 277 s) and gave
+**108/175 with zero per-id verdict flips** against the shipped sidecar.
+
+**That pass then found a real defect in the IFEval contract, not noise.** Two IFEval rescores drifted
+±1 cell, and instead of filing them under the published checker-noise band they were chased to the
+vendored source: `LetterFrequencyChecker.build_description` replaces any `letter` kwarg outside a-z
+with `random.choice(string.ascii_letters)`, so the two pinned cells that ask for punctuation
+(`ifeval-1122` "at least 4 hashtags, starting with '#'", `ifeval-1129` "6 or more exclamation marks")
+were decided by a **coin flip** — measured strict pass 4/12 and 7/12 over twelve draws of byte-identical
+shipped answers (31 of the 33 `keywords:letter_frequency` cells carry an alphabetic letter and are
+unaffected). Shipped as a new contract, never an edit: **`pub-ifeval-v2`**
+(`scripts/pub_bench_ifeval_v2.py`, SHA-256/16 `b4a089bc7bb3b212`) restores the pinned literal character
+on the built instruction, re-asserts the five SHA-1/16 vendored pins on every run, pins determinism
+(20 identical draws per affected cell) and fails closed if v1 and v2 differ on more than those 2 cells;
+no vendored byte moved. Corrected strict, three independent scorer passes over the shipped bytes: bare
+469/469/470 (published 467), contour-matched 463 (462), codex 515 (515, unchanged), `pub-repair-v1`
+497 (497, unchanged), `pub-repair-v2` 510 (509). Every paired verdict on the set survives the
+correction recomputed, with smaller margins: bare-vs-contour parity 16W/21L p=0.511 → 15W/23L
+p=0.256 (still a null), `pub-repair-v1` vs the redraw control 20/6 p=0.0094 → 18/6 p=0.0227,
+`pub-repair-v2` vs the control 28/2 p=8.7e-7 → 27/2 p=1.6e-6. The ±1 band itself is unchanged — the
+vendor's `langdetect` path in `change_case:*` is still there and is now the only remaining drift — so
+the "any IFEval delta under ~0.5 pp is checker noise" rule stands. The published v1 rows, their verdict
+files and their bytes are untouched; the corrected table and the digest pointer are in
+`IFEVAL-RESULT.md` and `MANIFEST.json`.
+
+Operational note for the next local leg (no action taken, issue #43 hold to 10:10 CET): the endpoint
+box answers `/health` with 200 and parks at 0 % GPU, but its engine process has been at **~758 % CPU
+for 30 h at zero request load** with 45 GiB resident — the idle engine-spin signature this line has
+measured before. A pre-flight engine restart is the known cure; it is an infrastructure action and the
+main brain serves this session, so it waits for the hold to lift and for the legs that need it.
+CI: the last push (01:29 UTC) is green on all four jobs; the single red in the window is a
+`pages-build-deployment` collision from the 01:07 push, and the daily `docs-freshness` job's last
+scheduled run was **green** (2026-11-09 11:50 UTC), so the "it errors daily because the tree is dirty"
+line is no longer true and should not be repeated without checking.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each resumable
+by id and scored only when complete. `house-ground-v1` stays the owner's call (issue #44, reminder
+2026-11-10 09:00 CET).
