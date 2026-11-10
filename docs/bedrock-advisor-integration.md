@@ -327,7 +327,8 @@ Contracts cost nothing until a token is generated; the flag below says only whet
 | `claude-fable-5-2` | **AVAILABLE** (contracted, not cleared, needs `aws_review`) | 8.00 / 40.00 |
 | `claude-sonnet-5` | NOT_AVAILABLE (no contract) | 2.00 / 10.00 |
 | `claude-sonnet-4-6`, `claude-sonnet-4-5-20250929-v1:0` | NOT_AVAILABLE | 3.00 / 15.00 (4.6) |
-| `claude-opus-5-5`, `claude-opus-5` | NOT_AVAILABLE | 4.00 / 20.00, 5.00 / 25.00 |
+| `claude-opus-5-5` | **AVAILABLE→** contract accepted `18:5x CET` (`offer-7sp77cpl4rveu`), flag was `PENDING` at read time | 4.00 / 20.00 |
+| `claude-opus-5` | NOT_AVAILABLE | 5.00 / 25.00 |
 | `claude-opus-4-8`, `-4-7`, `-4-6-v1`, `-4-5`, `-4-1` | NOT_AVAILABLE | 5.00 / 25.00 (4.8) |
 | `claude-fable-5`, `claude-fable-5-1` | NOT_AVAILABLE | 10.00 / 50.00 (5.1) |
 
@@ -337,6 +338,55 @@ Catalogue-wide the account can see **126 foundation models**: `amazon` 21 (Nova)
 opinion lane (Qwen / GLM / gpt-oss / Nova) is an availability question, not a paperwork question. Rates
 for Anthropic rows come from the model cards plus published Bedrock rate tables; treat them as quoted
 until a real invoice confirms them.
+
+### One-character invoke audit, `18:55 CET`
+
+Owner asked for the cheapest possible proof of invokability: one short question, answer capped at one
+character, `maxTokens=8`, every contracted lane at once (`~/.hermes/cache/scratch/brping.py`).
+
+| Lane | Result |
+|---|---|
+| `global.anthropic.claude-haiku-5-5` | `AccessDeniedException` |
+| `global.anthropic.claude-sonnet-5-5` | `AccessDeniedException` |
+| `global.anthropic.claude-opus-5-5` | `AccessDeniedException` |
+| `global.anthropic.claude-fable-5-2` | `AccessDeniedException` |
+| **spend** | **in=0 out=0 tokens, $0.00** |
+
+Haiku 4.5 was deliberately not pinged (owner bar on that model; a one-character ping there would cost
+≈ $0.00004). What this rules out: the request shape, the credentials, the region and the SDK are fine —
+the same code path against 4.5 earlier produced `ThrottlingException`, i.e. an *entitled* model answers
+and only the rate limit stopped it. What it does not yet separate: (a) entitlement propagation still
+running for the 5-generation models, or (b) their per-model token quota is provisioned at 0/unknown the
+way 4.5's was. The next cheap discriminator is a quota read per model (control plane, free) plus the
+periodic re-probe; if the quota reads a real default, (b) is dead and only time is left.
+
+## Credential hygiene: what must never reach GitHub
+
+The lane credentials are exactly the thing that must not leak into a repository, an issue comment or a
+screenshot. Standing rules, in force for every Bedrock step on this account:
+
+1. **One home for secrets.** AWS access key id + secret live only in `~/.hermes/profiles/bedrock/.env`
+   (mode `600`, outside the repo). `~/.aws/credentials` is not used. Nothing else on the machine holds
+   them, and the values are never printed — tooling prints masked confirmations only.
+2. **Never commit or paste:** access key id / secret, `offerToken` blobs, session tokens, account id,
+   model-ARN dumps that embed the account id, full `config.yaml`/`.env` listings, console screenshots of
+   the Access keys or Billing pages.
+3. **Commands are written so secrets cannot be inline.** Offer tokens are read into a shell variable from
+   a file (`TOK=$(jq -r '.offers[0].offerToken' file.json)`) and documented as `"$TOK"`; the repo shows the
+   shape of the command, never the value. Same rule for key creation output: captured programmatically into
+   `.env`, then the CloudShell buffer is cleared and its temp files deleted on the AWS side.
+4. **Machine check before every publish:** `scripts/security/secret_scan.py --git --pre-publish` (also runs
+   in the pre-push guard). A non-zero result blocks the push; nothing is pushed "because it was urgent".
+5. **Audit, `2026-11-10 18:55 CET`:** tracked files — no AKIA-shaped id, no secret-assignment pattern, no
+   `AQICAH…` offer-token blob. Full history — one AKIA-shaped literal, commit `2535841` (Gitleaks controls),
+   hash `619e3cc6…`, which is **not** the live key (`4393ce4a…`); it is the AWS documentation example.
+   Issue #55 comments — zero matches for key id / offer token / secret patterns. Local scratch files — zero
+   raw material, because the key went straight from CloudShell into `.env`. CloudShell scrollback — no key
+   or token shapes; the temp files holding offer tokens were deleted on the AWS side.
+6. **Rotation is a two-step edit, not an echo:** delete the old key in IAM, create the replacement, write it
+   into `.env` programmatically, confirm masked. Never `echo`/`cat` the value in a shell that is recorded.
+7. `model.key_env` stays unset for the `bedrock` provider: the profile authenticates through the AWS
+   credential chain, so no Strata or gateway key is ever attached to a Bedrock lane.
 
 Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
 (`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
