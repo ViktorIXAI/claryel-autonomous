@@ -1,6 +1,6 @@
 # Amazon Bedrock / Claude Fable 5.2 advisor lane
 
-Status: **wired on the AWS side, model access still gated**. Written 2026-11-10 after an
+Status: **local side verified end-to-end, AWS model access still gated**. Written 2026-11-10 after an
 infrastructure pass. The dated section at the end of this file (same day, account pass through
 CloudShell) supersedes the "nothing was applied" framing of the paragraph below: an IAM user, a
 least-privilege policy and one access key in the Hermes profile env file now exist, and real
@@ -186,12 +186,44 @@ form`.
 
 So the single blocker is paper, not plumbing:
 
-1. The Anthropic first-time-use form (`put-use-case-for-model-access`) has never been filed for
-   this account. Its content **is shared with Anthropic**, so filing it is an owner disclosure
-   decision, not a configuration step; the draft text is in issue #55 and has not been sent.
+1. The Anthropic first-time-use form (`put-use-case-for-model-access`) was **filed on
+   2026-11-10 13:52 CET** after the owner's go-ahead; the stored form reads back as company
+   `CLARYEL`, website `https://claryel.com`, industry `Technology`, users = owner, operators and
+   developers, intended use = public-benchmark harness for local quantized LLMs, code
+   generation/review/debugging, log and energy analysis on owned servers, no third-party personal
+   data. Filing it is an owner disclosure decision: its content is shared with Anthropic.
 2. After the form, the SaaS agreement is auto-created by the **first invoke from an identity that
    holds `aws-marketplace:Subscribe` / `ViewSubscriptions`** (the console identity here). The
    invoke-only user starts working after that, no policy change needed.
+
+Re-check after the form, `2026-11-10 14:02–14:05 CET`: `agreementAvailability` is still
+`NOT_AVAILABLE` for `anthropic.claude-haiku-5-5`, `anthropic.claude-haiku-4-5-20251001-v1:0` and
+`anthropic.claude-sonnet-4-5-20250929-v1:0`. First invoke from the console (root) identity: Haiku
+5.5 -> `AccessDeniedException: "anthropic.claude-haiku-5-5 is not available for this account ...
+contact AWS Sales"`; Haiku 4.5 -> `ThrottlingException: "Too many tokens per day"`. Service Quotas
+lists the effective cross-region TPM for both Haiku 4.5 and 5.5 as `0.0` while the requestable
+*default* is `5,000,000` (an increase request below the default is rejected) — the zero is a
+symptom of the missing model access, not a capacity ceiling, so quota tickets are not the fix.
+Conclusion: what is left is account-level AWS enablement (agreement/auto-provisioning, possibly an
+AWS Sales step for the Claude 5 family), not our IAM, network, SDK or routing. The gate is cheap to
+re-check (`get-foundation-model-availability` plus a 1-token `converse`); until it clears, the
+local brain stays the production lane and no Bedrock arm is published.
+
+Billing state, read rather than assumed: Cost Explorer reports **no spend in the trailing 90 days**
+and the account has **no budget alarms**; a `claryel-monthly-cost` COST budget (monthly, $100) was
+created so the first real metering is visible. Email notifications for it were rejected by the CLI
+(subscriber verification is owner-side), so the alarm is dashboard-only until the owner attaches a
+verified address. The account balance/credit itself is not readable through the CLI and was not
+verified.
+
+Verified on this machine, `2026-11-10 14:37 CET`: the `bedrock` PM extra is installed
+(`boto3 1.43.115`, `botocore 1.43.118`) and is reachable through the runtime bootstrap, and the
+`hermes-gateway` service was restarted (old main PID 519209 from 03:03 ran on a superseded
+interpreter tree that predated the install; new main PID 3095687). A fresh-process probe with the
+profile's own credentials imports the SDK, recognises `global.anthropic.claude-haiku-5-5` as a
+Bedrock Anthropic model, and gets the same AWS-side answer as CloudShell
+(`AccessDeniedException` for 5.5, `ThrottlingException` for 4.5). That closes the local half:
+SDK, credentials, region, profile pin and routing all work; only AWS enablement is missing.
 
 Retention, checked rather than assumed: `get-account-data-retention` returns `mode: inherit`, and
 the only lever is `put-account-data-retention`, which is **account-wide**. The
