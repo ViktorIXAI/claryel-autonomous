@@ -734,3 +734,75 @@ rule: after 12 Nov a Grok cell must either publish a percent from a complete arm
 suspension wording — nothing in between. `house-ground-v1` stays the owner's call (issue #44).
 Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; sanitization
 before every push; a partial arm publishes no percent.
+
+**Queue status 2026-11-10 09:55 CET (tick 12):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick; the local endpoint
+was read but not touched. The two partial Grok arms were re-verified intact a sixth time (gpqa-diamond
+**139 unique ids / 139 `finish=ok` / 0 empty answers**, last id `gpqa-138`; humaneval **120 / 120**,
+last id `humaneval-0119`), still unshipped and unscored by rule.
+
+**The tick went at the percent cells of the per-arm tables, and that audit found 9 stale cells in 4
+documents.** Tick 11 fixed the Grok *availability* cells for the reason that the table cell, not the
+prose, is what gets quoted. The same failure had been sitting one column over, on the percents
+themselves: a superseded number stayed the only number a reader of the arms table could see. Measured
+on the tracked bytes, four distinct shapes:
+
+* **the only contour number in the table was the superseded one** — `GPQA-RESULT.md` led with
+  `91/198 = 46.0 %` and `ARC-CHALLENGE-RESULT.md` with `283/300 = 94.3 %`, both escalation-shape rows
+  the digest header had already declared superseded (70.2 % and 97.0 %), with the corrected percent
+  living only in a section further down;
+* **a set whose arms table had no contour row at all** — `ARC-EASY-RESULT.md` (so both the superseded
+  `290/300 = 96.7 %` and the in-force `289/300 = 96.3 %` were unquotable from the table);
+* **a superseded checker contract printed as the current verdict** — `HUMANEVAL-RESULT.md` led with
+  the `pytest-v1` cells `158/164` (bare) and `155/164` (contour) while the digest's in-force rows for
+  the same stored bytes are `pytest-v2`: `159/164 = 97.0 %` and `157/164 = 95.7 %`;
+* **the same shape on LiveCodeBench, hidden by a denominator change** — the arms table still prints
+  the three `lcb-exec-v1` percents (`60/112`, `54/112`, `105/112`) with the pointer only in the
+  sentence *under* the table, and never prints the in-force `lcb-exec-v2` cells (`101/175 = 57.7 %`,
+  `99/175 = 56.6 %`, `168/175 = 96.0 %`).
+
+Fixes are labels and rows only — **no published percent, verdict file or arm byte moved**, and every
+in-force number added to a table is a digest row that tick 9 already re-scored from shipped bytes:
+
+* dated in-row pointers now sit on the five superseded cells (gpqa-diamond, arc-challenge, humaneval
+  bare + contour, livecodebench × 3), each stating that the printed number stays exactly as first
+  published and naming the corrected cell beside it; the HumanEval codex cell also says its
+  `pytest-v2` rescore left it unchanged at `163/164 = 99.4 %`, which is why it needed no new digest
+  row;
+* three matched-shape contour rows were **added** to the arms tables that never carried them
+  (gpqa-diamond `139/198 = 70.2 %`, arc-challenge `291/300 = 97.0 %`, arc-easy `289/300 = 96.3 %`),
+  with their wall/engine time, sampled energy, request count and gate census taken from the
+  documents' own parity sections — GPQA's row states plainly that that leg has no energy samples
+  (sampler wiring bug) rather than inventing a number, and the ARC-EASY row states that its leg wall
+  was never recorded separately;
+* the rule is now machine-checked: `scripts/pub_superseded_cell_check.py` derives the supersession set
+  from the digest table itself (tokens `ladder rungs 512,1200, enable_thinking off`,
+  `checker pytest-v1`, `checker lcb-exec-v1`), and requires that in the result document's arms table
+  (a) any row carrying a superseded percent says "superseded", and (b) the corrected percent is
+  quotable from a row of the same arm family. Arm identity is **bench+model, not bench+model+tasks**,
+  because a corrected contract legitimately moves the denominator (`lcb-exec-v1` 112 of 175 →
+  `lcb-exec-v2` 175 of 175) — requiring the tasks cell to match hid exactly the supersession the rule
+  exists to catch;
+* `harness/pub_superseded_cell_test.py` — **31 checks, 0 failed**, auto-enrolled by the
+  `harness/*test.py` glob (57 harness tests now). Non-vacuity: stripping the word "superseded" from
+  each of the five fixed tables reddens it, deleting the ARC-EASY contour row reports "no contour row
+  at all", removing `139/198 = 70.2 %` from both GPQA contour rows reports the missing in-force cell,
+  renaming a table header reports "no arms table found" instead of skipping the document, a bench with
+  no audited document is a finding, and a completed Grok row creates no finding (the rule does not
+  bite the availability cells). The pre-fix census on the tracked bytes was **9 findings across 4
+  documents**; after this commit the checker reports **0**.
+
+Ops state read this tick (no action): the last push (`2f9bab9`) is **green on all four jobs**
+(secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts) and its Pages build
+completed; the four latest Pages builds (07:00, 07:07, 07:44, 09:07 UTC) all `built`, so the
+22:35–04:23 UTC flap has not recurred. `docs-freshness` still records its last scheduled run at
+**2026-11-09 11:50 UTC (green)** — GitHub had not delivered today's scheduled run at 08:50 UTC, and
+the tree was clean, so the brief's "errors daily because the tree is dirty" line remains unreproduced
+for a third tick; the two earlier scheduled failures (2026-11-07, 2026-11-08) are the last red runs
+on record.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each resumable
+by id and scored only when complete. Standing limits unchanged: no Grok arm before 2026-11-12; frozen
+contour `0.0.2.56`; sanitization before every push; a partial arm publishes no percent.
