@@ -17,5 +17,18 @@ print(line)
 sys.exit(0 if "no leaks" in line or o.returncode == 0 else 1)
 PY
 [ $? -ne 0 ] && rc=1
+# PUB-line gates. Ticks 7-17 ran these five by hand in every tick; a standing push gate is the
+# only form that cannot be forgotten between ticks. Each names its own finding count on the last
+# line and exits non-zero on findings or on a missing artifact (fail closed).
+echo "pub gates:"
+for g in "scripts/pub_arms_index.py --check" \
+         "scripts/pub_derived_percent_check.py" \
+         "scripts/pub_grok_cell_check.py" \
+         "scripts/pub_superseded_cell_check.py" \
+         "scripts/pub_digest_row_check.py"; do
+    out=$(python3 $g 2>&1); st=$?
+    printf '  %-46s %s\n' "$g" "$(printf '%s' "$out" | tail -1)"
+    if [ $st -ne 0 ]; then rc=1; printf '%s\n' "$out" | tail -8; fi
+done
 echo "gate rc=$rc"
 exit $rc

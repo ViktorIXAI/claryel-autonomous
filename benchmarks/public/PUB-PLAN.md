@@ -1020,3 +1020,84 @@ docs/scanner finding, not a leg event).
 resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
 percent.
+
+
+**Queue status 2026-11-10 15:25 CET (tick 18):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick; the local endpoint
+was read but not touched (`/health` 200, GPU **100 % util / 132.2 W / 23.5 GiB** — that is this
+session's own brain traffic, the box hosts the live brain, so the "0 % GPU with ~638 % engine CPU"
+idle-spin note from ticks 13–17 was again not re-sampled under that same idle condition and stays
+open, unconfirmed either way; engine pid 3284575 at 638 % CPU, 56.7 GiB RSS, 1 d 18 h 56 min
+uptime, load average 13.5 on a 32-core box). The two partial Grok arms were re-verified intact a
+twelfth time (gpqa-diamond **139 unique ids / 139 `finish=ok` / 0 empty**, last id `gpqa-138`, 59
+of 198 to go; humaneval **120 / 120**, last id `humaneval-0119`, 44 of 164 to go), still unshipped
+and unscored by rule.
+
+**The tick went at the digest table itself — the artifact every verdict on this line quotes and the
+only one no gate had ever read as a table.** Census by the new `scripts/pub_digest_row_check.py`,
+zero model calls: **46 rows, 0 arithmetic findings, 0 task-pin findings.** Every row's
+`N/M = **P %**` reproduces 100·N/M inside its own one-decimal rounding, every denominator equals its
+tasks column, and every tasks cell reproduces the `MANIFEST.json`-labelled pin for its bench (IFEval
+through its labelled SHA-1/16, the other eight sets as SHA-256/16). What the census did find: **23
+of 46 rows name no checker contract** — they lean on the table head's single global "contract in
+force" sentence. That is the same defect class as the stale Grok cells (tick 11) and the stale
+superseded cells (tick 12): the per-row cell is what gets quoted, the head is what gets skipped.
+
+Gate plus writer guards; **no published row, verdict file or arm byte moved**:
+
+* `scripts/pub_digest_row_check.py` (new) pins the owner's fail-closed row rules mechanically: table
+  shape (one header, one delimiter, six cells per row); bench pinned and non-zero in `MANIFEST.json`
+  with a pre-registered prefix task count; tasks cell read through
+  `pub_bench_score.manifest_tasks_cell` rather than re-hashed by the caller; fraction, denominator
+  and percent consistent to 0.06 pp; **per-row checker-contract naming**; uniqueness per
+  (bench, model, tasks, contract set, request shape); and a vocabulary rule that reddens when a
+  contract in force is missing from the gate's own list. The 23 pre-rule rows are recorded by exact
+  identity (`bench|model|tasks|N/M`), and a **stale exception is itself a finding** — the list cannot
+  rot, and a 24th contract-less row cannot land.
+* Three live defects at the classic-set writer `pub_bench_score.main()`, found while wiring that
+  gate and fixed at the writer. (1) It re-hashed the task file with SHA-256/16 instead of routing
+  through `manifest_tasks_cell` — tick 10's guard reached the IFEval scorer only — so an IFEval run
+  through the generic scorer would have minted the unlabelled identity `e09a5cab3782ed5b` beside the
+  published `2c672531577dcc33` rows, two identities for one pinned file, exactly what that guard
+  exists to prevent. (2) Its call label named no contract. (3) An arm with no scored task reached
+  `digest_row` as `0/0 = **0.0%**`, a fabricated zero percent over an empty denominator; on the real
+  bytes it did not even get that far — the scan died first with `KeyError: 'checker'`, because IFEval
+  task rows carry no `checker`/`gold` key at all (reproduced on the shipped 541-row file, then fixed:
+  an absent checker is UNSCORED and the writer now refuses with exit 2 and writes no row).
+* `harness/pub_digest_row_gate_test.py` — **21 checks, 0 failed**, auto-enrolled by the
+  `harness/*test.py` glob. Non-vacuity, seven tamper classes: a printed percent 1.7 pp off its own
+  fraction, an unlabelled SHA-256 tasks cell, a verbatim duplicate row, a new contract-less row, a
+  denominator-0 row, a deleted pre-rule row (stale exception) and a stale contract vocabulary each
+  redden CI, while the published matched-shape / escalation-shape pairs are proven **not**
+  duplicates and a writer-shaped row that names its contract is accepted.
+* `scripts/push_ready.sh` now runs all five PUB gates (arms index, derived percents, Grok cells,
+  superseded cells, digest rows) instead of leaving them to a hand-run list that each tick has to
+  remember.
+
+One label defect recorded and deliberately **not** fixed, following the `task_sha16` naming precedent
+from tick 10: the three complete Grok rows print a mangled transport label in their call cell
+(`… v0.23.0+860.gf17db36.dirty (2026.9.24) · upstre toolsets off CLI`). It is a typo in published
+bytes, it enters no calculation, and repairing it would restate a published row's cell; the percents,
+ids and checker of those rows stay exactly as published.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+0 drift; `pub_derived_percent_check.py` 18 derivations, 41 digest + 169 document citations, 0
+uncovered; `pub_grok_cell_check.py` 9 documents, 0 findings; `pub_superseded_cell_check.py` 9
+documents, 0 findings; the new `pub_digest_row_check.py` 46 rows, 0 findings, 23/23 exceptions used;
+scorer self-test 22/22; `secret_scan.py --strict` 0 findings.
+
+Ops state read this tick (no action): the newest push `84342dc` (14:07 UTC) is **green on all five
+jobs** (secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts, pages).
+`docs-freshness` still records its last scheduled run at **2026-11-10 11:24:43 UTC (failed)** — the
+stale-status-date finding on the pre-fix SHA that ticks 15–17 recorded — and no scheduled run has
+fired against the fixed tree since; `scripts/qa/docs_policy.py --daily` prints PASS on the current
+tree, so the brief's "errors daily because the tree is dirty" line remains unreproduced.
+`LEG-INCIDENTS.md` carries one 2026-11-10 entry (14:45 CET, two worktrees held `main`) from the ops
+line; it is not a PUB leg event and no arm incident occurred this tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
+percent.

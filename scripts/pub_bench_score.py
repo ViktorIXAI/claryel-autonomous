@@ -354,8 +354,12 @@ def main():
                          % (len(tasks) - len(missing), len(tasks)))
     by = {}
     for tid, t in tasks.items():
-        b, ck = t["bench"], t["checker"]
-        ok = check(ck, t["gold"], ans.get(tid, {}).get("answer", ""))
+        # `checker` is missing on the task files whose contract lives in its own scorer
+        # (ifeval rows carry no `checker` key), and this generic path must not die with a
+        # KeyError there: an absent checker is UNSCORED, which the denominator guard below
+        # turns into a refusal. A crash mid-scan also leaves no report at all.
+        b, ck = t["bench"], t.get("checker")
+        ok = check(ck, t.get("gold"), ans.get(tid, {}).get("answer", ""))
         r = by.setdefault(b, {"scored": 0, "ok": 0, "unscored": 0})
         if ok is None:
             r["unscored"] += 1
@@ -368,11 +372,24 @@ def main():
         note = "" if not r["unscored"] else ("  [%d unscored, checker pending]" % r["unscored"])
         print("%-14s %4d/%4d = %5.1f%%  (answers %d/%d)%s"
               % (b, r["ok"], r["scored"], pct, len(tasks) - len(missing), len(tasks), note))
+    bench = os.path.basename(tasks_f).replace(".tasks.jsonl", "")
+    scored_n = sum(r["scored"] for r in by.values())
+    if scored_n == 0:
+        # An execution-checked set run through this scorer has no scored task at all
+        # (every task is UNSCORED until its checker ships). digest_row would happily print
+        # `0/0 = **0.0%**` — a fabricated zero percent over an empty denominator, the one
+        # failure rule 2 of PUB-PLAN.md exists to prevent. Fail closed instead.
+        sys.stderr.write("NO SCORED TASK: %d tasks, 0 scored under %s - no digest row "
+                         "written\n" % (len(tasks), CHECKER_CONTRACT))
+        return 2
     row = digest_row(
-        os.path.basename(tasks_f).replace(".tasks.jsonl", ""), model, len(tasks),
-        hashlib.sha256(open(tasks_f, "rb").read()).hexdigest()[:16],
-        call_label(list(ans.values()), temp),
-        sum(r["ok"] for r in by.values()), sum(r["scored"] for r in by.values()))
+        bench, model, len(tasks), manifest_tasks_cell(bench, tasks_f),
+        # A digest row must name its checker contract in its own cell (owner fail-closed
+        # rule), not lean on the table head's single global sentence: the per-row cell is
+        # what gets quoted. 23 pre-rule rows are recorded in
+        # `scripts/pub_digest_row_check.py`; this writer never adds a 24th.
+        "%s; checker %s" % (call_label(list(ans.values()), temp), CHECKER_CONTRACT),
+        sum(r["ok"] for r in by.values()), scored_n)
     dst = write_digest(row)
     print("-> %s" % os.path.basename(dst))
     return 0
