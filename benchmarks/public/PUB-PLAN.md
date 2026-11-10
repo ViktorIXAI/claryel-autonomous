@@ -1196,3 +1196,39 @@ entry — no leg started, stopped or restarted this tick.
 resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
 percent.
+
+
+**Queue status 2026-11-10 17:10 CET (tick 20):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 leg units, no
+`pub_bench_run`/`gate_run` process, no endpoint call and no cloud call this tick; the local endpoint
+was read but not touched (`/health` 200, GPU **0 % util / 36.4 W / 23.5 GiB** VRAM resident). The
+idle-spin condition is confirmed again under that same idle condition (ticks 13, 19): engine pid
+3284575 at **629 % CPU with the GPU at 0 % utilization**, 59.1 GiB RSS, 44.6 h of process uptime,
+load average 11.3 on a 32-core box, 47 of 60 GiB box RAM used. The pre-flight engine restart cure
+still waits — this engine hosts this session's live brain, so it is an owner decision; this tick
+started and stopped nothing.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+0 drift; `pub_derived_percent_check.py` 42 derivations recomputed from shipped bytes, 41 digest +
+169 document citations, 0 uncovered; `pub_grok_cell_check.py` 9 documents, 0 findings;
+`pub_superseded_cell_check.py` 9 documents, 0 findings; `pub_digest_row_check.py` 46 rows, 0
+findings, 23/23 pre-rule exceptions used; scorer self-test path exercised inside the derived-percent
+gate. The two partial Grok arms were re-verified intact a fourteenth time (gpqa-diamond **139 unique
+ids / 139 `finish=ok` / 0 empty**, last id `gpqa-138`, 59 of 198 to go; humaneval **120 / 120**,
+last id `humaneval-0119`, 44 of 164 to go; both files untouched since 2026-11-09 07:56), still
+unshipped and unscored by rule.
+
+Ops state read this tick (no action): the tick-19 push (`55b79e0`) is **green on all five jobs**
+(secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts, pages) at 15:28 UTC, its
+pages build completed in 4 m 9 s. `docs-freshness` still records its last scheduled run at
+**2026-11-10 11:24:53 UTC (failed)** — the stale-status-date finding on the pre-fix SHA — no
+scheduled run has fired against the fixed tree since, and `scripts/qa/docs_policy.py --daily` prints
+**PASS** on the current tree, so the brief's "errors daily because the tree is dirty" line remains
+unreproduced; the next scheduled run is expected tomorrow. `LEG-INCIDENTS.md` gains no new
+2026-11-10 PUB entry — no leg started, stopped or restarted this tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond 59 ids, humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541), each
+resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; sanitization before every push; a partial arm publishes no
+percent.
