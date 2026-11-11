@@ -2255,3 +2255,59 @@ transport-version boundary (stored rows `v0.23.0+860.gf17db36`, resumed rows `v0
 named beside any completed percent. Standing limits unchanged: no Grok arm before 2026-11-12; frozen
 contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO at this reading, with no local
 leg queued); sanitization before every push; a partial arm publishes no percent.
+
+---
+
+**Queue status 2026-11-11 07:20 CET (tick 38):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 `parb-pub-*` units at
+tick start, no `pub_bench_run`/`pub_bench_cloud`/`gate_run` process, tree clean; `origin/main` moved
+under the line by one foreign commit (`901230f`, the daily self-evolution research digest, touches
+only `sources/daily/`) and was fast-forwarded — no pub byte moved. No digest row, verdict, answer
+byte, bank file or manifest pin moved this tick.
+
+**Preflight NO-GO again: the fifteenth NO-GO in sixteen readings, idle-spin the sole reason.**
+Fresh reading at 07:20 CET: swap free **8 191 MiB of 8 191**, MemAvailable 14 111 MiB, engine state
+`S`, engine **548 % CPU with the GPU at 0 % utilization / 36.50 W**, load average 9.35, `/health`
+200, 0 foreign legs, still the same un-restarted engine process (pid `3284575`, age **2 d 10:44**).
+RSS 56 967 MiB — **down 486 MiB against tick 37's 57 453 MiB in ~35 min**, so the RSS growth noted
+last tick oscillates rather than trends. Today alone produced seven readings and the GO at 06:08 is
+the only one with a non-zero GPU utilization (29 %); the window is transient and the remedy stays an
+owner/box decision (engine restart or park the keep-up load). Nothing was restarted here, cloud legs
+are unaffected, and no admissible local leg exists anyway: every in-force set already carries bare +
+matched-shape contour + codex rows.
+
+**The 12 Nov chain launcher was this tick executed in LIVE mode under the closed window — the
+strongest guard proof that is safe to run today.** Tick 37 proved the guard without executing;
+today the execution itself is the proof, because the numeric guard (`20261111 -lt 20261112`) closes:
+the launcher printed `REFUSED: grok arms are suspended by owner quota until 2026-11-12` and exited
+**3 measured directly (no pipe)**, after which **0** `pub_bench_cloud` and **0** `gate_run` processes
+exist; the guard (lines 20/33) sits before the transport call (line 42), and the `GROK_DRYRUN=1` path
+again ran the census and exited 0 without a transport line. The census is the partials' **thirty-first
+verification, computed not recalled**: `gpqa-diamond/pub-grok.jsonl` **139/139/139/0**, SHA-256/16
+`cde63378fa1633c5`; `humaneval/pub-grok.jsonl` **120/120/120/0**, SHA-256/16 `a7c741de0d6ace8c`;
+0 duplicate and 0 non-`ok` rows in either. Resume sets unchanged: gpqa-diamond 59 (`gpqa-139`..`gpqa-197`),
+humaneval 44 (`humaneval-0120`..`humaneval-0163`), mmlu-pro 500, ifeval 541 — 1 144 calls, sequential
+ETA 9.0-27.6 h.
+
+**Today's daily-docs failure read from its own execution record, not from prose.** The 03:00 CET run
+of `ef7ea47ff99b` (GitHub docs freshness daily) exited 1 at 03:02:55: the real cause is **one DNS
+blip** — `Could not resolve host: github.com` (exit 128) on the **pre-fix bare `git push`**; the
+`MANIFEST GUARD:` lines in the same capture are the contract tests' tamper-control noise already
+attributed at tick 35, not findings. The repaired tool (`push_with_retry()` with bounded retry,
+commit `4fcf356`) is in the current tree, and **no marker commit is stranded**: `origin/main..HEAD`
+is 0 after the fetch, so nothing waits for an orphan push; the 12 Nov run pushes through the retry
+path. The job's own result delivery also degraded (`send_path_degraded` to the messaging target) —
+reported, not repaired here.
+
+**Standing gates re-run on the fetched tree, zero model calls, all green and identical to ticks 36-37:**
+`pub_arms_index.py --check` **index drift: 0**; `--pins` **manifest pin drift: 0**;
+`pub_derived_percent_check.py` **42 recomputed, 0 findings** (41 digest + 169 doc citations, 0
+uncovered); `pub_grok_cell_check.py` 9 documents **0 findings**; `pub_superseded_cell_check.py`
+9 documents **0 findings**; `pub_digest_row_check.py` **46 rows, 0 findings**, 23/23 exceptions.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order and the
+derived resume sets above, each resumable by id and scored only when complete, with the
+transport-version boundary (stored rows `v0.23.0+860.gf17db36`, resumed rows `v0.23.1+2.gb3746e3`)
+named beside any completed percent. Standing limits unchanged: no Grok arm before 2026-11-12; frozen
+contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO at this reading, with no local
+leg queued); sanitization before every push; a partial arm publishes no percent.
