@@ -3381,3 +3381,49 @@ legs scored only when complete under the tick-45 per-arm contracts, a set incomp
 staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
 moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
 block.
+
+## 2026-11-11 evening status tick (tick 58)
+
+*Running units first: 0 `parb-pub-*` units; standalone bracketed process counts all 0
+(`pub_bench_cloud`, `pub_bench_run`, `gate_run`); HEAD equals `origin/main` (`d7e5f73`), worktree
+clean — the tree has not moved since tick 57.*
+
+*Standing gates re-read, all green on unchanged bytes: arms-index drift 0; derived percents 42
+recomputed / 0 findings; grok-cell rule 9 docs / 0 findings; superseded-cell rule 9 docs / 0
+findings; digest-row rule 46 rows / 0 findings; scorer self-test 22 cases / 0 failures, exit 0
+when invoked correctly. Two invocation-form traps re-encountered and re-read unshielded, both in
+the same pipe-masked-exit family this line already owns: `pub_bench_score.py --selftest` runs the
+self-test then falls through to argparse usage and exits **2** (the subcommand is `selftest`,
+dashes absent), and `pub_grok_cell_check.py --help` raises a traceback because the tool has no
+argparse and treats `--help` as a document path — run with no arguments, it scans the 9 default
+docs and exits 0. Neither is a repo-byte defect; neither moved a file.*
+
+*Grok resume gate READY (22 checks) in both modes — window-CLOSED (today) exact-identity mode and
+window-OPEN floor mode `--as-of 2026-11-12` — resume sets exact: gpqa-diamond 59 ids
+(`gpqa-139..gpqa-197`), humaneval 44 ids, mmlu-pro 500, ifeval 541; queue total 1 144 calls.*
+
+*Chain launcher `go_grok_queue_20261112.sh` byte-identical to ticks 50–57 (SHA-256/16
+`9e479ca1129c97a7`, 4 777 B). Executed live unshielded: **exit 3, REFUSED** (window=closed, opens
+20261112) with the full per-arm census printed first (139/198, 120/164, 0/500, 0/541; queue total
+1 144 calls, sequential ETA 9.0–27.6 h). Afterwards: no lock file, 0 transports in a standalone
+count, 0 units, `~/pub-bench` entry count unchanged (274).*
+
+*Preflight series re-counted by driving the gate itself over every readings file: 20 readings,
+**2 GO / 16 NO-GO / 2 INPUT-GAP** — identical to ticks 56–57; no new reading since 18:21, and
+none was taken because no local leg is queued (the 11-12 queue is cloud-only, which rule 7 does
+not preflight-gate).*
+
+*Ops re-reads: docs-freshness job `ef7ea47ff99b` status `error`, cumulative `failure_streak` 8 —
+unchanged, next run 2026-11-12 03:00 CET, still the first attempt under the fixed bounded-retry
+call site. New this tick, mechanical from the scheduler's own warning line: that job's 03:00
+result additionally failed **delivery** (`send_path_degraded` to the chat target), so even a green
+future run must be confirmed from `jobs.json`, not from chat visibility. Hard-bank-era job
+`f23cf5d48e11` status `ok`, streak 0, still fires every 5 minutes and still exits 0 only under its
+2026-11-02 one-shot marker — stopping it remains an owner decision.*
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end
+staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
+moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
+block.
