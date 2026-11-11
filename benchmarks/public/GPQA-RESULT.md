@@ -16,7 +16,7 @@ can** — and it does.
 | codex | `gpt-6.1-sol`, codex-cli 0.166.0, reasoning xhigh, read-only sandbox, prompt via STDIN | 198/198 | **192/198 = 97.0 %** | 3553 s (17.9 s/task) | sampling parameters not exposed by the transport |
 | contour-0.0.2.56 (item P0) | the FROZEN contour runtime `0.0.2.56` on the same endpoint model, category `P`, public checkers in the validator slot, token ladder 512→1200 | 198/198 | **91/198 = 46.0 %** *(superseded as a parity row by the matched-shape arm below, 139/198 = 70.2 % — a request-shape cost, not a contour effect; the number itself stays exactly as first published. Dated pointer 2026-11-10)* | 2187 s leg wall, 1367.2 s measured engine time | streamed request, `request_seed` pinned (sp1), ladder 512→1200, `enable_thinking` off — NOT the bare arm's request shape; see the parity section |
 | contour-0.0.2.56, matched shape (item P0 re-run, 2026-11-08 23:06 CET; row added to this table 2026-11-10 so the in-force parity percent is quotable here) | the same frozen runtime and workspace recipe `pub-gpqa-diamond-contour-matched`, identical bank bytes, request shape equal to the bare arm's (`PARB_SHAPE=bare PARB_LADDER=1200`), checker `pub-checkers-v2`, same 198 ids | 198/198 | **139/198 = 70.2 %** | 1594 s leg wall, 1585.9 s measured engine time (8.0 s/task); no GPU energy samples for this leg (sampler wiring bug, stated in the caveats rather than papered over) | temp 0.7, first rung 1200 (single rung, 198 requests, 0 ladder steps), serve-default thinking, no request seed — the bare arm's call shape; 0 contour edits (`gate:fields_ok` 7 fired, adopted 0), 11/198 truncated at the ceiling |
-| grok | `grok-4.7`, hermes one-shot, toolsets off | **suspended by owner quota, resumes 2026-11-12** (leg ran to 139 of 198 rows stored, stopped 07:57 CET 2026-11-09; 59 ids to go, resumable by id — a stored-row count, not a score; it coincidentally equals the contour arm's 139/198) | no percent for a partial arm | — | — |
+| grok | `grok-4.7`, hermes one-shot CLI, toolsets off (cloud; **completed 2026-11-12 00:39 CET**, row added the same day — while the arm was partial it published no percent, so this is a new row, never an edit of an old one) | 198/198 | **174/198 = 87.9 %** | resumed leg 00:01:42→00:39:02 CET = 2240 s for the 59 missing ids (median 18.6 s, mean 38.0 s per call); the 139 ids stored on 2026-11-09 logged median 73.7 s / mean 239.9 s per call — a different transport build, wall times are not comparable across legs; no GPU energy for a cloud arm | sampling parameters not exposed by the transport; arm assembled from two legs resumed by id (198 unique ids, 198 `finish=ok`): 139 rows `v0.23.0+860.gf17db36.dirty`, 59 rows `v0.23.1+2.gb3746e3.dirty` — see "Grok arm completed 2026-11-12" at the end of this document |
 
 198/198 answered in every completed arm, 0 empty, 0 transport failures; the join dropped no ids.
 
@@ -181,7 +181,9 @@ The GPQA rows in `PUB-DIGEST.md` carried answer bytes for both contour legs but 
 under `pub-checkers-v2` (self-test 22/22, zero model calls): 127/198 and 192/198, exactly the
 published numbers. Scrub masked nothing; zero path/IP/key hits. The grok leg on this set is a
 **partial** (139/198, owner quota window until 2026-11-12), so its bytes are deliberately not
-published and no percent exists for it.
+published and no percent exists for it. *(corrected 2026-11-12: the grok arm completed at 00:39 CET
+on 2026-11-12, its bytes are now shipped as `arms/gpqa-diamond-grok-answers.jsonl` and the percent is
+published below — this paragraph stays as the record of what was true at 2026-11-10 02:40 CET.)*
 
 ## Grok status on this set (2026-11-10, supersedes the "lands late tonight" bullet above)
 
@@ -192,6 +194,9 @@ and resumable by id, and **no percent is published while the arm is partial**. T
 table on this set reads "suspended by owner quota, resumes 2026-11-12" — never a blank, never a zero,
 never a transport failure. This set is first in the 12 Nov resumption queue (gpqa-diamond 59 ids,
 then humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541).
+*(corrected 2026-11-12 00:39 CET: the queue ran and this set is **complete**; its table row now
+carries the percent 174/198 = 87.9 %, which discharges the "suspended by owner quota" cell. The
+sentence above stays as the rule that governed the window.)*
 
 **Launch and scoring of the resumed leg, pre-registered 2026-11-11 (tick 45).** The 12 Nov queue is
 started once, as a systemd user unit with an absolute launcher path
@@ -203,3 +208,94 @@ boundary: the 139 stored rows carry `v0.23.0+860.gf17db36.dirty`, the resumed ro
 CLI reports at resume time (`v0.23.1+2.gb3746e3.dirty` as measured 2026-11-11 11:45 CET, after the
 12 Nov 03:00 self-update). If the leg is still incomplete at the end of 2026-11-12 it stays unscored
 and continues the next day by id — that is the expected shape of a 1 144-call chain, not a failure.
+
+## Grok arm completed 2026-11-12 (00:39 CET): the fourth arm lands and the local-vs-cloud gap is bracketed
+
+The 12 Nov owner-quota window opened at 00:00 CET. The Grok queue was started **once** as a systemd
+user unit (`parb-pub-grok-queue`, absolute launcher path, `flock -n` double-spend lock,
+`PUB_CLOUD_TIMEOUT=2400`) in the pinned order gpqa-diamond → humaneval → mmlu-pro → ifeval. Before
+the first call the launcher ran the blank purge (every arm file printed `nothing parked`) and then
+the deciding gate `scripts/pub_grok_resume_check.py` (22 checks, **RESUME GATE: READY**, resume set
+`gpqa-139..gpqa-197` = 59 ids).
+
+**Leg 1 (this set): 00:01:42 → 00:39:02 CET, wall 2240 s, 59 calls, `bad=0`** — no parked blank, no
+transport failure. The two pre-existing zero-credit quarantines
+(`pub-grok.jsonl.bad-timeout.bak` 46 rows / 38 ok, `pub-grok.jsonl.suspended-window-20261111.bak`
+4 rows) were not touched and keep zero credit.
+
+### Arm identity after the resume (mechanical, not hand-read)
+
+`scripts/pub_grok_resume_check.py` in OPEN-window mode (inside the window the pin is a floor, not a
+snapshot): **198 rows / 198 unique ids / 198 `finish=ok` / 0 empty answers**, SHA-256/16
+`c479109822f388a5`, first id `gpqa-000`, last id `gpqa-197`. This is the first complete grok arm on a
+set this line calls unsaturated.
+
+### Percent and shipped bytes
+
+Checker `pub-checkers-v2` (`letter`), self-test 22/22 green before the row was written, all 198 pinned
+ids, 0 ids dropped: **174/198 = 87.9 %** — one digest row (`grok-4.7`, tasks `198 /
+af73cc064d4d8529`). Answer bytes shipped: `arms/gpqa-diamond-grok-answers.jsonl`, 198 lines,
+SHA-256/16 `c479109822f388a5`, `bytes_identical_to_runner_output=True` (the scrub masked nothing);
+the privacy grep (`bank|answer_key|expected_|/home/|/Users/|<LAN prefix>|api_key|ssh -i|Authorization`)
+over the answer fields returns **0 hits**. Re-scoring the **shipped** copy under the same contract
+with zero model calls reproduces 174/198 exactly, so the row is re-checkable off this machine.
+
+### Four arms on this set, in force (matched 198; every arm answered every id)
+
+| arm | strict |
+|---|---|
+| basalt, local, no contour | 127/198 = 64.1 % |
+| contour 0.0.2.56, matched shape | 139/198 = 70.2 % |
+| grok-4.7, cloud | 174/198 = 87.9 % |
+| codex `gpt-6.1-sol`, cloud | 192/198 = 97.0 % |
+
+New exact sign tests (`scripts/pub_bench_compare.py`, two-sided over discordant pairs only):
+
+| pair | W/L | diff | p |
+|---|---|---|---|
+| basalt vs grok | 6W / 53L | −23.7 pp | 1.75e-10 |
+| contour-matched vs grok | 8W / 43L | −17.7 pp | 6.9e-7 |
+| codex vs grok | 20W / 2L | +9.1 pp | 1.21e-4 |
+
+Discordant ids, the rarer direction listed in full:
+
+* basalt-only over grok (6): `gpqa-009, gpqa-087, gpqa-090, gpqa-099, gpqa-106, gpqa-170`;
+* contour-only over grok (8): `gpqa-009, gpqa-011, gpqa-018, gpqa-060, gpqa-090, gpqa-099, gpqa-135, gpqa-170`;
+* grok-only over codex (2): `gpqa-027, gpqa-072` — the **same two ids** on which the local arms alone
+  beat codex everywhere on this set (they are basalt's only 2 wins against codex, and 2 of contour's 3).
+  Two cells, so it is an observation, not a claim: three arms agree there and codex does not, which is
+  a reason to read codex's 97.0 % as one draw like every other arm rather than as a ceiling.
+
+Ladder verdict for this set: codex (97.0) > grok (87.9) > local contour (70.2) > local bare (64.1).
+The frozen contour's +6.1 pp over bare stays inside the ~6 pp resolution floor of a 198-task MCQ at
+temperature 0.7 (16W/28L, p=0.096) and is **not** claimed; the cloud-vs-local gaps (17.7–32.8 pp,
+43–67 discordant cells) clear that floor by a wide margin.
+
+### Cost / transport boundary (pre-registered at tick 45, reported now)
+
+Per-row `seconds`, split by the CLI build each row stores:
+
+| build (rows) | median | mean | max | sum |
+|---|---|---|---|---|
+| `v0.23.0+860.gf17db36.dirty` — 139 rows, 2026-11-09 leg | 73.7 s | 239.9 s | 2375.9 s | 33 340 s |
+| `v0.23.1+2.gb3746e3.dirty` — 59 rows, 2026-11-12 leg | 18.6 s | 38.0 s | 535.7 s | 2 240 s |
+
+The same model id answers ~4× faster per call at the median on 12 Nov than on 9 Nov, so wall time
+here is a transport/endpoint property and the two legs' timings are not comparable. The score is
+per-id, so the split does not bias the percent; what it buys is the honest statement that this arm
+was produced by two CLI builds.
+
+### Caveats on the grok row
+
+1. Single draw per id; sampling parameters are not exposed by the transport (no readable seed or
+   temperature), so this arm is not seed-reproducible — like the codex arm, unlike the two local ones.
+2. The arm is assembled from two legs resumed by id (139 + 59 = 198: no duplicate id, no gap). The
+   resume gate is what guarantees that; the two zero-credit quarantine files above are not part of it.
+3. Four-option MCQ → 25 % guessing floor; on 198 tasks the same-configuration flip rate measured on
+   this line (~5–6 % of cells, 44 discordant between the two local arms here) makes any delta under
+   ~12 cells unresolvable. The codex-vs-grok 9.1 pp clears that but rests on 22 discordant cells.
+4. Contamination is not excludable: GPQA-Diamond is public and static and is retired for frontier
+   comparison in 2026 aggregators (`PUB-PLAN.md` rule 5).
+5. Transport disclosure: the grok arm is a one-shot chat CLI with toolsets off (`-t ""`), so it has no
+   file access — a bank/gold read is mechanically impossible for this arm, and its answers were
+   grepped for bank/gold/path references (0 hits).

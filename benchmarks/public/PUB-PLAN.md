@@ -3728,3 +3728,58 @@ no new reading (the 2026-11-12 queue is cloud-only; rule 7 does not preflight-ga
 *This tick spent 5 Grok calls (4 stored ok rows + 1 in flight at check time). No digest row,
 verdict, bank file or manifest pin moved; partial arms publish no percent — the tracked change is
 this block.*
+
+## 2026-11-12 00:55 CET — tick 66 — GPQA-Diamond Grok arm COMPLETE (198/198), scored 87.9 %, bytes shipped
+
+*The first leg of the 12 Nov queue finished inside this tick. `parb-pub-grok-queue` active, one
+launcher, flock held, no second vendor leg (verified by `ps`, per the tick-65 ruling that the
+bracketed pgrep undercounts from this exec wrapper).*
+
+*Leg 1 result: `cloud-gpqa-diamond-grok.log` prints `grok done: ok=59 bad=0 wall 2240 s` at
+00:39:02 CET — 59 resumed ids (`gpqa-139..gpqa-197`), zero parked blanks, so
+`scripts/pub_cloud_blank_purge.py` moved nothing and the two zero-credit quarantines
+(`bad-timeout.bak` 46 rows / 38 ok, `suspended-window-20261111.bak` 4 rows) are untouched, mtimes
+still 2026-11-09 / 05:33. Arm identity re-read mechanically after the resume:
+**198 rows / 198 unique ids / 198 `finish=ok` / 0 empty**, SHA-256/16 `c479109822f388a5`, ids
+`gpqa-000..gpqa-197`. The resume gate in OPEN-window mode reports the pin as a floor and
+`RESUME GATE: READY` (20 checks), resume set for this set now 0 ids.*
+
+*Scoring and publication, zero model calls beyond the leg itself: `pub_bench_score.py selftest`
+22/22 → **gpqa-diamond grok 174/198 = 87.9 %** (`grok-4.7`, tasks `198 / af73cc064d4d8529`, checker
+`pub-checkers-v2`) — one new digest row, no duplicate identity. Bytes shipped through
+`publish_pub_bare_arm.py --min-rows 198` as `arms/gpqa-diamond-grok-answers.jsonl` (198 lines,
+SHA-256/16 `c479109822f388a5`, `bytes_identical_to_runner_output=True`, scrub masked nothing),
+index row added and `pub_arms_index.py --check` → drift 0. Privacy grep over the answer fields:
+**0 hits**. The **shipped** copy re-scores to exactly 174/198.*
+
+*Paired view (`pub_bench_compare.py`, matched 198, no id dropped): basalt 127 (64.1 %) < contour
+0.0.2.56 matched 139 (70.2 %) < **grok 174 (87.9 %)** < codex 192 (97.0 %); new sign tests
+basalt-vs-grok 6W/53L p=1.75e-10, contour-vs-grok 8W/43L p=6.9e-7, codex-vs-grok 20W/2L p=1.21e-4.
+`GPQA-RESULT.md` carries the arms-table row (a NEW row — the partial state published no percent and
+its bytes stayed unshipped), the discordant ids, the two-CLI-build cost table (139 rows
+`v0.23.0+860` median 73.7 s vs 59 rows `v0.23.1+2` median 18.6 s), and dated correction notes on the
+two sentences that described the suspension. No published number or byte was edited.*
+
+*Standing gates after the change: grok-cell rule 9 docs / 0 findings (the gpqa grok cell now carries
+a percent, which discharges the "suspended by owner quota" string), superseded-cell rule 0 findings,
+digest-row rule 47 rows / 0 findings (contracts named 24, legacy exceptions 23/23 used, no stale
+exception), derived percents 42 recomputed / 0 findings (176 doc citations, 0 uncovered), arms index
+drift 0.*
+
+*Queue state at check time: leg 2 (humaneval grok) started 00:39:02, **135 rows / 135 ok / 0 empty**,
+SHA-256/16 `6bfe8ceba37c4042`, 29 ids to go (≈65 s/call observed in this leg → ETA ≈30 min); then
+mmlu-pro 500 and ifeval 541, still in the pre-registered 9–27.6 h band, so a set incomplete at day
+end stays unscored and resumes by id the next day. No partial percent anywhere.*
+
+*Ops re-reads: docs-freshness `ef7ea47ff99b` cumulative `failure_streak` 8 unchanged (its schedule is
+`0 2 * * *`, i.e. 02:00 CET — the brief's "03:00" is the self-update job `af888c1c9341`, not the docs
+job; the 02:00 run today will see a clean tree because the queue writes only to the untracked
+workspace); legacy hard-bank job `f23cf5d48e11` (every 5 min) still marker-gated by
+`~/.hermes/mac-v22full-launch.state` — stopping it stays an owner decision. Preflight series 21
+readings, no new reading: nothing on the ladder needs a local leg (every in-force set already has a
+bare row and an admissible matched-shape contour row), and the Grok queue is cloud-only.*
+
+**Next in force:** the queue runs unattended — leg 2 humaneval grok (29 ids), then mmlu-pro grok
+(500), then ifeval grok (541), scored only when complete, under `pub-checkers-v2` and
+`pub-ifeval-v2` respectively (pre-registered at tick 45: IFEval's grok arm is minted under v2, with
+the v1 number beside it). Item P0 contour parity stays satisfied on every in-force set.
