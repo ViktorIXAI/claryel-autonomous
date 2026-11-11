@@ -2826,3 +2826,49 @@ contract named above. Standing limits unchanged: no Grok arm before 2026-11-12; 
 percent. This tick spent **zero model or cloud calls** and moved no digest row, verdict, answer byte,
 bank file or manifest pin — the tracked changes are this block plus dated notes in
 `GPQA-RESULT.md`, `MMLU-PRO-RESULT.md` and `IFEVAL-RESULT.md`.
+
+## Tick 46 — 2026-11-11 12:20 CET (status + a fail-open in the resume gate's `--as-of`, caught live and closed; zero model calls)
+
+**The ladder is still empty to 2026-11-12 and nothing was launched.** No `parb-pub-*` unit exists, a
+standalone bracketed transport count reads **0**, no local leg is queued, no codex item is queued and
+the Grok window is closed. All four legacy single-set Grok launchers were executed today and each
+exits **3** with `REFUSED: grok arms are suspended by owner quota until 2026-11-12`. The pinned
+2026-11-12 chain launcher was re-proven dry: `GROK_DRYRUN=1` exits 0 with `window=closed`, prints the
+census (**1 144 calls**, `gpqa-diamond -> humaneval -> mmlu-pro -> ifeval`), and its `bash -x` trace
+contains **0** transport lines. No leg was started, stopped or restarted and no partial file was
+discarded, so `LEG-INCIDENTS.md` gets no entry.
+
+**What this tick found is a tooling fail-open in the gate itself.** The tick asked the resume gate
+with `--as-of 20261111` (compact, no dashes) and it printed **`window is OPEN today (20261111)`**
+while the chain launcher's own numeric guard on the same date printed `window=closed`. The window mode
+in `scripts/pub_grok_resume_check.py` is a **string compare** (`as_of >= suspended_until`), and
+`"20261111" >= "2026-11-12"` is byte-wise **True** (digit `1` > hyphen at position 4) — so *any*
+compact date silently reads the suspension window as OPEN and disables the pinned-snapshot guard,
+which is exactly the mechanism that catches the 2026-11-11 05:31 early-launch class. The pinned chain
+queue is unaffected (it calls the gate without `--as-of`, so the default is today's ISO date), and no
+bytes or verdicts moved: the partials still match the pin exactly (139/139 and 120/120, hashes
+`cde63378fa1633c5` / `a7c741de0d6ace8c`). Fixed as tooling only — no contour stamp, no feature, no
+published byte: both window operands must now be the dashed ISO form (strict regex plus a calendar
+check; `date.fromisoformat` alone is not enough because Python >= 3.11 also accepts the compact
+form), and a malformed `--as-of` or a non-ISO `owner_window.suspended_until` inside the pin is an
+**INPUT GAP (exit 1)**, never a guessed mode. Contract test `harness/pub_grok_resume_test.py` grows
+**19 -> 23 checks**: compact `--as-of` refused, calendar-invalid `2026-02-30` refused, a well-formed
+ISO `--as-of` before the resume day still READY with **CLOSED** (the guard must not refuse valid
+dates), and a compact `suspended_until` in the pin refused. On the real bytes after the fix: compact
+exit **1**; default (today) **CLOSED + READY**; `--as-of 2026-11-12` **OPEN + READY** with the
+floor-mode progress note — tomorrow's chain sees exactly the mode the gate was built for.
+
+**Ops, re-read from the job record rather than restated:** the scheduled `docs-freshness` run of
+2026-11-11 **completed success** (11 s), so the "reports an error daily" boilerplate from the dirty
+03:00 trees did **not** recur today. The hard-bank-era job `f23cf5d48e11` fired at 12:21 CET and
+exited 0 under its one-shot marker — still active, still an owner decision to stop, untouched.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order,
+launched once as `parb-pub-grok-queue` under `systemd-run --user` with the absolute launcher path,
+gated on the blank purge then `pub_grok_resume_check.py` exit 0, each leg resumable by id and scored
+only when complete under the contracts fixed at tick 45. Standing limits unchanged: no Grok arm
+before 2026-11-12; frozen contour `0.0.2.56`, no new stamps, no hard pairs, hard bank untouched; a
+local leg needs a fresh preflight GO (none queued); sanitization before every push; a partial arm
+publishes no percent. This tick spent **zero model or cloud calls** and moved no digest row, verdict,
+answer byte, bank file or manifest pin — the tracked changes are this block plus the gate and its
+contract test.

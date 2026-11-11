@@ -18,7 +18,11 @@ What it pins:
      tracks the resume point, it does not freeze one moment forever);
   4. a completed set (every pinned id stored, remaining 0) returns READY;
   5. input gaps exit 1, never READY: an expected answer file missing, a queue entry with
-     no arm record, a missing pin file;
+     no arm record, a missing pin file, a malformed `--as-of` (compact `20261113` or a
+     calendar-invalid `2026-02-30` — the window mode is a string compare, and a compact
+     date always compares greater than the ISO `suspended_until`, which would silently
+     report a closed window as OPEN), and a pin whose `suspended_until` is not ISO —
+     while a well-formed ISO `--as-of` still decides both window states correctly;
   6. the MANIFEST pin guard is wired: a task file whose bytes moved is refused with exit 2
      and the published guard text (no second hash identity for one pinned file).
 """
@@ -218,6 +222,35 @@ def main() -> int:
 
     rc, out = f9.run(os.path.join(tmp, "no-such-pin.json"))
     ck(rc == 1 and "no resume pin" in out, "missing pin file must be INPUT GAP: %s" % out[-300:])
+
+    # 5b. a malformed --as-of must be an INPUT GAP, never a silently wrong window
+    #     mode (measured 2026-11-11: a compact `--as-of 20261111` string-compares
+    #     as >= "2026-11-12", which read the closed suspension window as OPEN).
+    def _run_asof(fix, asof):
+        env = dict(os.environ, PUB_MANIFEST_OVERRIDE=fix.manifest)
+        p = subprocess.run([sys.executable, SCRIPT, "--pin", fix.make_pin(),
+                            "--ws", fix.ws, "--repo", fix.repo, "--as-of", asof],
+                           capture_output=True, text=True, env=env, timeout=120)
+        return p.returncode, p.stdout + p.stderr
+
+    f13 = Fixture(os.path.join(tmp, "b13"))
+    rc, out = _run_asof(f13, "20261113")
+    ck(rc == 1 and "INPUT GAP" in out and "--as-of" in out,
+       "a compact --as-of must be INPUT GAP, not a byte-wise OPEN verdict: %s" % out[-300:])
+    rc, out = _run_asof(f13, "2026-02-30")
+    ck(rc == 1 and "INPUT GAP" in out,
+       "a calendar-invalid dashed --as-of must be INPUT GAP: %s" % out[-300:])
+    rc, out = _run_asof(f13, "2026-11-11")
+    ck(rc == 0 and "window is CLOSED" in out,
+       "a well-formed ISO --as-of before the resume day must still be READY with CLOSED mode "
+       "(the new guard must not refuse valid dates): %s" % out[-300:])
+
+    f14 = Fixture(os.path.join(tmp, "b14"))
+    p14 = json.load(open(f14.make_pin(), encoding="utf-8"))
+    p14["owner_window"]["suspended_until"] = "20261112"
+    rc, out = f14.run(_write(tmp, "bad-until-pin.json", p14))
+    ck(rc == 1 and "suspended_until" in out,
+       "a compact owner_window.suspended_until in the pin must be INPUT GAP: %s" % out[-300:])
 
     # 2. pin vocabulary: wrong tasks cell / wrong pinned task count
     f10 = Fixture(os.path.join(tmp, "b10"))

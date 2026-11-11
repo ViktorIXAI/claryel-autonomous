@@ -63,6 +63,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -273,6 +274,33 @@ def main() -> int:
 
     until = str((pin.get("owner_window") or {}).get("suspended_until") or "")
     as_of = args.as_of or __import__("datetime").date.today().isoformat()
+
+    # The window mode is a string comparison, so BOTH operands must be the ISO
+    # YYYY-MM-DD form. Measured 2026-11-11: a compact `--as-of 20261111` compared
+    # byte-wise as "20261111" >= "2026-11-12" == True (digit > hyphen at position 4),
+    # so any compact date silently reported the suspension window OPEN and disabled
+    # the pinned-snapshot guard that exists to catch launches inside the window.
+    # Python >= 3.11 date.fromisoformat also accepts the compact form, so the guard
+    # is a strict regex plus a calendar check, not fromisoformat alone.
+    def _iso_dashed(s):
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", str(s)):
+            return False
+        try:
+            __import__("datetime").date.fromisoformat(str(s))
+            return True
+        except ValueError:
+            return False
+
+    if not _iso_dashed(as_of):
+        sys.stderr.write(
+            "INPUT GAP: --as-of %r is not YYYY-MM-DD. The window mode is a string "
+            "compare and a non-ISO value decides it silently wrong (20261111-style "
+            "compact dates always read OPEN), so the gate refuses rather than "
+            "guessing.\n" % (args.as_of,))
+        return 1
+    if until and not _iso_dashed(until):
+        GAPS.append("owner_window.suspended_until %r is not YYYY-MM-DD - the window "
+                    "mode cannot be decided by string compare" % until)
     if not until:
         GAPS.append("the pin names no owner_window.suspended_until - the window cannot be decided")
         window_open = False
