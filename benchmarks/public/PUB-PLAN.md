@@ -3343,3 +3343,41 @@ legs scored only when complete under the tick-45 per-arm contracts, a set incomp
 staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
 moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
 block.
+
+## 2026-11-11 evening status tick (tick 57)
+
+*Running units first: 0 `parb-pub-*` units; standalone bracketed process counts all 0
+(`pub_bench_cloud`, `pub_bench_run`, `gate_run`); HEAD equals `origin/main` (`07b4976`), worktree
+clean — the tree has not moved since tick 56.*
+
+*Standing gates re-read, all green on unchanged bytes: arms-index drift 0; derived percents 42
+recomputed / 0 findings; grok-cell rule 9 docs / 0 findings; superseded-cell rule 9 docs / 0
+findings; digest-row rule 46 rows / 0 findings; scorer self-test OK. Grok resume gate READY (22
+checks) in window-CLOSED mode (today) and in window-OPEN floor mode `--as-of 2026-11-12`, resume
+sets exact.*
+
+*Chain launcher `go_grok_queue_20261112.sh` byte-identical to tick 56's reading (SHA-256/16
+`9e479ca1129c97a7`, 4 777 B); its flock on fd 9 over `grok-queue.lock` with exit class 4 sits at
+lines 55–57 of the in-force file. Executed live unshielded: **exit 3, REFUSED** (window=closed,
+opens 20261112), with the full per-arm census printed first (gpqa-diamond 139/198, humaneval
+120/164, mmlu-pro 0/500, ifeval 0/541; queue total 1 144 calls, sequential ETA 9.0–27.6 h).
+Afterwards: no lock file created, 0 transports in a standalone count, 0 units, `~/pub-bench` entry
+count unchanged (274).*
+
+*Preflight series re-counted by driving the gate itself over every readings file: 20 readings,
+**2 GO / 16 NO-GO / 2 INPUT-GAP** — identical to tick 56; no new reading since 18:21, and none was
+taken because no local leg is queued.*
+
+*Ops re-reads: docs-freshness job `ef7ea47ff99b` status `error`, cumulative `failure_streak` 8 —
+unchanged; its single retained execution row is the 03:00:17 CET attempt that died pre-fix
+(schedule `0 2 * * *` UTC = 03:00 CET), so tomorrow's run is still the first under the fixed
+bounded-retry call site. Hard-bank-era job `f23cf5d48e11` still fires every 5 minutes (`completed`
+execution row at 19:27:18 CET) and still exits 0 only under its 2026-11-02 one-shot marker —
+stopping it remains an owner decision.*
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end
+staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
+moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
+block.
