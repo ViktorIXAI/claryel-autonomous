@@ -2497,3 +2497,111 @@ leg resumable by id and scored only when complete, with the transport-version bo
 Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
 `pub_preflight.py` exit 0 (NO-GO at this reading, none queued); sanitization before every push; a
 partial arm publishes no percent.
+
+## Tick 42 — 2026-11-11 09:50 CET (status + the 12 Nov chain's leg loop exercised end-to-end against a stub transport, zero model calls)
+
+**Queue state:** 0 `parb-pub-*` units, no `pub_bench_run`/`pub_bench_cloud`/`gate_run` process, 0
+foreign legs, tree clean, HEAD `db2deff` == `origin/main` (0 ahead / 0 behind). Nothing launched:
+item 8 stays gated to 2026-11-12 by the owner quota window. No digest row, verdict, answer byte,
+bank file or manifest pin moved this tick.
+
+**Preflight NO-GO again: the nineteenth NO-GO in twenty readings, idle-spin the sole reason.**
+Fresh reading at 09:50 CET over the repo-standard key: swap free **8 123 MiB of 8 191** (the first
+reading of this line that is not the full 8 191 free — 68 MiB of swap in use, still far above the
+256 MiB floor), MemAvailable 14 719 MiB, engine state `S`, engine **534 % CPU with the GPU at 0 %
+utilization / 37.13 W**, load average 11.80, `/health` 200, 0 foreign legs — same un-restarted
+engine process (pid `3284575`, age **2 d 13:14**). RSS 56 475 MiB, **down 671 MiB against tick 41's
+57 146 MiB** (…57 575 → 57 373 → 57 146 → 56 475), so the oscillation band holds. The gate was run
+**unshielded** on the readings file and exits **3** as contracted; the wrapper still reports 0
+because of its trailing `echo` (tick 39's note). Remedy stays an owner/box decision and no local leg
+is queued anyway.
+
+**What this tick did instead of repeating the census: it read the shipped cloud runner and then
+exercised the chain's leg loop, because two consequences for the 1 144 paid calls are real and
+neither the census nor the resume pin covers them.** From `scripts/pub_bench_cloud.py`:
+
+* every attempt is appended to the arm file **including failures** (`finish=rc1`/`error`), and a leg
+  stops early only after **3 consecutive** failures; otherwise it returns **0 as long as at least one
+  ok row exists** (`return 0 if n_ok else 1`). So a single transport flake parks a blank and the leg
+  still looks healthy to the launcher;
+* that parked blank is a **permanent loss if the id is ever re-asked**: the public scorer keeps the
+  FIRST row per id (`if d["id"] not in ans: ans[d["id"]] = d`, `scripts/pub_bench_score.py:345-348`)
+  and counts an empty answer as missing (`:351`), which the skill's rule already records — and
+  `scripts/pub_grok_resume_check.py` turns a parked non-ok row into a hard NO-GO (exit 3) in **both**
+  window modes, so day two of a queue expected to span days would halt on a fixable condition.
+
+Measured on the shipped runner rather than inferred, with a rehearsal stub CLI on `PATH` (zero
+model, cloud or network calls, all writes into a scratch workspace): one flake inside an otherwise
+healthy leg gives **ok=3 bad=1, leg exit 0, one blank parked** in the arm file; three consecutive
+failures give **`transport dead … stopping leg`, exit 1 after 3 stored blank rows**, which is exactly
+the launcher's halt trigger. The tick-40 contract test `harness/pub_grok_resume_test.py` already
+pins the third half (a parked non-ok row ⇒ exit 3), so the whole chain of the trap is now proven by
+execution, not by prose.
+
+**The missing remedy ships as a tooling release (registers no contour feature, moves no published
+byte): `scripts/pub_cloud_blank_purge.py`.** It splits an arm file into ok rows and parked failures,
+**reports** them by id with the stored `engine_error` (exit 3 = blanks parked), and with `--write`
+moves exactly the parked rows to a named `<arm>.blank-quarantine-<UTC>.bak`, keeps a **byte-exact**
+`<arm>.pre-purge-<UTC>.keep` copy, rewrites the arm file with the ok rows in their original order and
+**verifies** (ok id list cell-for-cell, quarantine id set equal to the parked set, no ok row moved)
+before printing the before/after SHA-256/16. It never touches an ok row, deletes nothing, and refuses
+(exit 3, bytes untouched) on anything it must not decide alone — a duplicate id among ok rows, an ok
+row with an empty answer. Input gaps (missing / empty / unparseable arm file) exit 1, never a green
+light. Contract test `harness/pub_blank_purge_test.py` **22 checks, 0 failures** (enrolled by the
+`harness/*test.py` glob in `scripts/qa/static_checks.py`): clean-file no-op with untouched bytes,
+report mode that does not write, the exact split plus byte-exact pre-purge copy plus idempotence, an
+ok row that carries an `engine_error` field staying put, the two refusal classes with untouched bytes,
+three input-gap classes, and the all-blank case. On the **real** suspended partials in report mode:
+gpqa-diamond 139 rows / 139 ok / **0 parked** (SHA-256/16 `cde63378fa1633c5`), humaneval 120 / 120 /
+**0 parked** (`a7c741de0d6ace8c`) — 34th and 35th computed verification, mmlu-pro and ifeval never
+legged, so nothing to quarantine today.
+
+**The chain launcher now neutralizes the trap before it can halt the queue.**
+`pub-bench/go_grok_queue_20261112.sh` (untracked, so no shell recipe or connection material lands in
+this repo) gained a zero-credit quarantine pass over the four arm files between `cd` and the leg
+loop, guarded by `[ -s "$AF" ]` so a never-legged set is skipped, and halting the whole queue if the
+purge ever refuses. Line-order proof on the launcher: window guard **20** < census **24** < resume
+gate **31** < dry-run exit **34** < `REFUSED` **40** < `command -v hermes` **44** < `cd` **46** <
+blank purge **58** < transport call **65**; `bash -n` clean.
+
+**The leg loop was exercised end-to-end for the first time, against a stub transport, zero paid
+calls.** A rehearsal copy was generated mechanically and its only three differences from the real
+launcher are diff-proved: `TODAY_NUM` forced to `20261112` (guard open), the transport line replaced
+by a stub that logs its argv and exits a scripted code, and every **write** path (cloud logs, `--out`,
+purge target) redirected into a scratch workspace. The read-only steps — the resume census and
+`pub_grok_resume_check.py` — ran against the real repo bytes. Three scenarios:
+
+* **all legs healthy:** exit 0, exactly **4** transport invocations in the pinned order
+  `gpqa-diamond → humaneval → mmlu-pro → ifeval`, `=== grok queue complete ===` — the pinned order is
+  now proven by execution, not by line numbers;
+* **transport dead on leg 1:** exit 1, **1** invocation, `STOP: leg gpqa-diamond exited 1` — the
+  three remaining sets (44 + 500 + 541 = **1 085 calls**) are never asked, so a dead
+  transport or an expired token cannot spend the rest of the owner's quota;
+* **transport dead on leg 2:** exit 1, **2** invocations, halt before `mmlu-pro`.
+
+Each rehearsal run also re-ran the resume gate on the real bytes: **READY, 22 checks**, and the real
+arm files came out byte-exact (`cde63378fa1633c5`, `a7c741de0d6ace8c`), so the rehearsal cannot have
+touched them.
+
+**One observation named and deliberately NOT changed (same ruling as tick 41's pinned-total line):**
+when the cloud CLI writes nothing to stderr, the runner's stop message prints `transport dead ()` and
+the parked row's `engine_error` is empty, so a blank carries `finish=rc1` with no reason string. It is
+a diagnostics-only gap on a row that carries zero credit by rule and is now quarantined mechanically;
+editing a tracked runner the day before 1 144 paid calls is a halt risk bought for a log string, so it
+is recorded as a deferred tooling note.
+
+**Standing gates re-run on the tree with the new tool, all green and identical to ticks 36-41:**
+`pub_arms_index.py --check` **index drift 0**; `--pins` **manifest pin drift 0**;
+`pub_derived_percent_check.py` **42 recomputed from shipped bytes, 0 findings** (41 digest + 169
+document citations, 0 uncovered); `pub_grok_cell_check.py` 9 documents **0 findings**;
+`pub_superseded_cell_check.py` 9 documents **0 findings**; `pub_digest_row_check.py` **46 rows, 0
+findings**, 23/23 pre-rule exceptions used. All nine PUB contract tests green on the merged tree:
+arms index 34, blank purge **22 (new)**, derived percents 41, digest-row gate 21, digest writer 7,
+grok cells 21, grok resume 19, preflight 20/20, superseded cells 31.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, gated
+on `pub_grok_resume_check.py` exit 0 and now cleaned by `pub_cloud_blank_purge.py` before that gate,
+each leg resumable by id and scored only when complete, transport-version boundary named beside any
+completed percent. Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour
+`0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO at this reading, none queued);
+sanitization before every push; a partial arm publishes no percent.
