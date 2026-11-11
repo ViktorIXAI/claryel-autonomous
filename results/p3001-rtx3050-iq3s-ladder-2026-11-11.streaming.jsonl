@@ -1,0 +1,5 @@
+{"tag": "ttft-cold-2k", "ttft_s": 7.929, "wall_s": 7.9, "prompt_tokens": 1572, "completion_tokens": 128, "cached": 1024, "decode_tps": 27.2, "prefill_ms_engine": null, "gen_deltas_counted": 1, "note": "cached>50pct of prompt"}
+{"tag": "ttft-cold-8k", "ttft_s": null, "wall_s": 47.7, "prompt_tokens": 6173, "completion_tokens": 128, "cached": 1024, "decode_tps": 27.4, "prefill_ms_engine": null, "gen_deltas_counted": 0}
+{"tag": "ttft-cold-16k", "ttft_s": null, "wall_s": 92.3, "prompt_tokens": 12274, "completion_tokens": 128, "cached": 1024, "decode_tps": 28.5, "prefill_ms_engine": null, "gen_deltas_counted": 0}
+{"tag": "ttft-warm-8k-a", "ttft_s": null, "wall_s": 4.6, "prompt_tokens": 6173, "completion_tokens": 128, "cached": 6168, "decode_tps": 29.2, "prefill_ms_engine": null, "gen_deltas_counted": 0, "note": "cached>50pct of prompt"}
+{"tag": "ttft-warm-8k-b", "ttft_s": null, "wall_s": 4.7, "prompt_tokens": 6173, "completion_tokens": 128, "cached": 6168, "decode_tps": 29.1, "prefill_ms_engine": null, "gen_deltas_counted": 0, "note": "cached>50pct of prompt"}

@@ -194,3 +194,42 @@ one deleted a `sha16` key from an unrelated scanner exception record and one tru
 the `bfcl` row in `PUB-PLAN.md`. Both were caught by re-running the scanner (a record lost its byte
 pin) and by reading the table line back, and repaired in the same commit; the rule they reinforce is
 to diff every non-mexact patch before publishing, not to trust the tool's success flag.
+
+## 2026-11-11 — P3001 state S3-a ladder; the 59 tok/s figure gets a state label
+
+What was published: `results/p3001-rtx3050-iq3s-ladder-2026-11-11.md` with two raw
+runner JSONL files and an engine-accounting extract, `benchmarks/ladder/` runner
+sources plus method notes, the updated `hardware/inventory/P3001.md` passport rows,
+`hardware/changes/P3001.md` (CHG-001 closed, CHG-002 states table + checklist,
+CHG-003 outage), four new fleet rows in `hardware/changes/configuration-changes.md`,
+the S3-a launch twin, and `logs/INDEX.md` byte pins.
+
+Rules that shaped it:
+
+* **No historical measurement was rewritten.** The RTX 3060 (S1) numbers in
+  `results/p3001-initial-benchmarks.md` and `results/p3001-parb-v21.md` are byte-for-byte
+  as published; the new file cites them as S1 and states that GPU, RAM, engine dir,
+  serve profile, context cap and traffic mix all changed between states, so they are
+  **not** a controlled GPU comparison. A controlled A/B is listed as an open item.
+* **A circulated number was traced instead of reused.** "≈59 tok/s on P3001" is real
+  text, but the serve log puts it on S1/S2 rows (`1230 tok → 59.2`, `1225 → 59.3`,
+  `1213 → 59.7`; `725 → 58.9`, `512 → 59.1`), where decode rides on 96–100 % draft
+  acceptance. The same class of real-text request on the current S3-a (RTX 3050)
+  profile decoded at **25.7 tok/s**. Both are published with their state labels.
+* **Runner defects are disclosed, not hidden.** The real-text client crashed on a
+  reply-field assumption, so that row is quoted from the engine's own accounting line
+  and labelled as such; the runner published here carries the fix.
+* **An infrastructure failure is published, not repaired silently.** CHG-003: a
+  malformed serve profile landed at 14:11:29 UTC (`--kv` missing before `int8`,
+  `--gpu` with no value), and two engine starts died at 14:11:38 and 14:15:02 UTC with
+  `unknown argument: int8` — nothing listening on :8080 during that window. The box was
+  fixed by others (profile rewritten again at 14:25), and the endpoint was verified
+  healthy at 14:35 UTC under a **new, unmeasured** profile; that is recorded as a
+  fairness warning rather than smoothed over. This audit changed nothing on the box.
+* **Sanitization:** serve `api_key`/`tokenizer` values omitted, the box's LAN address
+  never written to the repo, account paths replaced with `$HOME`, prompt payloads not
+  published (the generators live in the runner sources, so rows stay reproducible).
+* One `patch` call again landed on a shifted boundary (a duplicated phrase in the
+  results file); caught by reading the diff, repaired in the same commit — the standing
+  rule from 2026-11-09 holds: diff every non-mexact patch.
+

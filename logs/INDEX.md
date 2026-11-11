@@ -223,3 +223,24 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 | 2026-11-04 14:25 | terminal-bench-publication | commit `d5c3cc1ac0cb46e6ed52b77bf0463609f1ebfb7a` | 4/66 completed, 1 solved, 3 failed |
 | 2026-11-04 15:41 | terminal-bench-publication | commit `e1ae88ae66f5e0e0290a87636b0a305aafb9478e` | 4/66 completed, 1 solved, 3 failed |
 | 2026-11-04 15:42 | terminal-bench-publication | commit `0406ae8eb521d032ee633b1d4032210d482b8a18` | 4/66 completed, 1 solved, 3 failed |
+
+## P3001 state S3-a ladder (2026-11-11)
+
+| artifact | note | bytes | sha256/16 |
+|---|---|---:|---|
+| results/p3001-rtx3050-iq3s-ladder-2026-11-11.md | documentation (S3-a ladder, streaming control, real-text row, spec-decode limits, S1/S2 context) | 13499 | `77e57cc599176fd7` |
+| results/p3001-rtx3050-iq3s-ladder-2026-11-11.jsonl | raw ladder rows 2026-11-11 13:29–13:33 UTC | 812 | `17336216f03efbab` |
+| results/p3001-rtx3050-iq3s-ladder-2026-11-11.streaming.jsonl | same ladder with stream=true 13:52–14:05 UTC | 1071 | `33bef04654339996` |
+| results/p3001-rtx3050-iq3s-ladder-2026-11-11.engine-lines.txt | engine accounting for the 11 requests + the real-text request ($HOME-sanitized) | 8022 | `fd2bb3c0d8ca4094` |
+| benchmarks/ladder/ladder_bench.py | runner | 2745 | `110ae2eae3e8c97f` |
+| benchmarks/ladder/ladder_ttft_stream.py | runner (streaming control) | 3346 | `e1240d8b4386ff73` |
+| benchmarks/ladder/realtext_bench.py | runner (real-text sample) | 2766 | `5af4ed8031f610b8` |
+| benchmarks/ladder/README.md | runner method notes | 1987 | `859e964bb1da52b5` |
+| hardware/configurations/strata-iq3_s-p3001.launch.json | sanitized twin of the S3-a serve profile | 2631 | `eba9b06d7c9c2359` |
+
+Raw rows are committed in git (no bundle needed). The 11 measured requests ran in
+the 13:27–14:10 UTC window under serve profile S3-a (sha256/16 `418cdef198c263f8`).
+Profile churn followed: a malformed edit at 14:11:29 UTC caused a ~6-minute hard
+failure (14:11:38, 14:15:02 starts), and the profile in force at 14:35 UTC is S3-c
+(sha256/16 `f09f2af548fc8566`), which has no published measurement yet — see
+hardware/changes/P3001.md CHG-003.

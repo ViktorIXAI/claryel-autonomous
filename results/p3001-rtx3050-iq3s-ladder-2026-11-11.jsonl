@@ -1,0 +1,5 @@
+{"tag": "cold-2k", "wall_s": 17.2, "prompt_tokens": 1568, "completion_tokens": 128, "prompt_tps": 132.2, "decode_tps": 24.3, "cached": 0}
+{"tag": "cold-8k", "wall_s": 47.2, "prompt_tokens": 6168, "completion_tokens": 128, "prompt_tps": 120.8, "decode_tps": 28.0, "cached": 1024}
+{"tag": "cold-16k", "wall_s": 91.7, "prompt_tokens": 12268, "completion_tokens": 128, "prompt_tps": 128.5, "decode_tps": 30.7, "cached": 1024}
+{"tag": "warm-8k-a", "wall_s": 4.8, "prompt_tokens": 6168, "completion_tokens": 128, "prompt_tps": 25.1, "decode_tps": 28.0, "cached": 6163, "prompt_tps_note": "cached>50pct; ratio meaningless"}
+{"tag": "warm-8k-b", "wall_s": 4.8, "prompt_tokens": 6168, "completion_tokens": 128, "prompt_tps": 15.1, "decode_tps": 28.7, "cached": 6163, "prompt_tps_note": "cached>50pct; ratio meaningless"}
