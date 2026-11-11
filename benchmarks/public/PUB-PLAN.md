@@ -3689,3 +3689,42 @@ legs scored only when complete under the tick-45 per-arm contracts, a set incomp
 staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
 moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
 block.
+
+## 2026-11-12 window-open tick (tick 65) — Grok queue LAUNCHED
+
+*00:01–00:09 CET. First tick after the owner-quota window opened (`20261112`). Working tree
+clean, `HEAD` (`0dd9a9a`) equals `origin/main` (0 ahead / 0 behind). Before launch: no
+`parb-pub-*` units, 0 `gate_run.py`, launcher `go_grok_queue_20261112.sh` byte-identical to
+ticks 50–64 (**SHA-256/16 `9e479ca1129c97a7`, 4 777 B**, mtime 14:46), `GROK_DRYRUN=1` run at
+00:01:36 exit 0 — full census printed (1 144 calls, order gpqa-diamond → humaneval → mmlu-pro →
+ifeval), resume gate **READY** (22 checks, floor mode, window OPEN today), no lock file created,
+zero mutation, zero calls.*
+
+*Launch — first quota spend since the 2026-11-09 07:57 CET stop: ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue bash <ABSOLUTE launcher path>` at
+00:01:42 CET (unit active, MainPID 2209663, Linger=yes so the chain survives session end and the
+03:00 gateway restart — it lives in the systemd user slice, not under the gateway). Numeric date
+guard opened (`window=open`); blank purge ran before the deciding gate exactly as ordered at
+tick 49; the tick-50 `flock` double-spend lock is held for the whole queue.*
+
+*Transport health — the lapsed xai-oauth access token (lapsed 23:32 CET 11-11) renewed itself on
+the first call: no credential value read or printed. gpqa-diamond resumed byte-exactly from
+`gpqa-139` — 4 rows stored by 00:04 (`139 → 143`, ids `gpqa-139..gpqa-142`), first row
+`finish=ok`, 987-char answer, 65.6 s, `ok=1 bad=0` in the leg log; one call in flight at check
+time. Observed arrival ~35–65 s/task is BELOW the pre-registered 188–322 s/task GPQA band, so the
+59-id gpqa-diamond resume ETA is ~1–2 h (was 3.1–5.3 h); whole-queue ETA stays 9–27.6 h and a set
+incomplete at day end stays unscored, resuming by id the next day (pre-registered at tick 45).*
+
+*Tooling observation (no action): inside this cron exec session `pgrep -cf 'pub_bench_clou[n].py'`
+reported **0** while `ps -ef` showed the runner pid 2209677 and a live transport child — the
+bracketed-count is NOT trustworthy from this exec wrapper. Liveness ruling for the queue is
+therefore row-count + `ps`/unit cgroup from now on, never that pgrep alone.*
+
+*Ops re-reads: docs-freshness job `ef7ea47ff99b` cumulative streak 8 unchanged (next run 03:00
+today); legacy hard-bank job `f23cf5d48e11` fired 00:03 and stays marker-gated
+(`~/.hermes/mac-v22full-launch.state` present) — stopping it remains an owner decision. Preflight:
+no new reading (the 2026-11-12 queue is cloud-only; rule 7 does not preflight-gate cloud legs).*
+
+*This tick spent 5 Grok calls (4 stored ok rows + 1 in flight at check time). No digest row,
+verdict, bank file or manifest pin moved; partial arms publish no percent — the tracked change is
+this block.*
