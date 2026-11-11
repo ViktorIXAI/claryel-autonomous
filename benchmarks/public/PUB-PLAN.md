@@ -3518,3 +3518,49 @@ legs scored only when complete under the tick-45 per-arm contracts, a set incomp
 staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
 moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
 block.
+
+## 2026-11-11 21:45 CET — tick 61 (last status tick before the 12 Nov window; everything tomorrow needs is verified byte-stable tonight; zero model or cloud calls)
+
+*Running units first: 0 `parb-pub-*` units; standalone bracketed process counts all 0
+(`pub_bench_cloud`, `pub_bench_run`, `gate_run`); HEAD equals `origin/main` (`7cebab0`), worktree
+clean — the tree has not moved since tick 60.*
+
+*Standing gates re-read, all green on unchanged bytes: arms-index drift 0; derived percents 42
+recomputed / 0 findings (41 digest citations + 169 doc citations, 0 uncovered); grok-cell rule 9
+docs / 0 findings; superseded-cell rule 9 docs / 0 findings; digest-row rule 46 rows / 0 findings
+(23 contracts named, 23/23 pre-rule exceptions used); scorer self-test 22 cases / 0 failures.*
+
+*Grok resume gate READY (22 checks) in both modes — window-CLOSED (today) exact-identity mode and
+window-OPEN floor mode `--as-of 2026-11-12`; stored partials re-hashed byte-exact at their pins
+(gpqa-diamond 139 rows SHA-256/16 `cde63378fa1633c5`, humaneval 120 rows SHA-256/16
+`a7c741de0d6ace8c`), resume sets exact (59 / 44 / 500 / 541), queue total 1 144 calls, order
+gpqa-diamond → humaneval → mmlu-pro → ifeval.*
+
+*Chain launcher `go_grok_queue_20261112.sh` byte-identical to ticks 50–60 (SHA-256/16
+`9e479ca1129c97a7`, 4 777 B). Executed live unshielded at 21:45:05 CET: **exit 3, REFUSED**
+(window=closed, opens 20261112) with the full per-arm census and ETA bands printed first.
+Afterwards: no lock file, 0 transports in a standalone count, 0 units, `~/pub-bench` still
+274 visible / 275 including the one hidden entry, and a `find -newermt 18:22` sweep shows **0**
+newest-than-reading entries — the refused run wrote nothing. As of this tick every mechanical
+precondition for tomorrow's single launch is verified green tonight: byte-identical launcher,
+byte-identical resumable partials, resume gate READY in the floor mode tomorrow runs in, zero
+competing units or transports. The date guard is the only thing that refuses today.*
+
+*Preflight series re-counted by driving the gate itself over every readings file: 20 readings,
+**2 GO / 16 NO-GO / 2 INPUT-GAP** — identical to ticks 56–60; newest reading still 18:21, NO-GO on
+the idle-spin pair; no new reading taken because no local leg is queued (the 2026-11-12 queue is
+cloud-only, which rule 7 does not preflight-gate).*
+
+*Ops re-reads from the scheduler's own records: docs-freshness job `ef7ea47ff99b` status `error`,
+cumulative `failure_streak` 8 — unchanged; next run 2026-11-12T02:00:00+00:00 (03:00 CET), still the
+first attempt under the fixed bounded-retry call site, and its result **delivery** also fails
+(`send_path_degraded`), so that run must be confirmed from `jobs.json`, not from chat visibility.
+Hard-bank-era job `f23cf5d48e11` status `ok`, streak 0, next fire 21:44 CET, still exits 0 only
+under its 2026-11-02 one-shot marker — stopping it remains an owner decision.*
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end
+staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
+moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
+block.
