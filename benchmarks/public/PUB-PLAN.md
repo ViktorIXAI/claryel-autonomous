@@ -1957,3 +1957,59 @@ to each set's in-force family), each resumable by id and scored only when comple
 unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
 `pub_preflight.py` exit 0 (the eleventh consecutive NO-GO reading keeps that moot); sanitization
 before every push; a partial arm publishes no percent.
+
+
+**Queue status 2026-11-11 04:53 CET (tick 34):** nothing launched — the queue stays empty and item 8
+(the Grok resumption: gpqa-diamond from `gpqa-139`, humaneval from `humaneval-0120`, then the two
+deferred sets) remains gated to 2026-11-12 by the owner quota window. 0 `parb-pub-*` units, no
+`pub_bench_run`/`pub_bench_cloud`/`gate_run` process on the host, 0 foreign legs on the endpoint;
+zero model calls and zero cloud calls this tick.
+
+**Preflight gate NO-GO a twelfth time — but the FIRST reading since the gate shipped in which the
+swap-exhaustion condition does not fire.** Same box, 04:53 CET: **swap free 8 191 MiB of 8 191**
+(completely unused; ticks 23–33 every time read 0 / 3 / 0 / 0 / 0 / 1 / 0 MiB free), MemAvailable
+14 607 MiB, engine state `S`, **558 % CPU with the GPU at 0 % utilization / 36.95 W** (the
+idle-spin pair — the only remaining NO-GO reason), load average 12.51, `/health` 200. Engine pid
+`3284575`, age **2 d 08:16 (56.3 h)** — the same un-restarted process as ticks 23–33; RSS
+57 254 MiB. One reading cannot separate a real swap release from a lull, and the distinction is
+moot for the launch decision while the idle-spin pair still closes the gate: if the engine really
+is parked with swap free now, a future reading will show low engine CPU as well. Exit 3; the line
+launches no local leg into that state. The cure (engine restart / parking the keep-up load) stays
+an owner decision — the same engine serves this session's brain — and the 2026-11-12 Grok
+resumption is cloud-side, unaffected. Gate contract test re-run: `harness/pub_preflight_test.py`
+**20/20 green**.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+**index drift: 0**; `pub_arms_index.py --pins` **manifest pin drift: 0**;
+`pub_derived_percent_check.py` registry `pub-derived-percents-v1` **42 entries recomputed, 0
+findings**; `pub_grok_cell_check.py` 9 documents, **0 findings**;
+`pub_superseded_cell_check.py` 9 documents, **0 findings**; `pub_digest_row_check.py`
+**46 rows, 0 findings**; `scripts/qa/docs_policy.py --daily` PASS.
+
+Grok partials re-verified intact again (twenty-seventh verification), zero model calls and still
+unscored/unshipped by rule: `gpqa-diamond/pub-grok.jsonl` SHA-256/16 **`cde63378fa1633c5`**,
+**139 rows / 139 unique ids / 139 `finish=ok` / 0 empty**, and `humaneval/pub-grok.jsonl`
+SHA-256/16 **`a7c741de0d6ace8c`**, **120 / 120 / 120 / 0 empty** — byte-identical to ticks 21–33,
+mtimes still 2026-11-09 07:56, last stored ids `gpqa-138` and `humaneval-0119`, resume points
+`gpqa-139` and `humaneval-0120` unchanged.
+
+Ops state read this tick (no action): `HEAD` == `origin/main` == **`4fcf356`** before this commit,
+working tree clean at tick start, and that push is **green on all five recorded jobs**
+(secret-scan, devsecops, hard-v6 scoring contracts, contour self-tests, pages build; read 04:55
+CET). `hermes cron list` shows no paused job owned by this line. The paused list now carries
+**three** entries, all operator-disabled with `paused_reason: null` and `paused_at: null`: the two
+B2003 jobs read at tick 33 plus `gh-inbox-watch`, which first appears in this line's reads this
+tick — an operator pause (no reason, no pause timestamp, no recent execution failure), not the
+runtime-drain pause class, so the drain-resume job correctly leaves all three alone.
+The 03:00 daily-docs run for 2026-11-11 already left its marker (`945df05`, on `origin/main`);
+its push-step repair from tick 33 is in force from tomorrow's run.
+No leg was started, stopped or restarted this tick; `LEG-INCIDENTS.md` gains nothing (no partial
+file discarded, zero model and zero cloud calls).
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond from `gpqa-139`, 59 ids; humaneval from `humaneval-0120`, 44 ids; then the deferred
+mmlu-pro 500 and ifeval 541, whose Grok go-scripts are written at launch time with ceilings matched
+to each set's in-force family), each resumable by id and scored only when complete. Standing limits
+unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
+`pub_preflight.py` exit 0 (the twelfth consecutive NO-GO reading keeps that moot); sanitization
+before every push; a partial arm publishes no percent.
