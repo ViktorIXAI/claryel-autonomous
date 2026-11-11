@@ -3259,3 +3259,45 @@ remains an owner decision, and this line touches no other job's state.
 legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end staying
 unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and moved no
 digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this block.
+
+## 2026-11-11 evening status tick (tick 55)
+
+*Running units first: no `parb-pub-*` unit (0), no `pub_bench_run`/`pub_bench_cloud` process, HEAD
+equals `origin/main` and the worktree is clean — the tree has not moved since tick 54.*
+
+*Standing gates re-read, all green on unchanged bytes: arms-index drift 0; derived percents 42
+recomputed / 0 findings (169 doc citations, 0 uncovered); grok-cell rule 9 docs / 0 findings;
+superseded-cell rule 9 docs / 0 findings; digest-row rule 46 rows / 0 findings (23/23 legacy
+no-contract exceptions used, none stale); scorer self-test 22 cases / 0 failures. Grok resume gate
+`READY` (22 checks) both in window-CLOSED mode (today) and window-OPEN floor mode `--as-of
+2026-11-12`: pinned resume queue 1 144 calls, order gpqa-diamond -> humaneval -> mmlu-pro -> ifeval.*
+
+*Chain launcher `go_grok_queue_20261112.sh` re-read unchanged (SHA-256/16 `9e479ca1129c97a7`,
+4 777 B) and executed live unshielded: **exit 3, REFUSED** by the date guard; afterwards 0 transports
+in a standalone count, no lock file, 0 `parb-pub-*` units. Two pipe-masked exit codes were caught and
+re-read unshielded this tick (the launcher behind `| tail` printed 0, the preflight gate behind
+`| tail` printed 0 — the skill's "re-run unshielded" rule applies to any wrapper, not just
+`preflight.sh`).*
+
+*New endpoint reading `preflight-20261111-1821.txt` (untracked, wrapper run bare, then the gate run
+unshielded): **NO-GO (exit 3)** on the idle-spin pair — engine 510 % CPU at GPU 0 %, `/health` 200,
+foreign legs 0. Preflight series now **20 readings: 2 GO / 16 NO-GO / 2 INPUT-GAP**, counted by
+running the gate over every reading file. No local leg was launched (none is queued; item P0 parity
+is complete for every in-force set).*
+
+*Ops decoding refined, from the job's own records: today's 03:00:17 CET `GitHub docs freshness
+daily` execution row still reads `failed` (`jobs.json` `failure_streak` = 8, the cumulative counter),
+but its trace shows the run DID commit its marker (`Daily docs freshness check: 2026-11-11`,
+`945df05`) and that commit is an ancestor of `origin/main` — a later push carried it out. So the
+published docs marker is current for 2026-11-11 while the job status stays red for its own failed
+push attempt; the brief's "reports an error daily" describes the status field, not the marker bytes.
+Hard-bank-era job `f23cf5d48e11` still fires on its 5-minute schedule (execution rows `completed` at
+18:21) and still exits 0 only under the 2026-11-02 one-shot marker — stopping it remains an owner
+decision.*
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end
+staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
+moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
+block.
