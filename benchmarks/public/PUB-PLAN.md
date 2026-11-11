@@ -2664,3 +2664,67 @@ contour `0.0.2.56`; a local leg needs the preflight GO (now GO, but **nothing is
 endpoint is busy serving the main brain); sanitization before every push; a partial arm publishes
 no percent. Status only: zero model calls, no digest row, verdict, answer byte, bank file or
 manifest pin moved.
+
+## Tick 44 — 2026-11-11 11:08 CET (status only, zero model calls)
+
+**The ladder is still empty to 2026-11-12 and nothing was launched: no local leg (no queued item),
+no Grok leg (window closed), no cloud leg (no queued codex item).** Every unit and transport count
+is zero: `systemctl --user list-units 'parb-pub-*'` empty, and the standalone bracketed counts give
+0 `pub_bench_run.py` / `gate_run.py` / `pub_bench_cloud.py` / `hermes -z` processes.
+
+**Endpoint health: the GO of tick 43 did not persist — the box oscillates.** Reading
+`preflight-20261111-1108.txt`: swap **8191 of 8191 MiB free**, MemAvailable **13 643 MiB**, engine
+pid 3284575 age 2 d 14:32 in state **S** at **527 % CPU with GPU util 0 % / 36.4 W** — the
+idle-spin pair that had been the sole NO-GO reason is back 38 minutes after a reading showing GPU
+99 % / 126.5 W. load1 15.24, `/health` 200, foreign legs 0. Re-derived by running the gate over
+**every** reading file taken today instead of restating prose: **14 files — 2 GO (06:08, 10:30),
+11 NO-GO, 1 input gap (09:48, non-empty `.err`)**. A GO is therefore a single-reading event on this
+box, which is exactly why rule 7 requires a fresh reading at launch time rather than a remembered
+one. Nothing was blocked by it: the deferred 12 Nov chain is cloud-only and cloud legs are not
+gated by the preflight.
+
+**The 12 Nov chain re-proven without spending one paid call** (`GROK_DRYRUN=1` under `bash -x`,
+exit 0, `window=closed`): the census prints the four resume sets byte-exact — gpqa-diamond **59**
+(`gpqa-139`..`gpqa-197`, SHA-256/16 `cde63378fa1633c5`, 139 rows / 139 `ok` / 0 empty, 35th
+verification), humaneval **44** (`humaneval-0120`..`humaneval-0163`, SHA-256/16 `a7c741de0d6ace8c`,
+120/120), mmlu-pro **500**, ifeval **541**, total **1 144 calls**, sequential ETA **9.0-27.6 h** —
+and `pub_grok_resume_check.py` prints **READY, 22 checks** with the two zero-credit quarantines
+listed as evidence (46-row timeout file `6cd28556fc2f973c`, 4-row suspended-window file
+`1e025849786a94c1`). The `bash -n` parse is clean and the trace contains **0** lines matching
+`pub_bench_cloud\.py|hermes -z`, so the dry path is proven not to reach a transport; the live guard
+is numeric (`TODAY_NUM -lt 20261112`) and sits above every other check.
+
+**Standing gates re-run on unchanged bytes, identical to ticks 36-43:** arms index `--check` index
+drift **0**, `--pins` manifest pin drift **0**, derived percents **42 recomputed / 0 findings**
+(41 digest + 169 document citations, 0 uncovered), grok-cell rule 9 documents **0 findings**,
+superseded-cell rule 9 documents **0 findings**, digest-row rule **46 rows, 0 findings**, 23/23
+pre-rule exceptions used; scorer self-test **22 cases, 0 failures**. Transport: `origin/main` equals
+local HEAD `5a8649a`, working tree clean before this entry.
+
+**Two ops findings, recorded only — nothing outside this line was modified.**
+
+1. *The daily docs job's deployed code path was read from the script, not assumed.*
+   `docs_freshness_daily.sh` cd's into `~/sah-main` (the single-writer rule), so the
+   `push_with_retry` repair that landed there at 04:19 today (`4fcf356`) **is** in force for the
+   next run; today's 03:02 failure stays attributed to the DNS blip under the pre-fix
+   single-attempt code (tick 43). Its schedule renders as `0 2 * * *` **UTC** = 03:00 CET, next run
+   2026-11-12 02:00 UTC. Separately, the second clone (`~/projects/strata-autonomous-harness`) sits
+   in **detached HEAD** at `649bf7e`, 48 behind / 0 ahead of `origin/main`, with an **empty staged
+   diff** — the staged-deletion signature of the two-clone hazard is absent, so no watchdog commit
+   can currently delete published bytes.
+2. *A hard-bank-era cron is still armed and fires every 5 minutes*: job `f23cf5d48e11`
+   "Mac v2.2 full after v2.1" (untracked `mac_v22_full_after_v21.sh`) is `[active]`. It does nothing
+   today only because its one-shot marker `~/.hermes/mac-v22full-launch.state` exists (written
+   2026-11-02 14:05, the same minute it launched the `PARB_GATE_VERSION=v2.2` Mac Studio full arm —
+   last log lines `wait 2436/2513` then `complete 2513/2513` then `launched`). **If that marker is
+   ever cleaned, the job re-arms a legacy v2.2 hard-bank launch on a line that is frozen at
+   `stable-hard-0.0.2.56`.** That is an owner decision to stop the job, not a change this line makes:
+   the marker file is the job's only guard and this line does not edit other jobs' state.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+gpqa-diamond -> humaneval -> mmlu-pro -> ifeval, gated on the blank purge then
+`pub_grok_resume_check.py` exit 0, each leg resumable by id and scored only when complete. Standing
+limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`, no new stamps, no hard
+pairs, hard bank untouched; a local leg needs a fresh preflight GO; sanitization before every push;
+a partial arm publishes no percent. Status only: zero model calls, no digest row, verdict, answer
+byte, bank file or manifest pin moved.
