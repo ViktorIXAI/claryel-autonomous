@@ -3634,3 +3634,58 @@ legs scored only when complete under the tick-45 per-arm contracts, a set incomp
 staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
 moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
 block.
+
+## 2026-11-11 late-night status tick (tick 64)
+
+*23:25 CET. Working tree clean, `HEAD` (`ff15ba3`) equals `origin/main` (0 ahead / 0 behind).
+`systemctl --user list-units 'parb-pub-*'` is empty and a standalone bracketed `pgrep` counts
+**0** cloud transports and **0** `gate_run.py` — no leg is running and none was launched.*
+
+*Resume gate `scripts/pub_grok_resume_check.py` green in **both** window modes: today (window
+CLOSED, exact-snapshot mode) exit 0 / 22 checks / READY, and `--as-of 2026-11-12` (floor mode
+tomorrow runs in) exit 0. Stored partial identities byte-identical to ticks 21–63:
+gpqa-diamond 139 rows / 139 ok / SHA-256/16 `cde63378fa1633c5`, resume set 59 ids `gpqa-139..gpqa-197`;
+humaneval 120 / 120 / `a7c741de0d6ace8c`, resume set 44 ids; mmlu-pro 0 stored / 500 resume;
+ifeval 0 stored / 541 resume; queue total 1 144 calls, order gpqa-diamond → humaneval → mmlu-pro →
+ifeval. The two zero-credit quarantines (`bad-timeout` 46/38, `suspended-window-20261111` 4/4) print
+as evidence only.*
+
+*Chain launcher `go_grok_queue_20261112.sh` byte-identical to ticks 50–63: **SHA-256/16
+`9e479ca1129c97a7`, 4 777 B**, mtime unchanged at 14:46. Executed live unshielded at 23:26:18:
+**exit 3, REFUSED** (`window=closed`, opens 20261112) with the full per-arm census and ETA bands
+printed first. Afterwards: no lock file, 0 transports, 0 units, `~/pub-bench` at 276 visible
+entries (277 including the one hidden entry) both before and after — the refused run wrote
+nothing. The date guard remains the only thing that refuses today.*
+
+*Preflight series re-counted by driving `scripts/pub_preflight.py` over every readings file:
+21 readings, **2 GO / 17 NO-GO / 2 INPUT-GAP** — identical to ticks 62–63; newest reading still
+22:18, NO-GO on the idle-spin pair alone; no new reading taken because no local leg is queued
+(the 2026-11-12 queue is cloud-only, which rule 7 does not preflight-gate).*
+
+*Grok auth metadata re-read once more, record names and timestamps only — no secret value read or
+printed. The scheduler auth store holds `providers.xai-oauth` with `last_refresh
+2026-11-11T16:32:18Z`, `expires_in 21600` (so the access token lapsed at 22:32 UTC = **23:32 CET**,
+before the first in-window tick) and a discovery block naming the token endpoint
+`auth.x.ai/oauth2/token`; `auth_mode oauth_device_code`. The first in-window leg therefore performs
+a refresh-token grant at launch — a token-endpoint exchange, not a metered model call. The
+pre-registered failure mode if that renewal fails stands: `pub_bench_cloud.py` parks non-`ok` rows,
+the launcher runs `scripts/pub_cloud_blank_purge.py` (line 76) **before** the resume gate (line 79),
+so parked blanks are quarantined with zero credit rather than scored or halting day two. This tick
+did not touch the auth store.*
+
+*Ops re-reads from the scheduler's own records: docs-freshness job `ef7ea47ff99b` cumulative
+`failure_streak` 8 in `jobs.json` — unchanged (last run 03:00 CET today, next 2026-11-12 03:00,
+still the first attempt under the fixed bounded-retry call site); `executions.db` now retains **0**
+rows for that job inside its pruning window (1 004 rows total, older rows pruned), which is why the
+streak is read from `jobs.json`. Hard-bank-era job `f23cf5d48e11` streak 0, its 2026-11-02 one-shot
+marker `~/.hermes/mac-v22full-launch.state` still present — stopping it remains an owner decision.*
+
+*Window arithmetic: this tick ran 23:25 CET; the 23:49 tick will print the same refusal;
+**00:19 CET is the first in-window tick**.*
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end
+staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
+moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
+block.
