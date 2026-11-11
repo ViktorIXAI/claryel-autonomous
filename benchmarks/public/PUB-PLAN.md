@@ -2996,3 +2996,71 @@ stamps, no hard pairs, hard bank untouched; a local leg needs a fresh preflight 
 queued); sanitization before every push; a partial arm publishes no percent. This tick spent
 **zero model or cloud calls** (dryrun + stub rehearsal only) and moved no digest row, verdict,
 answer byte, bank file or manifest pin — the tracked change is this block.
+
+## Tick 50 — 2026-11-11 14:55 CET (status + the 12 Nov chain gets a double-spend lock, proven against a concurrent instance; zero model or cloud calls)
+
+**Nothing running; nothing launched.** No `parb-pub-*` unit, 0 pub/gate transports (standalone
+bracketed count), Grok window closed until 2026-11-12, no local leg queued.
+
+**Hole closed ahead of tomorrow: two chain launches would have spent the owner Grok quota twice.**
+This same cron brief has run as TWO instances in the same clone with the same unit namespace
+(measured 2026-11-09: a sibling instance replaced a leg under the SAME unit name). `systemd-run`
+unit-name exclusivity only blocks the identical name — a second chain launch under any other name,
+or a hand-started leg alongside the chain, would double-spend exactly the quota the suspension
+protects. The chain launcher (untracked local file) now carries: (a) an `flock -n` on fd 9 over a
+lock file, taken AFTER the window refusal and before any mutation, held for the whole queue, and
+the kernel releases it even if the launcher is SIGKILLed, so a dead run cannot strand the lock;
+(b) a vendor-level `pgrep` check that refuses while any `pub_bench_cloud` transport runs on the
+host. New exit class **4 = concurrent instance / foreign vendor**. Census, dryrun and the window
+refusal consume nothing and never take the lock. Launcher sha `d1a7d320e0c70e2b` ->
+`9e479ca1129c97a7` (pre-lock copy kept as `go_grok_queue_20261112.sh.pre-lock.bak`). The 12 Nov
+launch order now reads: census -> window refusal -> double-spend lock -> vendor check -> blank
+purge -> deciding resume gate -> legs.
+
+**Proven today with zero paid calls** (the rehearsal builder gained a 5th substitution, the lock
+path itself into scratch — a rehearsal that takes the real queue lock, or crashes and strands it,
+would poison the real launch):
+* live run today: census (1 144-call queue) then `REFUSED` exit 3, and **no lock file is created**
+  — the refusal precedes the lock, the closed-window path mutates nothing;
+* `GROK_DRYRUN=1` under `bash -x`: exit 0, trace grep `pub_bench_cloud.py|hermes -z` = **0 lines**;
+* rehearsal A (all healthy): exit 0, stub legs fired in the pinned order
+  `gpqa-diamond -> humaneval -> mmlu-pro -> ifeval`;
+* rehearsal C (dead leg): first stub exits 2 -> the queue halts with exit 2, legs 2-4 never
+  invoked (exit-code propagation re-proven on the patched file; tick 49 proved the halt at leg 2);
+* rehearsal D (new): while a separate process holds the lock, a second rehearsal instance prints
+  `REFUSED ... no double-spend` and exits **4** with zero stub legs invoked;
+* the rehearsal diff enumerates exactly five substitutions; after every scenario the stored
+  partials stay byte-exact (`cde63378fa1633c5` / `a7c741de0d6ace8c`) and the real lock file was
+  never created.
+Builder trap caught in this tick: the first rehearsal copy was generated from a **relative**
+scratch path, so the launcher's own `cd $HOME/sah-main` re-rooted the log/AF substitutions
+mid-run and the stub legs died instead of running. Nothing landed in the repo (the writes failed
+on the missing dir and `git status` stayed clean), but the rule generalizes: substitutions in a
+launcher that cds must be absolute, or the rehearsal exercises a different script than the one
+that ships.
+
+**Machine note for the multi-hour chain: the user session is durable.** `loginctl` reads
+`Linger=yes` for this user, so a `systemd-run --user` unit outlives session end and survives the
+nightly gateway restart — the 9-27.6 h queue is not gated on a login session. No endpoint
+preflight was taken this tick (no local leg queued; the readings series stays 19 files,
+15 NO-GO / 2 GO / 2 INPUT-GAP).
+
+**Standing gates green on an unchanged tree:** resume gate exit 0 read **unpiped** (the pipe-
+masking class tick 49 logged for its own tooling was avoided deliberately: `| head` would have
+reported the head's status, not the gate's) — window CLOSED today, partials byte-exact, resume
+sets 59+44+500+541; arms index drift 0; derived percents 0 findings; grok-cell rule 0 findings;
+superseded-cell rule 0 findings; digest-row rule 0 findings. Ops records re-read from
+`executions.db`, not retyped: `docs-freshness ef7ea47ff99b` fired once today (03:00:17,
+**failed** — tick 48's DNS-blip reading stands, tomorrow takes the `push_with_retry()` path),
+hard-bank-era job `f23cf5d48e11` fired **138** times today (last 14:45) still exiting 0 under its
+one-shot marker — still an owner decision, untouched.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order,
+ONE `systemd-run --user --collect --unit=parb-pub-grok-queue bash <absolute launcher path>`
+launch; the launcher self-enforces census -> window refusal -> double-spend lock -> vendor check
+-> blank purge -> deciding gate -> legs, with per-arm contracts fixed at tick 45 and legs scored
+only when complete. Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour
+`0.0.2.56`, no new stamps, no hard pairs, hard bank untouched; a local leg needs a fresh
+preflight GO (none queued); sanitization before every push; a partial arm publishes no percent.
+This tick spent **zero model or cloud calls** (dryrun + stub rehearsals only) and moved no digest
+row, verdict, answer byte, bank file or manifest pin — the tracked change is this block.
