@@ -29,6 +29,9 @@ EXTRA_SCRIPTS = [
     # the publication scrub: masking must never edit a scored answer byte or break the JSON of the
     # line it touched, and a path token proven from the pinned task file must survive verbatim
     "scripts/qa/publish_scrub_test.py",
+    # the daily-docs push step: a transient network blip is retried, the single-writer guard block
+    # is not, and an unpushed marker commit is pushed even when the date no longer changes
+    "scripts/qa/refresh_docs_push_test.py",
 ]
 EXTRA_ARG_SCRIPTS = [
     ["scripts/qa/docs_policy.py", "--push"],

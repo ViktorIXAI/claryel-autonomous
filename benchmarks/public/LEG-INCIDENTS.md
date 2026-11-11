@@ -233,3 +233,40 @@ verdict bytes shipped in `arms/` (see `arms/README.md`, "First cloud-arm artifac
   `ALLOW_HARD_V6_PUSH=1`, so this operator-scheduled daily date-marker push honours the guard as
   designed. The hook itself is untouched; no repo byte, digest row, verdict or measurement moved.
   No leg was started, stopped or restarted; no partial file was discarded; zero model calls.
+
+## 2026-11-11 04:12 CET — correction to the entry above: today's docs-job push died on DNS, not on the guard, and it was ONE attempt, not eight
+
+* Re-read of the job's own execution record (`cron/executions.db`, execution
+  `88c0821487c2412e8320bcbc0137bb4c`, started 03:00:17, finished 03:02:55 CET): the run made
+  **exactly one** push attempt and its captured stderr is
+  `fatal: unable to access …: Could not resolve host: github.com` (exit 128), which the
+  incident classifier filed as signature `2ce70c4854dc`, `failure_type: auth`.
+  `BLOCKED_SINGLE_WRITER_GUARD` appears **nowhere** in that capture, so the guard never got to
+  run. The "8 consecutive times" figure in the entry above is not supported by any run record:
+  the job's daily failure history is four `repo is dirty; refusing daily docs refresh` runs
+  (2026-11-07, 08, 09, 10, all pre-retarget) plus today's single push-step failure.
+* What the guard diagnosis **did** get right, now proven mechanically instead of inferred: the
+  `pre-push` hook lives in the shared git dir of the worktree family (`…/strata-autonomous-harness/.git/hooks/pre-push`)
+  and blocks `refs/heads/main` unless `ALLOW_HARD_V6_PUSH=1` is set for that push. Driven with
+  today's stdin both ways: without the variable it prints `BLOCKED_SINGLE_WRITER_GUARD` and exits
+  1; with it, exit 0. So the 03:40 wrapper fix is correct and is exactly what tomorrow's run needs;
+  only today's attribution was wrong. Corrected as a dated entry, the text above is left as written.
+* The verification also surfaced a real defect in `scripts/qa/refresh_docs_status.py`: it pushed
+  **only inside the marker-changed branch**, so a marker commit whose push died (today: the DNS
+  blip) has no path back to `origin` on a later run — the marker already matches its own date, so
+  that branch never runs again. Today's marker commit `945df05` reached `origin/main` only because
+  a pub-line tick push carried it. Repaired as tooling (the frozen contour line allows tooling):
+  the push step moved outside the marker branch, retries a transient transport failure up to
+  `SAH_DOCS_PUSH_ATTEMPTS` (default 3) with `SAH_DOCS_PUSH_BACKOFF_S` (default 30 s), and refuses
+  to retry a guard block, naming the variable the wrapper must export instead.
+* Contract test `scripts/qa/refresh_docs_push_test.py` (10 checks, enrolled in
+  `scripts/qa/static_checks.py`): clean branch pushes nothing; a DNS failure is retried the bounded
+  number of times with backoff between attempts and never after the last; a second attempt that
+  succeeds returns 0; a guard block exits 1 after one attempt with no sleep; an unreadable
+  ahead-count still attempts the push; and the **call site** is pinned (`main` returns
+  `push_with_retry()`, no bare `git push` call left in the tool) so a passing helper cannot hide an
+  orphan commit again. End-to-end: the real tool run on today's tree (date already current) exits 0
+  printing `nothing to push (HEAD == upstream)`, after `docs_policy --daily` and the full static-QA
+  suite including the new test.
+* No leg was started, stopped or restarted; no partial file was discarded; zero model calls and zero
+  cloud calls; no digest row, verdict, answer byte, bank file or manifest pin moved.
