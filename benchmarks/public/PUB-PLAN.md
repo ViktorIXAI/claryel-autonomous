@@ -3301,3 +3301,45 @@ legs scored only when complete under the tick-45 per-arm contracts, a set incomp
 staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
 moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
 block.
+
+## 2026-11-11 evening status tick (tick 56)
+
+*Running units first: no `parb-pub-*` unit (0), no `pub_bench_run`/`pub_bench_cloud` process
+(standalone bracketed count: 0), HEAD equals `origin/main`, worktree clean — the tree has not moved
+since tick 55.*
+
+*Standing gates re-read, all green on unchanged bytes: arms-index drift 0; derived percents 42
+recomputed / 0 findings; grok-cell rule 9 docs / 0 findings; superseded-cell rule 9 docs / 0
+findings; digest-row rule 46 rows / 0 findings; scorer self-test OK. Grok resume gate `READY`
+(22 checks) in window-CLOSED mode (today) and window-OPEN floor mode `--as-of 2026-11-12`; the two
+suspended partials re-hashed byte-exact against their pinned identities: gpqa-diamond 139 rows
+SHA-256/16 `cde63378fa1633c5`, humaneval 120 rows SHA-256/16 `a7c741de0d6ace8c`.*
+
+*Chain launcher `go_grok_queue_20261112.sh` re-read unchanged (SHA-256/16 `9e479ca1129c97a7`,
+4 777 B) and executed live unshielded: **exit 3, REFUSED** (window=closed, opens 20261112); its
+printed census names the exact resume point `gpqa-139`; afterwards 0 transports in a standalone
+count, no lock file created, 0 units, `~/pub-bench` listing unchanged (274 entries; the delta vs
+tick 55's 272 is only the launcher's own two lineage backups `pre-order-fix.bak` 14:09 and
+`pre-lock.bak` 14:46, on disk since before tick 55 and included in this count — no file has been
+written there since the 18:21 preflight reading).*
+
+*Preflight series counted mechanically this tick and it caught a counting trap worth recording: a
+`preflight-*.txt` file carries **only key=value readings, not a verdict**, so grepping the files for
+`GO` miscounts the series (a naive first pass printed 0 GO / 1 NO-GO / 19 INPUT-GAP). The only
+correct count runs the gate itself on every file: 20 readings, **2 GO / 16 NO-GO / 2 INPUT-GAP**,
+identical to the tick 55 series; newest reading 18:21 NO-GO on the idle-spin pair. No local leg is
+queued, so no fresh reading was taken.*
+
+*Ops re-reads: the GitHub docs-freshness job (`ef7ea47ff99b`) still shows status `error` with the
+cumulative `failure_streak` counter at 8 — unchanged since tick 55, no new run since the 03:00 CET
+attempt that died pre-fix, one hour before the bounded-retry repair landed; tomorrow's 03:00 run is
+the first under the fixed call site. The hard-bank-era job `f23cf5d48e11` still fires every 5
+minutes (`completed` rows through 18:51) and still exits 0 only under its 2026-11-02 one-shot
+marker — stopping it remains an owner decision.*
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end
+staying unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and
+moved no digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this
+block.
