@@ -3215,3 +3215,47 @@ files, newest 14:07 CET (NO-GO on the idle-spin pair).
 legs scored only when complete under the tick-45 per-arm contracts. This tick spent **zero model or
 cloud calls** and moved no digest row, verdict, answer byte, bank file or manifest pin — the
 tracked change is this block.
+
+## 2026-11-11 17:47 CET — tick 54 (status; the resume gate is pre-read in its window-OPEN mode so tomorrow's launch cannot be blocked by the pin; zero model or cloud calls)
+
+*Seven standing gates re-run on unchanged bytes (clean tree, `HEAD == origin/main` at `81b8bc8`):
+arms index `--check` drift 0; derived percents **42 recomputed / 0 findings** (169 doc citations,
+0 uncovered); grok-cell rule 9 documents / 0 findings; superseded-cell rule 9 / 0; digest-row rule
+**46 rows / 23 contracts named / 0 findings**; `pub_bench_score.py selftest` 22 cases / 0 failures;
+Grok resume gate **READY** (22 checks, window **CLOSED** as of today), partials byte-exact
+(gpqa-diamond 139 stored rows, humaneval 120), pinned queue **1 144 calls**, order
+gpqa-diamond -> humaneval -> mmlu-pro -> ifeval.
+
+*What is new is the ordering check for tomorrow, done with zero calls: `scripts/pub_grok_resume_check.py`
+re-run with `--as-of 2026-11-12`, which selects the **open-window (floor) mode** instead of the
+closed-window (exact-snapshot) mode. It prints **READY**, 22 checks, the same exact resume sets —
+gpqa-diamond 59 ids, humaneval 44, mmlu-pro 500 (`mmlu-pro-0000..mmlu-pro-12024`), ifeval 541
+(`ifeval-1000..ifeval-3757`). So the byte identity of the partials is not tomorrow's blocker; the
+only thing standing between 2026-11-11 and the queue is the launcher's date guard. Reading the gate in
+the mode it will actually run in is what makes the pre-read worth recording — the closed-window reading
+alone would not have exercised the floor-mode branch.
+
+*Chain launcher `go_grok_queue_20261112.sh` re-read: SHA-256/16 `9e479ca1129c97a7`, 4 777 B, unchanged
+since the lock landed at tick 50. Executed live today, unshielded (no pipe, so the reported status is
+the launcher's own): **exit 3, REFUSED** — `grok arms are suspended by owner quota until 2026-11-12
+(today 2026-11-11)` — with the census printed first (1 144 calls, sequential ETA 9.0-27.6 h). Afterwards:
+0 `pub_bench_cloud` processes counted in a standalone call (the counting line carries the bracketed
+pattern only, so it cannot self-match), no lock file, workspace file count unchanged **272/272**,
+0 `parb-pub-grok*` units.
+
+*No local leg is queued, so no new endpoint reading was taken: the preflight series stands at 19 readings
+files, newest 14:07 CET (NO-GO on the idle-spin pair). Item P0 parity is complete for every in-force set,
+and ladder item 8 (the Grok resumption) is the only in-force next action, gated by the owner window.
+
+*Ops records, read from the jobs' own records: no `GitHub docs freshness daily` run since the 03:00:17 ->
+03:02:55 CET failure decoded in tick 53 (pre-fix bare push, `Could not resolve host: github.com`); the
+next slot takes the bounded-retry path, and whether it goes green is that job's record, not this tick's
+claim. Hard-bank-era job `f23cf5d48e11` is still on its 5-minute schedule (most recent retained execution
+row 17:45:17 CET, `completed`) and still exits 0 only under the 2026-11-02 one-shot marker — stopping it
+remains an owner decision, and this line touches no other job's state.
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end staying
+unscored and resuming by id the next day. This tick spent **zero model or cloud calls** and moved no
+digest row, verdict, answer byte, bank file or manifest pin — the tracked change is this block.
