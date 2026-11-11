@@ -2102,3 +2102,81 @@ when complete, with the transport-version boundary named beside any completed pe
 limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
 `pub_preflight.py` exit 0 (the thirteenth consecutive NO-GO keeps that moot); sanitization before
 every push; a partial arm publishes no percent.
+
+---
+
+**Queue status 2026-11-11 06:08 CET (tick 36):** nothing launched — the queue stays empty and item 8
+(the Grok resumption: gpqa-diamond from `gpqa-139`, humaneval from `humaneval-0120`, then the
+deferred mmlu-pro 500 and ifeval 541) remains gated to 2026-11-12 by the owner quota window.
+0 `parb-pub-*` units at tick start, no `pub_bench_run`/`pub_bench_cloud`/`gate_run` process,
+0 foreign legs on the endpoint, working tree clean at HEAD `dcdad5e` with `origin/main` equal.
+No digest row, verdict, answer byte, bank file or manifest pin moved this tick.
+
+**The local-leg preflight gate returned GO for the first time in fourteen readings — and there is
+nothing queued to launch into it.** Fresh reading at 06:08 CET: swap free **8 190 MiB of 8 191**,
+MemAvailable 14 148 MiB, engine state **`R`** (not `D`), engine **555 % CPU with the GPU at 29 %
+utilization / 39.40 W**, RSS 57 222 MiB, load average 10.05, `/health` 200, 0 foreign legs. The
+gate prints **`PREFLIGHT GO`** (exit 0): the idle-spin pair — high engine CPU **at 0 % GPU**, the
+single reason for the thirteen previous NO-GOs — is absent. The engine is the same un-restarted
+process as ticks 23-35 (pid `3284575`, age **2 d 09:32**), so the condition cleared by itself and no
+owner-side restart happened. Two honest limits on that reading: (i) the same engine serves this
+session's brain, so a reading taken while the agent is answering carries its own decode traffic and
+the 29 % GPU line is an endpoint state, not a forecast — a 12 Nov local leg would need a fresh
+reading anyway; (ii) the queue holds no local leg at all. The arm census read programmatically off
+`PUB-DIGEST.md` (39 percent rows) is the reason: every in-force set already carries a bare local row,
+an admissible matched-shape contour row and a ChatGPT-codex row — gsm8k (bare 1 284/1 319, contour
+matched 294/300, codex 293/300), arc-easy (2 261/2 376 / 289/300 / 290/300), arc-challenge
+(1 129/1 172 / 291/300 / 290/300), gpqa-diamond (127/198 / 139/198 / 192/198), humaneval
+(159/164 / 157/164 / 163/164, both `pytest-v2`), mmlu-pro (432/500 / 429/500 / 462/500), ifeval
+(467/541 / 462/541 / 515/541, `pub-ifeval-v1`), livecodebench (101/175 / 99/175 / 168/175,
+`lcb-exec-v2`), bfcl (1 116/1 240 / 1 122/1 240 / 281/300 on the pre-registered head slice). Grok is
+complete for three sets, partial for two, and not started for mmlu-pro/ifeval — which is exactly the
+12 Nov queue. So the GO is recorded as a state change of the endpoint, not as a launch.
+
+**Standing gates re-run on the tracked tree, zero model calls, all green:**
+`scripts/pub_arms_index.py --check` **index drift: 0**; `--pins` **manifest pin drift: 0**;
+`scripts/pub_derived_percent_check.py` registry `pub-derived-percents-v1` **42 entries recomputed
+from shipped bytes, 0 findings** (41 digest + 169 document citations, 0 uncovered);
+`scripts/pub_grok_cell_check.py` 9 documents **0 findings**; `scripts/pub_superseded_cell_check.py`
+9 documents **0 findings**; `scripts/pub_digest_row_check.py` **46 rows, 0 findings**, 23/23 pre-rule
+exceptions used; `scripts/qa/refresh_docs_push_test.py` **PASS** (recovers on attempt 2, guard block
+not retried, `main` returns `push_with_retry()`, no bare push call left in the tool).
+
+**Today's daily-docs failure re-read from the scheduler's own record rather than a replay.**
+Job `GitHub docs freshness daily` (`ef7ea47ff99b`), execution `88c0821487c2412e8320bcbc0137bb4c`:
+started 03:00:17, finished 03:02:55 CET, status **failed, "Script exited with code 1"**. The captured
+trace runs the whole static-QA list, commits `[main 945df05] Daily docs freshness check: 2026-11-11`
+(03:02:13) and then ends at `+ git push origin HEAD:main` — the **pre-fix single bare push**, which is
+expected: the push-step repair was committed at 04:19, after this run started. The marker commit is
+**not orphaned**: `945df05` is an ancestor of `origin/main` (carried by the pub-line push at 03:04).
+The `MANIFEST GUARD` lines in that stderr remain the non-vacuity tampers of
+`harness/pub_arms_index_test.py`, attributed at tick 35, not a task-file move. From the 12 Nov run
+the same job pushes through `push_with_retry()` (bounded retry on a transport error, guard block
+never retried, always pushes when `git rev-list --count @{u}..HEAD` > 0), pinned by the test above
+and enrolled in `scripts/qa/static_checks.py`.
+
+**Grok partials, twenty-ninth verification, zero model calls, still unscored and unshipped by rule:**
+`gpqa-diamond/pub-grok.jsonl` **139 rows / 139 unique ids / 139 `finish=ok` / 0 empty**, SHA-256/16
+`cde63378fa1633c5`, last stored id `gpqa-138` -> resume `gpqa-139`; `humaneval/pub-grok.jsonl`
+**120 / 120 / 120 / 0 empty**, SHA-256/16 `a7c741de0d6ace8c`, last stored id `humaneval-0119` ->
+resume `humaneval-0120`. The transport-version drift stated at tick 35 was re-read from the stored
+bytes rather than from prose: **all 259 rows carry
+`hermes Hermes Agent v0.23.0+860.gf17db36.dirty (2026.9.24) · upstre toolsets off`**, while the live CLI now
+reports `Hermes Agent v0.23.1+2.gb3746e3.dirty (2026.9.24) · upstream b3746e35`, so the resumed arms
+will genuinely hold two transport versions per file and any completed percent must name that
+boundary. `codex-cli 0.166.0` still resolves on PATH for the codex legs.
+
+**Grok launcher guards re-checked statically; nothing executed.** All four launchers
+(gpqa-diamond, humaneval, mmlu-pro, ifeval) still carry the numeric window guard
+(`TODAY_NUM=$(date +%Y%m%d)` … `if [ "$TODAY_NUM" -lt 20261112 ]` -> `REFUSED … exit 3`) and
+`bash -n` is clean on every one. They were **not** run this tick: their refusal path was proven by
+execution at tick 35, and re-executing a launcher is the action that burned 4 calls yesterday, so the
+static check is the right depth here.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond from `gpqa-139`, 59 ids including the 4 re-asked on 11 Nov by mistake; humaneval from
+`humaneval-0120`, 44 ids; then mmlu-pro 500 and ifeval 541), each resumable by id and scored only
+when complete, with the transport-version boundary named beside any completed percent. Standing
+limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
+`pub_preflight.py` exit 0 (GO for the first time at this tick, with no local leg queued);
+sanitization before every push; a partial arm publishes no percent.
