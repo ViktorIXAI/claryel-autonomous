@@ -2180,3 +2180,78 @@ when complete, with the transport-version boundary named beside any completed pe
 limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
 `pub_preflight.py` exit 0 (GO for the first time at this tick, with no local leg queued);
 sanitization before every push; a partial arm publishes no percent.
+
+---
+
+**Queue status 2026-11-11 06:45 CET (tick 37):** nothing launched — the queue stays empty and item 8
+(the Grok resumption) remains gated to 2026-11-12 by the owner quota window. 0 `parb-pub-*` units at
+tick start, no `pub_bench_run`/`pub_bench_cloud`/`gate_run` process, 0 foreign legs, working tree
+clean at HEAD `ecdc64a` with `origin/main` equal. No digest row, verdict, answer byte, bank file or
+manifest pin moved this tick. What this tick did instead of repeating a status line: it made
+tomorrow's queue mechanical — a resume census computed from the pinned task files rather than
+asserted from prose, and an ETA sized from this line's own measured per-set rates.
+
+**The preflight GO of tick 36 did not hold: NO-GO again, the fourteenth NO-GO in fifteen readings.**
+Fresh reading at 06:45 CET: swap free **8 191 MiB of 8 191**, MemAvailable 15 208 MiB, engine state
+`S`, engine **551 % CPU with the GPU at 0 % utilization / 37.31 W** — the idle-spin pair, and the
+sole reason the gate refuses. RSS 57 453 MiB (**+231 MiB against tick 36's 57 222 MiB in ~37 min**),
+load average 10.79, `/health` 200, 0 foreign legs; still the same un-restarted engine process
+(pid `3284575`, age **2 d 10:09**). Remedy stays an owner/box decision (engine restart or park the
+keep-up load); nothing was restarted here, and cloud legs are unaffected by this gate. The reading
+matters little this tick, because no admissible local leg exists: every in-force set already carries
+bare + matched-shape contour + codex rows.
+
+**Grok partials, thirtieth verification, now computed rather than recalled — zero model calls.**
+A new untracked local helper (`pub-bench/grok_resume_census.py`, answer files + the **pinned tracked
+task files** only, it can never call a transport) subtracts the stored `finish=ok` ids from the pinned
+task-file order, so the resume set is a derived number. It reproduces the identities read at ticks
+21-36 exactly: `gpqa-diamond/pub-grok.jsonl` **139 rows / 139 unique / 139 `finish=ok` / 0 empty**,
+SHA-256/16 `cde63378fa1633c5`; `humaneval/pub-grok.jsonl` **120 / 120 / 120 / 0**, SHA-256/16
+`a7c741de0d6ace8c`; **0 duplicate rows and 0 non-`ok` rows in either file**, so no blank-purge is
+needed before resuming (the pitfall where the public scorer keeps the FIRST row per id is not armed
+here). Derived resume sets: gpqa-diamond **59 ids** `gpqa-139`..`gpqa-197`; humaneval **44 ids**
+`humaneval-0120`..`humaneval-0163`; mmlu-pro **500 ids** (first `mmlu-pro-0000`); ifeval **541 ids**
+(first `ifeval-1000`).
+
+**New planning number for item 8: the 12 Nov Grok queue is 1 144 calls = 9.0-27.6 h of sequential
+wall time, i.e. it cannot be promised inside one day.** Per-leg bands from the rates this line's own
+cloud logs measured (`s/task`): gpqa-diamond 59 ids at **188-322** (measured, the expert-science
+leg's own rows) = **3.1-5.3 h**; humaneval 44 ids at **56-115** (measured at 80 and 120 rows) =
+**0.7-1.4 h**; mmlu-pro 500 ids at **14.9-20.9** (UNMEASURED for this set; band = measured grok
+MCQ/arithmetic legs arc-easy 14.9, arc-challenge 17.1, gsm8k 20.9) = **2.1-2.9 h**; ifeval 541 ids at
+**20.9-120** (UNMEASURED; low = grok gsm8k, high = grok humaneval long-output) = **3.1-18.0 h**. The
+two unmeasured bands are labeled as bands, not measurements. Consequence, pre-registered now rather
+than discovered on 12 Nov: the queue chains across more than one day at the high end, so legs run
+one vendor at a time in the pinned order, a day that ends mid-set leaves that set unscored and
+unpublished (a partial arm publishes no percent), and the resume-by-id design is what makes the
+multi-day chain safe rather than expensive.
+
+**The 12 Nov chain launcher exists and is proven without spending a call.**
+`pub-bench/go_grok_queue_20261112.sh` (untracked local file, so no connection material lands in this
+repo) runs the four legs strictly in sequence with the numeric window guard, `PATH` export plus a
+`command -v hermes` fail-closed, `PUB_CLOUD_TIMEOUT=2400`, and a **halt on any non-zero leg exit** so
+a dead transport cannot spend calls on the next set. Proofs done this tick, none of which touches a
+transport: `bash -n` clean; the guard expression evaluated in isolation both directions
+(`20261111` -> closed/would refuse, `20261112` and `20261113` -> open); ordering proven by line
+number, guard at line 20 **before** the PATH check (36) and the transport call (42); and a
+`GROK_DRYRUN=1` run under `bash -x` that prints the census, exits 0 and leaves **0 transport-invoking
+lines in the trace**. The launcher was deliberately NOT executed in live mode: tick 35's cost was
+exactly the act of executing a launcher whose guard was wrong, and here the guard, its position and
+the dry path are proven separately instead.
+
+**Standing gates re-run on the tracked tree, zero model calls, all green and identical to tick 36:**
+`scripts/pub_arms_index.py --check` **index drift: 0**; `--pins` **manifest pin drift: 0**;
+`scripts/pub_derived_percent_check.py` **42 entries recomputed from shipped bytes, 0 findings**
+(41 digest + 169 document citations, 0 uncovered); `scripts/pub_grok_cell_check.py` 9 documents
+**0 findings**; `scripts/pub_superseded_cell_check.py` 9 documents **0 findings**;
+`scripts/pub_digest_row_check.py` **46 rows, 0 findings**, 23/23 pre-rule exceptions used.
+The daily-docs job needs no re-reading: its 03:00 CET failure was attributed at tick 36 to the
+pre-fix bare push and its marker commit `945df05` is an ancestor of `origin/main`; from the 12 Nov
+run it pushes through `push_with_retry()`.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order and the
+derived resume sets above, each resumable by id and scored only when complete, with the
+transport-version boundary (stored rows `v0.23.0+860.gf17db36`, resumed rows `v0.23.1+2.gb3746e3`)
+named beside any completed percent. Standing limits unchanged: no Grok arm before 2026-11-12; frozen
+contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO at this reading, with no local
+leg queued); sanitization before every push; a partial arm publishes no percent.
