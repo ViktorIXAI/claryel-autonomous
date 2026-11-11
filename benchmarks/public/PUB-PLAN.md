@@ -2872,3 +2872,65 @@ local leg needs a fresh preflight GO (none queued); sanitization before every pu
 publishes no percent. This tick spent **zero model or cloud calls** and moved no digest row, verdict,
 answer byte, bank file or manifest pin — the tracked changes are this block plus the gate and its
 contract test.
+
+## Tick 48 — 2026-11-11 13:30 CET (status + a dated correction: today's `docs-freshness` run **failed**, and its own record says why; zero model calls)
+
+**Nothing was launched.** No `parb-pub-*` unit exists; a standalone call counting transports with
+bracketed patterns reads **0** for `pub_bench_cloud`, **0** for `pub_bench_run`, **0** for
+`gate_run`; no local leg is queued, no codex item is queued, and the Grok window is closed. No
+launcher was re-executed this tick: the chain's live `REFUSED` proof was run at tick 47 (12:56 CET)
+against the corrected gate and nothing in the guard or the pin has moved since.
+
+**Endpoint preflight: NO-GO again, and the series is now counted by driving the gate over every
+readings file.** The fresh reading at 13:29 CET: swap **8191/8191 MiB free**, MemAvailable 14116 MiB,
+engine state `S`, engine **514 % CPU at GPU 0 %** (36.22 W), load1 10.96, `/health` 200, 0 foreign
+legs, same engine pid 3284575 now aged 2 d 16:53. The single NO-GO reason is the idle-spin pair.
+Re-running `scripts/pub_preflight.py` over all 18 readings files of the series gives **14 NO-GO,
+2 GO, 2 INPUT-GAP** (last six: 10:30 GO, 11:08 NO-GO, 11:44 INPUT-GAP, 11:45 NO-GO, 12:56 NO-GO,
+13:29 NO-GO) — a GO is valid only for its own reading. Trap caught in this tick's own counting:
+`preflight.sh` writes **only the remote readings** into `preflight-<TS>.txt`, the gate's verdict goes
+to stdout, so a counter that greps those files for `PREFLIGHT GO/NO-GO` reports 17 INPUT-GAPs out of
+18. The series can only be re-derived by invoking the gate per file.
+
+**Grok resume gate: READY (22 checks), window CLOSED today, partials byte-exact.** `gpqa-diamond`
+139 rows / 139 ok / SHA-256/16 `cde63378fa1633c5`, resume set **59 ids** `gpqa-139..gpqa-197`;
+`humaneval` 120 / 120 / `a7c741de0d6ace8c`, resume set **44 ids** `humaneval-0120..humaneval-0163`;
+`mmlu-pro` 500 ids and `ifeval` 541 ids never legged. Pinned queue **1 144 calls**, order
+`gpqa-diamond -> humaneval -> mmlu-pro -> ifeval`. The two zero-credit quarantines are printed as
+evidence (46-row timeout file `6cd28556fc2f973c`, the 4-row suspended-window file
+`1e025849786a94c1`). Tick 46's fail-close was verified live on the way: `--as-of 20261111` now exits
+**1** with the named reason ("compact dates always read OPEN") instead of silently opening the window,
+and the default (today, ISO) reads **CLOSED**.
+
+**Correction (dated, not a silent rewrite).** Tick 46 recorded that the scheduled `docs-freshness`
+run of 2026-11-11 "completed success (11 s)". The job's own record says otherwise:
+`~/.hermes/cron/executions.db` holds exactly **one** execution for job `ef7ea47ff99b`,
+03:00:17 -> 03:02:55 CET, status **failed**, exit 1. Its captured stderr ends with
+`fatal: unable to access 'https://github.com/...': Could not resolve host: github.com` and a
+traceback from `scripts/qa/refresh_docs_status.py` line 51 calling a **bare** `git push` — the
+pre-fix code shape, whose `push_with_retry()` repair landed at 04:19 CET (`4fcf356`, tick 33). The
+`MANIFEST GUARD` / `DIGEST ROW COUNT MISMATCH` / `NO SCORED TASK` lines in that capture stay what
+tick 35 named them: tamper-control output from the contract tests the job runs, not the failure. So
+the standing "dirty tree at 03:00" explanation did not apply today either — today's error was a DNS
+blip on a bare push. No orphan commit came of it: the 2026-11-11 marker `945df05` is on
+`origin/main` and `git rev-list origin/main..HEAD` is 0, and tomorrow's run takes the retry path.
+
+**Frozen-line hygiene.** The hard-bank-era job `f23cf5d48e11` ("Mac v2.2 full after v2.1") fired again
+at 13:27 CET — **172** executions in the DB, still on a 5-minute schedule — and exits 0 only because
+the one-shot marker `~/.hermes/mac-v22full-launch.state` (2026-11-02) exists; removing that marker
+would re-arm a launch on a line the owner froze. Reported as an owner decision, not touched.
+
+**Standing gates green and unchanged:** arms index `--check` drift 0; derived percents 42 recomputed
+from shipped bytes, 0 findings; grok-cell rule 9 documents, 0 findings; superseded-cell rule 9
+documents, 0 findings; digest-row rule 46 rows, 0 findings. Every in-force set still holds its three
+admissible arms (bare / matched contour `0.0.2.56` / codex), so nothing on the ladder is blocked
+except by the Grok window.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, one
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch with the absolute launcher path,
+blank purge then `pub_grok_resume_check.py` exit 0 before the first call, legs scored only when
+complete under the contracts fixed at tick 45. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`, no new stamps, no hard pairs, hard bank untouched; a local leg
+needs a fresh preflight GO (none queued); sanitization before every push; a partial arm publishes no
+percent. This tick spent **zero model or cloud calls** and moved no digest row, verdict, answer byte,
+bank file or manifest pin — the tracked change is this block.
