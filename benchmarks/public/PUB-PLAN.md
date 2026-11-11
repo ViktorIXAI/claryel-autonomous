@@ -3064,3 +3064,69 @@ only when complete. Standing limits unchanged: no Grok arm before 2026-11-12; fr
 preflight GO (none queued); sanitization before every push; a partial arm publishes no percent.
 This tick spent **zero model or cloud calls** (dryrun + stub rehearsals only) and moved no digest
 row, verdict, answer byte, bank file or manifest pin — the tracked change is this block.
+
+## Tick 51 — 2026-11-11 15:30 CET (status + a dated correction: tick 50's launcher lineage backup does not hold the pre-lock bytes; zero model or cloud calls)
+
+**Nothing running; nothing launched; no new preflight reading.** No `parb-pub-*` unit exists; the
+standalone bracketed counts read 0 for `pub_bench_run.py`, `gate_run.py`, `pub_bench_cloud.py` and
+`hermes -z`. No local leg is queued, so no 20th preflight reading was taken — the readings series
+stays 19 files (**15 NO-GO / 2 GO / 2 INPUT-GAP**, last GO 10:30). The chain launcher was not
+re-executed: its live `REFUSED` proof ran at tick 50 (14:55) against the file whose sha256-16 is
+still `9e479ca1129c97a7` (mtime 14:46), and no guard, pin or partial changed since. Tree clean,
+HEAD `51a85ba` == `origin/main` (0 ahead / 0 behind).
+
+**Correction (dated, not a silent rewrite): one link in the launcher's lineage chain does not exist
+on disk.** Tick 50 recorded the launcher sha moving `d1a7d320e0c70e2b` -> `9e479ca1129c97a7` with
+"pre-lock copy kept as `go_grok_queue_20261112.sh.pre-lock.bak`". Reading the bytes now: that
+backup and the in-force launcher are the **same file** — SHA-256/16 `9e479ca1129c97a7…` for both
+(full digest match) and `diff` between them is empty; the backup also carries the `flock` block.
+So the pre-lock revision `d1a7d320e0c70e2b` was overwritten by the copy taken *after* the edit and
+is not recoverable: the only surviving distinct ancestor is the pre-order-fix copy
+`ad9f938c4acc13c8`. Consequence for tomorrow is zero — the launcher that ships is the exact
+byte-string the rehearsals exercised (rehearsal copies in scratch are substituted variants:
+`pub-rehearse-42` `664f44a8…`, `pub-rehearse-50` `32421c88…`), and the launch order it enforces is
+recorded in the tick 50 block. Consequence for the audit trail is real: a lineage claim that names
+a hash nobody can produce is not evidence. Rule learned on this line: a `.bak` taken after the edit
+is not a backup — take it before, then assert the two sha256-16 values differ before citing either.
+
+**Grok resume gate re-read today (unpiped): exit 0, `RESUME GATE: READY (22 checks)`, window
+CLOSED today** (`suspended_until 2026-11-12`). Stored partials byte-exact: gpqa-diamond 139 rows /
+139 `ok` / SHA-256/16 `cde63378fa1633c5`, resume set 59 ids `gpqa-139..gpqa-197`; humaneval
+120/120/`a7c741de0d6ace8c`, resume set 44 ids `humaneval-0120..humaneval-0163`; mmlu-pro 500 ids and
+ifeval 541 ids never legged. Pinned queue **1 144 calls**, order
+`gpqa-diamond -> humaneval -> mmlu-pro -> ifeval`. Both zero-credit quarantines still print as
+evidence (`6cd28556fc2f973c`, `1e025849786a94c1`). No real `grok-queue.lock` exists in
+`~/pub-bench`, consistent with tick 50's finding that the closed-window path never takes the lock.
+
+**Small hygiene read, recorded, not fixed:** the pin's `as_of` field is a literal
+`2026-11-11 08:30 CET` while that wall time was 15:30 CET — the generator wrote a UTC clock value
+under a CET label. It is a reporting field: the window decision is
+`as_of >= suspended_until` on the **local run date** (ISO-guarded since tick 46), so the mislabel
+cannot open the window early; on 12 Nov it reads one hour "behind", the conservative direction.
+`GROK-RESUME-PIN.json` was not edited — a cosmetic relabel is a published-byte move, and the pin is
+regenerated at window end anyway.
+
+**Standing gates green on an unchanged tree:** arms index `--check` drift 0 and `--pins` drift 0;
+derived percents **42 recomputed / 0 findings** (41 digest citations, 169 doc citations,
+0 uncovered); grok-cell rule 9 documents / 0 findings; superseded-cell rule 9 documents / 0
+findings; digest-row rule **46 rows / 23 contracts named / 0 findings**; scorer self-test
+`selftest cases=22 failures=0` + `scorer self-test OK`. Trap avoided in this tick's own tooling:
+`pub_bench_score.py --self-test` is not the invocation (argparse prints the epilog and exits 2,
+which a `tail` would have shown as a "full-looking" output); the real word is `selftest` and it was
+read with the exit code attached.
+
+**Ops records re-read from `executions.db`, not retyped.** `docs-freshness ef7ea47ff99b`: exactly
+1 run today, 03:00:17 -> 03:02:55, **failed** (tick 48's DNS-blip-on-a-bare-push reading stands;
+tomorrow's run takes the `push_with_retry()` path). Hard-bank-era job `f23cf5d48e11` fired **155
+times today** (last 15:27), still every 5 minutes, still exiting 0 only under the 2026-11-02
+one-shot marker — stopping it stays an owner decision and this line does not touch other jobs.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue bash <LOCAL_PATH>/pub-bench/go_grok_queue_20261112.sh`
+launch; the launcher self-enforces census -> window refusal -> double-spend lock -> vendor check ->
+blank purge -> deciding resume gate -> legs, per-arm scoring contracts fixed at tick 45, legs
+scored only when complete. Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour
+`0.0.2.56`, no new stamps, no hard pairs, hard bank untouched; a local leg needs a fresh preflight
+GO (none queued); sanitization before every push; a partial arm publishes no percent. This tick
+spent **zero model or cloud calls** and moved no digest row, verdict, answer byte, bank file or
+manifest pin — the tracked change is this block.
