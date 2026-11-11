@@ -2311,3 +2311,42 @@ transport-version boundary (stored rows `v0.23.0+860.gf17db36`, resumed rows `v0
 named beside any completed percent. Standing limits unchanged: no Grok arm before 2026-11-12; frozen
 contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO at this reading, with no local
 leg queued); sanitization before every push; a partial arm publishes no percent.
+
+## Tick 39 — 2026-11-11 07:55 CET (status only, zero model calls)
+
+Fresh preflight reading at 07:55 CET: swap free **8 191 MiB of 8 191**, MemAvailable 14 082 MiB,
+engine state `S`, engine **544 % CPU with the GPU at 0 % / 36.24 W**, load average 12.36, `/health`
+200, 0 foreign legs, still the same un-restarted engine (pid `3284575`, age **2 d 11:19**).
+RSS 57 575 MiB — **up 608 MiB against tick 38 in ~35 min**, opposite sign to tick 38's fall, so the
+oscillation reading from last tick holds. **NO-GO a sixteenth time in seventeen readings**, sole
+reason the idle-spin pair. The remedy stays an owner/box decision and no local leg is queued anyway:
+every in-force set already carries bare + matched-shape contour + codex rows, and the 12 Nov queue
+is Grok-cloud only. Tooling note caught while measuring: the untracked `preflight.sh` wrapper's
+trailing `echo` masks the gate's exit code — the gate itself was re-run **unshielded** on the same
+readings file and exits **3** as contracted.
+
+**Grok partials, thirty-second computed verification, byte-exact:** `gpqa-diamond/pub-grok.jsonl`
+**139/139/139/0**, SHA-256/16 `cde63378fa1633c5`; `humaneval/pub-grok.jsonl` **120/120/120/0**,
+SHA-256/16 `a7c741de0d6ace8c`; 0 duplicate and 0 non-`ok` rows. Resume sets unchanged: gpqa-diamond
+59 (`gpqa-139`..`gpqa-197`), humaneval 44 (`humaneval-0120`..`humaneval-0163`), mmlu-pro 500,
+ifeval 541 — 1 144 calls, sequential ETA 9.0-27.6 h.
+
+**Chain launcher guard re-proven in LIVE mode:** header printed `mode=live window=closed
+(opens 20261112)`, then `REFUSED: grok arms are suspended by owner quota until 2026-11-12`, exit
+**3**. The zero-transport assertion needed a second pass: an **unbracketed**
+`pgrep -cf 'pub_bench_cloud|gate_run'` counted **2** because the measuring shell's own command line
+contains the pattern (the same self-match class the skill warns about for ssh one-liners); the
+bracketed form `pgrep -cf '[p]ub_bench_clou[d]|[g]ate_ru[n].py'` counts **0**. No arm started,
+no owner quota spent.
+
+**Standing five PUB gates green and identical to ticks 36-38:** arms index `--check` **drift 0**;
+derived percents **42 recomputed, 0 findings**; grok cells 9 documents **0 findings**; superseded
+cells 9 documents **0 findings**; digest rows **46 rows, 0 findings**. No new daily-docs run has
+landed since tick 38 attributed today's single 03:00 failure (one DNS blip on the pre-fix bare
+push; `push_with_retry()` in tree, no orphaned marker commit).
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order with
+the derived resume sets above, each resumable by id and scored only when complete, transport-version
+boundary named beside any completed percent. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO at this
+reading, none queued); sanitization before every push; a partial arm publishes no percent.
