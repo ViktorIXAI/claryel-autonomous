@@ -2013,3 +2013,92 @@ to each set's in-force family), each resumable by id and scored only when comple
 unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
 `pub_preflight.py` exit 0 (the twelfth consecutive NO-GO reading keeps that moot); sanitization
 before every push; a partial arm publishes no percent.
+
+
+**Queue status 2026-11-11 05:32 CET (tick 35):** no public-line leg was launched by this tick and the
+queue stays empty: item 8 (the Grok resumption — gpqa-diamond from `gpqa-139`, humaneval from
+`humaneval-0120`, then the deferred mmlu-pro 500 and ifeval 541) remains gated to 2026-11-12 by the
+owner quota window. 0 `parb-pub-*` units at tick start, no `pub_bench_run`/`pub_bench_cloud`/
+`gate_run` process, 0 foreign legs on the endpoint. **One exception, reported in full:** while
+staging the deferred Grok launchers, a guard written with an unescaped `<` inside `[ ]` failed open
+as a shell redirection and started the gpqa-diamond Grok leg for 53 s — 4 calls (`gpqa-139`…
+`gpqa-142`). The leg was killed immediately, the 4 rows were quarantined to
+`gpqa-diamond/pub-grok.jsonl.suspended-window-20261111.bak` (SHA-256/16 `1e025849786a94c1`) with
+zero credit and no percent computed, and the arm file was rebuilt byte-exact to its verified
+identity (139 rows, SHA-256/16 `cde63378fa1633c5`, last id `gpqa-138`), so the resume point is
+unchanged and those 4 ids are re-asked inside the window. Dated entry in `LEG-INCIDENTS.md`; the
+cost that is real is 4 Grok calls spent outside the window. All four Grok launchers now carry a
+numeric date guard (`date +%Y%m%d -lt 20261112` -> exit 3) which cannot be read as a redirection,
+and all four were executed today: every one refuses and starts nothing.
+
+**Preflight gate NO-GO a thirteenth time; the idle-spin pair is now the single reason.** Same box,
+05:26 CET: **swap free 8 191 MiB of 8 191** for the second consecutive reading (ticks 23-33 read
+0 / 3 / 0 / 0 / 0 / 1 / 0 / 0 / 0 / 1 / 0 / 8 191), MemAvailable 14 712 MiB, engine state `S`,
+**554 % CPU with the GPU at 0 % utilization / 36.43 W**, RSS **56 934 MiB — down 320 MiB against
+tick 34's 57 254 MiB over 33 minutes**, load average 10.04, `/health` 200, 0 foreign legs. Engine
+pid `3284575`, age **2 d 08:50 (56.8 h)** — the same un-restarted process as ticks 23-34. Exit 3;
+the line launches no local leg into that state. The cure stays an owner decision (the same engine
+serves this session's brain) and the 12 Nov Grok resumption is cloud-side, unaffected. Gate contract
+test re-run: `harness/pub_preflight_test.py` **20/20 green**. The reader itself moved to a stable
+untracked path with a one-call wrapper (reading + gate): this tick's first attempt hit the gate's
+**input-gap** path (`exit 1`, no readings) because the remote read command had to be reconstructed
+from a scratch file the 24 h prune would take away, and a missing reading is never healthy. The
+launch decision did not change: the first attempt wrote no leg and reserved no endpoint.
+
+**A transport version drift now sits between the stored Grok bytes and the resumed legs (found
+before any 12 Nov call, zero model calls).** The 3 published Grok rows (gsm8k 288/300, arc-easy
+289/300, arc-challenge 288/300) and all 259 stored partial rows carry the transport string
+`hermes Hermes Agent v0.23.0+860.gf17db36.dirty`; the local CLI now reports
+`v0.23.1+2.gb3746e3.dirty`, an install whose HEAD commit is dated **2026-11-10 02:00** — i.e. the
+update landed after the legs were stopped, and the 4 quarantined rows above are the first rows the
+newer build ever wrote. So each resumed arm will hold two transport versions inside one answer file
+(the runner stamps the version per row, so the boundary is auditable); the completed-arm percent may
+only be published with that boundary named beside it, and it is stated here before the launch rather
+than after the number.
+
+**Standing gates re-run on the tracked tree, zero model calls, all green:**
+`pub_arms_index.py --check` **index drift: 0**; `pub_arms_index.py --pins` **manifest pin drift: 0**;
+`pub_derived_percent_check.py` registry `pub-derived-percents-v1` **42 entries recomputed, 0
+findings** (41 digest + 169 document citations, 0 uncovered); `pub_grok_cell_check.py` 9 documents,
+**0 findings** (every percent-less Grok cell still reads `suspended by owner quota, resumes
+2026-11-12`); `pub_superseded_cell_check.py` 9 documents, **0 findings**; `pub_digest_row_check.py`
+**46 rows, 0 findings**, 23/23 pre-rule exceptions used; `scripts/qa/docs_policy.py --daily` PASS;
+`harness/pub_preflight_test.py` 20/20; `harness/pub_arms_index_test.py` 34/34;
+`harness/pub_digest_row_gate_test.py` 21/21.
+
+**The `MANIFEST GUARD` lines in the daily docs job's stderr are test tampers, not a task-file move
+(attributed before anyone could file it as an integrity event).** Today's 03:00 docs run captured
+three guard refusals pointing at a scratch temp copy of `ifeval.tasks.jsonl`, a MANIFEST copy with
+the `hash_note` stripped, and a `no-such-bench` entry. Re-running the owner of those messages,
+`harness/pub_arms_index_test.py`, reproduces exactly those three lines on its own temp files and
+exits 0 (34/34): they are its non-vacuity controls. Independently, the tracked
+`benchmarks/public/ifeval.tasks.jsonl` still hashes to both published labels — SHA-1/16
+`2c672531577dcc33` (the pin every ifeval digest row prints) and SHA-256/16 `e09a5cab3782ed5b` (the
+`hash_note`-labelled twin) — and `MANIFEST.json` carries that note. Today's docs run remains a
+failure for the reason already recorded at 04:12 (one push attempt, DNS), with its push-step repair
+in force from tomorrow's run.
+
+**Grok partials re-verified after the incident (twenty-eighth verification), zero model calls, still
+unscored and unshipped by rule:** `gpqa-diamond/pub-grok.jsonl` **139 rows / 139 unique ids / 139
+`finish=ok` / 0 empty**, SHA-256/16 `cde63378fa1633c5`, last stored id `gpqa-138` -> resume
+`gpqa-139`; `humaneval/pub-grok.jsonl` **120 / 120 / 120 / 0 empty**, SHA-256/16
+`a7c741de0d6ace8c`, last stored id `humaneval-0119` -> resume `humaneval-0120`. Both launchers are
+id-resumable and need no purge: every stored row is `finish=ok`, so there is no blank for the
+public scorer to keep forever.
+
+**Staged for 2026-11-12 (untracked launchers, zero calls, zero published bytes):** the two deferred
+sets now have launchers in the pinned order — mmlu-pro 500 and ifeval 541 through the Grok transport
+(`hermes -z <prompt inline> -m grok-4.7 --provider xai-oauth -t ""`, prompt inline because a toolless
+transport cannot read a file), `PUB_CLOUD_TIMEOUT=2400` like the gpqa leg, PATH fail-closed check,
+out dirs `~/pub-bench/mmlu-pro` and `~/pub-bench/ifeval`. Both cloud CLIs were checked by version
+only: `hermes` and `codex-cli 0.166.0` resolve on PATH. The ceiling confound has to be stated at
+publish time for the ifeval Grok row exactly as it is for the codex row: the transport exposes no
+`max_tokens`, while the in-force ifeval family ran 1200.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+(gpqa-diamond from `gpqa-139`, 59 ids including the 4 re-asked today by mistake; humaneval from
+`humaneval-0120`, 44 ids; then mmlu-pro 500 and ifeval 541), each resumable by id and scored only
+when complete, with the transport-version boundary named beside any completed percent. Standing
+limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
+`pub_preflight.py` exit 0 (the thirteenth consecutive NO-GO keeps that moot); sanitization before
+every push; a partial arm publishes no percent.

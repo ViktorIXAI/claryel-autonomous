@@ -270,3 +270,36 @@ verdict bytes shipped in `arms/` (see `arms/README.md`, "First cloud-arm artifac
   suite including the new test.
 * No leg was started, stopped or restarted; no partial file was discarded; zero model calls and zero
   cloud calls; no digest row, verdict, answer byte, bank file or manifest pin moved.
+
+## 2026-11-11 05:31 CET — a launcher-guard syntax bug opened a suspended Grok leg for 53 s: 4 rows written, quarantined with zero credit, the verified partial restored byte-exact
+
+* What happened: while staging the two deferred Grok launchers for the 2026-11-12 window, a date
+  guard was injected into the two existing partial-resume launchers
+  (`go_cloud_gpqa_grok.sh`, `go_cloud_humaneval_grok.sh`). The injected test was written
+  `[ "$TODAY" < "2026-11-12" ]` — inside `[ ]` the `<` is a **shell redirection**, not a comparison,
+  so bash died with `2026-11-12: No such file or directory`, the guard failed **open**, and the
+  gpqa-diamond Grok leg started at 05:31 CET, inside the owner-quota suspension window. The
+  correctly escaped copy of the same guard in the new ifeval launcher did refuse, which is why the
+  failure looked like a cosmetic message rather than a hole.
+* Exposure, exact: 4 Grok calls (53 s wall) stored as `gpqa-139`, `gpqa-140`, `gpqa-141`,
+  `gpqa-142`. The leg was killed at 05:31 and 0 `pub_bench_cloud` processes remain; no second set
+  started (the humaneval launcher was never executed, the ifeval and mmlu-pro launchers refused).
+* Containment: the 4 rows were moved out of the arm file to
+  `gpqa-diamond/pub-grok.jsonl.suspended-window-20261111.bak` (SHA-256/16 `1e025849786a94c1`) with
+  **zero credit** — never scored, never published, and they do not count toward any percent. The arm
+  file was rebuilt from its first 139 rows and reproduces the identity read at ticks 21-34 exactly:
+  **139 rows / 139 unique ids / 139 `finish=ok` / 0 empty, SHA-256/16 `cde63378fa1633c5`**, last
+  stored id `gpqa-138`, so the resume point stays **`gpqa-139`** and those 4 ids are re-asked inside
+  the window. `humaneval/pub-grok.jsonl` is untouched: 120/120/120, SHA-256/16 `a7c741de0d6ace8c`.
+  The arm file's mtime is now 2026-11-11 05:31 (the file was rewritten); the content hash is the
+  identity and it matches.
+* Prevention, mechanical rather than a promise: all four Grok launchers (gpqa-diamond, humaneval,
+  mmlu-pro, ifeval) now carry the same numeric date guard
+  (`TODAY_NUM=$(date +%Y%m%d); [ "$TODAY_NUM" -lt 20261112 ] -> exit 3`), which cannot be parsed as
+  a redirection. `bash -n` is clean on every launcher, and each of the four was executed today: all
+  four print `REFUSED: grok arms are suspended by owner quota until 2026-11-12 (today 2026-11-11)`
+  and exit 3 without launching anything. The launchers stay untracked local files, so no connection
+  material or shell recipe lands in this repo.
+* Nothing published moved: no digest row, verdict, answer byte, result-doc number, bank file or
+  manifest pin changed. One line of owner-visible cost is real and is stated here: **4 Grok calls
+  were spent on the owner's account outside the quota window**.
