@@ -228,7 +228,7 @@ git, no Release yet). SHA-256 (first 16 hex) for future bundle verification:
 
 | artifact | note | bytes | sha256/16 |
 |---|---|---:|---|
-| results/p3001-rtx3050-iq3s-ladder-2026-11-11.md | documentation (S3-a ladder, streaming control, real-text row, spec-decode limits, S1/S2 context) | 13499 | `77e57cc599176fd7` |
+| results/p3001-rtx3050-iq3s-ladder-2026-11-11.md | documentation (S3-a ladder, streaming control, real-text row, spec-decode limits, S1/S2 context) | 13499 | `bc6f965ea6b9fabf` |
 | results/p3001-rtx3050-iq3s-ladder-2026-11-11.jsonl | raw ladder rows 2026-11-11 13:29–13:33 UTC | 812 | `17336216f03efbab` |
 | results/p3001-rtx3050-iq3s-ladder-2026-11-11.streaming.jsonl | same ladder with stream=true 13:52–14:05 UTC | 1071 | `33bef04654339996` |
 | results/p3001-rtx3050-iq3s-ladder-2026-11-11.engine-lines.txt | engine accounting for the 11 requests + the real-text request ($HOME-sanitized) | 8022 | `fd2bb3c0d8ca4094` |
