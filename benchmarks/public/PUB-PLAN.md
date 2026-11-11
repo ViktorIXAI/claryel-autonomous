@@ -3171,3 +3171,47 @@ still exiting 0 only under the 2026-11-02 one-shot marker — stopping it remain
 legs scored only when complete under the tick-45 per-arm contracts. This tick spent **zero model
 or cloud calls** and moved no digest row, verdict, answer byte, bank file or manifest pin — the
 tracked change is this block.
+
+## 2026-11-11 17:12 CET — tick 53 (status + the daily-docs job's stderr decoded: its `MANIFEST GUARD` lines are the pub gates' own tamper fixtures, and `(8 failures in a row)` is not eight attempts today; zero model or cloud calls)
+
+*Seven standing gates re-run on unchanged bytes (clean tree, `HEAD == origin/main` at `83deef1`):
+arms index `--check` drift 0; derived percents **42 recomputed / 0 findings**; grok-cell rule
+9 documents / 0 findings; superseded-cell rule 9 / 0; digest-row rule **46 rows / 0 findings**;
+`pub_bench_score.py selftest` OK; Grok resume gate **READY** (22 checks, window **CLOSED** as of
+today). Chain launcher `go_grok_queue_20261112.sh` unchanged since the lock landed (SHA-256/16
+`9e479ca1129c97a7`, 4 777 B), 0 `parb-pub-grok*` units, 0 `pub_bench_cloud` processes, partials
+byte-exact (gpqa-diamond 139 stored rows, humaneval 120), pinned queue **1 144 calls**. No local
+leg is queued, so no new endpoint reading was taken: the preflight series stands at 19 readings
+files, newest 14:07 CET (NO-GO on the idle-spin pair).
+
+*What is new is an attribution fix for two numbers this line and the ops reports repeat:
+  - **The four `MANIFEST GUARD` / `NO SCORED TASK` / `DIGEST ROW COUNT MISMATCH` lines in the
+    `GitHub docs freshness daily` capture are not pin drift.** They name a scratch copy
+    (`…/cache/scratch/tmp6edx2sq0/ifeval.tasks.jsonl`) and a bench id `no-such-bench`; that id is a
+    fixture at `harness/pub_arms_index_test.py:164`, and the other two messages are
+    `scripts/pub_bench_score.py`'s own guard strings (lines 219, 382) printed by its tamper
+    controls. The daily script runs the static-QA suite, so a **passing** run prints them by design
+    — the same capture ends `DOCS POLICY: PASS (daily)`, bank-gate census PASS, shape-parity 15/15.
+    The tracked bytes settle the negative directly: `benchmarks/public/ifeval.tasks.jsonl` is
+    SHA-1/16 `2c672531577dcc33` — the published tasks pin verbatim — and SHA-256/16
+    `e09a5cab3782ed5b`, its labelled `hash_note` twin. A later tick must not open a pin-drift
+    incident off these lines; the seven gates above are the check that would catch a real move.
+  - **`(8 failures in a row)` is a cumulative scheduler counter, not eight attempts on 2026-11-11.**
+    It is `failure_streak` in `~/.hermes/cron/jobs.json`, which persists across the job's whole
+    history including the pre-retarget dirty-tree refusals. `~/.hermes/cron/executions.db` has **no
+    `stdout` column at all** — the capture is the `error` column — and retains exactly one row for
+    this job: `88c08214…`, today 03:00:17 → 03:02:55 CET, `failed`.
+  - **That row re-confirms tick 52's attribution verbatim**: `Could not resolve host: github.com`,
+    `CalledProcessError: Command '('git', 'push', 'origin', 'HEAD:main')' returned non-zero exit
+    status 128`, raised from `scripts/qa/refresh_docs_status.py` line 51 **of the pre-fix file**
+    (line numbers have moved since — today's line 51 is an unrelated `int()` guard, so verify the
+    call site by name, not by the traceback's line number) — the pre-fix single-attempt call site,
+    with the bounded-retry repair (`4fcf356`, 04:19:00 +0100) landing one hour after the run. The dirty-tree check passed, the marker commit `945df05` verified an
+    ancestor of `origin/main`, and the next slot (2026-11-12 02:00 UTC) takes the
+    `push_with_retry()` path; whether that run goes green is the job's record, not this tick's claim.
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts. This tick spent **zero model or
+cloud calls** and moved no digest row, verdict, answer byte, bank file or manifest pin — the
+tracked change is this block.
