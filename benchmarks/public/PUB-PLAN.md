@@ -2418,3 +2418,82 @@ findings; digest rows 46 rows, 0 findings.
 gated on `pub_grok_resume_check.py` exit 0 before the first call. Standing limits unchanged: no Grok
 arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO
 at this reading, none queued); sanitization before every push; a partial arm publishes no percent.
+
+## Tick 41 — 2026-11-11 09:15 CET (status + the resume gate's OPEN-window branch proven on the real partials, zero model calls)
+
+**Queue state:** 0 `parb-pub-*` units, no `pub_bench_run`/`pub_bench_cloud`/`gate_run` process, 0
+foreign legs on the endpoint, tree clean, HEAD `3017f3d` == `origin/main` (0 ahead / 0 behind).
+Nothing launched: item 8 stays gated to 2026-11-12 by the owner quota window. No digest row, verdict,
+answer byte, bank file or manifest pin moved this tick.
+
+**Preflight NO-GO again: the eighteenth NO-GO in nineteen readings, idle-spin the sole reason.**
+Fresh reading at 09:15 CET: swap free **8 191 MiB of 8 191**, MemAvailable 15 234 MiB, engine state
+`S`, engine **537 % CPU with the GPU at 0 % utilization / 36.43 W**, load average 10.53, `/health`
+200, 0 foreign legs — still the same un-restarted engine process (pid `3284575`, age **2 d 12:39**).
+RSS 57 146 MiB, **down 227 MiB against tick 40's 57 373 MiB** (…56 967 → 57 575 → 57 373 → 57 146), so
+the oscillation holds rather than a monotone climb. The gate was again run **unshielded** on the
+readings file and exits **3** as contracted. Remedy stays an owner/box decision; no local leg is
+queued anyway, and cloud legs are outside this gate.
+
+**What this tick did instead of repeating the census: the new resume gate was proven on the branch
+tomorrow actually takes, on the real suspended files.** `pub_grok_resume_check.py` shipped at tick 40,
+and everything proven with it then was: READY with the window **closed** (today's default), and the
+tamper classes on **hermetic fixtures**. Tomorrow the chain launcher takes the decision from the real
+date, i.e. the **OPEN-window** branch, on exactly these bytes — a mode that had never touched them.
+Exercised with `--as-of`, zero model or cloud calls, the two arm files copied to a scratch workspace
+(the real files were never opened for writing):
+
+* `--as-of 2026-11-12`, floor intact → **READY (20 checks)**, resume sets unchanged: gpqa-diamond
+  **59** (`gpqa-139`..`gpqa-197`), humaneval **44** (`humaneval-0120`..`humaneval-0163`), mmlu-pro
+  **500** (`mmlu-pro-0000`..`mmlu-pro-12024`), ifeval **541** (`ifeval-1000`..`ifeval-3757`) =
+  **1 144 calls**, order gpqa-diamond → humaneval → mmlu-pro → ifeval. Tomorrow's queue does not halt
+  on its own gate.
+* **Non-vacuity in the open window, on the real rows:** one pinned `finish=ok` id (`gpqa-007`) deleted
+  from the scratch copy → **exit 3** with seven findings, the first naming the class exactly —
+  "1 ids the pin records as stored finish=ok are GONE from the arm file: gpqa-007 — stored work was
+  deleted or rewritten" — plus the moved answer-file hash (`f8c0b540bb83add0` against the pinned
+  `cde63378fa1633c5`), the row/unique/ok counts, and the resume range widening to `gpqa-007..gpqa-197`.
+  A resumed queue that silently lost stored work cannot spend quota.
+* **Healthy mid-window growth is legal, not a finding:** one legitimately resumed row (`gpqa-139`)
+  appended in the open window → **READY** with the progress note ("140 ok ids stored vs 139 pinned —
+  the window is open, growth is legal; regenerate the pin at window end") and the live resume set
+  shrinking to **58** ids `gpqa-140`..`gpqa-197`. This is the class that would otherwise stall the
+  1 144-call chain on day two: a gate that froze one moment would halt a healthy running queue.
+* The exercise left the real workspace byte-exact: `gpqa-diamond/pub-grok.jsonl` SHA-256/16
+  `cde63378fa1633c5` and `humaneval/pub-grok.jsonl` SHA-256/16 `a7c741de0d6ace8c` before **and** after,
+  33rd computed verification of both; the scratch copy was deleted afterwards.
+
+**One observation named and deliberately NOT changed (tooling decision, stated before the window
+rather than discovered inside it):** the gate's queue line prints the **pinned** total (`1144 calls`)
+by design, while the per-arm resume sets are live — in the growth control the live total was 1143
+against the printed 1144. The live total for ETA purposes comes from the census
+(`pub-bench/grok_resume_census.py`), which the launcher runs first. Editing a tracked gate's output
+the day before 1 144 paid calls is a halt risk bought for a cosmetic line, so it is recorded as a
+deferred tooling note and the gate ships unchanged.
+
+**Chain launcher re-read statically, not executed:** window guard **line 20** < census **24** < resume
+gate **31** < dry-run exit **35** < `REFUSED` **40** < `command -v hermes` **44** < transport call
+**50**, and `bash -n` is clean. Its refusal path was already proven by execution at ticks 38 and 39.
+
+**Standing gates re-run on the fetched tree, all green and identical to ticks 36-40:**
+`pub_arms_index.py --check` **index drift 0**; `--pins` **manifest pin drift 0**;
+`pub_derived_percent_check.py` **42 recomputed from shipped bytes, 0 findings** (41 digest + 169
+document citations, 0 uncovered); `pub_grok_cell_check.py` 9 documents **0 findings**;
+`pub_superseded_cell_check.py` 9 documents **0 findings**; `pub_digest_row_check.py` **46 rows, 0
+findings**, 23/23 pre-rule exceptions used; plus the two contract tests of this line's own gates —
+`harness/pub_grok_resume_test.py` **19 checks, 0 failures** and `harness/pub_preflight_test.py`
+**20/20**.
+
+**The daily-docs job status is re-read from the scheduler's own record, not from prose:** exactly **one**
+execution today — `88c0821487c2`, 03:00:17 → 03:02:55 CET, **failed (exit 1)** — whose real cause was
+attributed at tick 38 to one DNS blip on the pre-fix bare `git push` (the `MANIFEST GUARD:` lines in
+the same capture are the arms-index test's tamper controls). No second run until tomorrow 03:00, when
+the repaired `push_with_retry()` path is in force. This is the known daily error, not a data problem.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, gated on
+`pub_grok_resume_check.py` exit 0 (READY in both window modes on the real bytes as of this tick), each
+leg resumable by id and scored only when complete, with the transport-version boundary (stored rows
+`v0.23.0+860.gf17db36`, resumed rows `v0.23.1+2.gb3746e3`) named beside any completed percent.
+Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs
+`pub_preflight.py` exit 0 (NO-GO at this reading, none queued); sanitization before every push; a
+partial arm publishes no percent.
