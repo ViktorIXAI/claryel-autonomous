@@ -2350,3 +2350,71 @@ the derived resume sets above, each resumable by id and scored only when complet
 boundary named beside any completed percent. Standing limits unchanged: no Grok arm before
 2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO at this
 reading, none queued); sanitization before every push; a partial arm publishes no percent.
+
+## Tick 40 — 2026-11-11 08:30 CET (status + one tooling gate, zero model calls)
+
+Fresh preflight reading at 08:29 CET: swap free **8 191 MiB of 8 191**, MemAvailable 14 692 MiB,
+engine state `R`, engine **540 % CPU with the GPU at 0 % / 36.66 W**, load average 11.73, `/health`
+200, 0 foreign legs — still the same un-restarted engine (pid `3284575`, age **2 d 11:53**). RSS
+57 373 MiB, **down 202 MiB against tick 39**, so the oscillation (…56 967 → 57 575 → 57 373) holds
+rather than a monotone climb. **NO-GO a seventeenth time in eighteen readings**, sole reason the
+idle-spin pair; the gate was again run **unshielded** on the readings file and exits **3** as
+contracted. No local leg is queued: every in-force set already carries bare + matched-shape contour
++ codex rows, and the 12 Nov queue is Grok-cloud only, which the preflight gate does not touch.
+
+**The hand-read Grok partial census is now a gate (tooling release, registers no contour feature and
+moves no published byte).** From tick 21 to tick 39 the identity of the two suspended partials was
+re-read by hand and retyped into commit messages and `LEG-INCIDENTS.md` prose — nineteen hand readings
+of the same file is a rule, so it is now a checker, and it de-risks the 1 144 paid calls of the 12 Nov
+window by pinning the thing that must not drift: the resume set.
+
+* `benchmarks/public/GROK-RESUME-PIN.json` (`grok-resume-pin-v1`) pins, per queued arm, the published
+  tasks cell read through `manifest_tasks_cell`, the pinned task count, and for the two stored arms the
+  row / unique / `finish=ok` / empty counts, the **SHA-256/16 of the stored answer file**, the
+  `pinned_ok_ids` set and the resume set (`expected_remaining`, first and last remaining id), plus the
+  zero-credit quarantine files as evidence. Values are computed from the bytes, never typed.
+* `scripts/pub_grok_resume_check.py` makes **zero model or cloud calls**: it reads the pinned task
+  files, the local answer files and the pin, and answers mechanically whether the queue may spend a
+  call. It fails closed (exit 3) on identity drift (row counts, the answer-file hash), a duplicate id
+  parked in the arm file, a non-`ok` row parked there, an `ok` row with an empty answer, and
+  resume-set drift; an input gap (missing pin, missing bench record, an expected answer file absent)
+  exits 1 and is never a green light.
+* Two modes, decided from `owner_window.suspended_until` and the run date (`--as-of`, so the decision
+  is reproducible): while the window is **CLOSED** the pin is an exact snapshot and **any growth is a
+  finding**, because no Grok call is legal inside it — that is precisely the 2026-11-11 05:31 class,
+  where a launcher guard parsed as a redirection wrote 4 rows that had to be quarantined with zero
+  credit. Once the window is **OPEN** the pin is a floor: every `pinned_ok_ids` id must still be stored
+  (lost work is a finding), the corruption classes still apply, and growth is reported as progress with
+  a live resume set, so a healthy resumed queue is never halted by a gate that froze one moment.
+* Contract test `harness/pub_grok_resume_test.py` (**19 checks**, CI-enrolled by the `harness/*test.py`
+  glob, hermetic fixtures in a temp dir via `PUB_MANIFEST_OVERRIDE`, no real bytes read): a healthy
+  partial is READY; seven independent tamper classes each turn NO-GO (answer byte, duplicate id, parked
+  non-ok row, empty ok answer, growth inside the closed window, wrong tasks cell, wrong pinned task
+  count); growth with the window open is READY with a progress note while a vanished pinned id in that
+  same state is still NO-GO; a completed set (0 remaining) is READY; a never-legged arm with no answer
+  file is READY; three input-gap classes exit 1; and a moved task file is refused by the published
+  MANIFEST pin guard with exit 2.
+* Non-vacuity proven on the **real** bytes, not only on fixtures: with the two stored partials copied
+  to a scratch workspace and one row appended, the gate prints the window-closed finding and exits 3;
+  the real workspace hashes are unchanged by the exercise.
+* The 12 Nov chain launcher now calls the gate next to the census (`RESUME GATE NOT GREEN — refusing
+  to spend quota` → exit 3). Line-order proof on the patched launcher: window guard **line 20** <
+  gate **line 31** < `command -v hermes` **line 44** < transport call **line 50**; `bash -n` clean;
+  the `GROK_DRYRUN=1` trace shows the gate once and **0** lines invoking a transport; a LIVE run under
+  the still-closed window printed `REFUSED`, exit **3**, with **0** transport processes afterwards
+  (counted with the bracketed `grep -c 'pub_bench_clo[d]'`, after tick 39's lesson that an unbracketed
+  `pgrep -f` self-matches the measuring shell).
+* Gate on the real workspace at 08:30 CET: **READY, 22 checks** — `gpqa-diamond` 139/139 SHA-256/16
+  `cde63378fa1633c5` resume `gpqa-139`..`gpqa-197` (59), `humaneval` 120/120
+  SHA-256/16 `a7c741de0d6ace8c` resume `humaneval-0120`..`humaneval-0163` (44), `mmlu-pro` 500
+  (`mmlu-pro-0000`..`mmlu-pro-12024`), `ifeval` 541 (`ifeval-1000`..`ifeval-3757`) — **1 144 calls**
+  in the pinned order. Same numbers the hand census has printed since tick 21, now derived by code.
+
+**Standing five PUB gates green and identical to ticks 36-39:** arms index `--check` drift 0; derived
+percents 42 recomputed, 0 findings; grok cells 9 documents 0 findings; superseded cells 9 documents 0
+findings; digest rows 46 rows, 0 findings.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, now
+gated on `pub_grok_resume_check.py` exit 0 before the first call. Standing limits unchanged: no Grok
+arm before 2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO
+at this reading, none queued); sanitization before every push; a partial arm publishes no percent.
