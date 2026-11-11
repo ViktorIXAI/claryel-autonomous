@@ -2605,3 +2605,62 @@ each leg resumable by id and scored only when complete, transport-version bounda
 completed percent. Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour
 `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (NO-GO at this reading, none queued);
 sanitization before every push; a partial arm publishes no percent.
+
+## Tick 43 — 2026-11-11 10:30 CET (status only, zero model calls)
+
+**The endpoint preflight turned GO — the first GO of the series.** Reading #18 of the standing
+series (`preflight-20261111-1030.txt`, taken over the repo-standard key by the untracked
+`preflight.sh` wrapper): swap free **8191 of 8191 MiB** (0 free at ticks 38-39), MemAvailable
+**15 184 MiB**, engine pid 3284575 age 2 d 13:54 in state **S** (not `D`), pcpu 531 % **with GPU
+util 99 % / 126.5 W** — the idle-spin pair (CPU > 200 % at GPU util 0 %) that had been the sole
+NO-GO reason since the gate shipped is gone, the engine is in active decode. load1 10.77,
+`/health` 200, foreign legs 0. The gate's real exit was taken **unshielded** (the wrapper's
+trailing `echo` masks it — tick 39's pitfall): **GO, exit 0**. The earlier readings never reached
+GO (tick 39 census: 16 of 17 NO-GO, every one after the gate shipped). No arm was launched: the
+ladder is empty to 12 Nov and GPU util 99 % at 10:30 means the box is serving interactive traffic
+— a local leg would contaminate both that traffic and its own cost rows. The GO is recorded as an
+endpoint-health fact, not as an action taken.
+
+**Named observation, deliberately not changed:** while locating the wrapper I first executed the
+remote **payload** (`preflight_read.sh`) on the launch host by mistake: `nvidia-smi: command not
+found`, an empty engine pid, and `health_code=200` — the last is the launch host's own `:8080`
+app answering, the same class as the `0.0.0.0` bind trap this line has named twice before. The
+garbage reading was never fed to the gate; the real path pipes the payload over ssh. It is a
+footgun only if the payload is run unshielded, which the wrapper makes unnecessary; recorded, not
+patched.
+
+**The 12 Nov chain refused a 34th time, exit 3, after re-running both read-only gates on the real
+bytes:** census prints the four resume sets unchanged — gpqa-diamond **59** (`gpqa-139`..`gpqa-197`,
+sha256-16 `cde63378fa1633c5`, 139/139 ok, 34th byte-exact verification), humaneval **44**
+(`humaneval-0120`..`humaneval-0163`, sha `a7c741de0d6ace8c`, 120/120 ok), mmlu-pro **500**,
+ifeval **541**, total **1 144 calls**, sequential ETA 9.0-27.6 h — and `pub_grok_resume_check.py`
+prints **READY, 22 checks**, window CLOSED. After the refusal, standalone bracketed process counts
+are **0** `pub_bench_cloud.py` and **0** `hermes -z`.
+
+**Today's daily-docs failure, re-read from the job's own execution record rather than prose:**
+the `GitHub docs freshness daily` run claimed 03:00:17, failed 03:02:55, exit 1. The fatal line is
+`fatal: unable to access … Could not resolve host: github.com` (push, exit 128) — a transient DNS
+blip, **not** the dirty-tree class the standing brief predicts. The traceback's line numbers match
+the **pre-fix** single-attempt tool, and the repair (`push_with_retry`, retry loop + the push step
+outside the marker-changed branch) landed at **04:19:00 today** in `4fcf356` — i.e. the 03:00 run
+was the last appearance of the old code; tomorrow 03:00 is the first run under retry. No orphaned
+marker: commit `945df05` "Daily docs freshness check: 2026-11-11" (03:02:13) is on `origin/main`,
+carried by this line's own pushes after 04:19. The `MANIFEST GUARD` / `NO SCORED TASK` / `DIGEST
+ROW COUNT MISMATCH` stderr lines are the gates' own tamper controls firing on synthetic inputs
+(`no-such-bench`, scratch tmp paths) — tick 35's ruling, reconfirmed on this capture, no action.
+Transport now: `git ls-remote origin` returns `bffa767…` matching local HEAD; the SHA-pinned raw
+URL serves **200**; `api.github.com` times out at this minute — off the push path, recorded only.
+
+**Standing gates re-run on the unchanged bytes, identical to ticks 36-42:** `pub_arms_index.py
+--check` index drift **0**; `--pins` manifest pin drift **0**; `pub_derived_percent_check.py`
+**42 recomputed from shipped bytes, 0 findings** (41 digest + 169 document citations, 0 uncovered);
+`pub_grok_cell_check.py` 9 documents **0 findings**; `pub_superseded_cell_check.py` 9 documents
+**0 findings**; `pub_digest_row_check.py` **46 rows, 0 findings**, 23/23 pre-rule exceptions used.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order,
+gated on the blank purge then `pub_grok_resume_check.py` exit 0, each leg resumable by id and
+scored only when complete. Standing limits unchanged: no Grok arm before 2026-11-12; frozen
+contour `0.0.2.56`; a local leg needs the preflight GO (now GO, but **nothing is queued** and the
+endpoint is busy serving the main brain); sanitization before every push; a partial arm publishes
+no percent. Status only: zero model calls, no digest row, verdict, answer byte, bank file or
+manifest pin moved.
