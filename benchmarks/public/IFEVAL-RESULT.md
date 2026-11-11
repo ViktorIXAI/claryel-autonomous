@@ -519,3 +519,19 @@ nested `pin_history` record in the manifest. Proof that the edit moved no verdic
 edit with zero model calls: bare 469, `pub-repair-v1` 497, `pub-repair-v2` 510 of 541 strict under
 `pub-ifeval-v2` — identical to the pre-edit pin-audit re-scores — and the scorer self-test stayed
 22/22 (`selftest cases=22 failures=0`).
+
+## Grok leg on this set: scored under `pub-ifeval-v2` (decision pre-registered 2026-11-11, tick 45)
+
+The grok arm is leg 4 of the 2026-11-12 queue (**541** ids, `ifeval-1000`..`ifeval-3757`, ETA band
+**3.1-18.0 h**, explicitly a band: the low end is the measured grok gsm8k rate, the high end the
+measured grok humaneval long-output rate of 114.5 s/task — this set has no grok leg yet). The contract
+is decided **before** the leg: the digest row will be minted under **`pub-ifeval-v2`**, the corrected
+contract, because under `pub-ifeval-v1` two of the 541 cells (`ifeval-1122` `letter='#'`,
+`ifeval-1129` `letter='!'`) are coin flips of the vendored `letter_frequency` RNG, and a new arm must
+not be scored by a checker this repo has already corrected. The `pub-ifeval-v1` number will be printed
+beside it in the corrected table above so the four arms of this set stay on one comparable family, and
+the strict headline is published with loose beside it. The scorer runs only under this set's venv
+python and fail-closes unless the 41-test upstream suite is green and the reference band holds. The
+partial refusal is mechanical: `scripts/pub_bench_ifeval_v2.py:280-282` exits on >5 % missing before
+any digest write, so a leg that runs out of quota at day's end mints nothing and resumes by id the
+next day.

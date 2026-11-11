@@ -2728,3 +2728,101 @@ limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`, no n
 pairs, hard bank untouched; a local leg needs a fresh preflight GO; sanitization before every push;
 a partial arm publishes no percent. Status only: zero model calls, no digest row, verdict, answer
 byte, bank file or manifest pin moved.
+
+
+## Tick 45 — 2026-11-11 11:45 CET (status + the 12 Nov queue's launch contract and per-arm scoring contracts, decided today, zero model calls)
+
+**Queue state:** 0 `parb-pub-*` units; the standalone bracketed process counts give 0
+`pub_bench_run.py` / `gate_run.py` / `pub_bench_cloud.py` / `hermes -z`; tree clean, HEAD `61f1e25`
+== `origin/main` (0 ahead / 0 behind). Nothing launched: the Grok window is closed, the ladder has no
+open codex or local item until 12 Nov, and a partial arm publishes no percent.
+
+**Preflight: the clean reading is NO-GO; the 11:44 file is an input gap this tick caused, and it is
+kept as evidence.** The clean reading `preflight-20261111-1145.txt`: swap free **8 191 of 8 191 MiB**,
+MemAvailable 14 737 MiB, engine pid `3284575` age **2 d 15:09** in state `S` at **525 % CPU with GPU
+util 0 % / 36.06 W** (the idle-spin pair), load1 15.77, `/health` 200, 0 foreign legs — **NO-GO**, and
+the gate's own unshielded run inside the wrapper exits 3. The 11:44 attempt came out an **INPUT GAP**:
+the wrapper was wrapped in an outer `>` redirect onto the very path the wrapper writes internally, so
+the wrapper's own `cat "$OUT"` failed with "input file is output file", that message landed in the
+sibling `.err`, and the readings file came out without keys — the gate fail-closed on it exactly as
+designed ("a missing reading is never healthy"). Neither file was repaired. The whole day's series was
+re-derived by running the gate over every reading file rather than restating prose: **16 files —
+2 GO (06:08, 10:30), 12 NO-GO, 2 input gaps (09:48 an ssh read failure, 11:44 this wrapper
+collision)**.
+
+**What this tick did instead of another hand reading: the 12 Nov queue's launch contract and the
+scoring contract of each resumed arm are decided in the repo today, so nobody chooses them tomorrow
+while the owner's quota is being spent.**
+
+* **Launch contract (new, and the reason this tick is not a status line).** The pinned queue is
+  **1 144 calls with a sequential ETA 9.0-27.6 h** — longer than any agent session lives. This line's
+  own measured hazard class says a runner started from a cron/child session is torn down with that
+  session (the hard bank lost an arm at 13/77 rows that way, with the GPU still looking busy), so the
+  queue must be started as a systemd user unit with an **absolute** script path:
+  `systemd-run --user --collect --unit=parb-pub-grok-queue bash <LOCAL_PATH>/pub-bench/go_grok_queue_20261112.sh`.
+  A relative path dies instantly with status 127 because those units start in `$HOME` while the CLI
+  still prints `Running as unit: ...`. The unit form also puts the queue outside the Hermes worker
+  scope, which matters on a multi-day chain: the nightly self-update job (`af888c1c9341`, next run
+  **2026-11-12 03:00 CET**) restarts the gateway and can kill an in-flight cron child — a systemd unit
+  is not in that scope. Liveness is read from the row count of each arm file plus
+  `cloud-<bench>-grok.log` growth, never from `is-active`. Exactly one leg of the vendor at a time: a
+  second unit under another name would double-spend the quota the suspension exists to protect.
+* **A day that ends mid-set is the expected shape, not a failure.** Each leg is resumable by id, so a
+  set that is incomplete at the end of 12 Nov stays **unscored and unpublished** and the queue
+  continues the next day; no completion date is promised. The two unmeasured bands are named as bands:
+  mmlu-pro **2.1-2.9 h** (measured grok rates on this line: arc-easy 14.9, arc-challenge 17.1, gsm8k
+  20.9 s/task), ifeval **3.1-18.0 h** (low end = grok gsm8k, high end = grok humaneval long-output
+  114.5 s/task).
+* **Scoring contract per resumed arm.** gpqa-diamond 198 ids and mmlu-pro 500 ids: `pub-checkers-v2`
+  (`letter`), scored over the arm's own id set; humaneval 164: `pytest-v2` via
+  `scripts/pub_bench_exec.py` (pre-registered 2026-11-09); **ifeval 541: `pub-ifeval-v2`** — the
+  corrected contract, because under `pub-ifeval-v1` two of the 541 cells (`ifeval-1122`,
+  `ifeval-1129`) are coin flips of the vendored `letter_frequency` RNG and a *new* arm must not be
+  minted under a checker this repo has already corrected. The `pub-ifeval-v1` number is published
+  beside it in `IFEVAL-RESULT.md` so the four-arm table stays on one contract family. That scorer runs
+  with the set's own venv python only and re-asserts the five vendored pins, the 41-test upstream
+  suite and the reference band at every run.
+* **Partial refusal is code, not intention** (read from the shipped tools, with line numbers):
+  `scripts/pub_bench_exec.py:218-220` prints `partial arm: N/M answers present - no percent printed`
+  and returns 1 **before** `write_digest` is reached; `scripts/pub_bench_ifeval_v2.py:280-282`
+  `sys.exit`s on >5 % missing before any digest write. A stopped leg cannot mint a percent by accident.
+* **The transport version is read at resume time, not assumed:** today's CLI is
+  `Hermes Agent v0.23.1+2.gb3746e3.dirty` while the stored gpqa/humaneval rows carry
+  `v0.23.0+860.gf17db36.dirty`. The 12 Nov 03:00 self-update runs *before* the queue, so the boundary
+  sentence beside a completed percent names the version on the resumed rows.
+* **Pin lifecycle:** once the window opens, `GROK-RESUME-PIN.json` is a floor (growth is a progress
+  note, corruption is still a finding) and is regenerated only after the queue completes — as the gate
+  itself prints.
+
+**The chain was re-proven without one paid call (36th verification of the partials):**
+`GROK_DRYRUN=1 bash -x ~/pub-bench/go_grok_queue_20261112.sh` exits 0 with `window=closed`; the census
+prints the four resume sets byte-exact — gpqa-diamond **59** (`gpqa-139`..`gpqa-197`, SHA-256/16
+`cde63378fa1633c5`, 139 rows / 139 `ok` / 0 empty), humaneval **44** (`humaneval-0120`..`humaneval-0163`,
+`a7c741de0d6ace8c`, 120/120), mmlu-pro **500**, ifeval **541**, total **1 144 calls**, ETA
+**9.0-27.6 h** — the resume gate prints **READY (22 checks)** with the two zero-credit quarantines
+listed as evidence, and the `bash -x` trace contains **0** lines matching a transport.
+
+**Ops findings, recorded only — nothing outside this line was modified.** The hard-bank-era job
+`f23cf5d48e11` "Mac v2.2 full after v2.1" is still `[active]` every 5 minutes and is guarded only by
+the one-shot marker `~/.hermes/mac-v22full-launch.state` (26 B, written 2026-11-02 14:05); clearing
+that marker re-arms a legacy `v2.2` hard-bank launch on a line frozen at `stable-hard-0.0.2.56`, so
+stopping the job stays an owner decision and this line does not edit other jobs' state. The two
+B2003-era launchers (`8a4fabbe5a78`, `18625a65290a`) are `[paused]`. The daily docs job's next run is
+2026-11-12 02:00 UTC; today's 03:02 failure remains the DNS blip under the pre-fix code (tick 43).
+
+**Standing gates green and identical to ticks 36-44:** arms index `--check` drift **0** and `--pins`
+drift **0**; derived percents **42 recomputed / 0 findings**; grok-cell rule 9 documents **0 findings**;
+superseded-cell rule 9 documents **0 findings**; digest-row rule **46 rows / 0 findings**; scorer
+self-test OK. Contract tests: grok resume **19**, preflight **20/20**, blank purge **22**, arms index
+**34**, derived percents **41**, grok cells **21**, superseded cells **31**, digest-row gate **21**.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order
+gpqa-diamond -> humaneval -> mmlu-pro -> ifeval, launched as `parb-pub-grok-queue` under
+`systemd-run --user` with the absolute launcher path, gated on the blank purge then
+`pub_grok_resume_check.py` exit 0, each leg resumable by id and scored only when complete under the
+contract named above. Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour
+`0.0.2.56`, no new stamps, no hard pairs, hard bank untouched; a local leg needs a fresh preflight GO
+(NO-GO at this reading, none queued); sanitization before every push; a partial arm publishes no
+percent. This tick spent **zero model or cloud calls** and moved no digest row, verdict, answer byte,
+bank file or manifest pin — the tracked changes are this block plus dated notes in
+`GPQA-RESULT.md`, `MMLU-PRO-RESULT.md` and `IFEVAL-RESULT.md`.

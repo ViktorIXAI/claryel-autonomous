@@ -192,3 +192,14 @@ and resumable by id, and **no percent is published while the arm is partial**. T
 table on this set reads "suspended by owner quota, resumes 2026-11-12" — never a blank, never a zero,
 never a transport failure. This set is first in the 12 Nov resumption queue (gpqa-diamond 59 ids,
 then humaneval 44 ids, then the deferred mmlu-pro 500 and ifeval 541).
+
+**Launch and scoring of the resumed leg, pre-registered 2026-11-11 (tick 45).** The 12 Nov queue is
+started once, as a systemd user unit with an absolute launcher path
+(`systemd-run --user --collect --unit=parb-pub-grok-queue bash <LOCAL_PATH>/pub-bench/go_grok_queue_20261112.sh`),
+so the chain survives session end and the nightly gateway restart; liveness is read from row counts,
+not unit state. This set is leg 1 (**59** ids, measured-band ETA 3.1-5.3 h). When it completes it is
+scored by `pub-checkers-v2` (`letter`) over the **198** pinned ids, and the row names the transport
+boundary: the 139 stored rows carry `v0.23.0+860.gf17db36.dirty`, the resumed rows carry whatever the
+CLI reports at resume time (`v0.23.1+2.gb3746e3.dirty` as measured 2026-11-11 11:45 CET, after the
+12 Nov 03:00 self-update). If the leg is still incomplete at the end of 2026-11-12 it stays unscored
+and continues the next day by id — that is the expected shape of a 1 144-call chain, not a failure.

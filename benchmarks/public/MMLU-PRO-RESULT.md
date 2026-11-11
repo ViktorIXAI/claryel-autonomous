@@ -117,3 +117,13 @@ stored answers. Shipped now: `arms/mmlu-pro-basalt-answers.jsonl` (500 rows, `fc
 `pub-checkers-v2` (self-test 22/22, zero model calls): 432/500 and 462/500, exactly as published.
 Scrub masked nothing; zero path/IP/key hits. The grok leg on this set was never started (deferred by
 the owner quota window), so there is nothing to ship for it.
+
+## Grok leg on this set: contract pre-registered (2026-11-11, tick 45)
+
+The grok arm has never been started here (owner quota window). It is leg 3 of the 2026-11-12 queue
+(**500** ids, `mmlu-pro-0000`..`mmlu-pro-12024`, ETA band **2.1-2.9 h** labelled as an extrapolation
+from measured grok rates on other sets — 14.9 / 17.1 / 20.9 s/task — not from a leg of this set). When
+complete it is scored by `pub-checkers-v2` (`letter`) over the **500** pinned ids with the same
+matched-set rule as the bare and codex rows (first 500 ids of the pinned file in file order, frozen
+before any arm ran), and the row names the transport version of its rows. A partial arm publishes no
+percent and its bytes stay unshipped while partial.
