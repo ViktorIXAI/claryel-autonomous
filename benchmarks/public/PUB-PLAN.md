@@ -3130,3 +3130,44 @@ scored only when complete. Standing limits unchanged: no Grok arm before 2026-11
 GO (none queued); sanitization before every push; a partial arm publishes no percent. This tick
 spent **zero model or cloud calls** and moved no digest row, verdict, answer byte, bank file or
 manifest pin — the tracked change is this block.
+
+## 2026-11-11 16:05 CET — tick 52 (status only): standing suite re-read green on an unchanged tree; the 12 Nov chain re-proven live-REFUSED and byte-stable; today's docs-freshness failure fully attributed to pre-fix code
+
+*Six standing gates re-run on unchanged bytes (clean tree, `HEAD == origin/main`): arms index
+`--check` drift 0; derived percents **42 recomputed / 0 findings** (41 digest citations, 169 doc
+citations, 0 uncovered); grok-cell rule 9 documents / 0 findings; superseded-cell rule 9 / 0;
+digest-row rule **46 rows / 23 contracts named / 0 findings**; `pub_bench_score.py selftest`
+**22 cases, 0 failures**; Grok resume gate **READY** (22 checks, window CLOSED as of today) with
+partials byte-exact — gpqa-diamond 139/139 `cde63378fa1633c5` resume 59 ids, humaneval 120/120
+`a7c741de0d6ace8c` resume 44 ids, mmlu-pro 500 and ifeval 541 never legged — pinned queue
+**1 144 calls** in the pinned order.
+
+*Chain launcher `go_grok_queue_20261112.sh` re-read: SHA-256/16 `9e479ca1129c97a7`, unchanged
+since the lock landed at tick 50; lineage exactly as corrected in tick 51 (`.pre-lock.bak` is
+byte-identical to the in-force file, the named pre-lock revision unrecoverable, `.pre-order-fix.bak`
+3 489 B the only surviving ancestor). Executed live today 16:04 CET: **exit 3, REFUSED** (today
+2026-11-11), census printed first (queue 1 144 calls, sequential ETA 9.0-27.6 h), zero
+`pub_bench_cloud` processes afterwards, no lock file, no unit, workspace file count unchanged
+(272 before/after). Trap repeated and caught inside this tick's own tooling: piping the launcher
+through `head` reported head's exit 0 instead of the launcher's 3 — the unshielded re-run is what
+proved the refusal (same class tick 47 recorded).
+
+*Preflight series re-derived by driving the gate over all 19 readings files: **2 GO / 15 NO-GO /
+2 INPUT-GAP**, identical to tick 49's count (no new reading was taken; the newest file, 14:07 CET,
+is NO-GO on the idle-spin pair — engine 512 % CPU at GPU 0 %). No local leg is queued, so the gate
+decides nothing today; the engine state stays a box decision.
+
+*Ops records read from the job's own record, not retyped: docs-freshness `ef7ea47ff99b` ran exactly
+once today, 03:00:17 -> 03:02:55 CET, exit 1 on `Could not resolve host: github.com`. The captured
+traceback pins the pre-fix call site — a bare `run("git", "push", "origin", "HEAD:main")` inside
+`main` — because the bounded-retry repair (`4fcf356`) landed at **04:19 CET, one hour after the
+run**. The day's marker commit `945df05` verified an ancestor of `origin/main`, so the 12 Nov run
+starts from a current marker and takes the `push_with_retry()` path. Hard-bank-era job
+`f23cf5d48e11` fired 151 times in the measured UTC window (last 16:02 CET), still every 5 minutes,
+still exiting 0 only under the 2026-11-02 one-shot marker — stopping it remains an owner decision.
+
+**Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
+`systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
+legs scored only when complete under the tick-45 per-arm contracts. This tick spent **zero model
+or cloud calls** and moved no digest row, verdict, answer byte, bank file or manifest pin — the
+tracked change is this block.
