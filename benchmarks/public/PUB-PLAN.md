@@ -1725,3 +1725,49 @@ leg resumable by id and scored only when complete. Standing limits unchanged: no
 2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (the seventh
 consecutive NO-GO reading keeps that moot); sanitization before every push; a partial arm publishes
 no percent.
+
+**Queue status 2026-11-11 02:26 CET (tick 30):** nothing launched — the queue stays empty and item 8
+(the Grok resumption: gpqa-diamond from `gpqa-139`, humaneval from `humaneval-0120`, then the two
+deferred sets) remains gated to 2026-11-12 by the owner quota window. 0 `parb-pub-*` units, no
+`pub_bench_run`/`pub_bench_cloud`/`gate_run` process on the host, 0 foreign legs on the endpoint;
+zero model calls and zero cloud calls this tick.
+
+**The standing preflight gate reads NO-GO an eighth time.** Same box, 02:26 CET: **swap free 0 MiB of
+8 191 MiB** (the device stays pinned at zero, ticks 26–29 read 0 / 3 / 0 / 0), MemAvailable
+14 639 MiB (down 656 MiB from tick 29's reading), engine state `Sl` — the `D` state the 02:00 daily
+snapshot read did not reproduce on this reading — **574 % CPU with RSS 57 285 MiB, direction now
+reversed: down 394 MiB against tick 29's 57 679 MiB over 34 minutes**, load average 14.33, `/health`
+200. This reading **re-trips the idle-spin pair**: the GPU is back at **0 % / 36.5 W** (tick 29 had
+caught it at 99 %), so the NO-GO carries two reasons this time — swap exhaustion and the spin
+signature — where ticks 26–29 carried one. The RSS direction flip is stated as an observation only;
+the cure (engine restart / parking the keep-up load) stays an owner decision, and the 2026-11-12
+Grok resumption is cloud-side, unaffected. Gate contract test re-run: `harness/pub_preflight_test.py`
+**20/20 green**.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+**index drift: 0**; `pub_arms_index.py --pins` **manifest pin drift: 0**;
+`pub_derived_percent_check.py` registry `pub-derived-percents-v1` **42 entries recomputed, 0
+findings** (41 digest + 169 document citations, 0 uncovered); `pub_grok_cell_check.py` 9 documents,
+**0 findings**; `pub_superseded_cell_check.py` 9 documents, **0 findings**;
+`pub_digest_row_check.py` **46 rows, 0 findings**, 23/23 pre-rule exceptions used.
+
+Grok partials re-verified intact again (twenty-third verification), zero model calls and still
+unscored/unshipped by rule: `gpqa-diamond/pub-grok.jsonl` SHA-256/16 **`cde63378fa1633c5`**,
+**139 rows / 139 unique ids / 139 `finish=ok`**, and `humaneval/pub-grok.jsonl` SHA-256/16
+**`a7c741de0d6ace8c`**, **120 / 120 / 120** — byte-identical to ticks 21–29, mtimes still
+2026-11-09 07:56, resume points `gpqa-139` and `humaneval-0120` unchanged.
+
+Ops state read this tick (no action): `HEAD` == `origin/main` == `a371f82`, working tree clean, and
+that push is **green** (`devsecops`, `secret-scan`, `contour self-tests`, `hard-v6 scoring
+contracts`, `pages-build-deployment` all `success`, read 01:26 UTC). The daily `GitHub docs
+freshness` job's latest scheduled run is still a **failure** (2026-11-10 11:24 UTC, which predates
+the 2026-11-10 14:45 worktree retarget recorded in `LEG-INCIDENTS.md`); today's scheduled run has
+not fired yet, so its first run against the retargeted path with a clean tree is still pending.
+`LEG-INCIDENTS.md` gains no new 2026-11-11 PUB entry: no leg started, stopped or restarted this
+tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, each
+leg resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (the eighth
+consecutive NO-GO reading keeps that moot); sanitization before every push; a partial arm publishes
+no percent.
