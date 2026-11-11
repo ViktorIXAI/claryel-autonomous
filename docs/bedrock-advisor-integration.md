@@ -712,6 +712,43 @@ those single one-character calls:
   Haiku and Sonnet Bedrock ids: Hermes has no rate card for those Bedrock
   profile ids. On Bedrock, trust AWS Cost Explorer, not the in-app estimate.
 
+## Live operator thread on the Bedrock lane — measured usage, and the thinking-block trap
+
+The operator's own desktop thread in the `bedrock` profile ran through the fix:
+`model = global.anthropic.claude-haiku-5-5`, `billing_provider = bedrock`,
+`billing_base_url = bedrock-runtime.us-east-1`, **14 API calls**,
+`50` new input + `10,767` output + `95,475` cache-write + `292,949` cache-read
+tokens, closed normally (`tui_close`). Using Anthropic's standard cache ratios
+(write 1.25× input, read 0.1× input) at Haiku 5.5 `$0.10/$0.50` per MTok, that
+whole multi-hour thread is ≈ **`$0.02`**. The in-app figure still reads
+`cost_status = unknown` — the estimate has to be computed, not read.
+
+What the stale backend had been doing before the restart is now identifiable:
+the slash-form id routed through the **`anthropic` SDK** (Anthropic-compatible
+endpoint), not `bedrock-runtime`, so the wire and the billing line were not the
+Bedrock ones. After the restart plus the profile pin, the same thread moved onto
+`bedrock-runtime`.
+
+One real trap found in that thread, twice (`23:47`, `05:25`):
+
+```
+anthropic.BadRequestError 400: messages.7.content.0: Invalid `signature` in
+`thinking` block. The block is bound to a different conversation. Remove the
+block, or set `thinking.block_binding.prefix_mismatch_behavior` to "drop_block".
+…
+Thinking block signature recovery: suppressed rejected Anthropic replay blocks
+from 8 carrier/message(s) (canonical messages unchanged)
+```
+
+That is what a long-lived thread that was switched models/compacted looks like:
+signed thinking blocks from an earlier conversation no longer validate. Hermes
+recovers by suppressing the rejected blocks and the turn continues, but the
+clean answer is the same as for any model switch: start a new chat instead of
+dragging a long thread across lanes.
+
+A 100-word English smoke test on the same lane after the fix: 1 API call,
+`4` new input + `220` output + `18,674` cache-write tokens, 8 s, ≈ `$0.0025`.
+
 One more discriminator learned the same evening: control-plane
 `agreementAvailability = AVAILABLE` for `zai.glm-5.3` while its invoke still
 answers `AccessDeniedException … is not available for this account`, and the
