@@ -3558,6 +3558,76 @@ first attempt under the fixed bounded-retry call site, and its result **delivery
 Hard-bank-era job `f23cf5d48e11` status `ok`, streak 0, next fire 21:44 CET, still exits 0 only
 under its 2026-11-02 one-shot marker — stopping it remains an owner decision.*
 
+## 2026-11-11 22:51 CET — tick 63 (status + the frozen line's armed legacy jobs classified by what their scripts can actually do, plus the Grok transport pre-flight; zero model or cloud calls)
+
+*Standing gates re-read, all green on unchanged bytes: arms-index drift 0; derived percents 42
+recomputed / 0 findings (41 digest citations + 169 doc citations, 0 uncovered); grok-cell rule 9
+docs / 0 findings; superseded-cell rule 9 docs / 0 findings; digest-row rule 46 rows / 0 findings
+(23 contracts named, 23/23 pre-rule exceptions used); scorer self-test 22 cases / 0 failures.*
+
+*A documentation defect, found while locating this block: commit `8cdaad4` ("pub line tick 62",
+22:18 CET) is an **empty commit** — `git show --name-only` lists no file — so the tick-62 numbers
+were never written into `PUB-PLAN.md` and the in-file last block stayed the tick-61 one (20
+readings, newest 18:21). The commit itself is left as history; the numbers are restored here
+instead of editing anything: preflight series **21 readings, 2 GO / 17 NO-GO / 2 INPUT-GAP**, newest
+reading 22:18, NO-GO on the idle-spin pair. This tick re-counted that series by driving the gate
+itself over every readings file — identical 2/17/2.*
+
+*Grok resume gate READY (22 checks) in both modes — window-CLOSED (today, exact-identity) and
+window-OPEN floor mode `--as-of 2026-11-12`; stored partials byte-exact at their pins (gpqa-diamond
+139 rows SHA-256/16 `cde63378fa1633c5`, humaneval 120 rows SHA-256/16 `a7c741de0d6ace8c`), resume
+sets exact (59 / 44 / 500 / 541), queue total 1 144 calls, order gpqa-diamond → humaneval →
+mmlu-pro → ifeval.*
+
+*Chain launcher `go_grok_queue_20261112.sh` byte-identical to ticks 50–62 (SHA-256/16
+`9e479ca1129c97a7`, 4 777 B). Executed live unshielded at 22:51:18 CET: **exit 3, REFUSED**
+(`window=closed (opens 20261112)`) with the per-arm census and ETA bands printed first. Afterwards:
+**0** files newer than 22:49, entry count 277 (incl. the one hidden entry) unchanged, **no lock
+file**, 0 transports in a standalone count, 0 units — the refused run wrote nothing.*
+
+*Frozen-line hygiene, new this tick: the three `*/5` legacy jobs and the daily PARB report are now
+classified by **what their scripts can do**, not by their names (read-only inspection of the scripts
+and of the scheduler's own `jobs.json`):*
+1. *`f23cf5d48e11` → `mac_v22_full_after_v21.sh` is the **only launch-capable** legacy script left
+   on the frozen line — its line 32 nohups `gate_run.py` with `PARB_GATE_VERSION=v2.2` on the Mac
+   box. It is guarded **only** by the one-shot marker `~/.hermes/mac-v22full-launch.state`
+   (present, 2026-11-02 14:05). Removing the marker re-arms a hard-bank launch; stopping the job
+   stays an owner decision.*
+2. *`a808c7f205a6` "P2005 paired full 2.1→2.2 watch" (`*/5`, next fire 22:55 CET tonight) is
+   **read-only**: `p2005_full21_22_watch.sh` contains no launch verb at all (one ssh read of a
+   remote state file, then it writes a local `done` marker), and that marker
+   (`~/.hermes/state/p2005-full21_22/done`, 2026-11-03 20:10) makes it exit at line 11.*
+3. *`b2b5ee65993a` "contour pair done → publish + next pair" (`*/5`) is fed by
+   `pair_arms_done_watch.sh`, which this tick printed **0 bytes** (exit 0, empty stdout and stderr):
+   `queue.log` holds 16 `pairNNN done` tags and `benchmarks/hard/v6-results/` holds 24 published
+   `pair-2NN/` directories, so every done tag is already published and the watcher's loop skips
+   them all. Here the frozen line is protected by the watcher's own determinism, not by a marker.*
+4. *`5729ba45517e` "PARB daily status report" fires 03:00 CET tonight — report-only, moves no byte
+   on the frozen line.*
+
+*Grok transport pre-flight, new this tick, with **zero** model or cloud calls and no secret value
+read or printed (record key names, byte lengths and timestamps only, from the scheduler's own auth
+store): the CLI resolves at `~/.local/bin/hermes` — the launcher's line-81 `command -v` fail-closed
+check would pass — printing `Hermes Agent v0.23.1+2.gb3746e3.dirty`. The `xai-oauth` record holds
+an access token, a refresh token and a discovery block, with `last_refresh 2026-11-11T16:32:18Z`
+and `expires_in 21600`, so the current access token lapses at 22:32 UTC = **23:32 CET**, i.e.
+**before** the first in-window tick. Tomorrow's first leg therefore has to renew it through the
+refresh token. Pre-registered failure mode if that renewal fails: `pub_bench_cloud.py` parks
+non-`ok` rows, the launcher runs `scripts/pub_cloud_blank_purge.py` (line 76) **before** the resume
+gate (line 79), so parked blanks are quarantined with zero credit instead of being scored as losses
+or halting day two of the queue.*
+
+*Ops re-reads: docs-freshness job `ef7ea47ff99b` status `error`, cumulative `failure_streak` 8 —
+unchanged; next run 2026-11-12T02:00:00+00:00 (03:00 CET), first attempt under the fixed
+bounded-retry call site, and its result **delivery** also fails (`send_path_degraded`), so that run
+must be confirmed from `jobs.json`, not from chat visibility.*
+
+*Window arithmetic made explicit: this loop fires every 30 min. This tick ran 22:49 CET, the 23:19
+and 23:49 ticks will hit the same closed-window refusal, and **00:19 CET is the first in-window
+tick** — the single guarded `systemd-run --user --collect --unit=parb-pub-grok-queue` launch
+therefore starts ~19 min after the owner window opens, with a sequential ETA of 9.0–27.6 h for the
+1 144-call queue. A set incomplete at day end stays unscored and resumes by id the next day.*
+
 **Next in force is unchanged:** item 8, the Grok resumption on 2026-11-12 as ONE
 `systemd-run --user --collect --unit=parb-pub-grok-queue` launch of the guarded chain launcher,
 legs scored only when complete under the tick-45 per-arm contracts, a set incomplete at day end
