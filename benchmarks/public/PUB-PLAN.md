@@ -2934,3 +2934,65 @@ complete under the contracts fixed at tick 45. Standing limits unchanged: no Gro
 needs a fresh preflight GO (none queued); sanitization before every push; a partial arm publishes no
 percent. This tick spent **zero model or cloud calls** and moved no digest row, verdict, answer byte,
 bank file or manifest pin — the tracked change is this block.
+
+## Tick 49 — 2026-11-11 14:15 CET (status + the 12 Nov chain launcher's purge/gate ordering fixed and proven end-to-end, zero model or cloud calls)
+
+**Nothing is running; nothing was launched.** No `parb-pub-*` unit, 0 pub/gate transports
+(standalone bracketed count), Grok window closed until 2026-11-12, no local leg queued.
+
+**Ordering defect found in the 12 Nov chain launcher and fixed before tomorrow.** The launcher
+ran the deciding `pub_grok_resume_check.py` **before** `pub_cloud_blank_purge.py`, while the
+gate refuses (exit 3) whenever a parked non-ok row is stored — so a blank parked by a flake on
+day 1 of the 9–27.6 h chain would halt day 2 **before** the purge that exists to clear it,
+exactly the failure the purge's own comment block cites. New order (both launcher and plan
+contract now say the same thing): census (read-only) -> dryrun exit / window refusal (no
+mutation outside the window) -> blank purge -> **deciding** resume gate -> PATH check -> legs.
+Launcher sha `ad9f938c4acc13c8` -> `d1a7d320e0c70e2b` (untracked local file; the pre-fix copy is
+kept as `go_grok_queue_20261112.sh.pre-order-fix.bak`). Proven today with zero paid calls:
+* live run today: prints the census (1 144-call queue), then `REFUSED` exit 3; both stored
+  partials unchanged (`cde63378fa1633c5` / `a7c741de0d6ace8c`), zero purge/quarantine activity;
+* `GROK_DRYRUN=1` under `bash -x`: exit 0, resume gate READY (22 checks), trace grep
+  `pub_bench_cloud.py|hermes -z` = **0 lines**;
+* scratch rehearsal — a mechanically generated copy whose diff is exactly five substitutions
+  (window guard forced open, transport replaced by a logging stub, gate `--ws` / `AF` / `LOG`
+  paths redirected to scratch; read-only gates run on real bytes): **A** healthy -> four stub
+  legs fire in the pinned order `gpqa-diamond -> humaneval -> mmlu-pro -> ifeval`, partials stay
+  byte-exact, exit 0; **B** parked blank appended to the gpqa arm -> the gate alone reports
+  `non-ok rows parked ... gpqa-140` and exits 3 (the old-order day-2 halt, demonstrated), while
+  the new order purges first (named `.blank-quarantine-*.bak` + byte-exact `.pre-purge-*.keep`),
+  restores the pinned sha cell-for-cell, passes the gate, and runs all four legs; **C** stub leg 2
+  exits 1 -> queue halts (exit 1) with legs 3-4 never invoked.
+* Builder trap caught in this tick: the rehearsal copy was first generated from an **unquoted**
+  heredoc, so the shell expanded `$HOME`/`$(date)` inside the substitution patterns and four of
+  five replacements silently no-oped (diff showed one hunk). Rebuilt with a quoted heredoc and an
+  `assert count==1` per pattern; a rehearsal whose diff you have not enumerated proves nothing.
+
+**Endpoint preflight: NO-GO (19th reading).** Fresh reading 14:07 CET: swap 8191/8191 MiB free,
+MemAvailable 15 273 MiB, engine state `S` pid 3284575 aged 2 d 17:31, engine **512 % CPU at GPU
+0 %** (36.49 W), load1 13.74, `/health` 200, 0 foreign legs — sole NO-GO reason is again the
+idle-spin pair. Series counted by driving the gate over every readings file: 19 files =
+**15 NO-GO / 2 GO / 2 INPUT-GAP**. Remedy stays a box decision (engine restart / park the
+keep-up load), never a contour or bank change; cloud legs are unaffected by this gate.
+
+**Standing gates green:** resume gate READY with window CLOSED (22 checks; resume sets 59+44+500+
+541 ids); arms index drift 0; derived percents 42 recomputed, 0 findings; grok-cell rule 9 docs,
+0 findings; superseded-cell rule 9 docs, 0 findings; digest-row rule 46 rows, 0 findings.
+
+**Ops records re-read, not retyped.** The `docs-freshness` job `ef7ea47ff99b` fired exactly once
+today (03:00:17 CET, status **failed**) — tick 48's correction (DNS blip on a bare pre-fix push)
+stands; tomorrow's run takes the `push_with_retry()` path against an already-current marker.
+Tooling trap in this tick's own reading: an `exit_code` column does not exist in
+`executions.db` and a `2>/dev/null` turned that SQL error into a phantom "no run today";
+re-queried with the real schema (`status` column only) before repeating anything. Frozen-line
+hygiene: the hard-bank-era job `f23cf5d48e11` fired **141 times today** (last 14:03) — still
+active on a 5-minute schedule, still guarded only by the 2026-11-02 marker file; owner decision.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order,
+ONE `systemd-run --user --collect --unit=parb-pub-grok-queue bash <absolute launcher path>`
+launch; the launcher now enforces census -> window refusal -> blank purge -> deciding gate ->
+legs itself, with per-arm contracts fixed at tick 45 and legs scored only when complete.
+Standing limits unchanged: no Grok arm before 2026-11-12; frozen contour `0.0.2.56`, no new
+stamps, no hard pairs, hard bank untouched; a local leg needs a fresh preflight GO (none
+queued); sanitization before every push; a partial arm publishes no percent. This tick spent
+**zero model or cloud calls** (dryrun + stub rehearsal only) and moved no digest row, verdict,
+answer byte, bank file or manifest pin — the tracked change is this block.
