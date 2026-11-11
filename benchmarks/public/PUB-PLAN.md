@@ -1679,3 +1679,49 @@ leg resumable by id and scored only when complete. Standing limits unchanged: no
 2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (the sixth
 consecutive NO-GO reading keeps that moot); sanitization before every push; a partial arm publishes
 no percent.
+
+**Queue status 2026-11-11 01:52 CET (tick 29):** nothing launched — the queue stays empty and item 8
+(the Grok resumption: gpqa-diamond from `gpqa-139`, humaneval from `humaneval-0120`, then the two
+deferred sets) remains gated to 2026-11-12 by the owner quota window. 0 `parb-pub-*` units, no
+`pub_bench_run`/`pub_bench_cloud`/`gate_run` process on the host, 0 foreign legs on the endpoint;
+zero model calls and zero cloud calls this tick.
+
+**The standing preflight gate reads NO-GO a seventh time.** Same box, 01:52 CET: **swap free 0 MiB of
+8 191 MiB** (ticks 26–28 read 0 / 3 / 0 — the device stays pinned at zero), MemAvailable 15 295 MiB,
+engine state `S`, **575 % CPU with RSS 57 679 MiB — up 236 MiB over the 34 minutes since tick 28's
+reading**, load average 10.49, `/health` 200. One difference from ticks 24–28: this reading caught
+the GPU at **99 % utilization / 40.4 W** (the earlier NO-GO window read 0 % / 36–37 W), so the
+idle-spin pair did not trip this time and the single NO-GO reason is the swap exhaustion. The
+utilization burst is consistent with this session's own brain traffic on the shared endpoint — the
+gate reads, it does not attribute. The RSS growth direction still matches the over-parking class
+measured on the hard bank (03.11), stated as an observation only; the cure (engine restart / parking
+the keep-up load) stays an owner decision, and the 2026-11-12 Grok resumption is cloud-side,
+unaffected. Gate contract test re-run: `harness/pub_preflight_test.py` **20/20 green**.
+
+Standing gates re-run on the tracked tree, zero model calls, all green: `pub_arms_index.py --check`
+**index drift: 0**; `pub_arms_index.py --pins` **manifest pin drift: 0**;
+`pub_derived_percent_check.py` registry `pub-derived-percents-v1` **42 entries recomputed, 0
+findings** (41 digest + 169 document citations, 0 uncovered); `pub_grok_cell_check.py` 9 documents,
+**0 findings**; `pub_superseded_cell_check.py` 9 documents, **0 findings**;
+`pub_digest_row_check.py` **46 rows, 0 findings**, 23/23 pre-rule exceptions used.
+
+Grok partials re-verified intact again (twenty-second verification), zero model calls and still
+unscored/unshipped by rule: `gpqa-diamond/pub-grok.jsonl` SHA-256/16 **`cde63378fa1633c5`**,
+**139 rows / 139 unique ids / 139 `finish=ok`**, and `humaneval/pub-grok.jsonl` SHA-256/16
+**`a7c741de0d6ace8c`**, **120 / 120 / 120** — byte-identical to ticks 21–28, mtimes still
+2026-11-09 07:56, resume points `gpqa-139` and `humaneval-0120` unchanged.
+
+Ops state read this tick (no action): `HEAD` == `origin/main` == `cd78271`, working tree clean, and
+that push is **green** (`devsecops`, `secret-scan`, `contour self-tests`, `hard-v6 scoring
+contracts`, `pages-build-deployment` all `success`, read 01:53 CET). The daily `GitHub docs
+freshness` job (`0 2 * * *`) shows **next run 2026-11-11T02:00:00+00:00** — 7 minutes of UTC ahead
+of this reading — which will make it the first run against the retargeted `~/sah-main` path with a
+clean tree; the brief's "errors daily while the tree is dirty" line resolves or persists after it.
+`LEG-INCIDENTS.md` gains no new 2026-11-11 PUB entry: no leg started, stopped or restarted this
+tick.
+
+**Next in force is unchanged: item 8**, the Grok resumption on 2026-11-12 in the pinned order, each
+leg resumable by id and scored only when complete. Standing limits unchanged: no Grok arm before
+2026-11-12; frozen contour `0.0.2.56`; a local leg needs `pub_preflight.py` exit 0 (the seventh
+consecutive NO-GO reading keeps that moot); sanitization before every push; a partial arm publishes
+no percent.
