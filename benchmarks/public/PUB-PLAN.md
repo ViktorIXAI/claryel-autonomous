@@ -4779,3 +4779,58 @@ and zero cloud calls this tick.
 **Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
 arm (swap still 0 of 8191 MiB free); the remaining ladder rows (Terminal-Bench / SWE-bench Verified /
 GAIA-lite) need an owner decision to open; the Grok line stays closed by owner decision 2026-11-12.
+
+## Tick 87 — 2026-11-12 17:30 CET: read-only status tick; ninth preflight reading still NO-GO; the secret-scan red returned with new hardware-line pushes and this tick cleared it again; gates green; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` unit exists; the bracketed process counts are
+0 for the cloud transport and 0 for the local runners.
+
+*Ninth live preflight reading of the endpoint box (17:26 CET, one remote read over the
+repo-standard key, gate re-read unshielded per the tick-85 rule):*
+`mem_total_mib=61953 mem_available_mib=13378 swap_total_mib=8191 swap_used_mib=8190 swap_free_mib=1
+engine_state=S engine_pcpu=0.0 engine_rss_mib=57614 gpu_util_pct=0 gpu_power_w=26.97 load1=14.94
+health_code=200 foreign_legs=0` → **PREFLIGHT NO-GO, true exit 3**, resting on the swap rule alone
+(1 MiB free of 8191; the columns balance exactly, `8190 + 1 = 8191`, so the tick-78 guard is
+satisfied and the reading is trusted). Engine age 3 d 20:49, same pid 3284575 (no restart), RSS
+57.6 GiB against 61953 MiB `MemTotal`; GPU parked (0 %, 27.0 W), sampled engine CPU 0.0 %.
+**The box is not relieved** and relief remains an owner action.
+
+*The Grok line stays cancelled.* The resume gate re-run unshielded prints `checks: 22 | RESUME
+GATE: NO-GO - do not spend quota` with true exit **3**, the cancelled-window finding naming the
+owner decision. The stored archive still matches the pin by sha256-16 (gpqa-diamond **198/198**
+`c479109822f388a5`, humaneval **164/164** `161ddf5b1956ab13`, mmlu-pro **500/500**
+`5731d720f13ef8a5`, ifeval **359 of 541 rows** `01c1ee0b6e7f6d5d` — a stored-row count, not a
+score) and the 182 unasked ids print as `VOID, the line is cancelled, this is not a queue`. The
+operator marker is present and unbroken.
+
+*Secret-scan red returned with the next hardware-line pushes and was cleared the same way as
+tick 86 — CI-integrity repair, zero benchmark bytes.* `559090e` and `19dfe1e` (power-cap study
+docs + data) both went red on secret-scan; contour self-tests and pages were green. Reproduced
+locally: **2 findings**, rule `absolute_local_path|metadata`, one per file, in the new
+`docs/data/rx580-powcap-20261112/powcap_report.txt` and `powcap_ours_report.txt` — raw llama.cpp
+stderr lines (`load_backend:` and `failed to create context`) carried literal `/home/<user>/...`
+paths with the box username. Those are transcript lines, not measurements: masking the path
+prefix to `<LOCAL_PATH>/` changed 20 stderr lines and **no number**; no doc or manifest pins a
+sha16 of either file. A residual grep of the whole data dir for LAN prefixes, `/home/`, `/Users/`
+and the username now returns 0, and the repo scanner exits **0 with 0 findings** on the full tree.
+
+*All five standing gates re-run read-only at HEAD `19dfe1e`, all green (identical counts before
+and after the masking):* arms index drift 0; derived percents 42 recomputed from shipped bytes /
+0 findings (44 digest + 188 doc citations, 0 uncovered); grok-cell rule 9 docs / 0 findings on the
+in-force cancelled sentence; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows /
+0 findings (contracts named 26, pre-rule exceptions 23/23 used).
+
+*Repository hygiene.* Local `main` equalled `origin/main` at `19dfe1e`, tree clean (tick 85's
+in-flight hardware edit has since been committed by that line). The four commits since tick 86
+all belong to the hardware line (Bonsai 2 docs + power-cap study) and none touches
+`benchmarks/public/`.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`);
+no leg was started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. Zero
+model and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm (swap 1 of 8191 MiB free); the remaining ladder rows (Terminal-Bench / SWE-bench Verified /
+GAIA-lite) need an owner decision to open; the Grok line stays closed by owner decision
+2026-11-12.
