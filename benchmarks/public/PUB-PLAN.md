@@ -4893,3 +4893,62 @@ model and zero cloud calls this tick.
 arm (swap 0 of 8191 MiB free); the remaining ladder rows (Terminal-Bench / SWE-bench Verified /
 GAIA-lite) need an owner decision to open; the Grok line stays closed by owner decision
 2026-11-12.
+
+## Tick 89 — 2026-11-12 18:45 CET: read-only status tick; eleventh preflight reading still NO-GO (swap free recovered 0 -> 67 MiB, under the 256 threshold); the secret-scan red returned with the RX580 test-log dir and this tick cleared it again; gates green; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` unit exists; the bracketed process counts are
+0 for the cloud transport and 0 for the local runners; the only `running` job in the cron
+executions DB is this tick itself (`288a66f93167`, started 18:43:17 CET) — no sibling instance is
+editing the clone.
+
+*Eleventh live preflight reading of the endpoint box (18:45 CET, wrapper run bare, gate re-read
+unshielded for the true exit):*
+`mem_total_mib=61953 mem_available_mib=13158 swap_total_mib=8191 swap_used_mib=8124 swap_free_mib=67
+engine_state=S engine_pcpu=0.0 engine_rss_mib=57926 gpu_util_pct=0 gpu_power_w=26.83 load1=8.32
+health_code=200 foreign_legs=0` → **PREFLIGHT NO-GO, true exit 3**, resting on the swap rule alone
+(67 MiB free of 8191, threshold 256). The columns balance exactly (`8124 + 67 = 8191`), so the
+tick-78 producer-column guard is satisfied and the reading is trusted. Against tick 88: swap free
+0 → 67 MiB — the box is relieving at the margin, not by enough to change the call. Engine age
+3 d 22:09, same pid 3284575 (no restart since 08.11), RSS 57.9 GiB of 61953 MiB `MemTotal`; GPU
+parked (0 %, 26.8 W), sampled engine CPU 0.0 %. **The box is not relieved** and relief remains an
+owner action.
+
+*The Grok line stays cancelled.* The resume gate re-run unshielded prints `checks: 22 | RESUME
+GATE: NO-GO - do not spend quota` with true exit **3**, the cancelled-window finding naming the
+owner decision. The operator marker is present and unbroken; zero Grok calls.
+
+*Secret-scan red returned with the RX580 test-log pushes and was cleared the same way as ticks
+86-87 — CI-integrity repair, zero benchmark bytes.* HEAD `2b25cb2` (tick 88's push) went **red on
+secret-scan** (17:12:04 UTC) while the other four jobs stayed green; reproduced locally: **10
+findings**, rule `absolute_local_path|metadata`, one per file, all ten files in
+`docs/data/rx580-20261112/raw/` — the raw artifacts of the hardware-line commit `c8f329f` (19-pass
+RX 580 test log). The hits are raw llama.cpp / llama-bench transcript lines (`load_backend:`,
+`bench bin:`, model-path and usage lines) carrying the literal box-home prefix; the repair masked
+that prefix to `<LOCAL_PATH>` — **32 occurrences over 10 files, zero measurement bytes touched**
+(the diff is exactly 32 changed transcript lines, every number intact) and no document or manifest
+pins a sha16 of those files. A residual grep of the data dir for the box-home prefix, the box
+username, LAN prefixes and `/Users/` now returns 0, and the repo scanner exits **0 with 0
+findings** on the full tree.
+
+*All five standing gates re-run read-only with true exits captured unshielded, all green (counts
+identical to ticks 87-88):* arms index drift 0; derived percents 42 recomputed from shipped bytes /
+0 findings; grok-cell rule 9 docs / 0 findings on the in-force cancelled sentence; superseded-cell
+rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings.
+
+*Repository hygiene.* Tree clean and local `main` equalled `origin/main` at `2b25cb2` before this
+tick's two commits; the only commits since tick 88 (`3db7b94` audit #25 append, `c8f329f` RX 580
+test log) belong to the hardware line and touch no `benchmarks/public/` path. The 03:00 CET
+`docs-freshness` failure keeps its tick-88 attribution by re-execution (the retained execution row
+again opens with the tamper-fixture `MANIFEST GUARD` noise and exits 1 on the 03:00 tree state; the
+same steps pass on the synced tree) — no in-flight work was committed to silence the ops job.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`);
+no leg was started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry — the
+masking repair is recorded above as provenance, per the tick-82/86 pattern. Zero model and zero
+cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm (swap 67 of 8191 MiB free); the remaining ladder rows (Terminal-Bench / SWE-bench Verified /
+GAIA-lite) need an owner decision to open; the Grok line stays closed by owner decision
+2026-11-12.
