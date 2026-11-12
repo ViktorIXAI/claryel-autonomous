@@ -65,9 +65,40 @@ lowest GPU draw of the two, which also leaves the card cooler.
 * At ~3 000 such requests a day that is **≈0.84 €/day against ≈0.47 €/day** — the price of the ceiling in money
   rather than percentages.
 
+## The 48 GiB box simulation: how much of the VRAM loss RAM can buy back
+
+Same 16 GiB VRAM fence (`vram-reserve-mib 8079`), same model, now with the host-RAM envelope the owner set: the
+machine is treated as a 48 GiB box with 1 GiB of reserve — **everything on it, system included, must peak under
+47 GiB**. Peak RAM below is sampled once a second from `free -b` across the whole bench window, so it is a real
+peak, not a snapshot.
+
+| RAM budget | peak host RAM (whole box) | decode cold | decode warm, median | decode warm, best | prefill 878 | GPU W | CPU W | total W | €/1 M tokens |
+|---|---|---|---|---|---|---|---|---|---|
+| 22 GiB | 29.1 GiB of 47 | 60.1 | 84.7 | 91.2 | 337 | 98.4 | 76.6 | 190 | 0.156 € |
+| 30 GiB | 37.2 GiB of 47 | 69.4 | 86.0 | 90.4 | 468 | 106.3 | 80.4 | 202 | 0.163 € |
+| 36 GiB | 43.4 GiB of 47 | 70.6 | 97.4 | 103.7 | 537 | 97.1 | 87.4 | 200 | 0.142 € |
+| 42 GiB | 46.3 GiB of 47 | 86.1 | 107.8 | 108.9 | 642 | 114.7 | 87.1 | 217 | 0.140 € |
+
+RAM pays for what the card was denied: from a 22 GiB expert tier to 42 GiB, warm decode goes **84.7 → 107.8 t/s**
+and cold prefill **337 → 642 t/s**, while cost per million tokens falls 0.156 → 0.140 € — the faster tier is
+cheaper, because the watts rise more slowly than the speed. The trade is headroom: 42 GiB leaves 0.7 GiB under
+the ceiling, which is not survivable once real sessions with long contexts run on the box.
+
+**Live pick: 36 GiB budget.** Verified after restart, and stress-checked with 16 553- and 41 303-token prompts
+(the shapes real agent sessions use):
+
+* peak host RAM **44.0 GiB of 47** (3 GiB margin), GPU **16 085 / 24 463 MiB**, swap 1.0 GiB;
+* decode 97–99 t/s warm on short prompts, 86.0 t/s on a 16.5 K prompt, 73.1 t/s on a 41 K prompt (the long
+  contexts cost decode, as expected from KV pressure);
+* prefill on those long prompts: **3 298 and 3 037 t/s cold** — the strongest prefill number measured on this box;
+* expert-cache hit 72–74 %.
+
+If a future real workload pushes the peak past 47 GiB, the step down is `resident-budget-gib: 30` (peak 37.2 GiB,
+86 t/s median) rather than touching the VRAM fence.
+
 ## Ceiling, stated plainly
 
-With our 82 GiB IQ3_S pack, the 16 GiB VRAM + 32 GiB RAM envelope tops out at **≈83 t/s median decode (87 best)**,
+With our 82 GiB IQ3_S pack, the 16 GiB VRAM envelope tops out at **≈97 t/s median decode (104 best) when 36 GiB of host RAM is allowed for the expert tier**, and at ≈83 t/s if the box is held to 32 GiB,
 against 145 t/s when the card is allowed its full 24 GiB and 187 t/s when RAM is also unbounded. The mechanism is
 unchanged from the memory-ceiling study: it is the expert-cache hit rate, 74 % here versus 93 % with a full card.
 No engine knob closes that gap — the missing 100 t/s live in the 8 GiB of card and 14 GiB of RAM that the
@@ -76,3 +107,4 @@ constraints take away. Getting high decode **and** a 16 GiB card would mean a sm
 
 Raw logs: `docs/data/p2005-16gb-20261112/v3-raw.log`, `docs/data/p2005-16gb-20261112/v4-raw.log`.
 Drivers: `scripts/p2005_v3_ab.sh`, `scripts/p2005_v4_ab.sh`, bench `scripts/brain_bench.py`.
+Raw 48 GiB pass: `docs/data/p2005-16gb-20261112/v5-raw.log`, driver `scripts/p2005_v5_ab.sh`.
