@@ -1,0 +1,44 @@
+15:43:11 == preflight
+15:43:11    ok Nano-4B-Q4_K_M.gguf
+15:43:11    ok Bolt-E4B-Q4_K_XL.gguf
+15:43:11    ok Qwen2.5-3B-Instruct-Q4_K_M.gguf
+15:43:11    ok Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf
+15:43:11    card=/sys/class/drm/card1/device hwmon=/sys/class/drm/card1/device/hwmon/hwmon3 cap=120W min=0W max=120W
+15:43:11    waiting for the bonsai chain to release the GPU
+15:52:12 == start
+15:52:14    sampler pid=160368
+15:52:14 == cap 120 W
+15:52:14    cap=120W level=high od=5/5
+   cap120_3B                          372.49 ± 0.32  = 
+   cap120_3B                           44.84 ± 0.17  = 
+   cap120_Nano4B                      258.64 ± 0.26  = 
+   cap120_Nano4B                       31.16 ± 0.09  = 
+   cap120_BoltE4B                     420.41 ± 0.38  = 
+   cap120_BoltE4B                      24.12 ± 0.02  = 
+   ! llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+15:55:07 == cap 100 W
+15:55:07    cap=100W level=high od=5/5
+   cap100_3B                          359.11 ± 0.90  = 
+   cap100_3B                           44.44 ± 0.03  = 
+   cap100_Nano4B                      241.10 ± 0.52  = 
+   cap100_Nano4B                       30.68 ± 0.08  = 
+   cap100_BoltE4B                     407.65 ± 1.21  = 
+   cap100_BoltE4B                      23.82 ± 0.05  = 
+   ! llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+15:57:34 == cap 70 W
+15:57:34    cap=70W level=high od=5/5
+   cap70_3B                           232.87 ± 0.08  = 
+   cap70_3B                            39.50 ± 0.07  = 
+   cap70_Nano4B                       179.13 ± 0.00  = 
+   cap70_Nano4B                        26.75 ± 0.03  = 
+   cap70_BoltE4B                      266.25 ± 0.48  = 
+   cap70_BoltE4B                       20.62 ± 0.06  = 
+   ! llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+16:00:16 == cap 50 W
+16:00:16    cap=50W level=high od=5/5
+   cap50_3B                           160.03 ± 0.03  = 
+   cap50_3B                            28.15 ± 0.02  = 
+   cap50_Nano4B                       120.24 ± 0.08  = 
+   cap50_Nano4B                        18.55 ± 0.00  = 
+   cap50_BoltE4B                      184.37 ± 0.14  = 
+   cap50_BoltE4B                       14.02 ± 0.04  = 

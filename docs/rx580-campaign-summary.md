@@ -51,6 +51,12 @@ misses and the GPU mostly waits.
 | Bench tooling traps | `llama-bench` has no `-c` (use `-pg "pp,tg"`); HF two-shard URL guess 404s; an unbracketed `pkill -f` over SSH kills the SSH session itself |
 | **Our own methodology bug** | a bench loop resolved the binary as `$(dirname …)` instead of the file, so four Nemotron rows came out silently empty — an empty row is a missing arm, not a zero; fixed and re-run, numbers above are the re-run |
 
+## Power cap study
+
+`docs/rx580-power-cap-study.md` — caps 120 / 100 / 70 / 50 W × 3 models with 1 s power sampling:
+**70 W is the efficiency sweet spot** (−36 % watts for −12…−15 % speed, −26…−28 % cost per token),
+100 W is free speed, at 50 W the efficiency gain is already gone.
+
 ## Power, thermals, limits (measured, hwmon sampled 1 s)
 
 | State | GPU edge temp | Card power | Clocks | Fan |
