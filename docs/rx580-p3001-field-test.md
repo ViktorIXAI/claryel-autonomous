@@ -28,11 +28,16 @@ and needs a purchase decision within the hour.
 |----------------------------------------------|----------:|----------:|
 | `-ngl 0` (CPU + NVMe mmap)                   | 44.2      | **4.09**  |
 | `-ngl 99 -ncmoe 99 -ctk q8_0 -ctv q8_0`      | 33.9      | **5.85**  |
-| `-ngl 4 / 12 / 24` (partial offload)         | context creation fails: `failed to create context with model` | |
 | reference: same model, **Strata on the RTX 3050 8 GB** we removed (16K–256K ladder, 11.11) | 128–188 | **23–31** |
 
 So the GPU is worth only +43 % on decode here, and the whole setup is 4–5× slower
 than the Strata + RTX 3050 line it replaced.
+
+Offload-depth curve for our model (`-ncmoe 99`, i.e. all MoE experts on CPU, stock
+clocks): `-ngl 4` 4.28 → `-ngl 12` 4.72 → `-ngl 24` 5.50 → `-ngl 48` 7.78 →
+`-ngl 99` 7.93 t/s decode. Partial offload is **fine**; the `failed to create
+context` errors seen in an earlier sweep were VRAM-release flakiness after a
+previous run, not an arch limitation — retry with a few seconds' gap and it loads.
 
 Why: the model is 77.86 GiB and the box has 62 GiB of RAM, so llama.cpp's mmap
 streaming misses the page cache on almost every token; A3B activates ~3 B params
@@ -75,13 +80,44 @@ Log: `docs/data/rx580-p3001-temps-load-20261112.csv` (94 samples at `busy>=90 %`
 - System: RAM 10.4 GiB used during the small-model stress, swap untouched; the
   big-model runs pushed RAM/swap but never OOMed.
 
+## Power limit: how far it can actually be pushed (second pass, 13:0x–13:3x)
+The 120 W ceiling is written in the VBIOS power table: `power1_cap_max = 120 W`,
+and `echo 130000000 > power1_cap` (also 150 W, 185 W) is rejected with
+`Invalid argument` — the driver will not go above the table, so "remove the limit"
+is only possible by flashing a different VBIOS, which we are not doing on
+someone's warranty card.
+
+What can be raised without a flash, and what it buys:
+
+| knob                                        | result                                        |
+|---------------------------------------------|-----------------------------------------------|
+| `power_dpm_force_performance_level = high`  | accepted; memory pinned at max DPM state      |
+| `pp_sclk_od = 5`, `pp_mclk_od = 5` (+5 %)   | top sclk state **1348 MHz** (was 1284), mclk **1837 MHz** (was 1750) |
+| `pp_dpm_sclk/mclk` mask writes              | `Invalid argument` while level is `high`      |
+| `pp_power_profile_mode = COMPUTE`           | silently ignored, stays `3D_FULL_SCREEN`      |
+
+Measured on our model with those settings (same flags as the table above):
+
+| state          | pp512 t/s | tg128 t/s |
+|----------------|----------:|----------:|
+| stock (auto)   | 33.9      | 5.85      |
+| high + OD +5 % | **52.9–53.9** | **7.88–8.26** |
+
++34 % prefill and +41 % decode — real, but it does not change the ranking:
+8.3 t/s is still ~3× under the RTX 3050 + Strata line (23–31 t/s).
+Under sustained load the SMU keeps throttling to 850–1086 MHz at 107–112 W, so the
+1348 MHz state is only visible at idle; temperature at full load stayed 55 °C.
+These tweaks do not survive a reboot (`pp_sclk_od`/`pp_mclk_od` read back 5 but
+`power_dpm_force_performance_level` is back to `auto`).
+
 ## Verdict
 **Do not buy this card for the fleet inference role.**
 1. Strata — the engine the whole fleet runs — does not support gfx803 at all.
 2. llama.cpp (Vulkan/RADV) does run, and runs *our* GGUF without conversion, but
-   on our model it gives 5.9 t/s decode vs 23–31 t/s on the RTX 3050 we just
-   pulled, and 8 GiB VRAM cannot hold the KV for the 256 K context we use
-   (q8_0 KV alone is ~36 GB at 262144).
+   on our model it gives 5.9 t/s decode (8.3 t/s with clocks forced high and
+   +5 % overdrive) vs 23–31 t/s on the RTX 3050 we just pulled, and 8 GiB VRAM
+   cannot hold the KV for the 256 K context we use (q8_0 KV alone is ~36 GB at
+   262144).
 3. The card is physically fine and cool (59 °C, 110 W, quiet fan), so it is not a
    lemon — it is simply the wrong tool: no fp16, no int8 dot, no matrix cores,
    8 GiB VRAM, and a 120 W VBIOS.
