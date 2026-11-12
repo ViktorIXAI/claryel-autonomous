@@ -4150,3 +4150,64 @@ cloud arm on its 300-id cross-arm slice; Grok is cancelled by owner decision 202
 operator marker, the cloud runner and now the exit-3 gate; SimpleBench stays closed as unpinnable. Zero
 model and zero cloud calls this tick: no digest row, percent, answer byte, bank file, manifest pin or
 contour stamp moved.
+
+## Tick 76 — 2026-11-12 09:15 CET: read-only status tick; the daily-docs attribution re-read from the job's own capture (zero model/cloud calls)
+
+*Nothing runs and nothing is queued.* `systemctl --user list-units --all 'parb-*'` returns no unit at
+all (the Grok chain unit reads `inactive`), and the bracketed process counts are 0 for the cloud
+transport (`pub_bench_clou[n].py`) and 0 for the local runners (`pub_bench_ru[n].py`, `gate_ru[n].py`)
+counted in a standalone call. The operator marker for the cancelled vendor is still in place (written
+06:54), and the resume gate on the live workspace says
+`checks: 22 | RESUME GATE: NO-GO - do not spend quota` with **real exit 3** — verified unshielded,
+because the same reading piped through `tail` printed `rc=0`, which is the exit code of `tail`
+(the masking class this line's notes already name). Its record line is unchanged:
+`pinned resume record: 182 ids were never asked … VOID`. Stored Grok archive identical to the pin:
+gpqa-diamond 198/198, humaneval 164/164, mmlu-pro 500/500, ifeval **359 of 541 rows** (a stored-row
+count, not a score; resume set `ifeval-286 .. ifeval-3757`), plus the two zero-credit quarantines.
+
+*Standing gates re-run read-only, all green:* arms index drift 0; derived percents 42 recomputed /
+0 findings (44 digest + 188 doc citations, 0 uncovered); grok-cell rule 9 docs / 0 findings, printing
+the in-force sentence "suspended by owner quota, cancelled by owner decision 2026-11-12 (no resume
+date)" and rejecting 1 superseded sentence; superseded-cell rule 9 docs / 0 findings; digest row rule
+49 rows / 0 findings (contracts named 26, pre-rule exceptions 23/23 used).
+
+*CI at the pushed SHA `6860c73`:* 12 check runs, 11 `success` + `release-asset-validation` skipped
+(gitleaks, secret-scan class, tests 3.11 and 3.13, static-qa, contracts, reproduce, json-schema-qa,
+dependency-policy, build, deploy, report-build-status). `main` equals `origin/main` (0 ahead / 0
+behind) and the working tree was clean before this block.
+
+*Correction to tick 75's wording about the daily-docs failure, from the job's own record rather than
+restated.* `GitHub docs freshness daily` (`ef7ea47ff99b`, schedule `0 2 * * *`, fired 03:00:17 CET;
+`failure_streak: 9` is the cumulative scheduler counter, not nine attempts today) failed because
+`scripts/qa/refresh_docs_status.py` line 99 runs `scripts/qa/static_checks.py` with `check=True` and
+that suite exited non-zero. Inside its 747-line capture the suite's own summary is
+`21 checks, 1 failed` followed by `FAILED: row_count_census` — the hand-copied digest row count that
+became a derived pin at 04:47 (`5be2855`), i.e. tick 70's repair landed about 1.5 h after this run.
+Tick 75 wrote that the capture "ends on" that line: it does not — the capture ends on the
+`docs_policy.py --daily` trace line, and the cause is the traceback head naming `static_checks.py`
+plus that check name. Substance unchanged, so this is recorded as a dated correction here instead of
+an edit of tick 75's text. The `MANIFEST GUARD` / `NO SCORED TASK` / `DIGEST ROW COUNT MISMATCH` lines
+at the head of the same capture and the `Could not resolve host: github.com` push lines inside it are
+the gates' own tamper fixtures printed against scratch copies — not pin drift and not a network
+outage (the tracked IFEval task file still hashes to SHA-1/16 `2c672531577dcc33` over 541 rows).
+
+*Today's tree re-verified under the suite that failed at 03:00:* `scripts/qa/static_checks.py` exits
+**0** on `6860c73` (measured this tick, ~3 min), so the 2026-11-13 02:00 run is expected green provided
+the tree is not dirty at that minute. Nothing in-flight was committed to chase the streak.
+
+*Scheduling hygiene re-read, no action taken (owner decisions only):* the hard-bank-era job
+`f23cf5d48e11` "Mac v2.2 full after v2.1" is still enabled `every 5m` — **92 completions logged today**
+— and exits 0 only because its one-shot launch marker exists; stopping it stays an owner decision and
+its state was not touched. The drain-resume self-heal job `9a12508f8a69` ran 56 times today, this loop
+`288a66f93167` 11 times, no cron job anywhere is paused (`paused_reason` null), and the contour-pair
+watcher `b2b5ee65993a` stays disabled, consistent with the frozen hard line.
+
+*What is admissible next: nothing, and that is the state of the line, not a stall.* All eight in-force
+sets carry the three-arm standard (bare local brain / contour `0.0.2.56` in matched request shape /
+codex), with BFCL's cloud arm on rule 4's 300-id cross-arm slice and Grok published wherever a leg
+ever ran; Grok is cancelled by owner decision 2026-11-12 and blocked by the operator marker, the cloud
+runner and the exit-3 gate; SimpleBench stays closed as unpinnable; the remaining ladder rows
+(Terminal-Bench, SWE-bench Verified subset, GAIA-lite) are gated by the plan's own note — "hours each,
+only after 1-9" — and need an owner decision to open. Zero model and zero cloud calls this tick: no
+digest row, percent, answer byte, verdict, bank file, manifest pin or contour stamp moved; no leg was
+started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry.
