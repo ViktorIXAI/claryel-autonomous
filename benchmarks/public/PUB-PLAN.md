@@ -3922,3 +3922,74 @@ census blind again (the tick-68 defect class). The chain is then empty: every in
 on the three-arm template, Grok included wherever a leg exists; `BFCL-RESULT.md` and
 `LIVECODEBENCH-RESULT.md` keep their Grok availability cells. Item P0 parity stays satisfied on every
 in-force set, no local leg is queued, so the P2005 preflight gate stays uncalled.
+
+## 2026-11-12 05:35 CET — tick 71 — the "regenerate the pin at window end" step is now a tool, not a hand edit (zero model/cloud calls)
+
+*Queue read at 05:26-05:35 CET (read-only census + resume gate, exit 0):* legs 1-3 stay complete and
+published. Leg 4, the IFEval Grok arm, is the only transport running (`parb-pub-grok-queue` active,
+flock held, exactly one `pub_bench_cloud.py`): **251 rows / 251 unique / 251 `finish=ok` / 0 empty /
+0 duplicates**, `bad=0` in every progress line, last stored id `ifeval-2341`, **290 ids still
+unasked** (`ifeval-2349`..`ifeval-3757`). Measured 32.3-35 s/task → ETA band **08:20-08:30 CET**
+(supersedes the tick-70 ~07:20 estimate, which used the 26.9 s/task window measured at 04:30). No
+percent is taken from a partial arm; no second local leg, no engine touched.
+
+*Scorer pre-flight for leg 4 re-run offline (self-test only, no scoring of the partial, no digest
+write):* under the pinned venv only — vendor pins 5/5, upstream 41-test suite green, literal-character
+checks 6/6, determinism 20 draws × 2 re-drawn cells, reference strict 417/540 loose 431/540 (the
+pinned band 416/431 holds: the upstream checker flips ±1 task per run), v1/v2 strict diff `[1129]`.
+The stored Grok rows are shape-clean for that scorer: field set
+`answer/arm/bench/finish/id/model/seconds/transport`, `model=grok-4.7` on every row, 0 blanks, 0
+duplicates, answer length median 1140 chars.
+
+*Tooling shipped this tick.* The gate has printed "regenerate the pin at window end" since it was
+written, and every `GROK-RESUME-PIN.json` so far was hand-edited JSON — a hand-typed block over a
+several-hundred-id `pinned_ok_ids` list is exactly how a census goes blind again (tick 68's defect
+class, and the 19 hand readings of ticks 21-39 were the same hazard on the reading side). So the
+writer is now part of the same tool: `scripts/pub_grok_resume_check.py --write-pin` re-mints the pin
+**from the stored bytes** — tasks cell through the published MANIFEST guard, rows/unique/ok/empty and
+the answer-file SHA-256/16 through the gate's own `census()`, resume set from pinned task-file order —
+and carries `owner_window`, `queue_order`, `resume_rule` and the per-arm `quarantine` evidence over
+verbatim. Two fail-closed guards: it **refuses to pin corrupt bytes** (duplicate id, parked non-`ok`
+row, empty `ok` answer, an `ok` row without an id) so a pin can never launder them into the next
+window's resume identity, and without `--allow-in-flight` it refuses a **partially grown** leg,
+because that pin would freeze a moment the runner is about to move. A leg that has not started and a
+leg that finished are stable boundaries and write without the flag.
+
+*New contract test* `harness/pub_grok_resume_test`-shaped fixture, **39 checks, 0 failures** (the
+pre-existing gate test stays 27/0): round trip (the gate accepts what the writer mints and prints the
+same resume set), every written field equal to an independent census of the bytes, the three
+corruption refusals each leaving the existing pin **byte-identical**, the completed-set and
+never-legged shapes, verbatim vocabulary/quarantine preservation, and two mechanical non-vacuity
+controls — with the `--write-pin` dispatch stripped out of a copy of the tool the same fixture writes
+nothing, and after a real write, deleting one stored row turns the gate NO-GO
+("GONE from the arm file"), so the written id list really pins the work.
+
+*Live dry run on today's tree (writer pointed at a COPY of the pin):* exit 3 —
+`REFUSED - a leg is still in flight (ifeval)` — after printing the four arm identities it would have
+written (`gpqa-diamond 198/198 c479109822f388a5`, `humaneval 164/164 161ddf5b1956ab13`, `mmlu-pro
+500/500 5731d720f13ef8a5`, `ifeval 244/244 12ab4bf4deffce87 resume 297`). The copy compared
+byte-identical to the live pin and `git status` shows the live pin untouched: the guard protects the
+in-flight leg for free. The real regeneration happens in the leg-4 completion commit, once the leg
+stores 541/541.
+
+*Standing gates re-run (read-only, all green):* arms index drift 0; derived percents 42 recomputed /
+0 findings; grok-cell rule 9 docs / 0 findings; superseded-cell rule 9 docs / 0 findings; digest row
+rule 49 rows / 0 findings, contracts named 26, pre-rule exceptions 23/23 used. Full static-QA suite
+exit 0 in 2 m 48 s including the new test (auto-enrolled by the `harness/*test.py` glob), docs policy
+`--push` PASS, `scripts/security/secret_scan.py --dir . --strict` exit 0.
+
+*CI:* all five jobs green on `5be2855` (tick 70) at 03:47 CET — `hard-v6 scoring contracts`,
+`devsecops`, `contour self-tests`, `secret-scan`, `pages build and deployment`. That confirms tick
+70's root cause: today's 03:02 `docs_freshness_daily` failure was the red static-QA suite, not the
+dirty tree, and tomorrow's run is expected green. The daily-docs streak line stays as the operator
+sees it; nothing in-flight was committed to chase it.
+
+*Nothing published moved:* no digest row, verdict, answer byte, result-doc number, bank file,
+manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no leg was
+started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry.
+
+**Next in force:** unchanged — score leg 4 with `pub_bench_ifeval_v2.py` in the pinned venv when it
+stores 541/541 (ETA ~08:25 CET), ship answers + verdicts, one digest row under `pub-ifeval-v2` with
+the `pub-ifeval-v1` number beside it, publish the IFEval repair-event census beside the percent,
+extend `IFEVAL-RESULT.md`, and regenerate `GROK-RESUME-PIN.json` in that same commit — now by running
+`scripts/pub_grok_resume_check.py --write-pin` instead of typing it. The chain is then empty.

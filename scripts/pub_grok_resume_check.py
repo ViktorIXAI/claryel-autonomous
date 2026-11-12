@@ -53,6 +53,16 @@ Exit codes: 0 = RESUME-READY (identity matches the pin, resume set exact), 3 = f
 (do NOT spend quota), 1 = input gap (missing pin, missing bench entry, an expected answer
 file absent). An input gap is never a green light.
 
+A third mode (`--write-pin`) regenerates the pin from the stored bytes instead of checking
+it, so the "regenerate the pin at window end" instruction is mechanical rather than a
+hand-edited JSON over a 500-id list: every field is READ from the pinned task file (through
+the same MANIFEST pin guard) and from the arm file, the top-level owner window, queue order,
+resume rule and any quarantine evidence are carried over verbatim, and the writer REFUSES
+instead of laundering a duplicate id, a parked non-ok row or an empty `ok` answer into the
+next window's resume identity. Without `--allow-in-flight` it also refuses while a queued
+leg is still growing, because such a pin freezes a moment the runner is about to move.
+Contract test: `harness/pub_grok_pin_regen_test.py`.
+
 A set pinned as "never legged" (`answer_file: null`) is not exempt from the byte checks once
 its leg has started: the runner's output path is the convention `<ws>/<bench>/pub-grok.jsonl`,
 so that path is derived and censused, and its resume set is read live. Without the derivation
@@ -271,6 +281,161 @@ def check_arm(name: str, spec: dict, repo: str, ws: str, window_open: bool) -> i
     return len(remaining)
 
 
+def derive_arm(name: str, spec: dict, repo: str, ws: str) -> dict:
+    """Read the stored bytes of one arm and return the pin record for them.
+
+    Every number is READ, never typed: `expected_tasks_cell` comes from the published
+    MANIFEST guard (`pub_bench_score.manifest_tasks_cell`, so a moved task file exits 2)
+    and the row/ok/empty/hash fields come from `census()` on the arm file itself. The
+    answer path follows the same derivation the gate uses (pin value, else the
+    conventional `<ws>/<bench>/pub-grok.jsonl`), so a pin can never be regenerated blind
+    to a leg the pin predates — the tick-68 defect class.
+    """
+    tasks_path = os.path.join(repo, "benchmarks", "public", "%s.tasks.jsonl" % name)
+    if not os.path.exists(tasks_path):
+        GAPS.append("%s: pinned task file %s is missing" % (name, tasks_path))
+        return {}
+    cell = pbs.manifest_tasks_cell(name, tasks_path)
+    order = task_ids(tasks_path)
+
+    rel = spec.get("answer_file")
+    apath = os.path.join(ws, rel) if rel else None
+    if apath is None:
+        cand = os.path.join(ws, name, "pub-grok.jsonl")
+        apath = cand if os.path.exists(cand) else None
+        rel = os.path.relpath(cand, ws) if apath else None
+    if apath and os.path.exists(apath):
+        c = census(apath)
+        rows = read_rows(apath)
+    else:
+        c = {"rows": 0, "unique": 0, "ok": 0, "empty": 0, "bad_finish": [], "dup": [],
+             "sha256_16": "-"}
+        rows = []
+
+    # A pin is the byte-level floor of the NEXT window, so minting it from corrupt bytes
+    # would launder a duplicate id, a parked non-ok row or an empty ok answer into the
+    # resume identity. Refuse instead.
+    if c["dup"]:
+        FINDINGS.append("%s: refusing to mint a pin from bytes with duplicate ids %s"
+                        % (name, ", ".join(str(i) for i in c["dup"][:6])))
+    if c["bad_finish"]:
+        FINDINGS.append("%s: refusing to mint a pin from bytes with non-ok rows parked %s"
+                        % (name, ", ".join(str(i) for i in c["bad_finish"][:6])))
+    if c["empty"]:
+        FINDINGS.append("%s: refusing to mint a pin from bytes with %d empty finish=ok "
+                        "answers" % (name, c["empty"]))
+
+    ok_ids = [r.get("id") for r in rows if r.get("finish") == "ok" and r.get("id") is not None]
+    if len(ok_ids) != len([r for r in rows if r.get("finish") == "ok"]):
+        FINDINGS.append("%s: finish=ok rows without an id are present - a row the resume set "
+                        "cannot name is never pinnable" % name)
+    ok_set = set(ok_ids)
+    pinned_ok = [i for i in order if i in ok_set]          # task-file order, not sorted()
+    pinned_ok += sorted(i for i in ok_ids if i not in set(order))
+    remaining = [i for i in order if i not in ok_set]
+    if not remaining:
+        status = ("complete: %d/%d ids stored finish=ok, no resume set left"
+                  % (len(ok_ids), len(order)))
+    else:
+        status = ("partial: %d of %d ids stored finish=ok; resume set %d ids %s..%s"
+                  % (len(ok_ids), len(order), len(remaining), remaining[0], remaining[-1]))
+
+    rec = {
+        "expected_tasks_cell": cell,
+        "expected_pinned_tasks": len(order),
+        "answer_file": rel,
+        "status": status,
+        "expected_rows": c["rows"],
+        "expected_unique": c["unique"],
+        "expected_ok": c["ok"],
+        "expected_empty": c["empty"],
+        "answer_file_sha256_16": c["sha256_16"],
+        "pinned_ok_ids": pinned_ok,
+        "expected_remaining": len(remaining),
+        "expected_first_remaining": remaining[0] if remaining else None,
+        "expected_last_remaining": remaining[-1] if remaining else None,
+    }
+    if spec.get("quarantine"):
+        # operator-maintained evidence of zero-credit writes: carried over verbatim,
+        # never rewritten from bytes (the files themselves are censused by the gate).
+        rec["quarantine"] = spec["quarantine"]
+    print("pin record %-13s rows %4d ok %4d sha256-16 %-16s resume %4d ids %s..%s"
+          % (name, c["rows"], c["ok"], c["sha256_16"], len(remaining),
+             remaining[0] if remaining else "-", remaining[-1] if remaining else "-"))
+    return rec
+
+
+def write_pin(args) -> int:
+    """Regenerate the resume pin from the stored bytes (zero model/cloud calls).
+
+    Why this exists: the gate itself prints "regenerate the pin at window end" and every
+    previous pin was hand-edited. A hand-typed pin over a big `pinned_ok_ids` list is
+    exactly how a census goes blind again (tick 68 fixed gate blindness; the 19 hand
+    readings of tick 21-39 fixed the reading side). This makes the completion commit
+    mechanical and keeps the written numbers identical to the ones the gate prints.
+    """
+    if not os.path.exists(args.pin):
+        sys.stderr.write("INPUT GAP: no resume pin at %s (the writer preserves "
+                         "owner_window/queue_order/resume_rule from it)\n" % args.pin)
+        return 1
+    pin = json.load(open(args.pin, encoding="utf-8"))
+    queue = pin.get("queue_order") or []
+    arms = pin.get("arms") or {}
+    if not queue:
+        sys.stderr.write("INPUT GAP: the resume pin names no queue_order\n")
+        return 1
+    out_arms, in_flight = {}, []
+    for name in queue:
+        rec = derive_arm(name, arms.get(name) or {}, args.repo, args.ws)
+        if not rec:
+            continue
+        out_arms[name] = rec
+        # The hazard this guard exists for is pinning bytes WHILE the runner appends to them:
+        # a partially grown leg. A leg that has not started (0 stored, the full resume set
+        # left) and a leg that finished (0 remaining) are both stable boundaries and write
+        # without the flag - refusing them would block the two pins the queue actually needs.
+        if rec["expected_remaining"] and rec["expected_ok"]:
+            in_flight.append(name)
+    if FINDINGS:
+        for f in FINDINGS:
+            sys.stderr.write("FINDING: %s\n" % f)
+        sys.stderr.write("PIN WRITER: NO-GO - corrupt arm bytes are never pinned, and the "
+                         "existing pin file was left byte-identical\n")
+        return 3
+    if GAPS:
+        for g in GAPS:
+            sys.stderr.write("INPUT GAP: %s\n" % g)
+        return 1
+    if in_flight and not args.allow_in_flight:
+        sys.stderr.write(
+            "PIN WRITER: REFUSED - a leg is still in flight (%s), so the pin would freeze a "
+            "moment that the runner is about to move. Pass --allow-in-flight only when the "
+            "leg was stopped for a reason and this partial IS the resume identity.\n"
+            % ", ".join(in_flight))
+        return 3
+    new = {
+        "schema": pin.get("schema") or "grok-resume-pin-v1",
+        "as_of": __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M CET"),
+        "written_by": "scripts/pub_grok_resume_check.py --write-pin (read from stored bytes)",
+        "owner_window": pin.get("owner_window"),
+        "queue_order": queue,
+        "resume_rule": pin.get("resume_rule"),
+        "arms": out_arms,
+    }
+    text = json.dumps(new, indent=2, ensure_ascii=False) + "\n"
+    tmp = args.pin + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write(text)
+    os.replace(tmp, args.pin)
+    total = sum(a["expected_remaining"] for a in out_arms.values())
+    print("PIN WRITTEN: %s | %d arms | %d ids still unasked | as_of %s"
+          % (args.pin, len(out_arms), total, new["as_of"]))
+    if in_flight:
+        print("note: in-flight sets pinned as a floor (--allow-in-flight): %s"
+              % ", ".join(in_flight))
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(prog="pub_grok_resume_check.py", add_help=True)
     ap.add_argument("--pin", default=os.path.join(ROOT, "benchmarks", "public", "GROK-RESUME-PIN.json"))
@@ -280,11 +445,22 @@ def main() -> int:
                     help="YYYY-MM-DD the owner-window decision is taken from (default: today). "
                          "Fixed so the contract test can exercise both window states and a "
                          "later run can be reproduced.")
+    ap.add_argument("--write-pin", action="store_true",
+                    help="regenerate the pin at --pin from the STORED BYTES instead of checking "
+                         "it (zero model/cloud calls). The gate's own 'regenerate the pin at "
+                         "window end' instruction, made mechanical: numbers are read, never "
+                         "typed. Refuses on corrupt arm bytes and, without --allow-in-flight, "
+                         "on a leg that is still running.")
+    ap.add_argument("--allow-in-flight", action="store_true",
+                    help="with --write-pin: pin a partial leg on purpose (the leg was stopped "
+                         "and this partial IS the resume identity).")
     args = ap.parse_args()
 
     override = os.environ.get("PUB_MANIFEST_OVERRIDE")
     if override:
         pbs.MANIFEST_PATH = override
+    if args.write_pin:
+        return write_pin(args)
     if not os.path.exists(args.pin):
         sys.stderr.write("INPUT GAP: no resume pin at %s\n" % args.pin)
         return 1
