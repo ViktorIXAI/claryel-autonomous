@@ -1,0 +1,77 @@
+started
+=== arm base (loaded=1 after 24s)
+Mem:            60Gi        28Gi        18Gi       847Mi        14Gi        31Gi
+16057 MiB, 24463 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.3s 387t/s  tg=150 61.8t/s acc=68%  ttft=2.3s  end=stop  hit=67.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 76.2t/s acc=71%  ttft=0.1s  end=stop  hit=74.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 74.8t/s acc=71%  ttft=0.1s  end=stop  hit=73.6%  pcie=0.0%
+gpu_W 90.3 (max 149.6 n=9)
+cpu_W -5026.5 window 9s
+started
+=== arm spec4 (loaded=1 after 24s)
+Mem:            60Gi        32Gi       693Mi       903Mi        29Gi        28Gi
+15995 MiB, 24463 MiB
+foreign_in_window 3
+[server] s1 done  pp=878/0c 2.1s 418t/s  tg=158 62.3t/s acc=60%  ttft=2.1s  end=stop  hit=64.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.4s  tg=156 62.3t/s acc=67%  ttft=0.4s  end=stop  hit=60.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.3s  tg=156 67.8t/s acc=71%  ttft=0.4s  end=stop  hit=65.0%  pcie=0.0%
+gpu_W 103.1 (max 165.6 n=39)
+cpu_W -1185.3 window 40s
+started
+=== arm spec7 (loaded=1 after 24s)
+Mem:            60Gi        28Gi        18Gi       847Mi        14Gi        31Gi
+16051 MiB, 24463 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.2s 396t/s  tg=155 64.2t/s acc=76%  ttft=2.3s  end=stop  hit=65.9%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=159 75.6t/s acc=64%  ttft=0.1s  end=stop  hit=76.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=142 75.5t/s acc=73%  ttft=0.1s  end=stop  hit=73.5%  pcie=0.0%
+gpu_W 99.7 (max 148.7 n=8)
+cpu_W -5752.9 window 9s
+started
+=== arm spec4-suffix (loaded=0 after 80s)
+[server] network  http://192.168.1.186:8080/v1
+[server] error: unknown argument: /home/claryel/.cache/basalt/b2c1112ff2bd48ba/conversations
+[server] engine log: /home/claryel/.cache/basalt/b2c1112ff2bd48ba/engine.log
+[server] stopped
+started
+=== arm spec4-kvres2048 (loaded=1 after 24s)
+Mem:            60Gi        32Gi        15Gi       4.2Gi        17Gi        28Gi
+16021 MiB, 24463 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.4s 371t/s  tg=158 59.3t/s acc=63%  ttft=2.4s  end=stop  hit=68.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=158 69.9t/s acc=61%  ttft=0.1s  end=stop  hit=75.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 62.4t/s acc=67%  ttft=0.1s  end=stop  hit=74.8%  pcie=0.0%
+gpu_W 85.0 (max 114.3 n=9)
+cpu_W -5180.7 window 10s
+started
+=== arm spec4-kvres-b28 (loaded=1 after 24s)
+Mem:            60Gi        38Gi        13Gi       4.2Gi        13Gi        22Gi
+16037 MiB, 24463 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.1s 413t/s  tg=151 65.3t/s acc=66%  ttft=2.1s  end=stop  hit=67.9%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=159 65.7t/s acc=71%  ttft=0.1s  end=stop  hit=75.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=151 78.2t/s acc=66%  ttft=0.1s  end=stop  hit=75.4%  pcie=0.0%
+gpu_W 84.2 (max 126.1 n=9)
+cpu_W -5902.0 window 9s
+started
+=== arm spec4-ctx65k (loaded=1 after 24s)
+Mem:            60Gi        28Gi        18Gi       846Mi        14Gi        31Gi
+16017 MiB, 24463 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.2s 395t/s  tg=156 64.5t/s acc=73%  ttft=2.2s  end=stop  hit=66.7%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=156 82.3t/s acc=72%  ttft=0.1s  end=stop  hit=75.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=158 61.7t/s acc=64%  ttft=0.1s  end=stop  hit=76.7%  pcie=0.0%
+gpu_W 86.5 (max 123.7 n=9)
+cpu_W -5815.9 window 9s
+started
+=== arm spec4-elastic (loaded=1 after 24s)
+Mem:            60Gi        28Gi        16Gi       721Mi        16Gi        31Gi
+16015 MiB, 24463 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.4s 366t/s  tg=157 59.2t/s acc=67%  ttft=2.4s  end=stop  hit=56.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=156 69.3t/s acc=71%  ttft=0.1s  end=stop  hit=59.5%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=151 67.8t/s acc=62%  ttft=0.1s  end=stop  hit=61.4%  pcie=0.0%
+gpu_W 89.6 (max 143.3 n=10)
+cpu_W -5657.6 window 10s
+ALL_V3_DONE

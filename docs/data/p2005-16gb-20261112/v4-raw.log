@@ -1,0 +1,105 @@
+started
+=== arm base (loaded=1)
+Mem:            60Gi        29Gi        17Gi       847Mi        15Gi        31Gi
+16057 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.1s 412t/s  tg=150 61.4t/s acc=68%  ttft=2.2s  end=stop  hit=67.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 80.9t/s acc=74%  ttft=0.1s  end=stop  hit=75.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 77.9t/s acc=75%  ttft=0.1s  end=stop  hit=73.7%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 82.5t/s acc=72%  ttft=0.1s  end=stop  hit=74.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 83.2t/s acc=71%  ttft=0.1s  end=stop  hit=74.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 83.2t/s acc=72%  ttft=0.1s  end=stop  hit=74.5%  pcie=0.0%
+gpu_W avg 88.4 p90 121.0 max 121.2 n=15
+cpu_W avg 78.1 p90 83.2 max 87.3 n=14
+started
+=== arm spec2 (loaded=1)
+Mem:            60Gi        28Gi        17Gi       843Mi        15Gi        31Gi
+15989 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.2s 400t/s  tg=142 58.5t/s acc=71%  ttft=2.2s  end=stop  hit=68.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=150 70.2t/s acc=72%  ttft=0.1s  end=stop  hit=75.9%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=162 73.2t/s acc=73%  ttft=0.1s  end=stop  hit=76.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=142 75.8t/s acc=72%  ttft=0.1s  end=stop  hit=74.8%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 77.7t/s acc=74%  ttft=0.1s  end=stop  hit=76.5%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=142 78.0t/s acc=73%  ttft=0.1s  end=stop  hit=74.9%  pcie=0.0%
+gpu_W avg 96.1 p90 132.2 max 134.5 n=15
+cpu_W avg 76.8 p90 86.6 max 87.3 n=14
+started
+=== arm spec4 (loaded=1)
+Mem:            60Gi        29Gi        17Gi       846Mi        15Gi        31Gi
+16019 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.2s 404t/s  tg=156 66.9t/s acc=73%  ttft=2.2s  end=stop  hit=67.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=156 75.8t/s acc=72%  ttft=0.1s  end=stop  hit=74.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=155 81.1t/s acc=75%  ttft=0.1s  end=stop  hit=75.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=155 83.9t/s acc=71%  ttft=0.1s  end=stop  hit=75.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=150 81.3t/s acc=65%  ttft=0.1s  end=stop  hit=75.7%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 82.4t/s acc=71%  ttft=0.1s  end=stop  hit=76.2%  pcie=0.0%
+gpu_W avg 94.2 p90 128.3 max 128.4 n=15
+cpu_W avg 82.2 p90 87.3 max 87.4 n=14
+started
+=== arm spec7 (loaded=1)
+Mem:            60Gi        29Gi        17Gi       847Mi        15Gi        31Gi
+16051 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.2s 402t/s  tg=155 67.2t/s acc=76%  ttft=2.2s  end=stop  hit=65.9%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=159 62.2t/s acc=64%  ttft=0.1s  end=stop  hit=76.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=158 82.1t/s acc=67%  ttft=0.1s  end=stop  hit=75.9%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=144 77.5t/s acc=71%  ttft=0.1s  end=stop  hit=73.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 83.6t/s acc=74%  ttft=0.1s  end=stop  hit=74.5%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=150 79.0t/s acc=67%  ttft=0.1s  end=stop  hit=75.5%  pcie=0.0%
+gpu_W avg 94.0 p90 135.4 max 138.0 n=15
+cpu_W avg 76.1 p90 85.2 max 85.3 n=14
+started
+=== arm ctx65k-spec7 (loaded=1)
+Mem:            60Gi        28Gi        17Gi       847Mi        15Gi        31Gi
+16051 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.1s 409t/s  tg=155 62.6t/s acc=73%  ttft=2.2s  end=stop  hit=66.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=158 76.2t/s acc=64%  ttft=0.1s  end=stop  hit=75.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=142 72.5t/s acc=67%  ttft=0.1s  end=stop  hit=73.7%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=158 78.7t/s acc=68%  ttft=0.1s  end=stop  hit=74.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=144 74.9t/s acc=67%  ttft=0.1s  end=stop  hit=73.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=158 78.5t/s acc=63%  ttft=0.1s  end=stop  hit=75.6%  pcie=0.0%
+gpu_W avg 91.0 p90 127.5 max 131.9 n=15
+cpu_W avg 82.7 p90 87.4 max 88.0 n=14
+started
+=== arm ec12000 (loaded=1)
+Mem:            60Gi        29Gi        17Gi       846Mi        15Gi        31Gi
+16351 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.2s 403t/s  tg=156 63.4t/s acc=69%  ttft=2.2s  end=stop  hit=68.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=150 76.6t/s acc=70%  ttft=0.1s  end=stop  hit=76.7%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=159 64.2t/s acc=67%  ttft=0.1s  end=stop  hit=77.7%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=142 76.9t/s acc=68%  ttft=0.1s  end=stop  hit=75.5%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=159 82.6t/s acc=65%  ttft=0.1s  end=stop  hit=78.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=159 78.6t/s acc=66%  ttft=0.1s  end=stop  hit=76.8%  pcie=0.0%
+gpu_W avg 95.1 p90 136.4 max 136.6 n=16
+cpu_W avg 77.8 p90 86.3 max 88.2 n=15
+started
+=== arm cpux-experts (loaded=1)
+Mem:            60Gi        28Gi        17Gi       846Mi        15Gi        31Gi
+16019 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.2s 400t/s  tg=156 64.7t/s acc=73%  ttft=2.2s  end=stop  hit=67.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=156 76.0t/s acc=72%  ttft=0.1s  end=stop  hit=74.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=155 81.8t/s acc=75%  ttft=0.1s  end=stop  hit=75.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=155 87.1t/s acc=71%  ttft=0.1s  end=stop  hit=75.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=150 75.7t/s acc=65%  ttft=0.1s  end=stop  hit=75.7%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 81.8t/s acc=71%  ttft=0.1s  end=stop  hit=76.2%  pcie=0.0%
+gpu_W avg 89.9 p90 118.6 max 121.5 n=15
+cpu_W avg 79.0 p90 88.7 max 91.1 n=14
+started
+=== arm mtp2 (loaded=1)
+Mem:            60Gi        29Gi        17Gi       843Mi        15Gi        31Gi
+15989 MiB
+foreign_in_window 0
+[server] s1 done  pp=878/0c 2.2s 399t/s  tg=142 60.2t/s acc=72%  ttft=2.2s  end=stop  hit=68.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=142 57.2t/s acc=70%  ttft=0.1s  end=stop  hit=75.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=158 70.3t/s acc=67%  ttft=0.1s  end=stop  hit=76.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 73.1t/s acc=74%  ttft=0.1s  end=stop  hit=76.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=155 74.0t/s acc=79%  ttft=0.1s  end=stop  hit=75.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=142 72.3t/s acc=71%  ttft=0.1s  end=stop  hit=75.2%  pcie=0.0%
+gpu_W avg 95.4 p90 129.2 max 138.0 n=16
+cpu_W avg 75.6 p90 86.3 max 86.3 n=15
+ALL_V4_DONE
