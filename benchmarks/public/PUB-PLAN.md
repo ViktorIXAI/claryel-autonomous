@@ -4671,3 +4671,57 @@ pattern. Zero model and zero cloud calls this tick.
 arm (its swap is now fully consumed: 0 of 8191 MiB free); the remaining ladder rows
 (Terminal-Bench / SWE-bench Verified / GAIA-lite) need an owner decision to open; the Grok line
 stays closed by owner decision 2026-11-12.
+
+## Tick 85 — 2026-11-12 16:15 CET: read-only status tick; seventh preflight reading still NO-GO on fully consumed swap; the pipe-masking class caught on the resume gate itself; gates green at HEAD; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` unit exists; the bracketed process counts are
+0 for the cloud transport and 0 for the local runners.
+
+*Seventh live preflight reading of the endpoint box (16:15 CET, one remote read over the
+repo-standard key):*
+`mem_available_mib=14385 swap_total_mib=8191 swap_used_mib=8191 swap_free_mib=0 engine_state=S
+engine_pcpu=0.0 engine_rss_mib=56888 gpu_util_pct=47 gpu_power_w=27.18 load1=10.07 health_code=200
+foreign_legs=0` → **PREFLIGHT NO-GO, true exit 3**, resting on the swap rule alone. The columns
+balance exactly (`8191 + 0 = 8191`), so the tick-78 guard is satisfied and the reading is trusted.
+Against tick 84's 15:38 reading: free swap 0 → 0 MiB, engine age 3 d 19 h (no restart,
+pid 3284575), RSS 57.5 → 55.8 GiB against 60.5 GiB `MemTotal`; the GPU sample read 47 % at 27.2 W
+(session brain traffic on the resident engine, parked power), load1 10.07. **The box is not
+relieved** and relief remains an owner action (engine restart / parking the keep-up load — the
+engine hosts this session's live brain).
+
+*The exit-code hygiene rule from tick 84 reproduced on a second tool this tick, and was caught
+before any verdict was read from it.* The untracked wrapper again returned the trailing `echo`'s
+0 while the gate it runs prints NO-GO — the gate was re-run unshielded on the stored reading file
+(true exit **3**). The same masking then hit the Grok resume gate inside this tick's own command:
+`pub_grok_resume_check.py | tail` returned tail's exit 0 while printing `RESUME GATE: NO-GO - do
+not spend quota`; re-run unshielded the true exit is **3**, the cancelled-window finding naming the
+owner decision. Standing rule, now measured on three tools (preflight wrapper, resume gate, any
+piped gate): **a pipe replaces the exit code — read PUB gates unshielded, never through `tail`.**
+
+*The Grok line stays cancelled.* The stored archive still matches the pin (gpqa-diamond 198/198,
+humaneval 164/164, mmlu-pro 500/500, ifeval **359 of 541 rows** — a stored-row count, not a score)
+and the 182 unasked ifeval ids print as `VOID, the line is cancelled, this is not a queue`.
+
+*All five standing gates re-run read-only at HEAD `5c15250`, all green:* arms index drift 0;
+derived percents 42 recomputed from shipped bytes / 0 findings (44 digest + 188 doc citations,
+0 uncovered); grok-cell rule 9 docs / 0 findings on the in-force cancelled sentence;
+superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings (contracts named
+26, pre-rule exceptions 23/23 used). CI at that SHA: secret-scan, devsecops, contour self-tests,
+hard-v6 scoring contracts and pages all `success` (14:42 UTC).
+
+*Repository hygiene.* Local `main` equals `origin/main` at `5c15250` (0 ahead / 0 behind); the
+three commits since tick 84's HEAD all belong to the hardware line (RX 580 campaign doc, BigMoeOnEdge
+0.42 eval, audit #25 clarification) and none touches `benchmarks/public/`. The working tree carries
+one in-flight hardware-line edit (`docs/bigmoeonedge-p3001.md`); this tick committed none of it —
+that is the known 03:00 `docs-freshness` failure class from the machine notes, which keeps its
+tick-83 attribution and is not "fixed" by committing in-flight work.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`);
+no leg was started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. Zero
+model and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm (swap still 0 of 8191 MiB free); the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified / GAIA-lite) need an owner decision to open; the Grok line stays closed by owner decision
+2026-11-12.

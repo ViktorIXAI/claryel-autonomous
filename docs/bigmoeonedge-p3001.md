@@ -42,10 +42,15 @@ set (47.9 GiB) fits inside the 52.6 GiB the process may hold resident.
 | bmoe `--auto` (streaming declined, mmap) | `--auto` | 3.458 | 46.0 | 20.4 s |
 | bmoe `--auto --moe-stream` (planner kept it off) | same + stream | 3.677 | 46.5 | 20.1 s |
 | forced streaming, 4 threads | `--moe-stream --overlap --cache-mb auto` | 1.909 | 4.4 | 223 s |
+| forced streaming, 8 threads + 16 prefill threads | `--moe-stream --overlap --cache-mb auto -t 8 --threads-batch 16` | 2.242 | 9.8 | 127 s |
 | forced streaming + dense pinned, 4 threads | `--moe-stream --overlap --dense-weights anon --cache-mb 6000` | 1.769 | 4.4 | 213 s |
 
 Reference points from the same box, same model: llama.cpp b12318 Vulkan `-ngl 99 -ncmoe 99`
 = 7.93 tok/s decode (8.26 with the GPU overcoupled), CPU-only 4.09; RTX 3050 + Strata = 23–31.
+
+The engine's own diagnostic explains the loss: `decode cost: 295.6 ms/token of compute at 8 thread(s),
+92% cache hits at 26691 MiB` — with the expert cache already hitting 92 %, the floor on this box is the
+AVX1 CPU matmul (2.50 cpu-s per token), not the disk, so streaming only adds I/O on top of it.
 
 Flag/behaviour notes recorded the hard way:
 
