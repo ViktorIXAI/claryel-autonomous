@@ -86,6 +86,24 @@ for a ≤5 GiB model it costs less per token than the RTX 3050 does on our model
 mmproj. Sizes 2B / 4B / 9B / 27B exist. `Q2_0` runs on stock llama.cpp from b11556; `PTQ1_0` and
 `PQ2_0` need the PrismML llama.cpp fork, which publishes a **prebuilt Linux Vulkan binary**
 (`llama-prism-b12128-d7b2896-bin-ubuntu-vulkan-x64.tar.gz`) — so the GCN4 card needs no build and
-no ROCm. This is the right class of model for an 8 GiB Polaris card: 27B-class weights inside the
-VRAM. Run with the card at its maximum allowed power state (high + OD +5 %) and 1 s hwmon logging;
-numbers are appended in `docs/rx580-p3001-field-test.md` as soon as the pass completes.
+no ROCm.
+
+### Bonsai 2 27B measured on the RX 580 (card at `high` + OD +5 %)
+
+| Packing | Engine | pp512 | tg128 | € per 1M tokens (card at ~112 W) |
+|---|---|---|---|---|
+| **Q2_0 (7.09 GiB)** | **stock llama.cpp b12318 Vulkan** | **44.5** | **9.03** | 0.86 |
+| Q2_0 | PrismML fork `prism-b12128` | 42.6–44.4 | 4.81–4.83 | 1.61 |
+| PTQ1_0 (5.53 GiB) | PrismML fork | 36.5–37.0 | 3.91–3.93 | 1.98 |
+| PTQ1_0, CPU only (`-ngl 0`) | PrismML fork | 29.0 | 1.75 | — |
+
+Offload sweep (fork, PTQ1_0, decode): `-ngl` 8/16/24/40/99 → 2.04 / 2.22 / 2.32 / 3.17 / 3.93 t/s,
+so the GPU is doing real work — the fork's CPU path on AVX1 is simply terrible.
+
+Verdict for this family on GCN4: **use the mainline `Q2_0` packing with stock llama.cpp, not the
+fork's dense ternary packs.** The fork's `PTQ1_0`/`PQ2_0` kernels are ~2× slower on Polaris, which
+reports `fp16: 0 | int dot: 0 | matrix cores: none` — exactly the hardware those kernels were not
+written for, and their Vulkan FWHT PR is still a draft upstream. A 27B-class model at 9 t/s inside
+7 GiB suits background work, not interactive chat; the card's fast, useful range stays ≤5 GiB
+(30–60 t/s). Thermals through these runs: 43–54 °C, 14 W idle, ~42 W settling after load — still
+nowhere near a thermal limit.
