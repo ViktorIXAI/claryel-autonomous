@@ -4834,3 +4834,62 @@ model and zero cloud calls this tick.
 arm (swap 1 of 8191 MiB free); the remaining ladder rows (Terminal-Bench / SWE-bench Verified /
 GAIA-lite) need an owner decision to open; the Grok line stays closed by owner decision
 2026-11-12.
+
+## Tick 88 — 2026-11-12 18:00 CET: read-only status tick; tenth preflight reading still NO-GO (swap free now 0); daily docs-job failure attributed mechanically; gates green; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` unit exists; the bracketed process counts are
+0 for the cloud transport and 0 for the local runners. All nine result docs already carry their
+three-admissible-arm rows (bare / contour 0.0.2.56 matched shape / codex) for every in-force set,
+so Item P0 and the ladder hold no launchable item this tick.
+
+*Tenth live preflight reading of the endpoint box (18:03 CET, wrapper run bare, gate re-read
+unshielded for the true exit):*
+`mem_total_mib=61953 mem_available_mib=14122 swap_total_mib=8191 swap_used_mib=8191 swap_free_mib=0
+engine_state=S engine_pcpu=0.0 engine_rss_mib=56665 gpu_util_pct=0 gpu_power_w=26.13 load1=6.16
+health_code=200 foreign_legs=0` → **PREFLIGHT NO-GO, true exit 3**, resting on the swap rule alone
+(0 MiB free of 8191 — one MiB worse than tick 87; the columns balance exactly, `8191 + 0 = 8191`,
+so the tick-78 producer-column guard is satisfied and the reading is trusted). Engine age
+3 d 21:28, same pid 3284575 (no restart since 08.11), RSS 56.7 GiB of 61953 MiB `MemTotal`; GPU
+parked (0 %, 26.1 W), sampled engine CPU 0.0 %. **The box is not relieved** and relief remains an
+owner action. (One producer script was briefly run without its ssh wrapper on the launch host; it
+prints only, writes no reading file, and no gate was ever evaluated against its local numbers —
+the 18:03 reading above is the wrapper's own remote file.)
+
+*The Grok line stays cancelled.* The resume gate re-run unshielded prints `checks: 22 | RESUME
+GATE: NO-GO - do not spend quota` with true exit **3** (a first reading piped through `tail` had
+shown the pipe's exit 0 — re-run unshielded per the standing rule before quoting the number). The
+stored archive still matches the pin by sha256-16 (ifeval **359 of 541 rows** `01c1ee0b6e7f6d5d` —
+a stored-row count, not a score) and the 182 unasked ids print as `VOID, the line is cancelled,
+this is not a queue`. The operator marker is present and unbroken; zero Grok calls.
+
+*Daily docs-freshness job (02:00 UTC = 03:00 CET): failed again; today's cause attributed by
+re-execution, not by restating the machine note.* The job record (`ef7ea47ff99b`, one retained
+execution row; the `failure_streak: 9` in the job file is the cumulative scheduler counter, not
+today's attempt count) shows the wrapper dying on `scripts/qa/static_checks.py` exit 1, with the
+capture opening in the known tamper-fixture noise (five `MANIFEST GUARD` / `NO SCORED TASK` /
+`DIGEST ROW COUNT MISMATCH` lines against `…/cache/scratch/…` copies — not pin drift). The one
+real `FAIL` token in the capture is `row_count_census` inside the digest-row gate; run now at this
+clean HEAD that same test prints `PASS row_count_census` and exits 0, and the whole static-qa
+suite re-runs green (75 steps, exit 0). So today's failure is the working tree as it stood at
+03:00 (the pub loop's morning ticks edit the tree in place), the class the machine note describes —
+**no in-flight work was committed to silence the ops job**.
+
+*All five standing gates re-run read-only at HEAD `c8f329f` with true exits captured unshielded,
+all green (identical counts to tick 87):* arms index drift 0; derived percents 42 recomputed from
+shipped bytes / 0 findings; grok-cell rule 9 docs / 0 findings on the in-force cancelled sentence;
+superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings.
+
+*Repository hygiene.* Local `main` equalled `origin/main` at `c8f329f` (the only fetch needed a
+retry at 18:01 — first attempt hit the 120 s tool ceiling, the 90 s git-side retry completed; no
+divergence either way), tree clean. The one commit since tick 87 (`c8f329f`) belongs to the
+hardware line (P3001 RX 580 test log) and touches no `benchmarks/public/` path.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`);
+no leg was started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. Zero
+model and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm (swap 0 of 8191 MiB free); the remaining ladder rows (Terminal-Bench / SWE-bench Verified /
+GAIA-lite) need an owner decision to open; the Grok line stays closed by owner decision
+2026-11-12.
