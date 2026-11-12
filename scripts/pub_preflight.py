@@ -13,8 +13,17 @@ The readings come from a one-line remote read over the repo-standard key (the co
 untracked so no connection material lands in this repo) and are passed in as a `key=value` file:
 
     mem_total_mib=61953 mem_available_mib=14047 swap_total_mib=8191 swap_free_mib=3
-    engine_state=Dl engine_pcpu=602 engine_rss_mib=57409 gpu_util_pct=0 gpu_power_w=35.8
-    load1=13.38 health_code=200 foreign_legs=0
+    swap_used_mib=8188 engine_state=Dl engine_pcpu=602 engine_rss_mib=57409
+    gpu_util_pct=0 gpu_power_w=35.8 load1=13.38 health_code=200 foreign_legs=0
+
+An OPTIONAL `swap_used_mib` lets the gate check the producer's arithmetic: the Swap row of
+`free -m` is `total used free`, so the free column is the FOURTH token. Measured 2026-11-12 the
+untracked reader fed the third token (used) as swap_free_mib: on a box with swap completely spent
+(total 8191, used 8159-8191, free 0-32 MiB) it emitted swap_free_mib≈8184 and the swap rule would
+have GO'd into the exact condition this gate exists to refuse. When the key is present the gate
+requires used + free ≈ total (within SWAP_BALANCE_TOL_MIB, absorbing free(1)'s per-column rounding)
+and answers INPUT GAP, never GO, on a mismatch — a column mix-up is a broken reading, not a box
+state, and every stored reading of that lineage has an untrusted swap column.
 
 Two file shapes are accepted, because both are produced in practice: one `key=value` per line (every
 contract-test fixture) and the single space-separated line the remote read prints (the shape above).
@@ -48,6 +57,9 @@ import sys
 # costs one idle tick, a false GO costs a discarded partial leg.
 SWAP_FREE_MIN_MIB = 256     # legs ran while the swap device was nearly free; the refused window
                             # measured 48 MiB free (tick 21) then 3.6 MiB free (tick 23)
+SWAP_BALANCE_TOL_MIB = 64   # used + free must re-sum to total within this: free(1) rounds each
+                            # column independently (measured 2026-11-12: 8159 + 32 = 8191 exactly),
+                            # so a bigger gap means the producer moved columns, not that RAM moved
 MEM_AVAILABLE_MIN_MIB = 2048  # the resident engine plus its cache needs headroom to re-admit KV
 IDLE_SPIN_PCPU = 200        # idle-spin signature: engine >200 % CPU with GPU util 0 %; measured
                             # 602-629 % CPU at 0 % GPU / 35-37 W. Per-task seconds in that state run
@@ -110,6 +122,20 @@ def main() -> int:
     if bad:
         print("PREFLIGHT INPUT GAP: unreadable number(s): " + ", ".join(bad))
         return 1
+
+    if "swap_used_mib" in vals:
+        try:
+            used = int(vals["swap_used_mib"])
+        except ValueError:
+            print("PREFLIGHT INPUT GAP: unreadable number(s): swap_used_mib")
+            return 1
+        free, total = int(vals["swap_free_mib"]), int(vals["swap_total_mib"])
+        if abs(total - used - free) > SWAP_BALANCE_TOL_MIB:
+            print(f"PREFLIGHT INPUT GAP: the swap columns do not add up: used {used} + free {free}"
+                  f" != total {total} (tolerance {SWAP_BALANCE_TOL_MIB} MiB) — this is the producer"
+                  " column mix-up class (`free -m` Swap row is total used free; the free column is"
+                  " the fourth token); a broken reading is never healthy.")
+            return 1
 
     reasons: list[str] = []
     if int(vals["health_code"]) != 200:

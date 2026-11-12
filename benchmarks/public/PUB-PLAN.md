@@ -46,8 +46,22 @@ space-separated line the remote read prints. A padded value (`ps -o pcpu=` emits
 is still one reading; a key with an empty value never borrows the next line and stays an input gap.
 `engine_pcpu` must be a SAMPLED delta of `/proc/<pid>/stat` over N seconds, not a lifetime average:
 measured 2026-11-12, `ps -o pcpu=` read 459 % on an engine that sampled 1.0 % over 6 s, so the
-lifetime number turns the idle-spin branch into a false NO-GO on any long-lived engine. Contract
-test: `harness/pub_preflight_test.py` (26 checks, CI-enrolled by the
+lifetime number turns the idle-spin branch into a false NO-GO on any long-lived engine. The producer
+seam was audited the same morning (tick 78) and was lying on this very rule's side: the untracked
+reader fed the THIRD token of the `free -m` Swap row (USED) as `swap_free_mib` — on a box reading
+total 8191 / used 8159-8186 / free 0-32 MiB it emitted swap_free≈8184, and the swap rule would have
+GO'd into the exact condition the gate exists to refuse (replaying today's reader output through the
+pre-fix gate prints `PREFLIGHT GO`; the fixed gate answers an input gap). The gate now accepts an
+optional `swap_used_mib` and re-sums the columns (`SWAP_BALANCE_TOL_MIB = 64`, absorbing free(1)'s
+per-column rounding — today's readings balance exactly at 8186 + 5 = 8191), answering INPUT GAP,
+never GO, on a mismatch; the reader now takes the fourth token, emits `swap_used_mib` itself, and
+samples `engine_pcpu` over 6 s from `/proc/<pid>/stat` (live sample: 0.0-1.0 %, against the 459-565 %
+lifetime numbers the old line emitted). Every stored reading from that lineage has an untrusted swap
+column — the 2026-11-11 series shows swap "full" at 03:36/04:12 and "empty" (8184-8191) for the rest
+of the day, plus one file with a 294 911 MiB swap total (a junk read), and the two GO verdicts that
+morning rest on that column — but no local leg ever started on a stored reading, so no published
+number is affected; the exposure was prospective and is now mechanically guarded.
+Contract test: `harness/pub_preflight_test.py` (30 checks, CI-enrolled by the
 `harness/*test.py` glob) — one healthy set goes, six independent tampers each turn NO-GO, two
 non-vacuity controls (a busy GPU at high engine CPU, 1 GiB of swap free) still go, both input-gap
 classes fail closed, and four reading-shape cases pin the parser (one-line form and padded value reach
@@ -4287,3 +4301,58 @@ Grok is cancelled by owner decision 2026-11-12 and blocked by the marker, the ru
 gate, SimpleBench stays closed as unpinnable, and the remaining ladder rows (Terminal-Bench, SWE-bench
 Verified subset, GAIA-lite) need an owner decision to open — while the endpoint sits in this state a
 local leg would additionally be refused by `pub_preflight.py` until the box is relieved.
+
+## Tick 78 — 2026-11-12 11:15 CET: the live reader fed the preflight gate a lying swap column; producer fixed, the seam is arithmetically guarded from both sides (tooling only, zero model/cloud calls)
+
+*Nothing runs and nothing is queued.* `systemctl --user list-units 'parb-pub-*'` returns no unit, the
+bracketed process counts are 0 for the cloud transport and 0 for the local runners, the operator
+marker for the cancelled vendor is still in place, and the resume gate exits 3 unshielded
+(`checks: 22 | RESUME GATE: NO-GO - do not spend quota`, `pinned resume record: 182 ids … VOID`).
+
+*The defect, measured not inferred.* Tick 77 built the gate's producer-contract wording but left the
+untracked reader itself unaudited. A direct cross-read of the endpoint box answered
+`Swap: 8191 8159 32` (and 5 MiB free four minutes later) — swap saturation persists, the machine
+note's condition — while the reader took `$2" "$3` from that row, i.e. **total and USED**, and emitted
+the used value as `swap_free_mib`. Non-vacuity proven by replay: today's reader numbers on today's
+box, fed to the pre-fix gate (HEAD bytes), print **`PREFLIGHT GO`** — the swap rule would have walked
+a local leg onto a fully swapped-out engine, the exact mid-leg OOM class the gate exists to refuse;
+the fixed gate answers `INPUT GAP … the swap columns do not add up` with exit 1. The stored 11-11
+series shows the same column producing a physically unmotivated full→empty→full swap story (0 at
+03:36/04:12, 8184-8191 for the rest of the day) plus one junk file with a 294 911 MiB swap total, and
+that morning's two GO verdicts rest on it — but **no local leg ever started on any stored reading**
+(no local leg has been queued since the gate shipped; the last local leg predates it), so no published
+percent, verdict or answer byte is affected. The exposure was prospective; it is now closed.
+
+*What shipped (tooling, one release, no contour feature, no published byte moved).* The untracked
+reader now takes the fourth token (`$4` = free), emits `swap_used_mib` beside it, and implements the
+tick-77 pcpu semantics: `engine_pcpu` is a 6-second delta of `/proc/<pid>/stat` utime+stime
+(`100·d(utime+stime)/CLK_TCK/N`), NaN → input gap if the pid dies mid-sample; a live sample reads
+**0.0 %** against the 490-565 % lifetime numbers the old line emitted all day, so the idle-spin
+branch can no longer false-NO-GO a long-lived engine either. The tracked gate gained the seam check:
+when `swap_used_mib` is present, used + free must re-sum to total within `SWAP_BALANCE_TOL_MIB = 64`
+(free(1) rounds each column independently; today's readings balance **exactly**: 8186 + 5 = 8191),
+else INPUT GAP, never GO — a column mix-up is a broken reading, not a box state. Contract test
+26 → **30 checks, 30/30 green**: balanced columns still GO, the exact used-as-free mix-up (8159/8159
+on total 8191) is an input gap naming the class, a 61 MiB rounding gap is inside tolerance and GOes,
+an unreadable value fails closed. `pub_preflight.py` is not a MANIFEST pin, so no pin moved.
+
+*Live re-read through the fixed producer (fresh readings file, wrapper bare, gate unshielded):*
+`swap_total_mib=8191 swap_used_mib=8186 swap_free_mib=5 engine_pcpu=0.0 gpu_util_pct=0
+health_code=200 foreign_legs=0` → **PREFLIGHT NO-GO, real exit 3**, resting on the swap rule alone —
+the box remedy (relieve memory pressure or restart the engine) stays a box/owner decision, nothing on
+the box was touched. No local leg is queued, so the NO-GO costs nothing.
+
+*Standing gates re-run read-only, all green:* arms index drift 0; derived percents 42 / 0 findings;
+grok-cell rule 9 docs / 0 findings; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows
+/ 0 findings; resume gate 22 checks / exit 3 as above. The daily-docs job's 03:00 failure stays
+attributed to the mid-flight census pin (tick 76), next run 2026-11-13 03:00 CET expected green on a
+clean tree; the hard-bank-era `every 5m` legacy job keeps firing and stays an owner decision, its
+state untouched.
+
+*What is admissible next is unchanged:* all eight in-force sets carry the three-arm standard, Grok is
+cancelled by owner decision 2026-11-12 and blocked by the marker, the runner and the exit-3 gate,
+SimpleBench stays closed as unpinnable, and the remaining ladder rows need an owner decision to open;
+while the endpoint sits swap-saturated a local leg would be refused by `pub_preflight.py` until the
+box is relieved. Zero model and zero cloud calls this tick; no digest row, percent, verdict, answer
+byte, bank file, manifest pin or contour stamp moved; no leg started, stopped, duplicated or
+discarded, so `LEG-INCIDENTS.md` gains no entry.

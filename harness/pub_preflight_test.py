@@ -13,7 +13,12 @@ What it pins:
      number both exit 1, never GO;
   4. two non-vacuity controls prove the thresholds are conditional, not
      "any swap used / any CPU is fatal": engine at high CPU WITH the GPU busy is
-     GO, and a box with swap partially used (1 GiB free) is GO.
+     GO, and a box with swap partially used (1 GiB free) is GO;
+  5. the optional swap_used_mib re-sums the swap columns (2026-11-12: an untracked
+     reader fed the USED column as swap_free_mib on a swap-saturated box — used
+     8159 / free 32 / total 8191 — which would have GO'd the swap rule; when the
+     key is present a mismatch is an input gap, a within-tolerance balance still
+     GOes, and an unreadable value fails closed).
 
 The real readings that motivated this gate (2026-11-10, tick 23) are reproduced as
 the swap/D-state tamper case: 3 MiB swap free, engine state Dl, 602 % CPU at 0 % GPU.
@@ -111,6 +116,20 @@ def main() -> int:
     ck("INPUT GAP" in out, "missing reading must name the gap")
     rc, out = run(variant(load1="n/a"))
     ck(rc == 1, f"unreadable number must exit 1, got {rc}")
+
+    # Swap-column balance (2026-11-12): the untracked reader fed the USED column as
+    # swap_free_mib on a box with total 8191 / used 8159 / free 32, so the swap rule
+    # would have GO'd a fully swapped-out endpoint. When swap_used_mib is present the
+    # gate re-sums the columns; the producer's own numbers reproduce the mix-up.
+    rc, out = run(variant(swap_used_mib=391))
+    ck(rc == 0, f"balanced swap columns must still GO, got exit {rc}: {out}")
+    rc, out = run(variant(swap_used_mib=8159, swap_free_mib=8159))
+    ck(rc == 1 and "do not add up" in out,
+       f"the used-as-free mix-up must be an input gap, got exit {rc}: {out}")
+    rc, out = run(variant(swap_used_mib=390, swap_free_mib=7740))
+    ck(rc == 0, f"a 61 MiB rounding gap is inside tolerance and must GO, got exit {rc}: {out}")
+    rc, out = run(variant(swap_used_mib="n/a"))
+    ck(rc == 1, f"an unreadable swap_used_mib must exit 1, got {rc}")
 
     # Reading-file shapes (2026-11-12): the docstring teaches the single-line form and the
     # remote producer pads some values (`ps -o pcpu=` emits `engine_pcpu= 459`). A live read
