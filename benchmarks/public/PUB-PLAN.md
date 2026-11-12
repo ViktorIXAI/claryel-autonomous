@@ -4057,3 +4057,50 @@ zero model and zero cloud calls.*
 answers + verdicts, one digest row, the repair-event census beside the percent, extend
 `IFEVAL-RESULT.md`, and regenerate `GROK-RESUME-PIN.json` in the same commit via
 `scripts/pub_grok_resume_check.py --write-pin`. The chain is then empty; nothing else is queued.
+
+## Tick 73 — 2026-11-12 07:45 CET: the Grok line is CLOSED by owner cancellation; the block above is void
+
+The owner cancelled Grok at 06:40:54 CET ("грок больше не трогаем, лимитов очень мало, поэтому грок
+отмена"). The paragraph above was written when the IFEval leg was expected to finish at ~08:25; it
+stopped at 06:42:49 with 359 of 541 rows and will never store 541, so **no IFEval Grok percent will
+ever be minted on this line without a new owner decision**. The whole ladder's Grok column is closed
+at that row count, the completed legs keep their published percents, and item 8 ("Grok resumption")
+is closed as cancelled rather than gated to a date.
+
+*What the line looks like now.* Every in-force set carries three arms — bare local brain, contour
+`0.0.2.56` in matched request shape, and codex — with item P0 satisfied on all eight sets
+(gsm8k, arc-easy, arc-challenge, gpqa-diamond, humaneval, mmlu-pro, ifeval, LiveCodeBench). Grok
+percents stay published for gsm8k, arc-easy, arc-challenge, gpqa-diamond, humaneval, mmlu-pro and the
+hard-bank cadence row. IFEval's Grok cell carries a stored-row count (359/541, resumable by id,
+`01c1ee0b6e7f6d5d`), BFCL and both LiveCodeBench cells carry the cancelled-window sentence because no
+leg of those sets was ever started. The four cells that still promised "resumes 2026-11-12" were
+corrected with dated notes in the same commit.
+
+*Nothing is queued.* A new local leg may start on P2005 without a queue wait (no `parb-pub-*` unit,
+no runner process), but nothing is queued, and no Grok arm may be launched at all: the resume gate
+reports a CANCELLED window (CLOSED with no end) and the launchers and the cloud runner refuse while
+the operator's marker exists. The three-arm standard applies to any set the owner adds next.
+
+*Standing gates re-run (read-only, all green):* arms index drift 0; derived percents 42 / 0 findings;
+grok-cell rule 9 docs / 0 findings; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows
+/ 0 findings — the cancelled partial minted nothing, as intended. Contract tests on this tree:
+resume gate 32, grok-cell rule 27, pin regeneration 39, cancel guard 9 = 107 checks, 0 failures; the
+full static-QA suite exits 0.
+
+*CI.* `14cccf2` reddened `devsecops` on the cancel-guard test I added in that same commit: it asserted
+that the operator marker exists in `$HOME`, which is true on this box and false on a GitHub runner.
+Repaired in `c4fcad7` by asserting the ambient state is left exactly as found; all four jobs
+(secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts) are green on `c4fcad7`, and
+the raw URLs of the pin, both corrected result docs and the new test return 200 at that SHA.
+
+*GitHub `docs-freshness`.* The scheduled 03:00 run failed (streak 9). The cause is in its own capture:
+the digest-row gate test's census check tripped on a hand-copied row count while tick 69's MMLU-Pro
+publication was mid-flight — that pin became derived at 04:47 (`5be2855`), so today's tree is green
+under the same suite. The `MANIFEST GUARD: … does not match its published tasks pin` lines in the same
+capture are the checkers' tamper fixtures, not drift: the tracked IFEval task file still hashes to
+SHA-1/16 `2c672531577dcc33` / SHA-256/16 `e09a5cab3782ed5b` over 541 rows.
+
+*Nothing else moved:* no digest row, verdict, answer byte, result-doc percent, bank file, manifest pin
+or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no leg was started, so
+the only `LEG-INCIDENTS.md` entry this tick is the cancellation itself. Zero model and zero cloud
+calls this tick.
