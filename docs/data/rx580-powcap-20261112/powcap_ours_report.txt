@@ -1,0 +1,49 @@
+16:12:43 == cap 120 W (cap=120W)
+load_backend: loaded RPC backend from /home/claryel/llama-vulkan/llama-b12318/libggml-rpc.so
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
+load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded CPU backend from /home/claryel/llama-vulkan/llama-b12318/libggml-cpu-ivybridge.so
+16:12:48    restored cap=120W
+16:12:48 DONE_POWCAP_OURS
+our_cap120 ± 50.17
+our_cap120 ± 6.44
+our_cap120 ± 21.19
+16:14:24 == cap 100 W (cap=100W)
+load_backend: loaded RPC backend from /home/claryel/llama-vulkan/llama-b12318/libggml-rpc.so
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
+load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded CPU backend from /home/claryel/llama-vulkan/llama-b12318/libggml-cpu-ivybridge.so
+our_cap100 ± 51.53
+our_cap100 ± 6.74
+our_cap100 ± 21.80
+16:16:01 == cap 70 W (cap=70W)
+load_backend: loaded RPC backend from /home/claryel/llama-vulkan/llama-b12318/libggml-rpc.so
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
+load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded CPU backend from /home/claryel/llama-vulkan/llama-b12318/libggml-cpu-ivybridge.so
+our_cap70 ± 44.25
+our_cap70 ± 6.63
+our_cap70 ± 20.92
+16:17:45 == cap 50 W (cap=50W)
+load_backend: loaded RPC backend from /home/claryel/llama-vulkan/llama-b12318/libggml-rpc.so
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
+load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded CPU backend from /home/claryel/llama-vulkan/llama-b12318/libggml-cpu-ivybridge.so
+our_cap50 ± 34.02
+our_cap50 ± 6.59
+our_cap50 ± 18.32
+16:19:43 == cap 30 W (cap=30W)
+load_backend: loaded RPC backend from /home/claryel/llama-vulkan/llama-b12318/libggml-rpc.so
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
+load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded CPU backend from /home/claryel/llama-vulkan/llama-b12318/libggml-cpu-ivybridge.so
+our_cap30 ± 22.23
+our_cap30 ± 5.03
+our_cap30 ± 13.09
+16:22:26    restored cap=120W
+16:22:26 DONE_POWCAP_OURS

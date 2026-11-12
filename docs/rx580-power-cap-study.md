@@ -45,28 +45,57 @@ Notes on the setup, recorded because they matter for reading the numbers:
 Raw data: `docs/data/rx580-powcap-20261112/` (1 s sampler CSV, bench report, run windows, and the
 aggregation script that produced this table).
 
+## Our own 77 GiB MoE (`Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S`, `-ngl 99 -ncmoe 99`)
+
+This model needs 12 s between arms — consecutive bench runs left the VRAM unreleased and the next
+context failed to build (so the failures inside the first pass were flakiness, not the missing
+resizable BAR).
+
+| cap | pp512 | tg128 | Δ decode vs 120 W | avg W | peak W | Wh / 1k tokens | € / 1M tokens |
+|---|---|---|---|---|---|---|---|
+| 120 W | 50.2 | 6.44 | — | 69.5 | 115 | 3.00 | 0.75 |
+| 100 W | 51.5 | 6.74 | +4.7 % | 73.6 | 107 | 3.03 | 0.76 |
+| 70 W | 44.3 | 6.63 | +3.0 % | 62.9 | 80 | 2.64 | 0.66 |
+| 50 W | 34.0 | 6.59 | +2.3 % | 49.6 | 71 | 2.09 | **0.52** |
+| 30 W | 22.2 | 5.03 | −21.9 % | 32.1 | 44 | 1.77 | 0.44 |
+
+Raw data: `docs/data/rx580-powcap-20261112/powcap_ours_*`.
+
+This inverts the small-model rule. **Decode of the big MoE barely depends on the GPU power cap**
+(6.44 → 6.59 t/s from 120 W to 50 W) because its expert weights live in system RAM and the GPU only
+assists; what the cap does is cut prefill (50 → 34 → 22 t/s) and the card's draw (70 → 50 → 32 W).
+Cost per token therefore keeps falling all the way down: **0.75 € → 0.52 € at 50 W (−30 %), 0.44 € at
+30 W (−41 %)**. The 100 W row is noise at the top of the curve (its decode is 4.7 % *above* the 120 W
+row), which is also why the model needs repetition before any top-end claim.
+
 ## Verdict
 
-* **70 W is the sweet spot for every model tested.** Cutting the cap from 120 W to 70 W costs
+* **For models that fit in VRAM, 70 W is the sweet spot.** Cutting the cap from 120 W to 70 W costs
   ~36 % of the power (≈101 → 65 W) and only ~12–15 % of generation speed, so cost per million
   tokens falls **26–28 %** (3B: 0.156 → 0.114 €, Nano-4B: 0.238 → 0.176 €, Bolt-E4B: 0.291 → 0.221 €).
+* **For the 77 GiB MoE the cap is a prefill knob, not a decode knob** — decode is flat to 50 W and
+  cost per token falls monotonically, so the right cap there is **50 W (−30 % cost, free decode)** and
+  30 W only for latency-insensitive batch work.
 * **100 W is free speed**: −1 % throughput for −13 W. Worth taking if the box has to stay cool or
   quiet, no reason to leave the card there if the goal is efficiency.
 * **50 W is where efficiency turns back up**: decode falls 37–42 % while watts fall only ~52 %, and
   Wh per 1k tokens rises above the 70 W row for all three models. Going below 50 W buys nothing.
-* **30 W is a dead end, not a low-power mode**: 9–20 t/s, and cost per token is 13–18 % worse than at
-  70 W. The card does survive it (no hang, no reset, it stays on the bus), it is simply too starved.
+* **30 W is a dead end for VRAM-resident models, not for the offloaded MoE**: the small models fall to
+  9–20 t/s and their cost per token rises 13–18 % above the 70 W optimum, while the big MoE is still
+  getting cheaper per token at 30 W (prefill is what collapses). In both cases the card survives the
+  cap — no hang, no reset.
 * **Prefill pays for the cap much more than decode** (3B pp512: 372 → 233 at 70 W, −37 %, versus
   −12 % decode). If the workload is long-prompt / RAG-style, keep the card at 100–120 W; if it is
   chat-style generation, run it at 70 W.
-* Practical rule for this card in the fleet: **cap 70 W for background and chat traffic**, 120 W for
-  prompt-heavy traffic, never below 50 W.
+* Practical rule for this card in the fleet: **VRAM-resident model → cap 70 W** (chat/background) or
+  **100–120 W** (prompt-heavy). **Offloaded big MoE → cap 50 W**, 30 W for batch only. Never cap
+  below 30 W — the card still runs, it just stops being useful.
 
 ## To finish
 
-* A spaced retry pass for our 77 GiB MoE (`-ncmoe 99`, 12 s between arms): it failed to create a
-  context inside this pass at every cap. The card also reports `rebar: 0` — no resizable BAR on this
-  board — which is the structural reason large-model offload is fragile here (the CPU can only ever
-  address a 256 MB window of VRAM at a time).
+* Repetitions at the top of the curve (120 vs 100 W) for the big MoE — the 100 W row measured
+  *faster* than 120 W, which is run-to-run noise, not a real gain.
 * Clock logging: the sampler's `gpu_clock` fallback did not parse `pp_dpm_sclk` on this kernel, so
   the clock column is empty; fixed in `scripts/gpu_powcap_sampler.sh` for the next pass.
+* Applying the caps permanently (a udev rule or a boot script writing `power1_cap`) once the owner
+  picks the fleet default.
