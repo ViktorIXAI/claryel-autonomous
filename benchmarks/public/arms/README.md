@@ -202,6 +202,7 @@ convention the repo security scanner binds its byte-pinned exceptions to
 | gpqa-diamond-grok-answers.jsonl | 198 | `e780853b91480dc5` | `c479109822f388a5` |
 | mmlu-pro-basalt-answers.jsonl | 500 | `9089ff194dc21f74` | `fc9e8741edfec51e` |
 | mmlu-pro-codex-answers.jsonl | 500 | `681ffe375a800426` | `17230236196545a4` |
+| mmlu-pro-grok-answers.jsonl | 500 | `8f306afb5bc8026f` | `5731d720f13ef8a5` |
 | humaneval-codex-answers.jsonl | 164 | `5f8fc9fd3de212ae` | `d660e00fa0cfeb1b` |
 | humaneval-codex-verdicts.jsonl | 164 | `4b815578e7227a09` | `714a4005f8defed2` |
 | humaneval-grok-answers.jsonl | 164 | `3cb269da9f735bc5` | `bec1da78aec5f69e` |
