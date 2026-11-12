@@ -15,7 +15,7 @@
    cap120_Nano4B                       31.16 ± 0.09  = 
    cap120_BoltE4B                     420.41 ± 0.38  = 
    cap120_BoltE4B                      24.12 ± 0.02  = 
-   ! llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+   ! llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 15:55:07 == cap 100 W
 15:55:07    cap=100W level=high od=5/5
    cap100_3B                          359.11 ± 0.90  = 
@@ -24,7 +24,7 @@
    cap100_Nano4B                       30.68 ± 0.08  = 
    cap100_BoltE4B                     407.65 ± 1.21  = 
    cap100_BoltE4B                      23.82 ± 0.05  = 
-   ! llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+   ! llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 15:57:34 == cap 70 W
 15:57:34    cap=70W level=high od=5/5
    cap70_3B                           232.87 ± 0.08  = 
@@ -33,7 +33,7 @@
    cap70_Nano4B                        26.75 ± 0.03  = 
    cap70_BoltE4B                      266.25 ± 0.48  = 
    cap70_BoltE4B                       20.62 ± 0.06  = 
-   ! llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+   ! llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 16:00:16 == cap 50 W
 16:00:16    cap=50W level=high od=5/5
    cap50_3B                           160.03 ± 0.03  = 
@@ -42,7 +42,7 @@
    cap50_Nano4B                        18.55 ± 0.00  = 
    cap50_BoltE4B                      184.37 ± 0.14  = 
    cap50_BoltE4B                       14.02 ± 0.04  = 
-   ! llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+   ! llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 16:03:42 == cap 30 W
 16:03:42    cap=30W level=high od=5/5
    cap30_3B                           125.46 ± 0.01  = 
@@ -51,7 +51,7 @@
    cap30_Nano4B                        12.20 ± 0.02  = 
    cap30_BoltE4B                      144.44 ± 0.02  = 
    cap30_BoltE4B                        9.11 ± 0.01  = 
-   ! llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+   ! llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 16:08:15 == restore
 16:08:15    cap=120W level=auto
    window                      avg_W   max_W  clk_avg  n
