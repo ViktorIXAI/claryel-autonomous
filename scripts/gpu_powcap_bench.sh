@@ -53,9 +53,10 @@ cat $HW/power1_cap_default | sudo tee $HW/power1_cap >/dev/null 2>&1
 echo auto | sudo tee $CARD/power_dpm_force_performance_level >/dev/null 2>&1
 say "   cap=$(($(cat $HW/power1_cap)/1000000))W level=$(cat $CARD/power_dpm_force_performance_level)"
 python3 - <<'PY' | tee -a $R
-import csv
-W=[l.split() for l in open('/home/claryel/llama-vulkan/powcap_windows.txt') if l.strip()]
-S=[r for r in csv.DictReader(open('/home/claryel/llama-vulkan/powcap_power.csv'))]
+import csv,os
+D=os.path.expanduser('~/llama-vulkan')
+W=[l.split() for l in open(D+'/powcap_windows.txt') if l.strip()]
+S=[r for r in csv.DictReader(open(D+'/powcap_power.csv'))]
 print("   window                      avg_W   max_W  clk_avg  n")
 for w in W:
     tag,s = w[0], int(w[1]); e = int(w[2]) if len(w)>2 else s
