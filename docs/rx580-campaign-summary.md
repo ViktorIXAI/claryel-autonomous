@@ -139,3 +139,19 @@ written for, and their Vulkan FWHT PR is still a draft upstream. A 27B-class mod
 7 GiB suits background work, not interactive chat; the card's fast, useful range stays ≤5 GiB
 (30–60 t/s). Thermals through these runs: 43–54 °C, 14 W idle, ~42 W settling after load — still
 nowhere near a thermal limit.
+
+
+## Documentation audit clarification — 2026-11-12 (issue #25)
+
+**Dated correction; original campaign measurements and wording above are retained for provenance.**
+The `high` +5% row above labels the 33.9 → 52.9–53.9 pp512 change as `+34 % prefill`.
+The actual relative increase is **+56.0% to +59.0% prefill**. The `+41 % decode`
+label is the upper end of the 5.85 → 7.88–8.26 tg128 range (**+34.7% to +41.2%**).
+These are arithmetic corrections on the published numbers, **not** new runs or
+independent host validation. See `docs/rx580-p3001-field-test.md` and
+[issue #25](https://github.com/ViktorIXAI/claryel-autonomous/issues/25).
+
+The power-cap recommendations in `docs/rx580-power-cap-study.md` derive from
+one benchmark repetition per cap, card-only power samples, and an unverified
+run-window alignment; they are **provisional configuration hypotheses**, not
+independently established fleet defaults or full-system electricity costs.
