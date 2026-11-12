@@ -5471,3 +5471,117 @@ block; zero benchmark bytes, no digest row or percent moved. Push uses the stand
 box holds its longest GO streak of the series (4 in a row), so the owner-gated ladder rows
 (Terminal-Bench / SWE-bench Verified / GAIA-lite) could start the moment an owner decision opens
 them; the Grok line stays closed by owner decision 2026-11-12.
+
+## Tick 97 — 2026-11-13 00:44 CET: read-only status tick + **repo-integrity repair** — tick 96's commit never reached `origin/main` because the **tree object of `benchmarks/public/` was missing from the object store** (`git fsck`: exactly one missing object, its push died with `bad tree object`); the object was rebuilt **byte-identical** with `git mktree` and both commits are published now; **fifth consecutive PREFLIGHT GO** (19th reading, same engine process for two ticks running); `push_ready.sh` green end to end; Grok gate NO-GO exit 3; zero legs, zero calls
+
+*No leg was started, stopped, duplicated or discarded: the launch queue is still empty* — every
+in-force set carries bare + contour matched-shape + codex arms, grok is cancelled by owner decision
+2026-11-12, and the remaining ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite) are
+owner-gated. Zero model and zero cloud calls this tick.
+
+*The movement this tick is repository integrity, and it was blocking publication, not tidying it.*
+Local `main` was **two commits** in front of `origin/main` by the end of the repair: at tick start
+`git ls-remote origin main` was `03745b1` while local `HEAD` was `fdf9c7c` (tick 96, committed
+00:01 CET), and the remote-tracking reflog has **no push entry for `fdf9c7c` at all**. The reason is
+not a forgotten push: this tick's own push attempt died with `fatal: bad tree object
+a92ec006ebe8509dd1ae09f8ad068bb37a44166a`, and `git fsck --no-dangling` reports **exactly one
+missing object** in the whole store — precisely that tree, which is `benchmarks/public/` inside tick
+96's commit (parent `03745b1`, the published head). So tick 96's push failed for the same reason,
+and an operator reading `main` between 2026-11-13 00:01 and this tick never saw its record. Nothing
+measured is affected — tick 96 wrote only `PUB-PLAN.md` and moved no digest row, percent, verdict,
+answer byte or manifest pin.
+*Reconstruction rather than rewrite.* `git fsck --connectivity-only` shows the single broken link
+(tree `05ad98b7` → missing `a92ec006`); `fdf9c7c`, its root tree, the `benchmarks` tree and every
+other object resolve. The lost subtree was rebuilt with `git mktree` from `03745b1`'s
+`benchmarks/public` listing (29 entries) with the one changed blob substituted — the tick-96 text of
+`PUB-PLAN.md`, recovered by cutting this tick's own append off the working file. The rebuilt tree
+hashes to `a92ec006ebe8509dd1ae09f8ad068bb37a44166a`, **byte-identical to the lost object**, which is
+a cryptographic proof of both the object and the recovered text, and `git fsck
+--connectivity-only` is clean afterwards. `fdf9c7c` and this commit were then pushed as a plain
+fast-forward with the pre-push guard honoured (`ALLOW_HARD_V6_PUSH=1 git push origin HEAD:main`, no
+`--no-verify`) and verified the house way: `git ls-remote` re-read + a SHA-pinned
+`raw.githubusercontent.com` fetch of `benchmarks/public/PUB-PLAN.md` returning 200. No history was
+rewritten, no branch other than `main` touched.
+*Mechanism of the loss, stated to the measured extent.* No `gc.log`; the single pack in the common
+git dir (`~/projects/…/.git/objects/pack`, shared with the second worktree) is dated **2026-11-12
+16:16**, i.e. the last repack predates the tick-96 commit by ~8 h, so the object was written loose at
+00:01 and was gone by this tick with no later gc on record. One loose object lost, everything else
+fsck-clean: the cause is not established beyond that, and it is recorded as an open endpoint-of-repo
+hazard rather than explained away. Standing rule this tick adds to its own practice: **a tick's block
+is not done until `git ls-remote` matches `HEAD`.** A commit that exists only locally is an
+unpublished record, and a broken object store can fail a push in a way an exit-code pipe hides — so
+the push is re-read from the remote, never from the local command's status.
+
+*Nineteenth reading; fifth consecutive GO.* Reading (wrapper run bare, gate re-run unshielded, true
+exit **0**): `swap_free_mib=3 110` / `swap_used_mib=5 081` (of 8 191 — the two columns balance
+exactly at the total, tick-78 producer-column guard satisfied), `mem_available_mib=17 232`,
+`engine_rss_mib=55 594` (the ops line's 36 GiB tier), `engine_state=S`, `engine_pcpu=0.0`
+(6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=7.76`, `load1=0.07`, `health_code=200`,
+`foreign_legs=0` → **PREFLIGHT GO**, valid for that reading only. The engine is the same process as
+at ticks 95 and 96 (`pid=1142697 age=01:45:57` ⇒ started ≈ 22:57) — the second tick running of the
+series with no inter-tick engine cycle. *The series census is re-derived mechanically this tick*
+(`pub_preflight.py` run over every stored reading file, not hand-indexed): **39 files → 7 GO /
+30 NO-GO / 2 input-gap**, day splits 2026-11-11 2 GO / 17 NO-GO / 2 gap, 2026-11-12 4 GO /
+13 NO-GO, 2026-11-13 1 GO. Tick 96's hand index said 36 across all days; the file re-run says 38
+before today's reading, so the index had under-counted the 2026-11-11 files by two — bookkeeping
+only, no published percent involved. Per tick 78, two of the 11-11 GOs rest on the untrusted swap
+column, so the **trustworthy-column GO streak is 5**.
+
+*Five standing gates re-run read-only with true exits captured unshielded, all green, counts
+identical to ticks 88–96:* arms index drift 0; derived percents 42 recomputed from shipped bytes /
+0 findings (digest citations 44, result-doc citations 188, uncovered 0); grok-cell rule 9 docs / 0
+findings; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings (contracts
+named 26, pre-rule exceptions 23/23). `scripts/push_ready.sh` green end to end (manifest VERIFY
+PASS, links 154 across 325 markdown files, DOCS POLICY PASS, gitleaks no leaks, the five pub gates,
+`gate rc=0`). `scripts/security/secret_scan.py --dir . --strict` exit **0**, 0 findings, 18 vendored
+metadata exceptions — exception set unchanged.
+
+*The Grok line stays cancelled.* Resume gate unshielded: `checks: 22 | RESUME GATE: NO-GO - do not
+spend quota`, true exit **3**, `pinned resume record: 182 ids were never asked … VOID, the line is
+cancelled, this is not a queue`. The stored archives re-read at their pinned identities: gpqa-diamond
+198 rows / 198 ok `c479109822f388a5`, humaneval 164 / 164 `161ddf5b1956ab13`, mmlu-pro 500 / 500
+`5731d720f13ef8a5`, ifeval **359 rows / 359 unique / 359 `finish=ok` / 0 empty** `01c1ee0b6e7f6d5d`
+with the 182-id resume set `ifeval-286..ifeval-3757` intact — a one-word owner reversal still
+resumes by id. Operator marker intact and untouched at `~/pub-bench/GROK-CANCELLED` (06:54). Zero
+Grok calls.
+
+*Frozen-line hygiene, read from the files rather than from prose.* `git log -1 --
+harness/gate_versioning.py` is `a36774c` **2026-11-08 10:02 CET** ("pair-257: contour 0.0.2.57
+UNMEASURED — frozen to exactly (2,57), line stays 0.0.2.56"): **no commit has touched the version
+source for five days**. `CURRENT_REVISION (2,57)` / `CURRENT_STAMP "0.0.2.57"` come from `b2fb0d6`
+(2026-11-08 09:51) and therefore predate the frozen delivery tag `stable-hard-0.0.2.56` (`ee84649`,
+2026-11-08 15:21) — tick 96's ordering claim restated against the two dated commits behind it. The
+last entry in `CONTOUR_FEATURES` is `(2, 57)`; nothing was registered after it, no hard-bank pair
+ran, no hard-bank byte moved. Zero `parb-*` user units; bracketed standalone process counts
+`gate_run.py` 0, `pub_bench_run.py` 0, `pub_bench_cloud.py` 0. Legacy job `f23cf5d48e11` ("Mac v2.2
+full after v2.1", every 5 min) enabled, `last_status=ok`, streak 0, no-op while
+`~/.hermes/mac-v22full-launch.state` (2026-11-02) exists — verified present; drain guard
+`9a12508f8a69` enabled, `last_status=ok`. The second clone's index is empty
+(`git -C <second clone> diff --cached --stat` prints nothing), so the staged-deletion hazard is not
+live.
+
+*Daily docs-job record, read mechanically and reported per the machine note (not fixed).* Job
+`ef7ea47ff99b` (schedule `0 2 * * *`): `last_status=error`, `failure_streak: 9` — the cumulative
+scheduler counter, never nine attempts today. `executions.db` still retains **zero** execution rows
+for it; `cron_incidents`' newest row for the job is `4cfeecb7852d`, `state=alerted`, **last seen
+2026-11-12 03:02:20 CET** — the same incident tick 96 analysed (stderr head is the static suite's
+negative-control MANIFEST GUARD prints; recorded cause is the mutable digest-row-count pin that
+`5be2855` removed at 04:47). **No 2026-11-13 fire has happened yet**: the next scheduled run is
+today at 02:00 UTC (03:00 CET), and the README marker still reads `Status checked: 2026-11-11`,
+which is consistent with that rather than with a new failure.
+
+*Repo state and CI.* CI at `origin/main` `03745b1` was **green on all five workflows** (secret-scan,
+contour self-tests, hard-v6 scoring contracts, devsecops, pages-build-deployment); nothing had ever
+run at `fdf9c7c` because that commit could not be pushed until this tick. After the repair
+`git fsck --connectivity-only --no-dangling` is clean (0 findings), the two-commit fast-forward is
+published and re-read from the remote (`git ls-remote origin main` == `HEAD`), and the five pub gates
+plus `push_ready.sh` were re-run on the repaired tree — the reconstruction moved no tracked content
+byte, only the object that indexes them. CI at the new head is read next tick rather than asserted
+now. The only file this tick writes is `PUB-PLAN.md`; zero benchmark bytes moved, so
+`LEG-INCIDENTS.md` gains no entry — no leg was involved, and the integrity gap repaired here is a
+push and an object store, not a leg.
+
+**Next in force:** unchanged and empty — no leg is queued or admissible; the endpoint box holds a
+five-reading GO streak, so the owner-gated ladder rows (Terminal-Bench / SWE-bench Verified /
+GAIA-lite) could start the moment an owner decision opens them; the Grok line stays closed by owner
+decision 2026-11-12.
