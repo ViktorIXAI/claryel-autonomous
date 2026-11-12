@@ -3993,3 +3993,43 @@ stores 541/541 (ETA ~08:25 CET), ship answers + verdicts, one digest row under `
 the `pub-ifeval-v1` number beside it, publish the IFEval repair-event census beside the percent,
 extend `IFEVAL-RESULT.md`, and regenerate `GROK-RESUME-PIN.json` in that same commit — now by running
 `scripts/pub_grok_resume_check.py --write-pin` instead of typing it. The chain is then empty.
+
+## 2026-11-12 06:15 CET — tick 72 — status only: IFEval Grok leg 319/541, no percent, all standing gates green (zero model/cloud calls)
+
+*Queue read at 06:13-06:14 CET (read-only census + resume gate, exit 0):* legs 1-3 stay complete and
+published (gpqa-diamond 198/198 = 87.9 %, humaneval 164/164 = 97.6 %, mmlu-pro 500/500 = 86.0 %).
+Leg 4, the IFEval Grok arm, is the only transport running (`parb-pub-grok-queue` active, one
+`pub_bench_cloud.py` process per `ps`, the chain's journal shows exactly one leg boundary:
+`cloud mmlu-pro grok exit=0 03:18:38` then `--- leg ifeval started 2026-11-12T03:18:38+01:00`):
+**319 rows / 319 unique ids / 319 `finish=ok` / 0 empty / 0 duplicates**, stored SHA-256/16
+`8f7b1cdb2c56be7f`, last stored id `ifeval-2667`, **222 ids still unasked** (gate's live resume set
+exact: `ifeval-2674`..`ifeval-3757`). Rate since tick 71: +68 rows in ~39 min = ~35 s/task — the
+same band as tick 71's 32.3-35 s/task — so the ETA stays **08:20-08:30 CET** and the leg does not
+finish inside this tick; no percent is taken from a partial arm. The resume gate prints
+`RESUME GATE: READY` (18 checks) in OPEN-window mode; the two zero-credit quarantines
+(`bad-timeout.bak` 46/38, `suspended-window-20261111.bak` 4/4) are unchanged.*
+
+*Standing gates re-run (read-only, all green):* arms index drift 0; derived percents 42 recomputed /
+0 findings (44 digest + 188 doc citations, 0 uncovered); grok-cell rule 9 docs / 0 findings;
+superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings, contracts named 26,
+pre-rule exceptions 23/23 used. The citation census grew since tick 71 (42->44 digest, 176->188 doc)
+because tick 69's MMLU-Pro Grok publication added rows; the checker accounts for them, 0 uncovered.*
+
+*Ops re-reads (no action):* the tick-71 push (`c588052`, 04:35 CET) is **green on the four CI jobs**
+(secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts). GitHub `docs-freshness`
+workflow: last scheduled run **2026-11-11 11:13:46 UTC, success** (`ebc9f79`) — at 05:14 UTC no
+scheduled run has been recorded for 2026-11-12 yet, so no run has yet exercised today's green
+static-QA tree via that surface; the observed delivery window is 10:30-11:50 UTC. Local `main`
+equals `origin/main` (0 ahead / 0 behind), working tree clean before this block. No local leg is
+queued, so the P2005 preflight gate stays uncalled; the engine was not touched.*
+
+*Nothing published moved:* no digest row, verdict, answer byte, result-doc number, bank file,
+manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no leg was
+started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. This tick spent
+zero model and zero cloud calls.*
+
+**Next in force:** unchanged — when leg 4 stores 541/541 (ETA ~08:25 CET): score under
+`pub-ifeval-v2` in the pinned venv (self-test + reference band first, v1 number beside it), ship
+answers + verdicts, one digest row, the repair-event census beside the percent, extend
+`IFEVAL-RESULT.md`, and regenerate `GROK-RESUME-PIN.json` in the same commit via
+`scripts/pub_grok_resume_check.py --write-pin`. The chain is then empty; nothing else is queued.
