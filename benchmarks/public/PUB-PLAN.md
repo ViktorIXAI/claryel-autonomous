@@ -4497,3 +4497,55 @@ and zero cloud calls this tick.
 needs owner relief before any new local arm, the remaining ladder rows (Terminal-Bench /
 SWE-bench Verified / GAIA-lite) need an owner decision to open, and the Grok line stays closed by
 owner decision 2026-11-12.
+
+## Tick 82 — 2026-11-12 14:07 CET: read-only status tick; the lineage's one "junk read" gets a name; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` unit exists; the bracketed process counts are
+0 for the cloud transport and 0 for the local runners. The Grok resume gate was re-run **unshielded**
+and prints `checks: 22 | RESUME GATE: NO-GO - do not spend quota` with true exit **3**, the
+cancelled-window finding naming the owner decision (the tick's first invocation piped the gate
+through `tail` and read as exit 0 — the exact masking this line's own note warns about, caught and
+re-run per the rule, not reasoned around). The stored Grok archive still matches the pin: gpqa-diamond
+198/198, humaneval 164/164, mmlu-pro 500/500, ifeval 359 of 541 rows — a stored-row count, not a
+score — and the 182 unasked ids print as `VOID, the line is cancelled, this is not a queue`.
+
+*All five standing gates re-run read-only at HEAD `9c56e96`, all green:* arms index drift 0; derived
+percents 42 recomputed / 0 findings (44 digest + 188 doc citations, 0 uncovered); grok-cell rule
+9 docs / 0 findings on the in-force cancelled sentence; superseded-cell rule 9 docs / 0 findings;
+digest row rule 49 rows / 0 findings (contracts named 26, pre-rule exceptions 23/23 used). CI at
+that SHA: secret-scan, devsecops, contour self-tests, hard-v6 scoring contracts and pages all
+`success`. Local clone synced with `origin/main` (0 ahead / 0 behind), clean tree.
+
+*Fourth live preflight reading of the endpoint box (14:02 CET, one remote read over the
+repo-standard key):*
+`mem_available_mib=14307 swap_total_mib=8191 swap_used_mib=8189 swap_free_mib=2 engine_state=S
+engine_pcpu=0.0 engine_rss_mib=57288 gpu_util_pct=0 gpu_power_w=26.73 load1=11.04 health_code=200
+foreign_legs=0` → **PREFLIGHT NO-GO, true exit 3**. The refusal rests on the swap rule alone
+(2 MiB free of 8191 MiB); the columns balance exactly (`8189 + 2 = 8191`), so the tick-78 seam guard
+is satisfied and the reading is trusted. The box is **not relieved** since tick 80's diagnosis: the
+serve engine age is 3 d 17 h (no restart), its RSS is 57.3 GiB against a 60.5 GiB `MemTotal`,
+`vmstat` still shows active paging (si/so ≈ 500/540 pages/s over one sample second, quiet the next),
+and the GPU is parked (0 %, 26.7 W, sampled engine CPU 0.0 %). The block on any new local arm is
+unchanged and remains a box/owner action, not a contour or bank change.
+
+*Provenance finding, zero model/cloud calls: the 294 911 MiB "junk read" in the 2026-11-11 lineage
+is a wrong-machine artifact, and the gate's fail-closed branch is what caught it.* While taking this
+tick's reading, the untracked reader script was first executed on the **launch host** instead of the
+endpoint box. It emitted exactly `swap_total_mib=294911` — the number tick 78's note records as "one
+file with a 294 911 MiB swap total (a junk read)" — with empty engine and GPU fields, because the
+launch host carries no GPU and a ~294 GiB swap partition on its RAID. So that lineage's junk entry
+has a mechanism (local execution of an endpoint-only reader), not a sensor fault. What matters for
+the audit trail: the gate answered that reading **INPUT GAP, exit 1** ("a missing reading is never
+treated as healthy"), never GO — exactly as tick 78's fix intends. Tick 78's standing conclusion is
+unchanged and re-confirmed: no local leg ever started on a stored reading, so no published percent
+rests on that lineage, and no repair is needed — a wrong-machine reading lands in the fail-closed
+branch by construction.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no
+leg was started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. Zero model
+and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm; the remaining ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite) need an owner
+decision to open; the Grok line stays closed by owner decision 2026-11-12.
