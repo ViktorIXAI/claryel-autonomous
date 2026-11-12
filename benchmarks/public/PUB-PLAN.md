@@ -4380,3 +4380,83 @@ while the endpoint sits swap-saturated a local leg would be refused by `pub_pref
 box is relieved. Zero model and zero cloud calls this tick; no digest row, percent, verdict, answer
 byte, bank file, manifest pin or contour stamp moved; no leg started, stopped, duplicated or
 discarded, so `LEG-INCIDENTS.md` gains no entry.
+
+## Tick 80 — 2026-11-12 12:50 CET: the preflight NO-GO is structural, not a transient state — read-only endpoint diagnosis (zero model/cloud calls)
+
+*Audit-trail continuity first:* tick 79 wrote its record into this plan's
+`Publication-completeness census` section and rule 1 (plus `harness/pub_taskfile_shape_test.py`),
+not as a dated block, so the dated block series above skips 79. This pointer closes the gap without
+restating its content; nothing in this block duplicates it.
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` unit exists, the bracketed process counts are 0
+for the cloud transport and 0 for the local runners, the operator marker for the cancelled vendor is
+still in place (written 06:54), and the resume gate exits **3** unshielded:
+`checks: 22 | RESUME GATE: NO-GO - do not spend quota`, `pinned resume record: 182 ids were never
+asked … VOID`. The stored Grok archive still matches the pin (gpqa-diamond 198/198, humaneval
+164/164, mmlu-pro 500/500, ifeval **359 of 541 rows** — a stored-row count, not a score, resume set
+`ifeval-286 .. ifeval-3757`).
+
+*Standing gates re-run read-only at HEAD `62b5f4d`, all green:* arms index drift 0; derived percents
+42 recomputed / 0 findings (44 digest + 188 doc citations, 0 uncovered); grok-cell rule 9 docs / 0
+findings; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings (contracts
+named 26, pre-rule exceptions 23/23 used). CI at that SHA: secret-scan, devsecops, contour
+self-tests, hard-v6 scoring contracts and pages all `success`; the GitHub `docs-freshness` workflow
+(schedule 03:20 UTC, landed 11:30 UTC today) is `success` on the same SHA. The local
+`GitHub docs freshness daily` cron (03:00 CET) keeps its cumulative streak 9 from this morning's
+mid-flight census failure (attributed mechanically in tick 76, re-confirmed by tick 78's suite
+re-run); its next run is expected green provided the tree is not dirty at that minute.
+
+*Third live preflight reading of this line (12:47 CET, one remote read):*
+`mem_available_mib=13956 swap_total_mib=8191 swap_used_mib=8191 swap_free_mib=0 engine_state=S
+engine_pcpu=0.0 engine_rss_mib=57020 gpu_util_pct=0 gpu_power_w=26.68 health_code=200 foreign_legs=0`
+→ **PREFLIGHT NO-GO, real exit 3** (the wrapper's trailing `echo` masks its code, so the gate was
+re-run unshielded exactly as this line's note requires; `swap_used_mib + swap_free_mib = 8191 = total`,
+so the tick-78 seam guard is satisfied and the reading is trusted). The refusal rests on the swap rule
+alone: 0 MiB free of 8191.
+
+*Why this NO-GO is not transient — read-only probe of the endpoint box, zero calls.* Swap is 100.0 %
+full (`SwapFree: 136 kB` of 8 388 604 kB) and the swap holder is the serving engine itself: a
+per-process VmSwap census over `proc/<pid>/status` puts **6 813 488 kB (~6.5 GiB)** of the serve's
+own ~56.4 GiB RSS in swap, three times the next holder. The live serve configuration sets
+`resident-budget-gib 56`, `conversation-cache-mib 6144` and 6 cache slots on a 60.5 GiB `MemTotal`
+box, so the weight budget alone leaves ~4 GiB for the OS while the page cache holds ~15 GiB — the tail
+lands in swap and stays there. No OOM kill in the last 24 h; `kswapd0`/`kcompactd0` were active with
+`si/so` = 502/544 pages/s at sample time and quiet 1 s later; the GPU is parked (0 %, 26.7 W) and the
+sampled engine CPU is 0.0 % against the 453 % lifetime `ps` average, i.e. parked load, not decode.
+Local legs earlier in this line (the 2026-11-09 IFEval and LiveCodeBench legs) ran with this same
+serve up, so the saturation is an accumulated state, not a boot condition: **as currently configured,
+the standing preflight gate and the standing serve configuration are mutually exclusive**, and every
+future local leg will be refused until the box is relieved.
+
+*The cure for this class was already measured on this box by the hard-bank line* (2026-11-03, the
+KV-starvation stall: empty completions with `ptok=0` at ~20 s while rows looked structurally fine): a
+RAM admission floor, `conversation-cache-min-free-mib` raised 1536 → 3072, plus a node restart. The
+live configuration carries **no such key**, and the serve log holds zero `park` lines, so on this
+build the pressure goes straight to swap instead of being refused by the engine. Whether to relieve
+RAM (lower the resident budget, park the keep-up serve, or reboot the machine) is a box/owner decision
+— the gate's own remedy line says the same — and nothing on the box was touched by this tick.
+
+*Consequence for the ladder, stated plainly.* Every in-force set already carries the three-arm
+standard — bare local brain, contour `0.0.2.56` in matched request shape, codex — across gsm8k,
+ARC-Easy, ARC-Challenge, GPQA-Diamond, HumanEval, MMLU-Pro, IFEval and LiveCodeBench, with BFCL's
+cloud arm on rule 4's 300-id cross-arm slice; Grok is cancelled by owner decision 2026-11-12 and
+blocked by the marker, the cloud runner and the exit-3 gate; SimpleBench stays closed as unpinnable.
+So there is no queued item this tick could run, and any *new* local arm — a re-draw for resolution, or
+the Terminal-Bench / SWE-bench Verified / GAIA-lite rows that need an owner decision to open — requires
+the endpoint to be relieved first. That is the state of the line, not a stall.
+
+*Scheduling hygiene re-read, nothing touched (owner decisions only).* Two hard-bank-era `every 5m`
+jobs are still enabled and firing on a line frozen at `stable-hard-0.0.2.56`: "Mac v2.2 full after
+v2.1" logged **128** completions today and "P2005 paired full 2.1→2.2 watch" **154**; both exit 0 on
+their one-shot state markers, and neither was touched. The drain-resume self-heal ran 77 times today,
+no cron job anywhere is paused (`paused_reason` null), and the contour-pair watcher stays disabled,
+consistent with the frozen hard line.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank file,
+manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no leg was
+started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. Zero model and zero
+cloud calls this tick.
+
+**Next in force:** unchanged and empty — no leg is queued or admissible. The one blocking fact for any
+future local arm is the endpoint box state above; opening the remaining ladder rows is an owner
+decision.
