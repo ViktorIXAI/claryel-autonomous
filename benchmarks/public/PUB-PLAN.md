@@ -4460,3 +4460,40 @@ cloud calls this tick.
 **Next in force:** unchanged and empty — no leg is queued or admissible. The one blocking fact for any
 future local arm is the endpoint box state above; opening the remaining ladder rows is an owner
 decision.
+
+## Tick 81 — 2026-11-12 13:30 CET: read-only status tick; standing gates green on the synced tree; zero legs, zero calls
+
+*Nothing moved on the line and nothing is admissible.* No `parb-pub-*` unit exists and the bracketed
+process counts are 0 for the cloud transport and 0 for the local runners. The Grok line stays
+cancelled: the resume gate re-run unshielded prints `checks: 22 | RESUME GATE: NO-GO - do not spend
+quota` with exit **3**, the cancelled-window finding naming the owner decision, and the stored
+archive still matching the pin (gpqa-diamond 198/198, humaneval 164/164, mmlu-pro 500/500, ifeval
+**359 of 541 rows** — a stored-row count, not a score; the 182 unasked ids print as `VOID, the line
+is cancelled, this is not a queue`). No local preflight reading was taken: with no leg queued, a
+fourth reading of the structurally swap-saturated endpoint (tick 80's diagnosis) would change no
+decision, and relieving the box stays an owner action.
+
+*All five publication gates re-run read-only, all green:* arms index drift 0; derived percents
+42 recomputed / 0 findings (44 digest + 188 doc citations, 0 uncovered); grok-cell rule 9 docs / 0
+findings on the in-force cancelled sentence; superseded-cell rule 9 docs / 0 findings; digest row
+rule 49 rows / 0 findings (contracts named 26, pre-rule exceptions 23/23 used).
+
+*Repository hygiene, zero pub bytes touched:* the local clone was one commit behind `origin/main`
+with a clean tree and nothing ahead, so it was fast-forwarded to `9f72ef0` — that commit is the
+hardware line's `CHG-004 P3001` passport update (`hardware/changes/P3001.md`,
+`hardware/inventory/P3001.md`), not benchmark material; the pub tree at that SHA carries the same
+`benchmarks/public/` bytes the gates above just scored. Outbound connectivity observation: the
+tick's `git fetch` died with `Failed to connect to github.com port 443` after ~132 s (same class as
+the DNS failures the daily-docs job hit earlier today), so the sync used the cached remote ref and
+this block's push is expected to ride with the next reachable tick if it fails; no published
+percent depends on it.
+
+*No published byte moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no
+leg was started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. Zero model
+and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — same three blocking facts as tick 80: the endpoint box
+needs owner relief before any new local arm, the remaining ladder rows (Terminal-Bench /
+SWE-bench Verified / GAIA-lite) need an owner decision to open, and the Grok line stays closed by
+owner decision 2026-11-12.
