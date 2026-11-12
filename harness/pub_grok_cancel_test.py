@@ -12,8 +12,10 @@ This test pins the innermost layer, where every path must converge:
   3. a non-grok arm is unaffected by the marker (a codex leg must stay runnable);
   4. no answer file is written by a refused run (a refusal that still creates the arm file would
      poison the resume census);
-  5. the marker path is read from `$HOME` at call time, so the test stays hermetic and the
-     operator's real marker is never touched.
+  5. the marker path is read from `$HOME` at call time, so the test stays hermetic, and the
+     assertion is "left exactly as found", never "the marker exists": this test also runs on CI,
+     where no operator marker exists at all (measured 2026-11-12 - the first version asserted the
+     marker is present and reddened static-qa on the runner while passing on the operator box).
 
 The transport is replaced by a recording stub, so this test spends ZERO cloud calls.
 
@@ -63,6 +65,7 @@ def fixture_tasks(path: Path):
 def main() -> int:
     mod = load()
     real_marker = os.path.expanduser("~/pub-bench/GROK-CANCELLED")   # read BEFORE HOME is moved
+    real_marker_existed = Path(real_marker).exists()
     mod.cli_version = lambda prog: "fixture-cli"                     # no subprocess in a test
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
@@ -117,10 +120,11 @@ def main() -> int:
         ck(calls == ["codex", "codex"] and "REFUSED" not in out_txt,
            "the cancel marker must not block a codex arm: %r %r" % (calls, out_txt[:120]))
 
-        # 4. the real operator marker was never consulted or moved by this test
+        # 4. the fixture never creates or deletes a marker in the real HOME
         ck(os.environ["HOME"] == str(home), "the test pinned HOME to its fixture")
-        ck(Path(real_marker).exists(),
-           "the operator marker still exists at %s (this test never touches it)" % real_marker)
+        ck(Path(real_marker).exists() == real_marker_existed,
+           "the test must leave the operator marker exactly as it found it (existed before: %s) at %s"
+           % (real_marker_existed, real_marker))
 
     print("pub_grok_cancel contract: %d checks, %d failure(s)" % (CHECKS, len(FAILED)))
     return 1 if FAILED else 0
