@@ -340,3 +340,26 @@ verdict bytes shipped in `arms/` (see `arms/README.md`, "First cloud-arm artifac
   `scripts/pub_grok_cell_check.py` now reads its vocabulary from that record and reddens a
   percent-less cell still carrying a superseded sentence. Four cells were corrected with dated
   notes (BFCL, IFEVAL, LIVECODEBENCH ×2) — no number was retyped anywhere.
+
+## 2026-11-12 07:55 CET — the Grok resume gate reported READY (exit 0) on the cancelled line; zero calls spent, fixed the same tick
+
+No leg and no byte moved. The defect is in the guard, and it is recorded here because this log is
+what a future tick reads before arming anything quota-bearing.
+
+* What the gate said at 07:55, against the live workspace with the cancellation already in the pin:
+  `checks: 22 | RESUME GATE: READY` with exit 0, and the next line read
+  `pinned resume queue total: 182 calls, order gpqa-diamond -> humaneval -> mmlu-pro -> ifeval`.
+* Why that is wrong rather than merely untidy: the identity checks prove the stored archive still
+  matches the pin, which is a different statement from "an arm is allowed", and exit 0 is the value
+  an armed launcher obeys. The word "queue" plus a call total is what a reader turns into work, on a
+  line the owner cancelled at 06:40:54 the same morning.
+* Fix (tooling, same tick): in cancelled mode the gate appends a finding naming the owner decision
+  and returns 3 (NO-GO) even when every stored byte matches, and the resume set prints as
+  `pinned resume record: 182 ids were never asked … VOID, the line is cancelled, this is not a queue`.
+  Re-read after the fix: 22 checks, `RESUME GATE: NO-GO - do not spend quota`, exit 3.
+* The second half of the bug was the contract test: `harness/pub_grok_resume_test.py` asserted
+  `rc == 0` plus "window is CLOSED" for the matching-bytes case, so the suite was green on the
+  fail-open behavior. The check is inverted to demand exit 3, the cancellation named, no `READY`
+  anywhere in the output, and `VOID` on the record line. 33 resume checks, 0 failures.
+* Credit: zero Grok calls before or after; the chain unit has been inactive since 06:42:49 and the
+  operator marker still blocks every launcher and the cloud runner.

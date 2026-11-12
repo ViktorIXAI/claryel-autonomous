@@ -56,6 +56,11 @@ and every further Grok row is a finding. That is the owner decision of 2026-11-1
 "resumes 2026-11-12" window the same day it opened. A run date before the cancellation with
 no window end in the pin fails CLOSED rather than reading as a green light.
 
+In CANCELLED mode the gate is a NO-GO by itself (exit 3), even when every stored byte still
+matches the pin: the identity checks can only say the archive is intact, never that an arm is
+allowed, and exit 0 is what an armed launcher obeys. The pinned resume set is printed as a VOID
+record rather than a queue total, because a line the owner cancelled has no work to run.
+
 Exit codes: 0 = RESUME-READY (identity matches the pin, resume set exact), 3 = findings
 (do NOT spend quota), 1 = input gap (missing pin, missing bench entry, an expected answer
 file absent). An input gap is never a green light.
@@ -484,6 +489,7 @@ def main() -> int:
     ow = pin.get("owner_window") or {}
     until = str(ow.get("suspended_until") or "")
     cancelled = str(ow.get("cancelled_on") or "")
+    cancelled_mode = False
     as_of = args.as_of or __import__("datetime").date.today().isoformat()
 
     # The window mode is a string comparison, so BOTH operands must be the ISO
@@ -522,8 +528,22 @@ def main() -> int:
         # the pin is an exact snapshot FOREVER. Any growth past it is a finding, which is the
         # mechanical form of "no Grok arm until the owner re-arms this line".
         window_open = False
+        cancelled_mode = True
         mode_note = ("cancelled by owner decision on %s with no resume date - CLOSED "
                      "indefinitely, no Grok call is legal at all" % cancelled)
+        # The identity checks below can only say the stored bytes still match the pin; they can
+        # never say the arm is allowed. Before this line the gate printed "RESUME GATE: READY"
+        # with exit 0 on the live workspace after the cancellation (2026-11-12, measured at
+        # 07:5x CET: 22 checks, READY, "pinned resume queue total: 182 calls") — and exit 0 is
+        # exactly what a chain launcher reads as a green light, while the queue line reads like
+        # work to do. A cancelled line must fail CLOSED in this gate, not in an untracked marker
+        # alone: the marker is the belt, this exit code is the braces.
+        FINDINGS.append(
+            "owner_window: the Grok line is CANCELLED by owner decision %s, so no arm may be "
+            "launched and the %d unasked ids in the pin are a record, not a queue - this stays "
+            "a finding until a new owner decision re-arms the line (the owner's words: stop "
+            "touching Grok, very few limits left)" % (cancelled, sum(
+                int(arms[n].get("expected_remaining", 0)) for n in queue if n in arms)))
     elif not until:
         if cancelled and _iso_dashed(cancelled):
             # The run date precedes the cancellation and the old window end was dropped from
@@ -548,7 +568,13 @@ def main() -> int:
             live_remaining += check_arm(name, arms[name], args.repo, args.ws, window_open) or 0
 
     total = sum(int(arms[n].get("expected_remaining", 0)) for n in queue if n in arms)
-    print("pinned resume queue total: %d calls, order %s" % (total, " -> ".join(queue)))
+    if cancelled_mode:
+        # The word "queue" in this line is what a reader (or a launcher log) turns into work:
+        # on a cancelled line the ids are a record of what was never asked, never a plan.
+        print("pinned resume record: %d ids were never asked (order %s) - VOID, the line is "
+              "cancelled, this is not a queue" % (total, " -> ".join(queue)))
+    else:
+        print("pinned resume queue total: %d calls, order %s" % (total, " -> ".join(queue)))
     print("live resume total read from the stored bytes: %d ids still unasked"
           % live_remaining)
     for p in PROGRESS:

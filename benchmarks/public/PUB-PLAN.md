@@ -4081,6 +4081,18 @@ no runner process), but nothing is queued, and no Grok arm may be launched at al
 reports a CANCELLED window (CLOSED with no end) and the launchers and the cloud runner refuse while
 the operator's marker exists. The three-arm standard applies to any set the owner adds next.
 
+*Gate correction found while reading that gate back (08:05 CET, zero quota spent).* The gate's first
+cancelled-window implementation reported **`RESUME GATE: READY` with exit 0** on this pin and printed
+`pinned resume queue total: 182 calls` — the identity checks prove the archive is intact, which is not
+the same statement as "an arm is allowed", and exit 0 is precisely what an armed launcher obeys. The
+gate now emits a finding naming the owner cancellation and exits 3 (NO-GO) in cancelled mode even when
+every stored byte matches the pin, and prints the resume set as `pinned resume record: 182 ids were
+never asked … VOID … this is not a queue`. Live re-read after the fix: 22 checks, `RESUME GATE: NO-GO
+- do not spend quota`, exit 3. The contract test that had pinned the fail-open behavior (`rc == 0` +
+"window is CLOSED") was itself the bug's second half and was inverted — a test asserting the wrong
+semantics is worse than no test. Marker guard 9 + resume gate 33 + pin regeneration 39 + grok-cell 27
+= 108 checks, 0 failures.
+
 *Standing gates re-run (read-only, all green):* arms index drift 0; derived percents 42 / 0 findings;
 grok-cell rule 9 docs / 0 findings; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows
 / 0 findings — the cancelled partial minted nothing, as intended. Contract tests on this tree:

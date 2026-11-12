@@ -268,14 +268,21 @@ def main() -> int:
     #      `suspended_until: null` plus `cancelled_on`, CLOSED has no end — the pinned snapshot
     #      never expires, so an armed launcher cannot quietly spend owner quota again, months
     #      later. A run date before the cancellation with no window end fails CLOSED, never OPEN.
+    #      The gate must say NO-GO on the cancellation day itself, WITH EXIT 3 and the
+    #      cancellation named: a matching-bytes verdict of READY is exactly what the chain
+    #      launcher reads as a green light, and the first version of this check pinned that
+    #      fail-open behavior (rc 0 + "window is CLOSED") while the live run at 07:5x CET printed
+    #      "RESUME GATE: READY" and "pinned resume queue total: 182 calls" on a cancelled line.
     f15 = Fixture(os.path.join(tmp, "b15"))
     pin_c = json.load(open(f15.make_pin(), encoding="utf-8"))     # matches the stored bytes
     pin_c["owner_window"] = {"suspended_until": None, "cancelled_on": "2026-11-12"}
     ppath = _write(tmp, "cancel-pin.json", pin_c)
     rc, out = f15.run(ppath, "2026-11-12")
-    ck(rc == 0 and "window is CLOSED" in out
-       and "cancelled by owner decision on 2026-11-12" in out,
-       "matching bytes under a cancelled window must be READY and CLOSED: %s" % out[-300:])
+    ck(rc == 3 and "window is CLOSED" in out
+       and "CANCELLED by owner decision" in out and "RESUME GATE: NO-GO" in out,
+       "a cancelled window must be NO-GO with exit 3 even when the bytes match: %s" % out[-300:])
+    ck("READY" not in out and "VOID" in out and "not a queue" in out,
+       "a cancelled line must never print READY or a queue total: %s" % out[-300:])
     f15.rows.append(row(2))
     f15.write_arm()
     rc, out = f15.run(ppath, "2026-11-12")
