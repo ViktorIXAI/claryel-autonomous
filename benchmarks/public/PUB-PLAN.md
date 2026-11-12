@@ -5403,3 +5403,71 @@ tick only masked its log lines and appended this block. Push uses the standard i
 **Next in force:** unchanged and empty — the endpoint box holds its first GO streak of the series,
 so the owner-gated ladder rows could start the moment an owner decision opens them; the Grok line
 stays closed by owner decision 2026-11-12.
+
+## Tick 96 — 2026-11-12 23:58 CET: read-only status tick; **fourth consecutive PREFLIGHT GO** (eighteenth reading, engine same pid since ~22:57 — first tick of the series with no inter-tick engine cycle); census 17 files → 4 GO / 13 NO-GO / 0 input-gap; five gates + links + docs policy green; today's docs-job incident re-read from the scheduler's own DB: its stderr head is the suite's negative-control prints, the static suite now exits 0 unshielded, README marker still 2026-11-11; Grok gate NO-GO exit 3; CI green at `03745b1`; zero legs, zero calls
+
+*Eighteenth reading; the mechanical file census moves with it.* Files dated today: **17** → 4 GO
+(21:31, 22:22, 23:11, 23:54) / 13 NO-GO / 0 input-gap — **four consecutive GO**, the longest streak
+of the series. Reading (wrapper run bare, gate re-run unshielded, true exit **0**):
+`swap_free_mib=7138` / `swap_used_mib=1053` (of 8 191 — the two columns balance exactly at the
+total, tick-78 producer-column guard satisfied), `mem_available_mib=16 660`,
+`engine_rss_mib=48 970` (the ops line's 36 GiB tier), `engine_state=S`, `engine_pcpu=0.0`
+(6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=8.00`, `load1=0.08`, `health_code=200`,
+`foreign_legs=0` → **PREFLIGHT GO**, valid for that reading only. The engine is the same process
+as at 23:11 (`pid=1142697 age=57:25` ⇒ started ≈ 22:57) and every column moved under 1 %
+(`mem_available_mib` 16 694 → 16 660) — the box has settled after the ops tier restore, which the
+fourteenth reading said would not come without intervention. Hygiene of this tick's own tool use:
+the first wrapper call at 23:53 collided with its own readings filename (an outer shell redirect
+truncated the file the wrapper writes) — that call's file was deleted with **zero credit** and not
+counted above; the 23:54 call is the eighteenth reading. No leg was involved, so no
+`LEG-INCIDENTS.md` entry.
+
+*Five standing gates re-run read-only with true exits captured unshielded, all green, counts
+identical to ticks 88–95:* arms index drift 0; derived percents 42 recomputed from shipped bytes /
+0 findings (digest citations 44, result-doc citations 188, uncovered 0); grok-cell rule 9 docs / 0
+findings; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings
+(contracts named 26, pre-rule exceptions 23/23). Link checker exit 0; `docs_policy.py --push` PASS.
+
+*The daily docs-job record, re-read from the scheduler's own DB and reported per the machine note
+(not fixed).* `executions.db` holds zero execution rows for `ef7ea47ff99b` (unchanged since tick
+95); `cron_incidents` holds five open rows. Today's row (`error_sig 4cfeecb7852d`, fired
+03:02:20 CET, `state=alerted`; the scheduler's classifier labels it `auth` — mechanically it is a
+script exit 1) records stderr **starting with** `MANIFEST GUARD: …/tmp0sm7gha6/ifeval.tasks.jsonl
+does not match its published tasks pin 2c672531577dcc33 (sha1/16=53f7c77566d17ce4 …)`. This tick
+re-ran the whole static suite unshielded on the clean tree (`SAH_LINK_MODE=offline
+static_checks.py`, true exit **0**) and the same three MANIFEST GUARD lines appear at log lines
+427–429 as the suite's own **negative-control prints** from the pinned-file shape tests — the
+repo's own `ifeval.tasks.jsonl` hashes to both published labels (SHA-1/16 `2c672531577dcc33`,
+SHA-256/16 `e09a5cab3782ed5b`, 541 rows) and `MANIFEST.json` labels both with the 2026-11-10
+`hash_note`. So the incident's stderr head is expected test noise, the recorded cause stays the
+tick-92 attribution (the mutable digest-row-count pin that `5be2855` removed at 04:47), and the
+marker step of the failed 03:02 run never executed: the README still reads `Status checked:
+2026-11-11`. Next fire 2026-11-13 02:00 UTC.
+
+*The Grok line stays cancelled.* Resume gate unshielded: `checks: 22 | RESUME GATE: NO-GO - do not
+spend quota`, true exit **3**, `pinned resume record: 182 ids were never asked … VOID, the line is
+cancelled, this is not a queue`; the stored IFEval half re-reads 359 rows / 359 ok /
+`sha256-16 01c1ee0b6e7f6d5d` with the 182-id resume set intact, so the one-word owner reversal
+still resumes by id. Operator marker intact at `~/pub-bench/GROK-CANCELLED` (06:54), untouched.
+Zero Grok calls.
+
+*Frozen-line hygiene, checked mechanically.* `git log --since=00:00 -- harness/gate_versioning.py`
+is empty: **zero contour commits today**, `CURRENT_REVISION (2,57)` predates the frozen tag
+`stable-hard-0.0.2.56` and nothing registered today; no hard-bank pair, no hard-bank edit.
+Job `f23cf5d48e11` ("Mac v2.2 full after v2.1") enabled, last run 23:57 `ok`, no open incident —
+no-op while `~/.hermes/mac-v22full-launch.state` (2026-11-02) exists, verified present. Drain
+guard `9a12508f8a69` last run 23:50 `ok`. Zero `gate_run.py` / `pub_bench_run` / cloud-transport
+processes and no `parb-pub-*` user unit (standalone checks at tick start).
+
+*Repo state.* Local `main` was **one behind** at tick start — the audit line's `03745b1
+docs(audit #25)` (dated P2005 GPU-power ranking + RAM-envelope caveats, docs only) arrived between
+ticks — fast-forwarded clean; tree clean at the ff. CI all green at `03745b1` (secret-scan,
+contour self-tests, hard-v6 scoring contracts, devsecops, pages). `secret_scan.py --strict`
+re-run locally: exit **0**, zero findings, exception set unchanged. This tick appends only this
+block; zero benchmark bytes, no digest row or percent moved. Push uses the standard invocation
+(`ALLOW_HARD_V6_PUSH=1 git push origin HEAD:main`), pre-push guard honoured, no `--no-verify`.
+
+**Next in force:** unchanged and empty — no leg is queued or admissible this tick; the endpoint
+box holds its longest GO streak of the series (4 in a row), so the owner-gated ladder rows
+(Terminal-Bench / SWE-bench Verified / GAIA-lite) could start the moment an owner decision opens
+them; the Grok line stays closed by owner decision 2026-11-12.
