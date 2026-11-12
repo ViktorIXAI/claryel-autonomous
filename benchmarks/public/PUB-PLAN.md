@@ -5027,3 +5027,70 @@ and zero cloud calls this tick.
 arm (swap 0 of 8191 MiB free, twelfth reading); the remaining ladder rows (Terminal-Bench /
 SWE-bench Verified / GAIA-lite) need an owner decision to open; the Grok line stays closed by owner
 decision 2026-11-12.
+
+## Tick 91 — 2026-11-12 19:55 CET: read-only status tick; thirteenth preflight reading NO-GO (swap free 4 of 8191 MiB, engine RSS relief 57.5 → 53.9 GiB without freeing swap); CI green at HEAD; five gates green; Grok gate NO-GO exit 3; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-*` user unit exists (unit list empty); the bracketed
+process counts are 0 for the cloud transport, 0 for the local runner and 0 for `gate_run.py`; the
+only `running` row in the cron executions DB at tick start is this tick itself (`288a66f93167`,
+19:54:17 CET), so no sibling instance is editing the clone.
+
+*Thirteenth live preflight reading of the endpoint box (19:55 CET, wrapper run bare, gate re-read
+unshielded for the true exit):*
+`mem_total_mib=61953 mem_available_mib=13209 swap_total_mib=8191 swap_used_mib=8187 swap_free_mib=4
+engine_state=S engine_pcpu=0.0 engine_rss_mib=53895 gpu_util_pct=0 gpu_power_w=26.38 load1=6.47
+health_code=200 foreign_legs=0` → **PREFLIGHT NO-GO, true exit 3**, resting on the swap rule alone
+(4 MiB free of 8191, threshold 256). Columns balance exactly (`8187 + 4 = 8191`), tick-78 producer
+guard satisfied. New signal against tick 90: engine RSS fell 57 477 → 53 895 MiB and load1 9.88 →
+6.47 while swap stayed pinned at ~100 % consumed — the box sheds resident memory without giving the
+swap back, which matches tick 80's structural diagnosis rather than a transient. Engine age
+3 d 23:19, same pid 3284575 (no restart since 08.11), GPU parked (0 %, 26.4 W). Relief stays an
+owner action; this endpoint also serves the deployment's main brain and the gate's remedy line says
+a restart is a box decision.
+
+*The Grok line stays cancelled.* Resume gate re-run unshielded: `checks: 22 | RESUME GATE: NO-GO -
+do not spend quota`, true exit **3**. Stored archive still matches the pin by sha256-16: ifeval
+**359 of 541 rows** `01c1ee0b6e7f6d5d` (a stored-row count, not a score), gpqa-diamond / humaneval /
+mmlu-pro complete at 198/198, 164/164, 500/500; the 182 never-asked ids print as `VOID, the line is
+cancelled, this is not a queue`. Operator marker intact at `~/pub-bench/GROK-CANCELLED` ("owner
+decision 2026-11-12: grok cloud arms cancelled …"), unbroken, not touched. Zero Grok calls.
+
+*CI green at HEAD `97f9416`:* `secret-scan`, `contour self-tests`, `devsecops`, `hard-v6 scoring
+contracts`, `pages-build-deployment` all success (18:23-18:30 UTC). Locally the repo scanner exits
+**0** with `top_files: []`; the five sha16-bound vendored exceptions still listed and counted
+(including `pub-repair-pub-repair-bfcl-v1.jsonl@3f5376495bf06e6c` and
+`pub-repair-v1-merged-answers.jsonl@639332eea931294f`), none widened. No hardware-line push has
+re-contaminated the tree since the tick-89 masking repair.
+
+*All five standing gates re-run read-only with true exits captured unshielded, all green (counts
+identical to ticks 87-90):* arms index drift 0; derived percents 42 recomputed from shipped bytes /
+0 findings (digest citations 44, result-doc citations 188, uncovered 0); grok-cell rule 9 docs /
+0 findings on the in-force cancelled sentence with 1 superseded sentence rejected; superseded-cell
+rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings, contracts named 26, pre-rule
+exceptions used 23/23 (list full, cannot rot).
+
+*Daily docs-freshness job: reported, not fixed (machine note).* `ef7ea47ff99b` has one retained
+execution row (03:00:17 → 03:02:22 CET, `failed`) and `failure_streak: 9` is the cumulative
+scheduler counter, not nine runs today. The no-drift negative was re-proven mechanically:
+`benchmarks/public/ifeval.tasks.jsonl` 221 580 B hashes to SHA-1/16 **`2c672531577dcc33`** and
+SHA-256/16 **`e09a5cab3782ed5b`** — the published pin pair exactly, one identity kept. The tree is
+clean at this tick (0 modified files).
+
+*Frozen-line hygiene, unchanged and reported rather than touched.* Job `f23cf5d48e11` ("Mac v2.2
+full after v2.1", every 5 min) is still scheduled and `ok` (streak 0, not paused); it is a no-op
+only while the one-shot marker `~/.hermes/mac-v22full-launch.state` (2026-11-02 14:05) exists.
+Nothing hard-bank ran: zero `gate_run.py` processes, no `parb-*` unit, no new contour stamp
+(hard line stays frozen at `stable-hard-0.0.2.56`).
+
+*Repository hygiene.* Tree clean; local `main` equalled `origin/main` at `97f9416` before this
+section (ahead 0 / behind 0 after fetch); zero commits touched `benchmarks/public/` since tick 90
+except this one.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed; no leg was started, stopped, duplicated or discarded,
+so `LEG-INCIDENTS.md` gains no entry. Zero model and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm (swap 4 of 8191 MiB free, thirteenth reading); the remaining ladder rows (Terminal-Bench /
+SWE-bench Verified / GAIA-lite) need an owner decision to open; the Grok line stays closed by owner
+decision 2026-11-12.
