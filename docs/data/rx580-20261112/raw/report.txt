@@ -1,6 +1,6 @@
 12:04:32 stage A: get llama.cpp Vulkan prebuilt
 12:04:34 asset: https://github.com/ggml-org/llama.cpp/releases/download/b12318/llama-b12318-bin-ubuntu-vulkan-x64.tar.gz
-12:04:38 bench bin: /home/claryel/llama-vulkan/llama-b12318/llama-bench
+12:04:38 bench bin: <LOCAL_PATH>/llama-vulkan/llama-b12318/llama-bench
 Available devices:
   Vulkan0: AMD Radeon RX 580 2048SP (RADV POLARIS10) (8192 MiB, 8164 MiB free)
   Vulkan1: Quadro K620 (2294 MiB, 2205 MiB free)
@@ -10,17 +10,17 @@ Available devices:
 ggml_vulkan: Found 2 Vulkan devices:
 ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
 ggml_vulkan: 1 = Quadro K620 (NVIDIA) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 32 | shared memory: 49152 | int dot: 0 | matrix cores: none
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so
 error: invalid parameter for argument: -c
-usage: /home/claryel/llama-vulkan/llama-b12318/llama-bench [options]
+usage: <LOCAL_PATH>/llama-vulkan/llama-b12318/llama-bench [options]
   -pg <pp,tg>                                       (default: )
 12:05:52 B bench [GGML_VK_ALLOW_GRAPHICS_QUEUE=1]
 ggml_vulkan: Found 2 Vulkan devices:
 ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
 ggml_vulkan: 1 = Quadro K620 (NVIDIA) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 32 | shared memory: 49152 | int dot: 0 | matrix cores: none
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so
 error: invalid parameter for argument: -c
-usage: /home/claryel/llama-vulkan/llama-b12318/llama-bench [options]
+usage: <LOCAL_PATH>/llama-vulkan/llama-b12318/llama-bench [options]
   -pg <pp,tg>                                       (default: )
 12:05:52 stage C: MoE 30B-A3B (fleet-class comparison)
 12:05:52 shard 00001 http=404 size=4.0K

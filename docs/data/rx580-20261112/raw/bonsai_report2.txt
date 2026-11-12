@@ -4,7 +4,7 @@
 | qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           tg128 |          4.81 ± 0.00 |
 | qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |     pp512+tg128 |         24.52 ± 0.00 |
 3:ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
-5:load_backend: loaded CPU backend from /home/claryel/bonsai/prism/libggml-cpu-ivybridge.so
+5:load_backend: loaded CPU backend from <LOCAL_PATH>/bonsai/prism/libggml-cpu-ivybridge.so
 15:28:03 == stock llama.cpp b12318 on the Q2_0 file (the README says Q2_0 is mainline-capable)
 | qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           pp512 |         44.48 ± 0.00 |
 | qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           tg128 |          9.03 ± 0.00 |

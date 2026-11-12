@@ -19,9 +19,9 @@ build: 7021f7e09 (12318)
 12:30:27 109183W 47C busy=100 clock=897810000
 12:30:33 3) our model with partial offload
 12:30:33 3.4 our-model ngl=4 ncmoe=99
-llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 12:30:45 3.12 our-model ngl=12 ncmoe=99
-llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 12:30:57 3.24 our-model ngl=24 ncmoe=99
-llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 12:31:07 ALL_DONE4

@@ -1,7 +1,7 @@
 15:24:17 == waiting for the previous pass
 15:42:17 == download Bonsai 2 9B
-   2.00 GB /home/claryel/bonsai/models/Ternary-Bonsai-2-9B-PTQ1_0.gguf
-   2.56 GB /home/claryel/bonsai/models/Ternary-Bonsai-2-9B-Q2_0.gguf
+   2.00 GB <LOCAL_PATH>/bonsai/models/Ternary-Bonsai-2-9B-PTQ1_0.gguf
+   2.56 GB <LOCAL_PATH>/bonsai/models/Ternary-Bonsai-2-9B-Q2_0.gguf
 15:46:45 == fork 9B PTQ1_0 ngl99
 | qwen35 9B PTQ1_0 - 1.75 bpw ternary (group 128) |   1.85 GiB |     8.95 B | Vulkan     |  99 |   0 |           pp512 |        122.26 ± 0.06 |
 | qwen35 9B PTQ1_0 - 1.75 bpw ternary (group 128) |   1.85 GiB |     8.95 B | Vulkan     |  99 |   0 |           tg128 |         12.38 ± 0.04 |

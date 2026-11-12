@@ -1,6 +1,6 @@
 12:23:38 RUN ngl0-cpu :: -ngl 0
 ggml_vulkan: Found 1 Vulkan devices:
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so
 | qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   0 |           pp512 |         44.17 ± 0.66 |
 | qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   0 |           tg128 |          4.09 ± 0.00 |
 | qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   0 |     pp512+tg128 |         14.31 ± 0.05 |
@@ -8,28 +8,28 @@ load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318
   Swap: used 0 of 63 GiB
 12:27:01 RUN ngl99-ncmoe99 :: -ngl 99 -ncmoe 99 -ctk q8_0 -ctv q8_0 -fa off
 ggml_vulkan: Found 1 Vulkan devices:
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
-llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so
+llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
   Mem: used 1 of 62 GiB
   Swap: used 0 of 63 GiB
 12:27:08 RUN ngl99-ncmoe74 :: -ngl 99 -ncmoe 74 -ctk q8_0 -ctv q8_0 -fa off
 ggml_vulkan: Found 1 Vulkan devices:
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
-llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so
+llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
   Mem: used 1 of 62 GiB
   Swap: used 0 of 63 GiB
 12:27:15 RUN ngl99-ncmoe48 :: -ngl 99 -ncmoe 48 -ctk q8_0 -ctv q8_0 -fa off
 ggml_vulkan: Found 1 Vulkan devices:
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
-llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so
+llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
   Mem: used 1 of 62 GiB
   Swap: used 0 of 63 GiB
 12:27:22 RUN ngl99-ncmoe24 :: -ngl 99 -ncmoe 24 -ctk q8_0 -ctv q8_0 -fa off
 ggml_vulkan: Found 1 Vulkan devices:
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
-llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so
+llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
   Mem: used 22 of 62 GiB
   Swap: used 0 of 63 GiB
 12:27:57 RUN ngl99-ncmoe99-faon :: -ngl 99 -ncmoe 99 -ctk q8_0 -ctv q8_0 -fa on
 ggml_vulkan: Found 1 Vulkan devices:
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so

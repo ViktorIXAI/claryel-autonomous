@@ -9,10 +9,10 @@
 14:29:37 == bmoe D8 :: --moe-stream --device-cache-mb 1800 --gpu-layers 99 --cache-mb 6000 --io-threads 4 -t 8
 14:30:33    rc=1
    err: 
-   err: error: could not load the model: /home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf
+   err: error: could not load the model: <LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf
 14:30:43 == Nemotron downloads
-    5060482240 /home/claryel/nemotron/Bolt-E4B-Q4_K_XL.gguf
-    2837072864 /home/claryel/nemotron/Nano-4B-Q4_K_M.gguf
+    5060482240 <LOCAL_PATH>/nemotron/Bolt-E4B-Q4_K_XL.gguf
+    2837072864 <LOCAL_PATH>/nemotron/Nano-4B-Q4_K_M.gguf
 14:35:44 == bench Nano4B-gpu
 14:35:52 == bench Nano4B-cpu
 14:36:00 == bench BoltE4B-gpu

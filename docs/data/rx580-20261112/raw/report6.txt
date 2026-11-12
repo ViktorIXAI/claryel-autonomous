@@ -1,8 +1,8 @@
-load_backend: loaded RPC backend from /home/claryel/llama-vulkan/llama-b12318/libggml-rpc.so
+load_backend: loaded RPC backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-rpc.so
 ggml_vulkan: Found 1 Vulkan devices:
 ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | rebar: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
-load_backend: loaded Vulkan backend from /home/claryel/llama-vulkan/llama-b12318/libggml-vulkan.so
-load_backend: loaded CPU backend from /home/claryel/llama-vulkan/llama-b12318/libggml-cpu-ivybridge.so
+load_backend: loaded Vulkan backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-vulkan.so
+load_backend: loaded CPU backend from <LOCAL_PATH>/llama-vulkan/llama-b12318/libggml-cpu-ivybridge.so
 | model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
 | ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
 | qwen2 3B Q4_K - Medium         |   1.79 GiB |     3.09 B | Vulkan     |  99 |   0 |           pp512 |        392.01 ± 1.34 |

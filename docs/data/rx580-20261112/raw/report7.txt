@@ -1,6 +1,6 @@
 13:04:51 state: level=high 7: 1348Mhz * 2: 1837Mhz * cap=120000000
 13:04:51 A) our model ngl99 ncmoe99 (uncapped clocks)
-llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+llama_bench: error: failed to create context with model '<LOCAL_PATH>/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
 13:05:03 B) our model ngl0 (CPU+disk, clocks pinned high)
 | qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   0 |           pp512 |         45.62 ± 0.52 |
 | qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   0 |           tg128 |          4.23 ± 0.01 |
