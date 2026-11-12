@@ -27,8 +27,8 @@ on the control machine `~/.hermes/config.yaml.bak-brain-switch` (the brain-selec
     "resident-experts": true,
     "expert-cache": "auto",
     "prefill": "auto",
-    "vram-reserve-mib": 8591,
-    "resident-budget-gib": 20,
+    "vram-reserve-mib": 512,
+    "resident-budget-gib": 22,
     "conversation-cache-mib": 6144,
     "conversation-cache-slots": 6,
     "conversation-cache-disk-mib": 20480
@@ -36,11 +36,13 @@ on the control machine `~/.hermes/config.yaml.bak-brain-switch` (the brain-selec
 }
 ```
 
-Two keys did the work:
+Two keys set the shape (values after the second measurement round, see "What owns the speed" below):
 
-* `vram-reserve-mib 8591` = 24 463 − 15 872. With `expert-cache auto`, the expert tier only fills what is left on
-  the card after the reserve, which pins total GPU use at ≈15.5 GiB.
-* `resident-budget-gib 20` = the ceiling for resident experts in system RAM.
+* `vram-reserve-mib 512` — the card is deliberately left essentially full (23.6 GiB of 24.4 GiB in use). Reserving
+  8 591 MiB of it, as the first round of this file did, halves decode speed: the expert tier shrinks and the
+  expert-cache hit falls from 93 % to 72 %.
+* `resident-budget-gib 22` — the ceiling for experts resident in system RAM. This is the knob that meets the
+  owner's 30 GiB host target: 28 Gi used, 31 Gi free, swap 1.0 Gi.
 
 Everything else untouched: context, `kv int8`, `resident-experts`, `prefill auto`, conversation cache 6 GiB × 6
 slots + 20 GiB disk tier.
@@ -73,8 +75,8 @@ for i in $(seq 1 30); do curl -s -m 8 http://127.0.0.1:8080/health | grep -q '"l
 | 25 | 34–35 Gi | 25–26 Gi | 15 487 MiB (13 596 + 1 850) | 0.99 Gi of 8.0 | `14.2 GiB experts on SSD`; 30 % of experts file-only; expert-cache hit 53–71 % |
 | **20 (current)** | **26 Gi** | **33 Gi** | **15 517 MiB** | 1.1 Gi of 8.0 | `19.2 GiB experts on SSD`; 41 % of experts file-only; `ram floor 7.8 GiB` |
 
-Both ceilings hold exactly: the 30 GiB RAM target is met with 4 GiB of slack at tier 20, and VRAM sits at 15.5 GiB
-with ≈9 GiB of the card free for anything else.
+Those two ceilings held exactly at the time. The 15.5 GiB VRAM half of it was **reverted the same evening** once
+the matrix below showed what it was really costing; the RAM half is still in force at tier 22 (28 Gi used).
 
 ## Fallback brain check (done before the restarts)
 
@@ -120,7 +122,7 @@ Every row has the **same 15.5 GiB VRAM ceiling** (`vram-reserve-mib 8591`); only
 
 | RAM tier (`resident-budget-gib`) | host RAM used | decode, cold | decode, warm (best of 4) | prefill, 5 553 tokens cold | expert-cache hit | warm TTFT |
 |---|---|---|---|---|---|---|
-| **20 — current, ≤30 GiB host target** | **26 Gi** | 58.5 t/s | **75.8 t/s** | 1 676 t/s | 64–72 % | ≈1.05 s |
+| 20 — first cap round, later reverted | **26 Gi** | 58.5 t/s | **75.8 t/s** | 1 676 t/s | 64–72 % | ≈1.05 s |
 | 25 | 31 Gi | 61.0 t/s | 80.4 t/s | 1 748 t/s | 66–74 % | ≈1.0 s |
 | 56 (RAM uncapped) | 46 Gi | 75.4 t/s | **107.9 t/s** | 1 912 t/s | 66–73 % | ≈0.76 s |
 
@@ -129,7 +131,7 @@ Two notes on method. The model stops at ~150 generated tokens on this benchmark 
 forcing `ignore_eos`. And the cold arm is one request per tier after a fresh load, so it also carries the
 first-touch cost.
 
-## Energy and cost at the live tier (measured on P2005, 12.11)
+## Energy and cost (measured on P2005, 12.11)
 
 `scripts/p2005_energy.sh` samples GPU `power.draw` (1 s) and the CPU package through RAPL while one bench runs,
 and keeps the engine's own accounting lines for the same window:
@@ -155,21 +157,54 @@ The 30 GiB host cap therefore costs about **+0.05…0.08 € per million tokens*
 unbounded, and the same cap is what keeps 33 GiB of RAM and 9 GiB of VRAM usable for anything else on the box.
 Wall-outlet power is not metered on P2005, so these are component sums, not socket readings.
 
-## Verdict
+## What owns the speed: the VRAM ceiling, not the RAM ceiling
 
-* Holding the host at **26 Gi used** (4 GiB of slack under the 30 GiB target) costs **≈30 % of decode**
-  (75.8 vs 107.9 t/s) and ≈0.3 s of warm TTFT; prefill is barely affected (1 676 vs 1 912 t/s), so long-prompt
-  work pays almost nothing for the cap.
-* The **VRAM ceiling is the cheap half**: at 15.5 GiB the card keeps ~9 GiB free and the engine's expert tier
-  simply shrinks.
-* With tier 20 the box has 33 GiB RAM and 9 GiB VRAM free — enough to run a second, small service on P2005
-  without touching the brain.
-* Fallback brain at the same test ≈64 SSE chunks/s (~45 t/s equivalent): a real brain at roughly half speed.
-* If a later run wants the speed back without losing the host cap, tier 25 is the borderline point: 31 Gi used
-  for +6 % decode.
+A second matrix (`scripts/p2005_v2_ab.sh`, raw log `docs/data/p2005-brain-ab-20261112/ab2-raw.log`) crossed the
+two ceilings — same bench, engine's own numbers:
+
+| `vram-reserve-mib` | `resident-budget-gib` | host RAM used | VRAM used | decode cold | decode warm | expert-cache hit | experts on SSD |
+|---|---|---|---|---|---|---|---|
+| 512 (card full) | 56 | 38 Gi | 23 635 MiB | 114.1 | **187.1** | 94.2 % | — |
+| 512 | 32 | 38 Gi | 23 635 MiB | 109.6 | 187.0 | 94.2 % | — |
+| **512** | **22 (live)** | **28 Gi** | **23 615 MiB** | 85.9 | **145.0** | **93.2 %** | 9.3 GiB |
+| 8591 (15.5 GiB VRAM cap) | 22 | 28 Gi | 15 521 MiB | 49.4 | 75.2 | 72.2 % | 9.3 GiB |
+| 8591 | 32 | 38 Gi | 15 541 MiB | 63.8 | 87.1 | 71.7 % | 7.2 GiB |
+
+Across the last three rows: at the **same** RAM budget (22) and the same 9.3 GiB of experts on SSD, giving the card
+back to the engine lifts warm decode **75 → 145 t/s (+93 %)** and hit **72 → 93 %**. Down a column with the card
+capped: pouring another 10 GiB of RAM at the problem buys almost nothing (75 → 87 t/s, hit unchanged). The earlier
+verdict in this file — "the VRAM ceiling is the cheap half" — is **wrong**, and this matrix is what disproves it.
+
+## The same story in four days of real traffic
+
+The serve log carries 57 237 production `done` lines; split by the engine-era markers:
+
+| era | requests | decode p50 | p90 | max | expert-cache hit p50 |
+|---|---|---|---|---|---|
+| `vram-reserve 512` + budget 56 (before the caps) | 18 331 | 130 | **242** | 353 | 87.2 % |
+| same config, later days | 24 648 | 127 | 215 | 327 | 86.1 % |
+| same config, longer sessions | 14 177 | 100 | 138 | 236 | 80.7 % |
+| `vram-reserve 8591` + budget 20 (capped) | 11 | 62 | 74 | 79 | 58.5 % |
+
+The "200 tokens/s" the owner remembered is real: it is the p90 of the uncapped config at 86–87 % expert-cache hit,
+and it vanished when the VRAM reserve pushed experts onto NVMe. It also shows why the synthetic 600/150 bench
+understated the damage: −30 % in the bench, −50 % at the production median plus the loss of the whole fast tail.
+
+## Verdict (live config: `vram-reserve 512`, `resident-budget 22`)
+
+* **Both owner constraints hold at once, but only by spending the card, not the RAM**: host RAM 28 Gi used
+  (31 Gi free, target ≤30 GiB met) with warm decode 145 t/s, cold 86 t/s, prefill 518 t/s on the 878-token bench,
+  expert-cache hit 93 %.
+* The 15.5 GiB VRAM cap costs roughly **half of decode** (145 → 75 t/s at equal RAM). Keeping that much of the card
+  free only pays if a second GPU service actually needs it on the brain box; at 23.6 / 24.4 GiB there is no
+  headroom left.
+* Raising RAM does not recover what the VRAM cap took: 22 → 32 GiB is +16 % decode and the hit rate stays at 72 %.
+* Energy follows speed: at 145 t/s the same ≈170 W box makes a million tokens in ≈1.93 h (0.48 kWh) → **≈0.12 €/M**
+  against 0.16 €/M at the capped tier.
+* Fallback brain on the same bench ≈64 SSE chunks/s (~45 t/s equivalent) — about a third of the restored speed.
 
 Rollback of the engine limits: `cp ~/basalt/basalt-config.json.bak-20261112 ~/basalt/basalt-config.json` and
 restart the serve.
 
 Bench script: `scripts/brain_bench.py` (streams `/v1/chat/completions`; TTFT, SSE chunk rate, wall time; args:
-url, runs, model, prompt tokens, generation tokens). A/B driver: `scripts/p2005_ram_ab.sh`.
+url, runs, model, prompt tokens, generation tokens). A/B driver: `scripts/p2005_ram_ab.sh`. A/B drivers: `scripts/p2005_ram_ab.sh` (RAM tiers), `scripts/p2005_v2_ab.sh` (VRAM × RAM matrix).

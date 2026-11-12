@@ -1,0 +1,66 @@
+started
+=== arm vram-reserve=512MiB budget=56GiB loaded after 27s
+Mem:            60Gi        38Gi        21Gi       829Mi       1.9Gi        22Gi
+Swap:          8.0Gi       1.0Gi       7.0Gi
+23635 MiB
+   "run": 0,
+   "run": 0,
+   "run": 0,
+[server] s1 done  pp=878/0c 1.4s 610t/s  tg=156 114.1t/s acc=73%  ttft=1.5s  end=stop  hit=82.8%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=155 185.3t/s acc=76%  ttft=0.1s  end=stop  hit=93.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 187.1t/s acc=71%  ttft=0.0s  end=stop  hit=94.2%  pcie=0.0%
+[server] ram      floor 7.4 GiB (3.0 margin + 4.4 cache), 14.2 GiB experts on SSD, RAM copy <= 25.0 of 55.5 GiB
+[server] ram      floor 7.8 GiB (3.0 margin + 4.7 cache), 19.2 GiB experts on SSD, RAM copy <= 20.0 of 55.7 GiB
+started
+=== arm vram-reserve=512MiB budget=32GiB loaded after 27s
+Mem:            60Gi        38Gi        21Gi       829Mi       2.1Gi        22Gi
+Swap:          8.0Gi       1.0Gi       7.0Gi
+23635 MiB
+   "run": 0,
+   "run": 0,
+   "run": 0,
+[server] s1 done  pp=878/0c 1.4s 647t/s  tg=156 109.6t/s acc=73%  ttft=1.4s  end=stop  hit=82.8%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=155 186.5t/s acc=76%  ttft=0.1s  end=stop  hit=93.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 187.0t/s acc=71%  ttft=0.0s  end=stop  hit=94.2%  pcie=0.0%
+[server] ram      floor 7.4 GiB (3.0 margin + 4.4 cache), 14.2 GiB experts on SSD, RAM copy <= 25.0 of 55.5 GiB
+[server] ram      floor 7.8 GiB (3.0 margin + 4.7 cache), 19.2 GiB experts on SSD, RAM copy <= 20.0 of 55.7 GiB
+started
+=== arm vram-reserve=512MiB budget=22GiB loaded after 27s
+Mem:            60Gi        28Gi        31Gi       829Mi       2.1Gi        31Gi
+Swap:          8.0Gi       1.0Gi       7.0Gi
+23615 MiB
+   "run": 0,
+   "run": 0,
+   "run": 0,
+[server] s1 done  pp=878/0c 1.7s 511t/s  tg=156 85.9t/s acc=69%  ttft=1.8s  end=stop  hit=83.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 145.0t/s acc=70%  ttft=0.1s  end=stop  hit=93.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 111.1t/s acc=70%  ttft=0.0s  end=stop  hit=93.9%  pcie=0.0%
+[server] ram      floor 7.8 GiB (3.0 margin + 4.7 cache), 19.2 GiB experts on SSD, RAM copy <= 20.0 of 55.7 GiB
+[server] ram      floor 7.3 GiB (3.0 margin + 4.3 cache), 9.3 GiB experts on SSD, RAM copy <= 22.0 of 55.3 GiB
+started
+=== arm vram-reserve=8591MiB budget=22GiB loaded after 27s
+Mem:            60Gi        28Gi        31Gi       834Mi       2.1Gi        31Gi
+Swap:          8.0Gi       1.0Gi       7.0Gi
+15521 MiB
+   "run": 0,
+   "run": 0,
+   "run": 0,
+[server] s1 done  pp=878/0c 2.2s 398t/s  tg=142 49.4t/s acc=72%  ttft=2.3s  end=stop  hit=64.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=142 75.2t/s acc=70%  ttft=0.1s  end=stop  hit=72.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=144 72.3t/s acc=65%  ttft=0.1s  end=stop  hit=71.8%  pcie=0.0%
+[server] ram      floor 7.3 GiB (3.0 margin + 4.3 cache), 9.3 GiB experts on SSD, RAM copy <= 22.0 of 55.3 GiB
+[server] ram      floor 7.6 GiB (3.0 margin + 4.6 cache), 17.2 GiB experts on SSD, RAM copy <= 22.0 of 55.2 GiB
+started
+=== arm vram-reserve=8591MiB budget=32GiB loaded after 27s
+Mem:            60Gi        38Gi        21Gi       834Mi       2.1Gi        21Gi
+Swap:          8.0Gi       1.0Gi       7.0Gi
+15541 MiB
+   "run": 0,
+   "run": 0,
+   "run": 0,
+[server] s1 done  pp=878/0c 1.8s 484t/s  tg=150 63.8t/s acc=73%  ttft=1.9s  end=stop  hit=65.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=156 81.5t/s acc=76%  ttft=0.1s  end=stop  hit=71.5%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 87.1t/s acc=73%  ttft=0.1s  end=stop  hit=71.7%  pcie=0.0%
+[server] ram      floor 7.6 GiB (3.0 margin + 4.6 cache), 17.2 GiB experts on SSD, RAM copy <= 22.0 of 55.2 GiB
+[server] ram      floor 7.0 GiB (3.0 margin + 4.0 cache), 7.2 GiB experts on SSD, RAM copy <= 32.0 of 55.6 GiB
+ALL_V2_DONE
