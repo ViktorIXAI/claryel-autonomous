@@ -264,6 +264,35 @@ def main() -> int:
     ck(rc == 1 and "suspended_until" in out,
        "a compact owner_window.suspended_until in the pin must be INPUT GAP: %s" % out[-300:])
 
+    # 14b. CANCELLED window (owner decision 2026-11-12 06:40 CET, tick 73): with
+    #      `suspended_until: null` plus `cancelled_on`, CLOSED has no end — the pinned snapshot
+    #      never expires, so an armed launcher cannot quietly spend owner quota again, months
+    #      later. A run date before the cancellation with no window end fails CLOSED, never OPEN.
+    f15 = Fixture(os.path.join(tmp, "b15"))
+    pin_c = json.load(open(f15.make_pin(), encoding="utf-8"))     # matches the stored bytes
+    pin_c["owner_window"] = {"suspended_until": None, "cancelled_on": "2026-11-12"}
+    ppath = _write(tmp, "cancel-pin.json", pin_c)
+    rc, out = f15.run(ppath, "2026-11-12")
+    ck(rc == 0 and "window is CLOSED" in out
+       and "cancelled by owner decision on 2026-11-12" in out,
+       "matching bytes under a cancelled window must be READY and CLOSED: %s" % out[-300:])
+    f15.rows.append(row(2))
+    f15.write_arm()
+    rc, out = f15.run(ppath, "2026-11-12")
+    ck(rc == 3 and "INSIDE the closed owner window" in out,
+       "a Grok row written on the cancellation day must be NO-GO: %s" % out[-400:])
+    rc, out = f15.run(ppath, "2026-12-05")
+    ck(rc == 3 and "cancelled by owner decision on 2026-11-12" in out,
+       "a cancelled window must never reopen a month later: %s" % out[-400:])
+    rc, out = f15.run(ppath, "2026-11-11")
+    ck(rc == 3 and "fail closed" in out and "window is CLOSED" in out,
+       "a run date before the cancellation with no window end must fail CLOSED: %s" % out[-400:])
+    pin_bad = json.loads(json.dumps(pin_c))
+    pin_bad["owner_window"] = {"suspended_until": None, "cancelled_on": "20261112"}
+    rc, out = f15.run(_write(tmp, "bad-cancel-pin.json", pin_bad), "2026-11-12")
+    ck(rc == 1 and "cancelled_on" in out,
+       "a compact cancelled_on in the pin must be INPUT GAP: %s" % out[-300:])
+
     # 2. pin vocabulary: wrong tasks cell / wrong pinned task count
     f10 = Fixture(os.path.join(tmp, "b10"))
     rc, out = f10.run(f10.make_pin(expected_tasks_cell="0" * 16))

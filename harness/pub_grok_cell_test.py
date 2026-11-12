@@ -46,6 +46,15 @@ def ok(cond, label):
 def main() -> int:
     chk = load("pub_grok_cell_check", "scripts/pub_grok_cell_check.py")
 
+    # 0. the sentence is READ, not remembered: the checker's vocabulary is the owner-window
+    #    record's, and every superseded window's sentence is a finding (tick 73, 2026-11-12:
+    #    the owner cancelled Grok on the day the resume window opened and four table cells still
+    #    promised a resume "2026-11-12").
+    in_force, superseded = chk.load_window()
+    ok(bool(in_force), "the in-force sentence comes from the owner-window record (%r)" % in_force)
+    ok(len(superseded) >= 1, "the record names at least one superseded sentence (%d)" % len(superseded))
+    ok(in_force not in superseded, "the in-force sentence is not also listed as superseded")
+
     # 1. the tracked tree is clean under the rule, and the scope is real
     docs = list(chk.DEFAULT_DOCS)
     ok(len(docs) >= 9, "checker scans every result document (%d found)" % len(docs))
@@ -75,7 +84,7 @@ def main() -> int:
         f_stale.write_text(stale, encoding="utf-8")
         got = chk.check_doc(f_stale)
         ok(len(got) >= 2, "stale 'in flight' cell is a finding (%d)" % len(got))
-        ok(any("no suspension sentence" in g for g in got),
+        ok(any("suspension sentence" in g for g in got),
            "the missing-suspension-sentence finding fires")
         ok(any("'in flight'" in g for g in got), "the stale-marker finding fires")
 
@@ -112,6 +121,30 @@ def main() -> int:
         f_blank = td / "BLANK-RESULT.md"
         f_blank.write_text(blank, encoding="utf-8")
         ok(len(chk.check_doc(f_blank)) >= 1, "a blank grok cell is a finding")
+
+        # 7b. TAMPER (tick 73, 2026-11-12): a cell that still carries the SUPERSEDED window's
+        #     sentence must redden — after the owner cancelled Grok, "resumes 2026-11-12" is a
+        #     false availability claim, the exact class this checker exists for.
+        stale_window = stale.replace(
+            "| in flight (12/198 at publish time) | pending — no percent for a partial arm | — | — |",
+            "| %s | no percent for a partial arm | — | — |" % superseded[0])
+        f_old = td / "OLDWINDOW-RESULT.md"
+        f_old.write_text(stale_window, encoding="utf-8")
+        got_old = chk.check_doc(f_old)
+        ok(any("SUPERSEDED" in g for g in got_old),
+           "a percent-less cell carrying the superseded sentence is a finding: %r" % got_old[:2])
+
+        # 7c. the corrected wording for the cancelled window passes
+        new_window = stale_window.replace(superseded[0], in_force)
+        f_new = td / "NEWWINDOW-RESULT.md"
+        f_new.write_text(new_window, encoding="utf-8")
+        ok(chk.check_doc(f_new) == [], "in-force cancelled-window wording passes: %r"
+           % chk.check_doc(f_new))
+
+        # 7d. INPUT GAP: a checker with no vocabulary must refuse, never fall back to a
+        #     remembered sentence (that is how a stale window survives a decision change).
+        rc_gap = chk.main(["pub_grok_cell_check.py", "--pin", str(td / "no-such-pin.json")])
+        ok(rc_gap == 2, "a missing owner-window record is an INPUT GAP exit 2 (got %r)" % rc_gap)
 
     # 8. the CLI contract: 0 on the clean tree, 3 on a tampered tree
     rc_clean = chk.main(["pub_grok_cell_check.py"])

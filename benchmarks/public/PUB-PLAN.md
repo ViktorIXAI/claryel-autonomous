@@ -208,6 +208,30 @@ still ship, because measurement honesty is not model development.
   removes the serialization constraint on cloud legs; the local endpoint is unaffected, so bare and
   contour legs keep running at full rate during the window.
 
+## Arm availability policy — Grok CANCELLED (owner decision, 2026-11-12 06:40 CET)
+
+The 2026-11-09 window above was superseded the day it opened. The resumed chain completed
+gpqa-diamond (198/198 → 87.9 %), humaneval (164/164 → 97.6 %) and mmlu-pro (500/500 → 86.0 %) and
+the IFEval leg ran 03:18:38 → 06:42:49 CET, reaching 359 of 541 stored rows, when the owner
+cancelled Grok outright (stop touching Grok, very few limits remain — the account had already
+returned `HTTP 403 personal-team-blocked:spending-limit` on a chat request at 02:06 CET).
+
+* **No Grok arm is launched from 2026-11-12 onward** until a new owner decision re-arms this line.
+  `benchmarks/public/GROK-RESUME-PIN.json` now carries `owner_window.cancelled_on` with
+  `suspended_until: null`, which the resume gate reads as a CANCELLED window: the pin is an exact
+  snapshot with no expiry and every further Grok row is a finding that halts a chain launcher
+  before it spends quota.
+* Every stored partial stays on disk, byte-intact and resumable by id (IFEval 359/541). A partial
+  publishes no percent.
+* Grok cells for an incomplete set read **"suspended by owner quota, cancelled by owner decision
+  2026-11-12 (no resume date)"**; the 2026-11-09 sentence "…resumes 2026-11-12" is recorded as
+  superseded and `scripts/pub_grok_cell_check.py` reddens any percent-less cell still carrying it.
+* Completed Grok rows are unaffected and stay in force: gsm8k-300 96.0 %, arc-easy-300 96.3 %,
+  arc-challenge-300 96.0 %, gpqa-diamond-198 87.9 %, humaneval-164 97.6 %, mmlu-pro-500 86.0 %,
+  hard-bank cadence 134/183 on bank v6.6.
+* The cross-arm standard of this line is therefore **three arms** for the foreseeable future:
+  bare local brain / contour `0.0.2.56` at matched request shape / ChatGPT `gpt-6.1-sol`.
+
 ## Deployment hold — issue #43 (2026-11-09 10:10 CET → 2026-11-10 10:10 CET)
 
 The owner mandated a 24-hour architecture deployment freeze (issue #43). This line honors it: no

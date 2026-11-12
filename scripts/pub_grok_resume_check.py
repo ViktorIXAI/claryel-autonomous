@@ -49,6 +49,13 @@ Two modes, decided from `owner_window.suspended_until` and the run date (`--as-o
     progress with a live resume set instead of a false alarm, so a healthy resumed queue is
     never halted by a gate that only froze one moment.
 
+A `owner_window.cancelled_on` (ISO date, `suspended_until: null`) makes the window
+CANCELLED: from that date on it is CLOSED with no end, so the pinned snapshot never expires
+and every further Grok row is a finding. That is the owner decision of 2026-11-12 06:40 CET
+(stop touching Grok, very few limits left, Grok cancelled), which superseded the 2026-11-09
+"resumes 2026-11-12" window the same day it opened. A run date before the cancellation with
+no window end in the pin fails CLOSED rather than reading as a green light.
+
 Exit codes: 0 = RESUME-READY (identity matches the pin, resume set exact), 3 = findings
 (do NOT spend quota), 1 = input gap (missing pin, missing bench entry, an expected answer
 file absent). An input gap is never a green light.
@@ -474,7 +481,9 @@ def main() -> int:
         if name not in arms:
             GAPS.append("%s: listed in queue_order but the pin has no arm record" % name)
 
-    until = str((pin.get("owner_window") or {}).get("suspended_until") or "")
+    ow = pin.get("owner_window") or {}
+    until = str(ow.get("suspended_until") or "")
+    cancelled = str(ow.get("cancelled_on") or "")
     as_of = args.as_of or __import__("datetime").date.today().isoformat()
 
     # The window mode is a string comparison, so BOTH operands must be the ISO
@@ -503,14 +512,36 @@ def main() -> int:
     if until and not _iso_dashed(until):
         GAPS.append("owner_window.suspended_until %r is not YYYY-MM-DD - the window "
                     "mode cannot be decided by string compare" % until)
-    if not until:
-        GAPS.append("the pin names no owner_window.suspended_until - the window cannot be decided")
+    if cancelled and not _iso_dashed(cancelled):
+        GAPS.append("owner_window.cancelled_on %r is not YYYY-MM-DD - the cancellation date "
+                    "decides the window mode by string compare, so the gate refuses rather "
+                    "than guessing" % cancelled)
+    if cancelled and _iso_dashed(cancelled) and as_of >= cancelled:
+        # Cancelled window state (owner decision 2026-11-12 06:40 CET, delivered on Telegram:
+        # stop touching Grok, very few limits left, Grok cancelled): the window has no end, so
+        # the pin is an exact snapshot FOREVER. Any growth past it is a finding, which is the
+        # mechanical form of "no Grok arm until the owner re-arms this line".
         window_open = False
+        mode_note = ("cancelled by owner decision on %s with no resume date - CLOSED "
+                     "indefinitely, no Grok call is legal at all" % cancelled)
+    elif not until:
+        if cancelled and _iso_dashed(cancelled):
+            # The run date precedes the cancellation and the old window end was dropped from
+            # the pin: fail closed rather than handing out a green light.
+            window_open = False
+            mode_note = ("the run date %s precedes the owner cancellation on %s and the pin "
+                         "names no window end - fail closed" % (as_of, cancelled))
+        else:
+            GAPS.append("the pin names no owner_window.suspended_until and no cancelled_on - "
+                        "the window cannot be decided")
+            window_open = False
+            mode_note = "undecided"
     else:
         window_open = as_of >= until
-    print("grok resume gate | pin %s | as of %s | window closes %s | window is %s today (%s)"
-          % (os.path.relpath(args.pin, ROOT), pin.get("as_of"), until,
-             "OPEN" if window_open else "CLOSED", as_of))
+        mode_note = "window closes %s" % until
+    print("grok resume gate | pin %s | as of %s | window is %s today (%s) | %s"
+          % (os.path.relpath(args.pin, ROOT), pin.get("as_of"),
+             "OPEN" if window_open else "CLOSED", as_of, mode_note))
     live_remaining = 0
     for name in queue:
         if name in arms:

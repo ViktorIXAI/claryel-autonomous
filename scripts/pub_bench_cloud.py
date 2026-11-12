@@ -66,6 +66,16 @@ def main():
         print(__doc__)
         return 2
     tasks_f, arm = sys.argv[1], sys.argv[2]
+    # Owner cancel guard (2026-11-12): the owner cancelled the Grok arms because the owner-side
+    # quota is too small for the remaining sets. Checked here, in the transport runner itself,
+    # so EVERY path fails closed - launcher, systemd-run unit, or a direct call - not just the
+    # go-scripts. There is no flag that bypasses it: lifting the cancel means deleting the marker.
+    if arm == "grok":
+        marker = os.path.expanduser("~/pub-bench/GROK-CANCELLED")
+        if os.path.exists(marker):
+            reason = open(marker, encoding="utf-8").read().strip()
+            print("REFUSED: grok arms cancelled by owner decision (%s): %s" % (marker, reason))
+            return 3
     limit, offset, out = None, 0, OUT_DEFAULT
     rest = sys.argv[3:]
     for i, a in enumerate(rest):

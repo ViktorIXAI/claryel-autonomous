@@ -17,11 +17,15 @@ answer-graded sets cannot.
 | bare local brain `qwen3.8-flash-next-iq3_s-basalt` (P2005, IQ3_S, 24 GB class) | 541 (full set) | `2c672531577dcc33` | temp 0.7, `max_tokens` 1200, one request per task, no request seed, serve-default thinking | **467/541 = 86.3 %** | 481/541 = 88.9 % | 751/834 = 90.0 % |
 | contour 0.0.2.56, matched shape (first rung 1200, no seed, serve-default thinking, validator slot = `pub-ifeval-v1`) | 541 (full set) | `2c672531577dcc33` | same shape as the bare arm by the parity shape rule: one 1200-token rung = one request per task, temp 0.7 | **462/541 = 85.4 %** | 477/541 = 88.2 % | 743/834 = 89.1 % |
 | codex `gpt-6.1-sol` xhigh (subscription CLI, stdin transport) | 541 (full set) | `2c672531577dcc33` | transport does not expose sampling params; one leg split by the owner-side usage window — 08:24 → 12:39 (440 ok rows, 15 333 s), quota window, resumed 13:34 → 14:41 (101 ok rows, 3467 s); 3 stale `rc1` rows purged with zero credit before the resume (`LEG-INCIDENTS.md`) | **515/541 = 95.2 %** | 526/541 = 97.2 % | 807/834 = 96.8 % |
-| grok-4.7 | 541 | `2c672531577dcc33` | — | suspended by owner quota, resumes 2026-11-12 | — | — |
+| grok-4.7 | 541 | `2c672531577dcc33` | leg started 03:18:38 CET under the 2026-11-12 window, stopped by the owner at 06:42:49 CET with **359 of 541 rows stored** (`finish=ok`, resumable by id: 182 ids `ifeval-286`..`ifeval-3757` left, ~33 s/task measured) — a stored-row count, not a score | suspended by owner quota, cancelled by owner decision 2026-11-12 (no resume date) | — | — |
 
 Cross-arm standard for this window is three arms (bare local / contour matched shape / ChatGPT
 codex): the Grok quota ran dry on the owner side on 2026-11-09 and no Grok percent is produced for
-this set before 2026-11-12. The ChatGPT leg stopped at 440/541 rows at 12:39 on the subscription
+this set before 2026-11-12. *(corrected 2026-11-12: the window did open on 2026-11-12 and the Grok
+leg did start, but the owner cancelled Grok at 06:40 CET the same morning — the leg stopped at
+359 of 541 stored rows at 06:42:49 CET and publishes no percent; see "Grok leg stopped mid-set by
+owner cancellation, 2026-11-12 06:42 CET" at the end of this document.)* The ChatGPT leg stopped at
+440/541 rows at 12:39 on the subscription
 usage limit, resumed at 13:34 when the window reopened and **completed 541/541 at 14:41 CET**, so
 the IFEval comparison is three arms. Paired sign tests over the same 541 ids (strict axis, exact
 McNemar): codex vs bare **61W/13L, p = 1.4e-8**; codex vs contour matched **62W/9L, p = 7.3e-11**;
@@ -535,3 +539,26 @@ python and fail-closes unless the 41-test upstream suite is green and the refere
 partial refusal is mechanical: `scripts/pub_bench_ifeval_v2.py:280-282` exits on >5 % missing before
 any digest write, so a leg that runs out of quota at day's end mints nothing and resumes by id the
 next day.
+
+## Grok leg stopped mid-set by owner cancellation, 2026-11-12 06:42 CET
+
+* The pre-registered resume window opened as planned: the sequential Grok chain (unit
+  `parb-pub-grok-queue`) finished gpqa-diamond (198/198), humaneval (164/164) and mmlu-pro
+  (500/500), then started the IFEval leg at **03:18:38 CET**.
+* At **06:40:54 CET** the owner cancelled Grok entirely (Telegram reply to the 02:00 daily status
+  report: stop touching Grok, very few limits remain, Grok cancelled — the same account had already
+  answered a chat request at 02:06:40 CET with `HTTP 403 personal-team-blocked:spending-limit`).
+  The unit was stopped at **06:42:49 CET**, four minutes later, with the leg mid-set.
+* State kept, zero credit taken: **359 of 541 rows stored**, all `finish=ok`, 0 empty, 0 duplicate
+  ids, answer file SHA-256/16 `01c1ee0b6e7f6d5d`. The **182 remaining ids** (`ifeval-286` ..
+  `ifeval-3757`) were never asked and the file stays resumable by id. The measured leg rate ran
+  27.4 s/task at row 200 to 33.6 s/task at row 340, so ~1.7 h of the ~3.5 h queue was left undone.
+  `LEG-INCIDENTS.md` carries the dated entry; this partial publishes **no percent**, and the
+  arm's pre-registered checker contract (`pub-ifeval-v2`) stands unchanged for any future leg.
+* The cancellation is now enforced mechanically rather than by memory: the owner-window record in
+  `GROK-RESUME-PIN.json` carries `cancelled_on: 2026-11-12` with `suspended_until: null`, so the
+  resume gate reports a **CANCELLED** window — CLOSED with no end — and treats *any* further Grok
+  row as an uncredited write. Re-reading the gate against the real arm bytes gives 22 checks /
+  READY with the snapshot matching all four files; appending one synthetic row to a scratch copy of
+  the IFEval file turns the same gate into exit 3 with the "INSIDE the closed owner window"
+  finding, so a chain launcher started again halts at that gate before spending quota.
