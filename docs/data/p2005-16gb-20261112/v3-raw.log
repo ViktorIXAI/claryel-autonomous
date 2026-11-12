@@ -30,9 +30,9 @@ gpu_W 99.7 (max 148.7 n=8)
 cpu_W -5752.9 window 9s
 started
 === arm spec4-suffix (loaded=0 after 80s)
-[server] network  http://192.168.1.186:8080/v1
-[server] error: unknown argument: /home/claryel/.cache/basalt/b2c1112ff2bd48ba/conversations
-[server] engine log: /home/claryel/.cache/basalt/b2c1112ff2bd48ba/engine.log
+[server] network  http://<LAN_IP>:8080/v1
+[server] error: unknown argument: <LOCAL_PATH>/.cache/basalt/b2c1112ff2bd48ba/conversations
+[server] engine log: <LOCAL_PATH>/.cache/basalt/b2c1112ff2bd48ba/engine.log
 [server] stopped
 started
 === arm spec4-kvres2048 (loaded=1 after 24s)
