@@ -10,6 +10,13 @@ bytes, one percent row per run.
 
 1. A benchmark is one pinned task file: `benchmarks/public/<name>.tasks.jsonl` + `MANIFEST.json`
    (source URL + sha16). A re-fetch that changes bytes is a new version, never an in-place edit.
+   A pinned task file is read by iterating the file object, never with `read_text().splitlines()`:
+   the GPQA file's `gpqa-167` prompt carries one U+2028 (LINE SEPARATOR) inside its JSON string,
+   and `splitlines()` cuts that record in half (198 records become 199 fragments, 2 of them
+   unparseable), so a percent computed that way can silently rest on the wrong denominator. All
+   shipped readers already iterate; the invariant (record count per pinned file, the per-set
+   separator census, and the trap itself) plus tamper controls are pinned by
+   `harness/pub_taskfile_shape_test.py` (43 checks, added 2026-11-12).
 2. Scorers live in `scripts/pub_bench_score.py` and are deterministic (`number`, `letter`,
    `exact`). Execution checkers (`pytest` for HumanEval, `ifeval` rules) ship as separate
    contracts; until they exist, those tasks are counted as UNSCORED and excluded from the
@@ -68,6 +75,23 @@ classes fail closed, and four reading-shape cases pin the parser (one-line form 
 the verdict; a dropped key in that form and an empty value still exit 1). Threshold constants in the
 file carry the measurements that set them. The gate
 registers no contour feature and moves no published byte.
+
+## Publication-completeness census (2026-11-12, zero model calls)
+
+Every shipped public arm was re-scored from its shipped answer bytes with the pinned checker, and
+every fraction equals its published digest row: 24 answer-graded arms across GSM8K / ARC-Easy /
+ARC-Challenge / GPQA-Diamond / MMLU-Pro (both contour request shapes, codex, grok, the full local
+arms at 1319 / 2376 / 1172 and the 300-id matched slices), 4 HumanEval arms through the `pytest-v2`
+battery (basalt 159, codex 163, contour matched 157, grok 160 of 164), 3 BFCL arms through
+`bfcl-ast-v1` (basalt 1116, contour matched 1122 of 1240, codex 281/300 on the category-pure
+slice), and the repair/redraw sidecars (1161, 161, 163, 108, 497, 509 — the census command is in
+the same audit). The heaviest check re-executed the LiveCodeBench bare arm against the whole hidden
+battery (175 questions, 6537 tests): 101/175 reproduced with **0 per-id verdict flips** against the
+shipped verdict file, checker self-test 18/18, and the untracked payload still reproduces its pin
+(100 111 386 B, SHA-256/16 `86f92ab37602195a`). The audit's own first pass was the thing that broke,
+not the data — it read the GPQA task file with `read_text().splitlines()` and lost a record; that is
+the rule-1 hazard above, and no published number was affected (the pinned bytes match
+`af73cc064d4d8529`, 198 records).
 
 ## Benchmark ladder, cheapest first
 
