@@ -204,6 +204,8 @@ convention the repo security scanner binds its byte-pinned exceptions to
 | mmlu-pro-codex-answers.jsonl | 500 | `681ffe375a800426` | `17230236196545a4` |
 | humaneval-codex-answers.jsonl | 164 | `5f8fc9fd3de212ae` | `d660e00fa0cfeb1b` |
 | humaneval-codex-verdicts.jsonl | 164 | `4b815578e7227a09` | `714a4005f8defed2` |
+| humaneval-grok-answers.jsonl | 164 | `3cb269da9f735bc5` | `bec1da78aec5f69e` |
+| humaneval-grok-verdicts.jsonl | 164 | `61696f8e618fd88c` | `db4a0baf90425496` |
 
 First **bare-arm** artifacts (2026-11-09): `ifeval-basalt-*`. A bare arm has no ledger, and IFEval's
 percent is produced by the vendored upstream checker rather than by a number/letter match, so an
@@ -472,7 +474,13 @@ grok leg resumed at 00:01:42 CET and completed at 00:39:02 CET (59 new ids, `bad
 longer partial: it ships as `arms/gpqa-diamond-grok-answers.jsonl` (198 rows, SHA-256/16
 `c479109822f388a5`, indexed above) and publishes 174/198 = 87.9 % under `pub-checkers-v2`, with the
 shipped copy re-scored to the same fraction. The **humaneval** grok leg is still in flight and stays
-unshipped with no percent, by this same rule.)*
+unshipped with no percent, by this same rule. *(Updated 2026-11-12 00:59 CET: the humaneval grok leg
+also completed inside this window — 44 resumed ids, `bad=0`, 164/164 `finish=ok`, SHA-256/16
+`161ddf5b1956ab13` — so it now ships as `arms/humaneval-grok-answers.jsonl` +
+`arms/humaneval-grok-verdicts.jsonl` (indexed above) and publishes 160/164 = 97.6 % under
+`pytest-v2`. Its shipped copy is the one arm on this line whose bytes differ from the runner output:
+the scrub masked 11 `local_path` occurrences inside model-written code, and the masked copy
+re-scores to the identical 160/164 with the identical four failing ids.)*
 
 Reproduce one row:
 
@@ -542,7 +550,10 @@ without shipped bytes**. The two **partial** grok arms (139/198, 120/164) publis
 their bytes stay unshipped by rule; both partial files were re-verified intact at this pass
 (139 unique ids / 139 `finish=ok`; 120 / 120). *(Updated 2026-11-12: gpqa-diamond grok completed
 198/198 and now ships with its percent (174/198 = 87.9 %), so the invariant still holds for every
-percent row in the table; humaneval grok is still partial and still ships nothing.)*
+percent row in the table; humaneval grok is still partial and still ships nothing. *(Updated
+2026-11-12 00:59 CET: humaneval grok completed 164/164 and ships answers + verdict sidecar with its
+percent 160/164 = 97.6 %; the invariant — every percent row in the digest has shipped bytes, and no
+partial arm has a percent — still holds.)*
 
 ### Index pins were ambiguous: one column, two hash functions (corrected 2026-11-10 07:00 CET, zero model calls)
 

@@ -3783,3 +3783,50 @@ bare row and an admissible matched-shape contour row), and the Grok queue is clo
 (500), then ifeval grok (541), scored only when complete, under `pub-checkers-v2` and
 `pub-ifeval-v2` respectively (pre-registered at tick 45: IFEval's grok arm is minted under v2, with
 the v1 number beside it). Item P0 contour parity stays satisfied on every in-force set.
+
+## 2026-11-12 01:05 CET — tick 67 — HumanEval Grok arm COMPLETE (164/164), scored 97.6 % under `pytest-v2`, bytes + verdict sidecar shipped
+
+*Leg 2 of the queue finished inside the same tick as leg 1 was published. `parb-pub-grok-queue`
+still active with one launcher and the flock held; leg 3 (mmlu-pro, 500 ids) started 00:59:10 and is
+the only transport running.*
+
+*Leg 2: resumed 00:39:02 from `humaneval-0120`, `grok done: ok=44 bad=0 wall 1206 s` at 00:59:10 CET.
+Post-resume identity (resume gate, OPEN-window floor mode, 20 checks, READY): **164 rows / 164 unique
+ids / 164 `finish=ok` / 0 empty**, SHA-256/16 `161ddf5b1956ab13`.*
+
+*Scoring: `pub_bench_exec.py` ran its self-test first (`reference_passes=True wrong_passes=False`
+plus the four `pytest-v2` pins) and published **160/164 = 97.6 %** — the arm is scored at v2 exactly
+as the 2026-11-09 checker-correction section pre-registered ("the grok arm will be scored at v2"),
+which is why no v1 row exists for it anywhere. Failing cells `humaneval-0078`, `0133`, `0155`, `0163`;
+error classes: two `SyntaxError: invalid character '—' (U+2014)` (transport character/format cost)
+and two `AssertionError` (genuine). No partial percent was ever taken for the 120-row state.*
+
+*Publication: `arms/humaneval-grok-answers.jsonl` (164, SHA-256/16 `bec1da78aec5f69e`) and
+`arms/humaneval-grok-verdicts.jsonl` (164, `db4a0baf90425496`), index rows added,
+`pub_arms_index.py --check` drift 0. This is the first arm on the line whose shipped bytes are NOT
+byte-identical to the runner output: the scrub masked 11 `local_path` occurrences inside
+model-written code (14 grep hits over the answer fields, the rest the English word "bank"). Because
+masking touches code, the shipped copy was re-executed under the pinned checker: **160/164 with the
+same four failing ids**, so masking moved no verdict.*
+
+*Paired view over the verdict files (`pub_bench_verdict_sign.py`, 164 common ids, 0 dropped):
+contour 157 (95.7) < basalt 159 (97.0) < grok 160 (97.6) < codex 163 (99.4); sign tests
+4W/2L p=0.688, 1W/5L p=0.219, 4W/5L p=1.000, 1W/7L p=0.070, 4W/7L p=0.549, 4W/1L p=0.375 — every
+pair non-significant, span 3.7 pp. Published verdict for the set: **saturated, no resolving power at
+n=164**, in direct contrast with GPQA-Diamond where the same arms separate by 17–33 pp. Dated
+correction notes were added to the stale header line and to the two 2026-11-09/2026-11-10 sentences
+that described the suspension; no published number or byte was edited.*
+
+*Queue state at check: leg 3 mmlu-pro grok running (started 00:59:10, first log line
+`grok 20/500 ok=20 bad=0 elapsed 173 s (8.7 s/task) eta 69 min`), then ifeval 541. Whole remaining
+queue stays inside the pre-registered 9–27.6 h band; a set incomplete at day end stays unscored and
+resumes by id the next day.*
+
+*Standing gates re-run after both publications: arms index drift 0, derived percents 42 recomputed /
+0 findings, grok-cell rule 9 docs / 0 findings (gpqa and humaneval grok cells now carry percents),
+superseded-cell rule 0 findings, digest rows 48 / 0 findings.*
+
+**Next in force:** leg 3 (mmlu-pro grok, 500 ids) then leg 4 (IFEval grok, 541 ids, minted under
+`pub-ifeval-v2` with the v1 number beside it, pre-registered at tick 45). Each completes → score →
+one digest row → result-doc section. Item P0 contour parity is already satisfied on every in-force
+set; no local leg is queued, so the P2005 preflight gate stays uncalled (21 readings, newest 11 Nov).

@@ -1,5 +1,9 @@
 # HumanEval (164 tasks) — arms so far (local brain + codex; grok queued, contour parity measured 2026-11-09)
 
+*(Header correction 2026-11-12: that parenthetical is the 2026-11-09 state and the H1 is kept as
+written. Four arms now exist on this set — the grok arm completed 2026-11-12 00:59 CET at
+160/164 = 97.6 % under `pytest-v2` — see the arms table and the section at the end.)*
+
 Date: 2026-11-08. Pinned task file `benchmarks/public/humaneval.tasks.jsonl`, tasks sha16
 `971d976289cd9357` (source: openai/human-eval `HumanEval.jsonl.gz`, see `MANIFEST.json`).
 This set is scored by **execution**, not text matching: checker contract `pytest-v1`
@@ -18,7 +22,7 @@ the flips auditable.
 | brain-basalt | `qwen3.8-flash-next-iq3_s-basalt`, IQ3_S on a 24 GB-class GPU, no contour | 164/164 | **158/164 = 96.3 %** *(the `pytest-v1` verdict exactly as first published, and superseded as a verdict by the same stored answer bytes re-scored under contract `pytest-v2`: **159/164 = 97.0 %**, the in-force cell — A/B table in the `pytest-v2` release section below. Dated pointer 2026-11-10)* | 1697 s (10.3 s/task) | temp 0.7, max_tokens 1200, single seed pass |
 | codex | `gpt-6.1-sol`, codex-cli 0.166.0, reasoning xhigh, read-only sandbox, prompt via STDIN | 164/164 | **163/164 = 99.4 %** *(`pytest-v1` as-run; the `pytest-v2` rescore of the same bytes leaves this arm unchanged at 163/164 = 99.4 %, so no corrected digest row was needed. Dated pointer 2026-11-10)* | 1484 s (9.0 s/task) | sampling parameters not exposed by the transport |
 | contour-0.0.2.56, matched shape (item P0, 2026-11-09) | the FROZEN contour runtime `0.0.2.56` on the same endpoint model, category `P` (no hard-bank family scaffolding), validator slot = the `pytest-v1` execution checker that scored the bare row | 164/164 | **155/164 = 94.5 %** *(the `pytest-v1` verdict exactly as first published, and superseded as a verdict by the same stored answer bytes re-scored under contract `pytest-v2`: **157/164 = 95.7 %**, the in-force cell — A/B table in the `pytest-v2` release section below. Dated pointer 2026-11-10)* | 1190 s wall, 1175 s measured engine time (mean 7.16 / median 7.38 s/task) | temp 0.7, first rung 1200 (single rung), serve-default thinking, no request seed — the bare arm's call shape; see the parity section |
-| grok | `grok-4.7`, hermes one-shot, toolsets off | **suspended by owner quota, resumes 2026-11-12** (leg ran from 04:07 CET 2026-11-09, stopped 07:57 CET with 120 of 164 rows stored — a stored-row count, not a score; 44 ids to go, resumable by id) | no percent for a partial arm | — | — |
+| grok | `grok-4.7`, hermes one-shot CLI, toolsets off (cloud; **completed 2026-11-12 00:59 CET**, row added the same day — while the arm was partial it published no percent and shipped no bytes) | 164/164 | **160/164 = 97.6 %** under the in-force checker `pytest-v2` (scored at v2 exactly as pre-registered in the checker-correction section below) | resumed leg 00:39:02→00:59:10 CET = **1206 s** for the 44 missing ids; the whole 164-row arm logs median 31.7 s / mean 91.1 s per call — two transport builds, so per-call times are not comparable across legs; cloud arm, no GPU energy | sampling parameters not exposed by the transport; arm assembled from two legs resumed by id (164 unique ids, 164 `finish=ok`, 0 empty): 120 rows `v0.23.0+860.gf17db36.dirty`, 44 rows `v0.23.1+2.gb3746e3.dirty` — see "Grok arm completed 2026-11-12" at the end of this document |
 
 The matched set is the **full 164-task file** (`--limit` unused): cross-arm comparison on this
 set needs no subset, and no ids were dropped in any completed arm (164/164 answered, 0 empty).
@@ -210,6 +214,9 @@ that was running was stopped at 07:57 CET with **120 of 164** rows stored; those
 intact and resumable by id, and **no percent is published for them**. The grok cell in any table on
 this set reads "suspended by owner quota, resumes 2026-11-12". The `pytest-v2` re-score of that arm
 happens only on the completed set.
+*(corrected 2026-11-12 00:59 CET: the set **is** complete (164/164, leg finished 00:59:10 CET), it was
+scored under `pytest-v2` as pre-registered, and the table row now carries 160/164 = 97.6 %, which
+discharges the "suspended by owner quota" cell. This section stays as the record of the window.)*
 
 ## Published answer bytes of the bare arm (2026-11-09 23:5x CET): a completeness gap on this set, closed
 
@@ -380,3 +387,73 @@ asserted at re-score time). Re-score of the shipped copies: **163/164 = 99.4 %**
 `humaneval-0064` — the same cell the corrected paired table lists as basalt-only, so the table
 above needs no edit. Scrub masked nothing; bytes byte-identical to the runner output, zero
 path/IP/key hits.
+
+## Grok arm completed 2026-11-12 (00:59 CET): four arms on 164 tasks, and this set cannot rank them
+
+Leg 2 of the 12 Nov Grok queue: resumed 00:39:02 CET from `humaneval-0120`, completed 00:59:10 CET,
+**44 calls, wall 1206 s, `bad=0`** — no parked blank, so the blank purge had nothing to move. Arm
+identity read mechanically after the resume (`scripts/pub_grok_resume_check.py`, OPEN-window floor
+mode, `RESUME GATE: READY`): **164 rows / 164 unique ids / 164 `finish=ok` / 0 empty**, SHA-256/16
+`161ddf5b1956ab13`.
+
+Scoring used the contract in force for this set, `pytest-v2` (`scripts/pub_bench_exec.py`): its
+self-test ran first and printed `reference_passes=True wrong_passes=False` plus the four v2 pins
+(`prose_pass prose_wrong_fails monotone fail_closed`) before any percent was written:
+**160/164 = 97.6 %**. The failing cells are `humaneval-0078`, `humaneval-0133`, `humaneval-0155`,
+`humaneval-0163` — and the error classes matter: `0078`/`0155` are `SyntaxError: invalid character
+'—' (U+2014)`, i.e. a typographic em-dash surviving inside the extracted program, while `0133` and
+`0163` are genuine assertion failures. **Two of this arm's four losses are a transport
+character/format cost, not a reasoning gap** — the same class of defect that made `pytest-v2`
+necessary in the first place (the checker correction below exists because of this arm's answers).
+
+### Shipped bytes and the masking check
+
+`arms/humaneval-grok-answers.jsonl` (164 rows, SHA-256/16 `bec1da78aec5f69e`) and
+`arms/humaneval-grok-verdicts.jsonl` (164 rows, `db4a0baf90425496`). Unlike every other arm on this
+line, this one is **not** byte-identical to the runner output: the privacy scrub masked
+**11 `local_path` occurrences** (the model's own code contains absolute machine-path literals of the
+`<LOCAL_PATH>` shape the sanitizer exists for — 14 grep hits over the answer fields in total, the rest
+being the English word "bank"). Because masking
+touches code text, the re-check is mandatory: the **shipped, masked** copy re-scored under the same
+pinned checker gives **160/164 with exactly the same four failing ids**, so masking moved no verdict.
+
+### Four arms, matched 164 (no id dropped, verdict-file join `scripts/pub_bench_verdict_sign.py`)
+
+| arm | strict (`pytest-v2`) |
+|---|---|
+| contour 0.0.2.56, matched shape | 157/164 = 95.7 % |
+| basalt, local, no contour | 159/164 = 97.0 % |
+| grok-4.7, cloud | 160/164 = 97.6 % |
+| codex `gpt-6.1-sol`, cloud | 163/164 = 99.4 % |
+
+| pair | W/L | p |
+|---|---|---|
+| basalt vs contour | 4W / 2L | 0.688 |
+| basalt vs codex | 1W / 5L | 0.219 |
+| basalt vs grok | 4W / 5L | 1.000 |
+| contour vs codex | 1W / 7L | 0.070 |
+| contour vs grok | 4W / 7L | 0.549 |
+| codex vs grok | 4W / 1L | 0.375 |
+
+Discordant ids worth naming: codex loses only `humaneval-0064` to basalt and only
+`humaneval-0078, 0133, 0155, 0163` (grok's four) to grok's side of the ledger; the cells grok wins
+against basalt (`0032, 0132, 0134, 0145, 0147`) are the same cells codex wins against basalt, and the
+cells grok loses to contour are exactly its four format/assertion failures.
+
+**Verdict on this set: it is saturated and has no resolving power at n=164.** The four arms span
+3.7 pp, every pair is non-significant (p ≥ 0.070), and the largest discordance in any pair is 8
+cells. Nothing here ranks a cloud brain against the local one — unlike GPQA-Diamond, where the same
+arms separate by 17–33 pp. The ladder keeps HumanEval for the *checker* story (execution-verified
+code, contract `pytest-v1` → `pytest-v2`) and for the repair/redraw census, not for brain ranking.
+
+### Caveats
+
+1. Single draw per id; provider sampling parameters hidden by the transport; two CLI builds in one
+   arm (120 + 44 rows) and a 4× transport speed difference between the legs, so wall time here is a
+   transport property.
+2. Contamination: HumanEval is a 2021 public set, retired for frontier comparison in 2026
+   aggregators; a 97–99 % band on it is expected for any frontier chat brain.
+3. The checker executes model code in an rlimit'd child (address/CPU/file-size/process limits, wall
+   timeout, empty environment, private temp cwd). No network isolation is claimed.
+4. The arm publishes no GPU energy (cloud leg); the two local arms' energy figures are in the
+   sections above.
