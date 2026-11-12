@@ -60,6 +60,18 @@ def run(vals: dict) -> tuple[int, str]:
         os.unlink(path)
 
 
+def run_text(text: str) -> tuple[int, str]:
+    """Feed a raw readings file exactly as a producer writes it (any shape)."""
+    fd, path = tempfile.mkstemp(prefix="preflight-", suffix=".txt")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        p = subprocess.run([sys.executable, SCRIPT, path], capture_output=True, text=True)
+        return p.returncode, p.stdout + p.stderr
+    finally:
+        os.unlink(path)
+
+
 def variant(**over) -> dict:
     v = dict(HEALTHY)
     v.update(over)
@@ -99,6 +111,31 @@ def main() -> int:
     ck("INPUT GAP" in out, "missing reading must name the gap")
     rc, out = run(variant(load1="n/a"))
     ck(rc == 1, f"unreadable number must exit 1, got {rc}")
+
+    # Reading-file shapes (2026-11-12): the docstring teaches the single-line form and the
+    # remote producer pads some values (`ps -o pcpu=` emits `engine_pcpu= 459`). A live read
+    # that day hit both, and the gate answered INPUT GAP then `unreadable number(s):
+    # engine_pcpu, gpu_power_w` — fail-closed, but the documented shape was unusable.
+    one_line = " ".join(f"{k}={v}" for k, v in HEALTHY.items())
+    rc, out = run_text(one_line + "\n")
+    ck(rc == 0, f"the docstring's one-line shape must parse, got exit {rc}: {out}")
+    ck("PREFLIGHT GO" in out, "the one-line shape must reach the verdict, not the parser")
+    padded = ("mem_total_mib=61953 mem_available_mib=14047 swap_total_mib=8191 "
+              "swap_free_mib=7800 engine_state=Sl engine_pcpu= 12.0 engine_rss_mib=57409 "
+              "gpu_util_pct=0.0 gpu_power_w= 34.0 load1=1.2 health_code=200 foreign_legs=0")
+    rc, out = run_text(padded + "\n")
+    ck(rc == 0, f"a padded value (ps output) must still be one reading, got exit {rc}: {out}")
+    rc, out = run_text(padded.replace("swap_free_mib=7800", "swap_free_mib=0") + "\n")
+    ck(rc == 3 and "swap free" in out,
+       f"a padded live reading with a spent swap device must NO-GO, got {rc}: {out}")
+    rc, out = run_text("engine_pcpu=\n459\n"
+                       + "\n".join(f"{k}={v}" for k, v in HEALTHY.items() if k != "engine_pcpu")
+                       + "\n")
+    ck(rc == 1 and "INPUT GAP" in out,
+       f"an empty value must NOT borrow the next line, got exit {rc}: {out}")
+    rc, out = run_text(" ".join(f"{k}={v}" for k, v in HEALTHY.items() if k != "health_code") + "\n")
+    ck(rc == 1 and "INPUT GAP" in out,
+       f"a dropped key in the one-line shape must fail closed, got exit {rc}: {out}")
 
     if FAILED:
         print(f"PUB PREFLIGHT TEST: {CHECKS - len(FAILED)}/{CHECKS} FAILED:")

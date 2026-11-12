@@ -41,10 +41,18 @@ uninterruptible I/O, the idle-spin pair "engine > 200 % CPU at 0 % GPU", `/healt
 foreign leg on the same endpoint), **1 = input gap** — a missing or unreadable reading is never
 treated as healthy. The readings come from a one-line remote read over the repo-standard key; that
 command stays untracked so no connection material lands in this repo, and the tool takes a plain
-`key=value` file. Contract test: `harness/pub_preflight_test.py` (20 checks, CI-enrolled by the
+`key=value` file, in either shape the producer actually uses: one pair per line, or the single
+space-separated line the remote read prints. A padded value (`ps -o pcpu=` emits `engine_pcpu= 459`)
+is still one reading; a key with an empty value never borrows the next line and stays an input gap.
+`engine_pcpu` must be a SAMPLED delta of `/proc/<pid>/stat` over N seconds, not a lifetime average:
+measured 2026-11-12, `ps -o pcpu=` read 459 % on an engine that sampled 1.0 % over 6 s, so the
+lifetime number turns the idle-spin branch into a false NO-GO on any long-lived engine. Contract
+test: `harness/pub_preflight_test.py` (26 checks, CI-enrolled by the
 `harness/*test.py` glob) — one healthy set goes, six independent tampers each turn NO-GO, two
-non-vacuity controls (a busy GPU at high engine CPU, 1 GiB of swap free) still go, and both input-gap
-classes fail closed. Threshold constants in the file carry the measurements that set them. The gate
+non-vacuity controls (a busy GPU at high engine CPU, 1 GiB of swap free) still go, both input-gap
+classes fail closed, and four reading-shape cases pin the parser (one-line form and padded value reach
+the verdict; a dropped key in that form and an empty value still exit 1). Threshold constants in the
+file carry the measurements that set them. The gate
 registers no contour feature and moves no published byte.
 
 ## Benchmark ladder, cheapest first
@@ -4211,3 +4219,71 @@ runner and the exit-3 gate; SimpleBench stays closed as unpinnable; the remainin
 only after 1-9" — and need an owner decision to open. Zero model and zero cloud calls this tick: no
 digest row, percent, answer byte, verdict, bank file, manifest pin or contour stamp moved; no leg was
 started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry.
+
+## Tick 77 — 2026-11-12 10:20 CET: the endpoint preflight is run on a live reading for the first time; two parser traps and one metric-semantics trap repaired (tooling only, zero model/cloud calls)
+
+*Nothing runs and nothing is queued.* `systemctl --user list-units 'parb-pub-*'` returns no unit, the
+bracketed process counts are 0 for the cloud transport and 0 for the local runners, and the operator
+marker for the cancelled vendor is still in place (written 06:54). The resume gate on the live
+workspace exits **3** unshielded: `checks: 22 | RESUME GATE: NO-GO - do not spend quota`,
+`pinned resume record: 182 ids were never asked … VOID`. Stored Grok archive identical to the pin
+(gpqa-diamond 198/198, humaneval 164/164, mmlu-pro 500/500, ifeval **359 of 541 rows**, a stored-row
+count and not a score).
+
+*Standing gates re-run read-only, all green:* arms index drift 0; derived percents 42 recomputed /
+0 findings (44 digest + 188 doc citations, 0 uncovered); grok-cell rule 9 docs / 0 findings;
+superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings.
+`scripts/qa/static_checks.py` exits **0** on `61c18e3` (the whole suite, ~4 min; the one `FAILED`
+string inside its capture is `CHECKS 41, FAILED 0` from the docs-push fixture, a passing summary), so
+the 2026-11-13 02:00 UTC `GitHub docs freshness daily` run is expected green provided the tree is not
+dirty at that minute — that job's own capture still shows
+`Last run: 2026-11-12T03:02:22+01:00 error: Script exited with code 1` with the traceback head naming
+`scripts/qa/static_checks.py`, exactly as attributed in tick 76.
+*CI at the pushed SHA `61c18e3`*: 12 check runs, 11 `success` + `release-asset-validation` skipped.
+
+*The first live preflight reading of this line (P2005, one remote read):*
+`mem_total_mib=61953 mem_available_mib=12913 swap_total_mib=8191 swap_free_mib=0 engine_state=S
+engine_rss_mib=56728 gpu_util_pct=0 gpu_power_w=37.5 health_code=200 foreign_legs=0`; box up 17 days,
+engine up 3.57 days, no OOM kill in the last 24 h, `vmstat` showing `si=0 so=100` pages/s continuously
+swapped out at 99 % CPU idle, and the GPU parked (0 %, 37 W, 58 °C). Verdict **PREFLIGHT NO-GO, exit
+3**, reason named by the gate: *swap free 0 MiB of 8191 MiB (< 256): the engine can be OOM-restarted
+mid-leg*. That is the machine note's condition, present and measured rather than inferred; the remedy
+is a box decision (relieve the memory pressure or restart the engine, and any restart of the machine
+itself is the owner's action), never a contour or bank change, so no box action was taken. Nothing was
+queued, so the NO-GO cost nothing — a local leg would have been refused before the endpoint window was
+reserved, which is exactly what the gate is for.
+
+*Feeding the gate its own documented shape found two parser traps.* The docstring and this plan
+describe a single space-separated `key=value` line; the reader split each line on the FIRST `=`, so
+that shape lost 11 of the 12 readings (`PREFLIGHT INPUT GAP: no reading for mem_available_mib, …`),
+and a producer that pads (`ps -o pcpu=` emits `engine_pcpu= 459`) produced `unreadable number(s):
+engine_pcpu, gpu_power_w`. Both fail CLOSED — never a false GO — but they meant the documented shape
+could not be fed at all. `read()` now takes every `key=value` token on a line and accepts `= value`;
+the whitespace never crosses a line, so `engine_pcpu=` with an empty value stays an input gap.
+*Non-vacuity proved against the pre-fix file at HEAD, same six inputs:* the fixture shape GO (0) in
+both, the docstring one-line shape 1 → **0**, the padded live line 1 → **0**, padded-plus-spent-swap
+1 → **3 (NO-GO)**, empty-value-own-line 1 → 1 (message now `no reading for engine_pcpu`), dropped key
+in the one-line shape 1 → 1. Three verdicts changed, every fail-closed case stayed fail-closed.
+
+*Third trap, a metric-semantics one, measured not assumed:* the gate's idle-spin branch compares
+`engine_pcpu > 200` at `gpu_util_pct == 0`, and the natural producer feeds it `ps -o pcpu=`, which is
+a **lifetime average**. This box answered `459 %` while a 6-second delta of `/proc/<pid>/stat`
+utime+stime gave **1.0 %** — so the branch would turn any long-lived engine that once did real work
+into a false NO-GO. Thresholds are unchanged (no behaviour moved); the gate's docstring and this
+plan's standing rule now state that `engine_pcpu` must be a sampled delta
+(`pcpu = 100 * d(utime+stime) / CLK_TCK / N`), and today's NO-GO rests on the swap rule, which is an
+instantaneous reading from `/proc/meminfo`.
+
+*Contract test grew 20 → 26 checks* (`harness/pub_preflight_test.py`, **26/26 green**, CI-enrolled by
+the `harness/*test.py` glob): the six tampers, two non-vacuity controls, two input-gap classes, plus
+four reading-shape cases — one-line form and padded value reach the verdict, a dropped key in that
+form and an empty value still exit 1.
+
+*Nothing else moved:* no digest row, percent, verdict, answer byte, bank file, manifest pin or contour
+stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no leg was started, stopped,
+duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. Zero model and zero cloud calls this
+tick. What is admissible next is unchanged: all eight in-force sets carry the three-arm standard,
+Grok is cancelled by owner decision 2026-11-12 and blocked by the marker, the runner and the exit-3
+gate, SimpleBench stays closed as unpinnable, and the remaining ladder rows (Terminal-Bench, SWE-bench
+Verified subset, GAIA-lite) need an owner decision to open — while the endpoint sits in this state a
+local leg would additionally be refused by `pub_preflight.py` until the box is relieved.

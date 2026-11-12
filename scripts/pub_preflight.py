@@ -16,6 +16,22 @@ untracked so no connection material lands in this repo) and are passed in as a `
     engine_state=Dl engine_pcpu=602 engine_rss_mib=57409 gpu_util_pct=0 gpu_power_w=35.8
     load1=13.38 health_code=200 foreign_legs=0
 
+Two file shapes are accepted, because both are produced in practice: one `key=value` per line (every
+contract-test fixture) and the single space-separated line the remote read prints (the shape above).
+A value padded by its producer is still one reading — `ps -o pcpu=` emits `engine_pcpu= 459`, and a
+2026-11-12 live read hit exactly that, with the gate answering `unreadable number(s): engine_pcpu,
+gpu_power_w`. That fails CLOSED (never a false GO), but it meant the documented shape could not be
+fed at all, so the parser now takes `= <value>` as well as `=<value>`. A key with an EMPTY value on
+its own line is still an input gap: the value never jumps to the next line.
+
+`engine_pcpu` must be an INSTANTANEOUS sample, not a lifetime average. Measured 2026-11-12: an engine
+up 3.57 days answered `ps -o pcpu=` = 459 % while a 6-second delta of `/proc/<pid>/stat` utime+stime
+gave 1.0 % — `ps` averages over the whole process life, so the idle-spin branch fires as a FALSE NO-GO
+on any long-lived engine that once did real work. The honest reading is two `/proc/<pid>/stat` reads
+N seconds apart: pcpu = 100 * (d(utime+stime) / CLK_TCK) / N. The thresholds themselves are unchanged;
+this is the semantics of the number the gate must be fed (that day the NO-GO stood on swap free 0 MiB
+with `so=100` pages/s swapped out, which is an instantaneous reading).
+
 Usage:
     python3 scripts/pub_preflight.py READINGS.TXT
 
@@ -25,6 +41,7 @@ Exit 1 = bad or missing input (a missing reading is never treated as healthy).
 """
 from __future__ import annotations
 
+import re
 import sys
 
 # Thresholds carry the measurement that set them. They are deliberately conservative: a false NO-GO
@@ -44,15 +61,22 @@ REQUIRED = (
 FLOATS = ("engine_pcpu", "gpu_util_pct", "gpu_power_w", "load1")
 
 
+KEY_VALUE = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)=\s*(\S+)")
+
+
 def read(path: str) -> dict:
+    """Parse every `key=value` token per line, so both the fixture form (one pair per
+    line) and the one-line remote reading parse identically. `=\\s*(\\S+)` also accepts a
+    padded value (`ps -o pcpu=` emits `engine_pcpu= 459`); the whitespace never reaches the
+    next line, so a key with an empty value stays an input gap and fails closed."""
     vals: dict[str, str] = {}
     with open(path, encoding="utf-8") as fh:
         for line in fh:
             line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
+            if not line or line.startswith("#"):
                 continue
-            k, v = line.split("=", 1)
-            vals[k.strip()] = v.strip()
+            for m in KEY_VALUE.finditer(line):
+                vals[m.group(1)] = m.group(2)
     return vals
 
 
