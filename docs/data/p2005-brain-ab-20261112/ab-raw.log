@@ -1,0 +1,253 @@
+started
+=== budget=20GiB loaded after 33s; state:
+Mem:            60Gi        26Gi        33Gi       834Mi       2.0Gi        34Gi
+Swap:          8.0Gi       1.1Gi       6.9Gi
+15517 MiB
+--- bench 600/256 x3
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 600,
+ "gen_tokens": 256,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 3.91,
+   "sse_chunks": 87,
+   "chars": 396,
+   "chunk_rate": 68.4,
+   "wall_s": 5.2
+  },
+  {
+   "run": 1,
+   "ttft_s": 1.11,
+   "sse_chunks": 88,
+   "chars": 401,
+   "chunk_rate": 81.3,
+   "wall_s": 2.2
+  },
+  {
+   "run": 2,
+   "ttft_s": 1.05,
+   "sse_chunks": 87,
+   "chars": 396,
+   "chunk_rate": 82.0,
+   "wall_s": 2.1
+  }
+ ]
+}
+--- bench 600/1024 x2 (sustained peak)
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 600,
+ "gen_tokens": 1024,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 1.05,
+   "sse_chunks": 87,
+   "chars": 396,
+   "chunk_rate": 82.0,
+   "wall_s": 2.1
+  },
+  {
+   "run": 1,
+   "ttft_s": 1.01,
+   "sse_chunks": 87,
+   "chars": 396,
+   "chunk_rate": 80.2,
+   "wall_s": 2.1
+  }
+ ]
+}
+--- bench 4000/256 x1 (prefill)
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 4000,
+ "gen_tokens": 256,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 4.3,
+   "sse_chunks": 89,
+   "chars": 434,
+   "chunk_rate": 76.9,
+   "wall_s": 5.4
+  }
+ ]
+}
+=== engine stats while budget=20:
+[server] s1 done  pp=878/0c 2.5s 357t/s  tg=156 58.5t/s acc=72%  ttft=2.5s  end=stop  hit=64.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 73.9t/s acc=73%  ttft=0.1s  end=stop  hit=71.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 75.6t/s acc=71%  ttft=0.1s  end=stop  hit=72.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 75.8t/s acc=70%  ttft=0.1s  end=stop  hit=72.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 75.6t/s acc=69%  ttft=0.1s  end=stop  hit=72.1%  pcie=0.0%
+[server] s1 done  pp=5553/0c 3.3s 1676t/s  tg=157 74.3t/s acc=73%  ttft=3.4s  end=stop  hit=72.1%  pcie=0.0%
+started
+=== budget=25GiB loaded after 33s; state:
+Mem:            60Gi        31Gi        28Gi       834Mi       2.1Gi        28Gi
+Swap:          8.0Gi       1.1Gi       6.9Gi
+15527 MiB
+--- bench 600/256 x3
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 600,
+ "gen_tokens": 256,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 3.35,
+   "sse_chunks": 89,
+   "chars": 432,
+   "chunk_rate": 68.1,
+   "wall_s": 4.6
+  },
+  {
+   "run": 1,
+   "ttft_s": 1.08,
+   "sse_chunks": 89,
+   "chars": 432,
+   "chunk_rate": 86.5,
+   "wall_s": 2.1
+  },
+  {
+   "run": 2,
+   "ttft_s": 0.98,
+   "sse_chunks": 85,
+   "chars": 423,
+   "chunk_rate": 78.6,
+   "wall_s": 2.0
+  }
+ ]
+}
+--- bench 600/1024 x2 (sustained peak)
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 600,
+ "gen_tokens": 1024,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 1.06,
+   "sse_chunks": 87,
+   "chars": 396,
+   "chunk_rate": 83.9,
+   "wall_s": 2.1
+  },
+  {
+   "run": 1,
+   "ttft_s": 0.94,
+   "sse_chunks": 83,
+   "chars": 424,
+   "chunk_rate": 84.2,
+   "wall_s": 1.9
+  }
+ ]
+}
+--- bench 4000/256 x1 (prefill)
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 4000,
+ "gen_tokens": 256,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 4.19,
+   "sse_chunks": 77,
+   "chars": 385,
+   "chunk_rate": 73.3,
+   "wall_s": 5.2
+  }
+ ]
+}
+=== engine stats while budget=25:
+[server] s1 done  pp=878/0c 2.1s 427t/s  tg=157 61.0t/s acc=70%  ttft=2.1s  end=stop  hit=66.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=157 77.0t/s acc=70%  ttft=0.1s  end=stop  hit=72.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=153 76.0t/s acc=64%  ttft=0.1s  end=stop  hit=73.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 76.4t/s acc=73%  ttft=0.1s  end=stop  hit=72.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=151 80.4t/s acc=66%  ttft=0.1s  end=stop  hit=73.7%  pcie=0.0%
+[server] s1 done  pp=5553/0c 3.2s 1748t/s  tg=145 71.4t/s acc=70%  ttft=3.2s  end=stop  hit=69.9%  pcie=0.0%
+started
+=== budget=56GiB loaded after 33s; state:
+Mem:            60Gi        46Gi        13Gi       834Mi       2.1Gi        14Gi
+Swap:          8.0Gi       1.1Gi       6.9Gi
+15557 MiB
+--- bench 600/256 x3
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 600,
+ "gen_tokens": 256,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 2.55,
+   "sse_chunks": 85,
+   "chars": 423,
+   "chunk_rate": 80.9,
+   "wall_s": 3.6
+  },
+  {
+   "run": 1,
+   "ttft_s": 0.78,
+   "sse_chunks": 87,
+   "chars": 396,
+   "chunk_rate": 100.4,
+   "wall_s": 1.6
+  },
+  {
+   "run": 2,
+   "ttft_s": 0.76,
+   "sse_chunks": 87,
+   "chars": 396,
+   "chunk_rate": 112.2,
+   "wall_s": 1.5
+  }
+ ]
+}
+--- bench 600/1024 x2 (sustained peak)
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 600,
+ "gen_tokens": 1024,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 0.75,
+   "sse_chunks": 87,
+   "chars": 396,
+   "chunk_rate": 116.6,
+   "wall_s": 1.5
+  },
+  {
+   "run": 1,
+   "ttft_s": 0.76,
+   "sse_chunks": 89,
+   "chars": 432,
+   "chunk_rate": 113.0,
+   "wall_s": 1.5
+  }
+ ]
+}
+--- bench 4000/256 x1 (prefill)
+{
+ "url": "http://127.0.0.1:8080/v1",
+ "prompt_tokens": 4000,
+ "gen_tokens": 256,
+ "runs": [
+  {
+   "run": 0,
+   "ttft_s": 3.66,
+   "sse_chunks": 77,
+   "chars": 385,
+   "chunk_rate": 99.3,
+   "wall_s": 4.4
+  }
+ ]
+}
+=== engine stats while budget=56:
+[server] s1 done  pp=878/0c 1.5s 570t/s  tg=153 75.4t/s acc=68%  ttft=1.6s  end=stop  hit=66.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.1s  tg=155 98.3t/s acc=73%  ttft=0.1s  end=stop  hit=71.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 104.5t/s acc=75%  ttft=0.1s  end=stop  hit=72.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 107.9t/s acc=77%  ttft=0.1s  end=stop  hit=72.9%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 106.1t/s acc=77%  ttft=0.1s  end=stop  hit=73.1%  pcie=0.0%
+[server] s1 done  pp=5553/0c 2.9s 1912t/s  tg=145 96.2t/s acc=79%  ttft=2.9s  end=stop  hit=69.6%  pcie=0.0%
+ALL_AB_DONE

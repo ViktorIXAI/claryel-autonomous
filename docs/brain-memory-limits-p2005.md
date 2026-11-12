@@ -111,8 +111,39 @@ walking from the original config to the capped one:
 Decode −20…−35 %, warm TTFT ≈ ×2. The mechanism is the engine's own line: `30 % / 41 % of the experts are only in
 the file: decode reads them from the SSD`, and expert-cache hit falls from ~75 % to ~60 %.
 
-Absolute tokens/s per tier (20 / 25 / 56) at the fixed 15.5 GiB VRAM ceiling are taken from basalt's own request
-lines (`pp=`, `tg=`, `acc=`, `hit=`) in the follow-up commit to this file.
+## Speed cost — absolute numbers, from basalt's own request lines
+
+Every row has the **same 15.5 GiB VRAM ceiling** (`vram-reserve-mib 8591`); only the RAM tier changes. Driver:
+`scripts/p2005_ram_ab.sh` — per tier it restarts the engine, waits for health, then drives 3 × (600-token prompt,
+256 generated), 2 × (600/1024) and 1 × (4 000/256). `decode`/`prefill` below are the engine's own `done` lines
+(`pp=` prompt read, `tg=` generation, `acc=` speculative drafts accepted 64–73 %); TTFT is client-side SSE.
+
+| RAM tier (`resident-budget-gib`) | host RAM used | decode, cold | decode, warm (best of 4) | prefill, 5 553 tokens cold | expert-cache hit | warm TTFT |
+|---|---|---|---|---|---|---|
+| **20 — current, ≤30 GiB host target** | **26 Gi** | 58.5 t/s | **75.8 t/s** | 1 676 t/s | 64–72 % | ≈1.05 s |
+| 25 | 31 Gi | 61.0 t/s | 80.4 t/s | 1 748 t/s | 66–74 % | ≈1.0 s |
+| 56 (RAM uncapped) | 46 Gi | 75.4 t/s | **107.9 t/s** | 1 912 t/s | 66–73 % | ≈0.76 s |
+
+Two notes on method. The model stops at ~150 generated tokens on this benchmark prompt (`end=stop`), so the
+"1024-token sustained" arm is the same length as the others — no long-generation arm was reachable without
+forcing `ignore_eos`. And the cold arm is one request per tier after a fresh load, so it also carries the
+first-touch cost.
+
+## Verdict
+
+* Holding the host at **26 Gi used** (4 GiB of slack under the 30 GiB target) costs **≈30 % of decode**
+  (75.8 vs 107.9 t/s) and ≈0.3 s of warm TTFT; prefill is barely affected (1 676 vs 1 912 t/s), so long-prompt
+  work pays almost nothing for the cap.
+* The **VRAM ceiling is the cheap half**: at 15.5 GiB the card keeps ~9 GiB free and the engine's expert tier
+  simply shrinks.
+* With tier 20 the box has 33 GiB RAM and 9 GiB VRAM free — enough to run a second, small service on P2005
+  without touching the brain.
+* Fallback brain at the same test ≈64 SSE chunks/s (~45 t/s equivalent): a real brain at roughly half speed.
+* If a later run wants the speed back without losing the host cap, tier 25 is the borderline point: 31 Gi used
+  for +6 % decode.
+
+Rollback of the engine limits: `cp ~/basalt/basalt-config.json.bak-20261112 ~/basalt/basalt-config.json` and
+restart the serve.
 
 Bench script: `scripts/brain_bench.py` (streams `/v1/chat/completions`; TTFT, SSE chunk rate, wall time; args:
 url, runs, model, prompt tokens, generation tokens). A/B driver: `scripts/p2005_ram_ab.sh`.
