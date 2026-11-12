@@ -5339,3 +5339,67 @@ file, manifest pin or contour stamp changed; no leg incident, so `LEG-INCIDENTS.
 **Next in force:** queue empty — endpoint box back in a GO streak but still settling after the ops
 line's config restore; the owner-gated ladder rows can start the moment an owner decision opens
 them; the Grok line stays closed by owner decision 2026-11-12.
+
+## Tick 95 — 2026-11-12 23:20 CET: status tick + CI-integrity repair; **third consecutive PREFLIGHT GO** (seventeenth reading, box settled after the ops line's 36 GiB tier restore); the secret-scan red the ops line's 16-GiB study carried since `c419f55` cleared — 3 transcript lines masked, zero numbers moved; five gates green; Grok gate NO-GO exit 3; zero legs, zero calls
+
+*No leg was started, stopped, duplicated or discarded: the launch queue is still empty* — every
+in-force set carries bare + contour matched-shape + codex arms, grok is cancelled by owner decision
+2026-11-12, and the remaining ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite) are
+owner-gated. Zero model and zero cloud calls this tick.
+
+*Seventeenth reading; the mechanical file census moves with it.* Files dated today: **16** → 3 GO
+(21:31, 22:22, 23:11) / 13 NO-GO / 0 input-gap — the **first consecutive GO trio** of the series.
+Reading (wrapper bare, gate re-run unshielded, true exit **0**):
+`swap_free_mib=7138` / `swap_used_mib=1053` (of 8 191), `mem_available_mib=16 694`,
+`engine_rss_mib=48 970`, `engine_state=S`, `engine_pcpu=0.0` (6 s sampled delta), `gpu_util_pct=0`
+at `gpu_power_w=7.96`, `load1=0.01`, `health_code=200`, `foreign_legs=0` → **PREFLIGHT GO**, valid
+for that reading only. The engine cycled again between ticks (`pid=1142697 age=14:58` at 23:11 ⇒
+started ≈ 22:56): the parallel ops line applied its new live config (RAM tier 36 GiB per its
+`7278f71`), which is why RSS moved 25.7 → 49.0 GiB and MemAvailable 33.0 → 16.7 GiB while the swap
+columns stayed balanced. Zero legs live at either observation, so no `LEG-INCIDENTS.md` entry —
+endpoint state, same attribution pattern as tick 94.
+
+*The new movement this tick is CI integrity, not a benchmark byte.* The repo secret-scan was red at
+`origin/main`: CI `secret-scan` job `completed/failure` at `c419f55` (21:29) and `7278f71` (22:10),
+green at tick 94's `f5d6c67`; the local `secret_scan.py --strict` reproduced it with true exit **1**
+— 3 findings, all metadata class, `credential_like: 0`, one file:
+`docs/data/p2005-16gb-20261112/v3-raw.log` (ops 16-GiB study data, all three hits inside the serve
+banner of a failed-load arm: one LAN endpoint URL → `private-network-address` + `private_ip`, two
+`/home/<user>` paths → `absolute_local_path`). Repaired on the tick-86 precedent: LAN IP masked to
+`<LAN_IP>`, `/home/<user>` prefix masked to `<LOCAL_PATH>` — exactly **3 lines changed, zero
+numeric values moved** (the arm's numbers are elsewhere in the file); no doc or manifest pins a
+sha16 of this raw log; the residual grep of the whole data dir for LAN prefixes, `/home/`, `/Users/`
+and the username returns 0. Scanner then exits **0** (0 findings, 18 vendored exceptions — the
+exception set did not widen). Commit `1a225f7`, zero benchmark bytes, no digest row or percent moved.
+
+*Five standing gates re-run read-only with true exits captured unshielded, all green, counts
+identical to ticks 88–94:* arms index drift 0; derived percents 42 recomputed from shipped bytes /
+0 findings (digest citations 44, result-doc citations 188, uncovered 0); grok-cell rule 9 docs / 0
+findings; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings
+(contracts named 26, pre-rule exceptions 23/23). Link checker 154 links / 325 markdown files exit 0;
+`docs_policy.py --push` PASS.
+
+*The Grok line stays cancelled.* Resume gate unshielded: `checks: 22 | RESUME GATE: NO-GO - do not
+spend quota`, true exit **3**, `pinned resume record: 182 ids were never asked … VOID, the line is
+cancelled, this is not a queue`. Operator marker intact at `~/pub-bench/GROK-CANCELLED`, untouched.
+Zero Grok calls.
+
+*Daily docs-job record, read mechanically and reported per the machine note (not fixed).* Job
+`ef7ea47ff99b` shows `last_status=error`, `failure_streak: 9` — the cumulative scheduler counter,
+never nine attempts today; schedule `0 2 * * *`; `executions.db` retains zero rows for it, so
+today's fire cannot be attributed beyond the counter.
+
+*Frozen-line hygiene, unchanged.* Job `f23cf5d48e11` ("Mac v2.2 full after v2.1", every 5 min)
+enabled, `last_status=ok`, streak 0; no-op while `~/.hermes/mac-v22full-launch.state` (2026-11-02)
+exists — verified present. Zero `gate_run.py` / `pub_bench_run` / cloud-transport processes
+(bracketed counts, standalone call), no `parb-*` user unit, no new contour stamp (hard line frozen
+at `stable-hard-0.0.2.56`).
+
+*Repo state.* Local `main` == `origin/main` == `7278f71` at tick start (0/0), tree clean; the ops
+commits `c419f55` and `7278f71` arrived between ticks and are that line's own pushed work — this
+tick only masked its log lines and appended this block. Push uses the standard invocation
+(`ALLOW_HARD_V6_PUSH=1 git push origin HEAD:main`), pre-push guard honoured, no `--no-verify`.
+
+**Next in force:** unchanged and empty — the endpoint box holds its first GO streak of the series,
+so the owner-gated ladder rows could start the moment an owner decision opens them; the Grok line
+stays closed by owner decision 2026-11-12.
