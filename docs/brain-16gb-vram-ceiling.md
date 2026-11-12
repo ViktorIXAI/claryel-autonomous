@@ -108,3 +108,11 @@ constraints take away. Getting high decode **and** a 16 GiB card would mean a sm
 Raw logs: `docs/data/p2005-16gb-20261112/v3-raw.log`, `docs/data/p2005-16gb-20261112/v4-raw.log`.
 Drivers: `scripts/p2005_v3_ab.sh`, `scripts/p2005_v4_ab.sh`, bench `scripts/brain_bench.py`.
 Raw 48 GiB pass: `docs/data/p2005-16gb-20261112/v5-raw.log`, driver `scripts/p2005_v5_ab.sh`.
+
+## Documentation audit addendum — 2026-11-12 22:21 UTC (issue #25)
+
+This dated clarification preserves the original 12 November measurements and interpretations above; it does not constitute a new measurement or a change to the live engine configuration.
+
+* **GPU power ranking:** the original 32 GiB-envelope table reports `base` GPU power **88.4 W** and `spec 4 + resident-cpu-experts` **89.9 W**. Therefore the prose assertion that the latter has the *lowest GPU draw of the two* is incorrect by **1.5 W**; the `base` arm has the lower reported average GPU draw. The related assertion that the chosen arm *leaves the card cooler* is not established by these power figures alone; comparative temperature telemetry is not presented in that table. The best single decode run (87.1 versus 83.2 t/s) remains a recorded observation, not evidence of a statistically significant advantage.
+* **Historical versus later envelope:** the opening 32 GiB **whole-host** constraint and the original `resident-budget-gib: 22` configuration describe the initial pass. The later 48 GiB simulation and its 36 GiB expert-tier live pick are a **subsequent configuration**, not an additional arm satisfying the original 32 GiB whole-host limit. The original live JSON above must not be interpreted as a verified snapshot of the later live setting.
+* **Verification boundary:** calculations are checked against the published table only. No host access, replay of raw logs, temperature validation or independent GitHub Actions run was performed for this addendum. Evidence: this document's two tables and the versioned v3/v4/v5 raw-log references. Audit tracking: https://github.com/ViktorIXAI/claryel-autonomous/issues/25.
