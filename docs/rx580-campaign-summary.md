@@ -100,6 +100,14 @@ no ROCm.
 Offload sweep (fork, PTQ1_0, decode): `-ngl` 8/16/24/40/99 → 2.04 / 2.22 / 2.32 / 3.17 / 3.93 t/s,
 so the GPU is doing real work — the fork's CPU path on AVX1 is simply terrible.
 
+The **9B** size of the same family is the one that actually works on this card:
+
+| Packing | Engine | pp512 | tg128 | € per 1M tokens (card at ~112 W) |
+|---|---|---|---|---|
+| **9B Q2_0 (2.37 GiB)** | **stock llama.cpp** | **170.0** | **27.35** | 0.28 |
+| 9B PTQ1_0 (1.85 GiB) | PrismML fork | 122.3 | 12.38 | 0.62 |
+| 9B PTQ1_0, CPU only | PrismML fork | 90.2 | 5.13 | — |
+
 Verdict for this family on GCN4: **use the mainline `Q2_0` packing with stock llama.cpp, not the
 fork's dense ternary packs.** The fork's `PTQ1_0`/`PQ2_0` kernels are ~2× slower on Polaris, which
 reports `fp16: 0 | int dot: 0 | matrix cores: none` — exactly the hardware those kernels were not
