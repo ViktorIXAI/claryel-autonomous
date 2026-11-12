@@ -4116,3 +4116,37 @@ SHA-1/16 `2c672531577dcc33` / SHA-256/16 `e09a5cab3782ed5b` over 541 rows.
 or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no leg was started, so
 the only `LEG-INCIDENTS.md` entry this tick is the cancellation itself. Zero model and zero cloud
 calls this tick.
+
+## Tick 75 — 2026-11-12 08:35 CET: the cancelled-line gate fix is shipped; the ladder has no queued work
+
+*What shipped.* The 08:05 gate correction (the resume gate now reports NO-GO with exit 3 on a cancelled
+window and prints the resume set as a `VOID` record instead of a queue total) went out as `3360ef3`,
+together with the inverted contract test that had pinned the fail-open behavior: 33 resume checks,
+0 failures, plus pin regeneration 39, cancel guard 9, grok-cell 27. Live re-read on this workspace after
+the fix: 22 checks, `RESUME GATE: NO-GO - do not spend quota`, exit 3, and
+`pinned resume record: 182 ids were never asked … VOID`.
+
+*Standing gates on the shipped tree (read-only):* arms index drift 0; derived percents 42 / 0 findings;
+grok-cell rule 9 docs / 0; superseded-cell rule 9 docs / 0; digest row rule 49 rows / 0. `push_ready.sh`
+rc=0 (manifest verify, 152 links, docs policy, gitleaks, the five PUB gates).
+
+*The daily docs job's failure is explained, not guessed.* `scripts/qa/static_checks.py` exits **0** on this
+tree, and the 03:00 CET capture of `GitHub docs freshness daily` ends on one line -
+`FAIL row_count_census` inside the digest-row gate test (21 checks, 1 failed), the hand-copied digest row
+count that became a derived pin while tick 69's MMLU-Pro publication was mid-flight. The four
+`MANIFEST GUARD: …` lines at the head of that capture are the checkers' own tamper fixtures printed against
+scratch copies, not drift on a tracked task file. So the streak is a mid-flight artifact of that morning,
+not a standing breakage; the next scheduled run should go green provided the tree is not dirty at that
+minute.
+
+*CI at the pushed SHA `3360ef3`.* secret-scan, contour self-tests, devsecops and hard-v6 scoring contracts
+all completed success (the first `gh` re-read hit a transient `api.github.com` i/o timeout, not a red job);
+the raw URLs of the gate, its test, both docs, the resume pin and the digest return 200 at that SHA.
+
+*Nothing runs next, and that is the state of the line, not a stall.* Every in-force set carries the
+three-arm standard - bare local brain, contour `0.0.2.56` in matched request shape, codex - across gsm8k,
+ARC-Easy, ARC-Challenge, GPQA-Diamond, HumanEval, MMLU-Pro, IFEval and LiveCodeBench, plus BFCL with the
+cloud arm on its 300-id cross-arm slice; Grok is cancelled by owner decision 2026-11-12 and blocked by the
+operator marker, the cloud runner and now the exit-3 gate; SimpleBench stays closed as unpinnable. Zero
+model and zero cloud calls this tick: no digest row, percent, answer byte, bank file, manifest pin or
+contour stamp moved.
