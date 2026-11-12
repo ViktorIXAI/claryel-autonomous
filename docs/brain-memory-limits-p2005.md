@@ -129,6 +129,32 @@ Two notes on method. The model stops at ~150 generated tokens on this benchmark 
 forcing `ignore_eos`. And the cold arm is one request per tier after a fresh load, so it also carries the
 first-touch cost.
 
+## Energy and cost at the live tier (measured on P2005, 12.11)
+
+`scripts/p2005_energy.sh` samples GPU `power.draw` (1 s) and the CPU package through RAPL while one bench runs,
+and keeps the engine's own accounting lines for the same window:
+
+```
+[server] s1 done  pp=878/0c   1.9s 471t/s  tg=156 60.9t/s acc=69%  ttft=1.9s  end=stop  hit=65.8%
+[server] s1 done  pp=878/873c 0.1s         tg=156 73.8t/s acc=70%  ttft=0.1s  end=stop  hit=72.1%
+gpu_W_avg 79.8 (max 106.6)   cpu_package_W 76.3   (idle reference: GPU 8 W, CPU 6.7 W)
+```
+
+So decode on this box burns **≈80 W of GPU plus ≈76 W of CPU package** — the CPU number is the point: the
+RAM-capped tier streams experts from NVMe and runs a third of the expert matmuls on cores, which is why the
+box is a ~170 W device rather than a GPU-only one. With ~15 W of board/RAM/NIC overhead:
+
+| arm | decode t/s | kWh per 1 M generated tokens | cost at 0.25 €/kWh |
+|---|---|---|---|
+| warm (tier 20, current) | 73.8 | 0.64 | **0.16 €** |
+| cold (tier 20) | 60.9 | 0.78 | 0.19 € |
+| tier 56 (RAM uncapped, power not re-measured) | 107.9 | ≈0.44 | ≈0.11 € |
+
+Brain running 24/7 (mostly idle at ≈50 W plus ~4 M tokens of agent work a day) costs **≈1 € a day**.
+The 30 GiB host cap therefore costs about **+0.05…0.08 € per million tokens** compared with leaving RAM
+unbounded, and the same cap is what keeps 33 GiB of RAM and 9 GiB of VRAM usable for anything else on the box.
+Wall-outlet power is not metered on P2005, so these are component sums, not socket readings.
+
 ## Verdict
 
 * Holding the host at **26 Gi used** (4 GiB of slack under the 30 GiB target) costs **≈30 % of decode**
