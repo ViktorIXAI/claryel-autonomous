@@ -4,6 +4,21 @@ Date 2026-11-12, one machine, ~35 min of measured load. Purpose: the owner put a
 newly acquired Radeon RX 580 2048 SP into P3001 (replacing a GeForce RTX 3050 8 GB)
 and needs a purchase decision within the hour.
 
+
+## Audit clarification — 2026-11-12 (issue #25; arithmetic and scope)
+
+This is a dated correction to the observations below, not a new measurement or
+replacement of the original readings. The second-pass prefill values 52.9–53.9
+t/s versus 33.9 t/s imply **+56.0% to +59.0%**, not the **+34%** written below.
+The decode values 7.88–8.26 versus 5.85 imply **+34.7% to +41.2%**;
+"+41%" describes only the upper end. Also, the earlier paragraph stating
+that partial `-ngl` offload "is broken" was superseded by the later offload-depth
+retest (4/12/24/48/99 layers loaded). Preserve both dated observations and
+attribute the earlier context-creation errors to the reported transient
+VRAM-release condition, not a demonstrated architecture limitation. These
+calculations use published numbers only; host readings were not independently
+reproduced by this documentation audit.
+
 ## Test bed
 - P3001: Xeon E5-2697 v2 (12c/24t, **no AVX2**), 62 GiB DDR3-1333 ECC, Seagate
   FireCuda 530R 1 TB NVMe (model tier), Ubuntu 24.04.4, kernel 6.8.
