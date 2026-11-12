@@ -5094,3 +5094,95 @@ so `LEG-INCIDENTS.md` gains no entry. Zero model and zero cloud calls this tick.
 arm (swap 4 of 8191 MiB free, thirteenth reading); the remaining ladder rows (Terminal-Bench /
 SWE-bench Verified / GAIA-lite) need an owner decision to open; the Grok line stays closed by owner
 decision 2026-11-12.
+
+## Tick 92 — 2026-11-12 20:31 CET: read-only status tick; fourteenth preflight reading NO-GO (swap free still 4 of 8191 MiB, engine RSS back up 53.9 → 57.5 GiB, load1 10.9 — no self-relief); the daily docs-job red is attributed to a dated cause at last: its 03:02 signature is the mutable digest-row-count pin that `5be2855` removed at 04:47, and the whole static suite now exits 0 locally; CI green at HEAD; five gates green; Grok gate NO-GO exit 3; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` user unit exists (unit list empty); the bracketed
+process counts are 0 for the cloud transport, 0 for the local runner and 0 for `gate_run.py`; the only
+`running` row in the cron executions DB at tick start is this tick itself (`288a66f93167`, 20:31:17
+CET), so no sibling instance is editing the clone. No ladder item is open: every in-force set carries
+bare + matched-shape contour + codex rows, and the `pub-repair` queue items 1–5 are closed.
+
+*Fourteenth live preflight reading of the endpoint box (20:32 CET, readings file
+`preflight-20261112-2032.txt`, gate re-read unshielded for the true exit):*
+`mem_total_mib=61953 mem_available_mib=14406 swap_total_mib=8191 swap_used_mib=8187 swap_free_mib=4
+engine_state=S engine_pcpu=0.0 engine_rss_mib=57470 gpu_util_pct=0 gpu_power_w=26.82 load1=10.92
+health_code=200 foreign_legs=0` → **PREFLIGHT NO-GO, true exit 3**, resting on the swap rule alone
+(4 MiB free of 8191, threshold 256). Columns balance exactly (`8187 + 4 = 8191`), tick-78 producer
+guard satisfied. Movement against tick 91 (37 min apart): swap free unchanged at 4 MiB while engine
+RSS climbed back 53 895 → 57 470 MiB and load1 6.47 → 10.92 — the tick-91 reading ("sheds resident
+memory without releasing swap") reversed within half an hour, so the box is not drifting toward
+relief on its own; the swap stays ~100 % consumed either way. Same engine pid 3284575, age 3 d 23:56,
+no restart since 08.11; GPU parked (0 %, 26.8 W). Relief stays an owner action — this endpoint also
+serves the deployment's main brain and the gate's remedy line says a restart is a box decision.
+
+*The daily docs-freshness failure finally has a dated cause instead of the machine note's default.*
+Today's incident on job `ef7ea47ff99b` (03:02:20 CET, signature `4cfeecb7852d`, scheduler class
+`auth`, state `alerted`) ends inside `scripts/qa/static_checks.py` with **`FAILED: row_count_census`**,
+a check in `harness/pub_digest_row_gate_test.py` that pinned the digest row count as a literal.
+Commit `5be2855` ("pub line tick 70: two contract tests pinned mutable values and reddened devsecops
+for four pushes — fixed as tooling, zero model or cloud calls") replaced exactly that pin with values
+derived from the bytes and the gate's own registry — at **04:47:51 CET, 1 h 45 min after the job
+fired**. So the 03:00 fire measured a defect that was already being fixed the same morning, and the
+`failure_streak` counter carries the older `repo is dirty; refusing daily docs refresh` signatures
+(`9895a9e00573` 08.11, `dbb99fce836b` 09.11, `ad179e247c5c` 10.11) which are a different cause and
+are untouched by this. Reproduced mechanically at this tick rather than asserted: that test alone
+**22 checks / 0 failed, exit 0**, and the full static suite re-run locally on the clean tree is
+**75 steps, exit 0** (the three `rc=1` lines in its log are the suite's own tamper controls;
+bank-gate census green — 8 banks, `working` gold 67/67, E 10/10, leakage 0). Consequence, stated as a
+falsifiable prediction rather than a fix: tomorrow's 03:00 fire has **no known local red**; if it goes
+red again the cause is contention at 03:00 (the machine note's rule — report, never commit in-flight
+work to beat it), not that check.
+
+*The Grok line stays cancelled.* Resume gate re-run unshielded: `checks: 22 | RESUME GATE: NO-GO -
+do not spend quota`, true exit **3**. Stored archive still matches the pin by sha256-16: gpqa-diamond
+198/198 `c479109822f388a5`, humaneval 164/164 `161ddf5b1956ab13`, mmlu-pro 500/500
+`5731d720f13ef8a5`, ifeval **359 of 541 rows** `01c1ee0b6e7f6d5d` (a stored-row count, not a score);
+the 182 never-asked ids print as `VOID, the line is cancelled, this is not a queue`. Operator marker
+intact at `~/pub-bench/GROK-CANCELLED` ("owner decision 2026-11-12: grok cloud arms cancelled …"),
+unbroken, not touched. Zero Grok calls.
+
+*CI green at `origin/main` `705a860`:* `secret-scan`, `contour self-tests`, `devsecops`, `hard-v6
+scoring contracts`, `pages-build-deployment` all success (19:01–19:06 UTC), and the SHA-pinned raw URL
+for `PUB-PLAN.md` returns 200. Recorded because it happened: the first two `gh run list` calls died on
+`dial tcp 140.82.121.5:443: i/o timeout`; the numbers above come from the third call — a network
+timeout is not a green.
+
+*All five standing gates re-run read-only with true exits captured unshielded, all green (counts
+identical to ticks 88–91):* arms index drift 0; derived percents 42 recomputed from shipped bytes /
+0 findings (digest citations 44, result-doc citations 188, uncovered 0); grok-cell rule 9 docs /
+0 findings on the in-force cancelled sentence with 1 superseded sentence rejected; superseded-cell
+rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings, contracts named 26, pre-rule
+exceptions used 23/23 (list full, cannot rot).
+
+*Local integrity checks.* Repo scanner `scripts/security/secret_scan.py --dir . --strict` exits **0**:
+0 findings, `credential_like: 0`, 18 vendored metadata exceptions with 13 sha16-bound pins listed
+(`pub-repair-v2-merged-answers.jsonl@ee4728cc10e4498f`, `bfcl.tasks.jsonl@068d359eb0af79b1`,
+`vendor/instruction_following_eval/data/gpt4_sample.jsonl@ff57ec6d17688771` among them), none widened.
+Link checker 154 links across 323 markdown files, exit 0; `docs_policy.py --push` PASS. IFEval
+identity re-proven by hashing the tracked file: `benchmarks/public/ifeval.tasks.jsonl`, 221 580 B,
+SHA-1/16 **`2c672531577dcc33`** and SHA-256/16 **`e09a5cab3782ed5b`** — the published pin pair.
+
+*Repository hygiene, including a push observation that has to be written down.* Tree clean (0 modified)
+at tick start; the only file this tick writes is `PUB-PLAN.md`. Local `main` was **ahead 1** of
+`origin/main` when the tick began, by a commit the parallel hardware line authored at 20:30 and had not
+yet pushed: `72620a7 docs(hw): queue the tensorless-on-P100 campaign (P1004) …`, one insertion in
+`docs/hw-eval-queue.md`, no pub artifact touched. Before any push here the tree was gated anyway (link
+check and docs policy green on a tree that contains it), and by commit time the sibling line had pushed
+that commit itself — `origin/main` moved to `72620a7` between the two fetches in this tick, so this
+tick's push is a plain fast-forward with nothing of another agent swept along silently.
+
+*Frozen-line hygiene, unchanged and reported rather than touched.* Job `f23cf5d48e11` ("Mac v2.2 full
+after v2.1", every 5 min) is still scheduled and `ok` (last fire 20:33, completed; streak 0, not
+paused); it is a no-op only while the one-shot marker `~/.hermes/mac-v22full-launch.state`
+(2026-11-02 14:05) exists. Nothing hard-bank ran: zero `gate_run.py` processes, no `parb-*` unit, no
+new contour stamp (hard line stays frozen at `stable-hard-0.0.2.56`).
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank file,
+manifest pin or contour stamp changed; no leg was started, stopped, duplicated or discarded, so
+`LEG-INCIDENTS.md` gains no entry. Zero model and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm (swap 4 of 8191 MiB free, fourteenth reading); the remaining ladder rows (Terminal-Bench /
+SWE-bench Verified / GAIA-lite) need an owner decision to open; the Grok line stays closed by owner
+decision 2026-11-12.
