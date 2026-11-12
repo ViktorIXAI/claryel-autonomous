@@ -143,16 +143,80 @@ def main() -> int:
         shutil.rmtree(base)
 
     # 5. a completed Grok row and a suspended Grok row both stay legal here: the
-    #    superseded rule must not fire on the availability cells
+    #    superseded rule must not fire on the availability cells.
+    #    The target document is DERIVED, never pinned to a file name: 2026-11-12 the
+    #    MMLU-PRO Grok cell published its percent and the pinned target string simply
+    #    vanished, so the test crashed on a clean publication. A doc is eligible only
+    #    when its bench actually carries superseded digest rows (otherwise the audit
+    #    skips it and the check would be vacuous in both directions).
+    def audited_docs(base_dir):
+        drows = C.digest_rows(os.path.join(base_dir, "public", "PUB-DIGEST.md"))
+        benches = {r["bench"] for r in drows if r["superseded"]}
+        return [sub(base_dir, d) for b, d in sorted(C.DOC_FOR_BENCH.items())
+                if b in benches and os.path.exists(sub(base_dir, d))]
+
+    def grok_row_line(path):
+        """(index, text) of the Grok row inside the doc's arms table, else None."""
+        got = C.arms_table(path)
+        if not got:
+            return None
+        _table, start = got
+        lines = open(path, encoding="utf-8").read().splitlines()
+        for k in range(start, len(lines)):
+            line = lines[k]
+            if not line.startswith("|"):
+                break
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            if cells and "grok" in cells[0].lower() and not set(cells[0]) <= set("-: "):
+                return (k, line)
+        return None
+
+    def swap_line(path, idx, new_line):
+        lines = open(path, encoding="utf-8").read().splitlines(True)
+        assert 0 <= idx < len(lines), "row index out of range in %s" % path
+        lines[idx] = new_line + "\n"
+        open(path, "w", encoding="utf-8").write("".join(lines))
+
+    # 5a. availability cell -> completed percent row: still no finding
     base = tmp_copy()
     try:
-        p = sub(base, "MMLU-PRO-RESULT.md")
-        text = open(p, encoding="utf-8").read()
-        rewrite(p, "| grok | `grok-4.7`, hermes one-shot, toolsets off | **suspended by owner quota, "
-                    "resumes 2026-11-12**", "| grok-4.7 | `grok-4.7` | 500/500 | 470/500 = 94.0 % |")
-        f = C.check(os.path.join(base, "public", "PUB-DIGEST.md"),
-                    os.path.join(base, "public"))
-        ck(f == [], "a completed Grok row must not create a superseded finding: %s" % f[:3])
+        targets = []
+        for d in audited_docs(base):
+            hit = grok_row_line(d)
+            if hit and "suspended by owner quota" in hit[1]:
+                targets.append((d, hit[0]))
+        ck(bool(targets),
+           "no audited doc carries a Grok availability cell — re-target check 5a "
+           "(the corpus no longer exercises the suspended-cell exemption)")
+        if targets:
+            d, k = targets[0]
+            swap_line(d, k, "| grok-4.7 | `grok-4.7`, hermes one-shot, toolsets off "
+                            "| 175/175 | 168/175 = 96.0 % |")
+            f = C.check(os.path.join(base, "public", "PUB-DIGEST.md"),
+                        os.path.join(base, "public"))
+            ck(f == [], "a completed Grok row must not create a superseded finding: %s" % f[:3])
+    finally:
+        shutil.rmtree(base)
+
+    # 5b. the same exemption in the other direction: an audited doc's completed Grok
+    #     row rewritten INTO an availability cell must also produce no finding.
+    base = tmp_copy()
+    try:
+        done = None
+        for d in audited_docs(base):
+            hit = grok_row_line(d)
+            if hit and "%" in hit[1]:
+                done = (d, hit[0])
+                break
+        ck(bool(done),
+           "no audited doc carries a completed Grok row — re-target check 5b")
+        if done:
+            d, k = done
+            swap_line(d, k, "| grok | `grok-4.7`, hermes one-shot, toolsets off | — | "
+                            "**suspended by owner quota, resumes on the owner's schedule** |")
+            f = C.check(os.path.join(base, "public", "PUB-DIGEST.md"),
+                        os.path.join(base, "public"))
+            ck(f == [], "a suspended Grok cell must not create a superseded finding: %s" % f[:3])
     finally:
         shutil.rmtree(base)
 

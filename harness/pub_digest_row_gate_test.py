@@ -82,11 +82,36 @@ def replace_row(text, needle, new):
     return "\n".join(lines) + "\n"
 
 
+def table_row_lines(text):
+    """The gate's own row filter (6-cell `| ... |` lines, header excluded).
+
+    The census and the exception-set pins used to name 46 and 23 literally, which is a
+    mutable enumeration: every published arm row moves the first number (2026-11-12:
+    49 rows, the check went red on a clean publication). Both pins are derived here from
+    the bytes and from the gate's own registry; the numbers they assert are unchanged in
+    meaning, just no longer hand-copied.
+    """
+    out = []
+    for line in text.splitlines():
+        if not line.startswith("| ") or line.startswith("| bench |"):
+            continue
+        if len([c.strip() for c in line.strip().strip("|").split("|")]) == 6:
+            out.append(line)
+    return out
+
+
 # 1. the tracked table passes, and the pre-rule exception set matches it exactly
 code, out = run_gate_on(digest_text)
 chk(code == 0, "tracked_digest_passes_gate")
-chk("rows=46" in out, "row_count_census")
-chk("pre-rule exceptions used=23/23" in out, "legacy_exception_set_exact")
+_n_rows = len(table_row_lines(digest_text))
+chk(_n_rows > 0 and ("digest rows=%d " % _n_rows) in out, "row_count_census")
+# non-vacuity: the census tracks the table, so deleting one row moves the printed count
+_dropped = digest_text.replace(table_row_lines(digest_text)[0] + "\n", "", 1)
+_code2, out2 = run_gate_on(_dropped)
+chk(("digest rows=%d " % (_n_rows - 1)) in out2, "row_count_census_tracks_the_table")
+_n_legacy = len(load(GATE, "gate_ref").LEGACY_NO_CONTRACT)
+chk(_n_legacy > 0 and ("pre-rule exceptions used=%d/%d" % (_n_legacy, _n_legacy)) in out,
+    "legacy_exception_set_exact")
 chk("duplicate" not in out, "matched_and_escalation_pair_is_not_a_duplicate")
 
 gsm_row = next(l for l in digest_text.splitlines()

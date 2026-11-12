@@ -3859,3 +3859,66 @@ now names its date.
 gpqa-diamond 198/198 ok, humaneval 164/164 ok, mmlu-pro **186 rows / 186 ok / 0 parked / 0 dups**
 (leg started 00:59:10, 14.4 s/task, ETA ~77 min), ifeval not started. **Live resume total: 855 ids
 still unasked** (314 mmlu-pro + 541 ifeval). No percent published for a partial set.
+
+## 2026-11-12 04:35 CET — tick 70 — CI red on four pushes traced to two contract tests pinning mutable values; fixed as tooling (zero model/cloud calls)
+
+*Queue read at 04:29-04:35 CET (read-only census + resume gate, exit 0):* legs 1-3 of the Grok chain
+are complete and published (gpqa-diamond 198/198 = 87.9 %, humaneval 164/164 = 97.6 %, mmlu-pro
+500/500 = 86.0 % from tick 69). Leg 4, IFEval grok (541 ids), was auto-started by the same chain at
+03:18:38 and is the only transport running: **193 rows / 193 unique ids / 193 `finish=ok` / 0 empty**,
+stored sha256-16 `a27e3f7e3b42aca4`, `bad=0` in every progress line, measured 26.9 s/task,
+**348 ids still unasked** (resume set exact: `ifeval-2041`..`ifeval-3757`), measured-rate ETA ~07:20
+CET (census band 2.0-11.6 h because the IFEval outputs are longer than gsm8k's). `parb-pub-grok-queue`
+is active, the flock is held, exactly one `pub_bench_cloud.py` process: no double-spend, no second
+local leg, no engine touched. No percent taken from a partial arm.
+
+*Root cause of the four red `devsecops` runs (static-qa step) — tooling, not a data or bank
+regression:*
+
+1. `harness/pub_digest_row_gate_test.py` pinned two mutable enumerations literally
+   (`rows=46`, `pre-rule exceptions used=23/23`). Every published arm row moves the first number: the
+   digest is 49 rows today, so the census check failed on a clean publication. Fixed by deriving both
+   from the source of truth — the census from the digest bytes through the gate's own 6-cell row
+   filter, the exception total from the gate's own registry — and a new non-vacuity control
+   (`row_count_census_tracks_the_table`: deleting one row must move the printed count by exactly one).
+   Now **22 checks, 0 failed** (was 21 checks, 1 failed).
+2. `harness/pub_superseded_cell_test.py` pinned its tamper target to the **MMLU-PRO Grok availability
+   cell** — the exact cell tick 69 converted into a percent the same night — so the test died with
+   `AssertionError: tamper target missing`, i.e. it crashed because the line it protects had
+   legitimately completed. Fixed by deriving the target document (only docs whose bench actually
+   carries superseded digest rows are eligible, otherwise the audit skips the doc and the check would
+   be vacuous) and testing the availability-cell exemption in both directions: suspended cell ->
+   completed percent row, and completed row -> synthesized availability cell. If either target ever
+   leaves the corpus the check fails loudly with a re-target instruction instead of silently
+   no-opping. Now **34 checks, 0 failed**.
+   Today's live targets: LIVECODEBENCH-RESULT.md (still an availability cell) and ARC-CHALLENGE-RESULT.md
+   (completed Grok row) — both inside the audited bench set.
+
+*Why this also explains the daily docs job:* the 2026-11-12 03:02 CET run of `docs_freshness_daily`
+exited 1 — its stderr tail is the static-QA output, so today's error was the red static-QA suite above,
+NOT the dirty-tree condition named in the standing machine notes. `scripts/qa/static_checks.py` now
+exits 0 end to end, so both `devsecops` and tomorrow's docs job are expected green.
+
+*IFEval scorer readiness for leg 4 (offline, zero calls):* `scripts/pub_bench_ifeval_v2.py` self-test
+green under the pinned venv only — vendor pins 5/5, upstream 41-test unit suite green, literal-character
+checks 6/6, determinism 20 draws x 2 re-drawn cells, reference band **strict 417/540 loose 431/540**
+(the pinned band is 416/431: the upstream checker flips +/-1 task per run, so the band holds and the
+scorer accepted it), v1/v2 strict diff none. It refuses a partial arm before scoring.
+
+*Standing gates re-run (read-only, all green):* arms index drift 0; derived percents 42 recomputed /
+0 findings; grok-cell rule 9 docs / 0 findings; superseded-cell rule 9 docs / 0 findings; digest row
+rule 49 rows / 0 findings, contracts named 26, pre-rule exceptions 23/23 used.
+
+*Nothing published moved:* both edits are test-only; no digest row, verdict, answer byte, result-doc
+number, bank file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`).
+
+**Next in force:** (a) when leg 4 stores 541/541 (measured ETA ~07:20 CET) score it with
+`pub_bench_ifeval_v2.py` in the pinned venv, ship answers + verdicts, one digest row under
+`pub-ifeval-v2` with the `pub-ifeval-v1` number beside it (pre-registered at tick 45), publish the
+IFEval repair-event census beside the percent, and extend `IFEVAL-RESULT.md`; (b) in that same commit
+regenerate `GROK-RESUME-PIN.json` from the completed bytes — the live gate prints
+"regenerate the pin at window end", and a stale 0-row pin would otherwise make the next window's resume
+census blind again (the tick-68 defect class). The chain is then empty: every in-force set is complete
+on the three-arm template, Grok included wherever a leg exists; `BFCL-RESULT.md` and
+`LIVECODEBENCH-RESULT.md` keep their Grok availability cells. Item P0 parity stays satisfied on every
+in-force set, no local leg is queued, so the P2005 preflight gate stays uncalled.
