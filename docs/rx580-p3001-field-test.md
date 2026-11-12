@@ -50,10 +50,12 @@ Qwen2.5-3B-Instruct Q4_K_M (1.79 GiB, fully resident in VRAM, `-ngl 99 -fa off`)
 | tg128               |  60.0 ± 0.2 t/s     |
 | pp8192 + tg1024     | 160.8 ± 3.0 t/s     |
 
-A same-engine RTX 3060 comparison was attempted on B2003 and is **not valid**:
-that box exposed no usable Vulkan device (NVIDIA ICD missing / iGPU), so the
-numbers came out meaningless — treat the 3050 reference above (Strata) as the
-comparison instead.
+A same-engine RTX 3060 comparison on B2003 is **not usable**: on that laptop
+`GGML_VK_VISIBLE_DEVICES=0` selects the Arrow Lake iGPU (`Vulkan0: Intel(R)
+Graphics (ARL)`, shared 35 GiB), which is what produced 220.8 pp512 / 11.4 tg128.
+The RTX 3060 is `Vulkan1` and had only **823 MiB free** at the time because its
+Strata serve holds the card, so no 3060 Vulkan number was taken. Use the Strata +
+RTX 3050 reference above instead.
 
 ## Thermals and power (5 s hwmon logger, sustained prefill stress ~13 min)
 Log: `docs/data/rx580-p3001-temps-load-20261112.csv` (94 samples at `busy>=90 %`).
