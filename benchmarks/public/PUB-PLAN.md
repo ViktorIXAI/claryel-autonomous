@@ -5186,3 +5186,73 @@ manifest pin or contour stamp changed; no leg was started, stopped, duplicated o
 arm (swap 4 of 8191 MiB free, fourteenth reading); the remaining ladder rows (Terminal-Bench /
 SWE-bench Verified / GAIA-lite) need an owner decision to open; the Grok line stays closed by owner
 decision 2026-11-12.
+
+## Tick 93 — 2026-11-12 21:31 CET: read-only status tick; **preflight GO for the first time in this series** (fifteenth reading: swap free 7 096 of 8 191 MiB, engine RSS 25.1 GiB, load1 0.11) — the box self-relieved between 20:31 and 21:31, engine restarted ~21:16 per `etime`; gates green; Grok gate NO-GO exit 3; CI green at HEAD through a transient GitHub outage; zero legs, zero calls
+
+No leg was started, stopped, duplicated or discarded: the launch queue is empty — every in-force set
+(gsm8k, arc-easy, arc-challenge, gpqa-diamond, humaneval, mmlu-pro, ifeval, livecodebench, bfcl)
+already carries bare + contour matched-shape + codex arms, IFEval/LCB/BFCL shipped, grok is cancelled,
+and the remaining ladder rows are owner-gated. Zero model and zero cloud calls this tick.
+
+*The saturation blocker is lifted.* Fifteenth preflight reading (`pub_preflight.py`, unshielded):
+`swap_free_mib=7096` of 8 191 (tick 92 held at 4), `mem_available_mib=34 656`, `engine_rss_mib=25 760`
+(tick 92: 57.5 GiB), `engine_state=S`, `engine_pcpu=0.0` (6 s sampled delta), `gpu_util_pct=0` at
+`gpu_power_w=8.09`, `load1=0.11`, `health_code=200`, `foreign_legs=0` → **PREFLIGHT GO**. The
+self-relief the fourteenth reading said would not come came between the two ticks: the reader's
+`engine age=14:45` is `ps -o etime=` **MM:SS**, i.e. the engine on the endpoint box restarted at
+≈ 21:16 CET with a fresh 25 GiB load and swap emptied to 7 GiB free. No leg was live at that minute
+(zero `gate_run`/`pub_bench_run` on the box, no `parb-pub-*` unit at tick start), so this is not a
+mid-leg engine restart and gains no `LEG-INCIDENTS.md` entry — it is recorded here as endpoint state.
+The GO is valid for that reading only (this series measured a GO and a NO-GO inside one hour before
+the saturation), so any future leg re-reads at launch. What the GO changes: nothing launchable today,
+because the queue is empty — it only removes the endpoint blocker for owner-opened ladder items.
+
+*Transient GitHub unreachability, recorded because it sat between two green observations.* The tick's
+first `git fetch` died with `Failed to connect to github.com port 443 after 133110 ms`; minutes later
+`curl -sI https://github.com` returned **200 in 0.44 s** (raw host 301, generic internet 200) and the
+retry `git fetch` succeeded. Same network family as tick 92's two `gh` `i/o timeout` calls. The CI
+numbers below come from a **successful** `gh run list` after the recovery — a network timeout is not
+a green.
+
+*CI green at `origin/main` `06231d4`:* six workflow runs at that head, all `completed` / `success`
+(20:17–20:24 UTC). Local `main` == `origin/main` == `06231d4` (ahead 0, behind 0), tree clean at tick
+start; the only file this tick writes is `PUB-PLAN.md`.
+
+*All five standing gates re-run read-only with true exits captured unshielded, all green (counts
+identical to ticks 88–92):* arms index drift 0; derived percents 42 recomputed from shipped bytes /
+0 findings (digest citations 44, result-doc citations 188, uncovered 0); grok-cell rule 9 docs /
+0 findings on the in-force cancelled sentence with 1 superseded sentence rejected; superseded-cell
+rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings, contracts named 26, pre-rule
+exceptions used 23/23.
+
+*The Grok line stays cancelled.* Resume gate re-run unshielded: `checks: 22 | RESUME GATE: NO-GO -
+do not spend quota`, true exit **3**; the record line prints `pinned resume record: 182 ids were never
+asked … VOID, the line is cancelled, this is not a queue`. Operator marker intact at
+`~/pub-bench/GROK-CANCELLED`, untouched. Zero Grok calls.
+
+*Daily docs-job record, read mechanically and reported per the machine note (not fixed).* Job
+`ef7ea47ff99b` ("GitHub docs freshness daily") shows in the job record `last_status=error`,
+`failure_streak: 9` — the cumulative scheduler counter, never nine attempts today. The schedule on the
+record is `0 2 * * *` while the machine note and tick 92 discuss a 03:0x fire; `executions.db` retains
+**zero** rows for this job at all, so today's fire cannot be attributed from the DB beyond the
+cumulative counter, and no in-flight work was committed to beat it.
+
+*Local integrity checks.* Repo scanner `scripts/security/secret_scan.py --dir . --strict` exits **0**
+(0 findings, `credential_like: 0`, 18 vendored metadata exceptions listed, none widened); link checker
+154 links across 324 markdown files, exit 0; `docs_policy.py --push` PASS.
+
+*Frozen-line hygiene, unchanged and reported rather than touched.* Job `f23cf5d48e11` ("Mac v2.2 full
+after v2.1", every 5 min) is still scheduled and `ok` (streak 0, not paused); it is a no-op only while
+the one-shot marker `~/.hermes/mac-v22full-launch.state` (2026-11-02 14:05) exists — verified present
+this tick. Nothing hard-bank ran: zero `gate_run.py` processes, no `parb-*` unit, no new contour stamp
+(the hard line stays frozen at `stable-hard-0.0.2.56`). A sibling cron ("Strata: новая версия",
+`a80f51cbac9a`) was mid-run at tick start with no workdir in this clone; the tree stayed free of
+foreign edits.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank file,
+manifest pin or contour stamp changed, so `LEG-INCIDENTS.md` gains no entry.
+
+**Next in force:** queue empty — the endpoint box is back to PREFLIGHT GO (first time since the
+saturation began), so the owner-gated ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite)
+could start the moment an owner decision opens them; the Grok line stays closed by owner decision
+2026-11-12.
