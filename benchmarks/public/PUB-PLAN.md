@@ -4549,3 +4549,57 @@ and zero cloud calls this tick.
 **Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
 arm; the remaining ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite) need an owner
 decision to open; the Grok line stays closed by owner decision 2026-11-12.
+
+## Tick 83 — 2026-11-12 15:00 CET: read-only status tick; the daily-docs failure decoded to its failing step; gates green at HEAD; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` unit exists; the bracketed process counts are
+0 for the cloud transport and 0 for the local runners. No new preflight reading was taken: no local
+leg is queued, and the box is not relieved since tick 80's diagnosis — a fifth reading of the
+structurally swap-saturated endpoint would change no decision, and relief stays an owner action.
+
+*The Grok line stays cancelled.* The resume gate re-run unshielded prints
+`checks: 22 | RESUME GATE: NO-GO - do not spend quota` with true exit **3**, the cancelled-window
+finding naming the owner decision. The stored archive still matches the pin: gpqa-diamond 198/198,
+humaneval 164/164, mmlu-pro 500/500, ifeval **359 of 541 rows** — a stored-row count, not a score —
+and the 182 unasked ids print as `VOID, the line is cancelled, this is not a queue`.
+
+*All five standing gates re-run read-only at HEAD `88cc329`, all green:* arms index drift 0; derived
+percents 42 recomputed / 0 findings; grok-cell rule 9 docs / 0 findings on the in-force cancelled
+sentence; superseded-cell rule 9 docs / 0 findings; digest row rule 49 rows / 0 findings. CI at that
+SHA at read time: secret-scan, contour self-tests and pages `success`; devsecops and the hard-v6
+scoring contracts still in flight.
+
+*The `GitHub docs freshness daily` failure got an attribution, zero pub bytes touched.* The job
+carries `failure_streak 9` in the scheduler record — a cumulative counter across the job whole
+history; today's run is **one** failure (the standing rule: never retype a failure count). Its
+03:00 CET capture opens with the pub gates' own tamper fixtures (`no-such-bench`, guard strings
+printed against scratch copies), and the negative is proven by hash, not by eye: the tracked IFEval
+tasks file still hashes to its published pins (SHA-1/16 `2c672531577dcc33`, SHA-256/16
+`e09a5cab3782ed5b`), so no tracked pin moved. Inside the capture the static-QA trace shows every
+suite `OK` up to the last step, and `refresh_docs_status.py` died with `returned non-zero exit
+status 1` on that last step, `docs_policy.py --daily`, against the tree as it stood at 03:00; the
+same step run at 14:5x on the synced tree prints `DOCS POLICY: PASS (daily)` exit 0. That is the
+known 03:00 dirty-tree noise class from this line's machine notes — reported, not "fixed" by
+committing in-flight work.
+
+*Repository hygiene.* The clone fast-forwarded twice during the tick, `4f89c9c` → `88cc329`: both
+commits belong to the hardware line (the RX 580 P3001 field-test doc and a dated audit #25
+arithmetic/offload-scope clarification in `docs/rx580-p3001-field-test.md`). Neither touches
+`benchmarks/public/`, no pin and no stamp moved; the pub tree at `88cc329` scored green on the five
+gates above.
+
+*Scheduling hygiene re-read, nothing touched (owner decisions only).* Two hard-bank-era `every 5m`
+jobs remain `enabled: true` and firing on the line frozen at `stable-hard-0.0.2.56`: "Mac v2.2 full
+after v2.1" logged **149** completions today and "P2005 paired full 2.1→2.2 watch" **179**; both
+exit 0 on their one-shot state markers, and neither was touched. The contour-pair watcher stays
+`enabled: false`; the drain-resume self-heal ran 90 times today; no cron job anywhere is paused
+(`paused_reason` null).
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`); no
+leg was started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry. Zero model
+and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm; the remaining ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite) need an owner
+decision to open; the Grok line stays closed by owner decision 2026-11-12.
