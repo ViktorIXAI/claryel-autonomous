@@ -1,0 +1,18 @@
+14:14:47 == s_ov :: --moe-stream --overlap --io-threads 4 --cache-mb auto
+14:19:33    rc=0
+   generation: 111 tokens, 0.524 s/token (1.909 tok/s)
+   compute: 90.5% CPU occupancy (1.8970 cpu-s/token over 4 threads), 0.16 major faults/token
+   prefill: 699 tokens, 160.590 s (4.4 tok/s) | model load 62.354 s | TTFT 222.944 s
+   mode: expert streaming, cache auto, dense anon, overlap
+   bmoe: expert streaming ON  n_expert=512 o_direct=1 io_threads=4 cache=25138 MiB shards=2
+14:19:42 == s_dev :: --moe-stream --device-cache-mb 1800 --cache-mb 6000 --io-threads 4
+14:20:52    rc=1
+   bmoe: expert streaming ON  n_expert=512 o_direct=1 io_threads=4 cache=6000 MiB shards=2
+14:21:00 == s_press :: --moe-stream --overlap --dense-weights anon --cache-mb 6000 --io-threads 4
+14:25:39    rc=0
+   generation: 111 tokens, 0.565 s/token (1.769 tok/s)
+   compute: 93.4% CPU occupancy (2.1113 cpu-s/token over 4 threads), 0.01 major faults/token
+   prefill: 699 tokens, 158.515 s (4.4 tok/s) | model load 54.320 s | TTFT 212.835 s
+   mode: expert streaming, cache 6000 MiB, dense anon, overlap
+   bmoe: expert streaming ON  n_expert=512 o_direct=1 io_threads=4 cache=6000 MiB shards=2
+14:25:47 DONE_BMOE3

@@ -1,0 +1,8 @@
+14:08:46 == A: forced stream + overlap + VRAM expert cache 1800 MiB
+14:09:30    rc=1
+14:09:40 == B: RAM capped to 30 GiB (experts cannot all be resident) + streaming
+14:09:40    rc=1
+14:09:50 == C: same 30 GiB cap, plain llama.cpp mmap (no streaming) for comparison
+14:09:50    llama-cli=/home/claryel/llama-vulkan/llama-b12318/llama-cli
+14:09:50    rc=1
+14:09:50 DONE_BMOE2

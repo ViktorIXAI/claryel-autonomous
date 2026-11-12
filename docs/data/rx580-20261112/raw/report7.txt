@@ -1,0 +1,32 @@
+13:04:51 state: level=high 7: 1348Mhz * 2: 1837Mhz * cap=120000000
+13:04:51 A) our model ngl99 ncmoe99 (uncapped clocks)
+llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+13:05:03 B) our model ngl0 (CPU+disk, clocks pinned high)
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   0 |           pp512 |         45.62 ± 0.52 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   0 |           tg128 |          4.23 ± 0.01 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   0 |     pp512+tg128 |         15.25 ± 0.07 |
+13:08:20 C) 3B fully in VRAM (card ceiling)
+| qwen2 3B Q4_K - Medium         |   1.79 GiB |     3.09 B | Vulkan     |  99 |   0 |           pp512 |        359.78 ± 1.28 |
+| qwen2 3B Q4_K - Medium         |   1.79 GiB |     3.09 B | Vulkan     |  99 |   0 |           tg128 |         60.25 ± 0.46 |
+| qwen2 3B Q4_K - Medium         |   1.79 GiB |     3.09 B | Vulkan     |  99 |   0 |     pp512+tg128 |        174.66 ± 0.93 |
+13:08:47    peak so far: since 13:04  peak_gpu_C=47.0  peak_gpu_W=122.21  peak_cpu_C=70.0  last_row=['13:08:45', 47.0, 95.0, 110.24, 1087.27, 1855.0, 36.9, 120.0, 51.0, 42.0, 10.2, 0.03]
+13:08:47 D) sustained 4-min load clock/power probe
+| qwen2 3B Q4_K - Medium         |   1.79 GiB |     3.09 B | Vulkan     |  99 |   0 |    pp8192+tg512 |        204.90 ± 2.17 |
+13:12:47    clock/power trace:
+13:10:37 107W 54C 910460000Hz busy=100
+13:10:47 111W 54C 1073850000Hz busy=100
+13:10:57 107W 55C 850320000Hz busy=100
+13:11:07 110W 55C 877400000Hz busy=100
+13:11:17 112W 55C 930890000Hz busy=100
+13:11:27 111W 55C 1086530000Hz busy=100
+13:11:37 41W 53C 1348200000Hz busy=0
+13:11:47 41W 51C 1348200000Hz busy=0
+13:11:57 41W 50C 1348200000Hz busy=0
+13:12:07 41W 49C 1348200000Hz busy=0
+13:12:17 41W 48C 1348200000Hz busy=0
+13:12:27 41W 47C 1348200000Hz busy=0
+13:12:37 41W 47C 1348200000Hz busy=0
+13:12:47 41W 46C 1348200000Hz busy=0
+13:12:47 restore: echo auto | sudo tee /sys/class/drm/card1/device/power_dpm_force_performance_level >/dev/null; echo 0xff | sudo tee /sys/class/drm/card1/device/pp_dpm_sclk >/dev/null; echo 0x7 | sudo tee /sys/class/drm/card1/device/pp_dpm_mclk >/dev/null; echo auto | sudo tee /sys/class/drm/card1/device/power_dpm_force_performance_level >/dev/null
+13:12:47 level now=auto
+13:12:47 ALL_DONE7

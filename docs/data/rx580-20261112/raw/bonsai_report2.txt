@@ -1,0 +1,20 @@
+15:15:41 == waiting for the fork pass to finish
+15:26:21 == which kernels does the fork use (full stderr of a 1-rep run)
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           pp512 |         44.41 ± 0.00 |
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           tg128 |          4.81 ± 0.00 |
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |     pp512+tg128 |         24.52 ± 0.00 |
+3:ggml_vulkan: 0 = AMD Radeon RX 580 2048SP (RADV POLARIS10) (radv) | uma: 0 | fp16: 0 | bf16: 0 | fp4: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: none
+5:load_backend: loaded CPU backend from /home/claryel/bonsai/prism/libggml-cpu-ivybridge.so
+15:28:03 == stock llama.cpp b12318 on the Q2_0 file (the README says Q2_0 is mainline-capable)
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           pp512 |         44.48 ± 0.00 |
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           tg128 |          9.03 ± 0.00 |
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |     pp512+tg128 |         24.74 ± 0.00 |
+15:29:32 == partial offload sweep with the fork (where does the card stop helping)
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |   8 |   0 |           tg128 |          2.04 ± 0.00 |
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |  16 |   0 |           tg128 |          2.22 ± 0.00 |
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |  24 |   0 |           tg128 |          2.32 ± 0.00 |
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |  40 |   0 |           tg128 |          3.17 ± 0.00 |
+15:42:09 == power/temp tail
+   input=14W temp=43000
+   csv_max:15 60 100 123.22 300 37.6 120 75 66 33.1 0.04 
+15:42:09 DONE_BONSAI2

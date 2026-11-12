@@ -1,0 +1,21 @@
+13:24:27 ngl=4
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   4 |         99 |           pp512 |         46.73 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   4 |         99 |           tg128 |          4.28 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |   4 |         99 |     pp512+tg128 |         15.64 ± 0.00 |
+13:26:03 ngl=12
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  12 |         99 |           pp512 |         47.81 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  12 |         99 |           tg128 |          4.72 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  12 |         99 |     pp512+tg128 |         16.65 ± 0.00 |
+13:27:33 ngl=24
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  24 |         99 |           pp512 |         47.58 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  24 |         99 |           tg128 |          5.50 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  24 |         99 |     pp512+tg128 |         18.84 ± 0.00 |
+13:28:55 ngl=48
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  48 |         99 |           pp512 |         53.46 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  48 |         99 |           tg128 |          7.78 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  48 |         99 |     pp512+tg128 |         24.49 ± 0.00 |
+13:30:02 ngl=99
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  99 |         99 |           pp512 |         51.51 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  99 |         99 |           tg128 |          7.93 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  99 |         99 |     pp512+tg128 |         24.81 ± 0.00 |
+DONE9

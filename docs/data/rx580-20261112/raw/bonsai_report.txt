@@ -1,0 +1,35 @@
+14:39:58 == power state: push to the ceiling the VBIOS allows
+14:39:58    level=high od_sclk=5 od_mclk=5 cap=120W
+14:39:58    thermal logger on
+14:39:58 == prism fork (prebuilt Vulkan for Linux)
+14:40:02    bench=prism/llama-bench
+version: 0.7.0-dev (build 12128, commit d7b289683)
+built with GNU 11.4.0 for Linux x86_64
+14:40:02 == model downloads
+   5.95 GB models/Ternary-Bonsai-2-27B-PTQ1_0.gguf
+   7.63 GB models/Ternary-Bonsai-2-27B-Q2_0.gguf
+14:50:19 == bench PTQ1_0-ngl99 :: -m models/Ternary-Bonsai-2-27B-PTQ1_0.gguf -ngl 99 -fa off
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |  99 |   0 |           pp512 |         36.95 ± 0.12 |
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |  99 |   0 |           tg128 |          3.93 ± 0.03 |
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |  99 |   0 |     pp512+tg128 |         18.99 ± 0.05 |
+14:53:44 == bench PTQ1_0-ngl0 :: -m models/Ternary-Bonsai-2-27B-PTQ1_0.gguf -ngl 0
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |   0 |           pp512 |         29.02 ± 0.00 |
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |   0 |           tg128 |          1.75 ± 0.00 |
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |   0 |     pp512+tg128 |          7.31 ± 0.01 |
+15:00:29 == bench PTQ1_0-long :: -m models/Ternary-Bonsai-2-27B-PTQ1_0.gguf -ngl 99 -fa off -pg 16384,512 -r 1
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |  99 |   0 |           pp512 |         36.45 ± 0.17 |
+| qwen35 27B PTQ1_0 - 1.75 bpw ternary (group 128) |   5.53 GiB |    26.90 B | Vulkan     |  99 |   0 |           tg128 |          3.91 ± 0.01 |
+15:20:39 == bench Q2_0-ngl99 :: -m models/Ternary-Bonsai-2-27B-Q2_0.gguf -ngl 99 -fa off
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           pp512 |         42.63 ± 0.01 |
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           tg128 |          4.83 ± 0.01 |
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |     pp512+tg128 |         23.95 ± 0.03 |
+15:23:29 == bench Q2_0-stock :: -m models/Ternary-Bonsai-2-27B-Q2_0.gguf -ngl 99 -fa off
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           pp512 |         42.68 ± 0.02 |
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |           tg128 |          4.83 ± 0.02 |
+| qwen35 27B Q2_0                |   7.09 GiB |    26.90 B | Vulkan     |  99 |   0 |     pp512+tg128 |         23.97 ± 0.03 |
+15:26:19 == power/temp at the end
+   input=42W temp=54000
+   Mem: used 32 of 62 GiB
+   Swap: used 0 of 63 GiB
+15:26:19    restored level=auto
+15:26:19 DONE_BONSAI

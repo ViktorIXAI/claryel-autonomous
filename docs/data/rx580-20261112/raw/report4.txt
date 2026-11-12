@@ -1,0 +1,27 @@
+12:28:22 1) our model -ngl 99 full stderr
+ggml_vulkan: Found 1 Vulkan devices:
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | --------------: | -------------------: |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  99 |         99 |           pp512 |         33.90 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  99 |         99 |           tg128 |          5.85 ± 0.00 |
+| qwen4exp A3B IQ3_S - 3.4375 bpw |  77.86 GiB |   176.94 B | Vulkan     |  99 |         99 |         pp8+tg8 |          3.81 ± 0.00 |
+
+build: 7021f7e09 (12318)
+12:29:27 2) GPU stress (3B on RX580, sustained prefill) for thermals
+| qwen2 3B Q4_K - Medium         |   1.79 GiB |     3.09 B | Vulkan     |  99 |   0 |    pp2048+tg256 |        220.19 ± 1.04 |
+12:30:33    stress power/temp trace:
+12:29:27 16181W 33C busy=0 clock=592030000
+12:29:37 110075W 41C busy=100 clock=1079660000
+12:29:47 107148W 43C busy=100 clock=993170000
+12:29:57 111224W 44C busy=100 clock=1107900000
+12:30:07 112245W 45C busy=100 clock=1073740000
+12:30:17 105195W 46C busy=100 clock=894550000
+12:30:27 109183W 47C busy=100 clock=897810000
+12:30:33 3) our model with partial offload
+12:30:33 3.4 our-model ngl=4 ncmoe=99
+llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+12:30:45 3.12 our-model ngl=12 ncmoe=99
+llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+12:30:57 3.24 our-model ngl=24 ncmoe=99
+llama_bench: error: failed to create context with model '/home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf'
+12:31:07 ALL_DONE4

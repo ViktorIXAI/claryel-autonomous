@@ -1,0 +1,23 @@
+15:24:17 == waiting for the previous pass
+15:42:17 == download Bonsai 2 9B
+   2.00 GB /home/claryel/bonsai/models/Ternary-Bonsai-2-9B-PTQ1_0.gguf
+   2.56 GB /home/claryel/bonsai/models/Ternary-Bonsai-2-9B-Q2_0.gguf
+15:46:45 == fork 9B PTQ1_0 ngl99
+| qwen35 9B PTQ1_0 - 1.75 bpw ternary (group 128) |   1.85 GiB |     8.95 B | Vulkan     |  99 |   0 |           pp512 |        122.26 ± 0.06 |
+| qwen35 9B PTQ1_0 - 1.75 bpw ternary (group 128) |   1.85 GiB |     8.95 B | Vulkan     |  99 |   0 |           tg128 |         12.38 ± 0.04 |
+| qwen35 9B PTQ1_0 - 1.75 bpw ternary (group 128) |   1.85 GiB |     8.95 B | Vulkan     |  99 |   0 |     pp512+tg128 |         67.02 ± 0.00 |
+15:47:52 == fork 9B PTQ1_0 ngl0
+| qwen35 9B PTQ1_0 - 1.75 bpw ternary (group 128) |   1.85 GiB |     8.95 B | Vulkan     |   0 |           pp512 |         90.24 ± 0.11 |
+| qwen35 9B PTQ1_0 - 1.75 bpw ternary (group 128) |   1.85 GiB |     8.95 B | Vulkan     |   0 |           tg128 |          5.13 ± 0.01 |
+| qwen35 9B PTQ1_0 - 1.75 bpw ternary (group 128) |   1.85 GiB |     8.95 B | Vulkan     |   0 |     pp512+tg128 |         20.98 ± 0.11 |
+15:50:15 == stock 9B Q2_0 ngl99
+| qwen35 9B Q2_0                 |   2.37 GiB |     8.95 B | Vulkan     |  99 |   0 |           pp512 |        170.01 ± 0.10 |
+| qwen35 9B Q2_0                 |   2.37 GiB |     8.95 B | Vulkan     |  99 |   0 |           tg128 |         27.35 ± 0.05 |
+| qwen35 9B Q2_0                 |   2.37 GiB |     8.95 B | Vulkan     |  99 |   0 |     pp512+tg128 |         81.84 ± 0.33 |
+15:51:02 == fork 9B Q2_0 ngl99
+| qwen35 9B Q2_0                 |   2.37 GiB |     8.95 B | Vulkan     |  99 |   0 |           pp512 |        157.55 ± 1.08 |
+| qwen35 9B Q2_0                 |   2.37 GiB |     8.95 B | Vulkan     |  99 |   0 |           tg128 |         12.42 ± 0.03 |
+| qwen35 9B Q2_0                 |   2.37 GiB |     8.95 B | Vulkan     |  99 |   0 |     pp512+tg128 |         63.91 ± 0.26 |
+15:52:06 == power/temp tail
+   input=14W temp=42000 clocks=
+15:52:06 DONE_BONSAI9

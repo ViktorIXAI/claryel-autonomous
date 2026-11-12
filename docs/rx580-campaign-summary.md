@@ -51,6 +51,24 @@ misses and the GPU mostly waits.
 | Bench tooling traps | `llama-bench` has no `-c` (use `-pg "pp,tg"`); HF two-shard URL guess 404s; an unbracketed `pkill -f` over SSH kills the SSH session itself |
 | **Our own methodology bug** | a bench loop resolved the binary as `$(dirname …)` instead of the file, so four Nemotron rows came out silently empty — an empty row is a missing arm, not a zero; fixed and re-run, numbers above are the re-run |
 
+## Where every pass is recorded
+
+* `docs/rx580-p3001-test-log.md` — the chronological log: every pass with its timestamp, command shape,
+  returned rows, failures with causes (including our own tooling bugs and one mislabelled arm), and the
+  machine state at the end of the day.
+* `docs/rx580-p3001-field-test.md` — engine discovery, first speed table, thermals, power limits.
+* `docs/rx580-power-cap-study.md` — caps 120/100/70/50/30 W for resident models and for the offloaded MoE.
+* `docs/rx580-cheap-answer-lane.md` — what the cap work buys: cost of one short answer and the idle-tax
+  ordering of levers.
+* `docs/amd-gcn4-inference-engines.md` — which engines run gfx803 at all.
+* `docs/bigmoeonedge-p3001.md` — the bmoe study on GCN4.
+* `docs/hw-eval-queue.md` — standing trial queue with states and next actions.
+* Raw artifacts: `docs/data/rx580-20261112/raw/` (19 bench reports + 1 s thermal CSVs from every pass),
+  `docs/data/rx580-p3001-temps-load-20261112.csv` (sustained-load thermal rows),
+  `docs/data/rx580-powcap-20261112/` (power CSVs, run windows, bench reports, `aggregate.py`).
+* Reusable scripts: `scripts/gpu_powcap_bench.sh`, `scripts/gpu_powcap_sampler.sh`,
+  `scripts/hwmon_gpu_logger.py`, `scripts/rx580_vulkan_bench.sh`.
+
 ## Power cap study
 
 `docs/rx580-power-cap-study.md` — caps 120 / 100 / 70 / 50 W × 3 models with 1 s power sampling:

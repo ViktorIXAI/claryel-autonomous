@@ -1,0 +1,23 @@
+14:04:50 == RUN stream_off :: --auto
+14:06:12    rc=0 wall=82.1s  out_tokens=3267 bytes
+   err: sched_graph_realloc: graph reallocation: nodes = 7672 (changed = 0), splits = 74, n_same = 1, n_diff = 0
+   err: sched_graph_realloc: graph reallocation: nodes = 7672 (changed = 0), splits = 74, n_same = 2, n_diff = 0
+   err: llama_moe_cache: ubatch <= 8: hits = 23966, misses = 29324, hit rate = 44.97%, uploaded = 57301.34 MiB
+   csv cols: # bmoe_metrics v2 rows: 118
+   Mem: used 9 of 62 GiB
+   Swap: used 0 of 63 GiB
+   plan: resolve_fused_ops: layer 3 is assigned to device Vulkan0 but fused top-k mask is assigned to device CPU (usually due to missing support)
+   plan: sched_reserve:    Vulkan0 compute buffer size =   972.53 MiB
+   plan: sched_reserve: Vulkan_Host compute buffer size =   102.55 MiB
+14:06:12 == RUN stream_on :: --auto --moe-stream --io-threads 4
+14:07:32    rc=0 wall=79.6s  out_tokens=3267 bytes
+   err: sched_graph_realloc: graph reallocation: nodes = 7672 (changed = 0), splits = 74, n_same = 1, n_diff = 0
+   err: sched_graph_realloc: graph reallocation: nodes = 7672 (changed = 0), splits = 74, n_same = 2, n_diff = 0
+   err: llama_moe_cache: ubatch <= 8: hits = 23966, misses = 29324, hit rate = 44.97%, uploaded = 57301.34 MiB
+   csv cols: # bmoe_metrics v2 rows: 118
+   Mem: used 9 of 62 GiB
+   Swap: used 0 of 63 GiB
+   plan: resolve_fused_ops: layer 3 is assigned to device Vulkan0 but fused top-k mask is assigned to device CPU (usually due to missing support)
+   plan: sched_reserve:    Vulkan0 compute buffer size =   972.53 MiB
+   plan: sched_reserve: Vulkan_Host compute buffer size =   102.55 MiB
+14:07:32 DONE_BMOE

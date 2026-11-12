@@ -1,0 +1,20 @@
+14:26:27 == bmoe S8 :: --moe-stream --overlap --io-threads 4 --cache-mb auto -t 8 --threads-batch 16
+14:29:27    rc=0
+   generation: 111 tokens, 0.446 s/token (2.242 tok/s)
+   compute: 69.9% CPU occupancy (2.4955 cpu-s/token over 8 threads), 25.98 major faults/token
+   prefill: 699 tokens, 71.620 s (9.8 tok/s) | model load 55.002 s | TTFT 126.622 s
+   mode: expert streaming, cache auto, dense anon, overlap
+   err: bmoe: context checkpoints: 112.6 MiB each, up to 8 kept
+   err: bmoe: decode cost: 295.6 ms/token of compute at 8 thread(s), 92% cache hits at 26691 MiB, the median of 7 windows
+14:29:37 == bmoe D8 :: --moe-stream --device-cache-mb 1800 --gpu-layers 99 --cache-mb 6000 --io-threads 4 -t 8
+14:30:33    rc=1
+   err: 
+   err: error: could not load the model: /home/claryel/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf
+14:30:43 == Nemotron downloads
+    5060482240 /home/claryel/nemotron/Bolt-E4B-Q4_K_XL.gguf
+    2837072864 /home/claryel/nemotron/Nano-4B-Q4_K_M.gguf
+14:35:44 == bench Nano4B-gpu
+14:35:52 == bench Nano4B-cpu
+14:36:00 == bench BoltE4B-gpu
+14:36:08 == bench BoltE4B-kv8
+14:36:16 DONE_PASS4
