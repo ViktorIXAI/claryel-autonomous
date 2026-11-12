@@ -3830,3 +3830,32 @@ superseded-cell rule 0 findings, digest rows 48 / 0 findings.*
 `pub-ifeval-v2` with the v1 number beside it, pre-registered at tick 45). Each completes → score →
 one digest row → result-doc section. Item P0 contour parity is already satisfied on every in-force
 set; no local leg is queued, so the P2005 preflight gate stays uncalled (21 readings, newest 11 Nov).
+
+## 2026-11-12 tick 68 — resume-gate blindness on a set the pin predates (tooling, zero calls)
+
+*Finding (read-only tick, no leg launched):* the Grok resume gate could not see the set it most
+needed to protect. `GROK-RESUME-PIN.json` records the two deferred sets with `answer_file: null`
+("never legged"), so once their legs started the gate still printed
+`mmlu-pro stored 0 rows / resume set 500 ids` while **186 rows were already on disk**: no census,
+no duplicate/parked-blank/empty checks, and a stale resume set. A day-two resume that trusts that
+line would spend quota against a file it never validated.
+
+*Fix (tooling release, no contour stamp, no hard-bank byte touched):* a `null` `answer_file` now
+derives the runner's own convention `<ws>/<bench>/pub-grok.jsonl`, censuses it, applies the same
+corruption classes (duplicate id, parked non-`ok` row, `ok` row with an empty answer) and reads the
+resume set live. Growth over a 0-row pin stays legal only with the owner window OPEN and an
+uncredited write (finding) inside the closed window. `main()` also prints a **live resume total**
+read from the stored bytes, so a tick no longer does that arithmetic by hand.
+
+*Contract test:* `harness/pub_grok_resume_test.py` 20 → **27 checks, 0 failures**. Non-vacuity is
+mechanical, not asserted: `PUB_RESUME_SCRIPT` re-points the test at the pre-fix gate bytes, where
+exactly the 4 new checks fail (23/23 old checks still green), i.e. the new rule changed behaviour
+and nothing else moved. A second latent defect was closed in the same commit: three closed-window
+checks relied on the default `--as-of` (today), so on 2026-11-12 — the first day after the pinned
+window — one of them silently flipped to OPEN and reddened the suite; every window-sensitive check
+now names its date.
+
+*Live queue read at 01:45 CET (gate exit 0, `pub_cloud_blank_purge.py` report mode, zero calls):*
+gpqa-diamond 198/198 ok, humaneval 164/164 ok, mmlu-pro **186 rows / 186 ok / 0 parked / 0 dups**
+(leg started 00:59:10, 14.4 s/task, ETA ~77 min), ifeval not started. **Live resume total: 855 ids
+still unasked** (314 mmlu-pro + 541 ifeval). No percent published for a partial set.

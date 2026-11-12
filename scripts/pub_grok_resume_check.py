@@ -53,6 +53,13 @@ Exit codes: 0 = RESUME-READY (identity matches the pin, resume set exact), 3 = f
 (do NOT spend quota), 1 = input gap (missing pin, missing bench entry, an expected answer
 file absent). An input gap is never a green light.
 
+A set pinned as "never legged" (`answer_file: null`) is not exempt from the byte checks once
+its leg has started: the runner's output path is the convention `<ws>/<bench>/pub-grok.jsonl`,
+so that path is derived and censused, and its resume set is read live. Without the derivation
+the gate reported "stored 0 rows / resume set 500 ids" for the 2026-11-12 mmlu-pro leg while
+175 rows were already on disk, i.e. the only sets a day-two resume actually needs the gate for
+were the two it could not see.
+
 `PUB_MANIFEST_OVERRIDE` points the MANIFEST pin guard at another `MANIFEST.json`; it
 exists only so the contract test in `harness/pub_grok_resume_test.py` can run hermetic
 fixtures. The default is the published repo manifest.
@@ -121,12 +128,14 @@ def task_ids(tasks_path: str) -> list[str]:
     return out
 
 
-def check_arm(name: str, spec: dict, repo: str, ws: str, window_open: bool) -> None:
+def check_arm(name: str, spec: dict, repo: str, ws: str, window_open: bool) -> int:
+    """Census one arm against its pin. Returns how many pinned ids are still unasked
+    (0 on an early input-gap return, which cannot contribute a resume set)."""
     global CHECKS
     tasks_path = os.path.join(repo, "benchmarks", "public", "%s.tasks.jsonl" % name)
     if not os.path.exists(tasks_path):
         GAPS.append("%s: pinned task file %s is missing" % (name, tasks_path))
-        return
+        return 0
     cell = pbs.manifest_tasks_cell(name, tasks_path)
     CHECKS += 1
     if cell != spec.get("expected_tasks_cell"):
@@ -142,17 +151,33 @@ def check_arm(name: str, spec: dict, repo: str, ws: str, window_open: bool) -> N
     rel = spec.get("answer_file")
     apath = os.path.join(ws, rel) if rel else None
     if apath is None:
+        # A set pinned as "never legged" names no answer file, so without this the gate is
+        # BLIND to it the moment its leg starts (measured 2026-11-12 while the mmlu-pro Grok
+        # leg was mid-flight: the arm file held 175 rows and the gate still printed
+        # "stored 0 rows / resume set 500 ids"). The runner's own output path is the
+        # convention `<ws>/<bench>/pub-grok.jsonl`, so derive it and census the real bytes:
+        # the corruption classes (duplicate id, parked non-ok row, empty ok answer) and the
+        # live resume set then apply to a set the pin predates. Growth over a 0-row pin is
+        # legal progress only with the owner window OPEN and an uncredited write (finding)
+        # inside the closed window, exactly as for a pinned arm.
+        cand = os.path.join(ws, name, "pub-grok.jsonl")
+        if os.path.exists(cand):
+            apath = cand
+            print("   answer file derived by convention (%s/pub-grok.jsonl): the pin names "
+                  "no file for this set, so its bytes are censused and its resume set is "
+                  "read live" % name)
+    if apath is None:
         if int(spec.get("expected_rows", 0)) > 0:
             GAPS.append("%s: pin expects %d stored rows but the pin names no answer file"
                         % (name, int(spec["expected_rows"])))
-            return
+            return 0
         c = {"rows": 0, "unique": 0, "ok": 0, "empty": 0, "bad_finish": [], "dup": [],
              "sha256_16": "-"}
     elif not os.path.exists(apath):
         if int(spec.get("expected_rows", 0)) > 0:
             GAPS.append("%s: answer file %s is missing while the pin expects %d rows"
                         % (name, apath, int(spec["expected_rows"])))
-            return
+            return 0
         c = {"rows": 0, "unique": 0, "ok": 0, "empty": 0, "bad_finish": [], "dup": [],
              "sha256_16": "-"}
     else:
@@ -243,6 +268,7 @@ def check_arm(name: str, spec: dict, repo: str, ws: str, window_open: bool) -> N
     print("%-13s stored %4d rows / %4d ok / sha256-16 %-16s | resume set %4d ids %s..%s"
           % (name, c["rows"], c["ok"], c["sha256_16"], len(remaining),
              (remaining[0] if remaining else "-"), (remaining[-1] if remaining else "-")))
+    return len(remaining)
 
 
 def main() -> int:
@@ -309,12 +335,15 @@ def main() -> int:
     print("grok resume gate | pin %s | as of %s | window closes %s | window is %s today (%s)"
           % (os.path.relpath(args.pin, ROOT), pin.get("as_of"), until,
              "OPEN" if window_open else "CLOSED", as_of))
+    live_remaining = 0
     for name in queue:
         if name in arms:
-            check_arm(name, arms[name], args.repo, args.ws, window_open)
+            live_remaining += check_arm(name, arms[name], args.repo, args.ws, window_open) or 0
 
     total = sum(int(arms[n].get("expected_remaining", 0)) for n in queue if n in arms)
     print("pinned resume queue total: %d calls, order %s" % (total, " -> ".join(queue)))
+    print("live resume total read from the stored bytes: %d ids still unasked"
+          % live_remaining)
     for p in PROGRESS:
         print("progress: %s" % p)
     if GAPS:

@@ -24,7 +24,13 @@ What it pins:
      report a closed window as OPEN), and a pin whose `suspended_until` is not ISO —
      while a well-formed ISO `--as-of` still decides both window states correctly;
   6. the MANIFEST pin guard is wired: a task file whose bytes moved is refused with exit 2
-     and the published guard text (no second hash identity for one pinned file).
+     and the published guard text (no second hash identity for one pinned file);
+  7. a set pinned as "never legged" (`answer_file: null`) is not invisible once its leg has
+     started: the conventional `<ws>/<bench>/pub-grok.jsonl` path is derived, its bytes are
+     censused (so a parked non-`ok` row in a mid-flight leg is NO-GO), its resume set is read
+     live, and growth over the 0-row pin is legal progress only with the window OPEN.
+     Non-vacuity is proven mechanically: `PUB_RESUME_SCRIPT` points the test at another copy
+     of the gate, and against the pre-derivation bytes exactly these checks fail.
 """
 from __future__ import annotations
 
@@ -37,7 +43,8 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-SCRIPT = os.path.join(ROOT, "scripts", "pub_grok_resume_check.py")
+SCRIPT = os.environ.get("PUB_RESUME_SCRIPT") or os.path.join(
+    ROOT, "scripts", "pub_grok_resume_check.py")
 
 CHECKS = 0
 FAILED = []
@@ -121,11 +128,16 @@ class Fixture:
             json.dump(pin, fh, indent=2)
         return path
 
-    def run(self, pin: str) -> tuple[int, str]:
+    def run(self, pin: str, asof: str | None = None) -> tuple[int, str]:
         env = dict(os.environ, PUB_MANIFEST_OVERRIDE=self.manifest)
-        p = subprocess.run([sys.executable, SCRIPT, "--pin", pin, "--ws", self.ws,
-                            "--repo", self.repo],
-                           capture_output=True, text=True, env=env, timeout=120)
+        cmd = [sys.executable, SCRIPT, "--pin", pin, "--ws", self.ws, "--repo", self.repo]
+        # An explicit --as-of is what decides the window mode. Measured 2026-11-12, the first
+        # day AFTER the pinned suspension window: a fixture that relied on the default
+        # (`today`) silently flipped its CLOSED-window expectation to OPEN, so every
+        # closed-window check must name its date.
+        if asof:
+            cmd += ["--as-of", asof]
+        p = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=120)
         return p.returncode, p.stdout + p.stderr
 
 
@@ -178,7 +190,7 @@ def main() -> int:
     stale = json.load(open(f6.make_pin(), encoding="utf-8"))
     f6.rows.append(row(2))
     f6.write_arm()
-    rc, out = f6.run(_write(tmp, "stale-pin.json", stale))
+    rc, out = f6.run(_write(tmp, "stale-pin.json", stale), "2026-11-11")
     ck(rc == 3 and "INSIDE the closed owner window" in out,
        "growth inside the closed window must be NO-GO (the 2026-11-11 05:31 class): %s" % out[-400:])
     rc, out = f6.run(f6.make_pin())
@@ -276,6 +288,50 @@ def main() -> int:
     rc, out = f12.run(_write(tmp, "never-legged.json", p12))
     ck(rc == 0 and "resume set    3 ids" in out,
        "a never-legged set with no answer file must be READY: %s" % out[-300:])
+
+    # 15. a set pinned as "never legged" is not invisible once its leg has started
+    #     (measured 2026-11-12 while the mmlu-pro Grok leg was mid-flight: 175 rows on disk,
+    #     the gate printed "stored 0 rows / resume set 500 ids" because the pin predates the
+    #     leg and names no answer file). The conventional path must be derived and censused.
+    def _never_leg_pin(fix, tag):
+        d = json.load(open(fix.make_pin(), encoding="utf-8"))
+        arm = d["arms"][fix.bench]
+        arm.update({"answer_file": None, "status": "never legged; deferred into the window",
+                    "expected_rows": 0, "expected_unique": 0, "expected_ok": 0,
+                    "expected_empty": 0, "answer_file_sha256_16": "-", "pinned_ok_ids": [],
+                    "expected_remaining": fix.n, "expected_first_remaining": "t-000",
+                    "expected_last_remaining": "t-%03d" % (fix.n - 1)})
+        return _write(tmp, "never-leg-%s.json" % tag, d)
+
+    def _run_pin(fix, pin, asof):
+        env = dict(os.environ, PUB_MANIFEST_OVERRIDE=fix.manifest)
+        p = subprocess.run([sys.executable, SCRIPT, "--pin", pin, "--ws", fix.ws,
+                            "--repo", fix.repo, "--as-of", asof],
+                           capture_output=True, text=True, env=env, timeout=120)
+        return p.returncode, p.stdout + p.stderr
+
+    f15 = Fixture(os.path.join(tmp, "b15"), n=3, stored=2)
+    rc, out = _run_pin(f15, _never_leg_pin(f15, "open"), "2026-11-13")
+    ck(rc == 0 and "answer file derived by convention" in out
+       and "stored    2 rows" in out and "resume set    1 ids" in out,
+       "a mid-flight never-legged set must be censused through the derived path "
+       "(live resume set, not the pinned 500-style total): %s" % out[-400:])
+    ck(rc == 0 and "progress:" in out and "live resume total read from the stored bytes: 1 ids"
+       in out, "the live resume total must be read from bytes, not the pin: %s" % out[-400:])
+
+    # the same bytes outside the owner window are an uncredited write, as for a pinned arm
+    rc, out = _run_pin(f15, _never_leg_pin(f15, "closed"), "2026-11-11")
+    ck(rc == 3 and "INSIDE the closed owner window" in out,
+       "growth of a never-legged set inside the closed window must be NO-GO: %s" % out[-400:])
+
+    # the class that actually matters for a mid-flight leg: a parked non-ok row in a file
+    # the pin does not name must still be caught before quota is spent
+    f16 = Fixture(os.path.join(tmp, "b16"), n=3, stored=2)
+    f16.rows.append(row(2, answer="", finish="timeout"))
+    f16.write_arm()
+    rc, out = _run_pin(f16, _never_leg_pin(f16, "parked"), "2026-11-13")
+    ck(rc == 3 and "non-ok rows parked" in out,
+       "a parked blank inside a mid-flight derived-path leg must be NO-GO: %s" % out[-400:])
 
     print("pub_grok_resume_check contract: %d checks, %d failure(s)" % (CHECKS, len(FAILED)))
     for m in FAILED:
