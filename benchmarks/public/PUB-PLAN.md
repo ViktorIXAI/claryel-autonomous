@@ -4603,3 +4603,71 @@ and zero cloud calls this tick.
 **Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
 arm; the remaining ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite) need an owner
 decision to open; the Grok line stays closed by owner decision 2026-11-12.
+
+## Tick 84 — 2026-11-12 15:40 CET: read-only status tick; the swap rule now reads fully consumed; the reader's wrong-machine artifact reproduced and fail-closed again; gates green at HEAD; zero legs, zero calls
+
+*Nothing runs and nothing is queued.* No `parb-pub-*` unit exists; bracketed process counts are 0
+for both the cloud transport and the local runners.
+
+*Sixth live preflight reading of the endpoint box (15:38 CET, one remote read over the
+repo-standard key):*
+`mem_available_mib=14004 swap_total_mib=8191 swap_used_mib=8191 swap_free_mib=0 engine_state=S
+engine_pcpu=0.0 engine_rss_mib=57476 gpu_util_pct=0 gpu_power_w=26.43 load1=10.59 health_code=200
+foreign_legs=0` → **PREFLIGHT NO-GO, true exit 3**, resting on the swap rule alone. The columns
+balance exactly (`8191 + 0 = 8191`), so the tick-78 guard is satisfied and the reading is trusted.
+Against tick 82's 14:02 reading the box moved the wrong way: free swap 2 → 0 MiB, engine age
+3 d 17 h → 3 d 19 h (no restart), RSS 57.3 → 57.5 GiB against 60.5 GiB `MemTotal`; GPU parked
+(0 %, 26.4 W), sampled engine CPU 0.0 %, load1 10.59. **The box is not relieved** and relief
+remains an owner action.
+
+*The tick-82 wrong-machine artifact reproduced inside this tick and landed in the same
+fail-closed branch.* The untracked reader `pub-bench/preflight_read.sh` was first executed on the
+**launch host** instead of being pushed to the endpoint box, and it emitted exactly the junk
+profile tick 82 named — `swap_total_mib=294911` (the launch host's RAID swap partition), empty
+engine and GPU fields, plus a `ps -p` usage error because no engine pid existed there. The gate
+answered **INPUT GAP, exit 1** ("a missing reading is never treated as healthy"), never GO. The
+correct entry point is the wrapper `pub-bench/preflight.sh`, which pipes the reader over ssh into
+the endpoint box; the stored readings file kept only the real remote reading (the local artifact
+shared its timestamped name and was overwritten by it). No published number is affected — no leg
+ever started on either reading, and the exposure stays prospective.
+
+*Second tooling observation; the untracked wrapper was not touched.* `preflight.sh` prints the
+gate's verdict but its own exit status is the trailing `echo`'s: it returned 0 while printing
+`PREFLIGHT NO-GO`. The verdict was therefore re-read unshielded against the stored readings file:
+true exit **3**. Standing rule restated for the next tick: read the gate's exit code, never the
+wrapper's.
+
+*The Grok line stays cancelled.* The resume gate re-run unshielded prints
+`checks: 22 | RESUME GATE: NO-GO - do not spend quota` with true exit **3**, the cancelled-window
+finding naming the owner decision. The stored archive still matches the pin (gpqa-diamond 198/198,
+humaneval 164/164, mmlu-pro 500/500, ifeval **359 of 541 rows** — a stored-row count, not a score)
+and the 182 unasked ids print as `VOID, the line is cancelled, this is not a queue`.
+
+*All five standing gates re-run read-only at HEAD `4192c21`, all green:* arms index drift 0;
+derived percents 42 recomputed / 0 findings (44 digest + 188 doc citations, 0 uncovered);
+grok-cell rule 9 docs / 0 findings on the in-force cancelled sentence; superseded-cell rule
+9 docs / 0 findings; digest row rule 49 rows / 0 findings (contracts named 26, pre-rule
+exceptions 23/23 used). CI at that SHA: secret-scan, contour self-tests, hard-v6 scoring
+contracts, devsecops and pages all `success`. Local clone synced with `origin/main`
+(0 ahead / 0 behind), clean tree.
+
+*Scheduler hygiene re-read, nothing touched.* Exactly 4 jobs show `[paused]`, all outside this
+line and all long-standing: **B2003 finish watch**, **Tool-eval full after B2003** and
+**gh-inbox-watch** (unchanged since 2026-11-05), plus **contour pair done → publish + next pair**
+(disabled 2026-11-08, consistent with the frozen hard line). None is a PUB-line job, and resuming
+operator-paused jobs is owner-only, so none was touched. The two hard-era `every 5m` watchers
+("Mac v2.2 full after v2.1", "P2005 paired full 2.1→2.2 watch") stay enabled and fired `ok` this
+afternoon. The daily 03:00 docs-freshness failure keeps its tick-83 attribution
+(`docs_policy.py --daily` run against the 03:00 dirty tree; the same step passes on the synced
+tree) and was not "fixed" by committing in-flight work.
+
+*Nothing published moved:* no digest row, percent, verdict, answer byte, result-doc number, bank
+file, manifest pin or contour stamp changed (hard line stays frozen at `stable-hard-0.0.2.56`);
+no leg was started, stopped, duplicated or discarded, so `LEG-INCIDENTS.md` gains no entry — the
+wrong-machine reading never started a leg and is recorded above as provenance, per the tick-82
+pattern. Zero model and zero cloud calls this tick.
+
+**Next in force:** unchanged and empty — the endpoint box needs owner relief before any new local
+arm (its swap is now fully consumed: 0 of 8191 MiB free); the remaining ladder rows
+(Terminal-Bench / SWE-bench Verified / GAIA-lite) need an owner decision to open; the Grok line
+stays closed by owner decision 2026-11-12.
