@@ -76,6 +76,14 @@ the verdict; a dropped key in that form and an empty value still exit 1). Thresh
 file carry the measurements that set them. The gate
 registers no contour feature and moves no published byte.
 
+Since 2026-11-13 the gate also reads two optional readings the producer emits from one `/health`
+body: `health_loaded` (the `"loaded"` field) and `engine_serve_procs` (how many `basalt --serve`
+processes exist). A 200 response is not a model — measured that morning, the gate answered GO twice
+while a config-ladder restart had left the wrapper answering `"loaded": false` with no engine child
+(see `LEG-INCIDENTS.md`, 2026-11-13 09:55). Present and false is NO-GO; absent is a `(coverage)` note
+and an unchanged verdict, because the readings stored before the change were never fed the rule; a
+non-boolean flag is an input gap. `harness/pub_preflight_test.py` now runs 41 checks.
+
 ## Publication-completeness census (2026-11-12, zero model calls)
 
 Every shipped public arm was re-scored from its shipped answer bytes with the pinned checker, and
@@ -6257,3 +6265,98 @@ entry.
 **Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00 UTC
 (first attempt on the repaired precondition) and one fresh preflight reading before any owner-gated
 local leg.
+
+---
+
+## Tick 108 — 2026-11-13 09:55 CET: the endpoint was being re-tuned under this line, and the preflight gate was blind to it
+
+*Nothing was launched and no benchmark byte moved. This tick's only repo changes are tooling: the
+local-leg gate learned to read whether a model is actually loaded, plus its contract test and the
+incident record.*
+
+**Queue state first.** `systemctl --user list-units 'parb-pub-*' --no-legend` is empty and the
+bracketed transport counts (`pub_bench_cloud`, `pub_bench_run`, `gate_run`) are 0 in a standalone
+call — zero legs, zero endpoints reserved. The only `running` row in the executions DB is this tick
+(`288a66f93167`, workdir this clone); no sibling instance of this brief. The two frozen-line legacy
+jobs (`f23cf5d48e11`, `a808c7f205a6`) completed their 09:00–09:02 ticks with their launch-blocker
+markers in place, as on every prior tick.
+
+*What actually happened on the endpoint box, read rather than inferred.* A foreign campaign has been
+re-tuning the serving engine all day: `p2005_v4_ab.sh` (22:19) → `v5` (22:40) → `v6` (04:07) →
+`v7` (08:59) → `v8` (from 09:21), each arm restarting the serve. `v7` is the VRAM-window ladder the
+ops line published this morning as `c92dd50` ("16 → 20 → max GiB — decode 104.6 → 143.7 → 186.7 t/s",
+live config now `vram-reserve-mib 512`, and the live `/health` and process flags confirm 512/42). The
+`v8` arm runs a **different engine build** (Basalt 0.3.3 in a separate worktree) and its first attempt
+failed to load (`serve-033.log`: an error naming the vision companion binary). Between ~09:21 and
+09:30 there was **no engine child on the box at all** while `serve.server` kept answering `/health`
+with HTTP 200. `keep-up.sh` logged exactly one restart line ever (2026-11-08), so this churn is not
+the watchdog: it is the campaign, and the engine's own lifecycle wrapper respawns the child.
+
+*The consequence for this line, and it is a real one.* The preflight gate answered **GO at 09:03 and
+09:28** on that endpoint. `health_code=200` proves an HTTP listener, not a loaded model. Worse, the
+producer's engine pick (largest-RSS `bin/basalt` match) landed on the wrapper — whose argv contains
+`--engine-bin …/bin/basalt` — so the 09:28 file reported `engine_rss_mib=516` where the warm engine
+runs ~57 718 MiB: RSS/state/pcpu rules were describing the wrong process, so no threshold tuning
+could have caught it. A leg launched on that GO would have burned its whole budget against a dead
+engine. Fixed this tick (tooling only, no contour stamp, no published byte): the producer now reads
+`/health` once and emits `health_loaded` + `engine_serve_procs` and selects the engine by
+`basalt --serve`; the gate treats them as optional-but-binding (false → NO-GO, absent → verdict
+unchanged plus a `(coverage)` line, so the 51 pre-fix readings are never re-judged retroactively, and
+a non-boolean flag is an input gap). `harness/pub_preflight_test.py` 30 → **41 checks green**, with
+the 09:28 bytes as the non-vacuity control: same numbers keep their GO without the flag, turn NO-GO
+with it. Proof on live bytes at 09:55 (a v8 arm mid-restart, engine 9 s old at 3 644 MiB):
+`PREFLIGHT NO-GO … reports "loaded": false`, exit 3. The incident is recorded in `LEG-INCIDENTS.md`.
+
+*Fifty-second reading; nineteen GO.* Census run unshielded per file with the exit captured before
+anything else prints: **52 files = 19 GO / 31 NO-GO / 2 input-gap** (+3 files, +2 GO, +1 NO-GO from
+tick 107's 49/17/30/2), and exactly **1** reading carries the loaded flag — this tick's own. That new
+09:55 reading is a NO-GO, not a GO: the endpoint is inside the campaign and is **not launchable for
+this line right now**, independent of any owner gate. The two non-empty sibling `.err` files are still
+the 2026-11-11 pair, so no new input gap. The engine-RSS watch that ticks 104–105 closed at
+57 718 MiB is now void: that process family was replaced by the ladder, and RSS since then has read
+36 566 → 516 (wrapper) → 3 644 → 36 306 MiB as arms come and go.
+
+*The shared branch moved by one foreign commit, then synced.* `c92dd50` (the ops VRAM-window ladder,
+authored 09:08:23 in this same clone) was picked up by fast-forward; working tree clean, `git fsck`
+quiet, `git ls-remote origin main` equals `HEAD`. GitHub Actions at that SHA: `build`,
+`tests (3.11)`, `static-qa`, `json-schema-qa`, `devsecops`, `secret-scan`/`gitleaks`, `reproduce`,
+`dependency-policy`, `report-build-status` and `pages` all `completed`/`success`
+(`release-asset-validation` skipped).
+
+*Gates at the synced head.* Five PUB gates green unshielded: `pub_arms_index.py --check` drift 0;
+`pub_derived_percent_check.py` 42 derived percents recomputed from shipped bytes (digest citations 44,
+doc citations 188, uncovered 0), 0 findings; `pub_grok_cell_check.py` 9 documents, 0 findings, the
+in-force sentence read from the pin (`suspended by owner decision 2026-11-12 (no resume date)`) and 1
+superseded sentence rejected; `pub_superseded_cell_check.py` 9 documents, 0 findings;
+`pub_digest_row_check.py` 49 rows, 0 findings (26 name a contract, 23/23 legacy exceptions used).
+`secret_scan.py --strict` exit 0 with `top_files: []`. `pub_grok_resume_check.py --as-of 2026-11-13`
+captured unshielded: 22 checks, `NO-GO — do not spend quota`, exit **3**, the record line still
+`182 ids were never asked … VOID, the line is cancelled, this is not a queue`; the IFEval partial
+reads `stored 359 rows / 359 ok / sha256-16 01c1ee0b6e7f6d5d`, resumable by id, zero credit, zero
+published percent.
+
+*The daily-docs error the brief expects is still a pre-fix capture.* Its only retained execution row
+is `2026-11-13T03:00:18+01:00` and its capture names the old call site
+`run(..., "scripts/qa/docs_policy.py", "--daily")` (line 96 of that tree) dying on
+`README status date is stale: 2026-11-11 is 2 days old` — exactly the self-lock tick 101 found. The
+repair `7b9a208` landed 03:39:33, 39 minutes after that fire; the current file calls `--push` at line
+106, and the next fire (2026-11-14 02:00 UTC) is the first attempt on fixed bytes. `failure_streak:
+10` is the cumulative scheduler counter, not ten runs today (one row retained).
+
+*Owner surface read (nothing to act on).* The freshest repo activity is issue **#25**, the repository
+consistency audit (owner checkpoints 07:37 UTC), whose direction forbids altering frozen banks,
+results or scores without specific approval — a docs-audit line with its own writer, not a public-line
+launch order. #41 (PARB design) last moved 2026-11-12 06:10 and #56 is the P1004 tensorless campaign.
+Nothing lifts the Grok cancellation of 2026-11-12, and nothing opens the three owner-gated ladder rows
+(Terminal-Bench / SWE-bench Verified / GAIA-lite). The queue stays empty by decision, not starvation.
+
+**Verdict:** unchanged on the scoreboard, corrected on the instrument. Nine in-force sets still carry
+bare + contour matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12, SimpleBench
+is closed as unpinnable, the remaining ladder rows are owner-gated. Zero model calls, zero cloud calls,
+zero benchmark bytes moved. The endpoint is inside a foreign re-tuning campaign and is currently NO-GO
+for any local leg, so a future owner-gated leg needs a fresh reading on the new engine build, not the
+GO streak this line has been quoting.
+
+**Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00 UTC
+(first attempt on the repaired precondition), and one fresh `health_loaded=true` reading before any
+owner-gated local leg — now a flag the gate enforces, not a judgement call.

@@ -156,6 +156,40 @@ def main() -> int:
     ck(rc == 1 and "INPUT GAP" in out,
        f"a dropped key in the one-line shape must fail closed, got exit {rc}: {out}")
 
+    # The loaded flag (2026-11-13): a config-ladder restart on the endpoint box killed the engine
+    # child while the serve.server wrapper kept answering HTTP 200 with "loaded": false, and this
+    # gate answered GO at 09:03 and 09:28 on exactly those bytes. health_code==200 proves a
+    # listener, not a model.
+    live0928 = {
+        "mem_total_mib": 61953, "mem_available_mib": 58884,
+        "swap_total_mib": 8191, "swap_free_mib": 7187, "swap_used_mib": 1004,
+        "engine_state": "S", "engine_pcpu": 0.0, "engine_rss_mib": 516,
+        "gpu_util_pct": 0.0, "gpu_power_w": 7.82,
+        "load1": 0.27, "health_code": 200, "foreign_legs": 0,
+    }
+    rc, out = run(live0928)
+    ck(rc == 0, f"a pre-fix reading with no loaded flag keeps its verdict (no retro-active rule), "
+                f"got exit {rc}: {out}")
+    ck("(coverage)" in out, "an uncovered reading must say so in the audit trail")
+    rc, out = run(dict(live0928, health_loaded="false", engine_serve_procs=0))
+    ck(rc == 3, f"the same bytes WITH the loaded flag must NO-GO, got exit {rc}: {out}")
+    ck('"loaded": false' in out, "the NO-GO must name the loaded flag")
+    ck("basalt --serve" in out, "the NO-GO must name the missing engine process")
+    rc, out = run(variant(health_loaded="false"))
+    ck(rc == 3 and '"loaded": false' in out,
+       f"a loaded=false model must NO-GO even with every other reading healthy, got {rc}: {out}")
+    rc, out = run(variant(health_loaded="true", engine_serve_procs=1))
+    ck(rc == 0, f"loaded=true with one engine process must GO, got exit {rc}: {out}")
+    ck("(coverage)" not in out, "a fully covered reading must not print a coverage warning")
+    rc, out = run(variant(engine_serve_procs=0))
+    ck(rc == 3 and "launcher" in out,
+       f"engine_serve_procs=0 must NO-GO and name the wrong-process trap, got {rc}: {out}")
+    rc, out = run(variant(health_loaded="maybe"))
+    ck(rc == 1 and "not a boolean" in out,
+       f"an unparseable loaded flag must be an input gap, got exit {rc}: {out}")
+    rc, out = run(variant(engine_serve_procs="n/a"))
+    ck(rc == 1, f"an unreadable engine_serve_procs must exit 1, got {rc}")
+
     if FAILED:
         print(f"PUB PREFLIGHT TEST: {CHECKS - len(FAILED)}/{CHECKS} FAILED:")
         for f in FAILED:

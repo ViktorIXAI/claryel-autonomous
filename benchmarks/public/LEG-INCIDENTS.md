@@ -363,3 +363,39 @@ what a future tick reads before arming anything quota-bearing.
   anywhere in the output, and `VOID` on the record line. 33 resume checks, 0 failures.
 * Credit: zero Grok calls before or after; the chain unit has been inactive since 06:42:49 and the
   operator marker still blocks every launcher and the cloud runner.
+
+## 2026-11-13 09:55 CET — the local-leg preflight answered GO on an endpoint with no model loaded; zero legs launched, fixed the same tick
+
+No leg and no benchmark byte moved. The defect is in the gate that exists to stop a leg, so it is
+recorded here next to the other guard failures a future tick must read before arming anything.
+
+* What happened on the endpoint box. An operator config-ladder campaign (`p2005_v4_ab.sh` …
+  `p2005_v8_ab.sh`, one engine restart per arm: v6 at 04:07, v7 at 08:59, v8 from 09:21) stopped the
+  `basalt --serve` engine child at ~09:21 while the `serve.server` lifecycle wrapper stayed up. From
+  09:21 to 09:30 `/health` answered **HTTP 200 with `"loaded": false, "loading": false`** — a listener,
+  not a model. `keep-up.sh` did not relaunch it during that window (its own rules: exit 0 on 200).
+* What the gate said. `scripts/pub_preflight.py` answered **GO** at 09:03 and again at 09:28. The
+  09:28 file is the clean evidence: `health_code=200`, `engine_rss_mib=516`, `engine_state=S`,
+  `engine_pcpu=0.0`, swap 7 187 MiB free — every rule green on a box whose model was not serving.
+* A second defect sat underneath the first. The untracked producer picks "the largest-RSS
+  `bin/basalt` match", and the wrapper's argv carries `--engine-bin …/bin/basalt`, so with the engine
+  child gone the pick landed on the **wrapper**: the per-process readings (RSS 516 MiB against a warm
+  engine at 57 718 MiB, state, pcpu) were describing the wrong process, not a dying one. A rule tuned
+  on RSS or process state cannot see this at all.
+* Why it matters in money. A leg launched on that GO would spend its whole call budget against a dead
+  engine and produce the harness's known instant-row signature (`tok=0`, empty answer), then a partial
+  arm publishes nothing. That is the exact failure the preflight rule was created for.
+* Fix (tooling, same tick, no contour stamp, no published byte). The producer now reads `/health` once
+  and emits two new readings, `health_loaded` and `engine_serve_procs`, and selects the engine by
+  `basalt --serve` instead of any `bin/basalt` match. The gate treats them as optional-but-binding:
+  present and false → NO-GO, absent → the verdict is unchanged and the report prints a
+  `(coverage)` line, because the 51 readings stored before this change cannot be re-judged by a rule
+  they were never fed. A non-boolean `health_loaded` is an input gap, never a pass.
+  `harness/pub_preflight_test.py` went 30 → 41 checks: the exact 09:28 bytes keep their old GO with no
+  flag and turn NO-GO the moment the flag is added (non-vacuity on real numbers), plus tampers for
+  `engine_serve_procs=0`, an unparseable flag and an unreadable count.
+* Proof on live bytes at 09:55, while a v8 arm was mid-restart: `health_loaded=false`,
+  `engine_serve_procs=1`, engine process 9 s old at 3 644 MiB — the gate now answers
+  `PREFLIGHT NO-GO: /health answered 200 but reports "loaded": false`, exit 3, where the pre-fix gate
+  said GO.
+* Credit: zero model calls, zero cloud calls, zero discarded files, no leg ever started on a bad GO.

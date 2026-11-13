@@ -41,6 +41,26 @@ N seconds apart: pcpu = 100 * (d(utime+stime) / CLK_TCK) / N. The thresholds the
 this is the semantics of the number the gate must be fed (that day the NO-GO stood on swap free 0 MiB
 with `so=100` pages/s swapped out, which is an instantaneous reading).
 
+Two OPTIONAL readings close a class the `health_code == 200` rule cannot see — measured 2026-11-13,
+this gate answered GO twice (09:03, 09:28) while the endpoint had NO engine child at all:
+
+    health_loaded=true|false      the `"loaded"` field of the same /health body
+    engine_serve_procs=N          how many `basalt --serve` engine processes exist
+
+An operator config-ladder campaign on that box (`p2005_v4..v8_ab.sh`, one restart per arm) stopped the
+engine child at ~09:21 while the `serve.server` LIFECYCLE wrapper stayed up, so `/health` kept
+answering HTTP 200 with `"loaded": false, "loading": false` — a 200 that proves an HTTP listener, not
+a serving model. The same event broke the reader's own process pick: selecting the largest-RSS
+`bin/basalt` match landed on the launcher (whose argv carries `--engine-bin .../bin/basalt`), so
+`engine_rss_mib=516` with state `S` and pcpu `0.0` — every per-process rule read a healthy-looking
+number off the wrong process. A leg launched on that GO would have burned its whole call budget
+against a dead engine (the harness's known `tok=0` / instant-row signature).
+
+Semantics kept deliberately narrow: when either optional key is PRESENT it is binding (a false
+`health_loaded` or `engine_serve_procs=0` is NO-GO); when it is ABSENT the verdict is unchanged and the
+report prints a coverage line, because the 51 readings stored before this change cannot be re-judged
+by a rule they were never fed. A non-boolean `health_loaded` is an input gap, never a pass.
+
 Usage:
     python3 scripts/pub_preflight.py READINGS.TXT
 
@@ -71,6 +91,8 @@ REQUIRED = (
     "load1", "health_code", "foreign_legs",
 )
 FLOATS = ("engine_pcpu", "gpu_util_pct", "gpu_power_w", "load1")
+BOOL_TRUE = ("true", "1", "yes")
+BOOL_FALSE = ("false", "0", "no")
 
 
 KEY_VALUE = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)=\s*(\S+)")
@@ -138,8 +160,39 @@ def main() -> int:
             return 1
 
     reasons: list[str] = []
+
+    # Optional loaded flag (2026-11-13): HTTP 200 is not a serving model. Measured twice that
+    # morning (09:03, 09:28) a config-ladder restart left the serve.server WRAPPER up with
+    # "loaded": false and NO engine child, and a gate that only reads health_code answered GO.
+    # Absent = NOT COVERED (the pre-fix readings cannot be re-judged by a rule they were never
+    # fed); present = binding; unparseable = input gap, never a guess.
+    loaded_flag = None
+    if "health_loaded" in vals:
+        flag = vals["health_loaded"].strip().lower()
+        if flag in BOOL_TRUE:
+            loaded_flag = True
+        elif flag in BOOL_FALSE:
+            loaded_flag = False
+        else:
+            print(f"PREFLIGHT INPUT GAP: health_loaded={vals['health_loaded']!r} is not a boolean "
+                  "(true/false) — the loaded flag is never guessed.")
+            return 1
+    serve_procs = None
+    if "engine_serve_procs" in vals:
+        try:
+            serve_procs = int(vals["engine_serve_procs"])
+        except ValueError:
+            print("PREFLIGHT INPUT GAP: unreadable number(s): engine_serve_procs")
+            return 1
+
     if int(vals["health_code"]) != 200:
         reasons.append(f"/health answered {vals['health_code']}, not 200")
+    if loaded_flag is False:
+        reasons.append('/health answered 200 but reports "loaded": false — no model is serving '
+                       "(the lifecycle wrapper survives an engine-child death and keeps answering)")
+    if serve_procs is not None and serve_procs < 1:
+        reasons.append("no `basalt --serve` engine process on the box: engine_state/pcpu/rss in this "
+                       "reading describe the launcher, not the model")
     if int(vals["swap_free_mib"]) < SWAP_FREE_MIN_MIB:
         reasons.append(
             f"swap free {vals['swap_free_mib']} MiB of {vals['swap_total_mib']} MiB "
@@ -158,6 +211,15 @@ def main() -> int:
     print("endpoint readings:")
     for k in REQUIRED:
         print(f"  {k:<18} {vals[k]}")
+    for k in ("health_loaded", "engine_serve_procs"):
+        if k in vals:
+            print(f"  {k:<18} {vals[k]}")
+    if loaded_flag is None or serve_procs is None:
+        print("  (coverage) this reading carries no "
+              + "/".join(k for k, v in (("health_loaded", loaded_flag),
+                                        ("engine_serve_procs", serve_procs)) if v is None)
+              + " — a 200 alone cannot prove a model is loaded; the live producer emits both since "
+                "2026-11-13, so this file predates that fix.")
     if reasons:
         print("PREFLIGHT NO-GO:")
         for r in reasons:
