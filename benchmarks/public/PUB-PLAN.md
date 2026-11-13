@@ -7056,3 +7056,69 @@ repaired on `main` (streak-breaking fire expected tomorrow).
 `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
 without an outer redirect; engine stability still the binding constraint while the tuning campaign
 cycles (capacity is no longer one); daily-docs fire 2026-11-14 02:00 UTC.
+
+## Tick 117 — 2026-11-13 16:29 CET: scoreboard unmoved — fifth GO, the engine's longest hold reaches 2 h 17 min (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place, the tree clean,
+`git ls-remote origin main` equals `HEAD` (`f4bbb9b`), so the publish invariant of tick 97 holds.
+The only `running` row in `~/.hermes/cron/executions.db` is this tick's own fire (16:25:19) — no
+sibling instance in the clone.
+
+**Standing reads.** A fresh preflight reading at 16:29 (61st stored): **PREFLIGHT GO**, gate re-run
+unshielded `exit=0` — `health_loaded=true`, `engine_serve_procs=1`, `foreign_legs=0`, swap
+54 022 MiB free of 65 535, `engine_state=S`, `engine_pcpu=0.0` sampled over 6 s,
+`engine_rss_mib=56 707` (warm engine), `gpu_util_pct=0` at 27.77 W — the main-brain traffic that
+filled the tick-115/116 readings had quieted — `load1=13.33`. The wrapper ran bare, no outer
+redirect; no reading burned.
+**Stored-reading census:** **61 files = 27 GO / 32 NO-GO / 2 input-gap** (+1 file and +1 GO against
+tick 116's 60/26/32/2; the quarantined 14:27 `.collided` reading stays outside the glob). The queue
+in force is empty, so the GO authorizes nothing.
+
+**Machine-state attribution: the same engine process for 2 h 17 min — the day's longest hold keeps
+growing.** Engine pid 10597 (up 14:12:51, the second direct ops restart tick 114 attributed; argv
+`basalt-033/bin/basalt --serve … --resident-budget-gib 46 --max-context 196 608`) answers `/health`
+loaded at 55.2 GiB RSS. `keep-up.log` still records one restart today (13:07:49); no
+`p2005_v*_ab.sh` process runs (newest campaign script v10). New observation: the box's own uptime
+read 3 h 22 min at 16:29, i.e. a host boot at ~13:07 — the same minute as the single keep-up line,
+so that line coincided with a reboot, not only an engine kill; still attributed ops-campaign
+machine state, zero legs live, so no `LEG-INCIDENTS.md` entry (tick-110/113/114/116 precedent).
+
+**Gates at the working head.** Six checks green unshielded: arms index drift 0; 42 derived percents
+recomputed from shipped bytes; grok-cell 9 docs / 0 findings; superseded-cell 9 docs / 0 findings;
+digest rows 49 / 0 findings (23/23 legacy exceptions used); `secret_scan --strict` exit 0.
+
+**Grok line: still closed by the owner decision, re-proven not assumed.**
+`pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks, **NO-GO — do not spend quota**, exit 3,
+VOID record line intact. IFEval partial byte-intact and identical to tick 116's record:
+**359 rows / 359 unique / 359 `finish=ok` / 0 empty**, SHA-256-16 `01c1ee0b6e7f6d5d`, resume set
+182 ids `ifeval-286`..`ifeval-3757`. Zero credit, zero published percent, resumable by id only on a
+fresh owner reversal.
+
+**P0 parity audit re-parsed from the digest table this tick:** 49 percent rows across the nine
+in-force sets — every set carries bare `qwen3.8-flash-next-iq3_s-basalt`,
+`+contour-0.0.2.56` (matched shape) and `gpt-6.1-sol`; the six `pub-repair-*` keep-best rows sit in
+the four sets that have a validator (ifeval, bfcl, livecodebench, humaneval); `grok-4.7` appears
+only in completed arms. SimpleBench stays closed as unpinnable.
+
+**CI at the pushed head: everything green.** At `f4bbb9b` — `contour self-tests`, `hard-v6 scoring
+contracts`, `secret-scan` and `pages build and deployment` all completed/success.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** The two hard-bank-era jobs stay enabled
+and reported-not-touched; the one-shot marker re-read on the literal path
+(`~/.hermes/mac-v22full-launch.state`, 26 bytes, `2026-11-02T14:05:30+01:00`, unchanged). The
+two-clone hazard checked, not assumed: watchdog clone detached HEAD, **empty staged index**, its
+dirty entries (`hardware/os-snapshots/*`, three untracked `benchmarks/public/raw/*`) belong to the
+hardware line and were left untouched. Daily-docs: nothing has fired since tick 116's repair; the
+next fire (2026-11-14 02:00 UTC) starts from the passing precondition.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by owner
+decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model calls,
+zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint read a fifth **GO**
+and the engine's single-process hold reached 2 h 17 min (the day's longest, GPU idle 27.8 W between
+readings while main-brain traffic served earlier).
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; engine stability still the binding constraint while the tuning campaign
+cycles (capacity measured clear at tick 116); daily-docs fire 2026-11-14 02:00 UTC.
