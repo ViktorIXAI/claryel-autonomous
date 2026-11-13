@@ -6799,3 +6799,81 @@ survive to end-of-leg today.
 `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg — and while the ops
 restart cadence continues, engine stability (not the GO bit) is the binding constraint; the daily-docs
 fire at 2026-11-14 02:00 UTC.
+
+## Tick 114 — 2026-11-13 14:30 CET: scoreboard unmoved — second GO of the afternoon, and the box swapped its engine a third time today (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place, the tree clean,
+`git ls-remote origin main` equals `HEAD` (`a938273`), so the publish invariant of tick 97 holds.
+
+**Standing reads.** A fresh preflight reading at 14:28 (58th stored): **PREFLIGHT GO** —
+`health_loaded=true`, `engine_serve_procs=1`, `foreign_legs=0`, swap 16 MiB used of 65 535,
+`engine_state=S`, `engine_pcpu=0.0` sampled over 6 s, `engine_rss_mib=57 815` (warm engine),
+`gpu_util_pct=0` at 26.43 W, `load1=6.32`. The queue in force is empty, so the GO authorizes
+nothing. **Stored-reading census:** **58 files = 24 GO / 32 NO-GO / 2 input-gap** (+1 file and
++1 GO against tick 113's 57/23/32/2).
+
+**A producer invocation slip this tick, recorded with zero credit.** The first reading attempt
+(14:27) was destroyed by its own wrapper call: the reading script names its output file by the
+minute (`preflight-YYYYMMDD-HHMM.txt`), and the tick's call wrapped it in an outer stdout redirect
+that resolved to the *same path* in the same minute; the gate's display block (a padded report, not
+the parseable `key=value` form) then overwrote the stored readings. The GO verdict itself was real —
+the gate parsed the file before the overwrite — but re-judging the stored file yields an input gap.
+Handling: the corrupted file is kept byte-intact as `preflight-20261113-1427.txt.collided` (zero
+credit, excluded from the census glob), a clean reading was taken at 14:28, and the census was
+re-run. Operational rule for future ticks: run `bash preflight.sh` **without an outer stdout
+redirect** — it writes its own readings file. Zero model calls, zero legs, zero published bytes.
+
+**Machine-state attribution: a third engine swap today, with zero legs live.** `keep-up.log` still
+records one restart this afternoon (`13:07:49`); tick 113 attributed pid 3491 (that keep-up path)
+and the ~13:51 direct ops swap to pid 6253 (`--resident-budget-gib 54`). This tick's 14:28 GO is
+answered by a **new engine, pid 10597, up at 14:12:51** — a second direct ops restart (no keep-up
+line) back on `--resident-budget-gib 46`, and carrying a knob this line has never measured against:
+**`--max-context 196 608`, down from the 262 144 every published arm ran on** (`--vram-reserve-mib
+500`, 6 144 MiB / 6-slot conversation cache, `--kv int8`, `--vision` kept). The tuning campaign is
+still cycling one restart per arm. Not a `LEG-INCIDENTS.md` entry: zero legs of this line were live
+and zero partial files exist (tick-110/113 precedent). Two consequences on record: a leg launched at
+this GO would again have been cut mid-series, so engine stability — not the GO bit — stays the
+binding constraint; and before any future owner-gated local leg, the plan's largest prompts must be
+size-checked against the **live** `--max-context`, since the capacity window just moved.
+
+**Gates at the working head.** Five PUB gates green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings, 23/23 legacy exceptions used.
+`secret_scan --strict` exit 0. `pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks,
+**NO-GO — do not spend quota**, exit 3; VOID record line intact; the Grok IFEval partial still
+`stored 359 rows / 359 ok / sha256-16 01c1ee0b6e7f6d5d` — bytes intact, zero credit, zero
+published percent.
+
+**CI at the pushed head: everything green, no flake.** At `a938273` — `build`/`contour
+self-tests`, `contracts`/`hard-v6 scoring contracts`, `secret-scan`, `devsecops`, `tests`,
+`reproduce`, `static-qa` all success and GitHub Pages `deploy` success (tick 112's re-run holds).
+
+**Owner-surface read (nothing to act on).** Issue #25 moved at 14:22:53 CET — comment 181, another
+independent docs-audit checkpoint citing this head; still that line's own writer, not a launch order
+for this line. Issue #10 unchanged since its 10:22 UTC Grok-monitor withdrawal comment. The two
+hard-bank-era jobs stay enabled and reported-not-touched: `Mac v2.2 full after v2.1` inert only via
+its one-shot launch marker (re-read: single `launched:` line at 2026-11-02 14:05:30, unchanged);
+`P2005 paired full 2.1→2.2 watch` last run 14:30 ok, still a 5-minute ssh round-trip onto the
+endpoint box. The local daily `GitHub docs freshness` job sits at failure_streak 10 (03:00 fire,
+cause recorded at tick 113 as a stale README status date), next fire 2026-11-14 02:00 UTC; this
+tick ran the job's own script read-only — exit 0, "nothing to push (HEAD == upstream)" — so
+tomorrow's fire is expected green; reported per the machine note, not repaired by this line.
+
+**P0 parity audit** (from tick 113's digest-table read, nothing moved since): all nine in-force
+sets carry bare local / `contour-0.0.2.56` matched-shape / codex rows; grok cells without a percent
+read "cancelled by owner decision 2026-11-12 (no resume date)"; SimpleBench stays closed as
+unpinnable.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by
+owner decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model
+calls, zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint read a
+second **GO** (14:28), while the box restarted its engine a third time today (14:12:51, new
+`--max-context 196 608`) — attributed machine state, zero legs live — and one preflight reading was
+burned by a wrapper/redirect path collision, quarantined with zero credit.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; engine stability remains the binding constraint while the restart cadence
+continues; the daily-docs fire at 2026-11-14 02:00 UTC.
