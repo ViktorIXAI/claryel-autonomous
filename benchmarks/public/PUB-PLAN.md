@@ -5789,3 +5789,88 @@ never build a commit message with nested here-documents in one shell line, and r
 `5be2855` in the tree and the digest gate green at this HEAD, a green run there closes the
 nine-failure streak; if it fails, its capture must be read for the real `FAIL` token rather than
 repeating the "dirty tree" sentence.
+
+## Tick 101 — 2026-11-13 03:45 CET: the docs job fired and failed a **tenth** time, now to a
+**new, self-locking cause** — repaired by tooling commit and recovered end-to-end this tick;
+**ninth consecutive PREFLIGHT GO** (23rd reading, swap free down to 412 MiB — watch); five pub
+gates + secret scan green; Grok gate NO-GO exit 3; zero legs, zero calls
+
+Nothing was launched: `systemctl --user list-units 'parb-pub-*'` is empty and
+`pgrep -f 'scripts/pub_bench_(run|cloud).py'` finds nothing; `foreign_legs=0` in the endpoint
+reading confirms it at the box.
+
+*Twenty-third reading; ninth consecutive GO.* Readings (wrapper run over the repo-standard ssh
+session against the endpoint box, gate unshielded, true exit **0**): `swap_free_mib=412` /
+`swap_used_mib=7 779` (of 8 191 — columns balance exactly at the total),
+`mem_available_mib=17 295`, `engine_rss_mib=56 310`, `engine_state=S`, `engine_pcpu=0.0`
+(6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=7.89`, `load1=0.10`, `health_code=200`.
+Engine `pid=1142697` age `04:38:42` — the **same** process for seven consecutive line readings.
+**Watch:** swap free fell 3 141 → 412 MiB since tick 100 (engine RSS +716 MiB); still GO, but a
+local leg would start with almost no swap headroom, and the machine note says swap saturation can
+restart the engine mid-leg. Stored-reading census: **43 files = 11 GO / 30 NO-GO / 2 input-gap**
+(the +1 GO is this tick's reading; exit captured per file, never through a pipe).
+
+*Producer misfire this tick, fail-closed and quarantined with zero credit.* The first invocation of
+the untracked reading wrapper ran **bare on this host** instead of over ssh: the host answered
+`mem_total_mib=31 238`, a junk `swap_total_mib=294 911`, blank `engine_state`/`gpu_*`
+(`nvidia-smi: command not found`), and the gate answered **INPUT GAP exit 1** — "a missing reading
+is never healthy". The file was renamed `preflight-20261113-0330.txt.host-local-err` so it leaves
+the census, and the correct reading came from the ssh invocation above. Zero model calls involved;
+no leg exists, so `LEG-INCIDENTS.md` gains no entry. Lesson kept: the wrapper is a **remote**
+producer — invoke it as `ssh <box> 'bash -s' < preflight_read.sh`, never bare.
+
+*The docs job — today's fire read from the capture, a new failure class, and its repair.* The
+standing sentence in the brief ("fails because the working tree is dirty at 03:00") is now **doubly
+stale**: the pin class was removed by `5be2855` (tick 100), and today's `03:00:19 CET` run
+(failure_streak **10**, `state=scheduled`, not paused) died **earlier than either** prior class —
+at `refresh_docs_status.py:96`, the `docs_policy.py --daily` precondition, with the single finding
+`README status date is stale: 2026-11-11 is 2 days old` (capture
+`2026-11-13_03-00-18`). That is a **mechanical self-lock**: the daily job is the only writer of the
+README status marker, the 11-11/12 runs died *later* (inside `static_checks`) so the marker aged
+past the one-day tolerance, and from then on the gate refuses every future run **before** it can
+reach the marker write — the job can never heal itself.
+
+Repair landed as tooling (`7b9a208`, allowed under the contour freeze — no stamp, no benchmark
+byte): the job's precondition is now the **push-mode** policy, so structure, links and
+forbidden-phrase checks stay fail-closed while the "at least once per day" policy is enforced by
+the job *writing* the marker rather than by refusing to run once it is late. The contract test
+grew checks 7–8: the call site must name `--push` and never `--daily`, and a non-vacuity fixture
+proves the date finding is real and fires **only** in daily mode (5-day-old marker fails
+`fresh=True`, passes `fresh=False`) — 13 checks PASS; full `static_checks` green at this head
+(75 commands, exit 0); `docs_policy --push` PASS; `docs_policy --daily` still exits 1 on the then-
+stale marker **by design** (it stays the external watchdog). Recovery was then proven
+**end-to-end**, not argued: the operator-scheduled wrapper itself was re-run at 03:44 with the
+clean tree — **exit 0**, marker refreshed to `Status checked: 2026-11-13`, marker commit `195c9d1`
+("Daily docs freshness check: 2026-11-13") pushed on attempt 1 and verified on `origin/main`. The
+next scheduled fire (2026-11-14 02:00 UTC) is the first attempt that can turn the scheduler's own
+`failure_streak` over; expected green, but it stays next tick's read, not a claim here.
+
+*Gates at the synced head.* Five PUB gates green unshielded: `pub_arms_index.py --check` drift 0;
+`pub_derived_percent_check.py` 42 derived percents, 0 findings; `pub_grok_cell_check.py` 9
+documents, 0 findings; `pub_superseded_cell_check.py` 9 documents, 0 findings;
+`pub_digest_row_check.py` 49 rows, 0 findings. `secret_scan.py --strict` exit **0**.
+`pub_grok_resume_check.py` exit **3**, 22 checks, `RESUME GATE: NO-GO — do not spend quota` —
+the owner cancel of 2026-11-12 is still in force. CI at the tick-start HEAD `716d22e`: all check
+runs `completed/success` (`gitleaks`, `static-qa`, `contracts`, `tests (3.11)`, `tests (3.13)`,
+`dependency-policy`, `json-schema-qa`, `reproduce`, `build`, `deploy`, `report-build-status`;
+`release-asset-validation` skipped).
+
+*Repo integrity.* `git ls-remote origin main` == `HEAD` == `716d22e` at tick start,
+`main...origin/main` = `0 0`, `git fsck --connectivity-only --no-dangling` prints nothing. The
+second clone (`HEAD 9f72ef0`, behind main) has an **empty index** — its `M
+hardware/os-snapshots/latest.json` and untracked snapshot/raw files belong to the hardware-snapshot
+agent that works there, not to this line; the staged-deletion hazard is not live. Legacy jobs
+`f23cf5d48e11` / `a808c7f205a6` report `ok` (03:25/03:26), drain guard `9a12508f8a69` `ok` at
+03:20; neither launched anything.
+
+**Verdict:** the public line stays closed for everything in force — nine sets each carry bare +
+contour matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12, SimpleBench is
+closed as unpinnable, the remaining ladder rows are owner-gated. This tick moved no benchmark byte
+and made zero model calls; it fixed the daily-docs deadlock (tooling only) and recovered the
+marker. The endpoint holds a nine-reading GO streak on one stable engine process with swap free
+down to 412 MiB — watch that column before any owner-gated local leg starts.
+
+**Next in force:** unchanged and empty. Read the docs job's next scheduled fire (2026-11-14 02:00
+UTC): with the self-lock gone and the marker current, it should close the streak; if it fails, its
+capture must be read for the real `FAIL` token. Swap-free headroom is the one endpoint column to
+re-read before any queued leg.
