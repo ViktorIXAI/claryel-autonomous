@@ -96,6 +96,45 @@ the ceiling, which is not survivable once real sessions with long contexts run o
 If a future real workload pushes the peak past 47 GiB, the step down is `resident-budget-gib: 30` (peak 37.2 GiB,
 86 t/s median) rather than touching the VRAM fence.
 
+## The 61 GiB ceiling: the ladder runs into a wall at 42
+
+The owner raised the host-RAM allowance to ~61 GiB, so the ladder went 42 (control) → 50 → 55 → 61 with the 16 GiB
+VRAM fence unchanged. Result: **the ladder is flat from 42 up — the box self-limits long before 61.**
+
+| RAM budget | peak host RAM | decode warm, median | decode warm, best | prefill 878 | max swap-in / s | total W | €/1 M tokens |
+|---|---|---|---|---|---|---|---|
+| 42 GiB | 46.2 GiB | 105.6 | 109.2 | 526 | 0.2 MiB | 228 | 0.150 € |
+| 50 GiB | 46.3 GiB | 106.0 | 108.2 | 572 | 0.0 MiB | 227 | 0.149 € |
+| 55 GiB | 46.2 GiB | 105.7 | 108.1 | 569 | 1.3 MiB | 231 | 0.152 € |
+| 61 GiB | 46.2 GiB | 104.6 | 108.1 | 568 | 0.0 MiB | 236 | 0.157 € |
+
+The engine says why, in its own words, when asked for 61:
+
+```
+[server] warning: FileExpertSource: --resident-budget-gib 61.00 is more than the RAM has room for
+           (55.51 GiB available minus 12 GiB headroom and other limits)
+[server] warning: model 51.1 GiB, free VRAM + RAM 48.5 GiB: the rest is read from the SSD while generating (slow)
+[server] ram      floor 7.0 GiB (3.0 margin + 4.0 cache), 2.7 GiB experts on SSD, RAM copy <= 36.0 of 55.5 GiB
+[server] warning: 6% of the experts (2.7 GiB) are only in the file: decode reads them from the SSD and may be much slower
+```
+
+* the pack that participates in decoding is **51.1 GiB**, not the 82 GiB file size;
+* this box can give at most **48.5 GiB of residency** — the 16 GiB VRAM window plus what RAM leaves after the
+  engine's own floor and headroom — so the requested 61 GiB is refused as a number and resolves to the same tier
+  as 42: peak RAM identical (46.2 GiB), decode identical within noise (104–109 t/s), prefill identical (568–572 t/s);
+* the last **2.7 GiB — 6 % of the experts — never becomes resident**; decode reads them from NVMe every token, and
+  that is the wall. No amount of RAM ceiling removes it while the VRAM fence stands at 16 GiB.
+
+Long-context behaviour with this best configuration (27 553-token prompts): prefill **3 262–3 290 t/s**, decode
+**84.5–87.7 t/s** — a 27 K prompt is processed in 8.4 s. Zero swap thrash at every tier (max swap-in 1.3 MiB/s at
+budget 55, 0 at 61).
+
+Watts here are higher than in the 48 GiB section (≈228 W vs ≈200 W) because the bench window now includes the
+27 K-prompt prefill bursts, which run the card at up to 199 W; per-million cost is therefore an upper bound.
+
+**Live pick: `resident-budget-gib: 42`** — the smallest budget that reaches the wall, 15 GiB under the 61 GiB
+ceiling. For a real 48 GiB machine the pick stays 36 GiB.
+
 ## Ceiling, stated plainly
 
 With our 82 GiB IQ3_S pack, the 16 GiB VRAM envelope tops out at **≈97 t/s median decode (104 best) when 36 GiB of host RAM is allowed for the expert tier**, and at ≈83 t/s if the box is held to 32 GiB,
@@ -116,3 +155,4 @@ This dated clarification preserves the original 12 November measurements and int
 * **GPU power ranking:** the original 32 GiB-envelope table reports `base` GPU power **88.4 W** and `spec 4 + resident-cpu-experts` **89.9 W**. Therefore the prose assertion that the latter has the *lowest GPU draw of the two* is incorrect by **1.5 W**; the `base` arm has the lower reported average GPU draw. The related assertion that the chosen arm *leaves the card cooler* is not established by these power figures alone; comparative temperature telemetry is not presented in that table. The best single decode run (87.1 versus 83.2 t/s) remains a recorded observation, not evidence of a statistically significant advantage.
 * **Historical versus later envelope:** the opening 32 GiB **whole-host** constraint and the original `resident-budget-gib: 22` configuration describe the initial pass. The later 48 GiB simulation and its 36 GiB expert-tier live pick are a **subsequent configuration**, not an additional arm satisfying the original 32 GiB whole-host limit. The original live JSON above must not be interpreted as a verified snapshot of the later live setting.
 * **Verification boundary:** calculations are checked against the published table only. No host access, replay of raw logs, temperature validation or independent GitHub Actions run was performed for this addendum. Evidence: this document's two tables and the versioned v3/v4/v5 raw-log references. Audit tracking: https://github.com/ViktorIXAI/claryel-autonomous/issues/25.
+Raw 61 GiB ladder: `docs/data/p2005-16gb-20261112/v6-raw.log`, driver `scripts/p2005_v6_ab.sh`.
