@@ -111,6 +111,43 @@ def main() -> int:
     check("main returns push_with_retry()", "return push_with_retry()" in src)
     check("no bare push call left in the tool", 'run("git", "push"' not in src)
 
+    # 7. self-lock pin (measured 2026-11-13 03:00 CET, job capture
+    #    2026-11-13_03-00-18: the run died at the docs_policy call with
+    #    "README status date is stale: 2026-11-11 is 2 days old"). The daily docs
+    #    job is the only writer of that marker, so its precondition must be the
+    #    push-mode policy; gating the refresher on --daily self-locks permanently
+    #    once the marker is more than one day old.
+    check("the job gates on docs_policy --push, not --daily",
+          '"scripts/qa/docs_policy.py", "--push"' in src and '"--daily"' not in src)
+
+    # 8. non-vacuity for check 7 (module fixture, zero repo writes): the date
+    #    finding is real and fires ONLY in fresh/daily mode — a 5-day-old marker
+    #    fails check_readme(fresh=True) and passes check_readme(fresh=False).
+    #    Without this control, swapping --daily for --push could hide a checker
+    #    that never looks at the date at all.
+    import datetime as _dt
+    import tempfile
+    spec = importlib.util.spec_from_file_location("docs_policy_probe", HERE / "docs_policy.py")
+    dp = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dp)
+    with tempfile.TemporaryDirectory() as td:
+        tdp = Path(td)
+        (tdp / "README.md").write_text(
+            "# Claryel Autonomous Harness\n"
+            f"Status checked: {_dt.date.today() - _dt.timedelta(days=5)}\n"
+            "Current version\nHeadline results\nHow to use\n"
+            "Documentation policy\nSource and citation policy\n",
+            encoding="utf-8")
+        dp.ROOT = tdp
+        fresh_fails: list[str] = []
+        push_fails: list[str] = []
+        dp.check_readme(fresh=True, failures=fresh_fails)
+        dp.check_readme(fresh=False, failures=push_fails)
+        check("daily mode really flags a 5-day-old marker",
+              any("stale" in f for f in fresh_fails), str(fresh_fails))
+        check("push mode really ignores the marker date",
+              not any("stale" in f for f in push_fails), str(push_fails))
+
     print(f"DOCS PUSH TEST: {FAILS} failed" if FAILS else "DOCS PUSH TEST: PASS")
     return 1 if FAILS else 0
 

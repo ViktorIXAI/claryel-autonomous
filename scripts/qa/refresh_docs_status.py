@@ -93,7 +93,17 @@ def main() -> int:
         print("README has no `Status checked: YYYY-MM-DD` marker")
         return 1
 
-    run(sys.executable, "scripts/qa/docs_policy.py", "--daily")
+    # The precondition is the PUSH-mode policy, not --daily. The date-staleness
+    # finding is exactly what this job exists to repair, so gating the repair on
+    # it self-locks after any red streak: measured 2026-11-13 03:00 CET (job
+    # `GitHub docs freshness daily`, capture 2026-11-13_03-00-18) the run died at
+    # this call with "README status date is stale: 2026-11-11 is 2 days old",
+    # because the 11-11/12 runs died later (row_count_census pin, removed by
+    # 5be2855) and never refreshed the marker — after which no future run can
+    # ever reach the marker write again. Structure, links and forbidden-phrase
+    # checks stay fail-closed; the "at least once per day" policy is enforced by
+    # this job writing the marker daily, not by refusing to run once it is late.
+    run(sys.executable, "scripts/qa/docs_policy.py", "--push")
     env = os.environ.copy()
     env["SAH_LINK_MODE"] = "offline"
     subprocess.run([sys.executable, "scripts/qa/static_checks.py"], cwd=ROOT, check=True, env=env)
