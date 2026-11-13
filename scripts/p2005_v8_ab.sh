@@ -7,13 +7,18 @@ BIN=$HOME/basalt-033/bin/basalt
 PYBIN=$HOME/basalt/.venv/bin/python
 LOG=$HOME/basalt-033/serve-033.log
 CFG=/tmp/v8_cfg.json
+# Privacy fix (pub-line tick 109, 2026-11-13): the base config used to hard-code the
+# model path as an absolute path carrying the box's local username, which breaks
+# AGENTS.md rule 1 and reds the repo secret scan (rule absolute_local_path). $HOME
+# resolves to the same directory, so the written config bytes are unchanged.
+MODEL_ABS=$HOME/basalt/model/Qwen3.8-FN-IQ3_S.basalt
 MODEL=qwen3.8-flash-next-iq3_s-basalt
 base_cfg() {
-cat > $CFG <<'JSON'
+cat > $CFG <<JSON
 {
   "version": 2,
   "server": {"host": "0.0.0.0", "port": 8080},
-  "models": [{"model": "/home/claryel/basalt/model/Qwen3.8-FN-IQ3_S.basalt", "alias": "qwen3.8-flash-next-iq3_s-basalt",
+  "models": [{"model": "$MODEL_ABS", "alias": "qwen3.8-flash-next-iq3_s-basalt",
               "gpu": "0", "kv": "int8", "max-context": 262144}],
   "engine": {"resident-experts": true, "expert-cache": "auto", "prefill": "auto",
              "vram-reserve-mib": 512, "resident-budget-gib": 42, "resident-cpu-experts": true,
