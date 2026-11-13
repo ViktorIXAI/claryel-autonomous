@@ -6639,3 +6639,82 @@ the owner.
 **Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
 `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; the daily-docs fire at
 2026-11-14 02:00 UTC.
+
+## Tick 112 — 2026-11-13 13:00 CET: scoreboard unmoved — the endpoint NO-GOs under live main-brain load while its engine restarts on the tuned config; one GitHub Pages infra flake re-run green (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place, the tree clean,
+`git ls-remote origin main` equals `HEAD` (`80ea69d`), so the publish invariant of tick 97 holds.
+
+**Standing reads.** A fresh preflight reading at 13:00 (56th stored): `health_loaded=true`,
+`engine_serve_procs=1`, `foreign_legs=0`, swap 4 713 MiB used of 65 535, `engine_pcpu=0.0`
+sampled over 6 s — but `engine_state=D` (uninterruptible I/O), `gpu_util_pct=99` at 116.58 W and
+`load1=15.15`. The gate verdict is **PREFLIGHT NO-GO** ("engine in uninterruptible I/O:
+thrashing"). The queue in force is empty, so the gate refused what nobody asked for — no leg is
+blocked by it.
+
+**Machine-state attribution: the endpoint engine restarted between ticks with zero legs live.**
+Ticks 109–111 read the same engine pid (age 54:09 at 12:19); this tick reads a new pid at age
+14:30, i.e. the engine came back at ~12:45 CET — the ops config-tuning campaign that has been
+restarting the box's engine through the day (the 09:55 `LEG-INCIDENTS.md` entry records a
+v6→v8 ladder campaign, one restart per arm; no such script is running now). What matters for
+this line: the live process carries the tuned working flags (`--vram-reserve-mib 500`,
+`--resident-budget-gib 46`, `--resident-cpu-experts`, `--vision`, conversation cache
+6 144 MiB / 6 slots, `--kv int8`, `--max-context 262144`) and the serve log shows a healthy
+decode after the restart (prefill 483 t/s at an 86.1 % cache hit, decode 112 t/s, draft-accept
+67 %). Not a `LEG-INCIDENTS.md` entry: zero legs of this line were live on the endpoint and zero
+partial files exist — machine state, attributed, per the tick-110 precedent.
+
+**Stored-reading census** run unshielded with the exit captured before anything prints:
+**56 files = 22 GO / 32 NO-GO / 2 input-gap** (+1 file and +1 NO-GO against tick 111's
+55/22/31/2 — the new NO-GO is this tick's 13:00 reading); the two non-empty sibling `.err`
+files are still dated 2026-11-11.
+
+**Gates at the working head.** Five PUB gates green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings, 23/23 legacy exceptions used.
+`secret_scan --strict` exit 0. `pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks,
+**NO-GO — do not spend quota**, exit 3; VOID record line intact; the Grok IFEval partial still
+`stored 359 rows / 359 ok / sha256-16 01c1ee0b6e7f6d5d` — bytes intact, zero credit, zero
+published percent.
+
+**CI finding at the pushed head: every repo-owned job green; GitHub's automatic Pages deploy
+flaked once on an OIDC token timeout and was re-run green.** At `80ea69d` — `build`,
+`contracts`, `dependency-policy`, `gitleaks`, `json-schema-qa`, `report-build-status`,
+`reproduce`, `static-qa`, `tests (3.11)` and `tests (3.13)` all success
+(`release-asset-validation` skipped); the scheduled `docs-freshness` CI workflow ran green at
+11:15 UTC. The only red is GitHub's own `pages build and deployment` run: its deploy step failed
+inside `actions/deploy-pages@v5` fetching an OIDC id-token (`Request timeout: …/idtoken/…`) — a
+GitHub-hosted infrastructure timeout, no repo byte involved (the run before it, at the
+previous head, deployed green 46 minutes earlier, and this tick's first GitHub API reads timed
+out the same way before a retry succeeded). The failed run was re-run once: **attempt 2 success**,
+Pages serves from the pushed head again. The re-run moved no repo byte and retried no benchmark
+leg — there is no leg to retry on this line.
+
+**Owner-surface read (nothing to act on).** Issue #25 moved again at 11:27 UTC (12:27 CET, after
+tick 111's read) — still the repository-wide docs-consistency audit line with its own writer, not
+a launch order for this line. Issue #10 unchanged since its 10:22 UTC Grok-monitor withdrawal
+comment. The two hard-bank-era jobs stay enabled and stay reported-not-touched (the tick-111
+hazard note stands unchanged): `Mac v2.2 full after v2.1` — every 5 min, last run 13:02 ok, still
+inert only because its one-shot launch marker dated 2026-11-02 14:05 exists (read again this
+tick, single `launched:` line unchanged); `P2005 paired full 2.1→2.2 watch` — `*/5`, last run
+13:05 ok, still a permanent 5-minute ssh round-trip onto this line's endpoint box. The local
+daily `GitHub docs freshness` job sits at failure_streak 10, next fire 2026-11-14 02:00 UTC —
+reported per the machine note, not repaired by this line.
+
+**P0 parity audit** (from tick 111's digest-table read, nothing moved since): all nine in-force
+sets carry bare local / `contour-0.0.2.56` matched-shape / codex rows; grok cells without a
+percent read "cancelled by owner decision 2026-11-12 (no resume date)"; SimpleBench stays closed
+as unpinnable.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by
+owner decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model
+calls, zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint answered
+NO-GO under live main-brain load while its engine restarted on the tuned working config
+(attributed, no leg live), and one GitHub Pages deploy infra flake was re-run green.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg (this afternoon the
+box must also settle out of the state-D / 99 % GPU main-brain load before a GO is even readable);
+the daily-docs fire at 2026-11-14 02:00 UTC.
