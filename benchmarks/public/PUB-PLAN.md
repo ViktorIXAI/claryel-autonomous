@@ -7530,3 +7530,75 @@ ops tuning campaign read **0 processes** for a fifth time today.
 without an outer redirect; engine stability relaxing (campaign idle five times) with the new
 caution that this box now samples state-D under its ~13 GiB swap load — a GO is still only
 per-reading; daily-docs fire 2026-11-14 02:00 UTC.
+
+## Tick 123 — 2026-11-13 19:57 CET: scoreboard unmoved — the tenth GO of the afternoon lands on a foreign dashboard commit that passes every pub gate (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place (`GROK-CANCELLED`,
+121 B, 2026-11-12 06:54:20, intact). The only `running` row in `~/.hermes/cron/executions.db`
+is this cron itself (`288a66f93167`). **This tick's tree did not start equal to `origin/main`:**
+the remote was one commit ahead — a foreign `d34d8e0 docs(dashboard): identify Claryel and label
+Nov 1 charts as archival (#25)`, one file (`dashboard/index.html`, +5/−2), a descendant of this
+line's tick-122 commit. The working tree was clean and `main..origin/main` held exactly that one
+commit, so the line moved onto it with `git merge --ff-only` rather than pushing over it; every
+gate below was then run on the merged head.
+
+**Standing reads: the tick-122 state-D sample did not reproduce and the engine hold reaches 5 h
+45 min.** The 19:57 reading (67th stored): engine pid 10597 age 05:44:50 — the same single
+process since 14:12:51 that ticks 114–122 tracked, state `S`, `engine_rss_mib=57 625` (warm),
+swap 51 633 MiB free of 65 535, GPU 0 %/26.6 W, `health_loaded=true`, `engine_serve_procs=1`,
+`foreign_legs=0`, `engine_pcpu=0.0` (6 s sample). Gate re-run unshielded: **PREFLIGHT GO,
+exit=0** — the tenth GO of the afternoon. On the box: ops tuning campaign processes **0**
+(sixth idle read today), `keep-up.log` still records one restart today, box uptime 6 h 51 min.
+The wrapper ran bare, no outer redirect; no reading burned.
+
+**Stored-reading census** (the gate re-run mechanically over the whole series at the merged
+head): **67 files = 32 GO / 33 NO-GO / 2 input-gap** (+1 file and +1 GO against tick 122's
+66/31/33/2; today's subset alone: **29 files = 26 GO / 3 NO-GO / 0 input-gap**). Zero legs live,
+so still no `LEG-INCIDENTS.md` entry.
+
+**The foreign commit was verified, not assumed.** All five pub gates green unshielded at
+`d34d8e0`: arms index drift 0; 42 derived percents recomputed from shipped bytes (digest
+citations 44, doc citations 188, uncovered 0); grok-cell 9 docs / 0 findings with the in-force
+sentence read from the pin; superseded-cell 9 docs / 0 findings; digest rows 49 / 0 findings
+(23/23 legacy exceptions used). `secret_scan --strict` exit 0 — the dashboard diff carries no
+local path, LAN address or credential token. CI at `d34d8e0`: `secret-scan`, `contour
+self-tests`, `hard-v6 scoring contracts` and `pages-build-deployment` completed/success,
+`devsecops` still in progress at the read.
+
+**Digest table byte-stable** (sha256-16 `9d5ac7c3a60fb9dd`, last touched by `ad8d8c0`): the
+per-set row census reproduces tick 122 exactly — gsm8k 6, arc-easy 5, arc-challenge 5,
+gpqa-diamond 5, humaneval 8, ifeval 5, mmlu-pro 4, livecodebench 7, bfcl 4 — 49 rows, every
+in-force set carrying bare / contour-0.0.2.56 matched-shape / codex, the six `pub-repair-*`
+keep-best rows in the four sets with a validator. SimpleBench stays closed as unpinnable.
+
+**Grok line: still closed by the owner decision, re-proven not assumed.** Resume gate
+unshielded: 22 checks, **NO-GO — do not spend quota, exit=3**, VOID record line intact ("182 ids
+were never asked … this is not a queue"). The IFEval partial re-verified from its own stored
+bytes, identical to ticks 117–122: **359 rows / 359 `finish=ok` / sha256-16 `01c1ee0b6e7f6d5d`**,
+resume set 182 ids `ifeval-286`..`ifeval-3757`. The three completed Grok arms byte-exact against
+the pin with resume sets of 0 ids (gpqa-diamond 198/198 `c479109822f388a5`, humaneval 164/164
+`161ddf5b1956ab13`, mmlu-pro 500/500 `5731d720f13ef8a5`). Zero credit, zero published percent,
+resumable by id only on a fresh owner reversal.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** `Mac v2.2 full after v2.1`
+(`f23cf5d48e11`) fired 19:56:19, status ok — inert behind its one-shot launch marker, re-read on
+the literal path (26 B, `2026-11-02T14:05:30+01:00`, unchanged); `P2005 paired full 2.1→2.2 watch`
+remains a permanent 5-minute ssh round-trip onto this line's endpoint box, reported not touched.
+The two-clone deletion hazard checked, not assumed: the watchdog clone sits at a detached HEAD
+with an empty staged index. Daily-docs: nothing has fired since the tick-116 repair; the next
+fire (2026-11-14 02:00 UTC) starts from the passing precondition.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by
+owner decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model
+calls, zero cloud calls, zero published benchmark bytes moved. What moved: `origin/main` took a
+**foreign dashboard commit ahead of this line** (`d34d8e0`, `dashboard/index.html`) — taken by
+fast-forward and passed **every pub gate and the secret scan unshielded** at that head — and the
+endpoint re-read **GO** after tick 122's transient state-D sample (engine single-process hold
+**5 h 45 min** and growing, ops campaign idle for a sixth read).
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; the state-D caution stays open — not reproduced this read, but the box
+still carries ~13.9 GiB of swap against a 57.6 GiB-RSS engine, and a GO is only per-reading;
+daily-docs fire 2026-11-14 02:00 UTC.
