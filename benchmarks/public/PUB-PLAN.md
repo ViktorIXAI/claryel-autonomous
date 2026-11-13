@@ -6877,3 +6877,71 @@ burned by a wrapper/redirect path collision, quarantined with zero credit.
 `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
 without an outer redirect; engine stability remains the binding constraint while the restart cadence
 continues; the daily-docs fire at 2026-11-14 02:00 UTC.
+
+## Tick 115 — 2026-11-13 15:15 CET: scoreboard unmoved — the engine holds its longest stable window of the day, third GO (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place, the tree clean,
+`git ls-remote origin main` equals `HEAD` (`ead042c`, the parallel agent's `CHG-001 P1006`
+passport commit stacked on tick 114's head), so the publish invariant of tick 97 holds.
+
+**Standing reads.** A fresh preflight reading at 15:08 (59th stored): **PREFLIGHT GO**, gate
+re-run unshielded `exit=0` — `health_loaded=true`, `engine_serve_procs=1`, `foreign_legs=0`,
+swap 8 012 MiB used of 65 535, `engine_state=S`, `engine_pcpu=0.0` sampled over 6 s,
+`engine_rss_mib=56 601` (warm engine), `gpu_util_pct=0` at 27.50 W, `load1=9.94`. The wrapper was
+run bare with no outer redirect (tick 114's rule) and no reading was burned this tick.
+**Stored-reading census:** **59 files = 25 GO / 32 NO-GO / 2 input-gap** (+1 file and +1 GO
+against tick 114's 58/24/32/2, re-run over the whole glob excluding the quarantined `.collided`
+file). The queue in force is empty, so the GO authorizes nothing.
+
+**Machine-state attribution: the same engine process for 56 minutes — the day's longest hold.**
+Engine pid 10597 (up 14:12:51, the second direct ops restart tick 114 attributed) is still the
+process answering `/health` at 15:08; its cmdline carries `--resident-budget-gib 46` and
+`--max-context 196 608` **twice** (a duplicated flag from the tuning campaign, recorded as machine
+state, zero legs live so no `LEG-INCIDENTS.md` entry). `keep-up.log` still records one restart
+today (`13:07:49`). The campaign's script set now reaches `p2005_v10_ab.sh` (mtime 10:15) — v9 at
+09:53 — but no further engine process appeared after 14:12:51. The serve log's tail shows live
+**main-brain traffic** between readings: two ~90k-prompt-token requests (`pp=88 243`/`pp=90 204`,
+`end=stop`) decoding at 105–110 t/s with prefill 850–880 t/s — the box serving the operator's
+assistant, expected on a shared endpoint, zero foreign benchmark legs (`foreign_legs=0`). The
+capacity note from tick 114 stands: the live `--max-context` is 196 608 against the 262 144 every
+published arm ran on, so any future owner-gated local leg gets its largest plan prompt size-checked
+against the live value first.
+
+**Gates at the working head.** Five PUB gates green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings, 23/23 legacy exceptions used.
+`secret_scan --strict` exit 0. `pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks,
+**NO-GO — do not spend quota**, unshielded `exit=3` (the pipe-trap of the skill read before
+reporting); VOID record line intact; the Grok IFEval partial still `stored 359 rows / 359 ok /
+sha256-16 01c1ee0b6e7f6d5d` — bytes intact, zero credit, zero published percent.
+
+**CI at the pushed head: everything green.** At `ead042c` — `contour self-tests`, `secret-scan`,
+`hard-v6 scoring contracts`, `devsecops` (green at 15:14 after ~70 min in progress) and GitHub
+Pages `deploy` all success.
+
+**Owner-surface read (nothing to act on).** The two hard-bank-era jobs stay enabled and are
+reported-not-touched: `Mac v2.2 full after v2.1` (every 5 min) completed 15:08, inert only via its
+one-shot launch marker, re-read on the literal path (`~/.hermes/mac-v22full-launch.state`, 26
+bytes, `2026-11-02T14:05:30+01:00`, unchanged); `P2005 paired full 2.1→2.2 watch` completed 15:05,
+still a 5-minute ssh round-trip onto the endpoint box. The local daily `GitHub docs freshness` job
+sits at failure_streak 10 unchanged (today's 03:00 fire predates the precondition repair), next fire
+2026-11-14 02:00 UTC, expected green per tick 114's read-only run of its own script; reported per
+the machine note, not repaired by this line.
+
+**P0 parity audit** (digest-table read, nothing moved since tick 114): all nine in-force sets carry
+bare local / `contour-0.0.2.56` matched-shape / codex rows; grok cells without a percent read
+"cancelled by owner decision 2026-11-12 (no resume date)"; SimpleBench stays closed as unpinnable.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by
+owner decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model
+calls, zero cloud calls, zero published benchmark bytes moved. What moved: the engine kept one
+process for 56 minutes — the longest hold of a day that saw six restarts — and the endpoint read a
+third **GO**, main-brain traffic serving between readings.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg, and the live
+`--max-context 196 608` size check; `bash preflight.sh` without an outer redirect; engine
+stability still the binding constraint while the tuning campaign cycles; the daily-docs fire at
+2026-11-14 02:00 UTC.
