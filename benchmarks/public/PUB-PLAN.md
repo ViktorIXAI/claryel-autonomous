@@ -5754,9 +5754,11 @@ in either capture is **`FAILED: row_count_census`** inside `harness/pub_digest_r
 fixtures on scratch copies. That mutable pin was removed by `5be2855` (2026-11-12 04:47), the fix
 tick 99 already pointed at. Re-run at this HEAD: **22 checks, 0 failed, exit 0** — so today's
 `02:00 UTC = 03:00 CET` fire is the first attempt with both the digest-row-count pin and the
-superseded-cell pin gone. Whether it goes green now turns only on tree cleanliness at fire time, and
-this tick's own commit lands within a minute of that fire; the outcome is next tick's read, not a
-claim here. No in-flight file was committed to influence it.
+superseded-cell pin gone. The other half of the old failure mode is also absent at fire time: this
+tick's commit landed at **02:53:58 CET**, about six minutes before that fire, so the tree the docs
+job reads is clean (no in-flight file was committed to buy that — the status block was finished first
+and gated first, then committed). Whether today's run goes green is still next tick's read from the
+job's own capture, not a claim here.
 
 *Legacy jobs still armed against the frozen hard-bank line (owner decision, untouched).*
 `f23cf5d48e11` "Mac v2.2 full after v2.1" (every 5 min) stays a no-op while
@@ -5772,6 +5774,16 @@ closed as unpinnable, and the remaining ladder rows (Terminal-Bench / SWE-bench 
 are owner-gated. The endpoint has held an eight-reading GO streak on one stable engine process, so a
 queued owner-gated leg starts within one wrapper call. Zero model calls, zero cloud calls; the only
 file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
+
+*Commit-message defect this tick, its own making, repaired without a rewrite.* The first commit of
+this tick was created from a nested here-document and the message landed as the literal line
+`echo "COMMIT_EXIT=$?"; git log --oneline -1` (`b923ea5`, the file content correct, the message
+garbage), and that commit was pushed before the message was read back. Per this line's rule the
+shared branch is not rewritten: an empty `--allow-empty` record commit `29011b9` carries the real
+message beside it, and both refs are verified on `origin/main`. No benchmark byte moved in either
+commit, so no pin, digest row or published percent is affected. Lesson kept where it can fire again:
+never build a commit message with nested here-documents in one shell line, and read
+`git log --oneline -1` **before** the push, not after.
 
 **Next in force:** unchanged and empty. Read the docs job's `03:00 CET` fire next tick — with
 `5be2855` in the tree and the digest gate green at this HEAD, a green run there closes the
