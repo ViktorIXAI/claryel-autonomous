@@ -135,9 +135,41 @@ Watts here are higher than in the 48 GiB section (≈228 W vs ≈200 W) because 
 **Live pick: `resident-budget-gib: 42`** — the smallest budget that reaches the wall, 15 GiB under the 61 GiB
 ceiling. For a real 48 GiB machine the pick stays 36 GiB.
 
+## The other direction: opening the card window (20 GiB, then maximum)
+
+The owner then asked for the opposite experiment — raise the VRAM allowance from 16 GiB to 20 GiB and then to the
+maximum the card gives, and measure the ceiling. Same model, same `resident-cpu-experts`, RAM budget 42 GiB, RAM
+ceiling 61 GiB, agent kept off the box (one 20K-context probe per window is the only extra request in each window).
+
+| окно видеопамяти | reserve | GPU занято | decode тёплый, медиана / лучший | decode холодный | decode на 27.5K контексте | hit experts | пик ОЗУ машины | всего Вт | €/1 M токенов |
+|---|---|---|---|---|---|---|---|---|---|
+| 16 ГиБ | 8079 | 16089 МиБ | 104.5 / 108.5 | 79.5 | 85.9 | 75 % | 46.7 ГиБ | 211 | 0.140 € |
+| 20 ГиБ | 3983 | 20185 МиБ | 143.6 / 152.0 | 93.5 | 114.2 | 88 % | 42.7 ГиБ | 231 | 0.111 € |
+| макс 23.9 ГиБ | 512 | 23659 МиБ | 186.7 / 188.7 | 111.9 | 137.0 | 94 % | 39.4 ГиБ | 231 | 0.086 € |
+| макс 23.9 ГиБ | 512 (ОЗУ-бюджет 30) | 23655 МиБ | 168.6 / 183.3 | 97.9 | 137.8 | 94 % | 38.0 ГиБ | 222 | 0.091 € |
+
+The card window is the whole story on this machine. 16 → 20 GiB adds **+37 %** decode (104.6 → 143.7 t/s median)
+and pushes the expert-cache hit rate from 75 % to 87 %; 20 → 23.9 GiB adds another **+30 %** (143.7 → 186.7) and
+lifts the hit rate to 94 %, at which point only **1.3 GiB of experts stays on SSD**. Long-context decode moves with
+it: on a cached 27.5K-token prompt 86 → 114 → 137–149 t/s.
+
+Money moves the same way, because the watts barely change: 211 → 231 → 231 W total, so the cost per million tokens
+falls **0.140 → 0.111 → 0.086 €**. The widest window is the fastest and the cheapest at once. And contrary to the
+16 GiB case it is also the *lightest* on host RAM: the GPU takes what RAM would otherwise hold, so peak machine RAM
+drops 46.7 → 42.7 → 39.4 GiB, which puts the fastest configuration comfortably inside the 47 GiB budget of a 48 GiB
+machine as well.
+
+Cutting the RAM budget back to 30 GiB at the wide window costs ~10 % decode (168.6 median, one 115 t/s outlier) and
+saves only 1.4 GiB of RAM — not worth it, so 42 GiB stays.
+
+**Live configuration after this pass: `vram-reserve-mib: 512` + `resident-budget-gib: 42` +
+`resident-cpu-experts: true`.** Verified after restart (27 s to load): GPU **23 659 / 24 463 MiB** at 168 W and
+52 °C, peak host RAM **38.6 GiB** of the 61 GiB ceiling, swap 1.0 GiB with no thrash, decode 188.5–190.8 t/s warm
+(109.7 cold), 137.8 and 149.1 t/s on cached 27.5K prompts, expert-cache hit 93–94 %.
+
 ## Ceiling, stated plainly
 
-With our 82 GiB IQ3_S pack, the 16 GiB VRAM envelope tops out at **≈97 t/s median decode (104 best) when 36 GiB of host RAM is allowed for the expert tier**, and at ≈83 t/s if the box is held to 32 GiB,
+With our 82 GiB IQ3_S pack, the 16 GiB VRAM envelope tops out at **≈97 t/s median decode (104 best) when 36 GiB of host RAM is allowed for the expert tier**, and at ≈83 t/s if the box is held to 32 GiB — but opening the card window to its maximum triples that: ≈187 t/s median (191 best) at 23.7 GiB of VRAM,
 against 145 t/s when the card is allowed its full 24 GiB and 187 t/s when RAM is also unbounded. The mechanism is
 unchanged from the memory-ceiling study: it is the expert-cache hit rate, 74 % here versus 93 % with a full card.
 No engine knob closes that gap — the missing 100 t/s live in the 8 GiB of card and 14 GiB of RAM that the
@@ -156,3 +188,4 @@ This dated clarification preserves the original 12 November measurements and int
 * **Historical versus later envelope:** the opening 32 GiB **whole-host** constraint and the original `resident-budget-gib: 22` configuration describe the initial pass. The later 48 GiB simulation and its 36 GiB expert-tier live pick are a **subsequent configuration**, not an additional arm satisfying the original 32 GiB whole-host limit. The original live JSON above must not be interpreted as a verified snapshot of the later live setting.
 * **Verification boundary:** calculations are checked against the published table only. No host access, replay of raw logs, temperature validation or independent GitHub Actions run was performed for this addendum. Evidence: this document's two tables and the versioned v3/v4/v5 raw-log references. Audit tracking: https://github.com/ViktorIXAI/claryel-autonomous/issues/25.
 Raw 61 GiB ladder: `docs/data/p2005-16gb-20261112/v6-raw.log`, driver `scripts/p2005_v6_ab.sh`.
+Raw VRAM-window ladder: `docs/data/p2005-16gb-20261112/v7-raw.log`, driver `scripts/p2005_v7_ab.sh`.
