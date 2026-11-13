@@ -6467,3 +6467,98 @@ by masking the local username in three foreign ops launchers with byte-identical
 preflight GO **plus** the engine-build note above (the leg's wall/energy columns are a different stack
 from the published local arms); the queued tooling item is a per-leg engine-build stamp; the daily-docs
 fire at 2026-11-14 02:00 UTC.
+
+## Tick 110 — 2026-11-13 11:32 CET: scoreboard unmoved — the pub-line leg ships its **engine-build stamp**
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place. `origin/main`
+has not moved since tick 109 (`5d630c5`), the tree was clean, and no new leg launched: the
+in-force queue has been empty since tick 109.
+
+**Standing reads.** A fresh preflight reading at 11:32 (54th stored): `health_loaded=true`,
+`engine_serve_procs=1`, engine pid 1230043 age 06:59, RSS 57 870 MiB, swap 64 504 free of
+65 535 MiB (the box's swap grew since the 8 191 MiB era; the gate re-sums the columns and
+the reading balances), GPU 0 % / 26.97 W, `engine_pcpu=0.0` sampled over 6 s. Verdict
+**PREFLIGHT GO**. The full stored-reading census, run unshielded with the exit captured
+before anything else prints: **54 files = 21 GO / 31 NO-GO / 2 input-gap** (+1 file, +1 GO
+against tick 109's 53/20/31/2); the only two non-empty sibling `.err` files are still dated
+2026-11-11.
+
+**The endpoint moved again while this line was reading it** — machine state, attributed, not
+touched. `run-serve.sh` and `basalt-config.json` were edited at 11:21 with backups
+(`*.bak-20261113-pre-vision-fix`), a `keep-up restart` line appeared at 11:24:01 (the second
+line that log ever holds), and the live engine at this reading runs `--vram-reserve-mib 500`
+where tick 109 recorded 512. The campaign belongs to the ops line; no leg of this line was
+live, so `LEG-INCIDENTS.md` gains no entry. It is the second direct confirmation that arm
+bytes cannot say which engine served them.
+
+**Queued tooling item shipped: the per-leg engine-build stamp** (tooling release — no contour
+feature, no stamp registered, no published benchmark byte moved). Tick 109's comparability
+note named the gap; this tick built it.
+
+* Every row `scripts/pub_bench_run.py` writes now carries `engine_sha256_16`: the SHA-256/16
+  of the endpoint's `/health` body read moments before that row's call. An engine swap
+  mid-leg is therefore attributable per row, not only per leg. A failed health read never
+  fails the row — the stamp is null and `engine_health_error` names the gap (an endpoint
+  outage is never charged to the model).
+* The leg writes `run-record-<arm>.json` into its out dir BEFORE its first call: model alias,
+  api netloc, temp/max_tokens, the task file's SHA-256/16, `harness_git_sha` (the pub-line
+  twin of the hard bank's build attribution), the raw `/health` body plus its hash, the
+  launcher engine note, and a `resumes` list. A resumed leg that starts against a different
+  `/health` body sets `resumed_health_changed` and prints a loud WARNING instead of
+  re-stamping the leg it started.
+* Honest boundary, stated before it is read off the tool: `/health` on this endpoint exposes
+  the service name, model alias, `max_context` and loaded state — the binary version and the
+  RAM/VRAM knobs are not visible over HTTP (no `/version` endpoint exists). The other half
+  rides on `PARB_ENGINE_NOTE`: a one-line string the go-script captures live over ssh from
+  the endpoint box at leg start (captured, never typed from memory), stored verbatim in the
+  run-record and hashed. The publisher scrub masks machine paths inside the note TEXT for
+  display; the stored hash pins the pre-masking bytes.
+* Publication: `scripts/publish_pub_bare_arm.py` gained `--run-record` — it refuses a record
+  that is not exactly one JSON line, scrubs it through the shared sanitizer and re-parses the
+  shipped copy before printing the README index line. Proven by execution on a scratch
+  fixture: `api_host`/`health_url` masked to `<LAN_IP>`, the note path to `<LOCAL_PATH>`,
+  `api_key` to `[REDACTED]`; the fixture files were removed and `arms/` stayed clean.
+* Contract test `harness/pub_run_engine_stamp_test.py` (42 checks, auto-enrolled by the
+  `harness/*test.py` glob): drives the real `main()` with a stubbed transport — zero network,
+  zero model calls. Pinned: the row hash equals the SHA-256/16 of the exact bytes at that
+  moment (non-vacuity computed in the test); a mid-leg `/health` change moves the row stamp
+  but not the leg record; a health gap keeps the row `ok`; resume semantics hold; the 13
+  pre-existing row fields (the `task_sha16` label defect included) survive untouched.
+* `scripts/pub_bench_run.py` is not MANIFEST-pinned (the pinned tool set is the five vendored
+  IFEval files plus `pub_bench_lcb.py`), so no pin moves and no published arm needs a
+  re-score. The ten pub-family harness contracts re-ran green on the merged tree
+  (43/41/22/33/9/27/34/22/34/41 checks), as did the scorer self-test and the bare-arm
+  sanitizer self-test.
+* The 2026-11-08..11 local arms stay engine-unstamped — dated ops records remain their only
+  attribution. What ships is the guarantee that no FUTURE local leg is anonymous.
+
+**Gates at the working head.** Five PUB gates green unshielded: arms index drift 0; 42
+derived percents recomputed (digest citations 44, doc citations 188, uncovered 0); grok-cell
+9 docs / 0 findings; superseded-cell 9 docs / 0 findings; digest rows 49 / 0 findings with
+23/23 legacy exceptions used. `secret_scan --strict` exit 0. `pub_grok_resume_check.py
+--as-of 2026-11-13` captured unshielded: 22 checks, **NO-GO — do not spend quota**, exit 3;
+the VOID line intact; the Grok IFEval partial still `stored 359 rows / 359 ok / sha256-16
+01c1ee0b6e7f6d5d` — bytes intact, zero credit, zero published percent.
+
+**Owner surface read (nothing to act on).** Issue #25 is still the docs-audit line (last
+moved 10:08 UTC). Issue #10 moved at 10:22 UTC by the Grok monitor bot itself — an oversight
+withdrawal consistent with the owner's 2026-11-12 Grok cancellation, not a launch order for
+this line. Nothing lifts the cancellation and nothing opens the three owner-gated ladder
+rows (Terminal-Bench / SWE-bench Verified / GAIA-lite). The daily-docs job sits at
+failure_streak 10; its 2026-11-13 03:00 fire predates the precondition repair of that
+morning, and the 2026-11-14 02:00 UTC fire is its first on fixed bytes. Reported per the
+machine note, not repaired by this line.
+
+**Verdict:** unchanged on the scoreboard — nine in-force sets still carry bare + contour
+matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12, SimpleBench
+stays closed as unpinnable, and the remaining ladder rows are owner-gated. Zero model calls,
+zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint is
+PREFLIGHT **GO** on the re-tuned 0.3.3 engine (first read after the 11:24 vision-fix
+restart), and local legs stop being engine-anonymous — per-row `/health` hashes plus a
+per-leg run-record, contract-tested.
+
+**Next in force:** unchanged and empty. Standing reads: any owner-gated local leg needs a
+fresh preflight GO **plus** the engine-build note (wall/energy columns not comparable with
+the 2026-11-08..11 arms); a launched leg should ship with `--run-record` and its launcher
+should set `PARB_ENGINE_NOTE`; the daily-docs fire at 2026-11-14 02:00 UTC.

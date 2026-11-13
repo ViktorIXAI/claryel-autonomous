@@ -10,6 +10,12 @@ contract as the contour publisher: the SAME scrub function is imported from it (
 two), answer text is never edited, and the script refuses to publish a partial arm.
 
 Usage: publish_pub_bare_arm.py <answers.jsonl> <arm-label> [--verdicts FILE] [--min-rows N]
+                               [--run-record FILE]
+
+A --run-record is the leg's own `run-record-<arm>.json` written by pub_bench_run.py since
+2026-11-13 (engine /health hash, launcher engine note, pinned task-file hash, harness git sha).
+It ships scrubbed like every other file (LAN IPs -> <LAN_IP>, machine paths -> <LOCAL_PATH>);
+without it an outsider can re-score the arm but cannot attribute the serving engine build.
 
 It prints the exact index lines for benchmarks/public/arms/README.md; the README is then updated
 from that output, never retyped.
@@ -98,6 +104,7 @@ def main():
     ap.add_argument("answers", nargs="?")
     ap.add_argument("label", nargs="?")
     ap.add_argument("--verdicts")
+    ap.add_argument("--run-record", dest="run_record")
     ap.add_argument("--min-rows", type=int, default=1)
     ap.add_argument("--tasks", action="append", default=[],
                     help="byte-pinned task file; a path token that occurs in it is upstream "
@@ -148,6 +155,18 @@ def main():
         if os.path.exists(sc):
             print("scorer's own verdict sidecar (sha1/16 over the same bytes): %s"
                   % open(sc).read().strip())
+
+    if a.run_record:
+        rrdst = os.path.join(OUT_DIR, "%s-run-record.json" % a.label)
+        rr_lines = [l for l in open(a.run_record, encoding="utf-8") if l.strip()]
+        if len(rr_lines) != 1:
+            sys.exit("REFUSING: a run-record must be exactly one JSON line, got %d "
+                     "(a hand-merged record is not admissible)" % len(rr_lines))
+        rrkept, rrmasked = publish(a.run_record, rrdst, keep)
+        json.loads(open(rrdst, encoding="utf-8").read())   # the shipped copy must parse
+        print("wrote %s lines=%d sha16=%s masked=%s"
+              % (rrdst, rrkept, sha16(rrdst), rrmasked or "nothing"))
+        outs.append((rrdst, rrkept))
 
     print("\nREADME index lines (paste verbatim):")
     for p, n in outs:
