@@ -5585,3 +5585,64 @@ push and an object store, not a leg.
 five-reading GO streak, so the owner-gated ladder rows (Terminal-Bench / SWE-bench Verified /
 GAIA-lite) could start the moment an owner decision opens them; the Grok line stays closed by owner
 decision 2026-11-12.
+
+## Tick 98 — 2026-11-13 01:35 CET: read-only status tick; **sixth consecutive PREFLIGHT GO** (20th reading, one engine process across four readings and three ticks); reading census reconciles two denominators (40 files = 8 GO / 30 NO-GO / 2 input-gap vs the line's 20-reading index) after this tick caught its own `$?` reset in a census loop; five pub gates + secret scan green at `74ec9af`; Grok gate NO-GO exit 3; zero legs, zero calls
+
+*No leg was started, stopped, duplicated or discarded — the launch queue is still empty.* Every
+in-force set (`gsm8k`, `arc-easy`, `arc-challenge`, `gpqa-diamond`, `humaneval`, `mmlu-pro`,
+`ifeval`, `livecodebench`, `bfcl`) carries bare + contour matched-shape + codex arms; grok is
+cancelled by owner decision 2026-11-12; the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified / GAIA-lite) are owner-gated. Zero model and zero cloud calls. `systemctl --user
+list-units --all 'parb-*'` is empty and no `pub_bench_run`/`pub_bench_cloud` transport is alive, so
+no second leg against the endpoint was possible or needed.
+
+*Twentieth reading; sixth consecutive GO.* Readings (wrapper run bare, gate re-run unshielded, true
+exit **0**): `swap_free_mib=3 135` / `swap_used_mib=5 056` (of 8 191 — columns balance exactly at
+the total, the tick-78 producer-column guard satisfied), `mem_available_mib=17 196`,
+`engine_rss_mib=55 594` (the ops line's 36 GiB tier), `engine_state=S`, `engine_pcpu=0.0`
+(6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=7.79`, `load1=0.00`, `health_code=200`,
+`foreign_legs=0`. The GO is a *thin* one compared with tick 93/94: swap free fell 7 096 → 7 138 →
+3 110 → 3 135 MiB, still above the 256 MiB floor, and MemAvailable is unchanged at ~17 GiB.
+*First engine stability in this series:* `engine pid=1142697` appears in the last **four** readings
+(age 14:58 at 23:11 CET → 02:29:19 at 01:26 CET), i.e. no engine cycle across three consecutive
+ticks, where the earlier series cycled the engine between almost every reading.
+
+*The census finding of this tick is a measurement-method bug caught in this tick's own tool call.*
+The first attempt to count stored readings printed `40 exit=0` — every file GO, which contradicts
+the published series. The loop built its report line as `printf "%s %s\n" "$(basename …)" "exit=$?"`:
+bash expands arguments left to right, so the command substitution ran first and reset `$?` to the
+subshell's status 0 before it was read. The corrected form captures the status into a variable
+immediately after the gate call. This is the same class already recorded twice on this line (a `tail`
+pipe masking a gate exit, an `echo` at the end of the preflight wrapper masking `$?`): **the value
+printed next to a verdict is not the verdict unless it is read before anything else runs.**
+Corrected census, all 40 stored reading files re-run through the gate: **8 GO / 30 NO-GO /
+2 INPUT GAP**, by day `2026-11-11: 2 GO / 17 NO-GO / 2 gap`, `2026-11-12: 4 GO / 13 NO-GO / 0 gap`,
+`2026-11-13: 2 GO / 0 / 0`. The 2026-11-12 line reproduces tick 96's same-day count exactly
+(4 GO / 13 NO-GO), which is what pinned the arithmetic. *Two denominators, both named:* the file
+count (40) is every reading file in the operator workspace, including runs of the same untracked
+wrapper by other jobs; this line's published reading index (20) counts only the readings taken by
+its own ticks. Neither number is the other and neither moves a published percent — no leg ever
+started on a stored reading.
+
+*Gates at the synced head.* `git ls-remote origin main` == `HEAD` (`74ec9af`) at tick start and the
+object store is fsck-clean (`0` findings) — tick 97's rule re-read before anything else, because a
+tick that does not check the remote can publish into a broken store again. Five PUB gates green
+unshielded: `pub_arms_index.py --check` index drift 0; `pub_derived_percent_check.py` 42 derived
+percents recomputed from shipped bytes, 0 findings; `pub_grok_cell_check.py` 9 documents, 0 findings;
+`pub_superseded_cell_check.py` 9 documents, 0 findings; `pub_digest_row_check.py` 49 rows, 0
+findings. `scripts/security/secret_scan.py --dir . --strict` exit **0** (the one exception list is
+the sha16-bound vendored IFEval file, unchanged). `scripts/pub_grok_resume_check.py` exit **3**,
+22 checks, `RESUME GATE: NO-GO - do not spend quota` — the cancellation is still in force and the
+marker file still blocks all three launch paths. CI at `74ec9af`: `contour self-tests`,
+`hard-v6 scoring contracts`, `devsecops`, `secret-scan` all `success`, Pages deploy `success`.
+
+*Daily docs job, read from the scheduler rather than predicted.* Its schedule is `0 2 * * *` UTC =
+03:00 CET; the last recorded run is `2026-11-12T03:02` with `exit 1`, which tick 92 attributed to
+the mutable digest-row-count pin that `5be2855` removed at 04:47 the same day, so **today's 03:00 run
+is the first attempt after that fix** — it has not run yet at this tick's time and its outcome is
+this line's to read next tick, not to assert now. Nothing this tick leaves the tree dirty: the only
+file written is `PUB-PLAN.md`, committed and pushed before the 03:00 window opens.
+
+**Next in force:** unchanged and empty — no leg is queued or admissible. The endpoint holds a
+six-reading GO streak with a stable engine, so an owner-gated ladder row could start immediately
+when opened; the Grok line stays closed by owner decision 2026-11-12.
