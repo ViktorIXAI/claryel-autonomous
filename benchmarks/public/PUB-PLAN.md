@@ -6108,6 +6108,77 @@ SimpleBench is closed as unpinnable, and the remaining ladder rows (Terminal-Ben
 Verified / GAIA-lite) are owner-gated. Zero model/cloud calls, zero benchmark bytes moved; the only
 file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
 
-**Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00 UTC,
-one fresh preflight reading before any owner-gated local leg, and the RSS/available pair as the
+**Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00
+UTC, one fresh preflight reading before any owner-gated local leg, and the RSS/available pair as the
 preflight rule it already is.
+
+---
+
+## Tick 106 — 2026-11-13 07:36 CET: routine no-move tick — **fourteenth consecutive PREFLIGHT GO**
+(48th reading, fifth on the same budget-42 engine process); `origin/main` moved by exactly one
+foreign commit and fast-forwarded; five PUB gates + secret scan green at the synced HEAD; Grok gate
+NO-GO exit 3; zero legs, zero calls
+
+Nothing was launched: `systemctl --user list-units --all 'parb-*'` is empty, the three bracketed
+`pgrep -cf` transport counts (`pub_bench_clou[n].py`, `pub_bench_ru[n].py`, `gate_ru[n].py`) each
+print 0 in a standalone call, and `foreign_legs=0` in the endpoint reading confirms it at the box.
+
+*Forty-eighth reading; fourteenth consecutive GO.* Fresh reading `preflight-20261113-0731.txt` from
+the ssh wrapper: `swap_free_mib=7 191` / `swap_used_mib=1 000` (columns balance at the 8 191 total),
+`mem_available_mib=12 543`, `engine_rss_mib=57 718`, `engine_state=S`, `engine_pcpu=0.0` (6 s sampled
+delta), `gpu_util_pct=0` at `gpu_power_w=7.86`, `load1=0.01`, `health_code=200`, `foreign_legs=0`.
+Engine `pid=1173996` age `03:19:00` — the fifth reading on the budget-42 process from the 04:12:50
+RAM-ladder rollout. `engine_rss_mib` is identical (57 718) across the 06:50 and 07:31 readings,
+which keeps tick 105's closed watch closed: warm-up to the clamp ceiling, not a leak. Stored-reading
+census run unshielded per file with the exit captured before anything else prints:
+**48 files = 16 GO / 30 NO-GO / 2 input-gap** (+1 file, +1 GO from tick 105's 47/15/30/2).
+
+*The line's own GitHub transport stuttered once and recovered.* This tick's first `git fetch` died
+with `Failed to connect to github.com port 443` after 135 s; the retry on the next call completed
+clean. Same transient class the daily-docs job's retained capture shows (`Could not resolve host:
+github.com`), no leg or quota exposed, no byte lost — recorded because the fetch result and the
+`git ls-remote` answer disagreed inside one call (the fetch had not landed yet when `ls-remote`
+answered).
+
+*Foreign commit on the shared branch, fast-forwarded.* `git log main..origin/main` names exactly one
+commit that is not this line's: `b0be2f3` "Daily self-evolution research summary 2026-11-13" — the
+daily research line's own job adding `sources/daily/2026-11-13-self-evolution.md`, zero overlap with
+`benchmarks/public/`. `main` was 0 behind / origin 1 ahead, merged `--ff-only`, and all five PUB
+gates + the secret scan were re-run unshielded at the new HEAD rather than at the pre-merge tree.
+
+*Owner surface read (nothing to act on).* The open-issue list shows no owner decision lifting the
+Grok cancellation of 2026-11-12 and none opening the three owner-gated ladder rows (Terminal-Bench /
+SWE-bench Verified / GAIA-lite); the newest activity on the PARB cards is 2026-11-12 and stays in the
+design/evaluate class, not an in-force launch order. The queue remains empty by decision, not by
+starvation.
+
+*Gates at the synced head.* `HEAD` == `origin/main` == `b0be2f3` after the fast-forward, working
+tree clean, `git fsck --connectivity-only --no-dangling` quiet. Five PUB gates green unshielded:
+`pub_arms_index.py --check` drift 0; `pub_derived_percent_check.py` 42 derived percents recomputed
+from shipped bytes, 0 findings; `pub_grok_cell_check.py` 9 documents, 0 findings;
+`pub_superseded_cell_check.py` 9 documents, 0 findings; `pub_digest_row_check.py` 49 rows, 0
+findings. `secret_scan.py --strict` exit **0** (total_findings 0, 18 pinned vendored metadata
+exceptions). `pub_grok_resume_check.py --as-of 2026-11-13` run to a file with the exit captured
+directly: 22 checks, `RESUME GATE: NO-GO — do not spend quota`, exit **3**, the record line still
+printing `182 ids were never asked … VOID, the line is cancelled, this is not a queue`.
+
+*Scheduler reads.* The only `running` row in the executions DB is this tick itself
+(`288a66f93167`, workdir this clone, started 07:27:19) — no sibling instance of this brief in the
+tree. The two frozen-line legacy jobs `f23cf5d48e11` / `a808c7f205a6` completed their 07:30–07:32
+ticks with their launch-blocker markers verified in place (`mac-v22full-launch.state` of 2026-11-02;
+`b2003-finish-watch.state/completed`), and the empty transport counts above show nothing launched.
+*Second clone* (`~/projects/strata-autonomous-harness`): detached HEAD, empty index (`git diff
+--cached` = 0 files), only the hardware-snapshot agent's unstaged `hardware/os-snapshots/latest.json`
+plus untracked snapshot and `benchmarks/public/raw/` scratch — the staged-deletion hazard is not
+live. *The daily-docs job* offers nothing new to read: its next scheduled fire (2026-11-14 02:00
+UTC) is the first attempt that can turn the scheduler's failure streak over after the 13.11
+self-lock repair.
+
+**Verdict:** unchanged — the public line stays closed for everything in force: nine sets each carry
+bare + contour matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12,
+SimpleBench is closed as unpinnable, and the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified / GAIA-lite) are owner-gated. Zero model/cloud calls, zero benchmark bytes moved; the only
+file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
+
+**Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00
+UTC and one fresh preflight reading before any owner-gated local leg.
