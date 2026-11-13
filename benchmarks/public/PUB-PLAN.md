@@ -5980,3 +5980,63 @@ only file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entr
 
 **Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00
 UTC, and one fresh preflight reading before any owner-gated local leg.
+
+## Tick 104 — 2026-11-13 06:16 CET: routine no-move tick — **twelfth consecutive PREFLIGHT GO**
+(46th reading), third reading on the same budget-42 engine process; an engine-RSS warm-up growth is
+opened as a watch (host numbers stay healthy, no parking lines); five PUB gates + secret scan green
+at the synced HEAD; Grok gate NO-GO exit 3 (real exit captured un-piped); zero legs, zero calls
+
+Nothing was launched: `systemctl --user list-units 'parb-pub-*'` is empty,
+`pgrep -f 'scripts/pub_bench_(run|cloud).py'` finds nothing, and `foreign_legs=0` in the endpoint
+reading confirms it at the box.
+
+*Forty-sixth reading; twelfth consecutive GO.* Fresh reading `preflight-20261113-0616.txt` from the
+ssh wrapper: `swap_free_mib=7 191` / `swap_used_mib=1 000` (columns balance at the 8 191 total),
+`mem_available_mib=12 524`, `engine_rss_mib=57 793` (see the watch below), `engine_state=S`,
+`engine_pcpu=0.0` (6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=7.99`, `load1=0.87`,
+`health_code=200`, `foreign_legs=0`. Engine `pid=1173996` age `02:03:40` — the third reading on the
+budget-42 process from the 04:12:50 RAM-ladder rollout. Stored-reading census run unshielded per
+file with the exit captured before anything else prints: **46 files = 14 GO / 30 NO-GO / 2
+input-gap** (+1 file, +1 GO from tick 103's 45/13/30/2).
+
+*New observation, opened as a watch (no leg is exposed to it, the queue is empty).* The reported
+`engine_rss_mib` on the budget-42 process moved **44 385 (04:18 and 05:26 readings) → 57 793
+(06:16)** in 50 min of idle time. Root read on the box over the repo-standard key (read-only probe,
+zero engine actions): the serve log carries the rollout itself — `resident-budget` 50 → 55 → 61 → 42
+with the same engine clamp line each time (43.30 / 43.18 / 43.25 GiB, exactly the numbers the
+13.11 RAM-ladder note publishes), so the model copy itself has not grown; the log holds **zero**
+`parked` / `evict` / `admission` / `trimmed` lines inside the growth window — the 2026-11-03
+over-parking stall signature is absent; keep-up requests complete normally (`end=stop`, prefix hit
+50–55 %, decode 56–66 t/s); and the producer reads the largest single process, whose RSS
+double-counts the mmap'd model pages shared with its `serve.server` sibling. The host-side truth is
+the box's own `free -m`: used 49.4 GiB, buff/cache 13.3 GiB, available 12.5 GiB, swap free 7.1 GiB.
+The number to carry to the next reading: available 12.5 GiB sits ~0.5 GiB above the engine's own
+12 GiB headroom fence (the same fence its clamp warning quotes); available under the fence or swap
+used climbing is the preflight NO-GO class, not a new rule.
+
+*Gates at the synced head.* `git ls-remote origin main` == `HEAD` == `ca4bcfc`, working tree clean,
+`git fsck --connectivity-only --no-dangling` quiet. Five PUB gates green unshielded:
+`pub_arms_index.py --check` drift 0; `pub_derived_percent_check.py` 42 derived percents recomputed
+from shipped bytes, 0 findings; `pub_grok_cell_check.py` 9 documents, 0 findings;
+`pub_superseded_cell_check.py` 9 documents, 0 findings; `pub_digest_row_check.py` 49 rows, 0
+findings. `secret_scan.py --strict` exit **0**. `pub_grok_resume_check.py` run to a file with the
+exit captured directly (no pipe masking it this time): 22 checks, `RESUME GATE: NO-GO — do not spend
+quota`, exit **3** — the owner cancellation of 2026-11-12 is still in force. CI at `ca4bcfc`:
+every run completed/success (checks + pages build).
+
+*Second clone.* Index empty (`git diff --cached` = 0 files), only the hardware-snapshot agent's
+unstaged `hardware/os-snapshots/latest.json` plus untracked snapshot and `raw/` scratch files — the
+staged-deletion hazard is not live.
+
+*The daily-docs job* offers nothing new to read: its next scheduled fire (2026-11-14 02:00 UTC) is
+the first attempt that can turn the scheduler's failure streak over; its capture is that tick's read.
+
+**Verdict:** unchanged — the public line stays closed for everything in force: nine sets each carry
+bare + contour matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12,
+SimpleBench is closed as unpinnable, and the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified / GAIA-lite) are owner-gated. Zero model/cloud calls, zero benchmark bytes moved; the only
+file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
+
+**Next in force:** unchanged and empty. Standing reads: the engine-RSS/available watch on the next
+reading, the daily-docs fire at 2026-11-14 02:00 UTC, and one fresh preflight reading before any
+owner-gated local leg.
