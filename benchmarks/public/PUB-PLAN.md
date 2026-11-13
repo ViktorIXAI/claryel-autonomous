@@ -5646,3 +5646,58 @@ file written is `PUB-PLAN.md`, committed and pushed before the 03:00 window open
 **Next in force:** unchanged and empty — no leg is queued or admissible. The endpoint holds a
 six-reading GO streak with a stable engine, so an owner-gated ladder row could start immediately
 when opened; the Grok line stays closed by owner decision 2026-11-12.
+
+## Tick 99 — 2026-11-13 02:10 CET: read-only status tick; **seventh consecutive PREFLIGHT GO** (21st reading, engine pid unchanged across five readings); first full CI green read on a tick's own commit; five pub gates + secret scan green at `fc9415e`; Grok gate NO-GO exit 3; zero legs, zero calls
+
+*No leg was started, stopped, duplicated or discarded — the launch queue is still empty.* Every
+in-force set (`gsm8k`, `arc-easy`, `arc-challenge`, `gpqa-diamond`, `humaneval`, `mmlu-pro`,
+`ifeval`, `livecodebench`, `bfcl`) carries bare + contour matched-shape + codex arms; grok is
+cancelled by owner decision 2026-11-12; the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified / GAIA-lite) are owner-gated. Zero model and zero cloud calls. `systemctl --user
+list-units 'parb-pub-*' --no-legend` is empty and `pgrep -f 'scripts/pub_bench_(run|cloud).py'`
+finds nothing, so no second leg against the endpoint was possible or needed.
+
+*Twenty-first reading; seventh consecutive GO.* Readings (wrapper run bare, gate re-run unshielded,
+true exit **0**): `swap_free_mib=3 139` / `swap_used_mib=5 052` (of 8 191 — columns balance exactly
+at the total, the tick-78 producer-column guard satisfied), `mem_available_mib=17 216`,
+`engine_rss_mib=55 594` (the ops line's 36 GiB tier), `engine_state=S`, `engine_pcpu=0.0`
+(6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=7.79`, `load1=0.07`, `health_code=200`,
+`foreign_legs=0`. Engine `pid=1142697` age `03:11:06` — the **same** process across five
+consecutive readings (tick 96/97/98 + this one): the engine-cycle pattern of the earlier series is
+still absent, and swap free is flat (3 135 → 3 139 MiB) against tick 98.
+
+*Gates at the synced head.* `git ls-remote origin main` == `HEAD` (`fc9415e`, tick 98's own commit,
+pushed before its 03:00-window statement) and `git fsck --connectivity-only --no-dangling` is clean
+(0 findings); the second clone's index is empty, so the staged-deletion hazard is not live. Five
+PUB gates green unshielded: `pub_arms_index.py --check` index drift 0;
+`pub_derived_percent_check.py` 42 derived percents recomputed from shipped bytes, 0 findings
+(44 digest + 188 doc citations, 0 uncovered); `pub_grok_cell_check.py` 9 documents, 0 findings on
+the in-force cancelled sentence; `pub_superseded_cell_check.py` 9 documents, 0 findings;
+`pub_digest_row_check.py` 49 rows, 0 findings. `scripts/security/secret_scan.py --dir . --strict`
+exit **0**. `scripts/pub_grok_resume_check.py` exit **3**, 22 checks,
+`RESUME GATE: NO-GO - do not spend quota`, the 182 unasked ids printing as a VOID record — the
+cancellation is still in force.
+
+*CI at `fc9415e` — green on all five workflows* (`secret-scan`, `contour self-tests`,
+`hard-v6 scoring contracts`, `devsecops`, `pages-build-deployment`), all completed. This is the
+first tick that can read CI on its own predecessor's head rather than defer it: tick 97 repaired
+the object store that had blocked the push, tick 98 verified the push, this tick reads the result.
+
+*Daily docs job, read from the scheduler rather than predicted.* `ef7ea47ff99b` is `[active]`, its
+**last run is still `2026-11-12T03:02` error** and the newest `cron_incidents` row is the same
+`4cfeecb7852d` (`state=alerted`) — there is **no 2026-11-13 row**, because the next scheduled fire
+is today `02:00 UTC = 03:00 CET`, ~50 min after this tick. Today's run is the first attempt after
+`5be2855` removed the mutable digest-row-count pin (2026-11-12 04:47), so its outcome is this
+line's to read next tick, not to assert now. Drain guard `9a12508f8a69` ran `ok` at 02:10; legacy
+job `f23cf5d48e11` active and no-op while its 2026-11-02 state file exists.
+
+*What this line's verdict is, mechanically:* every queued item is closed, the only admissible next
+arms are owner-gated (the owner-relieved endpoint is ready — a seven-reading GO streak with a stable
+engine means a queued local leg starts within one wrapper call), and the Grok line stays closed by
+owner decision 2026-11-12. The only file this tick writes is `PUB-PLAN.md`; zero benchmark bytes
+moved, so `LEG-INCIDENTS.md` gains no entry.
+
+**Next in force:** unchanged and empty — no leg is queued or admissible. The endpoint holds a
+seven-reading GO streak with one stable engine process, so an owner-gated ladder row could start
+immediately when opened; the Grok line stays closed by owner decision 2026-11-12. Read the docs
+job's 03:00 CET fire next tick: a green run today closes the streak that ticks 92/96/97 recorded.
