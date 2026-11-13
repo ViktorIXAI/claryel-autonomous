@@ -6428,8 +6428,11 @@ the config the patched heredoc writes still resolves to the real absolute path
 (`<LOCAL_PATH>/basalt/model/Qwen3.8-FN-IQ3_S.basalt`) — so the ops campaign's reproducibility is
 untouched and only the tracked bytes changed. `bash -n` passes on all three files;
 `secret_scan.py --strict` now exits **0** with `total_findings: 0` and `top_files: []`;
-`docs_policy.py --push` PASS. `LEG-INCIDENTS.md` gains no entry: no leg of this line existed, and no
-engine restart happened mid-leg.
+`docs_policy.py --push` PASS, link check 155 links OK. Proven by the pipeline that was red, not only
+by the local scanner: at the pushed head `b3f656b` all five workflows are `completed`/`success` —
+`contour self-tests`, `hard-v6 scoring contracts`, `devsecops`, `secret-scan` (whose `gitleaks` job
+failed at `fe9755f`) and `pages build and deployment`. `LEG-INCIDENTS.md` gains no entry: no leg of
+this line existed, and no engine restart happened mid-leg.
 
 *Gates at the working head.* Five PUB gates green unshielded: `pub_arms_index.py --check` drift 0;
 `pub_derived_percent_check.py` 42 derived percents recomputed from shipped bytes (digest citations 44,
