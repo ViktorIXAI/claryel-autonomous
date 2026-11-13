@@ -6040,3 +6040,74 @@ file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
 **Next in force:** unchanged and empty. Standing reads: the engine-RSS/available watch on the next
 reading, the daily-docs fire at 2026-11-14 02:00 UTC, and one fresh preflight reading before any
 owner-gated local leg.
+
+---
+
+## Tick 105 — 2026-11-13 06:50 CET: routine no-move tick — **thirteenth consecutive PREFLIGHT GO**
+(47th reading); the engine-RSS watch from tick 104 **closes as warm-up, not a leak**; five PUB gates +
+secret scan green at the synced HEAD; Grok gate NO-GO exit 3; zero legs, zero calls
+
+Nothing was launched: `systemctl --user list-units 'parb-pub-*'` is empty,
+`pgrep -f 'scripts/pub_bench_(run|cloud).py'` finds nothing, and `foreign_legs=0` in the endpoint
+reading confirms it at the box.
+
+*Forty-seventh reading; thirteenth consecutive GO.* Fresh reading `preflight-20261113-0650.txt` from
+the ssh wrapper: `swap_free_mib=7 191` / `swap_used_mib=1 000` (columns balance at the 8 191 total),
+`mem_available_mib=12 522`, `engine_rss_mib=57 718`, `engine_state=S`, `engine_pcpu=0.0` (6 s sampled
+delta), `gpu_util_pct=0` at `gpu_power_w=7.76`, `load1=0.01`, `health_code=200`, `foreign_legs=0`.
+Engine `pid=1173996` age `02:38:03` — the fourth reading on the budget-42 process from the 04:12:50
+RAM-ladder rollout. Stored-reading census run unshielded per file with the exit captured before
+anything else prints: **47 files = 15 GO / 30 NO-GO / 2 input-gap** (+1 file, +1 GO from tick 104's
+46/14/30/2).
+
+*The tick-104 engine-RSS watch closes.* The reported RSS is now **44 385 (04:18, 05:26) → 57 793
+(06:16) → 57 718 (06:50)**: two consecutive readings agreeing within 0.14 %, i.e. the curve has
+flattened rather than continued to climb. Root read on the box over the repo-standard key (read-only
+probe, zero engine actions): the serve log inside the whole 04:12 → 06:52 window carries **zero**
+`parked` / `evict` / `admission` / `trimmed` lines (the box answered the count as 0), so the
+2026-11-03 over-parking stall signature is absent for the entire window, and the only clamp warnings
+are the four rollout lines themselves, quoting 43.30 / 43.18 / 43.25 GiB — exactly the ceiling the
+13.11 RAM-ladder note publishes, so the model copy never exceeded it. The process breakdown is the
+double-count tick 104 named, now with numbers: the keep-up parent 202 MiB, its vision sibling 552 MiB,
+and `--serve` 57 718 MiB — one mmap'd ~43 GiB expert set counted through two address spaces on top of
+engine overhead. Host truth (`free -m`, 06:52): used 49 444 MiB, buff/cache 13 288 MiB, available
+12 509 MiB, swap used 1 000 / free 7 191 MiB; keep-up requests complete normally (`end=stop`, prefix
+hit 50–65 %, decode 63–92 t/s), box load average 0.00. Verdict on the watch: **closed as warm-up to
+the clamp ceiling**; the carry-forward number stays the preflight rule it already was — available
+under the engine's own 12 GiB fence or swap used climbing is a NO-GO class, not a new rule.
+
+*Owner surface read (nothing to act on).* The open-issue list moved only on lines this one does not
+touch (a P1004 tensorless qualification campaign, a Bedrock IAM decision, research/evaluate cards);
+**no owner decision lifts the Grok cancellation of 2026-11-12** and none opens the three owner-gated
+ladder rows, so the queue remains empty by decision, not by starvation.
+
+*Gates at the synced head.* `git ls-remote origin main` == `HEAD` == `2e42759`, working tree clean,
+`git fsck --connectivity-only --no-dangling` quiet. Five PUB gates green unshielded:
+`pub_arms_index.py --check` drift 0; `pub_derived_percent_check.py` 42 derived percents recomputed
+from shipped bytes, 0 findings (44 digest citations + 188 document citations, 0 uncovered);
+`pub_grok_cell_check.py` 9 documents, 0 findings, the in-force cancelled sentence enforced with 1
+superseded sentence rejected; `pub_superseded_cell_check.py` 9 documents, 0 findings;
+`pub_digest_row_check.py` 49 rows, 0 findings. `secret_scan.py --strict` exit **0**
+(total_findings 0, credential_like 0, 18 pinned vendored metadata exceptions).
+`pub_grok_resume_check.py` run to a file with the exit captured directly: 22 checks,
+`RESUME GATE: NO-GO — do not spend quota`, exit **3**, and the record line still prints as
+`182 ids were never asked … VOID, the line is cancelled, this is not a queue`. CI at `2e42759`:
+contour self-tests, devsecops, hard-v6 scoring contracts, secret-scan and pages build all
+completed/success.
+
+*Second clone.* Index empty (`git diff --cached` = 0 files), only the hardware-snapshot agent's
+unstaged `hardware/os-snapshots/latest.json` plus untracked snapshot files and untracked
+`benchmarks/public/raw/` scratch — the staged-deletion hazard is not live.
+
+*The daily-docs job* offers nothing new to read: its next scheduled fire (2026-11-14 02:00 UTC) is
+the first attempt that can turn the scheduler's failure streak over after the 13.11 self-lock repair.
+
+**Verdict:** unchanged — the public line stays closed for everything in force: nine sets each carry
+bare + contour matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12,
+SimpleBench is closed as unpinnable, and the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified / GAIA-lite) are owner-gated. Zero model/cloud calls, zero benchmark bytes moved; the only
+file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
+
+**Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00 UTC,
+one fresh preflight reading before any owner-gated local leg, and the RSS/available pair as the
+preflight rule it already is.
