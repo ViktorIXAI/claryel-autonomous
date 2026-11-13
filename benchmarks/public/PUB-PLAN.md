@@ -6182,3 +6182,78 @@ file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
 
 **Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00
 UTC and one fresh preflight reading before any owner-gated local leg.
+
+---
+
+## Tick 107 — 2026-11-13 08:22 CET: routine no-move tick — **fifteenth consecutive PREFLIGHT GO**
+(49th reading, sixth on the same budget-42 engine process); `origin/main` did not move; five PUB gates
++ secret scan green at the synced HEAD; Grok gate NO-GO exit 3; CI green on all five jobs; zero legs,
+zero calls
+
+Nothing was launched: `systemctl --user list-units 'parb-pub-*' --no-legend` is empty and the
+bracketed transport counts are 0 in a standalone call, and `foreign_legs=0` in the endpoint reading
+confirms it at the box.
+
+*Forty-ninth reading; fifteenth consecutive GO.* Fresh reading `preflight-20261113-0820.txt` from the
+ssh wrapper (run bare, no outer redirect): `swap_free_mib=7 191` / `swap_used_mib=1 000` (columns
+balance at the 8 191 total), `mem_available_mib=12 542`, `engine_rss_mib=57 718`, `engine_state=S`,
+`engine_pcpu=0.0` (6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=8.17`, `load1=0.02`,
+`health_code=200`, `foreign_legs=0`. Engine `pid=1173996` age `04:07:16` — sixth reading on the
+budget-42 process from the 04:12:50 RAM-ladder rollout. `engine_rss_mib` is now identical (57 718)
+across the 06:50, 07:31 and 08:20 readings, which keeps tick 105's closed watch closed: warm-up to the
+clamp ceiling, not a leak. Stored-reading census run unshielded per file with the exit captured
+before anything else prints: **49 files = 17 GO / 30 NO-GO / 2 input-gap** (+1 file, +1 GO from tick
+106's 48/16/30/2); the two non-empty sibling `.err` files stay at 2026-11-11, so no new input gap.
+
+*The shared branch did not move.* `git fetch` completed clean (tick 106's 135 s github.com connect
+timeout did not repeat), `git ls-remote origin main` equals `HEAD` = `80c62d1`, and
+`git rev-list --left-right --count main...origin/main` is `0 0`. `git fsck --connectivity-only
+--no-dangling` quiet, working tree clean. GitHub Actions at that SHA: `contour self-tests`,
+`hard-v6 scoring contracts`, `devsecops`, `secret-scan` and `pages build and deployment` all
+`completed` / `success`.
+
+*Gates at the synced head.* Five PUB gates green unshielded: `pub_arms_index.py --check` drift 0;
+`pub_derived_percent_check.py` 42 derived percents recomputed from shipped bytes (digest citations
+44, doc citations 188, uncovered 0), 0 findings; `pub_grok_cell_check.py` 9 documents, 0 findings, the
+in-force cell sentence read from the pin (`cancelled by owner decision 2026-11-12 (no resume date)`)
+and 1 superseded sentence rejected; `pub_superseded_cell_check.py` 9 documents, 0 findings;
+`pub_digest_row_check.py` 49 rows, 0 findings (26 rows name a contract, 23/23 legacy exceptions used,
+so none has rotted). `secret_scan.py --strict` exit **0** (`top_files: []`, the pinned vendored
+metadata exceptions unchanged). `pub_grok_resume_check.py --as-of 2026-11-13` captured unshielded:
+22 checks, `RESUME GATE: NO-GO — do not spend quota`, exit **3**, the record line still
+`182 ids were never asked … VOID, the line is cancelled, this is not a queue`; the IFEval partial
+reads `stored 359 rows / 359 ok / sha256-16 01c1ee0b6e7f6d5d` — bytes intact and resumable by id,
+zero credit, zero published percent.
+
+*The daily-docs failure the brief expects is now a pre-fix capture, not a dirty tree.* The job's only
+retained execution row is `2026-11-13T03:00:18+01:00`, and its capture names the call site
+`run(..., "scripts/qa/docs_policy.py", "--daily")` — the self-lock tick 101 found. The repair
+`7b9a208` landed at 03:39:33 CET, 39 minutes **after** that fire, so today's error is the last
+utterance of the broken precondition; the current file calls `--push` (line 106) and the next fire
+(2026-11-14 02:00 UTC) is the first attempt on fixed bytes. `failure_streak: 10` in the job record is
+the cumulative scheduler counter, not ten attempts on this date (one row is retained). The two
+frozen-line legacy jobs completed their 08:02–08:15 ticks with their launch-blocker markers in place;
+the only `running` row in the executions DB is this tick (`288a66f93167`, workdir this clone) — no
+sibling instance of this brief. *Second clone* (`~/projects/strata-autonomous-harness`): detached
+HEAD, 0 staged files, only unstaged `hardware/os-snapshots/latest.json` plus untracked snapshots and
+`benchmarks/public/raw/` scratch — the staged-deletion hazard is not live.
+
+*Owner surface read (nothing to act on).* The freshest activity on the repo is issue **#25**
+"[DOCS][P0] Complete repository-wide consistency audit without rewriting historical evidence": the
+owner posted bounded verification checkpoints at 04:08 / 05:04 / 05:46 UTC today, and its direction
+explicitly forbids altering frozen banks, results or scores without specific approval. It is a
+docs-audit line with its own writer, not a public-line launch order, so nothing in `benchmarks/public/`
+was touched from it. Nothing lifts the Grok cancellation of 2026-11-12 (#41 PARB design last moved
+2026-11-12 06:10, #56 is the P1004 tensorless campaign), and no decision opens the three owner-gated
+ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite). The queue remains empty by decision,
+not by starvation.
+
+**Verdict:** unchanged — the public line stays closed for everything in force: nine sets each carry
+bare + contour matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12, SimpleBench
+is closed as unpinnable, and the remaining ladder rows are owner-gated. Zero model/cloud calls, zero
+benchmark bytes moved; the only file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no
+entry.
+
+**Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00 UTC
+(first attempt on the repaired precondition) and one fresh preflight reading before any owner-gated
+local leg.
