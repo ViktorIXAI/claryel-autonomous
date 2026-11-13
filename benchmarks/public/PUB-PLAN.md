@@ -7960,3 +7960,71 @@ without an outer redirect; PUB gates invoked as `python3 <script>` with exits re
 censuses taken by exit code and by column equality, never by a bench-name substring, and every
 census cross-checked against the gate's own row count; daily-docs fire 2026-11-14 02:00 UTC from a
 passing precondition.
+
+## Tick 127 — 2026-11-13 22:58 CET: scoreboard unmoved — fourteenth stored reading of the afternoon band, a thirteenth GO, engine hold passes 8 h 45 min; the live serve log decodes at 116–121 t/s while this line spends nothing (zero legs, zero calls, zero published bytes moved)
+
+**Scoreboard: unmoved.** Nine in-force sets complete on the three-arm standard (bare local /
+contour `0.0.2.56` matched shape / ChatGPT codex), re-certified by `scripts/pub_three_arm_parity_check.py`:
+**49 rows / 9 sets, 0 findings** (contour stamp `0.0.2.56`, Grok not an arm). `PUB-DIGEST.md`
+byte-stable since `ad8d8c0`: sha256-16 `9d5ac7c3a60fb9dd`, 16 517 B — this tick writes a tick block,
+not a row. No contour stamp or feature registered, no hard-bank pair launched, no hard-bank byte touched.
+
+**Endpoint read (the fourteenth stored reading of today's 14:00+ band, a thirteenth GO).**
+`bash preflight.sh` bare (no outer redirect), then the gate unshielded: **PREFLIGHT GO, exit 0**
+(`preflight-20261113-2258.txt`): swap 52 287 MiB free of 65 535, MemAvailable 18 844 MiB,
+engine state `S`, live-delta pcpu 0.0, RSS 56 195 MiB, GPU 0 % / 26.68 W, `health_code=200`,
+`health_loaded=true`, `engine_serve_procs=1`, foreign legs 0. Same engine process as ticks 117–126:
+pid 10597, age **8 h 45 min 26 s**, `/health` names the served alias and reports `loaded: true`.
+Afternoon-band census taken by exit code: **14 stored readings, 13 GO, 1 NO-GO** — the single non-GO
+is the transient 19:23 state-D sample recorded in tick 122, named here by file, not by memory.
+Whole-workspace census over every stored `preflight-*.txt`: **71 files, 36 GO / 33 NO-GO / 2 input
+gaps** (includes other jobs' runs of the same wrapper; both denominators named per the standing rule).
+The serve log tail at 22:57 shows real decodes (`s1 done`, pp 76 213 tokens, 116–121 t/s, acc 70 %):
+this endpoint is the fleet main brain and carries that traffic; `foreign_legs=0` and no
+`gate_run`/`pub_bench_run` process on the box, so this line saw its own traffic, not a competing leg.
+
+**Ops tuning campaign: ninth idle read.** Newest `p2005_v*_ab.sh` remains `p2005_v10_ab.sh` at
+10:15; nothing newer, no restart attributed to it. `keep-up.log` still holds exactly one restart
+line (the watchdog is not the actor). Engine binary path `basalt-033/bin/basalt` unchanged since
+14:13 — machine state, reported, never acted on.
+
+**Standing gates, all seven re-proven on the pushed head `c096b28` (exits read unshielded, gates
+invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3** (by design — the
+cancel): 22 checks, live resume total from stored bytes **182 ids still unasked**.
+`pub_grok_cell_check.py` exit 0 — 9 documents, 0 findings, in-force sentence
+"canceled by owner decision 2026-11-12 (no resume date)", 1 superseded sentence rejected.
+`pub_arms_index.py --check` exit 0 — index drift 0. `pub_derived_percent_check.py` exit 0 —
+**42 recomputed from shipped bytes, 0 findings** (digest citations 44, doc citations 188, uncovered 0).
+`pub_superseded_cell_check.py` exit 0 — 0 findings. `pub_digest_row_check.py` exit 0 —
+49 rows, 0 findings, pre-rule exceptions 23/23 used. Three-arm parity gate: 0 findings.
+
+**Grok line: still closed by the owner decision, re-proven not assumed.** The IFEval partial stays
+359 rows / 359 `finish=ok` / 0 empty / 359 unique ids, resume set 182 ids `ifeval-286`..`ifeval-3757`
+— read by the gate from the stored bytes, not restated. Zero credit, zero published percent,
+resumable by id only on a fresh owner reversal. `~/pub-bench/GROK-CANCELLED` in place; the runner
+refusal untouched.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state`
+re-read on the literal path: present, 26 B, `Nov 2 14:05` — the 5-min `Mac v2.2 full after v2.1`
+job stays inert only behind that marker; `P2005 paired full 2.1→2.2 watch` still a permanent 5-min
+ssh round-trip onto this line's endpoint box. Both reported as an owner decision, not edited.
+
+**Two-clone hazard: unchanged.** Watchdog clone shows **zero staged lines** and an empty branch name
+(detached HEAD), no index that could stage deletions of published arms. Reported, nothing touched.
+
+**Daily-docs job precondition is armed to pass, not fixed by this line.**
+`scripts/qa/docs_policy.py --daily` exits 0 and `README.md` carries `Status checked: 2026-11-13`,
+so the "dirty tree at 03:00" cause is not currently armed (working tree clean at 22:59 CET, zero
+`running` rows in the executions DB — no sibling agent in this clone). Next fire 2026-11-14 02:00 UTC.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the engine hold passed **8 h 45 min** on the same process with
+the afternoon band at **13 GO of 14 readings** (sole non-GO the tick-122 transient), all seven PUB
+gates green on the pushed head, and the three-arm parity certified mechanically at 49 rows / 9 sets.
+IFEval / LiveCodeBench / BFCL rows and the repair-family census are unchanged from ticks 121–126.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; PUB gates invoked as `python3 <script>` with exits read unshielded;
+censuses taken by exit code and column equality, cross-checked against each gate's own row count;
+daily-docs fire 2026-11-14 02:00 UTC from a passing precondition.
