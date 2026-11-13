@@ -6718,3 +6718,84 @@ NO-GO under live main-brain load while its engine restarted on the tuned working
 `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg (this afternoon the
 box must also settle out of the state-D / 99 % GPU main-brain load before a GO is even readable);
 the daily-docs fire at 2026-11-14 02:00 UTC.
+
+## Tick 113 — 2026-11-13 13:48 CET: scoreboard unmoved — the endpoint reads **GO** again, then swaps its engine again under the GO (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place, the tree clean,
+`git ls-remote origin main` equals `HEAD` (`1a13b4f`), so the publish invariant of tick 97 holds.
+
+**Standing reads.** A fresh preflight reading at 13:48 (57th stored): **PREFLIGHT GO** —
+`health_loaded=true`, `engine_serve_procs=1`, `foreign_legs=0`, swap free 65 535 MiB (zero used),
+`engine_state=S`, `engine_pcpu=0.0` sampled over 6 s, `engine_rss_mib=45 386`,
+`gpu_util_pct=0` at 26.76 W, `load1=16.31` (CPU-side main-brain load; the gate takes GPU and
+swap rules, both green). The queue in force is empty, so the GO authorizes nothing — no leg is
+launched on a GO with no owner-gated item pending.
+
+**Machine-state attribution: the box is still cycling engines through this tick, with zero legs
+live.** `keep-up.log` records one restart this afternoon, `2026-11-13_13:07:49 keep-up restart`;
+the engine answering the 13:48 GO (pid 3491, age 33:47) came up at 13:15:05 on that path, and the
+serve log shows healthy decode on it (prefill 582 t/s at an 87.8 % cache hit, decode 122–123.5 t/s,
+draft-accept 69 %) under live main-brain traffic. Then, at ~13:51 — three minutes after this
+tick's GO — the engine changed again: pid 6253 at age 02:24 against the box clock 13:53:36, now
+carrying `--resident-budget-gib 54` (was 46 at ticks 110–112) with `--vram-reserve-mib 500` and
+the 6 144 MiB / 6-slot conversation cache kept. `keep-up.log` has no 13:51 line, so that swap is
+the ops direct restart, not keep-up — the config-tuning campaign that LEG-INCIDENTS (09:55 entry)
+records as one engine restart per arm is still running. Not a `LEG-INCIDENTS.md` entry: zero legs
+of this line were live on the endpoint and zero partial files exist — machine state, attributed,
+per the tick-110 precedent. What it does mean for this line: a GO is readable but the endpoint is
+not stable enough for a leg to survive — a leg launched at 13:48 would have been cut mid-series by
+the 13:51 swap, exactly the machine note's restart-mid-leg condition. The standing GO +
+`PARB_ENGINE_NOTE` + `--run-record` rule already forces the engine note to name which build a row
+belongs to; the 57th reading's rows would have split across two engines.
+
+**Stored-reading census** run unshielded with the exit captured before anything prints:
+**57 files = 23 GO / 32 NO-GO / 2 input-gap** (+1 file and +1 GO against tick 112's 56/22/32/2 —
+the new GO is this tick's 13:48 reading); the two non-empty sibling `.err` files are still dated
+2026-11-11.
+
+**Gates at the working head.** Five PUB gates green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings, 23/23 legacy exceptions used.
+`secret_scan --strict` exit 0. `pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks,
+**NO-GO — do not spend quota**, exit 3; VOID record line intact; the Grok IFEval partial still
+`stored 359 rows / 359 ok / sha256-16 01c1ee0b6e7f6d5d` — bytes intact, zero credit, zero
+published percent.
+
+**CI at the pushed head: everything green, no infra flake this tick.** At `1a13b4f` — `build`,
+`contracts`, `dependency-policy`, `gitleaks`, `json-schema-qa`, `report-build-status`,
+`reproduce`, `static-qa`, `tests (3.11)` and `tests (3.13)` all success, GitHub Pages `deploy`
+success (tick 112's re-run holds), `release-asset-validation` skipped.
+
+**Owner-surface read (nothing to act on).** Issue #25 moved again at 12:35:43 UTC (13:35 CET,
+after tick 112's 11:27 UTC read) — a non-comment change: comment count still 180 with the newest
+comment dated 2026-11-10, no labels; still the repository-wide docs-consistency audit line with
+its own writer, not a launch order for this line. Issue #10 unchanged since its 10:22 UTC
+Grok-monitor withdrawal comment. The two hard-bank-era jobs stay enabled and stay
+reported-not-touched (the tick-111 hazard note stands unchanged): `Mac v2.2 full after v2.1` —
+every 5 min, last run 13:50 ok, still inert only because its one-shot launch marker dated
+2026-11-02 14:05 exists (read again this tick, single `launched:` line unchanged);
+`P2005 paired full 2.1→2.2 watch` — `*/5`, last run 13:50 ok, still a permanent 5-minute ssh
+round-trip onto this line's endpoint box. The local daily `GitHub docs freshness` job sits at
+failure_streak 10 (the 11-13 03:00 fire already counted at tick 112), next fire 2026-11-14
+02:00 UTC; its 03:00 error line names the cause as `README status date is stale: 2026-11-11 is
+2 days old` — reported per the machine note, not repaired by this line.
+
+**P0 parity audit** (from tick 112's digest-table read, nothing moved since): all nine in-force
+sets carry bare local / `contour-0.0.2.56` matched-shape / codex rows; grok cells without a
+percent read "cancelled by owner decision 2026-11-12 (no resume date)"; SimpleBench stays closed
+as unpinnable.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by
+owner decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model
+calls, zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint read
+**GO** at 13:48 (first GO since 12:19) and then swapped its engine again at ~13:51 on a new
+ops flag (`--resident-budget-gib 54`) — attributed machine state with zero legs live, and the
+practical reading is that the endpoint is still in its re-tuning cycle, so a GO alone would not
+survive to end-of-leg today.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg — and while the ops
+restart cadence continues, engine stability (not the GO bit) is the binding constraint; the daily-docs
+fire at 2026-11-14 02:00 UTC.
