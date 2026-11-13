@@ -7360,3 +7360,87 @@ the box load average fell 13.2 → 9.7.
 `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
 without an outer redirect; engine stability relaxing (campaign idle three times, capacity
 measured clear at tick 116); daily-docs fire 2026-11-14 02:00 UTC.
+
+
+## Tick 121 — 2026-11-13 18:50 CET: scoreboard unmoved — ninth GO, the hold reaches 4 h 38 min and still grows, the ops campaign reads idle a fourth time (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place (`GROK-CANCELLED`,
+121 B, 2026-11-12 06:54:20, intact), the tree clean, `git ls-remote origin main` equals `HEAD`
+(`66b075c`), so the publish invariant of tick 97 holds. The only `running` row in
+`~/.hermes/cron/executions.db` is this tick's own fire (18:49:19, `PUB benchmark loop 30m`) —
+no sibling instance in the clone. The `Mac v2.2 full after v2.1` job fired at 18:49 and was
+delivered `suppressed` (inert behind its one-shot marker, as every read since the line froze).
+
+**Standing reads.** A fresh preflight reading at 18:50 (65th stored): **PREFLIGHT GO**, gate
+re-run unshielded `exit=0` — `health_loaded=true`, `engine_serve_procs=1`, `foreign_legs=0`,
+swap 52 601 MiB free of 65 535, `engine_state=S`, `engine_pcpu=0.0` sampled over 6 s,
+`engine_rss_mib=56 834` (warm engine), `gpu_util_pct=0` at 26.43 W, `load1=6.86`. The wrapper
+ran bare, no outer redirect; no reading burned. **Stored-reading census** (the gate re-run
+mechanically over the whole series at the working head): **65 files = 31 GO / 32 NO-GO /
+2 input-gap** (+1 file and +1 GO against tick 120's 64/30/32/2; today's subset alone:
+27 files = 25 GO / 2 NO-GO). The queue in force is empty, so the GO authorizes nothing.
+
+**Machine-state attribution: the same engine process for 4 h 38 min — the day's longest hold
+keeps growing, and the tuning campaign now reads idle for a fourth consecutive read.** Engine
+pid 10597 (etimes 16 675 s at the 18:50 read, started 14:12:51, the second direct ops restart
+tick 114 attributed; argv `basalt-033/bin/basalt --serve --model …/Qwen3.8-FN-IQ3_S.basalt
+--resident-…`) answers `/health` 200 with `loaded=true` and the served alias
+`qwen3.8-flash-next-iq3_s-basalt` named in the body, 56.1 GiB RSS. `pgrep -cf 'p2005_v[0-9]'`
+on the box reads **0** for the fourth time today; `keep-up.log` still records one restart today
+(13:07:49); box `up 5:43` at 18:50. Serve log mtime 18:50:47 — main-brain traffic still serving.
+Zero legs live, so still no `LEG-INCIDENTS.md` entry
+(tick-110/113/114/116/117/118/119/120 precedent).
+
+**Gates at the working head.** Six checks green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings (23/23 legacy exceptions used);
+`secret_scan --strict` exit 0.
+
+**Grok line: still closed by the owner decision, re-proven not assumed — and this tick caught
+its own pipe mask again.** The first resume-gate call this tick was piped through `tail`, so the
+printed `exit=0` was `tail`'s status, not the gate's; re-run unshielded it is 22 checks,
+**NO-GO — do not spend quota, `exit=3`**, VOID record line intact ("182 ids were never asked …
+this is not a queue"). The IFEval partial re-verified from its own stored bytes, identical to
+ticks 117-120: **359 rows / 359 `finish=ok` / sha256-16 `01c1ee0b6e7f6d5d`**, resume set 182 ids
+`ifeval-286`..`ifeval-3757`. The three completed Grok arms are byte-exact against the pin with
+resume sets of 0 ids (gpqa-diamond 198/198 `c479109822f388a5`, humaneval 164/164
+`161ddf5b1956ab13`, mmlu-pro 500/500 `5731d720f13ef8a5`). Zero credit, zero published percent,
+resumable by id only on a fresh owner reversal. Same discipline as tick 118's gate-exit re-read:
+a gate exit behind a pipe is never reported.
+
+**P0 parity audit re-parsed from the digest table this tick** (tick 119's corrected filter —
+header row excluded by `| bench |`, delimiter row excluded, data rows kept): **49 rows /
+9 in-force sets** — gsm8k 6, arc-easy 5, arc-challenge 5, gpqa-diamond 5, humaneval 8, ifeval 5,
+mmlu-pro 4, livecodebench 7, bfcl 4 — identical to the machine-checked gate; per-model census
+33 local-stack rows / 10 `gpt-6.1-sol` / 6 completed `grok-4.7`, i.e. grok appears only in
+completed arms. Every set carries bare / contour-0.0.2.56 matched-shape / codex; the six
+`pub-repair-*` keep-best rows sit in the four sets that have a validator. SimpleBench stays
+closed as unpinnable.
+
+**CI at the pushed head: everything green.** At `66b075c` — `contour self-tests`, `secret-scan`,
+`devsecops` and `hard-v6 scoring contracts` all completed/success.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** The two hard-bank-era jobs stay
+enabled and reported-not-touched: `Mac v2.2 full after v2.1` (`f23cf5d48e11`, every 5 min —
+last fire 18:49, `suppressed`) is inert only because of its one-shot launch marker, re-read on
+the literal path (`~/.hermes/mac-v22full-launch.state`, 26 B, `2026-11-02T14:05:30+01:00`,
+unchanged); `P2005 paired full 2.1→2.2 watch` (`*/5`) remains a permanent 5-minute ssh
+round-trip onto this line's endpoint box. The two-clone deletion hazard was checked, not
+assumed: the watchdog clone sits at a detached HEAD with an empty staged index. Daily-docs:
+nothing has fired since the tick-116 repair; the next fire (2026-11-14 02:00 UTC) starts from
+the passing precondition.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by
+owner decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model
+calls, zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint read its
+ninth **GO** of the day, the engine's single-process hold reached **4 h 38 min** (the day's
+longest, still growing; load average 9.7 → 6.9), the ops tuning campaign read **0 processes**
+for a fourth time today, and this tick re-read its own pipe-masked gate exit before reporting
+it (same trap class as ticks 118-119, caught again in the same shape).
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; engine stability relaxing (campaign idle four times, capacity
+measured clear at tick 116); daily-docs fire 2026-11-14 02:00 UTC.
