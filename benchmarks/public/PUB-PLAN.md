@@ -6945,3 +6945,114 @@ third **GO**, main-brain traffic serving between readings.
 `--max-context 196 608` size check; `bash preflight.sh` without an outer redirect; engine
 stability still the binding constraint while the tuning campaign cycles; the daily-docs fire at
 2026-11-14 02:00 UTC.
+
+
+## Tick 116 — 2026-11-13 15:55 CET: scoreboard unmoved — fourth GO, the engine's longest hold continues, and the standing capacity note is now a **measured** census (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place, the tree clean,
+`git ls-remote origin main` equals `HEAD` (`61c0e0b`, the parallel agent's `P3032` hardware commit
+stacked on tick 115's head), so the publish invariant of tick 97 holds.
+
+**Standing reads.** A fresh preflight reading at 15:50 (60th stored): **PREFLIGHT GO**, gate re-run
+unshielded `exit=0` — `health_loaded=true`, `engine_serve_procs=1`, `foreign_legs=0`, swap
+10 023 MiB used of 65 535 (55 512 free), `engine_state=R`, `engine_pcpu=0.0` sampled over 6 s,
+`engine_rss_mib=56 913` (warm engine), `gpu_util_pct=96` at 139.19 W, `load1=15.57` (CPU-side
+main-brain load; the gate takes the GPU and swap rules, both green). The wrapper was run bare with
+no outer redirect (tick 114's rule); no reading was burned.
+**Stored-reading census:** **60 files = 26 GO / 32 NO-GO / 2 input-gap** (+1 file and +1 GO against
+tick 115's 59/25/32/2; the quarantined 14:27 `.collided` reading stays outside the glob). The queue
+in force is empty, so the GO authorizes nothing.
+
+**Machine-state attribution: the same engine process for 1 h 37 min — still the day's longest hold.**
+Engine pid 10597 (up 14:12:51, the second direct ops restart tick 114 attributed) answers `/health`
+at 15:50 with 58.3 GB RSS; `keep-up.log` still records one restart today (13:07:49) and no
+`p2005_v*_ab.sh` process is running (newest campaign script mtime 10:15, v10). The serve log's tail
+shows live **main-brain traffic**, not benchmark traffic: a 113 442-prompt-token request decoding at
+110.5 t/s with an 83.7 % cache hit and `end=stop`, immediately followed by the engine's own context
+split line `thinking budget 75 126 tokens, output cap 100 167 (answer-room auto)` — 75 126 + 100 167
+= 175 293, inside the live window, so the engine is auto-fitting requests to the reduced context
+rather than rejecting them. Zero foreign benchmark legs (`foreign_legs=0`), zero legs of this line,
+zero partial files — machine state, attributed, no `LEG-INCIDENTS.md` entry (tick-110/113/114
+precedent).
+
+**The capacity note from ticks 114–115 is now a measured number, not a promise (zero model calls).**
+Both ticks recorded that any future owner-gated local leg must have "its largest plan prompt
+size-checked against the live `--max-context`", because the box moved from the 262 144 every
+published arm ran on to 196 608. That check was run against shipped bytes: every published bare-arm
+row carries its own `ptok`, so the census over all nine in-force sets gives
+
+| set | bare rows | max prompt (id) | completion cap | prompt + cap |
+|---|---|---|---|---|
+| gpqa-diamond | 198 | 2 812 (`gpqa-071`) | 1200 | 4 012 |
+| livecodebench | 175 | 1 750 (`lcb-arc190_c`) | 2400 | 4 150 |
+| mmlu-pro | 500 | 1 129 (`mmlu-pro-6552`) | 1200 | 2 329 |
+| bfcl | 1240 | 1 009 (`parallel_multiple_189`) | 1200 | 2 209 |
+| humaneval | 164 | 457 (`humaneval-0129`) | 1200 | 1 657 |
+| ifeval | 541 | 415 (`ifeval-2859`) | 1200 | 1 615 |
+| gsm8k | 1344 | 258 (`gsm8k-1077`) | 1200 | 1 458 |
+| arc-challenge | 1172 | 252 (`arc-challenge-0231`) | 1200 | 1 452 |
+| arc-easy | 2376 | 251 (`arc-easy-1771`) | 1200 | 1 451 |
+
+The worst case on the whole line is 4 150 tokens of prompt+completion against a live window of
+196 608, i.e. **≥193 796 tokens of margin on every set** — the two context windows differ by 65 536
+tokens while the line's largest single request is 4 150. So the capacity window the tuning campaign
+just moved cannot reject any in-force set: the standing rule stays as a read (record the live flag
+in `PARB_ENGINE_NOTE`), but it is no longer an open hazard for these nine sets. Row counts are
+shipped-arm rows (gsm8k 1344 = the 1319 full arm + the 25-row smoke), prompt sizes are the same task
+prompts the matched-shape contour legs send, and no published percent, verdict or arm byte moved.
+
+**Gates at the working head.** Five PUB gates green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings, 23/23 legacy exceptions used.
+`secret_scan --strict` exit 0.
+
+**Grok line: still closed by the owner decision, re-proven not assumed.**
+`pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks, **NO-GO — do not spend quota**, unshielded
+`exit=3`, VOID record line intact ("182 ids were never asked … this is not a queue"). The Grok IFEval
+partial re-verified byte-intact: **359 rows / 359 unique / 359 `finish=ok` / 0 empty**, SHA-256-16
+`01c1ee0b6e7f6d5d`, last stored id `ifeval-2859`, resume set 182 ids `ifeval-286`..`ifeval-3757` —
+zero credit, zero published percent, resumable by id if the owner ever reverses.
+
+**P0 parity audit re-parsed from the digest table this tick** (not carried from tick 115): 49 percent
+rows across the nine in-force sets; every set carries bare
+`qwen3.8-flash-next-iq3_s-basalt` / `+contour-0.0.2.56` (matched shape) / `gpt-6.1-sol`, four sets
+carry a `pub-repair-*` keep-best row, and `grok-4.7` appears only where the arm completed. SimpleBench
+stays closed as unpinnable.
+
+**CI at the pushed head: everything green.** At `61c0e0b` — `contour self-tests`, `hard-v6 scoring
+contracts`, `secret-scan`, `devsecops` and `pages build and deployment` all completed/success.
+
+**Status change on the daily-docs job, read from the job's own record (not repaired by this line).**
+The machine note says it errors daily; the record now says why and says it is fixed. Today's fire at
+**03:00:18 CET failed** with `docs_policy.py --daily` → `README status date is stale: 2026-11-11 is 2
+days old`, on the **pre-fix** call site (traceback line 96 still passed `--daily`), streak 10. Thirty
+nine minutes later the precondition repair `7b9a208` landed (the call site is now line 106, gating on
+`--push`), and at **03:41:36** the job's own marker commit `195c9d1` "Daily docs freshness check:
+2026-11-13" landed on `main` — the README now carries `Status checked: 2026-11-13`, and
+`docs_policy.py --daily` on the tracked tree exits 0 with **PASS**. So the next fire (2026-11-14
+02:00 UTC) starts from a passing precondition; the daily-error line in this brief is now resolved on
+bytes, not expected.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** The two hard-bank-era jobs stay enabled
+and reported-not-touched: `Mac v2.2 full after v2.1` (every 5 min) is inert only because of its
+one-shot launch marker, re-read on the literal path (`~/.hermes/mac-v22full-launch.state`, 26 bytes,
+`2026-11-02T14:05:30+01:00`, unchanged); `P2005 paired full 2.1→2.2 watch` (`*/5`) remains a
+permanent 5-minute ssh round-trip onto this line's endpoint box. The two-clone deletion hazard was
+checked, not assumed: the watchdog clone sits at a detached HEAD with an **empty staged index** — no
+staged deletions of published arms — and its dirty entries (`hardware/os-snapshots/latest.json`,
+three untracked `benchmarks/public/raw/*` files) belong to the hardware line and were left untouched.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by owner
+decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model calls,
+zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint read a fourth **GO**
+with the engine holding one process for 1 h 37 min (the day's longest hold, main-brain traffic
+serving between readings); the standing capacity check became a measured census showing ≥193.8k
+tokens of headroom on every set; and the daily-docs failure is now attributed and mechanically
+repaired on `main` (streak-breaking fire expected tomorrow).
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; engine stability still the binding constraint while the tuning campaign
+cycles (capacity is no longer one); daily-docs fire 2026-11-14 02:00 UTC.
