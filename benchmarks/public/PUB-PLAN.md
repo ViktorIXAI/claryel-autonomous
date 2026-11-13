@@ -5926,5 +5926,57 @@ moved. The endpoint is GO on the new budget-42 engine process, and the swap-pres
 tick 101 opened is closed at 7 191 MiB free.
 
 **Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00
-UTC, and one fresh preflight reading before any owner-gated leg — the endpoint process changed this
-tick, so no GO carries over.
+UTC, and one fresh preflight reading before any owner-gated leg — the endpoint process changed
+this tick, so no GO carries over.
+
+## Tick 103 — 2026-11-13 05:27 CET: routine no-move tick — **eleventh consecutive PREFLIGHT GO**
+(45th reading), still the same budget-42 engine process as tick 102, second reading on it; five PUB
+gates + secret scan green at the synced HEAD; Grok gate NO-GO exit 3; zero legs, zero calls
+
+Nothing was launched: `systemctl --user list-units 'parb-pub-*'` is empty,
+`pgrep -f 'scripts/pub_bench_(run|cloud).py'` finds nothing, and `foreign_legs=0` in the endpoint
+reading confirms it at the box.
+
+*Forty-fifth reading; eleventh consecutive GO.* Fresh reading `preflight-20261113-0526.txt` from
+the ssh wrapper (exit 0, remote producer invoked as `ssh <box> 'bash -s' < preflight_read.sh`):
+`swap_free_mib=7 191` / `swap_used_mib=1 000` (columns balance exactly at the 8 191 total),
+`mem_available_mib=14 863`, `engine_rss_mib=44 385`, `engine_state=S`, `engine_pcpu=0.0`
+(6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=8.05`, `load1=0.08`, `health_code=200`,
+`foreign_legs=0`. Engine `pid=1173996` age `01:13:18` — the **same** budget-42 process tick 102
+attributed to the 04:12:50 RAM-ladder rollout, now on its second line reading. Stored-reading
+census run unshielded per file with the exit captured before anything else prints:
+**45 files = 13 GO / 30 NO-GO / 2 input-gap** (+1 file, +1 GO from tick 102's 44/12/30/2). The
+tick-101 swap watch stayed closed between the two readings: swap free 7 191 MiB both times.
+
+*Gates at the synced head.* `git ls-remote origin main` == `HEAD` == `31b1fdb`,
+`main...origin/main` = `0 0`, `git fsck --connectivity-only --no-dangling` quiet, working tree
+clean. Five PUB gates green unshielded: `pub_arms_index.py --check` drift 0;
+`pub_derived_percent_check.py` 42 derived percents recomputed from shipped bytes, 0 findings;
+`pub_grok_cell_check.py` 9 documents, 0 findings; `pub_superseded_cell_check.py` 9 documents,
+0 findings; `pub_digest_row_check.py` 49 rows, 0 findings. `secret_scan.py --strict` exit **0**.
+`pub_grok_resume_check.py` exit **3**, 22 checks, `RESUME GATE: NO-GO — do not spend quota` — the
+owner cancellation of 2026-11-12 is still in force. CI at `31b1fdb`: every check run
+completed/success (`gitleaks`, `static-qa`, `contracts`, `tests (3.11)`, `tests (3.13)`,
+`dependency-policy`, `json-schema-qa`, `reproduce`, `build`, `deploy`, `report-build-status`;
+`release-asset-validation` skipped).
+
+*Second clone and legacy jobs.* The second clone (`9f72ef0`) shows an empty index and only the
+hardware-snapshot agent's unstaged `hardware/os-snapshots/latest.json` plus untracked snapshot
+files — the staged-deletion hazard is not live. Legacy jobs `f23cf5d48e11` / `a808c7f205a6` are
+`active` with their launch-blocker markers verified in place (`mac-v22full-launch.state` of
+2026-11-02; `b2003-finish-watch.state/completed`), drain guard `9a12508f8a69` `active` — none
+launched anything.
+
+*The daily-docs job* offers nothing new to read: its `03:00:19 CET` fire today was already read at
+tick 101 (tenth failure, new self-lock class, repaired by `7b9a208` and recovered end-to-end there
+— marker commit `195c9d1` on `origin/main`). The next scheduled fire (2026-11-14 02:00 UTC) is the
+first attempt that can turn the scheduler's failure streak over; its capture is that tick's read.
+
+**Verdict:** unchanged — the public line stays closed for everything in force: nine sets each carry
+bare + contour matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12,
+SimpleBench is closed as unpinnable, and the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified / GAIA-lite) are owner-gated. Zero model/cloud calls, zero benchmark bytes moved; the
+only file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
+
+**Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00
+UTC, and one fresh preflight reading before any owner-gated local leg.
