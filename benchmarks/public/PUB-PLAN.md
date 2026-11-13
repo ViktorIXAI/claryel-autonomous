@@ -7807,3 +7807,156 @@ byte-exact.
 without an outer redirect; PUB gates invoked as `python3 <script>` and their exits read unshielded;
 censuses taken by exit code and by column equality, never by a bench-name substring; daily-docs fire
 2026-11-14 02:00 UTC from a passing precondition.
+
+## Tick 126 — 2026-11-13 22:12 CET: scoreboard unmoved — thirteenth GO of the afternoon, engine hold reaches 7 h 54 min; the P0 three-arm census stops being hand-derived, because it has mis-counted three measured times (zero legs, zero calls, zero published bytes moved)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*' --no-legend` empty, no
+`scripts/pub_bench_(run|cloud).py` process on this box, and on the endpoint box
+`gate_run.py|[p]ub_bench_run.py|[p]ub_bench_cloud.py` counted **0**. The Grok cancel marker is intact
+(`GROK-CANCELLED`, 121 B, 2026-11-12 06:54). The only `running` row in `~/.hermes/cron/executions.db`
+is this cron itself (`288a66f93167`, started 22:06:19). `HEAD` equals `origin/main` at `2af97c4`,
+working tree clean — no foreign commit landed between ticks.
+
+**Standing reads: thirteenth consecutive GO, longest engine hold of the day.** The 70th stored
+reading (22:06, wrapper run bare with no outer redirect, so no reading was burned): engine pid 10597
+age **07:54:02** — the same single process since 14:12:51 that ticks 114-125 tracked, state `S`,
+`engine_pcpu=0.0` (6 s sampled delta), swap 52 403 MiB free of 65 535 (13 132 in use),
+MemAvailable 18 195 of 61 953, GPU **0 %/25.79 W**, `health_code=200` with `health_loaded=true` and
+`engine_serve_procs=1`, `foreign_legs=0`, load1 7.40. Gate re-run **unshielded on the saved file:
+PREFLIGHT GO, exit=0**. One number moved without a restart: `engine_rss_mib` read **54 742** against
+tick 125's 57 266 on the same pid — the warm engine shrank its resident set while its ~13.1 GiB of
+swap stayed put; no engine restart, `keep-up.log` still one restart today (13:07:49). On the box: ops
+tuning campaign **0** processes (ninth idle read today), box uptime 8 h 59 min, serve log written at
+22:07:08 (main-brain traffic still served). The tick-122 state-D caution: a box-wide state histogram
+showed **1** process in `D` at one instant, and the targeted follow-up on the same box listed **no**
+`D`-state process at all while `vmstat 2 3` read si/so = 0 — a momentary block, not a thrashing box,
+on the fourth consecutive read that does not reproduce the tick-122 sample.
+
+**Stored-reading census** (gate re-run mechanically over the whole series, exit code captured
+immediately after the call — no pipes, no trailing `echo`, no `$?` reuse):
+**70 files = 35 GO / 33 NO-GO / 2 input-gap** — exactly tick 125's 69/34/33/2 plus this tick's one
+new GO; today's subset alone: **32 files = 29 GO / 3 NO-GO / 0 input-gap**. Zero legs live, so still
+no `LEG-INCIDENTS.md` entry (tick-110…125 precedent).
+
+**A trap in this tick's own census helper, caught before it was reported.** The census script's first
+pass printed `files=0 GO=0` while 69 readings existed on disk. The cause was a "guard" line written as
+`files = [f for f in files if ...] and files`: the comprehension is empty, so `and` evaluates to the
+empty list and the whole series was discarded — a filter that cannot fail loudly. The disagreement
+with tick 125's known 69-file census is what exposed it; the line was removed and the census above
+reproduces the series. This is the fourth self-inflicted census bug in this family (tick 119 and
+tick 124: a bench-name substring filter eating digest rows; tick 125: a mis-invoked gate list whose
+exit 126 was read as five failing gates), and all four share one property: **a filter that drops
+data silently still prints a clean verdict.**
+
+**Which is why this tick converted the P0 census into a gate instead of doing it by hand a
+thirteenth time.** The owner rule in force since 2026-11-12 — three arms per set (bare local /
+contour `0.0.2.56` in matched request shape / ChatGPT codex) — plus the line's parity-shape rule had
+been re-derived from the digest table by hand on every tick since the cancel, in a form that had
+already mis-counted three times. New checker, allowed class (a pub-line checker; it registers no
+contour feature, launches no arm, scores no byte and moves no published number):
+
+* `scripts/pub_three_arm_parity_check.py` (new) — reads the digest table **by column** and the set
+  vocabulary from `MANIFEST.json`, then pins: (1) an in-force set is a pinned bench with `tasks > 0`,
+  and a percent row for a `tasks == 0` bench (SimpleBench, closed as unpinnable) is a finding;
+  (2) every in-force set must carry a `bare` row, a **matched-shape** contour row and a `codex` row;
+  (3) a set whose only contour row is escalation-shape (`ladder rungs 512,1200` /
+  `enable_thinking off`) is a finding — those rows stay published as history, never edited;
+  (4) every contour row must carry the frozen stamp `0.0.2.56`, anything else is a finding;
+  (5) **Grok is never an arm and never a missing arm** — the cancel sentence is read out of
+  `GROK-RESUME-PIN.json -> owner_window.cell_phrase` at run time, so the checker cannot quote a stale
+  status; (6) `pub-repair` keep-best rows are sidecars and never satisfy rule 2; (7) a census
+  self-check: attributed rows must equal parsed rows, the mechanical form of "no row was eaten by a
+  name-substring filter". Unknown bench name, a missing header or a ragged row **fail closed with
+  exit 2**. Denominators are reported, not compared: the line's own rule 4 (local brain runs the
+  full pinned set, cloud cross-arm slice is the first 300 ids) means gsm8k / arc-easy /
+  arc-challenge / bfcl legitimately differ, and the gate prints the shared denominator where one
+  exists (`gpqa-diamond 198`, `humaneval 164`, `ifeval 541`, `livecodebench 112+175`,
+  `mmlu-pro 500`) and the stated skew where it does not.
+* Verdict on live bytes at the pushed head: **49 rows / 9 in-force sets / 0 findings** —
+  `bare + contour-matched + codex` on all nine sets, Grok 6 rows over gsm8k / arc-easy /
+  arc-challenge / gpqa-diamond / humaneval / mmlu-pro and absent on ifeval / livecodebench / bfcl,
+  printed with the pin's sentence "suspended by owner quota, cancelled by owner decision 2026-11-12
+  (no resume date) | cancelled_on=2026-11-12". Per-set census reproduces the tick-125 hand census
+  exactly (gsm8k 6, arc-easy 5, arc-challenge 5, gpqa-diamond 5, humaneval 8, ifeval 5, mmlu-pro 4,
+  livecodebench 7, bfcl 4 = 49).
+* `harness/pub_three_arm_parity_test.py` (new) — **20/20 checks green**, CI-enrolled by the
+  `harness/*test.py` glob that `scripts/qa/static_checks.py` runs in the devsecops job. Tampers: drop
+  the mmlu-pro codex row, drop the mmlu-pro bare row, remove arc-easy's matched contour row, put one
+  contour row on `0.0.2.57`, add a SimpleBench percent, add an unknown bench, delete the header,
+  delete a cell — each must turn exit 3 or the fail-closed exit 2 with the right words. Non-vacuity:
+  removing the superseded **escalation** row still passes (the gate wants a matched row, not every
+  contour row), and dropping every `pub-repair` row or every **Grok** row still passes (sidecars are
+  not arms, the cancelled line is not a missing arm). Anti-substring control: three extra
+  LiveCodeBench rows must show up as exactly **+3** in the printed census (`7 → 10`) and the row count
+  must follow the tamper — the exact failure mode of tick 124.
+* Control that the test is not itself vacuous: the checker was temporarily replaced by an always-GO
+  stub (bytes backed up, restored, **sha256-16 identical after restore**); against that stub **11 of
+  the 20 checks go red**, and against the real gate the file reads 20/20 again. The test's own first
+  draft also had a fake-tamper bug — its table splitter never flipped its `seen` flag, so every row
+  landed in the header block and every "tamper" was a no-op; caught by reading the row counts, and
+  the splitter now derives the header block from the two `|` lines and fail-closes otherwise.
+
+**Standing gates, re-run green unshielded at the pushed head.** Six checks: arms index **drift 0**;
+derived percents **42 recomputed from shipped bytes, 0 findings** (digest citations 44, doc citations
+188, uncovered 0); grok-cell rule **9 docs / 0 findings** with the in-force sentence read from the
+pin; superseded-cell rule **9 docs / 0 findings**; digest rows **49 / 0 findings** (contracts named
+26, 23/23 legacy exceptions used); `scripts/security/secret_scan.py --dir . --strict` **exit 0**. The
+new parity gate is the seventh line of the standing list from this tick on.
+
+**Digest table byte-stable** (sha256-16 `9d5ac7c3a60fb9dd`, 16 517 B, unchanged since `ad8d8c0`): this
+tick writes a reader of that table, not a row in it. `PUB-DIGEST.md`, every task file, every answer
+file and every checker contract byte is untouched.
+
+**Grok line: still closed by the owner decision, re-proven not assumed.** Resume gate unshielded:
+22 checks, **NO-GO — do not spend quota, exit=3**; the VOID record line intact ("182 ids were never
+asked … VOID, the line is cancelled, this is not a queue") and the zero-credit quarantine lines
+intact (gpqa 46/38 and 4/4). The IFEval partial re-verified from its own stored bytes, identical to
+ticks 117-125: **359 rows / 359 `finish=ok` / 0 empty / 359 unique ids / sha256-16
+`01c1ee0b6e7f6d5d`**, resume set 182 ids `ifeval-286`..`ifeval-3757`. The three completed Grok arms
+are byte-exact against the pin with resume sets of 0 ids (gpqa-diamond 198/198 `c479109822f388a5`,
+humaneval 164/164 `161ddf5b1956ab13`, mmlu-pro 500/500 `5731d720f13ef8a5`). Zero credit, zero
+published percent, resumable by id only on a fresh owner reversal.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** `Mac v2.2 full after v2.1`
+(`f23cf5d48e11`, every 5 min, enabled) fired 22:02:19, status ok — inert only behind its one-shot
+launch marker, re-read on the literal path (`~/.hermes/mac-v22full-launch.state`, 26 B,
+`2026-11-02T14:05:30+01:00`, unchanged). `P2005 paired full 2.1→2.2 watch` (`a808c7f205a6`, `*/5`)
+fired 22:05:19, ok — still a permanent 5-minute ssh round-trip onto this line's endpoint box. Both
+reported as an owner decision, not edited. No contour stamp or feature registered, no hard-bank pair
+launched, no hard-bank byte touched.
+
+**Two-clone hazard: unchanged.** The watchdog clone still shows **zero staged lines** and an empty
+branch name (detached HEAD at `aa4e4d6`, "CHG-001 P2005: unannounced hardware drift detected", which
+`git merge-base --is-ancestor` confirms is **not an ancestor of `main`** — `main` carries the
+same-message `ac3bae9`). Its tree holds one modified file (`hardware/os-snapshots/latest.json`) and
+six untracked paths, three of them scratch files sitting in that clone's `benchmarks/public/raw/`.
+All reported, nothing touched — not this line's refs or bytes, zero credit taken.
+
+**Daily-docs job, read from its own record.** `GitHub docs freshness daily` (`ef7ea47ff99b`,
+`0 2 * * *`) last fired **2026-11-13 03:00:19 CET** with status error — the pre-fix run tick 116
+attributed — and has not fired since; the executions DB retains **no row** for that id (pruning), so
+the attribution does not come from the DB. `README.md` line 100 carries `Status checked: 2026-11-13`
+and `scripts/qa/docs_policy.py --daily` exits 0 (`DOCS POLICY: PASS (daily)`), so the machine note's
+"dirty tree at 03:00" cause is not currently armed (tree clean at 22:12 CET). The job's
+`failure_streak 10` is cumulative, not ten attempts today. Next fire 2026-11-14 02:00 UTC.
+
+**Verdict:** unchanged on the scoreboard — nine in-force sets complete on the three-arm standard
+(bare local / contour `0.0.2.56` matched shape / ChatGPT codex), grok cancelled by owner decision
+2026-11-12, SimpleBench closed as unpinnable, the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified subset / GAIA-lite) owner-gated. Zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the endpoint read its **thirteenth GO** of the afternoon with the
+single engine process at **7 h 54 min** of hold (ninth idle read of the ops tuning campaign, and the
+warm engine's RSS fell 57 266 → 54 742 MiB on the same pid); the **P0 three-arm census is now a
+gate** (`scripts/pub_three_arm_parity_check.py`, 49 rows / 9 sets / 0 findings, `bare + matched-shape
+contour + codex` certified on all nine sets) with a **20/20 contract test** whose non-vacuity is
+proven both ways (a vacuous always-GO gate turns 11 of its checks red; escalation/sidecar/Grok drops
+stay green); and this tick caught its own census helper silently emptying the reading series
+(`[..] and files`) before it could be reported — the fourth silent-filter bug in this family, which
+is exactly what the new gate's row-count self-check exists to refuse.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; PUB gates invoked as `python3 <script>` with exits read unshielded;
+censuses taken by exit code and by column equality, never by a bench-name substring, and every
+census cross-checked against the gate's own row count; daily-docs fire 2026-11-14 02:00 UTC from a
+passing precondition.
