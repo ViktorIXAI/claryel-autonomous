@@ -7712,3 +7712,98 @@ digest census was wrong for one step and corrected by cross-checking against the
 without an outer redirect; the state-D caution stays open and a GO is only per-reading; digest and
 per-set censuses are taken by column equality, never by a bench-name substring; daily-docs fire
 2026-11-14 02:00 UTC from a passing precondition.
+
+## Tick 125 — 2026-11-13 21:20 CET: scoreboard unmoved — twelfth GO of the afternoon, engine hold passes 7 h; this tick's own gate list mis-invoked and was corrected before it could be reported (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*' --no-legend` empty, no
+`scripts/pub_bench_(run|cloud).py` process on this box, and on the endpoint box
+`gate_run.py|[p]ub_bench_run.py|[p]ub_bench_cloud.py` counted **0**. The Grok cancel marker is intact
+(`GROK-CANCELLED`, 121 B, 2026-11-12 06:54). The only `running` row in `~/.hermes/cron/executions.db`
+is this cron itself (`288a66f93167`, started 21:18:19). `HEAD` equals `origin/main` at `0e7b3f3`,
+working tree clean — no foreign commit landed between ticks.
+
+**Standing reads: twelfth consecutive GO, longest engine hold of the day.** The 69th stored reading
+(21:19, wrapper run bare with no outer redirect, so no reading was burned): engine pid 10597 age
+**07:06:50** — the same single process since 14:12:51 that ticks 114-124 tracked, now **7 h 08 min**
+and still growing; state `S`, `engine_rss_mib=57 266` (warm), `engine_pcpu=0.0` (6 s sampled delta),
+swap 52 176 MiB free of 65 535 (13 359 in use), MemAvailable 20 099 of 61 953, GPU **0 %/27.20 W**,
+`health_code=200` with `health_loaded=true` and `engine_serve_procs=1`, `foreign_legs=0`,
+load1 10.66. Gate re-run **unshielded on the saved file: PREFLIGHT GO, exit=0**. One caution stated,
+not acted on: load1 ~10 at GPU 0 % with the serve log written at 21:20:48 means the box is still
+serving main-brain traffic while idle for this line, and it still carries ~13 GiB of swap against a
+57.3 GiB-RSS engine. The tick-122 state-D sample has now not reproduced across three consecutive
+reads. On the box: ops tuning campaign **0** processes (eighth idle read today), `keep-up.log` still
+one restart today (2 lines total), box uptime 8 h 13 min.
+
+**Stored-reading census** (gate re-run mechanically over the whole series by a script that captures
+the exit code immediately after the call — no pipes, no trailing `echo`, no `$?` reuse):
+**69 files = 34 GO / 33 NO-GO / 2 input-gap** — exactly tick 124's 68/33/33/2 plus this tick's one new
+GO; today's subset alone: **31 files = 28 GO / 3 NO-GO / 0 input-gap**. Zero legs live, so still no
+`LEG-INCIDENTS.md` entry (tick-110…124 precedent).
+
+**A trap in this tick's own tool call, caught before it was reported.** The first pass of the five
+PUB gates ran them as bare script paths (`scripts/pub_arms_index.py --check`, …) and every one
+returned **exit=126 `Permission denied`** — the files are not executable, so that reading said
+"five gates failed" while nothing had actually run. Re-invoked as `python3 <script>`, all six checks
+are green at the pushed head: arms index **drift 0**; derived percents **42 recomputed from shipped
+bytes, 0 findings** (digest citations 44, doc citations 188, uncovered 0); grok-cell rule **9 docs /
+0 findings** with the in-force sentence read from the pin
+("suspended by owner quota, cancelled by owner decision 2026-11-12 (no resume date)");
+superseded-cell rule **9 docs / 0 findings**; digest rows **49 / 0 findings** (contracts named 26,
+23/23 legacy exceptions used); `scripts/security/secret_scan.py --dir . --strict` **exit 0**. Same
+family as the tick-119/124 arithmetic traps: a command that never ran still prints an exit code, and
+the code is not a verdict.
+
+**Digest table byte-stable** (sha256-16 `9d5ac7c3a60fb9dd`, 16 517 B, unchanged since `ad8d8c0`): the
+per-set row census taken by exact first-column equality — not a bench-name substring — reproduces the
+gate's 49: gsm8k 6, arc-easy 5, arc-challenge 5, gpqa-diamond 5, humaneval 8, ifeval 5, mmlu-pro 4,
+livecodebench 7, bfcl 4.
+
+**Grok line: still closed by the owner decision, re-proven not assumed.** Resume gate unshielded:
+22 checks, **NO-GO — do not spend quota, exit=3**; the VOID record line intact ("182 ids were never
+asked … VOID, the line is cancelled, this is not a queue") and the zero-credit quarantine lines
+intact (gpqa 46/38 and 4/4). The IFEval partial re-verified from its own stored bytes, identical to
+ticks 117-124: **359 rows / 359 `finish=ok` / 0 empty / 359 unique ids / sha256-16
+`01c1ee0b6e7f6d5d`**, resume set 182 ids `ifeval-286`..`ifeval-3757`. The three completed Grok arms
+are byte-exact against the pin with resume sets of 0 ids (gpqa-diamond 198/198 `c479109822f388a5`,
+humaneval 164/164 `161ddf5b1956ab13`, mmlu-pro 500/500 `5731d720f13ef8a5`). Zero credit, zero
+published percent, resumable by id only on a fresh owner reversal.
+
+**CI at the pushed head: all five runs success** at `0e7b3f3` — `contour self-tests`, `secret-scan`,
+`devsecops`, `hard-v6 scoring contracts`, `pages build and deployment`.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** `Mac v2.2 full after v2.1`
+(`f23cf5d48e11`, every 5 min, enabled) is inert only behind its one-shot launch marker, re-read on
+the literal path (`~/.hermes/mac-v22full-launch.state`, 26 B, `2026-11-02T14:05:30+01:00`, unchanged).
+`P2005 paired full 2.1→2.2 watch` (`a808c7f205a6`, `*/5`) is still a permanent 5-minute ssh
+round-trip onto this line's endpoint box. Both reported as an owner decision, not edited.
+
+**Two-clone hazard: unchanged.** The watchdog clone still shows **zero staged lines** and an empty
+branch name (detached HEAD), parked on `aa4e4d6` "CHG-001 P2005: unannounced hardware drift
+detected — passport updated", which `git merge-base --is-ancestor` confirms is **not an ancestor of
+`main`** (`main` carries the same-message commit `ac3bae9`). Its tree holds one modified file
+(`hardware/os-snapshots/latest.json`) and six untracked paths, three of them scratch files sitting in
+that clone's `benchmarks/public/raw/` (`arceasy-test.jsonl`, `ifeval-input.jsonl`, `x.bin`). All
+reported, nothing touched — not this line's refs or bytes, zero credit taken.
+
+**Daily-docs job, read from its own record.** Last fired 2026-11-13 03:00:18 CET (the pre-fix run
+tick 116 attributed); the executions DB retains **no row** for that job id (pruning), so today's
+attribution does not come from the DB. `README.md` line 100 carries `Status checked: 2026-11-13` and
+`scripts/qa/docs_policy.py --daily` on the tracked tree exits 0 (`DOCS POLICY: PASS (daily)`), so the
+machine note's "dirty tree at 03:00" cause is not currently armed. Next fire 2026-11-14 02:00 UTC.
+
+**Verdict:** unchanged on the scoreboard — nine in-force sets complete on the three-arm standard
+(bare local / contour `0.0.2.56` matched shape / ChatGPT codex), grok cancelled by owner decision
+2026-11-12, SimpleBench closed as unpinnable, the remaining ladder rows (Terminal-Bench / SWE-bench
+Verified subset / GAIA-lite) owner-gated. Zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the endpoint read its **twelfth GO** of the afternoon with the
+single engine process at **7 h 08 min** of hold (ops tuning campaign idle for an eighth read); the
+standing gate list was re-proven green at the pushed head after this tick caught its own
+mis-invoked gate list (exit 126 is not a failing gate); the digest table and the Grok partial stayed
+byte-exact.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; PUB gates invoked as `python3 <script>` and their exits read unshielded;
+censuses taken by exit code and by column equality, never by a bench-name substring; daily-docs fire
+2026-11-14 02:00 UTC from a passing precondition.
