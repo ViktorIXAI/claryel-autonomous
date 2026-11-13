@@ -5701,3 +5701,79 @@ moved, so `LEG-INCIDENTS.md` gains no entry.
 seven-reading GO streak with one stable engine process, so an owner-gated ladder row could start
 immediately when opened; the Grok line stays closed by owner decision 2026-11-12. Read the docs
 job's 03:00 CET fire next tick: a green run today closes the streak that ticks 92/96/97 recorded.
+
+## Tick 100 — 2026-11-13 02:50 CET: read-only status tick; **eighth consecutive PREFLIGHT GO** (22nd reading, engine pid unchanged across six readings); five pub gates + secret scan green at `9fe0f28`; CI green on all five workflows **at the current HEAD**; the digest-row gate that reddened the docs job twice re-run green; Grok gate NO-GO exit 3; zero legs, zero calls
+
+Nothing was launched: `systemctl --user list-units 'parb-*'` is empty in both the plain and the
+`--all` listing, `pgrep -f 'pub_bench_(run|cloud)'` and `pgrep -f 'gate_ru[n].py'` find nothing, and
+the only `running` row in the scheduler's own `executions` table is this tick
+(`288a66f93167`, started 02:47:17), so no sibling instance of this brief holds the clone.
+
+*Twenty-second reading; eighth consecutive GO.* Readings (wrapper run bare, gate re-run unshielded,
+true exit **0**): `swap_free_mib=3 141` / `swap_used_mib=5 050` (of 8 191, columns balance exactly at
+the total — the tick-78 producer-column guard satisfied), `mem_available_mib=17 195`,
+`engine_rss_mib=55 594` (the ops line's 36 GiB tier), `engine_state=S`, `engine_pcpu=0.0`
+(6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=8.11`, `load1=0.01`, `health_code=200`,
+`foreign_legs=0`. Engine `pid=1142697` age `03:52:59` — the **same** process for six consecutive
+line readings; swap free is flat (3 139 → 3 141 MiB against tick 99).
+Stored-reading census (`pub_preflight.py` over every `preflight-*.txt`, exit captured per file,
+never through a pipe): **42 files = 10 GO / 30 NO-GO / 2 input-gap**. Against tick 98's census of
+40 files = 8 GO / 30 NO-GO / 2 input-gap the two added files are `02:07` (tick 99) and `02:49`
+(this tick), both GO — the file census and the line's 22-reading index agree.
+
+*Repo integrity.* `git ls-remote origin main` == `HEAD` == `9fe0f28` (tick 99's commit is on
+`origin/main`), `git rev-list --left-right --count main...origin/main` = `0 0`, and
+`git fsck --connectivity-only --no-dangling` prints nothing (0 findings) — two ticks clean after the
+tick-97 object-store repair. The second clone's index is empty, so the staged-deletion hazard is not
+live; the working tree was clean at the start of this tick.
+
+*Gates at the synced head.* Five PUB gates green unshielded: `pub_arms_index.py --check` index drift
+0; `pub_derived_percent_check.py` 42 derived percents recomputed from shipped bytes, 0 findings
+(44 digest + 188 doc citations, 0 uncovered); `pub_grok_cell_check.py` 9 documents, 0 findings on the
+in-force cancelled sentence (1 superseded sentence rejected as a class control);
+`pub_superseded_cell_check.py` 9 documents, 0 findings; `pub_digest_row_check.py` 49 rows, 0 findings
+(26 contracts named, 23/23 legacy exceptions used). `scripts/security/secret_scan.py --dir . --strict`
+exit **0**. `scripts/pub_grok_resume_check.py` exit **3** — 22 checks,
+`RESUME GATE: NO-GO - do not spend quota`, ifeval stored 359 rows / 359 ok, the 182 unasked ids
+(`ifeval-286..ifeval-3757`) printed as a VOID record, not a queue.
+
+*CI — green on the current HEAD, not a predecessor.* At `9fe0f28` all five workflows are
+`completed/success` (`secret-scan`, `contour self-tests`, `hard-v6 scoring contracts`, `devsecops`,
+`pages-build-deployment`). Tick 99 could only read CI on its own predecessor; this is the first tick
+whose green read sits on the HEAD it starts from, which is what makes "the pushed line is the measured
+line" checkable rather than asserted.
+
+*Daily docs job — the standing sentence corrected from the job's own record.* `ef7ea47ff99b` is
+`[active]`, `failure_streak 9`, last run `2026-11-12T03:02:22` **error**, newest incident still
+`4cfeecb7852d` (`state=alerted`, `failure_type=auth`). The brief for this line says the job fails
+"because the working tree is dirty during its 03:00 run" — that class is real but it is **not** what
+the last two runs did: `2026-11-11_03:02` and `2026-11-12_03:02` both die inside
+`scripts/qa/static_checks.py` with a `subprocess.CalledProcessError`, and the only real `FAIL` token
+in either capture is **`FAILED: row_count_census`** inside `harness/pub_digest_row_gate_test.py`
+(`21 checks, 1 failed`), after the four `MANIFEST GUARD` lines that are the gates' own tamper
+fixtures on scratch copies. That mutable pin was removed by `5be2855` (2026-11-12 04:47), the fix
+tick 99 already pointed at. Re-run at this HEAD: **22 checks, 0 failed, exit 0** — so today's
+`02:00 UTC = 03:00 CET` fire is the first attempt with both the digest-row-count pin and the
+superseded-cell pin gone. Whether it goes green now turns only on tree cleanliness at fire time, and
+this tick's own commit lands within a minute of that fire; the outcome is next tick's read, not a
+claim here. No in-flight file was committed to influence it.
+
+*Legacy jobs still armed against the frozen hard-bank line (owner decision, untouched).*
+`f23cf5d48e11` "Mac v2.2 full after v2.1" (every 5 min) stays a no-op while
+`~/.hermes/mac-v22full-launch.state` (2026-11-02 14:05) exists, and `a808c7f205a6`
+"P2005 paired full 2.1→2.2 watch" (every 5 min) stays inert as a completion watcher — its
+`b2003-finish-watch.state/completed` marker (2026-11-02 02:35) is in place. Both report `ok`;
+neither launched anything in the last hour (`executions` shows 5-minute `completed` rows only).
+Drain guard `9a12508f8a69` ran `ok` at 02:40.
+
+**Verdict:** the public line is closed for everything in force — nine sets each carry bare +
+contour matched-shape + codex arms, grok is cancelled by owner decision 2026-11-12, SimpleBench is
+closed as unpinnable, and the remaining ladder rows (Terminal-Bench / SWE-bench Verified / GAIA-lite)
+are owner-gated. The endpoint has held an eight-reading GO streak on one stable engine process, so a
+queued owner-gated leg starts within one wrapper call. Zero model calls, zero cloud calls; the only
+file this tick writes is `PUB-PLAN.md`, so `LEG-INCIDENTS.md` gains no entry.
+
+**Next in force:** unchanged and empty. Read the docs job's `03:00 CET` fire next tick — with
+`5be2855` in the tree and the digest gate green at this HEAD, a green run there closes the
+nine-failure streak; if it fails, its capture must be read for the real `FAIL` token rather than
+repeating the "dirty tree" sentence.
