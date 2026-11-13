@@ -233,3 +233,27 @@ Rules that shaped it:
   results file); caught by reading the diff, repaired in the same commit — the standing
   rule from 2026-11-09 holds: diff every non-mexact patch.
 
+
+
+## 2026-11-13 — P1006 first sighting: passport + onboarding incident (key delivery)
+
+Added hardware/inventory/P1006.md (passport from live reads: MSI B550-A PRO /
+Ryzen 5 5600X / 64 GB DDR4-3200 non-ECC / Intel Arc A750 8 GB `8086:56a1` on the
+open-source stack / one 990 PRO 1 TB holding root and a 604 GiB Arc-SYCL data
+tree at 92 % full) and hardware/changes/P1006.md CHG-001.
+
+The published part is the failure mode, not the machine: the standard console
+block fetches the fleet public key over HTTP, the fetch timed out at 132 s while
+the rest of the block ran, and the self-check line reported `key=0` — a box with
+a listener, a sudoers drop-in and a firewall rule, and no key. Measured the same
+day: the key-server's own host firewall (default-deny inbound) drops the key port,
+which produces a ~130 s timeout from another fleet host rather than a refusal.
+Recovery was an inline key write, verified by `ssh-keygen -lf` digest on the box
+and by a passwordless-sudo probe from the control host. Standing rule recorded
+fleet-side: read the `key=` field of every onboarding self-check, and paste the
+key inline unless the firewall rule was opened deliberately.
+
+No inference role claimed: the fleet engine has CPU and NVIDIA paths only, so this
+box is published as an Arc/SYCL experiment bench. Sanitization: no address, user,
+key path or hostname in either file (AGENTS.md rule 1); capacity and restart state
+published as open maintainer decisions, nothing patched or rebooted on the box.
