@@ -1,0 +1,37 @@
+=== arm v10_batch1 (loaded=1)
+[server] s1 done  pp=878/873c 0.0s  tg=157 172.6t/s acc=68%  ttft=0.1s  end=stop  hit=94.5%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 199.9t/s acc=70%  ttft=0.1s  end=stop  hit=95.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=159 175.9t/s acc=64%  ttft=0.1s  end=stop  hit=96.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 190.5t/s acc=70%  ttft=0.0s  end=stop  hit=96.0%  pcie=0.0%
+parallel: 4 streams, 628 tokens in 3.6s = 173.1 tok/s aggregate
+stream1 ttft 0.37s  chars 432  wall 1.0s  432 chars/s
+stream2 ttft 1.35s  chars 396  wall 1.8s  220 chars/s
+stream3 ttft 2.16s  chars 460  wall 2.7s  170 chars/s
+stream4 ttft 3.11s  chars 396  wall 3.6s  110 chars/s
+mem Mem:            60Gi        36Gi        17Gi       834Mi       7.4Gi        23Gi
+gpu MiB 23663 MiB, 24463 MiB
+=== arm v10_batch4 (loaded=1)
+[server] s1 done  pp=878/873c 0.0s  tg=150 47.2t/s acc=77% dl=1.7  ttft=0.0s  end=stop
+[server] s2 done  pp=878/873c 0.2s  tg=150 50.2t/s acc=73% dl=1.7  ttft=0.3s  end=stop
+[server] s4 done  pp=878/873c 0.1s  tg=156 57.5t/s acc=79% dl=1.8  ttft=0.6s  end=stop  hit=91.9%  pcie=0.0%  ssd=0.1%
+[server] s3 done  pp=878/873c 0.1s  tg=151 52.8t/s acc=70% dl=1.7  ttft=0.5s  end=stop
+parallel: 4 streams, 607 tokens in 3.4s = 178.8 tok/s aggregate
+stream1 ttft 1.77s  chars 417  wall 3.3s  126 chars/s
+stream2 ttft 1.70s  chars 417  wall 3.3s  126 chars/s
+stream3 ttft 1.97s  chars 396  wall 3.4s  116 chars/s
+stream4 ttft 1.84s  chars 424  wall 3.4s  125 chars/s
+mem Mem:            60Gi        42Gi        11Gi       834Mi       7.8Gi        17Gi
+gpu MiB 23769 MiB, 24463 MiB
+=== arm v10_batch4_cpu (loaded=1)
+[server] s1 done  pp=878/873c 0.0s  tg=150 50.9t/s acc=77% dl=1.8  ttft=0.0s  end=stop
+[server] s2 done  pp=878/873c 0.2s  tg=150 54.0t/s acc=72% dl=1.7  ttft=0.3s  end=stop
+[server] s3 done  pp=878/873c 0.1s  tg=150 56.5t/s acc=70% dl=1.7  ttft=0.5s  end=stop
+[server] s4 done  pp=878/873c 0.1s  tg=164 133.5t/s acc=75% dl=1.7  ttft=0.6s  end=stop  hit=88.2%  pcie=0.0%  ssd=0.1%
+parallel: 4 streams, 614 tokens in 3.3s = 185.2 tok/s aggregate
+stream1 ttft 1.63s  chars 417  wall 3.0s  139 chars/s
+stream2 ttft 1.71s  chars 417  wall 3.2s  130 chars/s
+stream3 ttft 1.71s  chars 417  wall 3.1s  135 chars/s
+stream4 ttft 1.79s  chars 445  wall 3.3s  135 chars/s
+mem Mem:            60Gi        42Gi        11Gi       831Mi       7.8Gi        17Gi
+gpu MiB 23769 MiB, 24463 MiB
+ALL_V10_DONE

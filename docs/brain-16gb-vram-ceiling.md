@@ -143,18 +143,24 @@ ceiling 61 GiB, agent kept off the box (one 20K-context probe per window is the 
 
 | окно видеопамяти | reserve | GPU занято | decode тёплый, медиана / лучший | decode холодный | decode на 27.5K контексте | hit experts | пик ОЗУ машины | всего Вт | €/1 M токенов |
 |---|---|---|---|---|---|---|---|---|---|
-| 16 ГиБ | 8079 | 16089 МиБ | 104.5 / 108.5 | 79.5 | 85.9 | 75 % | 46.7 ГиБ | 211 | 0.140 € |
-| 20 ГиБ | 3983 | 20185 МиБ | 143.6 / 152.0 | 93.5 | 114.2 | 88 % | 42.7 ГиБ | 231 | 0.111 € |
-| макс 23.9 ГиБ | 512 | 23659 МиБ | 186.7 / 188.7 | 111.9 | 137.0 | 94 % | 39.4 ГиБ | 231 | 0.086 € |
-| макс 23.9 ГиБ | 512 (ОЗУ-бюджет 30) | 23655 МиБ | 168.6 / 183.3 | 97.9 | 137.8 | 94 % | 38.0 ГиБ | 222 | 0.091 € |
+| 16 ГиБ | 8079 | 16089 МиБ | 104.5 / 108.5 | 79.5 | 85.9 | 75 % | 46.7 ГиБ | 196 | 0.130 € |
+| 20 ГиБ | 3983 | 20185 МиБ | 143.6 / 152.0 | 93.5 | 114.2 | 88 % | 42.7 ГиБ | 216 | 0.104 € |
+| макс 23.9 ГиБ | 512 | 23659 МиБ | 186.7 / 188.7 | 111.9 | 137.0 | 94 % | 39.4 ГиБ | 216 | 0.080 € |
+| макс 23.9 ГиБ | 512 (ОЗУ-бюджет 30) | 23655 МиБ | 168.6 / 183.3 | 97.9 | 137.8 | 94 % | 38.0 ГиБ | 207 | 0.085 € |
+
+> Cost basis corrected 2026-11-13: the watts column is now the **average whole-box draw during the bench window**
+> (GPU `power.draw` + RAPL package) taken from `data/p2005-16gb-20261112/v7-raw.log`, so the €/M column is
+> reproducible from the shipped log. The first version of this table used a spot sample (211 / 231 W, 0.140 /
+> 0.111 / 0.086 €), which overstated cost by 5–10 %; the same small bias sits in the v5 and v6 €/M columns
+> (recomputed: 48 GiB ladder 0.143 / 0.151 / 0.132 / 0.130 €, 61 GiB ladder 0.141–0.147 €). Ratios do not change.
 
 The card window is the whole story on this machine. 16 → 20 GiB adds **+37 %** decode (104.6 → 143.7 t/s median)
 and pushes the expert-cache hit rate from 75 % to 87 %; 20 → 23.9 GiB adds another **+30 %** (143.7 → 186.7) and
 lifts the hit rate to 94 %, at which point only **1.3 GiB of experts stays on SSD**. Long-context decode moves with
 it: on a cached 27.5K-token prompt 86 → 114 → 137–149 t/s.
 
-Money moves the same way, because the watts barely change: 211 → 231 → 231 W total, so the cost per million tokens
-falls **0.140 → 0.111 → 0.086 €**. The widest window is the fastest and the cheapest at once. And contrary to the
+Money moves the same way, because the watts barely change: 196 → 216 → 216 W total, so the cost per million tokens
+falls **0.130 → 0.104 → 0.080 €**. The widest window is the fastest and the cheapest at once. And contrary to the
 16 GiB case it is also the *lightest* on host RAM: the GPU takes what RAM would otherwise hold, so peak machine RAM
 drops 46.7 → 42.7 → 39.4 GiB, which puts the fastest configuration comfortably inside the 47 GiB budget of a 48 GiB
 machine as well.

@@ -1,0 +1,113 @@
+=== arm n_base (loaded=1)
+gpu MiB 23663 MiB, 24463 MiB
+host RAM peak used 37.1 GiB (ceiling 61)
+swap max per-second: in 24 pages (0.1 MiB) out 0 pages (0.0 MiB)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.3s 654t/s  tg=156 126.6t/s acc=72%  ttft=1.4s  end=stop  hit=85.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=151 167.8t/s acc=65%  ttft=0.0s  end=stop  hit=95.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 201.8t/s acc=71%  ttft=0.0s  end=stop  hit=95.8%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 179.1t/s acc=68%  ttft=0.0s  end=stop  hit=96.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 189.8t/s acc=68%  ttft=0.0s  end=stop  hit=96.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 192.7t/s acc=72%  ttft=0.0s  end=stop  hit=96.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 181.2t/s acc=70%  ttft=0.0s  end=stop  hit=96.4%  pcie=0.0%
+[server] s1 done  pp=27553/0c 7.3s 3768t/s  tg=151 164.8t/s acc=74%  ttft=7.3s  end=stop  hit=95.4%  pcie=0.0%  ssd=0.4%
+gpu_W avg 143.2 p90 172.7 max 172.8 n=16
+cpu_W avg 65.3 p90 97.1 max 99.3 n=15
+=== arm n_ram50 (loaded=1)
+gpu MiB 23663 MiB, 24463 MiB
+host RAM peak used 37.0 GiB (ceiling 61)
+swap max per-second: in 20 pages (0.1 MiB) out 0 pages (0.0 MiB)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.3s 674t/s  tg=156 119.5t/s acc=72%  ttft=1.3s  end=stop  hit=85.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 171.9t/s acc=67%  ttft=0.0s  end=stop  hit=95.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 204.4t/s acc=71%  ttft=0.0s  end=stop  hit=96.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=159 170.9t/s acc=65%  ttft=0.0s  end=stop  hit=96.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=144 174.0t/s acc=69%  ttft=0.0s  end=stop  hit=96.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 187.1t/s acc=71%  ttft=0.0s  end=stop  hit=96.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 188.0t/s acc=72%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%
+[server] s1 done  pp=27553/0c 7.4s 3734t/s  tg=159 154.4t/s acc=68%  ttft=7.4s  end=stop  hit=95.2%  pcie=0.0%  ssd=0.4%
+gpu_W avg 135.6 p90 171.4 max 171.6 n=17
+cpu_W avg 63.5 p90 96.0 max 100.7 n=16
+=== arm n_k8v4 (loaded=1)
+gpu MiB 23667 MiB, 24463 MiB
+host RAM peak used 37.0 GiB (ceiling 61)
+swap max per-second: in 0 pages (0.0 MiB) out 0 pages (0.0 MiB)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.3s 651t/s  tg=155 127.8t/s acc=76%  ttft=1.4s  end=stop  hit=85.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 182.6t/s acc=72%  ttft=0.0s  end=stop  hit=95.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 146.9t/s acc=74%  ttft=0.0s  end=stop  hit=96.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 183.8t/s acc=74%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 182.4t/s acc=73%  ttft=0.0s  end=stop  hit=96.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 183.9t/s acc=73%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 182.8t/s acc=74%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%
+[server] s1 done  pp=27553/0c 8.1s 3391t/s  tg=238 153.7t/s acc=70%  ttft=8.1s  end=stop  hit=94.7%  pcie=0.0%  ssd=0.2%
+gpu_W avg 140.7 p90 172.4 max 179.7 n=18
+cpu_W avg 63.8 p90 92.2 max 99.3 n=17
+=== arm n_par2 (loaded=1)
+gpu MiB 23659 MiB, 24463 MiB
+host RAM peak used 39.3 GiB (ceiling 61)
+swap max per-second: in 0 pages (0.0 MiB) out 0 pages (0.0 MiB)
+foreign_in_window 0
+gpu_W avg 95.1 p90 173.2 max 173.2 n=10
+cpu_W avg 82.3 p90 98.8 max 98.8 n=9
+=== arm n_pre32k (loaded=1)
+gpu MiB 23663 MiB, 24463 MiB
+host RAM peak used 37.3 GiB (ceiling 61)
+swap max per-second: in 0 pages (0.0 MiB) out 0 pages (0.0 MiB)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.3s 660t/s  tg=156 131.2t/s acc=72%  ttft=1.4s  end=stop  hit=85.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 170.5t/s acc=67%  ttft=0.0s  end=stop  hit=95.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 204.2t/s acc=71%  ttft=0.0s  end=stop  hit=96.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=159 167.0t/s acc=65%  ttft=0.0s  end=stop  hit=96.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=144 174.1t/s acc=69%  ttft=0.0s  end=stop  hit=96.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 186.9t/s acc=71%  ttft=0.0s  end=stop  hit=96.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 187.6t/s acc=72%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%
+[server] s1 done  pp=27553/0c 7.4s 3746t/s  tg=163 170.0t/s acc=78%  ttft=7.4s  end=stop  hit=95.6%  pcie=0.0%  ssd=0.4%
+gpu_W avg 133.9 p90 166.4 max 179.2 n=17
+cpu_W avg 64.9 p90 99.9 max 101.9 n=16
+=== arm n_cpu02 (loaded=1)
+gpu MiB 23653 MiB, 24463 MiB
+host RAM peak used 37.1 GiB (ceiling 61)
+swap max per-second: in 0 pages (0.0 MiB) out 0 pages (0.0 MiB)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.5s 574t/s  tg=160 119.3t/s acc=72%  ttft=1.6s  end=stop  hit=85.6%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=144 175.3t/s acc=69%  ttft=0.1s  end=stop  hit=94.9%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=158 168.2t/s acc=62%  ttft=0.0s  end=stop  hit=95.9%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=159 172.2t/s acc=64%  ttft=0.0s  end=stop  hit=96.5%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=159 172.2t/s acc=64%  ttft=0.0s  end=stop  hit=96.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 184.5t/s acc=69%  ttft=0.0s  end=stop  hit=96.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 191.4t/s acc=73%  ttft=0.0s  end=stop  hit=96.4%  pcie=0.0%
+[server] s1 done  pp=27553/0c 7.4s 3719t/s  tg=163 156.6t/s acc=74%  ttft=7.4s  end=stop  hit=95.6%  pcie=0.0%  ssd=0.4%
+gpu_W avg 138.8 p90 178.3 max 178.9 n=17
+cpu_W avg 63.6 p90 89.6 max 103.1 n=16
+=== arm n_relax (loaded=1)
+gpu MiB 23663 MiB, 24463 MiB
+host RAM peak used 37.0 GiB (ceiling 61)
+swap max per-second: in 5 pages (0.0 MiB) out 0 pages (0.0 MiB)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.3s 680t/s  tg=156 133.9t/s acc=72%  ttft=1.3s  end=stop  hit=85.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=151 165.6t/s acc=65%  ttft=0.0s  end=stop  hit=95.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 196.0t/s acc=71%  ttft=0.0s  end=stop  hit=95.8%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 175.8t/s acc=68%  ttft=0.0s  end=stop  hit=96.0%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 184.9t/s acc=68%  ttft=0.0s  end=stop  hit=96.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 190.4t/s acc=72%  ttft=0.0s  end=stop  hit=96.4%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 179.3t/s acc=70%  ttft=0.0s  end=stop  hit=96.4%  pcie=0.0%
+[server] s1 done  pp=27553/0c 7.4s 3710t/s  tg=163 179.5t/s acc=73%  ttft=7.4s  end=stop  hit=95.8%  pcie=0.0%  ssd=0.4%
+gpu_W avg 144.8 p90 181.3 max 182.5 n=17
+cpu_W avg 65.2 p90 103.5 max 104.9 n=16
+=== arm n_pleram (loaded=1)
+gpu MiB 23663 MiB, 24463 MiB
+host RAM peak used 43.7 GiB (ceiling 61)
+swap max per-second: in 1432 pages (5.6 MiB) out 260 pages (1.0 MiB)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.6s 552t/s  tg=156 99.3t/s acc=71%  ttft=1.6s  end=stop  hit=84.8%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 158.0t/s acc=69%  ttft=0.1s  end=stop  hit=95.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=151 171.4t/s acc=66%  ttft=0.1s  end=stop  hit=96.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 174.8t/s acc=67%  ttft=0.1s  end=stop  hit=96.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 178.6t/s acc=71%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 179.0t/s acc=71%  ttft=0.0s  end=stop  hit=96.5%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=153 171.6t/s acc=67%  ttft=0.0s  end=stop  hit=96.5%  pcie=0.0%
+[server] s1 done  pp=27553/0c 7.4s 3712t/s  tg=163 154.8t/s acc=72%  ttft=7.4s  end=stop  hit=95.5%  pcie=0.0%  ssd=0.4%
+gpu_W avg 134.8 p90 173.3 max 174.5 n=18
+cpu_W avg 59.2 p90 88.9 max 94.0 n=17
+ALL_V8_DONE

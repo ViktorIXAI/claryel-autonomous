@@ -1,0 +1,79 @@
+=== arm v9_base (loaded=1)
+--- 4 streams x 600 in / 1024 out:
+c4    "run": 3,
+c4    "ttft_s": 0.4,
+c4    "sse_chunks": 87,
+c4    "chars": 396,
+c4    "chunk_rate": 171.0,
+c4    "wall_s": 0.9
+c4   }
+c4  ]
+c4 }
+gpu MiB 23563 MiB, 24463 MiB
+host RAM peak used 37.4 GiB (ceiling 61)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.3s 673t/s  tg=156 128.8t/s acc=72%  ttft=1.3s  end=stop  hit=85.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 173.1t/s acc=68%  ttft=0.0s  end=stop  hit=95.1%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=153 183.8t/s acc=64%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=157 177.4t/s acc=68%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 192.1t/s acc=73%  ttft=0.0s  end=stop  hit=96.2%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=159 166.8t/s acc=68%  ttft=0.1s  end=stop  hit=96.2%  pcie=0.0%  ssd=0.2%
+[server] s1 done  pp=878/873c 0.0s  tg=156 181.1t/s acc=70%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%  ssd=0.2%
+[server] s1 done  pp=878/873c 0.0s  tg=157 175.5t/s acc=68%  ttft=0.0s  end=stop  hit=96.3%  pcie=0.0%  ssd=0.2%
+[server] s1 done  pp=878/873c 0.0s  tg=156 177.8t/s acc=72%  ttft=0.0s  end=stop  hit=96.2%  pcie=0.0%  ssd=0.2%
+[server] s1 done  pp=27553/27548c 0.1s  tg=149 153.7t/s acc=68%  ttft=0.2s  end=stop  hit=96.0%  pcie=0.0%  ssd=0.3%
+gpu_W avg 126.5 p90 162.6 max 165.9 n=11
+cpu_W avg 53.1 p90 58.0 max 58.0 n=10
+=== arm v9_batch4 (loaded=1)
+--- 4 streams x 600 in / 1024 out:
+c4    "run": 3,
+c4    "ttft_s": 0.47,
+c4    "sse_chunks": 91,
+c4    "chars": 460,
+c4    "chunk_rate": 150.5,
+c4    "wall_s": 1.1
+c4   }
+c4  ]
+c4 }
+gpu MiB 23563 MiB, 24463 MiB
+host RAM peak used 42.6 GiB (ceiling 61)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.3s 673t/s  tg=157 122.1t/s acc=72%  ttft=1.3s  end=stop  hit=84.0%  pcie=0.0%  ssd=0.1%
+[server] s1 done  pp=878/873c 0.0s  tg=157 176.6t/s acc=75%  ttft=0.0s  end=stop  hit=94.2%  pcie=0.0%  ssd=0.1%
+[server] s1 done  pp=878/873c 0.0s  tg=156 187.2t/s acc=77%  ttft=0.0s  end=stop  hit=94.0%  pcie=0.0%  ssd=0.2%
+[server] s1 done  pp=878/873c 0.0s  tg=157 174.2t/s acc=71%  ttft=0.0s  end=stop  hit=94.6%  pcie=0.0%  ssd=0.2%
+[server] s1 done  pp=878/873c 0.0s  tg=156 177.6t/s acc=77%  ttft=0.1s  end=stop  hit=94.3%  pcie=0.0%  ssd=0.2%
+[server] s1 done  pp=878/873c 0.0s  tg=156 172.3t/s acc=77%  ttft=0.0s  end=stop  hit=94.2%  pcie=0.0%  ssd=0.6%
+[server] s1 done  pp=878/873c 0.0s  tg=157 166.4t/s acc=73%  ttft=0.0s  end=stop  hit=94.3%  pcie=0.0%  ssd=0.6%
+[server] s1 done  pp=878/873c 0.0s  tg=156 177.6t/s acc=75%  ttft=0.1s  end=stop  hit=94.2%  pcie=0.0%  ssd=0.5%
+[server] s1 done  pp=878/873c 0.1s  tg=159 162.6t/s acc=66%  ttft=0.1s  end=stop  hit=94.7%  pcie=0.0%  ssd=0.5%
+[server] s1 done  pp=27553/27548c 0.1s  tg=154 160.6t/s acc=77%  ttft=0.2s  end=stop  hit=93.9%  pcie=0.0%  ssd=0.9%
+gpu_W avg 134.9 p90 166.2 max 167.3 n=12
+cpu_W avg 53.7 p90 58.4 max 60.7 n=11
+=== arm v9_batch8 (loaded=1)
+--- 4 streams x 600 in / 1024 out:
+c4    "run": 3,
+c4    "ttft_s": 0.52,
+c4    "sse_chunks": 89,
+c4    "chars": 432,
+c4    "chunk_rate": 130.9,
+c4    "wall_s": 1.2
+c4   }
+c4  ]
+c4 }
+gpu MiB 23869 MiB, 24463 MiB
+host RAM peak used 47.3 GiB (ceiling 61)
+foreign_in_window 1
+[server] s1 done  pp=878/0c 1.4s 642t/s  tg=159 101.8t/s acc=66%  ttft=1.4s  end=stop  hit=83.3%  pcie=0.0%
+[server] s1 done  pp=878/873c 0.0s  tg=155 144.3t/s acc=72%  ttft=0.0s  end=stop  hit=91.8%  pcie=0.0%  ssd=0.1%
+[server] s1 done  pp=878/873c 0.0s  tg=156 155.1t/s acc=72%  ttft=0.1s  end=stop  hit=92.8%  pcie=0.0%  ssd=0.2%
+[server] s1 done  pp=878/873c 0.0s  tg=156 148.8t/s acc=73%  ttft=0.0s  end=stop  hit=93.1%  pcie=0.0%  ssd=0.3%
+[server] s1 done  pp=878/873c 0.0s  tg=155 147.5t/s acc=72%  ttft=0.0s  end=stop  hit=93.0%  pcie=0.0%  ssd=0.4%
+[server] s1 done  pp=878/873c 0.0s  tg=155 147.7t/s acc=76%  ttft=0.0s  end=stop  hit=92.1%  pcie=0.0%  ssd=1.0%
+[server] s1 done  pp=878/873c 0.0s  tg=156 142.5t/s acc=74%  ttft=0.0s  end=stop  hit=92.5%  pcie=0.0%  ssd=1.1%
+[server] s1 done  pp=878/873c 0.0s  tg=156 141.0t/s acc=71%  ttft=0.0s  end=stop  hit=92.6%  pcie=0.0%  ssd=0.9%
+[server] s1 done  pp=878/873c 0.0s  tg=157 134.8t/s acc=73%  ttft=0.1s  end=stop  hit=92.2%  pcie=0.0%  ssd=1.0%
+[server] s1 done  pp=27553/27548c 0.1s  tg=163 138.7t/s acc=79%  ttft=0.2s  end=stop  hit=92.4%  pcie=0.0%  ssd=1.1%
+gpu_W avg 128.8 p90 157.2 max 157.5 n=13
+cpu_W avg 55.9 p90 58.3 max 60.3 n=12
+ALL_V9_DONE
