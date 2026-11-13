@@ -7122,3 +7122,80 @@ readings while main-brain traffic served earlier).
 `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
 without an outer redirect; engine stability still the binding constraint while the tuning campaign
 cycles (capacity measured clear at tick 116); daily-docs fire 2026-11-14 02:00 UTC.
+
+## Tick 118 — 2026-11-13 17:07 CET: scoreboard unmoved — sixth GO, the hold reaches 2 h 54 min and the ops campaign is idle for the first time today (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place (`GROK-CANCELLED`,
+121 B, 2026-11-12 06:54, intact), the tree clean, `git ls-remote origin main` equals `HEAD`
+(`3ddbb39`), so the publish invariant of tick 97 holds. The only `running` row in
+`~/.hermes/cron/executions.db` is this tick's own fire (17:05:19) — no sibling instance in the
+clone (the `f23cf5d48e11` row completed 17:02, see hygiene below).
+
+**Standing reads.** A fresh preflight reading at 17:06 (62nd stored): **PREFLIGHT GO**, gate
+re-run unshielded `exit=0` — `health_loaded=true`, `engine_serve_procs=1`, `foreign_legs=0`,
+swap 53 311 MiB free of 65 535, `engine_state=S`, `engine_pcpu=0.0` sampled over 6 s,
+`engine_rss_mib=56 668` (warm engine), `gpu_util_pct=0` at 27.01 W, `load1=12.90`. The wrapper
+ran bare, no outer redirect; no reading burned.
+**Stored-reading census:** **62 files = 28 GO / 32 NO-GO / 2 input-gap** (+1 file and +1 GO
+against tick 117's 61/27/32/2; the quarantined 14:27 `.collided` reading stays outside the glob).
+The queue in force is empty, so the GO authorizes nothing.
+**Guard-pitfall caught on this tick's own reading:** the Grok resume gate was first run through a
+`| tail -6` pipe and printed `exit=0` while the verdict line said NO-GO — the pipe's exit, not the
+gate's. Re-run unshielded: **exit 3**, the same class this line's docs already pin (`tail`-pipe,
+trailing-`echo`). The number beside a verdict is only real when read before anything else runs.
+
+**Machine-state attribution: the same engine process for ~2 h 54 min — the day's longest hold
+keeps growing, and the campaign that caused the six restarts is idle.** Engine pid 10597
+(age 02:53:20 at the 17:06 reading, started 14:12:51, the second direct ops restart tick 114
+attributed; argv `basalt-033/bin/basalt --serve … --resident-budget-gib 46
+--max-context 196 608`) answers `/health` loaded at 56.7 GiB RSS. `keep-up.log` still records one
+restart today (13:07:49); `pgrep -cf 'p2005_v[0-9]'` on the box reads **0** — the first
+campaign-idle reading of the day. Serve log mtime 17:07:14 — main-brain traffic still serving.
+Zero legs live, so still no `LEG-INCIDENTS.md` entry (tick-110/113/114/116/117 precedent).
+
+**Gates at the working head.** Six checks green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings (23/23 legacy exceptions used);
+`secret_scan --strict` exit 0.
+
+**Grok line: still closed by the owner decision, re-proven not assumed.**
+`pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks, **NO-GO — do not spend quota**,
+unshielded `exit=3`, VOID record line intact ("182 ids were never asked … this is not a queue").
+The IFEval partial re-verified from its own stored bytes by the gate's identity checks, identical
+to tick 117: **359 rows / 359 `finish=ok` / sha256-16 `01c1ee0b6e7f6d5d`**, resume set 182 ids
+`ifeval-286`..`ifeval-3757`. Zero credit, zero published percent, resumable by id only on a fresh
+owner reversal.
+
+**P0 parity audit re-parsed from the digest table this tick** (not carried from tick 117): 49
+percent rows across the nine in-force sets; every set carries bare
+`qwen3.8-flash-next-iq3_s-basalt` / `+contour-0.0.2.56` (matched shape) / `gpt-6.1-sol`; the six
+`pub-repair-*` keep-best rows sit in the four sets that have a validator (ifeval, bfcl,
+livecodebench, humaneval); `grok-4.7` appears only in completed arms. SimpleBench stays closed as
+unpinnable.
+
+**CI at the pushed head: everything green.** At `3ddbb39` — `contour self-tests`, `hard-v6
+scoring contracts`, `secret-scan`, `devsecops` and `pages build and deployment` all
+completed/success.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** The two hard-bank-era jobs stay
+enabled and reported-not-touched: `Mac v2.2 full after v2.1` (`f23cf5d48e11`, every 5 min — last
+fire completed 17:02) is inert only because of its one-shot launch marker, re-read on the literal
+path (`~/.hermes/mac-v22full-launch.state`, 26 bytes, `2026-11-02T14:05:30+01:00`, unchanged);
+`P2005 paired full 2.1→2.2 watch` (`*/5`) remains a permanent 5-minute ssh round-trip onto this
+line's endpoint box. The two-clone deletion hazard was checked, not assumed: the watchdog clone
+sits at a detached HEAD with an empty staged index. Daily-docs: nothing has fired since the
+tick-116 repair; the next fire (2026-11-14 02:00 UTC) starts from the passing precondition.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by
+owner decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model
+calls, zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint read a
+sixth **GO** and the engine's single-process hold reached 2 h 54 min (the day's longest); the ops
+tuning campaign that restarted the engine six times today read **0 processes** for the first
+time, and this tick caught its own pipe-masked gate exit and re-read it unshielded (exit 3).
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; engine stability was the binding constraint, now relaxing (capacity
+measured clear at tick 116); daily-docs fire 2026-11-14 02:00 UTC.
