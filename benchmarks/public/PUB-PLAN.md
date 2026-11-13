@@ -5874,3 +5874,57 @@ down to 412 MiB — watch that column before any owner-gated local leg starts.
 UTC): with the self-lock gone and the marker current, it should close the streak; if it fails, its
 capture must be read for the real `FAIL` token. Swap-free headroom is the one endpoint column to
 re-read before any queued leg.
+
+## Tick 102 — 2026-11-13 04:25 CET: **the endpoint's engine process changed mid-line and it was not a crash** — the budget-42 RAM-ladder config was rolled out at 04:12:50 by the ops line (new pid's own cmdline, sibling commit `9a19a27`); no OOM kill, no watchdog restart entry, the swap watch column closes (412 → 7 191 MiB free); tenth consecutive PREFLIGHT GO, now across two engine processes; five PUB gates + secret scan green at the synced HEAD; Grok gate NO-GO exit 3; zero legs, zero calls
+
+No leg and no benchmark byte moved; this tick's finding is the endpoint's own state. The streak
+description ticks 96–101 carried ("one stable engine process") ended between two readings: the
+03:31 preflight read pid 1142697 (age 4 h 38 min, started ~22:55 on 11-12), the 04:18 preflight
+read pid 1173996 at age 5 min 43 s. Attribution read from the box, not guessed:
+
+* The new process's own cmdline carries `--resident-budget-gib 42` with `--resident-cpu-experts`
+  and `--vram-reserve-mib 8079` — the RAM-ladder deployment recorded today in the ops-line commit
+  `9a19a27` (ladder 42/50/55/61 GiB flat at the 16 GiB fence, engine RAM-copy cap 43.25 GiB, live
+  budget 42). The swap change is the same event seen from the other side: engine RSS 56 310 MiB at
+  03:31 → 44 385 MiB now, and the tick-101 watch value (swap free 412 MiB) closed to 7 191.
+* Not an OOM class: the box's `dmesg` holds no `oom-kill` / `killed process` line, and the watchdog
+  log (`keep-up.log`) has carried no restart entry since 2026-11-08 — the process was replaced
+  deliberately, without the watchdog firing.
+* Post-change health from the same sources the streak uses: the keep-up probe logged a 104.5 tok/s
+  decode at 04:19:41, sampled `engine_pcpu=0.0` % at GPU 0 % / 8.0 W, `health_code=200`,
+  `foreign_legs=0`.
+
+*Endpoint reading (tenth consecutive GO).* Fresh reading `preflight-20261113-0418.txt`:
+`swap_free_mib=7 191`, `mem_available_mib=14 909`, engine state `S`, GPU 0 %, load1 0.01 — the GO
+is **thicker** than tick 101's thin one. File census run unshielded per file with the exit captured
+before anything else prints: **44 files = 12 GO / 30 NO-GO / 2 input-gap**, six readings today,
+the two files added since tick 101's census of 42 both GO. The GO streak is now ten readings but it
+**spans two engine processes**; do not quote "one stable process" from tick 96–101 again, and the
+GO does not carry across this process change — re-read before any owner-gated leg.
+
+*Gates at the synced head.* `git ls-remote origin main` == `HEAD` == `9a19a27` (tick 101's
+`7b57db2` plus one ops docs commit between), `main...origin/main` = `0 0`, `git fsck
+--connectivity-only --no-dangling` quiet, working tree clean. The second clone shows an empty index
+and a detached HEAD with only the hardware-snapshot agent's untracked files — the staged-deletion
+hazard is not live. Five PUB gates green unshielded: arms-index drift 0; derived percents 42
+recomputed from shipped bytes, 0 findings; grok-cell rule 9 documents, 0 findings (the in-force
+cell sentence is still the cancelled one); superseded-cell rule 9 documents, 0 findings; digest
+49 rows / 0 findings. `secret_scan.py --strict` exit **0**. `pub_grok_resume_check.py` exit **3**,
+22 checks, `RESUME GATE: NO-GO — do not spend quota` — the owner cancellation of 2026-11-12 is
+still in force; the resume record prints as VOID. CI at `9a19a27`: the three most recent workflow
+runs of that SHA (`contour self-tests`, `pages build and deployment`, `secret-scan`) all
+completed/success.
+
+*The daily-docs job* offers nothing to read this tick: its next scheduled fire is 2026-11-14
+02:00 UTC — the first attempt that can turn the scheduler's failure streak over now that the
+self-lock is gone (`7b9a208`) and the marker is current (`195c9d1`, tick 101's recovery).
+
+**Verdict:** the line stays closed for everything in force — nine sets each carry bare + contour
+matched-shape + codex arms, grok cancelled by owner decision 2026-11-12, SimpleBench closed as
+unpinnable, the remaining ladder rows owner-gated. Zero model/cloud calls, zero benchmark bytes
+moved. The endpoint is GO on the new budget-42 engine process, and the swap-pressure watch that
+tick 101 opened is closed at 7 191 MiB free.
+
+**Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00
+UTC, and one fresh preflight reading before any owner-gated leg — the endpoint process changed this
+tick, so no GO carries over.
