@@ -6360,3 +6360,107 @@ GO streak this line has been quoting.
 **Next in force:** unchanged and empty. Standing reads: the daily-docs fire at 2026-11-14 02:00 UTC
 (first attempt on the repaired precondition), and one fresh `health_loaded=true` reading before any
 owner-gated local leg — now a flag the gate enforces, not a judgement call.
+
+---
+
+## Tick 109 — 2026-11-13 10:42 CET: the endpoint came back on a **new engine build**, and `main`'s `gitleaks` job was red from a foreign commit — one read, one repaired
+
+*Nothing was launched and no benchmark byte moved. This tick writes `PUB-PLAN.md` plus a privacy/CI
+repair of three launchers the ops line had committed carrying the box's local username.*
+
+**Queue state first.** `systemctl --user list-units 'parb-pub-*' --no-legend` is empty, the bracketed
+transport counts (`pub_bench_cloud`, `pub_bench_run`, `gate_run`) are 0 in a standalone call, and
+`foreign_legs=0` in the endpoint reading confirms it at the box. The only `running` row in the
+executions DB is this tick (`288a66f93167`); the drain-resume job (`9a12508f8a69`) completed at 10:40,
+so no job of this line is sitting paused.
+
+*Fifty-third reading, and the first one taken on a different engine build.* Fresh reading
+`preflight-20261113-1042.txt`: `swap_free_mib=6 268` / `swap_used_mib=1 923` (columns balance at the
+8 191 total), `mem_available_mib=18 209`, `engine_rss_mib=57 843`, `engine_state=S`, `engine_pcpu=0.0`
+(6 s sampled delta), `gpu_util_pct=0` at `gpu_power_w=25.60`, `load1=8.71`, `health_code=200`,
+`foreign_legs=0`, and both flags tick 108 added are present and binding: **`health_loaded=true`,
+`engine_serve_procs=1`**. Engine pid `1220863` age `15:34` — it started ~10:26, so this is the first
+reading of the post-campaign engine. Verdict **PREFLIGHT GO**. Stored-reading census run unshielded
+per file with the exit captured before anything else prints: **53 files = 20 GO / 31 NO-GO /
+2 input-gap** (+1 file, +1 GO from tick 108's 52/19/31/2); the two non-empty sibling `.err` files are
+still dated 2026-11-11, so no new input gap.
+
+*The campaign that made tick 108 refuse has ended, and it went two arms further than that tick knew.*
+No `p2005_*_ab.sh` process exists on the endpoint box now, and the live engine command line (masked)
+is the **0.3.3 worktree binary** with `--resident-experts --expert-cache auto --prefill auto
+--vram-reserve-mib 512 --resident-budget-gib 42 --resident-cpu-experts --conversation-cache-mib 6144`.
+The launchers for `v9` (batch slots) and `v10` (4-stream concurrency) are now tracked files under
+`scripts/`, committed by the ops line as part of its 0.3.3 record.
+
+**Comparability note — this tick's measurement-integrity finding.** The endpoint stack changed under
+this line on 2026-11-13: the serving engine moved to Basalt **0.3.3** in a separate worktree with a new
+RAM/VRAM knob set, while every published PUB local arm (2026-11-08 → 2026-11-11) ran on the 0.2.1-era
+binary that that campaign's own launcher names as its rollback target. Stated in advance rather than
+discovered later: (a) wall-time, energy and tokens/s columns of any future local leg are **not
+comparable** with the published local arms and must be printed beside the build; (b) percent cells stay
+comparable only because the request shape and the pinned checkers did not change — sampling at
+temperature 0.7 plus a different KV/batch layout can still move individual cells, the same ±2–4
+discordant-cell caveat the hard bank documents for endpoint-load changes; (c) the pub artifacts carry
+**no serving-engine stamp at all**: `MANIFEST.json` has a `runtime` block only for the IFEval scoring
+venv, and `scripts/pub_bench_run.py` records model, finish reason and `engine_error` but no engine
+build, so the build a 2026-11-08..11 local arm ran on is attributable only from the dated ops record,
+never from the arm's own bytes. Named as a tooling gap, deliberately not built this tick: a per-leg
+engine-build/knob stamp in the leg's own record — the pub-line twin of the hard bank's
+`stack.contour_stamp`.
+
+**CI was red at `main`, and the cause is foreign to this line.** GitHub Actions at `fe9755f` ("move
+the P2005 brain to basalt v0.3.3 and measure every new knob"): `contour self-tests`,
+`hard-v6 scoring contracts`, `devsecops` and `pages build and deployment` all `completed`/`success`,
+while the **`gitleaks` job failed** (run `43401607886`, step "Scan current checkout":
+`"total_findings": 3`, top files `scripts/p2005_v8_ab.sh`, `scripts/p2005_v9_ab.sh`,
+`scripts/p2005_v10_ab.sh`). The repo scanner run locally reproduces it exactly: exit **1**, 3 findings,
+all rule `absolute_local_path`. The offending literal is the base-config model path, which embeds the
+box's local username — AGENTS.md safety rule 1, and the same rule family that kept this repo's scan red
+until the sanitizer patterns were broadened.
+
+*Repair (tooling only: no contour stamp, no benchmark byte, no published artifact touched).* The three
+launchers now define `MODEL_ABS=$HOME/basalt/model/Qwen3.8-FN-IQ3_S.basalt` and the base-config
+heredoc lost its quote for that single substitution — the block carries no other `$` or backtick (the
+body census prints exactly one variable). The behaviour claim was **proved on the endpoint box**, not
+argued: the pre-fix and post-fix `base_cfg` outputs are byte-identical, sha256
+`c1dcc03daa8d51d31148700cbfb2498609ad97b9522f9c0dc963f21dc894977a` for all three v8/v9/v10 pairs, and
+the config the patched heredoc writes still resolves to the real absolute path
+(`<LOCAL_PATH>/basalt/model/Qwen3.8-FN-IQ3_S.basalt`) — so the ops campaign's reproducibility is
+untouched and only the tracked bytes changed. `bash -n` passes on all three files;
+`secret_scan.py --strict` now exits **0** with `total_findings: 0` and `top_files: []`;
+`docs_policy.py --push` PASS. `LEG-INCIDENTS.md` gains no entry: no leg of this line existed, and no
+engine restart happened mid-leg.
+
+*Gates at the working head.* Five PUB gates green unshielded: `pub_arms_index.py --check` drift 0;
+`pub_derived_percent_check.py` 42 derived percents recomputed from shipped bytes (digest citations 44,
+doc citations 188, uncovered 0), 0 findings; `pub_grok_cell_check.py` 9 documents, 0 findings, the
+in-force sentence read from the pin and 1 superseded sentence rejected;
+`pub_superseded_cell_check.py` 9 documents, 0 findings; `pub_digest_row_check.py` 49 rows, 0 findings
+(26 name a contract, 23/23 legacy exceptions used). `pub_grok_resume_check.py --as-of 2026-11-13`
+captured unshielded: 22 checks, **NO-GO — do not spend quota**, exit **3**; the record line still reads
+`182 ids were never asked … VOID, the line is cancelled, this is not a queue`, and the IFEval Grok
+partial reads `stored 359 rows / 359 ok / sha256-16 01c1ee0b6e7f6d5d` — bytes intact, resumable by id,
+zero credit, zero published percent. A new Grok percent may not be published for that leg.
+
+*Owner surface read (nothing to act on).* The freshest repo activity is still issue **#25**
+("[DOCS][P0] Complete repository-wide consistency audit without rewriting historical evidence", last
+moved 08:52 UTC today) — a docs-audit line with its own writer, not a public-line launch order. #56 is
+the P1004 tensorless campaign, #41 (PARB design) last moved 2026-11-12 06:10. Nothing lifts the Grok
+cancellation of 2026-11-12 and nothing opens the three owner-gated ladder rows (Terminal-Bench /
+SWE-bench Verified / GAIA-lite). The daily-docs job offers nothing new to read: its next fire
+(2026-11-14 02:00 UTC) is the first attempt on the repaired precondition. *Second clone*
+(`~/projects/strata-autonomous-harness`): detached HEAD `9f72ef0`, **0 staged files** — the
+staged-deletion hazard is not live — only unstaged `hardware/os-snapshots/latest.json` plus untracked
+snapshots and `benchmarks/public/raw/` scratch.
+
+**Verdict:** unchanged on the scoreboard — nine in-force sets still carry bare + contour matched-shape
++ codex arms, grok is cancelled by owner decision 2026-11-12, SimpleBench stays closed as unpinnable,
+and the remaining ladder rows are owner-gated. Zero model calls, zero cloud calls, zero benchmark bytes
+moved. What did move: the endpoint is PREFLIGHT **GO** again with `health_loaded=true` on the new
+0.3.3 engine (the standing read tick 108 demanded), and `main`'s failing `gitleaks` job was repaired
+by masking the local username in three foreign ops launchers with byte-identical generated configs.
+
+**Next in force:** unchanged and empty. Standing reads: any owner-gated local leg now needs a fresh
+preflight GO **plus** the engine-build note above (the leg's wall/energy columns are a different stack
+from the published local arms); the queued tooling item is a per-leg engine-build stamp; the daily-docs
+fire at 2026-11-14 02:00 UTC.
