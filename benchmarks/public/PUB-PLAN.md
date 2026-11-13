@@ -7282,3 +7282,81 @@ digest-parser substring trap before it could be reported as a data loss.
 `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
 without an outer redirect; engine stability relaxing (campaign idle twice, capacity measured
 clear at tick 116); daily-docs fire 2026-11-14 02:00 UTC.
+
+
+## Tick 120 — 2026-11-13 18:25 CET: scoreboard unmoved — eighth GO, the hold reaches 4 h 04 min and still grows, the ops campaign reads idle a third time (zero legs, zero calls)
+
+**Nothing was running.** `systemctl --user list-units 'parb-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place (`GROK-CANCELLED`,
+121 B, 2026-11-12 06:54, intact), the tree clean, `git ls-remote origin main` equals `HEAD`
+(`53950ca`), so the publish invariant of tick 97 holds. The only `running` row in
+`~/.hermes/cron/executions.db` is this tick's own fire (18:15:19, `PUB benchmark loop 30m`) —
+no sibling instance in the clone.
+
+**Standing reads.** A fresh preflight reading at 18:16 (64th stored): **PREFLIGHT GO**, gate
+re-run unshielded `exit=0` — `health_loaded=true`, `engine_serve_procs=1`, `foreign_legs=0`,
+swap 52 395 MiB free of 65 535, `engine_state=S`, `engine_pcpu=0.0` sampled over 6 s,
+`engine_rss_mib=56 484` (warm engine), `gpu_util_pct=0` at 27.12 W, `load1=9.66`. The wrapper
+ran bare, no outer redirect; no reading burned. **Stored-reading census** (the gate re-run
+mechanically over the whole series at the working head): **64 files = 30 GO / 32 NO-GO /
+2 input-gap** (+1 file and +1 GO against tick 119's 63/29/32/2). The queue in force is empty,
+so the GO authorizes nothing.
+
+**Machine-state attribution: the same engine process for 4 h 04 min — the day's longest hold
+keeps growing, and the tuning campaign now reads idle for a third consecutive read.** Engine
+pid 10597 (age 04:03:40 at the 18:16 reading, started 14:12:51, the second direct ops restart
+tick 114 attributed; argv `basalt-033/bin/basalt --serve … --resident-budget-gib 46
+--max-context 196 608`) answers `/health` `loaded=true` at 56.5 GiB RSS with the served alias
+in the body. `pgrep -cf 'p2005_v[0-9]'` on the box reads **0** for the third time today;
+`keep-up.log` still records one restart today (13:07:49, same minute as the box boot tick 117
+attributed; box `up 5:09` at 18:16). Serve log mtime 18:16:31 — main-brain traffic still
+serving. Zero legs live, so still no `LEG-INCIDENTS.md` entry
+(tick-110/113/114/116/117/118/119 precedent).
+
+**Gates at the working head.** Six checks green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings (23/23 legacy exceptions used);
+`secret_scan --strict` exit 0.
+
+**Grok line: still closed by the owner decision, re-proven not assumed.**
+`pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks, **NO-GO — do not spend quota**,
+unshielded `exit=3`, VOID record line intact ("182 ids were never asked … this is not a queue").
+The IFEval partial re-verified from its own stored bytes, identical to ticks 117-119:
+**359 rows / 359 `finish=ok` / sha256-16 `01c1ee0b6e7f6d5d`**, resume set 182 ids
+`ifeval-286`..`ifeval-3757`. The three completed Grok arms are byte-exact against the pin with
+resume sets of 0 ids (gpqa-diamond 198/198 `c479109822f388a5`, humaneval 164/164
+`161ddf5b1956ab13`, mmlu-pro 500/500 `5731d720f13ef8a5`). Zero credit, zero published percent,
+resumable by id only on a fresh owner reversal.
+
+**P0 parity audit re-parsed from the digest table this tick** (tick 119's corrected filter —
+header row excluded by `| bench |`, data rows kept): **49 rows / 9 in-force sets** — gsm8k 6,
+arc-easy 5, arc-challenge 5, gpqa-diamond 5, humaneval 8, ifeval 5, mmlu-pro 4, livecodebench 7,
+bfcl 4 — identical to the machine-checked gate. Every set carries bare
+`qwen3.8-flash-next-iq3_s-basalt` / `+contour-0.0.2.56` (matched shape) / `gpt-6.1-sol`; the six
+`pub-repair-*` keep-best rows sit in the four sets that have a validator. SimpleBench stays
+closed as unpinnable.
+
+**CI at the pushed head: everything green.** At `53950ca` — `contour self-tests`, `secret-scan`,
+`devsecops` and `hard-v6 scoring contracts` all completed/success.
+
+**Owner surface / frozen-line hygiene (nothing acted on).** The two hard-bank-era jobs stay
+enabled and reported-not-touched: `Mac v2.2 full after v2.1` (`f23cf5d48e11`, every 5 min) is
+inert only because of its one-shot launch marker, re-read on the literal path
+(`~/.hermes/mac-v22full-launch.state`, 26 B, `2026-11-02T14:05:30+01:00`, unchanged);
+`P2005 paired full 2.1→2.2 watch` (`*/5`) remains a permanent 5-minute ssh round-trip onto this
+line's endpoint box. The two-clone deletion hazard was checked, not assumed: the watchdog clone
+sits at a detached HEAD with an empty staged index. Daily-docs: nothing has fired since the
+tick-116 repair; the next fire (2026-11-14 02:00 UTC) starts from the passing precondition.
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled by
+owner decision 2026-11-12, SimpleBench closed, the remaining ladder rows owner-gated. Zero model
+calls, zero cloud calls, zero published benchmark bytes moved. What moved: the endpoint read its
+eighth **GO** of the day, the engine's single-process hold reached **4 h 04 min** (the day's
+longest, still growing), the ops tuning campaign read **0 processes** for a third time today, and
+the box load average fell 13.2 → 9.7.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; `bash preflight.sh`
+without an outer redirect; engine stability relaxing (campaign idle three times, capacity
+measured clear at tick 116); daily-docs fire 2026-11-14 02:00 UTC.
