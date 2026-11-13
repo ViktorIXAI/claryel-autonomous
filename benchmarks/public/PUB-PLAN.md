@@ -6562,3 +6562,80 @@ per-leg run-record, contract-tested.
 fresh preflight GO **plus** the engine-build note (wall/energy columns not comparable with
 the 2026-11-08..11 arms); a launched leg should ship with `--run-record` and its launcher
 should set `PARB_ENGINE_NOTE`; the daily-docs fire at 2026-11-14 02:00 UTC.
+
+## Tick 111 — 2026-11-13 12:19 CET: scoreboard unmoved — the Grok refusal re-proven **by execution**, and two hard-bank watchers still firing on a frozen line
+
+**Nothing was running.** `systemctl --user list-units 'parb-pub-*'` empty, no
+`scripts/pub_bench_(run|cloud).py` process, the Grok cancel marker in place, the tree clean,
+and `git ls-remote origin main` equals `HEAD` (`a5358b5`), so the publish invariant of tick 97
+holds: the operator is reading exactly what this line committed.
+
+**Standing reads.** A fresh preflight reading at 12:19 (55th stored): `health_loaded=true`,
+`engine_serve_procs=1`, engine pid unchanged since ticks 109/110 (age 54:09, RSS 57 051 MiB
+against 57 870 at tick 110), swap 56 290 free of 65 535 MiB, GPU 0 % / 27.60 W,
+`engine_pcpu=0.0` sampled over 6 s, `foreign_legs=0`. Verdict **PREFLIGHT GO**. Stored-reading
+census run unshielded with the exit captured before anything prints: **55 files = 22 GO /
+31 NO-GO / 2 input-gap** (+1 file, +1 GO against tick 110's 54/21/31/2); the two non-empty
+sibling `.err` files are still dated 2026-11-11.
+
+**Gates at the working head.** Five PUB gates green unshielded: arms index drift 0; 42 derived
+percents recomputed from shipped bytes (digest citations 44, doc citations 188, uncovered 0);
+grok-cell 9 docs / 0 findings with the in-force sentence read from the pin; superseded-cell
+9 docs / 0 findings; digest rows 49 / 0 findings, 23/23 legacy exceptions used.
+`secret_scan --strict` exit 0. CI green on all six workflows at the pushed head, `docs-freshness`
+included (11:15 UTC) — that is the CI workflow, distinct from the local daily job below.
+`pub_grok_resume_check.py --as-of 2026-11-13`: 22 checks, **NO-GO — do not spend quota**, exit 3,
+VOID record line intact, the Grok IFEval partial still `stored 359 rows / 359 ok / sha256-16
+01c1ee0b6e7f6d5d` — bytes intact, zero credit, zero published percent.
+
+**The owner cancellation re-proven by execution, not by reading the code.** The real leg command
+(`python3 scripts/pub_bench_cloud.py <ifeval tasks> grok --limit 1 --out <scratch dir>`) printed
+`REFUSED: grok arms cancelled by owner decision …`, exited **3**, and the `--out` directory was
+**not created** — zero mutation, zero paid call. The refusal lives in the transport runner's
+`main()` before `os.makedirs`, so launcher, unit and direct call all fail closed, and there is no
+bypass flag. The guard is vendor-scoped: the codex branch runs with the marker present (pinned by
+`harness/pub_grok_cancel_test.py`, which also pins "no arm file created by a refusal" and the
+non-vacuity control). No codex call was made this tick — nothing in force asked for one.
+
+**Owner-surface finding: two hard-bank-era jobs are still enabled on a line the owner froze
+(2026-11-08, tag `stable-hard-0.0.2.56`). Reported, deliberately not touched** — this line never
+edits another job's state or schedule; disabling or keeping them is the owner's call.
+
+* `Mac v2.2 full after v2.1` — every 5 min, 2 638 completions. Its script is a **launcher**, not a
+  watcher: it ssh's to the Mac Studio and starts a full `gate_run.py` arm stamped
+  `PARB_GATE_VERSION=v2.2` as soon as the Mac plan reads complete. It is inert today only because
+  the one-shot marker `<LOCAL_HERMES>/mac-v22full-launch.state` exists (dated 2026-11-02 14:05,
+  matching the single `launched:` line in its log at `2026-11-02T14:05:30` — the arm did run once,
+  2 513/2 513 plan tasks). Clean that marker and a 5-minute tick re-arms a hard-bank arm on the
+  frozen line: endpoint contamination plus new published bytes the owner closed. Nothing was
+  launched today: this tick read 0 `gate_run.py` processes on the Mac Studio and
+  `foreign_legs=0` on the endpoint, and the frozen arm file still holds exactly 2 513 rows.
+* `P2005 paired full 2.1→2.2 watch` — `*/5`, 2 826 completions. Read-only watcher (it prints only
+  when its `PAIR COMPLETE` grep hits and its own `done` marker is absent, and never launches), but
+  it is a permanent 5-minute ssh round-trip onto this line's endpoint box.
+  Together the two jobs cost roughly 1 150 remote reads per day for state that is already finished.
+
+**Owner surface otherwise unchanged.** Issue #25 last moved 10:08 UTC (the docs-consistency audit
+line). Issue #10's newest comment is the Grok monitor bot withdrawing its repository oversight at
+Viktor's instruction — consistent with the 2026-11-12 Grok cancellation, not a launch order for
+this line. Nothing re-arms the Grok line, and the three owner-gated ladder rows (Terminal-Bench,
+SWE-bench Verified, GAIA-lite) stay closed. The daily job `GitHub docs freshness daily` sits at
+failure_streak 10, last fire 03:00:19 local, next fire 2026-11-14 02:00 UTC — its first on the
+repaired precondition (machine note; reported, not repaired by this line).
+
+**P0 parity audit from the digest table (zero calls).** All nine in-force sets carry the three
+cross-arm rows the standard requires — bare local, `contour-0.0.2.56` matched request shape, and
+ChatGPT codex — and the only non-full cloud row is BFCL's codex arm, the pinned first-300
+category-pure slice that rule 4 fixes for cloud cost and the BFCL doc states as a skew. SimpleBench
+stays closed as unpinnable; every grok cell without a percent reads "cancelled by owner decision
+2026-11-12 (no resume date)".
+
+**Verdict:** unchanged on the scoreboard — nine sets complete on three arms, grok cancelled,
+SimpleBench closed, the remaining ladder rows owner-gated. Zero model calls, zero cloud calls, zero
+published benchmark bytes moved. What moved: two proofs (the Grok transport refusal with no output
+directory, and the marker that keeps an armed frozen-line launcher inert) plus one hazard handed to
+the owner.
+
+**Next in force:** unchanged and empty. Standing reads unchanged: a fresh preflight GO **plus**
+`PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg; the daily-docs fire at
+2026-11-14 02:00 UTC.
