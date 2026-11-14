@@ -10298,3 +10298,33 @@ running-job single-writer census at the start of every tick. Two owner-side ques
 this line's to fix: the hardware line's habit of launching model seeding **from** this endpoint box
 (the ten-minute 1856.8 MiB/s window is the last measured cost), and whether the three placeholder
 files in the published raw namespace of the watchdog clone should be removed at all.
+
+**Post-record addendum, 12:48.** CI on this record: **5/5 green** (`secret-scan`, `contour self-tests`,
+`pages-build-deployment`, `hard-v6 scoring contracts`, `devsecops`). Publishing took three attempts and
+the record keeps them, because both failures were about the transport and one was about me: the first
+push died after 133 s with no route to the git host while `codeload` and `raw` answered normally, so the
+outage was the host path rather than the repository; the second was refused by this repository's own
+pre-push guard, `BLOCKED_SINGLE_WRITER_GUARD`, because I re-typed the command and dropped
+`ALLOW_HARD_V6_PUSH=1` — the guard behaved exactly as designed, moved no ref, cost nothing; the third
+landed `7626ac3..0eefe0a` and all four paths answer **200** at the SHA-pinned raw URL.
+Terminology correction to the paragraph above: `~/projects/strata-autonomous-harness` is **not a
+clone**. `git worktree list` shows it as this repository's primary worktree, parked detached at
+`8ccef67`, with `~/sah-main` as the linked worktree that holds `main` — one object store, one hooks
+directory, one `main` ref, two working directories. That is the mechanism of the deletion hazard this
+line already carries: a stale primary worktree presents its stale content as staged deletions of
+published arms, and its untracked files are invisible to any index check taken from the benchmark
+worktree. The deviation set and the ownership of the sync call are unchanged by the correction.
+
+**Close-of-tick endpoint read (12:45) — and the first honest number that field ever produced.**
+`PREFLIGHT NO-GO` on two rules at once: live swap `33.5 MiB/s in + 0.0 out` against the 20.0 mean
+ceiling (the largest swap mean in this series after today's 18.9 near-miss), and block-device reads
+`69.3 MiB/s` against the corrected whole-disk ceiling of 50.0, largest attributed reader `basalt`.
+Beside them: `engine_pcpu = 899.0 %` — the first non-zero value this producer has ever printed, in the
+same window where GPU util is 6 % at 32.21 W and the engine sits in state `R` at 57 141 MiB RSS. That
+combination (nine cores busy, GPU nearly idle) is the shape the now-alive idle-spin guard exists to
+catch, and it is also the documented engine-spin signature, so the value is worth re-reading next tick
+rather than acting on from one window. Swap peak 107.0 MiB/s against that 33.5 MiB/s mean, still
+reported and not gated. MemAvailable 19 215 → 20 136 MiB, swap free 49 971 MiB, `/health` 200 with
+`"loaded": true`, one serve process, zero foreign legs. Decision: the engine is **left alone** — no leg
+is queued, the 22 h single-process hold is itself a tracked datapoint, and on this line a restart is a
+box decision, never a benchmark-side reflex.
