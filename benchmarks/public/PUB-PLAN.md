@@ -10993,3 +10993,76 @@ census table. What this tick adds to the record: the first GO on the post-restar
 18:47 busy verdict was endpoint state, not a persistent box condition, and it carries the arming
 counter to 9 of 30 with a new quiet-window peak datum (37.2 MiB/s) that sits below the band floor and
 moves nothing in it.
+
+## Tick 157 — 2026-11-14 20:17 CET: scoreboard unmoved; the swap-throughput rule refused a window alone for the first time (GPU quiet, device quiet) — a sub-window burst, not sustained thrash; census 116 = 66 GO / 44 NO-GO / 6 gap, arming 9/30, band unmoved; queue empty, zero legs, zero calls, zero published benchmark percent moved
+
+Nothing launched — the queue in force is still empty (ticks 149–156's constraint, unchanged): every
+in-force set carries all three admissible arms, the Grok cells stay closed by the owner quota decision
+of 2026-11-12, and the "later" ladder rows remain owner decisions.
+
+**The endpoint: `preflight-20261114-2017.txt` exits 3 on ONE rule — the swap-throughput rule stood
+alone.** Sequence on the same engine pid **175316** (age 03:45:52, so still no restart since
+16:31:23): 17:16 NO-GO (busy) → 17:51 GO → 18:47 NO-GO (busy) → 19:42 GO → **20:17 NO-GO (swap)**.
+Everything else green: GPU mean 2.2 % / peak 11 % (instant sample 0 % at 26.55 W), whole-disk device
+reads 0.1 MiB/s (top reader `basalt`), `MemAvailable` 19.7 GiB, `swap_free` 55.5 GiB, engine state S
+at 9.9 % sampled CPU, RSS 57 043 MiB (inside the warm band), `/health` 200 `loaded=true`, one serve
+process, `foreign_legs=0`, load1 11.30. The refusal: swap window mean **99.2 + 0.0 MiB/s >= 20.0**
+with an in-window peak of 235.8. This is the first NO-GO on this engine where GPU and device were
+both quiet — the rule written for the "engine gets restarted mid-leg" state now stands independent of
+the GPU/device rules that carried every earlier refusal on this box.
+A new shape datum, stated because the sampler's own windows made it visible: the traffic was a
+**sub-window burst**, not sustained thrash. The device sample runs consecutively to the swap sample,
+not concurrently, and it read 0.1 MiB/s after the swap window had seen 99.2; a follow-up 2 s×3
+`vmstat` on the box read `si=so=0` at 99–100 % idle. The swap files are regular files
+(`/swap.img` 8 GiB with 4.4 GiB used + `/swap2.img` 56 GiB with 5.4 GiB used, which re-sums the
+reading's `swap_used` 10 018 MiB exactly), so pages moved to/from a real filesystem — but the burst
+had decayed inside the seconds it took the sampler to move on. The verdict stands for its own reading
+exactly as the GOs do, and the box's alternation on this one process is now five observations deep.
+
+**Machine-derived census (the tool, not prose), `as-of 2026-11-14 20:17`, gate sha16
+`68705b7b41cb1239`:** 116 stored readings — **66 GO / 44 NO-GO / 6 input gaps**; the as-of day 44
+files = 29 GO / 11 NO-GO / 4 gaps; **launchable (GO) windows in the last 24 h 35 -> 34**, and the
+move is attributed mechanically: the sliding cutoff (13 Nov 19:42 -> 13 Nov 20:17) drops exactly one
+GO reading, `preflight-20261113-1957.txt` (the same slide also drops the 13 Nov 19:23 NO-GO, which
+affects no other cell), and this tick's 20:17 NO-GO adds nothing to the count. Device scope row now
+**17 whole-disk (`50.0`) / 99 unscoped (`100.0`) / 0 unknown**. Swap-peak coverage 21 readings carry
+the key (2 NaN, 19 parseable), band set **17 gate-judged**, swap-mean-passing windows with a peak
+**12** (unchanged), swap-mean-failing windows with a peak **4 -> 5** (this reading: window mean 99.2
+fails the mean rule, peak 235.8), band unchanged at **67.6 (passing max) / 107.0 (failing min)** —
+the new peak sits far above the failing floor, so the separation is intact — peak still
+reported-not-gated, arming counter **9 of 30** (a NO-GO adds band coverage, no arming credit).
+`--check` re-derives the committed `PREFLIGHT-CENSUS.md` byte-for-byte at this stamp.
+
+**Gates and tests.** All five PUB publication gates exit 0 at the tick's HEAD (`pub_arms_index
+--check`, `pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`,
+`pub_digest_row_check`), plus `pub_preflight_census.py --check` = 0. `pub_grok_resume_check --as-of
+2026-11-14` exits **3** with the in-force cancellation record and the stored-bytes census
+"**182 ids still unasked**" — the resume map a one-word owner reversal would need, spent by nothing.
+Contract tests: preflight **103/103**, census **50/50**, taskfile shape **43/43**;
+`scripts/security/secret_scan.py --dir . --strict` exits **0** unshielded.
+
+**Frozen-line hygiene.** Legacy hard-bank 5-min watcher `f23cf5d48e11` active and inert: the state
+marker `~/.hermes/mac-v22full-launch.state` exists at the literal path (dated 2026-11-02 14:05,
+`ls`-ed per the tick-111 lesson). Daily docs job `ef7ea47ff99b` active — the standing "dirty tree at
+03:00" note remains unfired (its last recorded run is ok). Drain guard `9a12508f8a69` active.
+
+**Repository state.** `main` == `68eb7b6` at the tick start; during the tick `origin/main` moved by
+one commit foreign to this line (`97bbaaf`, docs #25: an annotation on the superseded same-host
+benchmark plan, +2 lines in `docs/small-models-cuda-bench.md`) — read, not touched; this tick's
+commit rebases onto it and `main` stays the only delivery line. CI on that head is green (contour
+self-tests, secret-scan, devsecops, hard-v6 scoring contracts, pages — all success). Second-worktree
+census (`~/projects/strata-autonomous-harness`): HEAD still detached at `8ccef67`, and
+`git merge-base --is-ancestor` after a fresh `git fetch` again proves it **is an ancestor of
+`origin/main`** — no orphan deviation; staged diff empty, so the staged-deletions hazard is clean;
+untracked accumulation still **7** files (three scratch files inside the published
+`benchmarks/public/raw/` namespace plus four `hardware/os-snapshots/` dated 2026-11-11…2026-11-14),
+unchanged for a fourth tick. Recorded as the owning workstreams' decision; this line commits nothing
+foreign.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action, **no published benchmark percent moved** — the moved artifacts are the regenerated
+census table and this plan block. What this tick adds to the record: the swap-mean rule has now
+carried a refusal with no companion rule for the first time on this engine, and the reading's burst
+shape (mean 99.2 / peak 235.8 inside 6.16 s, device 0.1 and `si=so=0` seconds later) is measured —
+if a future release ever proposes gating the peak instead of the mean, this is a concrete case where
+the mean caught in seconds what a sustained-traffic interpretation would have over-weighted.
