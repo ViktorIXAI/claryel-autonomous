@@ -3027,3 +3027,43 @@ from this cadence before the stability map is rebuilt on the 2.55 line.
   0 leaks, semantic suite 66 controls 0 violations.
 - Line status unchanged: adopted 0.0.2.56, bank v6.8 at the bank ceiling (96.5% map-258);
   next scheduled measurement remains the four-arm cadence when due.
+
+## 2026-11-15 00:2x CET — eval-system: the bank gate census asked the environment TWICE and went red on correct bytes — now one probe per run (tooling only: no contour stamp, no bank byte, no verdict row moved)
+
+- **Found while auditing CI of pub tick 162, not while it hurt.** The only failure in the
+  last 25 main-branch runs is `hard-v6 scoring contracts` at head `8d3426e` (tick 161's
+  head, run 43647153276, step "contour gate contracts"):
+  `harness/bank_gate_census_test.py` -> `CENSUS TABLE DRIFT`, and on every bank row
+  `want: ... NOT RUN (no sandbox)` vs `have: ... PASS 10/10`. The very next run on the same
+  bank bytes (`f9faab9`, run 43650849675) went green. A check that goes red by accident is
+  not a check — same rule the PUB preflight line applies to its guards.
+- **Root cause (localized, mechanical):** `collect()` and `check_md()` each called
+  `c6._docker_available()` independently. On that runner `collect()`'s probe failed, so the
+  recomputed rows carried the sentinel `NOT RUN (no sandbox)`, while `check_md()`'s second
+  probe succeeded, applied no column-skip, and compared that sentinel against the measured
+  committed bytes. The documented policy ("a runner without the sandbox shows NOT RUN and
+  `--check` skips that column") was true of the verdict and false of the comparison, because
+  the two decisions consulted the environment twice and got different answers.
+- **Fix (tooling):** one probe per process (`sandbox_ok()`, memoized), its result carried in
+  `meta["sandbox_ok"]` and used by `check_md()` as the authority — the comparison policy now
+  follows what the recomputing run actually did, never a second opinion. The census stamp
+  gains `| sandbox during this run: available (E battery re-executed) | not available (...)`,
+  so a reader can tell a measured E column from a never-re-executed one without running
+  anything, and `--check` prints an explicit skip note instead of silently skipping a column.
+- **Replay proof, pre-fix vs post-fix in one process, same committed table:** pre-fix
+  `check_md(sentinel rows, measured table)` = **1** (the CI failure reproduced exactly);
+  post-fix same inputs = **0**; measured-vs-measured = **0**; tampered GOLD column with the
+  skip applied = **1**, so the skip is scoped to one column and is not a blanket skip.
+- **Tamper controls pinned in the test:** a committed table whose E column was never
+  re-executed must NOT pass a sandbox-capable `--check` (=1), a stale scanner sha16 in the
+  stamp must go red (=1), and a contradicting live probe must not re-enable the comparison
+  once the run recorded `sandbox_ok=False` (=0, i.e. `meta` wins over the environment).
+  `harness/bank_gate_census_test.py` 11 -> **23 checks, PASS**.
+- **Census re-run at current bytes:** `--check` **PASS (8 banks)**, gold selftest PASS 67/67
+  and E battery PASS 10/10 on every bank, every bank byte-matches its registry sha16. The
+  regenerated `BANK-GATE-CENSUS.md` differs from the previous published one in exactly two
+  lines — the auto-generated header sentence and the stamp (scanner sha16
+  `6e96c8eb04e526b1` -> `9bf2cf7046bd1b82` plus the new sandbox clause); all 8 verdict rows
+  are byte-identical, so no gate verdict moved anywhere.
+- **Line status unchanged:** frozen at `stable-hard-0.0.2.56`, no new stamp or feature, no
+  pair launched, no bank edited. Adopted line and bank v6.8 percent stay as published.

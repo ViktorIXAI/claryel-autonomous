@@ -44,6 +44,27 @@ MD_PATH = os.path.join(ROOT, "benchmarks", "hard", "BANK-GATE-CENSUS.md")
 ALLOWED_STATUS = {"working", "provisional", "superseded"}
 
 
+_SANDBOX_OK = None
+
+
+def sandbox_ok():
+    """ONE sandbox probe per process, shared by collect() and check_md().
+
+    Before this, the two functions probed the environment independently and could
+    disagree on the same runner: at head 8d3426e the CI job's collect() probe answered
+    "no sandbox" (so the recomputed rows carried `NOT RUN (no sandbox)`) while
+    check_md()'s second probe answered "sandbox available", applied no skip, and
+    compared that sentinel against the committed `PASS 10/10` - a red
+    `hard-v6 scoring contracts` job that named no defect and could not be reproduced
+    on the next runner (the next run on the same bytes went green). The comparison
+    policy must follow what the recomputing run actually did, never a second opinion
+    of the environment."""
+    global _SANDBOX_OK
+    if _SANDBOX_OK is None:
+        _SANDBOX_OK = bool(getattr(c6, "_docker_available", lambda: False)())
+    return _SANDBOX_OK
+
+
 def sha16(path):
     return hashlib.sha256(open(path, "rb").read()).hexdigest()[:16]
 
@@ -82,9 +103,11 @@ def collect():
     (CI runners), E rows get verdict `NOT RUN (no sandbox)` and only E-uncapable
     failures bind; `--check` then does not compare the E column (its inputs are still
     byte-pinned by the bank sha16 + scorer sha16 stamp). A sandbox-capable host always
-    re-derives the E verdict strictly."""
+    re-derives the E verdict strictly. The probe result of THIS run is carried in meta
+    as `sandbox_ok`, and check_md() follows that record instead of probing again:
+    one run, one opinion about its own sandbox."""
     from concurrent.futures import ThreadPoolExecutor
-    docker_ok = bool(getattr(c6, "_docker_available", lambda: False)())
+    docker_ok = sandbox_ok()
     reg = json.load(open(REGISTRY, encoding="utf-8"))
     errors = []
     entries = reg.get("banks", [])
@@ -155,6 +178,7 @@ def collect():
         "census_sha16": sha16(os.path.abspath(__file__)),
         "scorer_sha16": sha16(os.path.join(ROOT, "harness", "parb_check_v6.py")),
         "registry_sha16": sha16(REGISTRY),
+        "sandbox_ok": docker_ok,
     }
     return rows, meta, errors
 
@@ -179,14 +203,18 @@ def render(rows, meta):
             "any bank whose bytes no longer match its registry sha16 fails closed. `working` must pass "
             "both gates; older rows are historical context, their status column is registry state, not a "
             "re-narrated promotion verdict. The `gold E battery` column is the docker-sandbox re-execution "
-            "and runs on sandbox-capable hosts only (repo policy: E re-execution is local); a runner "
-            "without the sandbox shows `NOT RUN (no sandbox)` and `--check` skips that column - its inputs "
-            "stay byte-pinned by the scanner/scorer/bank sha16 stamp below. E-category failures get one "
+            "and runs on sandbox-capable hosts only (repo policy: E re-execution is local); a run whose "
+            "sandbox probe fails writes `NOT RUN (no sandbox)` and `--check` of THAT run does not compare "
+            "the E column - the skip follows the probe recorded in the stamp below, so one recomputing run "
+            "has exactly one opinion about its own sandbox (two independent probes once made a CI job red on "
+            "correct bytes). The column's inputs stay byte-pinned by the scanner/scorer/bank sha16 stamp. E-category failures get one "
             "re-draw on a sandbox host (a container hiccup must not fabricate a bank defect); a task "
             "failing BOTH draws is a real FAIL and goes red.\n\n")
     stamp = ("\nscanner: `bank_gate_census_v6.py` %s | scorer `harness/parb_check_v6.py` %s | "
-             "registry `BANK-VERSIONS.json` %s\n"
-             % (meta["census_sha16"], meta["scorer_sha16"], meta["registry_sha16"]))
+             "registry `BANK-VERSIONS.json` %s | sandbox during this run: %s\n"
+             % (meta["census_sha16"], meta["scorer_sha16"], meta["registry_sha16"],
+                "available (E battery re-executed)" if meta.get("sandbox_ok")
+                else "not available (E column not re-executed, not compared)"))
     return head + "\n".join(md_table(rows)) + "\n" + stamp
 
 
@@ -196,14 +224,17 @@ def check_md(rows, meta):
         return 1
     want = render(rows, meta)
     have = open(MD_PATH, encoding="utf-8").read()
-    docker_ok = bool(getattr(c6, "_docker_available", lambda: False)())
+    # Follow THIS run's recorded probe (meta, written by collect()) instead of asking
+    # the environment a second time: when the two probes disagreed the sentinel verdict
+    # got compared against measured bytes and CI went red on correct data (head 8d3426e).
+    docker_ok = bool(meta.get("sandbox_ok"))
 
     def table(text):
         lines = [l for l in text.splitlines() if l.startswith("| v6")]
         if docker_ok:
             return lines
-        # E battery is a local-only re-execution: a runner without the sandbox may
-        # not compare (and must not overwrite) the locally measured E column.
+        # E battery is a local-only re-execution: a run that could not run the sandbox
+        # may not compare (and must not overwrite) the locally measured E column.
         out = []
         for l in lines:
             parts = l.split("|")
@@ -211,6 +242,9 @@ def check_md(rows, meta):
                 parts[7] = " E-COLUMN-COMPARISON-SKIPPED "
             out.append("|".join(parts))
         return out
+    if not docker_ok:
+        print("note: E-column comparison skipped for this run (its sandbox probe failed); "
+              "every other column is compared strictly")
     if table(want) != table(have):
         print("CENSUS TABLE DRIFT: committed BANK-GATE-CENSUS.md does not match a fresh recompute")
         for a, b in zip(table(want), table(have)):

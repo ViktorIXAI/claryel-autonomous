@@ -11540,3 +11540,24 @@ test, the regenerated `PREFLIGHT-CENSUS.md` (stamp v2, window `as-of 2026-11-14 
 block. What the record gains: the peak band is no longer described as separated when it is not, the
 footprint's group direction is named instead of implied, and the evening's ±2.7 GiB engine-swap
 oscillation is on the record before any leg can be blamed for it.
+
+**Addendum to tick 162 (found while auditing the CI of this very commit, fixed in the same
+tick).** The CI audit surfaced the only red in the last 25 main-branch runs:
+`hard-v6 scoring contracts` at the PREVIOUS head `8d3426e` (tick 161), step "contour gate
+contracts", `harness/bank_gate_census_test.py` -> `CENSUS TABLE DRIFT` with
+`want: ... NOT RUN (no sandbox)` / `have: ... PASS 10/10` on all 8 bank rows. That is not a
+pub-line artifact and not a bank defect: the bank gate census probed the docker sandbox twice
+(`collect()` and `check_md()` separately) and the two answers disagreed on that runner, so the
+documented E-column skip never fired and a sentinel was compared against measured bytes. The
+next run on identical bytes went green. Fixed as tooling (allowed by the 2026-11-08 freeze:
+no stamp, no feature, no bank byte): one memoized probe per run carried in `meta`, followed by
+`--check`, a census stamp that names the sandbox state of the run that wrote it, and an
+explicit skip note in the log. Side-by-side replay on the same committed table: pre-fix
+**1** (the CI failure reproduced), post-fix **0**, tampered gold with the skip applied **1**
+(the skip is scoped to one column); contract test 11 -> 23 checks green; `--check` PASS over
+8 banks with the E battery re-executed (PASS 10/10) and every bank byte-matching its registry
+sha16. The regenerated `benchmarks/hard/BANK-GATE-CENSUS.md` changed in two lines only (header
+sentence + scanner sha16 `6e96c8eb04e526b1` -> `9bf2cf7046bd1b82` with the new sandbox clause);
+all 8 verdict rows byte-identical, no gate verdict moved. Full entry with the tamper controls:
+`benchmarks/hard/REVIEW-INBOX.md`, 2026-11-15 entry "the bank gate census asked the
+environment TWICE". This pub tick's own artifacts and percents are unchanged by it.
