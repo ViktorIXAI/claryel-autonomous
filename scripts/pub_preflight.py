@@ -59,7 +59,29 @@ against a dead engine (the harness's known `tok=0` / instant-row signature).
 Semantics kept deliberately narrow: when either optional key is PRESENT it is binding (a false
 `health_loaded` or `engine_serve_procs=0` is NO-GO); when it is ABSENT the verdict is unchanged and the
 report prints a coverage line, because the 51 readings stored before this change cannot be re-judged
-by a rule they were never fed. A non-boolean `health_loaded` is an input gap, never a pass.
+by a rule they were never fed. A non-boolean `health_loaded` is an input gap, never a guess.
+
+Two more OPTIONAL readings carry the standing swap read of ticks 139-142, which no stored rule could
+see (tooling release 2026-11-14, no contour stamp, no published benchmark byte):
+
+    swap_in_mib_per_s=<float>   d(pswpin)  over the producer's sample window, MiB/s
+    swap_out_mib_per_s=<float>  d(pswpout) over the same window, MiB/s
+
+The `swap_free_mib` rule sees a swap device that is ALREADY spent; it cannot see a device with 50 GiB
+free that is moving gigabytes through it right now, which is the condition the machine note blames for
+mid-leg engine restarts. And `load1` cannot proxy this traffic at all: measured 2026-11-13/14 the box
+answered load1 9.8 -> 14.6 -> 11.0 -> 14.0 across three minutes while three counter windows stayed at
+~0.2 MiB/s in / 0 out, and the next tick answered load1 12.6-13.5 with `vmstat 1 8` showing r=0 and
+b=0 in EVERY sample, idle 99-100 %, PSI cpu 0.00 and no D-state process. The counter delta decides;
+load1 is reported for the audit trail and never gates.
+
+Values must be LIVE counter deltas, never vmstat's first line: that row is a SINCE-BOOT AVERAGE
+(measured 2026-11-14: 2239/2425 KiB/s on a box whose live window was 0.0/0.0, and 2239 KiB/s x 20.2 h
+= 155.6 GiB = exactly the pswpin counter, so the boot row is arithmetic, not a sample). Ticks 138-139
+of this line published a swap claim off that row and retracted it the same day.
+
+Same optional-but-binding semantics: present and above `SWAP_RATE_MAX_MIB_S` (sum of both directions)
+is NO-GO, absent is not covered, a non-number or a negative rate is an input gap, never a guess.
 
 Usage:
     python3 scripts/pub_preflight.py READINGS.TXT
@@ -85,6 +107,17 @@ IDLE_SPIN_PCPU = 200        # idle-spin signature: engine >200 % CPU with GPU ut
                             # 602-629 % CPU at 0 % GPU / 35-37 W. Per-task seconds in that state run
                             # 20-220x the last paired median, so the leg scores but the timing and
                             # energy columns are garbage.
+SWAP_RATE_MAX_MIB_S = 20.0  # live swap throughput ceiling, pre-registered ABOVE every launchable
+                            # window this line recorded: 0.0/0.0 (2026-11-14, r=0 b=0 at eight
+                            # vmstat samples), ~0.2 MiB/s in + 0 out (2026-11-14 tick 142), and
+                            # si 5.3 + so 6.6 = 11.9 MiB/s (2026-11-14 tick 140, recorded GO at
+                            # idle). The one recorded window an order of magnitude higher
+                            # (si 77.9 MiB/s over 9.24 s, 2026-11-13 tick 139) coincided with the
+                            # engine flickering Sl<->D and that day was already a NO-GO on state.
+                            # A leg adds no new working set here — the engine is already resident —
+                            # so a box thrashing with NOTHING asking for RAM is the predictor of the
+                            # mid-leg restart the machine note warns about.
+OPTIONAL_FLOATS = ("swap_in_mib_per_s", "swap_out_mib_per_s")
 REQUIRED = (
     "mem_total_mib", "mem_available_mib", "swap_total_mib", "swap_free_mib",
     "engine_state", "engine_pcpu", "engine_rss_mib", "gpu_util_pct", "gpu_power_w",
@@ -185,6 +218,29 @@ def main() -> int:
             print("PREFLIGHT INPUT GAP: unreadable number(s): engine_serve_procs")
             return 1
 
+    # Live swap throughput (2026-11-14): two counter deltas over the producer's own sample window.
+    # Present = binding; absent = not covered; ONE of the two = a broken producer, because the two
+    # counters are read in the same window and a one-sided window proves the window was cut.
+    swap_rate: dict[str, float] = {}
+    for k in OPTIONAL_FLOATS:
+        if k in vals:
+            try:
+                v = num(vals, k)
+            except ValueError:
+                print(f"PREFLIGHT INPUT GAP: unreadable number(s): {k}")
+                return 1
+            if v < 0:
+                print(f"PREFLIGHT INPUT GAP: {k}={vals[k]} is negative — a /proc/vmstat counter "
+                      "delta cannot run backwards (counters reset only at boot), so the window is "
+                      "broken, not the box; a broken reading is never healthy.")
+                return 1
+            swap_rate[k] = v
+    if 0 < len(swap_rate) < len(OPTIONAL_FLOATS):
+        print("PREFLIGHT INPUT GAP: only " + ", ".join(sorted(swap_rate))
+              + " is present — swap_in_mib_per_s and swap_out_mib_per_s come from ONE counter "
+              "window, so a one-sided window is a cut sample, never a healthy reading.")
+        return 1
+
     if int(vals["health_code"]) != 200:
         reasons.append(f"/health answered {vals['health_code']}, not 200")
     if loaded_flag is False:
@@ -197,6 +253,15 @@ def main() -> int:
         reasons.append(
             f"swap free {vals['swap_free_mib']} MiB of {vals['swap_total_mib']} MiB "
             f"(< {SWAP_FREE_MIN_MIB}): the engine can be OOM-restarted mid-leg")
+    if len(swap_rate) == len(OPTIONAL_FLOATS):
+        total_rate = sum(swap_rate.values())
+        if total_rate >= SWAP_RATE_MAX_MIB_S:
+            reasons.append(
+                f"live swap throughput {vals['swap_in_mib_per_s']} MiB/s in + "
+                f"{vals['swap_out_mib_per_s']} MiB/s out = {total_rate:.1f} MiB/s over the sample "
+                f"window (>= {SWAP_RATE_MAX_MIB_S}): the box is moving pages while nothing is "
+                "asking for RAM — the free-swap column still looks healthy and load1 cannot see "
+                "this traffic, but this is the state from which the engine gets restarted mid-leg")
     if int(vals["mem_available_mib"]) < MEM_AVAILABLE_MIN_MIB:
         reasons.append(f"MemAvailable {vals['mem_available_mib']} MiB < {MEM_AVAILABLE_MIN_MIB}")
     if "D" in vals["engine_state"]:
@@ -211,7 +276,7 @@ def main() -> int:
     print("endpoint readings:")
     for k in REQUIRED:
         print(f"  {k:<18} {vals[k]}")
-    for k in ("health_loaded", "engine_serve_procs"):
+    for k in ("health_loaded", "engine_serve_procs") + OPTIONAL_FLOATS:
         if k in vals:
             print(f"  {k:<18} {vals[k]}")
     if loaded_flag is None or serve_procs is None:
@@ -220,6 +285,10 @@ def main() -> int:
                                         ("engine_serve_procs", serve_procs)) if v is None)
               + " — a 200 alone cannot prove a model is loaded; the live producer emits both since "
                 "2026-11-13, so this file predates that fix.")
+    if len(swap_rate) < len(OPTIONAL_FLOATS):
+        print("  (coverage) this reading carries no swap_in_mib_per_s/swap_out_mib_per_s counter "
+              "window — the live swap-throughput rule is not covered; the live producer emits both "
+              "since 2026-11-14, so this file predates that fix.")
     if reasons:
         print("PREFLIGHT NO-GO:")
         for r in reasons:

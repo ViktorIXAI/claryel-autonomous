@@ -18,7 +18,12 @@ What it pins:
      reader fed the USED column as swap_free_mib on a swap-saturated box — used
      8159 / free 32 / total 8191 — which would have GO'd the swap rule; when the
      key is present a mismatch is an input gap, a within-tolerance balance still
-     GOes, and an unreadable value fails closed).
+     GOes, and an unreadable value fails closed);
+     6. the optional live swap-throughput window `swap_in_mib_per_s` / `swap_out_mib_per_s`
+     (2026-11-14): present and over the pre-registered ceiling is NO-GO, the launchable bursts
+     this line recorded stay GO, the boundary is conditional (19.9 GO / 20.0 NO-GO), an
+     unreadable rate, a negative counter delta or a one-sided window is an input gap, an absent
+     window changes no verdict and prints a coverage line, and reasons accumulate.
 
 The real readings that motivated this gate (2026-11-10, tick 23) are reproduced as
 the swap/D-state tamper case: 3 MiB swap free, engine state Dl, 602 % CPU at 0 % GPU.
@@ -180,7 +185,52 @@ def main() -> int:
        f"a loaded=false model must NO-GO even with every other reading healthy, got {rc}: {out}")
     rc, out = run(variant(health_loaded="true", engine_serve_procs=1))
     ck(rc == 0, f"loaded=true with one engine process must GO, got exit {rc}: {out}")
-    ck("(coverage)" not in out, "a fully covered reading must not print a coverage warning")
+    ck("swap_in_mib_per_s" in out and "predates that fix" in out,
+       f"a loaded-covered reading with no counter window must still report the swap-rate gap, "
+       f"got exit {rc}: {out}")
+    rc, out = run(variant(health_loaded="true", engine_serve_procs=1,
+                          swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0))
+    ck(rc == 0 and "(coverage)" not in out,
+       f"a fully covered reading must not print a coverage warning, got exit {rc}: {out}")
+
+    # Live swap throughput (2026-11-14, tooling release, no contour stamp and no published byte).
+    # The stored swap rule sees a device that is ALREADY spent; it cannot see 50 GiB free with
+    # gigabytes moving through it now, and load1 cannot proxy the traffic at all — measured on the
+    # endpoint box 2026-11-13/14: load1 9.8 -> 14.6 -> 11.0 -> 14.0 across three minutes with three
+    # /proc/vmstat counter windows at ~0.2 MiB/s in / 0 out, then load1 12.6-13.5 with `vmstat 1 8`
+    # showing r=0 and b=0 in EVERY sample, idle 99-100 %, PSI cpu 0.00, no D-state process. The
+    # threshold is pre-registered above every launchable window this line recorded (the recorded
+    # 11.9 MiB/s burst is a GO; the 87.5 MiB/s burst was the day the engine flickered Sl<->D).
+    live_today = dict(live0928, health_loaded="true", engine_serve_procs=1,
+                      swap_total_mib=65535, swap_free_mib=50703, swap_used_mib=14832,
+                      mem_available_mib=19776, engine_rss_mib=56247, load1=12.59,
+                      gpu_power_w=27.26)
+    rc, out = run(dict(live_today, swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0))
+    ck(rc == 0 and "live swap throughput" not in out,
+       f"the 2026-11-14 live idle window (0.0 in / 0.0 out at load1 12.59) must GO, got {rc}: {out}")
+    rc, out = run(dict(live_today, swap_in_mib_per_s=5.3, swap_out_mib_per_s=6.6))
+    ck(rc == 0 and "live swap throughput" not in out,
+       f"the recorded launchable burst (11.9 MiB/s sum) must stay GO, got {rc}: {out}")
+    rc, out = run(dict(live_today, swap_in_mib_per_s=77.9, swap_out_mib_per_s=9.6))
+    ck(rc == 3 and "live swap throughput" in out,
+       f"an 87.5 MiB/s window must NO-GO and name the reason, got {rc}: {out}")
+    ck("load1 cannot see" in out, "the reason must say why load1 is not a substitute")
+    rc, out = run(variant(swap_in_mib_per_s=19.9, swap_out_mib_per_s=0.0))
+    ck(rc == 0, f"19.9 MiB/s sits under the pre-registered ceiling and must GO, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=20.0, swap_out_mib_per_s=0.0))
+    ck(rc == 3, f"exactly the ceiling must NO-GO, got {rc}")
+    rc, out = run(variant(swap_in_mib_per_s="n/a", swap_out_mib_per_s=0.0))
+    ck(rc == 1 and "unreadable number(s): swap_in_mib_per_s" in out,
+       f"an unreadable rate must be an input gap, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=1.0, swap_out_mib_per_s=-3.0))
+    ck(rc == 1 and "cannot run backwards" in out,
+       f"a negative counter delta is a broken window, never healthy, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=9.9))
+    ck(rc == 1 and "ONE counter window" in out,
+       f"a one-sided counter window must be an input gap, got {rc}: {out}")
+    rc, out = run(dict(variant(swap_in_mib_per_s=88.0, swap_out_mib_per_s=9.0), engine_state="Dl"))
+    ck(rc == 3 and "live swap throughput" in out and "uninterruptible" in out,
+       f"reasons must accumulate (thrash + D state), got {rc}: {out}")
     rc, out = run(variant(engine_serve_procs=0))
     ck(rc == 3 and "launcher" in out,
        f"engine_serve_procs=0 must NO-GO and name the wrong-process trap, got {rc}: {out}")

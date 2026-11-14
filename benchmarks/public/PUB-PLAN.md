@@ -9780,3 +9780,128 @@ Verified subset, GAIA-lite) need a fresh owner decision before any leg. Standing
 the `/proc/vmstat` counter-delta swap read (now falsified as load-1's proxy from both sides), the
 in-process returncode census of the preflight band, and the running-job single-writer census at the
 start of every tick.
+
+## Tick 143 — 2026-11-14 09:34 CET: scoreboard unmoved; engine hold 19 h 22 min on one process; band 52 GO of 89 (15 GO of 17 today); the standing swap read becomes a gate rule (tooling release, contract test 41 → 52 checks); load-1 falsified a third time — `vmstat 1 8` answered r=0 and b=0 in every sample at load1 12.6-13.5; zero legs, zero calls, zero published benchmark bytes moved
+
+**Foreign commit first, then this tick.** `main` moved under this line at 08:55 CET: `8ccef67`
+"CHG-001 MACSTUDIO: unannounced hardware drift detected — passport updated" touches only
+`hardware/changes/MACSTUDIO.md` and `hardware/inventory/mac-studio-m3u.md` (+71 lines, zero benchmark
+paths). This tick fast-forwarded onto it clean and reads CI across it: all five workflows
+(`pages-build-deployment`, `secret-scan`, `contour self-tests`, `hard-v6 scoring contracts`,
+`devsecops`) **success** on `8ccef67`.
+
+**Endpoint state (P2005, one process).** Engine pid 10597, **19 h 22 min** on the same process,
+RSS 57 255 MiB (58 629 212 KiB) at GPU 0 %, 27.5 W, sampled 6 s pcpu 0.0 %. Box up 20 h 14 min;
+`keep-up.log` unchanged since 2026-11-13 13:07 (two lines: `started`, one `keep-up restart` at the
+box boot) — the watchdog has not restarted anything since. The foreign config-ladder campaign is
+still idle, certified the way tick 142 certified it: a **standalone** bracketed `pgrep` (0 processes,
+no self-match) plus launcher mtimes (newest `p2005_v10_ab.sh`, Nov 13 10:15). No unit
+`parb-pub-*`, no `pub_bench_*` transport, no `gate_run.py` anywhere; the single-writer census in
+`executions.db` shows exactly one `running` job — this tick.
+
+**Preflight band: 89 stored reading files, 52 GO / 35 NO-GO / 2 input-gap; today 17 files, 15 GO / 2
+NO-GO.** Counted in-process over every file with the exit captured before anything else runs (the
+`$( )`-then-`$?` mask class), and the census reproduces tick 142's 27 GO of 30 plus today's
+readings exactly.
+
+**What moved this tick: the standing swap read became a gate rule (tooling release, no contour stamp,
+no bank/scorer/pin byte, no published benchmark byte).** For five ticks this line carried the swap
+verdict by hand: an ssh one-liner reading `/proc/vmstat` counter deltas each tick, because the stored
+`swap_free_mib` rule sees only a device that is **already spent** — today's box reports 50 044 MiB
+free of 65 535 while having pushed 156.9 GiB in / 170.7 GiB out since boot. Since 2026-11-14 the
+producer emits two more readings, `swap_in_mib_per_s` and `swap_out_mib_per_s` (`pswpin`/`pswpout`
+read twice over the SAME 6 s window as the engine CPU sample), and `scripts/pub_preflight.py` treats
+them with the same optional-but-binding semantics proven for `health_loaded` on 2026-11-13:
+
+* present and `in + out >= SWAP_RATE_MAX_MIB_S = 20.0` → NO-GO naming the rates;
+* absent → verdict unchanged plus a `(coverage)` line;
+* unreadable, **negative** (a counter delta cannot run backwards), or **one-sided** (the two counters
+  come from one window, so half a window is a cut sample) → INPUT GAP, never GO.
+
+The ceiling is **pre-registered above every launchable window this line recorded**, the way the LCB
+caps are: 0.0/0.0 today, ~0.2 MiB/s on 2026-11-14 tick 142, and si 5.3 + so 6.6 = 11.9 MiB/s on
+2026-11-14 tick 140 — all recorded GO. The one recorded window an order of magnitude higher
+(si 77.9 MiB/s over 9.24 s, 2026-11-13 tick 139) was the day the engine flickered `Sl`↔`D` and that
+day was already a NO-GO on state, so the new rule adds no contradiction anywhere in the stored
+series. **Non-vacuity proof on stored bytes:** the gate was re-run over all 88 readings taken before
+the change and every verdict is identical (51 GO / 35 NO-GO / 2 input-gap) — 88 files, 0 verdict
+moves, exactly the "pre-fix readings cannot be re-judged by a rule they were never fed" contract. The
+live producer's first reading (09:26) carries `0.0` / `0.0` at load1 13.77 and the gate answers GO.
+`harness/pub_preflight_test.py` went 41 → **52 checks**: the 2026-11-14 live idle window and the
+recorded 11.9 MiB/s burst both GO, an 87.5 MiB/s window NO-GOs and names the reason, the boundary is
+conditional (19.9 GO / 20.0 NO-GO), a negative delta and a one-sided window are input gaps, and
+reasons accumulate (thrash + `Dl` state prints both).
+
+**Honest limit of the rule, measured the same minute it shipped.** Six seconds is a window, not a
+history: the live window read `0.0 / 0.0` at 09:26 while the cumulative counters moved +1.8 GiB in /
++2.0 GiB out between 09:21 and 09:34 — an average of ~2.3 MiB/s, i.e. the box's reclaim churn is
+**bursty on a minutes scale and invisible to a 6 s sample half the time**. The rule therefore detects
+a thrash burst at launch time; the slow view stays in the stored reading series (swap used grew
+659 MiB between the 09:20 and 09:26 readings). Both numbers are below the ceiling and neither would
+block a leg; the ceiling stays where a burst actually predicts the mid-leg restart.
+
+**load-1 falsified a third time, from the other side.** The box answered load1 12.59 → 13.49 → 11.41
+while `vmstat 1 8` showed **r=0 and b=0 in every one of eight samples**, idle 99-100 %, cs ~1 700/s,
+PSI cpu 0.00, `procs_running` 1-2 over ten samples, and `ps` census 230 `S` + 230 `I` + 1 `R` and no
+`D` anywhere; a per-pid 6 s jiffies delta found no process above ~0 %. Across 20 more seconds load1
+decayed 10.62 → 7.60 exactly on its one-minute time constant. So the load figure is a lagging decay
+tail of a past burst plus intermittent sub-second runnable episodes no sampler is guaranteed to hit —
+it gates nothing (it never did in this gate) and the counter delta decides. The since-boot row is
+still arithmetic, not a sample: `vmstat`'s first line said si 2 239 / so 2 425 KiB/s on a box whose
+live window was 0.0/0.0, and 2 239 KiB/s x 20.2 h = 155.6 GiB reproduces the `pswpin` counter (now
+156.9) — the tick-138/139 trap reproduced as a control on the same box one day later.
+
+**Standing gates, all seven re-proven this tick on the standing head (exits read unshielded, gates
+invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3** by design (the cancel):
+22 checks, **182 unasked ids** (`ifeval-286..ifeval-3757`, stored 359 rows, sha256-16
+`01c1ee0b6e7f6d5d` unchanged) held as a `VOID` record, not a queue; the three completed Grok arms stay
+198/198, 164/164, 500/500 with resume sets of 0. `pub_grok_cell_check.py` 0 findings / 9 documents.
+`pub_arms_index.py --check` drift 0. `pub_derived_percent_check.py` 42 recomputed, 0 findings
+(digest citations 44, doc citations 188, uncovered 0). `pub_superseded_cell_check.py` 0 / 9.
+`pub_digest_row_check.py` 49 rows, 0 findings, pre-rule exceptions 23/23. Three-arm parity gate 49
+rows / 9 sets, 0 findings (contour stamp `0.0.2.56`, Grok not an arm).
+`scripts/security/secret_scan.py --dir . --strict` exit 0, 0 findings. `~/pub-bench/GROK-CANCELLED`
+in place, 121 B, `Nov 12 06:54` — not touched.
+
+**The hermetic PUB contract suite re-executed: 14 tests, 0 failures, 425 checks.** Counts from each
+test's own summary line: 34 (`pub_arms_index`) + 22 (`pub_cloud_blank_purge`) + 41
+(`pub_derived_percent`) + 22 (`pub_digest_row_gate`) + 7 (digest writer) + 9 (`pub_grok_cancel`) + 27
+(`pub_grok_cell`) + 39 (`pub_grok_resume_check --write-pin`) + 33 (`pub_grok_resume_check`) + **52**
+(`pub_preflight`, was 41) + 42 (`pub_bench_run engine-stamp`) + 34 (`pub_superseded_cell`) + 43
+(`pub_taskfile_shape`) + 20 (three-arm parity) = **425**. `scripts/qa/static_checks.py` exit 0 (its
+transcript prints `Could not resolve host: github.com` lines — those are the
+`refresh_docs_push_test` fixtures driving the retry helper against a fake remote, not this push).
+Zero model calls (temp fixtures, stubbed transports).
+
+**Frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state` re-read on the
+literal path: present, 26 B, `Nov 2 14:05`, contents `2026-11-02T14:05:30+01:00` unchanged. Both
+legacy hard-bank-era jobs are still enabled and still firing ok — `Mac v2.2 full after v2.1`
+(id `f23cf5d48e11`, every 5 m, last 09:17:26 CET) and `P2005 paired full 2.1→2.2 watch`
+(id `a808c7f205a6`, `*/5 * * * *`, last 09:20:26 CET — a permanent five-minute ssh round-trip onto
+this line's endpoint box). Reported as an owner decision, not edited. The drain-resume self-heal job
+(`9a12508f8a69`) completed 09:20 ok; no cron job on this line is paused.
+
+**Watchdog clone: the deviation set CHANGED shape, 8 paths → 7.** `~/projects/strata-autonomous-harness`
+staged index empty (0 lines), detached (branch name empty) and now sitting at `8ccef67` = `main`
+(it was `aa4e4d6` last tick, so the hardware line moved this clone too). `git status --porcelain`
+returns **seven** paths: the four stranded snapshots `hardware/os-snapshots/2026-11-11..-14.json` and
+the three untracked scratch files in the published raw namespace
+(`benchmarks/public/raw/arceasy-test.jsonl`, `ifeval-input.jsonl`, `x.bin`). The modified
+`hardware/os-snapshots/latest.json` of ticks 136-142 is **clean against HEAD** now — the hardware
+line's own work resolved it, not this tick. Nothing committed or deleted here; it stays the
+hardware/ops line's decision.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved, one tooling commit. What moved: the standing swap read stopped being prose and
+became a gate rule with a contract test and a verdict-identical replay of 88 stored readings; load-1
+was falsified as a proxy a third time with `r=0 b=0` at eight samples; the engine hold passed 19 h 22
+min without a watchdog restart; the watchdog clone's deviation changed shape on the hardware line's
+side. All seven gates and the 425-check contract suite green, Grok cancel armed-but-closed with its
+182-id resume record intact.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
+Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench Verified
+subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads unchanged: the
+`/proc/vmstat` counter-delta swap read (**now wired into the gate as
+`swap_in_mib_per_s`/`swap_out_mib_per_s`, window-based only**), the in-process returncode census of
+the preflight band, and the running-job single-writer census at the start of every tick.
