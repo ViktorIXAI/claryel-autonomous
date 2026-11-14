@@ -8694,3 +8694,145 @@ censuses by exit code and exact column equality, cross-checked against each gate
 per-test check counts summed from each test's own summary line because the formats differ;
 **`refresh_docs_status.py` is a mutation, never a dry run**; daily-docs next fire 2026-11-15 02:00
 UTC onto a marker that already carries today's date.
+
+
+## Tick 134 — 2026-11-14 03:48 CET: scoreboard unmoved; engine hold passes 13 h 36 min and the band reaches 20 GO of 22; the watchdog clone's orphan CHG-001 commit proven byte-identical to the record already on main, and three fleet OS snapshots found stranded untracked in that clone; zero legs, zero calls, zero published benchmark bytes moved
+
+**Scoreboard: unmoved.** Nine in-force sets complete on the three-arm standard (bare local /
+contour `0.0.2.56` matched shape / ChatGPT codex), re-certified by
+`scripts/pub_three_arm_parity_check.py`: **49 rows / 9 sets, 1 closed (`simplebench`), 0 findings**
+(contour stamp `0.0.2.56`, Grok not an arm; Grok percent absent on `bfcl`, `ifeval`,
+`livecodebench` by the 2026-11-12 owner cancel, cell sentence on the other six). `PUB-DIGEST.md`
+byte-stable since `ad8d8c0`: sha256-16 `9d5ac7c3a60fb9dd`, 16 517 B — re-hashed this tick, identical
+to ticks 131–133. No contour stamp or feature registered, no hard-bank pair launched, no hard-bank
+byte touched.
+
+**Legs: none, and none launched.** `systemctl --user list-units --all 'parb-*'` empty (0 lines);
+transport counts taken in standalone calls so no pattern self-matched the measuring shell:
+`pub_bench_run` 0, `pub_bench_cloud` 0, `gate_run.py` 0 on this host, and on the endpoint box
+`pgrep -cf 'gate_ru[n].py'` and `pgrep -cf '[p]ub_bench_ru[n].py'` both 0. The queue is empty: every
+in-force set carries all three admissible arms, the Grok line stays closed by the owner decision of
+2026-11-12 (operator marker present, 121 B, mtime 2026-11-12 06:54; the pinned resume record carries
+`cancelled_on: 2026-11-12` with `suspended_until: null`), and SimpleBench stays closed as
+unpinnable. Zero model calls, zero cloud calls this tick.
+
+**One instance of this brief, read from the scheduler rather than assumed.** The `executions` table
+holds exactly one `running` row, this job (`PUB benchmark loop 30m`, id `288a66f93167`, started
+03:48:26 CET). That is the double-spend surface the chain-lock rule exists for, and it read clean.
+
+**Endpoint read (twenty-second stored reading of the engine-hold band, a twentieth GO).**
+`bash preflight.sh` bare (no outer redirect): **`preflight-20261114-0349.txt` → PREFLIGHT GO**
+(empty `.err` sibling). Readings: swap 13 907 MiB used of 65 535 (51 628 free, balance inside
+tolerance), MemAvailable 19 590 MiB, engine state `S`, live-delta pcpu 0.0, RSS 55 524 MiB, GPU
+0 % / 26.77 W, `health_code=200`, `health_loaded=true`, `engine_serve_procs=1`, foreign legs 0,
+load1 **8.40**. Load is the third-highest sample of the band (the two NO-GOs carried 12.0 and 12.4)
+but this reading shows no `D` state, no swap traffic and GPU idle, so the gate went and no leg was in
+force to be exposed to it. The gate's verdict for this file was taken in-process with every other
+stored reading (see the census), never from the wrapper's exit.
+
+**Band and workspace census, returncodes taken in-process before any reporting line.**
+Engine-hold band (files named from the engine start minute `20261113-1412` onward, first
+`preflight-20261113-1428.txt`, last `preflight-20261114-0349.txt`): **22 readings, 20 GO / 2 NO-GO**,
+the two non-GOs unchanged — `preflight-20261113-1923.txt` and `preflight-20261114-0207.txt`, both
+`engine in uninterruptible I/O (state D): thrashing`. Whole workspace over every stored
+`preflight-*.txt`: **79 files, 43 GO / 34 NO-GO / 2 input gaps** — tick 133's 78 / 42 / 34 / 2 plus
+exactly this tick's one GO, so no stored reading changed verdict. The two input gaps are
+`preflight-20261111-0948.txt` (no engine/GPU readings) and `preflight-20261111-1144.txt` (no readings
+at all).
+
+**Engine continuity, read on the box, not inferred.** The same engine process as ticks 117–133
+(`basalt --serve`, pid 10597, `lstart Fri Nov 13 14:12:51 2026`), elapsed **49 012 s = 13 h 36 m 52 s**,
+state `Sl`, RSS 57 995 512 KiB. `/health` names the served alias
+`qwen3.8-flash-next-iq3_s-basalt`, `"loaded": true`, `"loading": false`, max context 196 608.
+`keep-up.log` is still 44 B with its single restart line `2026-11-13_13:07:49 keep-up restart` — the
+watchdog is not the actor in this window; the box's own uptime (14:42) matches that restart, so the
+engine hold spans essentially the whole boot.
+
+**Ops tuning campaign: sixteenth idle read.** Newest `p2005_v*_ab.sh` on the box remains
+`p2005_v10_ab.sh` (mtime 2026-11-13 10:15 CET; v9 at 09:53, v8 at 09:33) and no such script is
+running. Machine state, reported, never acted on.
+
+**Daily-docs job: green at its own fire, and the dirty-tree cause still unreproduced where it is
+claimed.** Read from the scheduler: `GitHub docs freshness daily` (id `ef7ea47ff99b`, `0 2 * * *`)
+last run **2026-11-14 03:02:14 CET, ok, failure streak 0, no error**. The untracked wrapper's own
+text settles the clone question: it declares `~/sah-main` the only worktree holding branch `main`,
+`cd`s there, and refuses only if **that** tree is dirty (`repo is dirty; refusing daily docs
+refresh`). This line's clone was clean at the fire and is clean now (0 paths) with local `main`
+equal to `origin/main` (0/0), so the brief's dirty-tree cause remains unreproduced on this surface;
+the recorded historical cause was the stale status date, repaired 2026-11-13.
+
+**Standing gates, all seven re-proven this tick on the pushed head `520d812` (exits read unshielded
+and in-process, gates invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3**
+(by design — the cancel): `checks: 22 | RESUME GATE: NO-GO - do not spend quota`, **182 unasked ids**
+(`ifeval-286..ifeval-3757`, stored 359 rows / 359 ok) which are a record, not a queue; the completed
+arms in the pin report resume set 0. `pub_grok_cell_check.py` exit 0 — 9 documents, 0 findings.
+`pub_arms_index.py --check` exit 0 — index drift 0. `pub_derived_percent_check.py` exit 0 —
+**42 recomputed from shipped bytes, 0 findings**. `pub_superseded_cell_check.py` exit 0 — 9 documents,
+0 findings. `pub_digest_row_check.py` exit 0 — 49 rows, contracts named 26, pre-rule exceptions
+23/23 used, 0 findings. Three-arm parity gate exit 0 — 49 rows / 9 sets / 1 closed, 0 findings.
+`scripts/security/secret_scan.py --dir . --strict` exit 0, `total_findings: 0`.
+
+**The hermetic PUB contract suite re-executed: 14 tests, 0 failures, 414 checks.** Exit codes first,
+then each test's own summary line (the formats differ, so the sum is taken from those lines): 34
+(`pub_arms_index`) + 22 (`pub_cloud_blank_purge`) + 41 (`pub_derived_percent`, `CHECKS 41, FAILED 0`)
++ 22 (`pub_digest_row_gate`) + 7 (digest writer) + 9 (`pub_grok_cancel`) + 27 (`pub_grok_cell`) + 39
+(`pub_grok_resume_check --write-pin`) + 33 (`pub_grok_resume_check`) + 41 (`pub_preflight`,
+`41/41 green`) + 42 (`pub_bench_run engine-stamp`) + 34 (`pub_superseded_cell`) + 43
+(`pub_taskfile_shape`) + 20 (three-arm parity) = **414**, reproducing ticks 128–133 exactly. Still
+zero model calls (temp fixtures, stubbed transports).
+
+**CI, read back rather than assumed.** Tick 133's head `520d812`: **all five jobs completed /
+success** — secret-scan, contour self-tests, pages-build-deployment, hard-v6 scoring contracts,
+devsecops (all updated 02:06–02:13 Z). CI on this tick's own head is re-read next tick, per the
+standing rule.
+
+**Frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state` re-read on the
+literal path: present, 26 B, `Nov 2 14:05`. Both legacy hard-bank-era jobs are still enabled and
+still firing green — `Mac v2.2 full after v2.1` (every 5 min, last 03:47:26 CET) and `P2005 paired
+full 2.1→2.2 watch` (`*/5`, last 03:50:26 CET, a permanent five-minute ssh round-trip onto this
+line's endpoint box). Both reported as an owner decision, not edited.
+
+**Watchdog clone: the deletion hazard is clean, and one claim from a previous tick is now proven
+mechanically instead of read visually.** The second clone's staged index is empty (0 lines) and it is
+detached (`git branch --show-current` prints nothing), so there is no index that could stage
+deletions of published arms. Tick 124 reported it "parked on an orphaned off-main CHG-001 commit";
+this tick proved the equivalence rather than trusting the subject line: its local-only commit
+`aa4e4d6` "CHG-001 P2005: unannounced hardware drift detected — passport updated" (2026-11-13
+13:18:30) and main's `ac3bae9` (13:19:05) share **patch-id `00b63245b729644be58a95e1445ec3749450675b`**
+and the same 2 files / 54 insertions, so the record is on `main` and **nothing is lost** — the clone is
+97 commits behind with that one duplicate on top, and its own `refs/heads/main` is current at
+`520d812`.
+
+**New finding of this tick, reported and not acted on: three fleet OS snapshots are stranded in that
+clone.** `hardware/os-snapshots/2026-11-11.json`, `-12.json` and `-13.json` (2 569 B each) exist
+**only as untracked files** in the second clone, next to a modified `latest.json` (8 diff lines
+against that clone's HEAD), while `main` tracks snapshots only through `2026-11-10`. That is the same
+class main already recorded once as a recovery (`hardware: publish OS snapshots 2026-11-06..10
+recovered from the duplicate worktree`). Three further untracked scratch files sit in that clone's
+**published** namespace (`benchmarks/public/raw/arceasy-test.jsonl` 14 B, `ifeval-input.jsonl`,
+`x.bin`) and are not tracked by `main`, whose raw directory holds six task files plus a README — so an
+auto-commit there that stages everything would land junk in a published path. Both are another
+workstream's clone: this line publishes no hardware bytes and edited nothing there.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the endpoint band reached **20 GO of 22 readings** with the engine
+hold passing **13 h 36 min** on one process (the box's whole boot), the watchdog clone's orphan
+CHG-001 commit is now proven a byte-duplicate of what is already on `main` (identical patch-id, nothing
+lost), and three fleet OS snapshots for 2026-11-11..13 were found stranded untracked in that clone
+while `main` stops at 2026-11-10 — an owner/hardware-line decision, not a change this line should make.
+All seven gates plus the 414-check contract suite are green and CI is green on all five jobs on the
+standing head. IFEval / LiveCodeBench / BFCL rows and the repair-family census are unchanged from
+ticks 121–133.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
+Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench Verified
+subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads unchanged: a fresh
+preflight GO **plus** `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local leg;
+after any NO-GO, one second reading before a box symptom is called sustained; `bash preflight.sh`
+without an outer redirect; PUB gates invoked as `python3 <script>` with exits read unshielded;
+census returncodes taken in-process before any command substitution in the reporting line; censuses by
+exit code and exact column equality, cross-checked against each gate's own row count; per-test check
+counts summed from each test's own summary line; **`refresh_docs_status.py` is a mutation, never a dry
+run**; transport counts taken in standalone calls so a bracketed pattern cannot self-match a line that
+also greps the literal; daily-docs next fire 2026-11-15 02:00 UTC onto a marker that already carries
+today's date.
