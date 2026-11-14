@@ -10480,3 +10480,68 @@ bytes moved; this tick adds only this record block plus one stored preflight rea
 GO-onto-an-empty-queue tick shows: the gate work of ticks 145–148 is now the easy part of the next
 leg — finding a launchable window costs one 6 s producer read and it comes open often enough (26 GO
 of 37 today), and what actually stops a leg is the absence of a next set.
+
+## Tick 151 — 2026-11-14 16:03 CET: scoreboard unmoved; the swap-throughput rule caught its biggest window yet — 443.8 MiB/s mean, 22x its ceiling — already gone six minutes later; the peak statistic gets its measured band (13 files, clean 67.6/107.0 separation, NOT gated); zero legs, zero calls, zero published benchmark bytes moved
+
+Nothing launched — the queue in force is still empty (tick 150's constraint, unchanged). The fresh
+producer read at 16:03 (`preflight-20261114-1603.txt`) answers **PREFLIGHT NO-GO, exit 3**: the live
+swap window reads **in 231.9 + out 211.9 = 443.8 MiB/s** against the `SWAP_RATE_MAX_MIB_S = 20.0`
+ceiling — **22x the ceiling and 5.3x the largest window this line had recorded** (the 13:58 file's
+83.7), with the peak statistic printing **655.2 MiB/s**, the largest number any stored reading
+carries. Every other axis stayed quiet at the same instant: GPU mean 1.5 % / peak 5 % at 26.88 W,
+whole-disk reads 0.1 MiB/s with top reader `basalt`, engine state S with sampled pcpu 14.1 %,
+`/health` 200 `loaded=true`, one serve process, swap_free 48.9 GiB. Engine hold: one process, age
+**1 d 01:50 — 25 h 50 min**, the longest of the band.
+
+**The storm was transient and the box was quiet again six minutes later.** A separate 6 s
+`/proc/vmstat` delta taken right after the NO-GO: `pswpin` +6 pages (0.04 MiB/s), `pswpout` +0. The
+engine was never in `D` in this window and no leg was near launch, so the event cost nothing — it is
+recorded as the swap rule working at its extreme: at 15:30 the same box read 3.9 MiB/s (GO), at
+16:03 it read 443.8 (NO-GO). "A GO is valid for that reading only" (tick 43/44 rule) is what a leg
+launched into this box between those two reads would have had to survive.
+
+**Mechanism note — the device counter cannot see swap, and swap-in here does not even hit the
+device.** The endpoint swaps through **two file-backed images** (`/swap.img` 8 GiB at 7.0 GiB used,
+`/swap2.img` 56 GiB at 9.8 GiB used) and `/proc/meminfo` carries **SwapCached 5.0 GiB** with zswap
+disabled (`enabled=N`), so swap-in pages can be served from the swap-file page cache: the 443.8
+MiB/s window is exactly the case where the swap counters scream while `blk_read_mib_per_s` reads
+0.1. The two rules are complementary, not redundant — the tick-145 device rule names foreign device
+readers the swap counters miss, this event names page churn the device counter misses. Neither rule
+alone would have seen the other's failure class.
+
+**Peak-statistic band (the open item tick 150 left): measured now, still NOT gated.** Re-running the
+current gate over every stored reading **in-process** and parsing the peak field gives **110 files —
+63 GO / 41 NO-GO / 6 input gaps** (tick 150's 109 / 63 / 40 / 6 plus exactly this tick's NO-GO);
+today 38 files, 26 GO / 8 NO-GO / 4 input gaps. **13 stored files carry the peak statistic** (the
+two broken 12:11/12:12 samplers stay NaN = input gap, zero credit). Band on those 13: the **highest
+peak inside a mean-GO window is 67.6 MiB/s** (12:27, window mean 14.0), the **lowest peak inside a
+mean-failing window is 107.0** (12:45, mean 33.5) — a clean separation with nothing between 67.6 and
+107.0, peaks 0.0-67.6 with means 0.0-14.0, peaks 107.0-655.2 with means 33.5-443.8. Not shipped as a
+rule this tick for the same reasons the GPU peak stays ungated (tick 146 discipline): n = 13, the
+peak correlates with the window mean (ratio ~3-8 on every file), so a peak gate adds no refusal the
+mean gate does not already reach today — it only fires earlier on a hypothetical low-mean/high-burst
+window that has not been recorded yet. Pre-registered arming condition, so this band cannot rot:
+once **>=30 launchable (GO) windows carry the peak field**, a ceiling is set **strictly above the
+highest launchable peak observed by then**, shipped only with the pre-fix/post-fix side-by-side
+replay over every stored reading at **0 verdict moves**, and a contract test pinning the measured
+separation as its non-vacuity control.
+
+**Gates and tests.** All five PUB publication gates green on HEAD (`pub_arms_index --check`,
+`pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`,
+`pub_digest_row_check`). Preflight contract test **103/103**, taskfile shape test **43/43** (no gate
+code moved this tick). `pub_grok_resume_check --as-of 2026-11-14` exits **3** with the in-force
+cancellation finding (IFEval pin: 182 never-asked ids as record, not queue; gpqa/humaneval/mmlu-pro
+resume sets 0 ids). Self-observation, recorded as a class repeat: the first run of the resume gate
+this tick printed `exit=0` because it was piped to `tail` — the mask this repo's own notes name three
+times — and the exit was re-read unshielded (**3**) before anything was written; the gate behaviour
+was correct both times, only the reported exit had been masked.
+
+**Repository state.** `main` == `origin/main` == `4a149fc` at the tick start, working tree clean in
+both worktrees (watchdog clone: empty staged diff, detached HEAD — the two-worktree hazard census
+again clean). CI green on that head (`pages`, `secret-scan`, `contour self-tests` all success).
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped;
+this tick adds one stored preflight reading plus this record block. What moved: the swap-throughput
+rule has now refused a window 22x its ceiling with the engine never in `D`, the swap/device rule
+complementarity is proven on live bytes, and the peak statistic has a measured (thin) band with a
+pre-registered arming condition instead of an open question.
