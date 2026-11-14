@@ -23,7 +23,17 @@ What it pins:
      (2026-11-14): present and over the pre-registered ceiling is NO-GO, the launchable bursts
      this line recorded stay GO, the boundary is conditional (19.9 GO / 20.0 NO-GO), an
      unreadable rate, a negative counter delta or a one-sided window is an input gap, an absent
-     window changes no verdict and prints a coverage line, and reasons accumulate.
+     window changes no verdict and prints a coverage line, and reasons accumulate;
+  7. the optional device-read window `blk_read_mib_per_s` plus its attribution `blk_top_reader`
+     (2026-11-14, same tooling release): both measured interference windows (1856.8 MiB/s and the
+     224.4 MiB/s tail phase of a fleet model push, engine taking 628 major faults/s at idle) are
+     NO-GO and name the reader, the measured idle device rate (0.2 MiB/s) stays GO, an over-ceiling
+     rate attributed to the engine itself still NO-GOs (the reader is diagnostic), the boundary is
+     conditional (99.9 GO / 100.0 NO-GO), an unreadable, non-finite or negative delta is an input
+     gap, an absent window changes no verdict and prints a coverage line, and reasons accumulate;
+  8. every parsed number must be FINITE: the producer emits NaN when a sample window was cut, and
+     Python's `float()` parses `NaN`/`inf`, so a cut sample used to reach the comparison stage where
+     every threshold answer is False — a silent GO on all the numeric rules (found 2026-11-14).
 
 The real readings that motivated this gate (2026-11-10, tick 23) are reproduced as
 the swap/D-state tamper case: 3 MiB swap free, engine state Dl, 602 % CPU at 0 % GPU.
@@ -188,10 +198,16 @@ def main() -> int:
     ck("swap_in_mib_per_s" in out and "predates that fix" in out,
        f"a loaded-covered reading with no counter window must still report the swap-rate gap, "
        f"got exit {rc}: {out}")
-    rc, out = run(variant(health_loaded="true", engine_serve_procs=1,
-                          swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0))
+    rc, out = run(dict(live0928, health_loaded="true", engine_serve_procs=1,
+                       swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0,
+                       blk_read_mib_per_s=0.0, blk_top_reader="basalt"))
     ck(rc == 0 and "(coverage)" not in out,
        f"a fully covered reading must not print a coverage warning, got exit {rc}: {out}")
+    rc, out = run(dict(live0928, health_loaded="true", engine_serve_procs=1,
+                       swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0))
+    ck(rc == 0 and "blk_read_mib_per_s device window" in out and "not covered" in out,
+       f"a reading covered by every older rule but not the device window must say so, "
+       f"got exit {rc}: {out}")
 
     # Live swap throughput (2026-11-14, tooling release, no contour stamp and no published byte).
     # The stored swap rule sees a device that is ALREADY spent; it cannot see 50 GiB free with
@@ -239,6 +255,73 @@ def main() -> int:
        f"an unparseable loaded flag must be an input gap, got exit {rc}: {out}")
     rc, out = run(variant(engine_serve_procs="n/a"))
     ck(rc == 1, f"an unreadable engine_serve_procs must exit 1, got {rc}")
+
+    # Foreign block I/O (2026-11-14, tooling release, no contour stamp, no published benchmark byte).
+    # The swap-throughput rule measured 17.4 MiB/s on this box at 10:59 — the highest value this line
+    # has recorded, 87 % of its own ceiling — and answered GO. The device counters name the cause the
+    # swap window cannot see: a fleet model push (`rsync -a .../models/IQ3_S/ -> <LAN_IP>`, started
+    # 10:54, recorded by the ops line the same morning) read the device at 1856.8 MiB/s over one 8 s
+    # window (nvme0n1 read 1856.8 / write 0.2) with 755 MiB/s of pgpgin in another, `pgscan_kswapd`
+    # stole 420 769 pages in 8 s, and the engine took 5021 major faults in 8 s (628/s) while every
+    # other rule was green (/health 200, loaded true, 49.9 GiB swap free, GPU util 2 %, Sl/Rl).
+    # The same box AFTER the push finished (11:12, idle) answers 0.2 MiB/s of device reads in two
+    # 10 s windows, engine 0.1 MiB/s, 0 major faults/s, pswpin/pswpout 0.00, vmstat si=so=0 idle 100 %
+    # — a 1000x gap the ceiling sits inside. The network-limited tail phase measured 224.4 MiB/s with
+    # `rsync` as the largest attributed reader.
+    live_push = dict(live_today, swap_in_mib_per_s=17.4, swap_out_mib_per_s=0.0,
+                     swap_free_mib=49935, swap_used_mib=15600, mem_available_mib=18591,
+                     engine_rss_mib=54299, load1=15.67, gpu_util_pct=3.0, gpu_power_w=36.33)
+    rc, out = run(live_push)
+    ck(rc == 0 and "blk_read_mib_per_s device window" in out,
+       f"the 2026-11-14 10:59 live bytes keep their verdict with no device window (no retro-active "
+       f"rule), got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=1856.8, blk_top_reader="rsync"))
+    ck(rc == 3 and "block-device reads" in out and "rsync" in out,
+       f"the measured interference window must NO-GO and name the reader, got exit {rc}: {out}")
+    ck("major faults" in out, "the reason must name the engine-side cost (refaults), not just MiB/s")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=224.4, blk_top_reader="rsync"))
+    ck(rc == 3 and "block-device reads" in out,
+       f"the measured tail-phase window (224.4 MiB/s) must also NO-GO, got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=99.9, blk_top_reader="basalt"))
+    ck(rc == 0, f"99.9 MiB/s sits under the pre-registered ceiling and must GO, got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=100.0))
+    ck(rc == 3, f"exactly the ceiling must NO-GO, got exit {rc}")
+    ck("largest attributed reader" not in out,
+       f"a NO-GO with no reader attribution must not invent one, got: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=0.2, blk_top_reader="basalt"))
+    ck(rc == 0, f"the measured idle device rate (0.2 MiB/s) must stay GO — the rule is not 'any disk "
+                f"activity': got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=120.0, blk_top_reader="basalt"))
+    ck(rc == 3 and "basalt" in out,
+       f"an over-ceiling rate attributed to the ENGINE itself still NO-GOs — the gate reads the "
+       f"device, the reader is diagnostic only, got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=17.4, blk_top_reader="rsync"))
+    ck(rc == 0 and "rsync" in out and "block-device reads" not in out,
+       f"an attribution below the ceiling must be printed for the audit trail and must not gate, "
+       f"got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s="n/a"))
+    ck(rc == 1 and "unreadable number(s): blk_read_mib_per_s" in out,
+       f"an unreadable device rate must be an input gap, got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=-1.0))
+    ck(rc == 1 and "cannot run backwards" in out,
+       f"a negative device counter delta is a broken window, never healthy, got exit {rc}: {out}")
+    rc, out = run(dict(variant(blk_read_mib_per_s=1400.0, blk_top_reader="rsync"), engine_state="Dl"))
+    ck(rc == 3 and "block-device reads" in out and "uninterruptible" in out,
+       f"reasons must accumulate (foreign I/O + D state), got exit {rc}: {out}")
+
+    # NaN fails CLOSED (found 2026-11-14 while wiring the device window). The producer emits NaN by
+    # design when its sample window was cut, and Python's float() parses "NaN"/"inf" — so before this
+    # fix a NaN reading reached the comparison stage, where `NaN >= ceiling` and `NaN > threshold` are
+    # both False: a cut sample used to be a SILENT GO on every numeric rule in this gate.
+    for key in ("load1", "engine_pcpu", "swap_in_mib_per_s", "blk_read_mib_per_s"):
+        over = {key: "NaN"}
+        if key.startswith("swap_"):
+            over["swap_out_mib_per_s"] = "0.0"
+        rc, out = run(variant(**over))
+        ck(rc == 1 and "unreadable number(s)" in out,
+           f"{key}=NaN must be an input gap, never a silent GO, got exit {rc}: {out}")
+    rc, out = run(variant(blk_read_mib_per_s="inf"))
+    ck(rc == 1, f"blk_read_mib_per_s=inf must be an input gap, got exit {rc}")
 
     if FAILED:
         print(f"PUB PREFLIGHT TEST: {CHECKS - len(FAILED)}/{CHECKS} FAILED:")

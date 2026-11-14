@@ -83,6 +83,33 @@ of this line published a swap claim off that row and retracted it the same day.
 Same optional-but-binding semantics: present and above `SWAP_RATE_MAX_MIB_S` (sum of both directions)
 is NO-GO, absent is not covered, a non-number or a negative rate is an input gap, never a guess.
 
+One more OPTIONAL reading closes the class the swap window could only see half of — measured
+2026-11-14 10:54-11:02 on this line's endpoint box:
+
+    blk_read_mib_per_s=<float>    d(sectors read) over the whole non-removable device set, over
+                                  the producer's own sample window, MiB/s
+    blk_top_reader=<comm>         OPTIONAL attribution: process name of the largest block reader
+                                  in that window (never a path, never a pid; informational only)
+
+The swap-rate rule caught this box moving 17.4 MiB/s through swap — the highest value this line has
+recorded, 87 % of its own ceiling — and still answered GO. The reason the box was moving pages is
+visible only in the device counters: a foreign fleet push (`rsync -a .../models/IQ3_S/ -> <LAN_IP>`,
+launched by the ops line at 10:54) was reading the model device at **1856.8 MiB/s** (`/proc/diskstats`
+delta over 8 s, nvme0n1 1856.8 read / 0.2 write) while pushing it over ssh, `pgscan_kswapd` was at
+429 007 pages per 8 s (1.6 GiB of reclaim in 8 s) and the engine was taking **5021 major faults in
+8 s (628/s)** against a lifetime average of 142.7/s — the engine's mapped pages were being evicted by
+the rsync's page-cache pressure and re-read from a device the rsync already saturated. `/health`
+answered 200, `health_loaded=true`, 49.9 GiB of swap free, GPU util 2 %, engine state Sl/Rl. Every
+existing rule was green on a box where a leg would pay an I/O queue on every refault. This is also the
+first named cause behind the load-1 climbs this line spent four ticks falsifying as a swap proxy
+(load1 12.9-15.7 in that window): a foreign reader, not idle reclaim.
+
+Same optional-but-binding semantics: present and at or above `BLK_READ_MAX_MIB_S` is NO-GO, absent is
+not covered, a non-number or a negative delta is an input gap. A leg adds no new working set — the
+engine is already resident — so the settled endpoint answers 0.2 MiB/s of device reads at idle (two
+10 s windows, engine 0.1 MiB/s, 0 major faults/s) and any sustained hundred-MiB/s stream is somebody
+else saturating the device the model weights live on.
+
 Usage:
     python3 scripts/pub_preflight.py READINGS.TXT
 
@@ -92,6 +119,7 @@ Exit 1 = bad or missing input (a missing reading is never treated as healthy).
 """
 from __future__ import annotations
 
+import math
 import re
 import sys
 
@@ -118,6 +146,22 @@ SWAP_RATE_MAX_MIB_S = 20.0  # live swap throughput ceiling, pre-registered ABOVE
                             # so a box thrashing with NOTHING asking for RAM is the predictor of the
                             # mid-leg restart the machine note warns about.
 OPTIONAL_FLOATS = ("swap_in_mib_per_s", "swap_out_mib_per_s")
+BLK_READ_MAX_MIB_S = 100.0   # device-read ceiling, pre-registered INSIDE a measured 1000x gap.
+                             # Idle endpoint (2026-11-14 11:12, push finished): the whole non-removable
+                             # device set answers **0.2 MiB/s** across two 10 s windows, the engine
+                             # itself 0.1 MiB/s with **0 major faults/s**, pswpin/pswpout 0.00 MiB/s and
+                             # `vmstat 2 4` showing si=so=0, bi≈100 blocks/s, idle 100 %. Interference
+                             # on the same box one hour earlier (a fleet model push to <LAN_IP>):
+                             # 224.4 MiB/s in the network-limited tail phase and 1856.8 MiB/s in the
+                             # burst phase, where the engine took 5021 major faults in 8 s (628/s) and
+                             # kswapd stole 420 769 pages in the same 8 s. 100 sits 500x above the idle
+                             # device rate and 2.2x below the mildest interference window. The reader
+                             # attribution is diagnostic only: the gate refuses on DEVICE reads,
+                             # whoever is doing them, because an engine refaulting at 100 MiB/s at idle
+                             # is exactly as sick as an external reader streaming the device — and a
+                             # model still loading is a state a leg must not start into either.
+BLK_KEY = "blk_read_mib_per_s"
+BLK_READER_KEY = "blk_top_reader"
 REQUIRED = (
     "mem_total_mib", "mem_available_mib", "swap_total_mib", "swap_free_mib",
     "engine_state", "engine_pcpu", "engine_rss_mib", "gpu_util_pct", "gpu_power_w",
@@ -165,8 +209,16 @@ def main() -> int:
     bad = []
     for k in FLOATS:
         try:
-            num(vals, k)
+            v = num(vals, k)
         except ValueError:
+            bad.append(k)
+            continue
+        if not math.isfinite(v):
+            # The producer prints NaN on purpose when its sample window was cut (a pid that died
+            # mid-sample). Python's float() accepts "NaN", "nan" and "inf", so a bare ValueError
+            # check let those reach the comparison stage, where every threshold answer is False —
+            # a NaN reading used to be a SILENT GO. Found 2026-11-14 while wiring the device-read
+            # window; the same trap sits in `load1` and `engine_pcpu`.
             bad.append(k)
     for k in ("mem_total_mib", "mem_available_mib", "swap_total_mib", "swap_free_mib",
               "engine_rss_mib", "health_code", "foreign_legs"):
@@ -175,7 +227,8 @@ def main() -> int:
         except ValueError:
             bad.append(k)
     if bad:
-        print("PREFLIGHT INPUT GAP: unreadable number(s): " + ", ".join(bad))
+        print("PREFLIGHT INPUT GAP: unreadable number(s): " + ", ".join(bad)
+              + " — a number that is not finite (NaN/inf) is a cut sample, never healthy.")
         return 1
 
     if "swap_used_mib" in vals:
@@ -229,6 +282,11 @@ def main() -> int:
             except ValueError:
                 print(f"PREFLIGHT INPUT GAP: unreadable number(s): {k}")
                 return 1
+            if not math.isfinite(v):
+                print(f"PREFLIGHT INPUT GAP: unreadable number(s): {k} — the producer emits NaN "
+                      "when its counter window was cut, and a NaN fails every threshold "
+                      "comparison silently; a cut sample is never healthy.")
+                return 1
             if v < 0:
                 print(f"PREFLIGHT INPUT GAP: {k}={vals[k]} is negative — a /proc/vmstat counter "
                       "delta cannot run backwards (counters reset only at boot), so the window is "
@@ -240,6 +298,28 @@ def main() -> int:
               + " is present — swap_in_mib_per_s and swap_out_mib_per_s come from ONE counter "
               "window, so a one-sided window is a cut sample, never a healthy reading.")
         return 1
+
+    # Foreign block I/O (2026-11-14, tooling release, no contour stamp, no published byte): the
+    # device counter is the only reading that names WHY the pages are moving. Measured the same
+    # morning, a fleet model push on this endpoint read the device at 1856.8 MiB/s while every other
+    # rule was green (swap free 49.9 GiB, health 200 + loaded, GPU 2 %, engine Sl/Rl) and the
+    # swap-throughput rule itself passed at 17.4 MiB/s — 87 % of its ceiling.
+    blk_rate = None
+    if BLK_KEY in vals:
+        try:
+            blk_rate = num(vals, BLK_KEY)
+        except ValueError:
+            print(f"PREFLIGHT INPUT GAP: unreadable number(s): {BLK_KEY}")
+            return 1
+        if not math.isfinite(blk_rate):
+            print(f"PREFLIGHT INPUT GAP: unreadable number(s): {BLK_KEY} — a NaN device rate is a "
+                  "cut sample (the producer emits NaN), never healthy.")
+            return 1
+        if blk_rate < 0:
+            print(f"PREFLIGHT INPUT GAP: {BLK_KEY}={vals[BLK_KEY]} is negative — a /proc/diskstats "
+                  "sector counter cannot run backwards outside a reboot, so the sample window is "
+                  "broken, not the box; a broken reading is never healthy.")
+            return 1
 
     if int(vals["health_code"]) != 200:
         reasons.append(f"/health answered {vals['health_code']}, not 200")
@@ -264,6 +344,17 @@ def main() -> int:
                 "this traffic, but this is the state from which the engine gets restarted mid-leg")
     if int(vals["mem_available_mib"]) < MEM_AVAILABLE_MIN_MIB:
         reasons.append(f"MemAvailable {vals['mem_available_mib']} MiB < {MEM_AVAILABLE_MIN_MIB}")
+    if blk_rate is not None and blk_rate >= BLK_READ_MAX_MIB_S:
+        who = vals.get(BLK_READER_KEY)
+        reasons.append(
+            f"block-device reads {blk_rate:.1f} MiB/s over the sample window "
+            f"(>= {BLK_READ_MAX_MIB_S})"
+            + (f", largest attributed reader: {who}" if who else "")
+            + " — a foreign reader is saturating the device the model weights live on, and the "
+              "engine pays for it in major faults (measured 2026-11-14: 1856.8 MiB/s of rsync "
+              "device reads while the engine took 5021 major faults in 8 s at idle, kswapd stealing "
+              "1.6 GiB of pages in the same window). The swap-free column and load1 both stay green "
+              "in this state; a leg launched here pays the I/O queue on every refault")
     if "D" in vals["engine_state"]:
         reasons.append(f"engine in uninterruptible I/O (state {vals['engine_state']}): thrashing")
     if num(vals, "engine_pcpu") > IDLE_SPIN_PCPU and num(vals, "gpu_util_pct") == 0:
@@ -276,7 +367,7 @@ def main() -> int:
     print("endpoint readings:")
     for k in REQUIRED:
         print(f"  {k:<18} {vals[k]}")
-    for k in ("health_loaded", "engine_serve_procs") + OPTIONAL_FLOATS:
+    for k in ("health_loaded", "engine_serve_procs") + OPTIONAL_FLOATS + (BLK_KEY, BLK_READER_KEY):
         if k in vals:
             print(f"  {k:<18} {vals[k]}")
     if loaded_flag is None or serve_procs is None:
@@ -289,6 +380,10 @@ def main() -> int:
         print("  (coverage) this reading carries no swap_in_mib_per_s/swap_out_mib_per_s counter "
               "window — the live swap-throughput rule is not covered; the live producer emits both "
               "since 2026-11-14, so this file predates that fix.")
+    if blk_rate is None:
+        print("  (coverage) this reading carries no blk_read_mib_per_s device window — the foreign "
+              "block-I/O rule is not covered; the live producer emits it since 2026-11-14, so this "
+              "file predates that fix.")
     if reasons:
         print("PREFLIGHT NO-GO:")
         for r in reasons:

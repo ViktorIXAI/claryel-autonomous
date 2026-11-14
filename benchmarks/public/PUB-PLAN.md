@@ -84,6 +84,51 @@ while a config-ladder restart had left the wrapper answering `"loaded": false` w
 and an unchanged verdict, because the readings stored before the change were never fed the rule; a
 non-boolean flag is an input gap. `harness/pub_preflight_test.py` now runs 41 checks.
 
+Since 2026-11-14 (tick 145) the producer also samples the **block device** over its own 6 s window and
+emits `blk_read_mib_per_s` (sectors read summed over every non-removable device) plus
+`blk_top_reader` (the process NAME of the largest reader in that window — a comm string, never a path
+or pid, diagnostic only). Why this exists: at 10:54 the ops line started a fleet model push on the
+endpoint box (`rsync -a <LOCAL_PATH>/models/IQ3_S/ -> <LAN_IP>`, the P3032 re-onboarding recorded in
+`hardware/changes/P3032.md`), and for the next eight minutes that box was reading its NVMe at
+**1856.8 MiB/s** (`/proc/diskstats` delta over 8 s; nvme0n1 read 1856.8 / write 0.2) with
+`pgscan_kswapd` stealing **420 769 pages in 8 s** (1.6 GiB) while the engine took **5021 major faults
+in 8 s (628/s)**. Every rule this gate had at the time was green on that box: `/health` 200,
+`health_loaded=true`, one serve process, 49.9 GiB of swap free, MemAvailable 18.6 GiB, GPU util 2 %,
+engine state Sl/Rl, and the swap-throughput rule itself passed at 17.4 MiB/s — the highest swap rate
+this line has ever recorded, 87 % of its own ceiling. The device counter is the only reading that
+names WHY the pages move, and it also retires an open question: the load-1 climbs this line spent four
+ticks falsifying as a swap proxy (9.8 → 14.6 → 11.0 → 14.0, then 11.28 against one swapped-in page)
+were the tail of a foreign reader, not idle reclaim — after the push finished, load1 still read 11.55
+while the device answered 0.2 MiB/s, `si=so=0` and idle 100 %.
+
+Calibration is a measured 1000x gap, not a guess. Idle endpoint, 11:12 the same day, two 10 s windows
+after the push finished: device reads **0.2 MiB/s**, engine attributed **0.1 MiB/s** with
+**0 major faults/s**, pswpin/pswpout **0.00 MiB/s**, `vmstat 2 4` showing `si=so=0`, `bi≈100`
+blocks/s, idle 100 %. Interference: 1856.8 MiB/s (burst phase, engine refaulting at 628/s) and
+224.4 MiB/s (network-limited tail phase, largest attributed reader `rsync`). The ceiling
+`BLK_READ_MAX_MIB_S = 100.0` sits 500x above the idle device rate and 2.2x below the mildest
+interference window. The rule gates on the DEVICE, whoever is reading it: an engine refaulting at
+100 MiB/s at idle is exactly as sick as an external reader streaming the device, and a model still
+loading is a state no leg should start into either. Same optional-but-binding semantics as the other
+two additions: present and over the ceiling is NO-GO, absent is a `(coverage)` line and an unchanged
+verdict (the 91 readings stored before this change are not re-judged retro-actively), a non-number or
+a negative delta is an input gap.
+
+The same commit closes a silent-GO hole found while wiring it: every number the gate parses must be
+**finite**. The producer emits `NaN` on purpose when a sample window was cut (a pid that died
+mid-sample), and Python's `float()` happily parses `NaN` and `inf` — so a cut sample reached the
+comparison stage, where `NaN >= ceiling` and `NaN > threshold` are both False. Before this fix a
+`load1=NaN`, `engine_pcpu=NaN` or `swap_in_mib_per_s=NaN` reading was a **GO** on every numeric rule in
+this gate. All parsed numbers now fail closed as an input gap. `harness/pub_preflight_test.py` went
+41 → 52 → **71 checks**: the two measured interference windows NO-GO and name the reader, the measured
+idle rate stays GO, an over-ceiling rate attributed to the engine itself still NO-GOs, the boundary is
+conditional (99.9 GO / 100.0 NO-GO), non-finite/negative/unreadable values are input gaps, an absent
+window prints the coverage line, and reasons accumulate (foreign I/O + D state). Proof on live bytes:
+the 11:14 reading (device 0.2 MiB/s, reader `basalt`) answers GO; the same file with the measured
+interference rate substituted (`blk_read_mib_per_s=1856.8`) answers `PREFLIGHT NO-GO ... largest
+attributed reader: rsync`, exit 3. This registers no contour feature, re-scores nothing and moves no
+published benchmark byte; the untracked producer gained the sampler, the repo gained the gate.
+
 ## Publication-completeness census (2026-11-12, zero model calls)
 
 Every shipped public arm was re-scored from its shipped answer bytes with the pinned checker, and
@@ -10005,3 +10050,139 @@ Verified subset, GAIA-lite) need a fresh owner decision before any leg. Standing
 the `/proc/vmstat` counter-delta swap read (gate-wired since tick 143, window-based only), the
 in-process returncode census of the preflight band, and the running-job single-writer census at the
 start of every tick.
+
+---
+
+## Tick 145 — 2026-11-14 11:14 CET: scoreboard unmoved; the endpoint's page traffic gets a named cause at last — a fleet model push read the device at 1856.8 MiB/s while every standing rule stayed green; the gate learns to see it (`blk_read_mib_per_s`, contract test 52 → 71 checks) and closes a NaN silent-GO hole on the way; engine hold 21 h 02 min on one process; zero legs, zero calls, zero published benchmark bytes moved
+
+**Single-writer check, read before any file was touched.** `~/.hermes/cron/executions.db` holds
+exactly one `running` row: execution `b31afc5c1b67420bab6f46b82cd120bd` for job `288a66f93167`
+**PUB benchmark loop 30m**, started 10:56:26 CET — this tick. No second instance, no sibling agent in
+the tree at read time.
+
+**Queue status:** nothing launched — the queue stays empty: every in-force set carries all three
+admissible arms (bare / contour 0.0.2.56 matched shape / ChatGPT codex), the Grok line stays closed by
+the owner decision of 2026-11-12 (`~/pub-bench/GROK-CANCELLED` untouched, 121 B, `Nov 12 06:54`),
+SimpleBench stays closed as unpinnable, and the "later" ladder rows need a fresh owner decision.
+0 leg units (`systemctl --user list-units 'parb-pub-*'` empty), no `pub_bench_run`/`pub_bench_cloud`
+process on this host.
+
+**What actually moved: the standing box read caught a foreign workload on the endpoint box.** At
+10:54 the ops/hardware line ran `<LOCAL_PATH>/fleet/push_p3032.sh` on the endpoint box — the follow-up
+to its own P3032 re-onboarding (record `f3104f4`, then `7d1938c`: "IQ3_S seed and systemd autostart").
+It rsynced the 78 GiB model set to `<LAN_IP>` and finished at ~11:04 (`PUSH_ALL_DONE`, `done mtp/rt
+rc=0`). While it ran, the endpoint box looked like this:
+
+| reading (live, endpoint box) | value | standing verdict |
+|---|---|---|
+| device reads (`/proc/diskstats`, 8 s) | **1856.8 MiB/s** (nvme0n1 read 1856.8 / write 0.2) | *no rule existed* |
+| device reads, tail phase (6 s producer window, 11:09) | **224.4 MiB/s**, largest attributed reader `rsync` | *no rule existed* |
+| `pgscan_kswapd` / `pgsteal_kswapd` (8 s) | 429 007 / 420 769 pages = 1.6 GiB reclaimed | *no rule existed* |
+| engine major faults (8 s) | **5021 = 628/s** (lifetime average 142.7/s) | *no rule existed* |
+| engine block reads attributed (8 s) | 44.6-86.0 MiB/s during the push, **0.1 MiB/s idle** | *no rule existed* |
+| `swap_in_mib_per_s` (producer, 10:59) | **17.4** in / 0.0 out — 87 % of the ceiling | GO (inside 20.0) |
+| `swap_free_mib` / MemAvailable | 49 935 MiB free / 18 591 MiB | GO |
+| `health_code` / `health_loaded` / `engine_serve_procs` | 200 / true / 1 | GO |
+| `engine_state` | Sl/Rl (one transient `Dl` sample, gone in 12 s) | GO |
+| `gpu_util_pct` / `gpu_power_w` | 2-3 % / 27-36 W | GO |
+| `load1` | 12.96 → 15.09 → 18.24, then 11.55 after the push ended | reported, never gates |
+
+Every rule this gate had answered **GO** on a box whose model device was being saturated and whose
+engine was refaulting 628 times a second. The push is legitimate ops work with a hardware record of
+its own — this line does not police it — but it is the fourth tick's worth of load-1 mystery resolved:
+the load was a foreign reader's tail, not idle reclaim, and the box keeps looking loaded for ten minutes
+after the reader is gone (load1 11.55 against 0.2 MiB/s of device reads, `si=so=0`, idle 100 %).
+
+**New standing read, wired as a gate (tooling release: no contour stamp, no bank, no published byte).**
+`scripts/pub_preflight.py` now reads an optional `blk_read_mib_per_s` (sectors read summed over every
+non-removable device, delta over the producer's 6 s window) with an optional diagnostic
+`blk_top_reader` (comm name only). Present and at or above `BLK_READ_MAX_MIB_S = 100.0` is NO-GO;
+absent is a `(coverage)` line and an unchanged verdict, so the 92 readings stored before the change are
+not re-judged retro-actively; a non-number, a non-finite number or a negative delta is an input gap.
+The ceiling sits inside a measured 1000x gap: idle endpoint 0.2 MiB/s (two 10 s windows, engine
+0.1 MiB/s, **0 major faults/s**, `si=so=0`, `bi≈100` blocks/s, idle 100 %) versus interference at
+1856.8 and 224.4 MiB/s. The untracked producer emits both readings; the repo holds only the gate.
+
+**A silent-GO hole closed on the same path.** The producer emits `NaN` when its sample window is cut,
+and `float("NaN")`/`float("inf")` parse cleanly — so `NaN >= ceiling` and `NaN > threshold` were both
+False and a cut sample was a **GO** on every numeric rule in this gate (`load1`, `engine_pcpu`,
+`gpu_util_pct`, `gpu_power_w`, the swap window). Every parsed number must now be finite or the gate
+answers INPUT GAP, exit 1. This is a prospective fix: no published arm was ever launched on a NaN
+reading (the stored band contains none — `grep -c NaN` over all 93 reading files is 0), and no
+benchmark byte moves.
+
+**Contract test `harness/pub_preflight_test.py`: 52 → 71 checks, green.** New pins: the two measured
+interference windows NO-GO and name the reader; the measured idle rate (0.2 MiB/s) stays GO; an
+over-ceiling rate attributed to the engine itself still NO-GOs (the gate reads the device, the reader
+is diagnostic); the boundary is conditional (99.9 GO / 100.0 NO-GO); `NaN` and `inf` are input gaps on
+`load1`, `engine_pcpu`, the swap window and the device window; a missing device window prints the
+coverage line and changes nothing; reasons accumulate (foreign I/O + `D` state). Non-vacuity on real
+bytes: the 11:09 live reading with `blk_read_mib_per_s=1856.8` substituted answers `PREFLIGHT NO-GO:
+block-device reads 1856.8 MiB/s over the sample window (>= 100.0), largest attributed reader: rsync`,
+**exit 3 read unshielded**; the 11:14 live reading (device 0.2 MiB/s, reader `basalt`, swap 0.0/0.0,
+load1 11.55) answers **GO**, exit 0.
+
+**Preflight band census, returncodes taken in-process (re-run after the change, so coverage semantics
+are exercised on real files).** Whole workspace: **93 files, 55 GO / 36 NO-GO / 2 input-gap**; today
+**21 files, 18 GO / 3 NO-GO**. The 91 readings stored before the change keep the verdict they had —
+they carry no device key, so they print the `(coverage)` line and are not re-judged retro-actively. The
+two readings produced after it did change, and one of them changed **within this tick**: the 11:09
+reading carries `blk_read_mib_per_s=224.4` with `blk_top_reader=rsync`, was emitted GO under the
+provisional 600 MiB/s ceiling drafted mid-tick, and re-runs **NO-GO** under the pre-registered 100
+(the tail phase of the push was still reading the box at the time, so NO-GO is the correct verdict for
+it); the 11:14 reading (device 0.2 MiB/s, reader `basalt`) is GO. No leg launched in that window, so no
+arm is affected by the threshold moving inside the tick — the change landed before any commit and
+before any launch. The two input gaps stay `preflight-20261111-0948.txt` and
+`preflight-20261111-1144.txt`.
+
+**Standing gates, all seven re-proven this tick (exits read unshielded).** `pub_grok_resume_check.py`
+**NO-GO exit 3** by design (the cancel): 22 checks, **182 unasked ids** held as a `VOID` record, stored
+359 rows sha256-16 `01c1ee0b6e7f6d5d` unchanged; the three completed Grok arms stay 198/198, 164/164,
+500/500 with resume sets of 0. `pub_grok_cell_check.py` 0 findings / 9 documents.
+`pub_arms_index.py --check` drift 0. `pub_derived_percent_check.py` 42 recomputed, 0 findings.
+`pub_superseded_cell_check.py` 0 / 9. `pub_digest_row_check.py` 49 rows, 0 findings. Three-arm parity
+49 rows / 9 sets, 0 findings (contour stamp `0.0.2.56`, Grok not an arm).
+`scripts/security/secret_scan.py --dir . --strict` exit 0, 0 findings — the new gate text names only
+`rsync`, `basalt`, device names and `/proc` counters, with the push destination written as
+`<LAN_IP>`. `scripts/qa/docs_policy.py --push` PASS; link checker 155 links / 334 markdown files clean.
+
+**Hermetic PUB contract suite re-executed: 14 tests, 0 failures, 444 checks** (was 425 — the delta is
+this tick's +19 in `pub_preflight` and nothing else): 34 + 22 + 41 + 22 + 7 + 9 + 27 + 39 + 33 + **71**
++ 42 + 34 + 43 + 20. Zero model calls (temp fixtures, stubbed transports).
+
+**Frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state` re-read on the literal
+path: present, 26 B, `Nov 2 14:05`, contents `2026-11-02T14:05:30+01:00`, unchanged. Both legacy
+hard-bank-era jobs are still enabled and still firing ok (`Mac v2.2 full after v2.1` last 11:05:26 CET,
+`P2005 paired full 2.1→2.2 watch`) — a permanent five-minute ssh round-trip onto this line's endpoint
+box, reported as an owner decision, not edited. The drain-resume self-heal job (`9a12508f8a69`)
+completed 11:00:27 ok; no cron job on this line is paused.
+
+**Watchdog clone: deviation set stable at seven paths.** `~/projects/strata-autonomous-harness` has an
+empty staged index (0 lines), is detached at `8ccef67` and now lags `main` by two records (`f3104f4`,
+`7d1938c` — both the hardware line's own commits). `git status --porcelain` returns the same seven
+paths as ticks 143-144: the four stranded snapshots `hardware/os-snapshots/2026-11-11..-14.json` and
+the three untracked scratch files in the published raw namespace. Nothing committed or deleted there;
+the sync call belongs to the hardware line.
+
+**Sibling on the same branch.** `main` moved twice during this tick from the ops/hardware line
+(`f3104f4` P3032 re-onboarded, `7d1938c` P3032 NVMe split + IQ3_S seed + autostart) — zero benchmark
+paths touched. This tick's commit carries exactly three paths (`scripts/pub_preflight.py`,
+`harness/pub_preflight_test.py`, `benchmarks/public/PUB-PLAN.md`); nothing of theirs was staged here.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the endpoint's page traffic finally has a named cause (a fleet
+model push, recorded by the hardware line itself), the preflight gate can now see foreign device reads
+(`blk_read_mib_per_s`, ceiling 100.0 MiB/s inside a measured 1000x gap) and refuses a leg into that
+state; a `NaN`-is-a-GO hole in the same gate is closed; the contract test went 52 → 71 checks and the
+hermetic suite 425 → 444. The engine hold passed **21 h 02 min** on one process (pid 10597) through the
+whole push, and `load1` is falsified a fifth time — 11.55 with the device at 0.2 MiB/s and idle 100 %.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
+Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench Verified
+subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads unchanged in kind: the
+`/proc/vmstat` counter-delta swap read, the new device-read window, the in-process returncode census of
+the preflight band, and the running-job single-writer census at the start of every tick. One owner-side
+question for the hardware line, not for this line to fix: a 78 GiB model seeding run launched **from**
+the benchmark endpoint box degrades that endpoint for the ten minutes it runs and after; launching such
+pushes from a third host, or scheduling them outside leg windows, costs the hardware line nothing and
+keeps this line's endpoint quiet.
