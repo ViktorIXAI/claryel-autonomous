@@ -9429,3 +9429,123 @@ plus one new: a `vmstat` line printed **before** the first delay interval is the
 not a sample — swap IO claims on this box go through the `/proc/vmstat` counter delta (same family
 as the preflight rule's refusal of `ps -o pcpu` lifetime averages), and a claim about the line's own
 evidence is re-verified on live counters the tick it is quoted, not carried.
+
+
+**Queue status 2026-11-14 07:35 CET (tick 140):** nothing launched — the queue stays empty: every
+in-force set carries all three admissible arms (bare / contour 0.0.2.56 matched shape / ChatGPT
+codex), the Grok line stays closed by the owner decision of 2026-11-12, SimpleBench stays closed as
+unpinnable, and the "later" ladder rows need a fresh owner decision. 0 leg units
+(`systemctl --user list-units 'parb-pub-*'` empty), no `pub_bench_run`/`pub_bench_cloud` process,
+0 foreign legs on the endpoint. Zero model calls, zero cloud calls this tick.
+
+**Endpoint read (twenty-eighth stored reading of the engine-hold band, a GO).**
+`bash preflight.sh` bare (no outer redirect): **`preflight-20261114-0728.txt` → PREFLIGHT GO**
+(`python3 scripts/pub_preflight.py <file>` unshielded: exit 0). Readings: swap 14 485 MiB used of
+65 535 (51 050 free), MemAvailable 19 517 MiB, engine state **S** (the 06:51 `D` had flipped back —
+the same `Sl`↔`D` flicker class as the band's three NO-GOs), live-delta pcpu 0.0 (6 s sample), RSS
+56 934 MiB, GPU 0 % / 26.72 W, `health_code=200`, `health_loaded=true`, `engine_serve_procs=1`,
+foreign legs 0, load1 **7.43**. The GO costs nothing and buys nothing: the queue is empty, so no leg
+was launched into it.
+
+**Band and workspace census, returncodes taken in-process.** Engine-hold band (first
+`preflight-20261113-1428.txt`, last `preflight-20261114-0728.txt`): **28 readings, 25 GO / 3 NO-GO**.
+All three non-GOs stay one class, all state D: `preflight-20261113-1923.txt`,
+`preflight-20261114-0207.txt`, `preflight-20261114-0651.txt`. Whole workspace: **85 files,
+48 GO / 35 NO-GO / 2 input gaps** — tick 139's 84 / 47 / 35 / 2 plus exactly this tick's one GO;
+the gaps stay `preflight-20261111-0948.txt` and `preflight-20261111-1144.txt`.
+
+**Engine continuity, read on the box, not inferred.** Same process as ticks 117–139
+(`basalt --serve`, pid 10597, `lstart Fri Nov 13 14:12:51 2026`), elapsed **17 h 16 m**, state `Sl`
+at the ssh read, RSS 59 013 188 KiB (+573 MiB since tick 139's read — resident-set growth while
+swapping, consistent with the counter reads below, not a new process). `/health` names the served
+alias `qwen3.8-flash-next-iq3_s-basalt`, `"loaded": true`, `"loading": false`, max context 196 608.
+`~/basalt/keep-up.log` still 44 B with its single restart line `2026-11-13_13:07:49 keep-up restart`
+— the watchdog is still not the actor. Box uptime 18 h 23 m: every reading of this band sits behind
+the same 2026-11-13 13:07 box boot.
+
+**The corrected swap read fires on its first tick of use, and the load-1 spike decays the same
+minute it appears.** The standing read adopted at tick 139 — `/proc/vmstat` pswpin/pswpout
+**counter deltas over timed windows**, never `vmstat` line 1 — was taken twice this tick:
+(a) a 10.0 s window at 07:28:50→07:29:01: **pswpin +13 471 pages = 52.6 MiB (si ≈ 5.3 MiB/s),
+pswpout delta 0** — live swap-IN while the gate read engine state `S`, pcpu 0.0 and 0 % GPU;
+(b) the next window to 07:30:38 (~94 s): **pswpin +41 688 pages (≈ 1.7 MiB/s) and pswpout
++159 695 pages = 623.8 MiB (so ≈ 6.6 MiB/s)** — the traffic turned to swap-OUT. Across the two
+windows the box moved ~840 MiB through swap while idle. The load trace inside the tick: load1
+**11.01** (load5 3.72 / load15 2.77 — the spike is minutes old) at 07:28:50, **9.32** around
+07:29:10, **7.63** at 07:30:38: a burst that appeared between the gate read (7.43) and the box read
+and lost 3.4 of load1 in 108 s. PSI at the box read: cpu some/full **0.00**, io some 3.69 / full
+3.68, memory some 1.01; `%Cpu` 99.2 idle, 0.5 wa — the tick-137 attribution family (swap-in/reclaim,
+not decode) again, and no `D` process state was needed to see it. Across-tick load1 now
+4.96 → 7.39 → 10.31 → 9.22 → 6.52 → 7.43 → 11.01 → 7.63; the two historical same-class NO-GO samples
+(12.0, 12.4) stayed unchallenged. Machine state **reported, not acted on**.
+
+**Ops tuning campaign: twenty-second idle read.** No `p2005_v[0-9]` process runs on either machine;
+the newest launcher on the box is still `~/basalt/p2005_v10_ab.sh` mtime `Nov 13 10:15`. Machine
+state, never acted on.
+
+**Daily-docs jobs: both green, and one of them moved `main` under this line.**
+`GitHub docs freshness daily` (id `ef7ea47ff99b`, `0 2 * * *`) last completed **2026-11-14
+03:02:14 CET, ok**, last failure 2026-11-13 03:00 recovered; next fire 2026-11-15 02:00 UTC. The
+brief's daily dirty-tree error stays unreproduced since 2026-11-14 03:00 (tick 133). Separately, a
+sibling docs job pushed `fad41d0` ("Daily self-evolution research summary 2026-11-14",
+`sources/daily/2026-11-14-self-evolution.md`, +61 lines, zero benchmark paths) to `main` at
+**07:08 CET**, between tick 139's push and this tick's read. This tick took it by fast-forward
+(`git merge --ff-only origin/main`, working tree clean at pick-up); the pub line neither authored
+nor touched it, and no benchmark byte moved on either side.
+
+**CI: green on the standing head, read on the first attempt.** `gh run list` at 07:31: on `fad41d0`
+**all five workflows are `success`** — secret-scan, contour self-tests, hard-v6 scoring contracts,
+devsecops, pages-build-deployment. The pub line's own tick-139 head `dde8a58` had devsecops
+`success` at 06:08 CET before the sibling commit landed on top.
+
+**Standing gates, all seven re-proven this tick on the picked-up head (exits read unshielded, gates
+invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3** (by design — the
+cancel): `checks: 22 | RESUME GATE: NO-GO - do not spend quota`, **182 unasked ids**
+(`ifeval-286..ifeval-3757`, stored 359 rows, sha256-16 `01c1ee0b6e7f6d5d` unchanged) held as a
+`VOID` record, not a queue. `pub_grok_cell_check.py` exit 0 — 9 documents, 0 findings.
+`pub_arms_index.py --check` exit 0 — index drift 0. `pub_derived_percent_check.py` exit 0 —
+**42 recomputed from shipped bytes, 0 findings**. `pub_superseded_cell_check.py` exit 0 — 9
+documents, 0 findings. `pub_digest_row_check.py` exit 0 — 49 rows, 0 findings. Three-arm parity
+gate exit 0 — 49 rows / 9 sets, 0 findings. `scripts/security/secret_scan.py --dir . --strict`
+exit 0, `total_findings: 0`.
+
+**The hermetic PUB contract suite re-executed: 14 tests, 0 failures, 414 checks.** Exit codes all
+0, counts from each test's own summary line: 34 (`pub_arms_index`, "PUB PIN CONTRACT") + 22
+(`pub_cloud_blank_purge`) + 41 (`pub_derived_percent`, prints `CHECKS 41, FAILED 0`) + 22
+(`pub_digest_row_gate`) + 7 (digest writer) + 9 (`pub_grok_cancel`) + 27 (`pub_grok_cell`) + 39
+(`pub_grok_resume_check --write-pin`) + 33 (`pub_grok_resume_check`) + 41 (`pub_preflight`) + 42
+(`pub_bench_run engine-stamp`) + 34 (`pub_superseded_cell`) + 43 (`pub_taskfile_shape`) + 20
+(three-arm parity) = **414**, reproducing ticks 128–139 exactly. Zero model calls (temp fixtures,
+stubbed transports).
+
+**Frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state` re-read on the
+literal path: present, 26 B, `Nov 2 14:05`, contents `2026-11-02T14:05:30+01:00` unchanged. Both
+legacy hard-bank-era jobs are still enabled and still firing ok — `Mac v2.2 full after v2.1`
+(id `f23cf5d48e11`, every 5 m, last 07:29:26 CET) and `P2005 paired full 2.1→2.2 watch`
+(id `a808c7f205a6`, `*/5 * * * *`, last 07:25:26 CET — a permanent five-minute ssh round-trip onto
+this line's endpoint box). Reported as an owner decision, not edited.
+
+**Watchdog clone: the deviation set is stable at eight paths.** `~/projects/strata-autonomous-harness`:
+staged index empty (0 lines), detached (branch name empty, `HEAD aa4e4d6` while `main` is
+`fad41d0` after the sibling commit), and `git status --porcelain` returns exactly the eight paths of
+ticks 136–139 — modified `hardware/os-snapshots/latest.json`, the four stranded snapshots
+2026-11-11/-12/-13/-14, and the three untracked scratch files in the published raw namespace.
+Nothing committed or deleted there; it stays the hardware/ops line's decision.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the engine hold passed **17 h 16 min** on one process and the
+band returned **GO** after the 06:51 state-D flicker (25 GO of 28); the tick-139 corrected swap read
+paid for itself on its first use — live counter windows caught si ≈ 5.3 MiB/s in one 10 s sample and
+so ≈ 6.6 MiB/s in the next (~840 MiB through swap in two minutes at idle), while a load1 spike to
+**11.01** appeared between the gate read and the box read and lost 3.4 of load1 within 108 s with
+PSI cpu 0.00 against io 3.69 — swap/reclaim traffic, not decode, on an engine that stayed `Sl` at
+0 % GPU throughout. A sibling docs job (`fad41d0`, daily self-evolution summary) moved `main` under
+the line at 07:08; this tick fast-forwarded onto it with a clean tree and CI reads green across it.
+All seven gates and the 414-check contract suite green, Grok cancel armed-but-closed with its resume
+record intact.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
+Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench
+Verified subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads unchanged:
+the `/proc/vmstat` counter-delta swap read stays in force (first live capture this tick), and a GO
+on an empty queue is recorded as a fact, not turned into a leg.
