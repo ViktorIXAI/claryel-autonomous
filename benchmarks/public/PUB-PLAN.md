@@ -129,6 +129,53 @@ interference rate substituted (`blk_read_mib_per_s=1856.8`) answers `PREFLIGHT N
 attributed reader: rsync`, exit 3. This registers no contour feature, re-scores nothing and moves no
 published benchmark byte; the untracked producer gained the sampler, the repo gained the gate.
 
+### The reading census is a tool now (2026-11-14, tick 154; zero model calls, zero contour stamp)
+
+Every tick since the gate became mechanical has restated the same paragraph — "N stored readings,
+x GO / y NO-GO / z input gaps", plus the swap-peak band and the arming counter — and re-derived it
+by hand. Two different denominators live inside that one paragraph and a hand census mixes them, so
+the arithmetic is now a tool: `scripts/pub_preflight_census.py` runs `scripts/pub_preflight.py` as a
+subprocess over every stored reading (the gate's returncode, never a restatement), derives the band
+and the arming counter from code, reads the three ceilings out of the gate source at run time, and
+writes `benchmarks/public/PREFLIGHT-CENSUS.md` — that file **is** the tool's output, stamped with the
+census id and the gate sha16, and `--check` re-derives it byte-for-byte from the retained readings.
+
+What the two denominators are, because this is where hand arithmetic goes wrong. The band is defined
+on the **swap-mean rule**, not on the verdict column:
+
+* a reading can be NO-GO on the GPU-mean or device rule with its swap window quiet (today's 12:14
+  and 17:16 files are exactly that: NO-GO on the device and GPU rules at swap means 0.0 and 0.1,
+  peaks 0.0 and 0.7), so the *lowest peak inside a gate-NO-GO window* is 0.0 while the band minimum
+  over the rule is 107.0 — reading the verdict column invents a separation that does not exist and
+  would justify a peak ceiling that refuses windows the mean rule passes;
+* a reading the gate refuses to judge at all (a NaN field = input gap) can carry a peak above the
+  band floor: `preflight-20261114-1226.txt` carries peak 113.1 at a window mean of 18.9 while
+  `engine_pcpu=NaN` makes it an input gap. Counting it into the passing group would report the band
+  maximum as 113.1 — i.e. **break** the 67.6/107.0 separation that is actually intact. The earlier
+  ticks were right to exclude it; this is the first tick where the exclusion is code rather than a
+  judgement, and the table prints both the excluded count and both denominators side by side.
+
+`harness/pub_preflight_census_test.py` (40 checks, CI-enrolled through the `harness/*test.py` glob in
+the devsecops static-QA job) pins it: the GPU-contention fixture with a quiet swap window must land
+in the PASSING group; a NaN `engine_pcpu` reading with a 400.0 peak gets zero band credit and is named
+as excluded; a NaN peak leaves the band, the coverage census and the arming counter alone; flipping
+one GO fixture's swap counter moves the verdict **and** both band extremes (the flip also has to raise
+that fixture's peak, because the gate itself fail-closes on a peak below its own window mean —
+measured live on the fixture: peak 5.0 against mean 25.0 is refused as a producer bug, which is the
+right answer and is why a naive flip would have tested nothing); a missing readings dir, a reading
+name the tool cannot timestamp, and a malformed `--as-of` all exit 1; and editing a stored reading
+inside the window makes `--check` drift, because stored readings are immutable evidence. The census
+itself is **not** CI-enrolled and cannot be: the readings live outside the repository, behind the same
+untracked seam as the producer command — which is exactly why the arithmetic is pinned by synthetic
+fixtures instead. No network, no ssh, no socket call sits in the tool (asserted by the test).
+
+First machine-derived census, `as-of 2026-11-14 17:51`, gate sha16 `68705b7b41cb1239`: **113 stored
+readings — 65 GO / 42 NO-GO / 6 input gaps**; the as-of day 41 files = 28 GO / 9 NO-GO / 4 gaps;
+**36 launchable (GO) windows in the last 24 h against 0 leg completions recorded in `queue.log`** in
+the same window; swap-peak coverage 18 readings carry the key (2 NaN, 16 parseable), band set 14
+gate-judged, band unchanged at **67.6 / 107.0**, arming counter **8 of 30**. The 36-vs-0 cell is the
+line's actual state in one number: the gate is no longer the constraint, the absence of a next set is.
+
 ## Publication-completeness census (2026-11-12, zero model calls)
 
 Every shipped public arm was re-scored from its shipped answer bytes with the pinned checker, and
@@ -10683,3 +10730,77 @@ block. What moved: the endpoint's warm-engine identity is now measured (not assu
 busy-brain refusal class — the one that would have burned a parity leg's comparability, not its
 uptime — is now observed live on both of its rules firing together with swap flat and the swap
 peak silent.
+
+## Tick 154 — 2026-11-14 17:51 CET: scoreboard unmoved; the reading census stops being hand-derived — two denominators that a hand census mixes, now code plus 40 pinned checks; a GO window opened with 36 launchable windows in 24 h against 0 legs queued; zero legs, zero calls, zero published benchmark bytes moved
+
+Nothing launched — the queue in force is still empty (tick 150's constraint, unchanged), and the
+fresh producer read at 17:51 (`preflight-20261114-1751.txt`) answers **PREFLIGHT GO, exit 0**: swap
+window **0.1 + 0.0 = 0.1 MiB/s** (mean) with a **0.5** peak, whole-disk reads **0.1 MiB/s** with top
+reader `basalt`, GPU window **mean 0.0 % / peak 0 %** at 27.42 W, engine state S with sampled pcpu
+**9.6 %**, RSS 57 374 MiB, MemAvailable 20.3 GiB, swap_free 57.5 GiB, `/health` 200 `loaded=true`,
+one serve process, `foreign_legs=0`, load1 9.07. Engine hold: one process (pid changed at the
+16:31:23 restart tick 152 recorded), age **1 h 20 min**. So the box is launchable again six minutes
+after the 17:16 busy-brain NO-GO, and there is still nothing in the queue to launch into it.
+
+**What moved this tick is the census, not the scoreboard.** Every tick since the gate became
+mechanical has re-derived the same paragraph by hand, and that paragraph carries two different
+sets: the gate's **verdict** per file, and the **swap-mean rule** the peak band is actually defined
+on. A hand census mixes them in both directions, and this tick caught both traps while writing the
+tool (full statement in "The reading census is a tool now" above):
+
+* the 12:14 and 17:16 files NO-GO on the **device/GPU** rules with their swap windows quiet
+  (mean 0.0 and 0.1, peak 0.0 and 0.7), so a verdict-column census reports a failing-group minimum
+  of **0.0** where the rule gives **107.0** — an invented separation that would "justify" a peak
+  ceiling refusing windows the mean rule passes;
+* the 12:26 file carries a peak of **113.1** at a window mean of 18.9 — above the 107.0 that sets the
+  band floor — but the gate refuses to judge it at all (`engine_pcpu=NaN` → input gap), so counting
+  it into the passing group would print a band maximum of 113.1 and declare the intact
+  67.6 / 107.0 separation broken. Excluding it was always right; now it is code, and the table
+  prints the excluded count next to it.
+
+`scripts/pub_preflight_census.py` (subprocess returncodes, ceilings parsed out of the gate source at
+run time, `--as-of` window, `--markdown`, `--check`), `harness/pub_preflight_census_test.py`
+(**40 checks**, auto-enrolled by the `harness/*test.py` static-QA glob; the census itself cannot be
+CI-enrolled because the readings live outside the repo), and the generated
+`benchmarks/public/PREFLIGHT-CENSUS.md` (`as-of 2026-11-14 17:51`, gate sha16 `68705b7b41cb1239`)
+landed in one commit. `--check` reproduces the committed table byte-for-byte; the test's drift
+control proves a stored reading edited inside the window goes red. No contour stamp, no bank edit, no
+pair, no published percent row; the tool has no ssh/socket/HTTP seam, which the test asserts.
+
+**Machine-derived census (the tool, not this prose): 113 stored readings — 65 GO / 42 NO-GO / 6 input
+gaps.** Today 41 files = 28 GO / 9 NO-GO / 4 gaps. **36 launchable (GO) windows in the last 24 h
+against 0 leg completions recorded in `queue.log` in the same window** — the cell that states the
+line's state: the most recent completion this line records at all is `pub-repair-humaneval done
+2026-11-10T00:54:13+01:00`, and the gate has opened 36 windows since. (The census reads the queue
+record, not the endpoint: a cloud leg never writes `queue.log`, so the cell is "recorded", not
+"any leg anywhere".) Peak coverage: 18 readings carry the key, 2 are NaN (zero credit), 16 parseable,
+of which 14 are gate-judged and enter the band; band unchanged at **67.6 (passing max) / 107.0
+(failing min)**, nothing between, peak still reported-not-gated; arming counter **8 of 30** launchable
+windows carrying the statistic (this tick's GO adds one to tick 153's 7).
+
+**Gates and tests.** All five PUB publication gates exit 0 at the tick's HEAD; `pub_grok_resume_check
+--as-of 2026-11-14` exits **3** with the in-force cancellation record (the guard answering correctly
+on the owner decision); preflight contract test **103/103**, taskfile shape **43/43**, the new census
+contract **40/40**; `scripts/security/secret_scan.py --dir . --strict` exits **0** unshielded.
+
+**Frozen-line hygiene.** Legacy hard-bank 5-min watcher `f23cf5d48e11` enabled and inert (last run
+17:59 ok) with the state marker present at the literal path; daily docs job `ef7ea47ff99b` last run
+**03:02 ok** — green for the second day running, the standing "dirty tree at 03:00" note stays
+unfired; drain guard `9a12508f8a69` active.
+
+**Repository state.** `main` == `origin/main` == `1cda05a` at the tick start, working tree clean, CI
+green on that head (`contour self-tests`, `secret-scan`, `hard-v6 scoring contracts`, `devsecops` all
+success at 16:38 Z). The newest commits are foreign to this line (P3032 / RX-580 hardware docs) and
+were read, not touched. Second-worktree census (`~/projects/strata-autonomous-harness`): HEAD still
+detached, parked at `8ccef67` (the CHG-001 MACSTUDIO record) which `git merge-base --is-ancestor`
+proves **is an ancestor of `origin/main`** — no orphan deviation this tick, unlike tick 134's case;
+staged diff empty, so the staged-deletions hazard is clean; untracked accumulation is now **7** files
+(three scratch files inside the published `benchmarks/public/raw/` namespace plus four
+`hardware/os-snapshots/` dated 2026-11-11…2026-11-14) — tick 153's "6" was its own arithmetic slip,
+the census is 3 + 4. Recorded as the owning workstreams' decision; this line commits nothing foreign.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action, **no published benchmark byte moved** — the new census table is a gate record, not
+a percent row. What moved: the tick's own census arithmetic is now reproducible and falsifiable
+instead of restated, and the queue-vs-window question the last four ticks kept answering in prose has
+a number (36 GO windows, 0 legs).
