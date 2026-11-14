@@ -7,36 +7,36 @@ connection seam on this line), so this census runs on the workstation only and i
 CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over
 synthetic readings, and `--check` re-derives this table from the retained readings.
 
-Census stamp: `pub-preflight-census-v1`, gate sha16 `dd2f0e4fa0255fa5`, window `as-of 2026-11-14 22:39` (121 stored readings, 121 inside the window).
+Census stamp: `pub-preflight-census-v1`, gate sha16 `dd2f0e4fa0255fa5`, window `as-of 2026-11-14 23:13` (122 stored readings, 122 inside the window).
 
 Ceilings read out of the gate source at run time, so this table cannot disagree with the rule it reports: `SWAP_RATE_MAX_MIB_S = 20.0` (window MEAN; the peak statistic is reported, not gated), `GPU_UTIL_MAX_MEAN_PCT = 50.0` (the window mean, never the peak), and the device-read ceiling is SCOPE-DEPENDENT: `BLK_READ_MAX_MIB_S_WHOLE = 50.0` applies to every reading carrying `blk_scope=whole-disk`, while `BLK_READ_MAX_MIB_S = 100.0` applies only to readings with NO scope key (the old diskstats sum, which double-counts partitions, i.e. about 2x the device). The two numbers are the SAME physical point; a file with an unrecognised scope value is an input gap the gate never judges. Naming one of these numbers without its scope is exactly how a generated table starts disagreeing with the rule it claims to report (measured 2026-11-14 18:47: a whole-disk reading of 56.2 MiB/s was refused by the gate while the first version of this table printed 100.0 as the whole-disk ceiling).
 
 | census cell | value |
 |---|---|
-| gate verdict GO | 67 |
+| gate verdict GO | 68 |
 | gate verdict NO-GO | 48 |
 | gate verdict input gap | 6 |
-| device scope of the readings in this window | 22 whole-disk (`50.0` ceiling) / 99 unscoped (`100.0` ceiling) / 0 unknown scope |
-| readings of the as-of day | 49 (30 GO / 15 NO-GO / 4 gap) |
+| device scope of the readings in this window | 23 whole-disk (`50.0` ceiling) / 99 unscoped (`100.0` ceiling) / 0 unknown scope |
+| readings of the as-of day | 50 (31 GO / 15 NO-GO / 4 gap) |
 | launchable (GO) windows in the last 24 h | 32 |
 | leg completions recorded in that window | 0 |
-| readings carrying the swap-peak key | 26 (NaN 2, parseable 24) |
-| ...of those, gate-JUDGED readings with a parseable peak (the band's set) | 22 (the other 2 sit in readings the gate refuses to judge at all) |
-| swap-mean-passing windows with a peak | 14 |
+| readings carrying the swap-peak key | 27 (NaN 2, parseable 25) |
+| ...of those, gate-JUDGED readings with a parseable peak (the band's set) | 23 (the other 2 sit in readings the gate refuses to judge at all) |
+| swap-mean-passing windows with a peak | 15 |
 | swap-mean-failing windows with a peak | 8 |
-| highest peak inside a swap-mean-PASSING window | 67.6 MiB/s |
+| highest peak inside a swap-mean-PASSING window | 111.4 MiB/s |
 | lowest peak inside a swap-mean-FAILING window | 107.0 MiB/s |
-| arming counter (launchable windows carrying the peak) | 10 of 30 |
+| arming counter (launchable windows carrying the peak) | 11 of 30 |
 
 Engine swap FOOTPRINT (added 2026-11-14, tick 159) — reported, never banded:
 
 | footprint cell | value |
 |---|---|
-| readings carrying `engine_vmswap_mib` | 3 (NaN 0, parseable 3) |
-| footprint on gate-GO windows (launchable) | 1 (median 3576 MiB, max 3576 MiB) |
+| readings carrying `engine_vmswap_mib` | 4 (NaN 0, parseable 4) |
+| footprint on gate-GO windows (launchable) | 2 (median 4934 MiB, max 6291 MiB) |
 | footprint on gate-NO-GO windows | 2 (median 3447 MiB, min 3357 MiB) |
-| page-cache share of swap in use (`swap_cached_mib` / used) | 3 readings, median 64.4 percent, max 65.2 percent |
-| footprint arming counter (launchable windows carrying it) | 1 of 30 |
+| page-cache share of swap in use (`swap_cached_mib` / used) | 4 readings, median 64.2 percent, max 65.2 percent |
+| footprint arming counter (launchable windows carrying it) | 2 of 30 |
 
 **Why a state variable joins a table of rates.** Every swap rule the gate has is a rate
 over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14
@@ -58,11 +58,11 @@ table's zeros are a coverage fact about stored history, not a measurement of hea
 
 **The two denominators, side by side, because they are not the same set.** The band above
 is defined on the **swap-mean rule**, not on the verdict column: the highest peak in a
-gate-`GO` window is 67.6 MiB/s and the lowest peak in a gate-`NO-GO` window is 0.0 MiB/s, and
+gate-`GO` window is 111.4 MiB/s and the lowest peak in a gate-`NO-GO` window is 0.0 MiB/s, and
 the second number is the trap - a reading can be NO-GO on the device or the GPU-mean rule
 while its swap window is quiet at 0.0, and a NaN-carrying reading is an INPUT GAP the gate
 never judges at all (2 such readings carry the peak key). Band: nothing between
-67.6 and 107.0 MiB/s, so a peak ceiling anywhere in that interval would refuse windows the mean
+111.4 and 107.0 MiB/s, so a peak ceiling anywhere in that interval would refuse windows the mean
 rule passes. The peak stays REPORTED, not gated, until the pre-registered arming threshold
 (30 launchable windows carrying the statistic) is met.
 

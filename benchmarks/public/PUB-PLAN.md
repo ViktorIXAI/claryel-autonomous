@@ -11372,3 +11372,64 @@ contract suite, the regenerated census table and this plan block. What the recor
 guard on this gate that still trusted a single instantaneous sample now reads the window, and the
 18-file idle-spin history shows the old premise was never contradicted except in the one file that
 names the defect.
+
+## Tick 161 — 2026-11-14 23:13 CET: scoreboard unmoved; the live GO window sits 1.9 MiB/s under the swap-mean ceiling with a 111.4 MiB/s in-window peak — the pre-registered peak band **crossed** (highest launchable peak 111.4 is now above the lowest mean-failing peak 107.0), which is the strongest evidence yet that a peak ceiling would add nothing the mean rule does not already catch; engine footprint grew +2 715 MiB between the two footprint-carrying GO windows; census 122 = 68 GO / 48 NO-GO / 6 gap; queue empty, zero legs, zero calls
+
+**Live preflight 23:13 — GO (one leg allowed; queue is empty, so a launch is not queued).** The
+producer ran bare (own timestamped readings file, empty sibling `.err`), then
+`scripts/pub_preflight.py` was run unshielded on that file for the real exit code (the wrapper's
+trailing `echo` makes its own `$?` meaningless).** GO: engine pid 175316, age 06:41:42 — same process
+as ticks 157-160, no restart, no engine action this tick; state `S`, sampled CPU 6.0 % over the
+measured 6.14 s swap window; GPU window mean 0.8 % / peak 5 % at six 1 Hz samples against an
+instantaneous 0 % at 25.95 W; swap 18.1 in / 0.0 out over that window with in-window peak 111.4;
+`swap_free` 52 962 MiB, `MemAvailable` 20 396 MiB; footprint 6 291 MiB of 12 573 MiB swap in use with
+6 035 MiB (48.0 %) page-cache resident; device 0.1 MiB/s whole-disk (`blk_top_reader=basalt`);
+`/health` 200 `loaded=true`, one serve process; `foreign_legs=0`; `load1` 8.15 printed only —
+falsified as a proxy at ticks 142/143.
+
+**What the window adds to the two unstarted statistics.** (1) Mean 18.1 MiB/s is the highest
+swap-mean value any GO has carried so far (the previous GO maximum was the 11.9 paired sample at
+tick 151) — 1.9 MiB/s under `SWAP_RATE_MAX_MIB_S = 20.0`, so the rule held without margin evidence;
+no ceiling change is proposed from one point. (2) The reported peak band **crossed**: highest peak
+inside a mean-PASSING window moved 67.6 -> **111.4**, lowest peak inside a mean-FAILING window stays
+**107.0**. A peak ceiling that kept this launchable window (ceiling > 111.4) could never have refused
+the 107.0 window the mean rule already refuses — at the current sample the peak statistic separates
+nothing the mean rule misses, it only sees bursts the page cache absorbs (device read stayed 0.1
+MiB/s through the 111.4 peak, and 48.0 % of swap-in-use was RAM-resident). The arming rule stands
+unchanged: >= 30 launchable windows carrying the field before any ceiling, here 11 of 30, and the
+crossed band is recorded as the reason a ceiling would likely be set above every observed mean-fail
+peak, i.e. decorative. (3) Footprint is the live hazard: the two launchable footprint readings went
+3 576 -> 6 291 MiB of `VmSwap` between 22:39 and 23:13 (+2 715 MiB in 34 minutes) while
+`SwapFree`/`MemAvailable` stayed green (52 962 / 20 396 MiB) and the device read 0.1 — exactly the
+"swap saturation can restart the engine mid-leg" machine note forming under a healthy-looking box.
+Footprint arming 2 of 30, no band started by design.
+
+**Census at as-of 23:13 (regenerated, `--check` 0, gate sha16 `dd2f0e4fa0255fa5` unmoved).**
+122 readings = 68 GO / 48 NO-GO / 6 gap (121 at the 22:39 pass; +1 is the 23:13 GO). As-of-day rows:
+50 = 31 GO / 15 NO-GO / 4 gap. Launchable (GO) windows in the last 24 h stay 32. Swap-peak coverage
+27 (2 NaN, 24 -> 25 parseable), gate-judged 23, mean-passing windows with a peak 14 -> 15, failing 8,
+band now 111.4 / 107.0 as above. Footprint coverage 4 (2 GO, 2 NO-GO; GO max 6 291, NO-GO median
+3 447), page-cache share median 64.2 %, footprint arming 2 of 30.
+
+**Gates and tests at this HEAD.** All six PUB publication gates exit 0 unshielded (arms index 0
+drift, derived percents, grok cells 9 documents / 0 findings, superseded cells, digest rows 49/0,
+three-arm parity 49 rows / 9 sets / 0 findings with every in-force set carrying bare + codex +
+contour-matched at `0.0.2.56`), `pub_preflight_census.py --check` = 0, `pub_grok_resume_check
+--as-of 2026-11-14` exits 3 with the in-force cancellation record, the marker `~/pub-bench/GROK-CANCELLED`
+untouched and the runner still refusing Grok arms. Contract tests: `pub_preflight_test` 117/117,
+`pub_preflight_census_test` 70/70. `scripts/security/secret_scan.py --dir . --strict` run unshielded
+before the commit.
+
+**Frozen-line hygiene.** No contour stamp registered, no hard-bank pair launched, no hard-bank byte
+edited, no new branch. Legacy watchers `f23cf5d48e11` / `a808c7f205a6` completed 23:10-23:11 (inert,
+marker `~/.hermes/mac-v22full-launch.state` verified at the literal path, dated 2026-11-02 14:05);
+drain guard `9a12508f8a69` completed 23:10. Executions DB shows exactly one running tick — this one,
+23:12:26. Second-worktree census unchanged: detached HEAD, empty staged diff, the same 7 untracked
+files — still the owning workstreams' decision, eighth tick.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action, **no published benchmark percent moved**. The moved artifact is the regenerated
+census table plus this plan block. What the record gains: the peak statistic's arming band is now
+empirically crossed rather than merely unmoved, and the footprint series shows the endpoint's swap
+growth (0.5 -> 6.1 GiB in one evening) that the free columns and the device rule cannot see — if the
+engine restarts under a future leg, this curve is the pre-existing evidence, not a mystery.
