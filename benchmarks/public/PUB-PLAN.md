@@ -10328,3 +10328,18 @@ reported and not gated. MemAvailable 19 215 → 20 136 MiB, swap free 49 971 MiB
 `"loaded": true`, one serve process, zero foreign legs. Decision: the engine is **left alone** — no leg
 is queued, the 22 h single-process hold is itself a tracked datapoint, and on this line a restart is a
 box decision, never a benchmark-side reflex.
+
+**Tick 147 close-of-tick endpoint read (13:19) — the flagged spin window cleared itself.** The single
+tick 146 deferred to the next tick was taken: `PREFLIGHT GO` on a fresh reading
+(`preflight-20261114-1319.txt`). Engine pid 10597 at 23 h 06 min age, state `S`, `engine_pcpu 5.3 %`
+(sampled 6 s delta), GPU 0 % at 27.68 W, one serve process, zero foreign legs, `/health` 200 with
+`"loaded": true`; swap in 1.0 MiB/s mean with a 6.1 MiB/s peak, whole-disk reads 0.1 MiB/s, MemAvailable
+17 806 MiB, swap used 15 910 MiB. So the 12:45 window — engine 899 % CPU at 6 % GPU util in state `R` —
+was transient: it cleared within ~34 minutes with no intervention, no engine restart, and the 23 h
+single-process hold still stands. `load1` is a falsified activity proxy a **seventh** time: 17.82 beside
+0.1 MiB/s of device reads and 5.3 % engine CPU (the hardware line's seeding tail, not decode). The GO
+is recorded, not spent: the in-force queue is empty — every in-force set carries all three admissible
+arms (bare / contour 0.0.2.56 matched shape / codex), Grok cells stay closed by the owner quota decision
+of 2026-11-12, and the "later" ladder rows need a fresh owner decision. Zero model calls, zero cloud
+calls, zero published benchmark bytes moved this tick; `main` was not under local edit pressure (the
+two records that landed since tick 146 are hardware-line P3032 docs, no benchmark paths).
