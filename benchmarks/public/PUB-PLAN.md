@@ -8557,3 +8557,140 @@ leg — and after any NO-GO, one second reading before a box symptom is called s
 read unshielded; censuses by exit code and exact column equality, cross-checked against each gate's
 own row count; per-test check counts summed from each test's own summary line because the formats
 differ; daily-docs fire 2026-11-14 02:00 UTC from a passing precondition.
+
+
+## Tick 133 — 2026-11-14 03:10 CET: scoreboard unmoved; the daily-docs job fired GREEN for the first time since 2026-11-10 and the marker it was going to write was written by this tick; one census-method defect caught in the act; zero legs, zero calls, zero published benchmark bytes moved
+
+**Scoreboard: unmoved.** Nine in-force sets complete on the three-arm standard (bare local /
+contour `0.0.2.56` matched shape / ChatGPT codex), re-certified by
+`scripts/pub_three_arm_parity_check.py`: **49 rows / 9 sets, 0 findings** (contour stamp
+`0.0.2.56`, Grok not an arm; Grok percent absent by the 2026-11-12 owner cancel on `bfcl`,
+`ifeval`, `livecodebench`, cell sentence on the other six). `PUB-DIGEST.md` byte-stable since
+`ad8d8c0`: sha256-16 `9d5ac7c3a60fb9dd`, 16 517 B, mtime 2026-11-12 03:23:17 — re-hashed this tick,
+identical to ticks 131–132. No contour stamp or feature registered, no hard-bank pair launched, no
+hard-bank byte touched.
+
+**Legs: none, and none launched.** `systemctl --user list-units 'parb-pub-*'` empty; no
+`pub_bench_run` / `pub_bench_cloud` process on this host; on the endpoint box
+`pgrep -cf 'gate_ru[n].py'`, `pgrep -cf 'pub_bench_ru[n].py'` and `pgrep -cf 'p2005_v[0-9]*_a[b].sh'`
+all 0. The queue is empty: every in-force set carries all three admissible arms, the Grok line is
+closed by the owner decision of 2026-11-12 (operator marker present, 121 B; the pinned resume record
+carries `cancelled_on: 2026-11-12` with `suspended_until: null`), and SimpleBench stays closed as
+unpinnable. Zero model calls, zero cloud calls this tick.
+
+**Endpoint read (nineteenth stored reading of the engine-hold band, an eighteenth GO).**
+`bash preflight.sh` bare (no outer redirect), gate re-run unshielded on the produced file:
+**`preflight-20261114-0254.txt` → PREFLIGHT GO, gate exit 0** (no `.err` sibling): swap 51 914 MiB
+free of 65 535 (used 13 621, balance inside tolerance), MemAvailable 20 343 MiB, engine state `S`,
+live-delta pcpu 0.0, RSS 54 836 MiB, GPU 0 % / 26.51 W, `health_code=200`, `health_loaded=true`,
+`engine_serve_procs=1`, foreign legs 0, load1 5.44. A GO is valid for this reading only; no leg was
+gated by it because none is in force.
+
+**A census-method defect found in the act — this is exactly what the "censuses by exit code" rule
+exists for, and the first pass did not follow it.** The first band census was a shell loop
+`for f in …; do python3 scripts/pub_preflight.py "$f" >/dev/null; echo "$(basename $f) exit=$?";
+done`, and it printed **exit=0 for both stored state-D readings** that tick 132 recorded as NO-GO.
+Root cause: the `$(basename …)` command substitution runs *before* `$?` is expanded, so every row
+reported the substitution's status (0), never the gate's. Re-running both files individually and
+unshielded reproduces the truth: `preflight-20261113-1923.txt` and `preflight-20261114-0207.txt` both
+print `PREFLIGHT NO-GO: engine in uninterruptible I/O (state D): thrashing`, **exit 3**. The census
+was then rebuilt in Python taking `subprocess.run([...]).returncode` directly. Corrected band census:
+**21 readings, 19 GO / 2 NO-GO** — tick 132's 20 / 18 / 2 plus this tick's GO, the two non-GOs
+unchanged. Whole-workspace census over every stored `preflight-*.txt`: **78 files, 42 GO / 34 NO-GO /
+2 input gaps** — tick 131–132's 77 / 41 / 34 / 2 plus exactly this tick's one GO, so no stored
+reading changed verdict. Rule for this line: capture `rc=$?` (or take the returncode in-process)
+**before** any command substitution appears in the reporting line.
+
+**Engine continuity, read on the box, not inferred.** The same engine process as ticks 117–132
+(`basalt --serve`, pid 10597, `lstart Fri Nov 13 14:12:51 2026`), age **12:41:11** at the preflight
+read and **12:48:05** at the box re-read; RSS 57 808 300 KiB then 58 632 756 KiB, state `Sl`.
+`/health` names the served alias, reports `"loaded": true`, max context 196 608. The engine hold
+passes **12 h 48 min**; no restart in the window.
+
+**Ops tuning campaign: fifteenth idle read.** Newest `p2005_v*_ab.sh` on the box remains
+`p2005_v10_ab.sh` (mtime 2026-11-13 10:15:33 CET; v9 at 09:53:37, v8 at 09:33:08), and no such
+script is running. Machine state, reported, never acted on.
+
+**Daily-docs job: first GREEN fire since 2026-11-10, with the marker written by this tick.** Read
+from the scheduler: job `GitHub docs freshness daily` (`0 2 * * *`, no-agent, script
+`docs_freshness_daily.sh`, id `ef7ea47ff99b`) fired at **2026-11-14 03:00:18 CET** and **completed
+ok at 03:02:14** — the scheduler now prints `Last run: … ok` with `Last failure at
+2026-11-13T03:00:19 … — recovered since`, ending a streak of 10 whose recorded cause is the stale
+status date (`README status date is stale: 2026-11-11 is 2 days old`), not the brief's dirty-tree
+line, which stays unreproduced: this clone's tree is clean (0 paths) and local `main` equals
+`origin/main`. The job's own log ends `nothing to push (HEAD == upstream)` because today's marker was
+already on `origin/main`: commit `ebc0f79` "Daily docs freshness check: 2026-11-14" (README line 100,
+one line changed, `Status checked: 2026-11-14`).
+**Provenance, stated plainly because it is mine, not the job's.** While reading the job's
+precondition this tick I invoked `scripts/qa/refresh_docs_status.py` with a `--dry-run` argument. The
+script takes **no arguments**, so the flag was silently ignored and the call performed its real work:
+it ran `docs_policy --push`, ran `static_checks.py` offline, rewrote the marker and committed
+locally. The single-writer guard then did its job and refused the push (`push blocked by the
+single-writer guard: the job wrapper must export ALLOW_HARD_V6_PUSH=1 for this push — not retrying`),
+so the commit sat local until this line pushed it under that env var (a plain fast-forward,
+`bc31c97..ebc0f79`, 0 ahead / 0 behind afterwards). Consequence for the schedule: when the job fired
+two minutes later the marker already matched today, its marker branch wrote nothing and its push step
+had nothing to push. Zero benchmark rows, arm bytes, verdict files or digest lines moved; the only
+tracked content touched is the README review-date marker. Recorded as an operator-surface incident of
+this line's own making so today's green is not read as a repair that fixed itself. Hazard named for
+future ticks: `refresh_docs_status.py` has no argument parsing and no dry-run mode — an invocation
+that looks read-only **is** a mutation, the same class as `build_hard_v6_ws.py --help` starting a
+build into `./--help`.
+
+**Standing gates, all seven re-proven this tick on the pushed head `bc31c97` (exits read unshielded,
+gates invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3** (by design — the
+cancel): `checks: 22 | RESUME GATE: NO-GO - do not spend quota`, the **182 unasked ids** in the pin
+are a record, not a queue. `pub_grok_cell_check.py` exit 0 — 9 documents, 0 findings, in-force
+sentence `suspended by owner quota, cancelled by owner decision 2026-11-12 (no resume date)` with 1
+superseded sentence rejected. `pub_arms_index.py --check` exit 0 — index drift 0.
+`pub_derived_percent_check.py` exit 0 — **42 recomputed from shipped bytes, 0 findings** (digest
+citations 44, doc citations 188, uncovered 0). `pub_superseded_cell_check.py` exit 0 — 9 documents, 0
+findings. `pub_digest_row_check.py` exit 0 — 49 rows, contracts named 26, pre-rule exceptions 23/23
+used, 0 findings. Three-arm parity gate exit 0 — 49 rows / 9 sets, 0 findings.
+`scripts/security/secret_scan.py --dir . --strict` exit 0, re-run on the final tree before push.
+
+**The hermetic PUB contract suite re-executed: 14 tests, 0 failures, 414 checks.** Counted by exit
+code first, then summed from each test's own summary line because the formats differ: 34
+(`pub_arms_index`) + 22 (`pub_cloud_blank_purge`) + **41** (`pub_derived_percent`, which prints
+`CHECKS 41, FAILED 0` and is missed by a `N checks` regex) + 22 (`pub_digest_row_gate`) + 7 (digest
+writer) + 9 (`pub_grok_cancel`) + 27 (`pub_grok_cell`) + 39 (`--write-pin`) + 33
+(`pub_grok_resume_check`) + 41 (`pub_preflight`, `41/41 green`) + 42 (`pub_bench_run engine-stamp`)
++ 34 (`pub_superseded_cell`) + 43 (`pub_taskfile_shape`) + 20 (three-arm parity) = **414**,
+reproducing ticks 128–132 exactly. Still zero model calls (temp fixtures, stubbed transports).
+
+**CI, read back rather than assumed.** Tick 132's head `bc31c97`: **all five jobs completed /
+success** — secret-scan 01:15:06Z, contour self-tests 01:15:03Z, pages-build-deployment 01:15:04Z,
+hard-v6 scoring contracts 01:19:56Z, devsecops 01:20:42Z. CI on this tick's own head is re-read next
+tick, per the standing rule.
+
+**Frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state` re-read on the
+literal path: present, 26 B, `Nov 2 14:05`. The two legacy hard-bank-era jobs are still enabled and
+still firing (`Mac v2.2 full after v2.1`, every 5 min, next run 03:01:19 CET; `P2005 paired full
+2.1→2.2 watch`, `*/5`, next run 03:00 CET — a permanent five-minute ssh round-trip onto this line's
+endpoint box). Both reported as an owner decision, not edited.
+
+**Watchdog clone: the deletion-hazard surface reads clean (again).** `git diff --cached --stat` is
+empty and the clone is detached (`git branch --show-current` prints nothing), so there is no index
+that could stage deletions of published arms.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the daily-docs job fired **green** at 03:00:18 CET for the first
+time since 2026-11-10 and ended a streak of 10, and the reason it had nothing to write is that this
+tick's own invocation wrote and pushed today's marker first — a mutation by a command that looked
+read-only, logged here as such. The engine hold passed **12 h 48 min** on one process with the band
+at **19 GO of 21 readings**, and the first band census printed a wrong verdict class because of a
+`$?`-clobbering command substitution, which is why the corrected numbers above come from an
+in-process returncode census. All seven gates plus the 414-check contract suite are green. IFEval /
+LiveCodeBench / BFCL rows and the repair-family census are unchanged from ticks 121–132.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
+Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench
+Verified subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads unchanged: a
+fresh preflight GO **plus** `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local
+leg; after any NO-GO, one second reading before a box symptom is called sustained; `bash
+preflight.sh` without an outer redirect; PUB gates invoked as `python3 <script>` with exits read
+unshielded; **census returncodes taken before any command substitution in the reporting line**;
+censuses by exit code and exact column equality, cross-checked against each gate's own row count;
+per-test check counts summed from each test's own summary line because the formats differ;
+**`refresh_docs_status.py` is a mutation, never a dry run**; daily-docs next fire 2026-11-15 02:00
+UTC onto a marker that already carries today's date.
