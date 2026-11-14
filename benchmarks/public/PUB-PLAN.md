@@ -11066,3 +11066,85 @@ carried a refusal with no companion rule for the first time on this engine, and 
 shape (mean 99.2 / peak 235.8 inside 6.16 s, device 0.1 and `si=so=0` seconds later) is measured —
 if a future release ever proposes gating the peak instead of the mean, this is a concrete case where
 the mean caught in seconds what a sustained-traffic interpretation would have over-weighted.
+
+## Tick 158 — 2026-11-14 20:52 CET: scoreboard unmoved; the swap rule refuses a second consecutive
+window on the same engine (mean 236.9 / peak **560.3 MiB/s**, the largest peak this line has recorded)
+with GPU and device both quiet; census 117 = 66 GO / 45 NO-GO / 6 gap, arming 9/30; the three-arm P0
+gate now says 49 rows / 9 sets / **0 findings**, so the queue and not the gate is the binding
+constraint; queue empty, zero legs, zero calls
+
+**Endpoint (reading `preflight-20261114-2052.txt`, gate exit 3 = NO-GO).** Engine pid 175316 at age
+4 h 21 min — the same process for seven consecutive readings (first at age 08:55, i.e. 16:40; the
+16:31:23 restart was ops-attributed in tick 152, not the watchdog and not this line). Two rules
+refused the window: live swap throughput **236.9 in + 0.0 out = 236.9 MiB/s** over a measured 6.14 s
+window (**>= 20.0**, in-window peak **560.3**), and the engine in uninterruptible I/O (state `D`).
+Everything else read healthy or quiet: `MemAvailable` 24 133 MiB of 61 953, swap free 55 164 of
+65 535, RSS 54 862 MiB, sampled engine CPU 14.5 %, GPU window mean **2.7 %** / peak 8 % against one
+instantaneous `nvidia-smi` sample of 0 % at 27.29 W, device 0.1 MiB/s whole-disk with
+`blk_top_reader=basalt`, `foreign_legs=0`, `/health` 200 with `loaded=true` and one serve process.
+
+**Second consecutive swap-only refusal on this engine, and the series is three deep.** 20:17 read mean
+99.2 / peak 235.8; 20:52 reads mean 236.9 / peak 560.3. Both with the GPU and the device quiet, which
+is exactly the class the swap rule was shipped for: this box's swap files are page-cache-resident
+(tick 151 measured a 443.8 MiB/s swap window carrying 0.1 MiB/s of device reads), so the device rule
+cannot see the traffic and the free-swap column still looks fine. The new 560.3 peak sits inside a
+mean-**failing** window, so the measured band is unmoved — highest peak inside a passing window 67.6,
+lowest inside a failing window 107.0 — the separation is intact and the peak stays reported, not gated.
+
+**Machine-derived census (the tool, not prose), `as-of 2026-11-14 20:52`, gate sha16
+`68705b7b41cb1239`:** 117 stored readings — **66 GO / 45 NO-GO / 6 input gaps**; as-of day 45 files =
+29 GO / 12 NO-GO / 4 gap; device scope **18 whole-disk (`50.0`) / 99 unscoped (`100.0`) / 0 unknown**;
+swap-peak coverage 22 readings carrying the key (2 NaN, 20 parseable) of which **18** are gate-judged
+with a parseable peak (was 17); swap-mean-passing windows with a peak **12**, swap-mean-failing windows
+with a peak **5 -> 6** (this reading); band unchanged at **67.6 / 107.0**; arming counter **9 of 30**
+(a NO-GO adds band coverage, no arming credit). Launchable (GO) windows in the last 24 h **34 -> 33**,
+and the move is an aged-out file, not a reclassification: the sliding cutoff (13 Nov 20:17 -> 13 Nov
+20:52) drops exactly one GO reading, `preflight-20261113-2042.txt`, whose GO this tick re-ran through
+the gate (exit 0) before naming it. `--check` first reported drift against the committed table (the
+failing-with-peak cell plus the stamp/day/scope rows), then matched byte-for-byte after regeneration.
+
+**Gates and tests at this HEAD.** All five PUB publication gates exit **0** unshielded (`pub_arms_index
+--check`, `pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`,
+`pub_digest_row_check`), `pub_preflight_census.py --check` = **0** after the regeneration,
+`pub_three_arm_parity_check.py` = **0** with **49 digest rows / 9 in-force sets / 0 findings** — every
+in-force set carries bare + codex + contour-matched at `0.0.2.56`, the six Grok rows carry the
+cancellation sentence, and `bfcl` / `ifeval` / `livecodebench` never had a Grok cell at all —
+`pub_grok_resume_check --as-of 2026-11-14` exits **3** with the in-force cancellation record and the
+**182 ids** that were never asked (VOID, not a queue). Contract tests green: `pub_preflight_test`,
+`pub_preflight_census_test`, `pub_taskfile_shape_test`.
+`scripts/security/secret_scan.py --dir . --strict` exits **0** unshielded.
+
+**Frozen-line hygiene.** Legacy hard-bank 5-min watcher `f23cf5d48e11` active and inert: its state
+marker exists at the literal path (dated 2026-11-02 14:05, `ls`-ed per the tick-111 lesson). The
+sibling `a808c7f205a6` P2005 2.1 -> 2.2 watch is still enabled every 5 min. Drain guard `9a12508f8a69`
+ran and completed at 20:50. Daily docs job `ef7ea47ff99b`: last run 03:02, scheduler
+`failure_streak = 0`, so the standing "dirty tree at 03:00" error stays unfired — and the executions
+DB retains **no** row for that job, so this sentence rests on the scheduler counter only (tick-53
+lesson: never retype a failure count beyond what the job's own record supports).
+
+**Repository state.** `main` == `origin/main` == `3778862` at the tick start, no foreign commit during
+it. CI green on all five jobs at that head (secret-scan, contour self-tests, devsecops, hard-v6
+scoring contracts, pages). Second-worktree census (`~/projects/strata-autonomous-harness`): HEAD still
+detached at `8ccef67`, and `git merge-base --is-ancestor` proves it **is an ancestor of `origin/main`**
+— no orphan deviation; staged diff empty, so the staged-deletions hazard is clean; untracked
+accumulation still **7** files (three scratch files inside the published `benchmarks/public/raw/`
+namespace plus four `hardware/os-snapshots/` dated 2026-11-11…2026-11-14) for a fifth tick. Recorded as
+the owning workstreams' decision; this line commits nothing foreign.
+
+**Queue — empty, and now mechanically proven empty rather than asserted.** The three-arm parity gate
+finds no missing in-force arm on any of the nine sets; every ladder item on the record is closed; the
+Grok line is cancelled; the repair-family class census is closed at four sets. What is open is a
+decision, not a task: (a) issue #44 `house-ground-v1`, still on owner hold; (b) issue #42, the GPQA
+vendor-vs-local repro, which needs its own pre-registered hypothesis plus endpoint legs; (c) the
+LiveCodeBench hidden battery as a release asset (an owner call, said so in the doc); (d) the two
+frozen-line watchers still firing every 5 min on a line the owner froze. None of these is launchable by
+this line without an owner word, and an unqueued leg with no pre-registered hypothesis would burn
+endpoint time for an unframed number.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped, no
+engine action, **no published benchmark percent moved** — the moved artifact is the regenerated census
+table plus this plan block. What this tick adds to the record: the swap-mean rule has now carried two
+refusals in a row on one engine with every other rule green (a 35-minute apart pair, mean 99.2 then
+236.9), and the peak statistic's observed range on the current engine grew to 560.3 MiB/s while the
+gate-judged band set reached 18 windows — the peak still has no ceiling, and the arming counter that
+would give it one sits at 9 of 30 launchable windows.
