@@ -141,9 +141,20 @@ def census(directory, as_of, day, window_hours):
         pk, pk_present, pk_ok = num(txt, "swap_total_peak_mib_per_s")
         si, _, _ = num(txt, "swap_in_mib_per_s")
         so, _, _ = num(txt, "swap_out_mib_per_s")
+        vw, vw_present, vw_ok = num(txt, "engine_vmswap_mib")
+        sc, sc_present, sc_ok = num(txt, "swap_cached_mib")
+        used, used_present, used_ok = num(txt, "swap_used_mib")
+        if not (used_present and used_ok):
+            tot, tot_p, tot_f = num(txt, "swap_total_mib")
+            fre, fre_p, fre_f = num(txt, "swap_free_mib")
+            used = (tot - fre) if (tot is not None and fre is not None) else None
         rows.append(dict(ts=ts, name=os.path.basename(f), rc=rc,
                          peak=pk if (pk_present and pk_ok) else None,
                          peak_present=pk_present,
+                         vmswap=vw if (vw_present and vw_ok) else None,
+                         vmswap_present=vw_present,
+                         cached=sc if (sc_present and sc_ok) else None,
+                         used=used,
                          scope=device_scope(txt),
                          mean=(si + so) if (si is not None and so is not None) else None))
     return rows, unnamed, as_of
@@ -172,6 +183,59 @@ def band(rows, swap_max):
     )
 
 
+def median(vals):
+    """Median of a non-empty list, or None. Kept here so the table cannot quote a mean of a
+    skewed distribution: engine VmSwap on this box ranges over an order of magnitude."""
+    if not vals:
+        return None
+    s = sorted(vals)
+    n = len(s)
+    return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2.0
+
+
+def mib(v):
+    """MiB cell text: an empty group prints 'n/a', never Python's None, because a reader cannot tell
+    'no window carried the key' from 'the value was zero' in the word None."""
+    return "n/a" if v is None else ("%.0f" % v)
+
+
+def pct(v):
+    return "n/a" if v is None else ("%.1f" % v)
+
+
+def footprint(rows):
+    """Coverage and distribution of the engine swap FOOTPRINT (added 2026-11-14, tick 159).
+
+    Deliberately NOT a band: no footprint ceiling exists, so this census counts the statistic the
+    way the peak census does — how many launchable windows carry it (the pre-registered arming
+    rule) — and reports the distribution without proposing a number. The reason it is censused at
+    all: every swap rule in force is a 6 s RATE, and a rate cannot see a state. The stored reading
+    from 21:12 that gate-answered GO with `swap_in=0.0 swap_out=0.0` sits inside an evening whose
+    engine footprint grew from 5.22 to 5.72 GiB, and at 21:30 52.5 % of the swap in use was
+    page-cache resident in RAM (measured with a bounded read-only sweep on the box)."""
+    carried = [r for r in rows if r["vmswap_present"]]
+    judged = [r for r in rows if r["rc"] in (0, 3)]
+    have = [r for r in rows if r["vmswap"] is not None]
+    launchable = [r for r in judged if r["rc"] == 0 and r["vmswap"] is not None]
+    nogo = [r for r in judged if r["rc"] == 3 and r["vmswap"] is not None]
+    shares = [100.0 * r["cached"] / r["used"] for r in rows
+              if r["cached"] is not None and r["used"] and r["used"] > 0]
+    return dict(
+        n_carried=len(carried),
+        n_nan=sum(1 for r in carried if r["vmswap"] is None),
+        n_parseable=len(have),
+        n_go_launchable=len(launchable),
+        n_nogo=len(nogo),
+        go_median=median([r["vmswap"] for r in launchable]),
+        go_max=max((r["vmswap"] for r in launchable), default=None),
+        nogo_median=median([r["vmswap"] for r in nogo]),
+        nogo_min=min((r["vmswap"] for r in nogo), default=None),
+        n_share=len(shares),
+        share_median=median(shares),
+        share_max=max(shares, default=None),
+    )
+
+
 def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
     go = [r for r in rows if r["rc"] == 0]
     nogo = [r for r in rows if r["rc"] == 3]
@@ -180,6 +244,7 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
     cut = as_of - datetime.timedelta(hours=window_hours)
     win_go = [r for r in go if r["ts"] > cut]
     b = band(rows, consts["SWAP_RATE_MAX_MIB_S"])
+    fp = footprint(rows)
     L = []
     L.append("# PUB preflight reading census (generated)")
     L.append("")
@@ -239,6 +304,40 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
     L.append("| lowest peak inside a swap-mean-FAILING window | %s MiB/s |" % b["fail_min"])
     L.append("| arming counter (launchable windows carrying the peak) | %d of %d |" % (
         b["arming"], ARMING_THRESHOLD))
+    L.append("")
+    L.append("Engine swap FOOTPRINT (added 2026-11-14, tick 159) — reported, never banded:")
+    L.append("")
+    L.append("| footprint cell | value |")
+    L.append("|---|---|")
+    L.append("| readings carrying `engine_vmswap_mib` | %d (NaN %d, parseable %d) |" % (
+        fp["n_carried"], fp["n_nan"], fp["n_parseable"]))
+    L.append("| footprint on gate-GO windows (launchable) | %d (median %s MiB, max %s MiB) |" % (
+        fp["n_go_launchable"], mib(fp["go_median"]), mib(fp["go_max"])))
+    L.append("| footprint on gate-NO-GO windows | %d (median %s MiB, min %s MiB) |" % (
+        fp["n_nogo"], mib(fp["nogo_median"]), mib(fp["nogo_min"])))
+    L.append("| page-cache share of swap in use (`swap_cached_mib` / used) | %d readings, median %s "
+             "percent, max %s percent |" % (fp["n_share"], pct(fp["share_median"]),
+                                            pct(fp["share_max"])))
+    L.append("| footprint arming counter (launchable windows carrying it) | %d of %d |" % (
+        fp["n_go_launchable"], ARMING_THRESHOLD))
+    L.append("")
+    L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")
+    L.append("over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14")
+    L.append("21:31-21:38, three back-to-back 5 s windows on the endpoint box took 320 MiB / 0 / 0 of")
+    L.append("swap-in, a producer-shaped 6 s window read 134.3 MiB/s in and 0.0 out, a second such")
+    L.append("window 3 min later read ONE page in, and across that whole span `pswpout` moved")
+    L.append("1 741.9 MiB that not one 6 s window saw — a ceiling on a rate can neither stop the")
+    L.append("outward storm (which is what the machine note says restarts the engine mid-leg) nor")
+    L.append("detect the refault load that precedes it. The footprint is the state behind those rates:")
+    L.append("the engine's own `VmSwap` grew 5 478 008 -> 6 004 096 kB across eight minutes while")
+    L.append("`MemAvailable` read 19-21 GiB and `SwapFree` 53.6 GiB, 35 359 of 35 361 major faults in")
+    L.append("a 6 s window belonged to the engine pid, and 52.5-57.1 % of the swap in use was ALSO")
+    L.append("page-cache resident in RAM, which is why the device rule saw 0.1 MiB/s of reads through")
+    L.append("the whole event (tick 151 measured the same complementarity from the other side: a")
+    L.append("443.8 MiB/s swap window at 0.1 MiB/s of device reads). No ceiling is proposed here:")
+    L.append("arming this statistic needs the same pre-registered threshold as the peak, and the")
+    L.append("footprint column starts filling with the first reading that carries the key, so this")
+    L.append("table's zeros are a coverage fact about stored history, not a measurement of health.")
     L.append("")
     L.append("**The two denominators, side by side, because they are not the same set.** The band above")
     L.append("is defined on the **swap-mean rule**, not on the verdict column: the highest peak in a")

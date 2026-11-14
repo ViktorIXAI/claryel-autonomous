@@ -39,7 +39,12 @@ What it pins:
      three ways - scoped (NO-GO), unscoped (GO), unknown scope value (input gap) - which is the only
      control that separates a correct ceiling table from one that mislabels the number;
   9. the table is deterministic over a frozen `--as-of` window, and that bound really excludes
-     later readings.
+     later readings;
+  10. the engine swap FOOTPRINT census (added 2026-11-14, tick 159): the footprint is a STATE key and
+     a huge one changes no verdict (no ceiling is registered yet), a NaN footprint is an input gap,
+     the coverage/arming cells count only what they name, the page-cache share divides by the
+     reading's own `swap_used_mib`, and stripping the keys from identical fixtures moves no verdict
+     and no peak-band cell — the non-retroactivity proof for a key no stored reading carries.
 """
 import os
 import re
@@ -286,6 +291,92 @@ def main():
             check(int_cell(out11, "gate verdict input gap") == 1,
                   "the bound excludes the 0005 reading (its NaN peak), got %r"
                   % cell(out11, "gate verdict input gap"))
+
+        # 10. the engine swap FOOTPRINT census (added 2026-11-14, tick 159): a STATE key beside the
+        # rate rules, because a 6 s rate cannot see a state. Measured on the box the same evening:
+        # three back-to-back 5 s windows took 320 MiB / 0 / 0 of swap-in while the engine's VmSwap
+        # grew 5.22 -> 5.72 GiB and 35 359 of 35 361 major faults belonged to that one pid. What this
+        # case pins: (a) a huge footprint changes NO verdict (no ceiling is registered — the same
+        # pre-armed rule as the peak, 30 launchable windows carrying the statistic), (b) a NaN
+        # footprint is an input gap (the /proc EAGAIN class that already owns engine_pcpu), (c) the
+        # coverage and arming cells count what they name, (d) the page-cache share is computed from
+        # the used column, not from a hand-typed number, and (e) adding the keys to every fixture
+        # moves NO verdict and NO peak-band cell, which is the non-retroactivity proof for a key the
+        # 118 stored readings never carried.
+        G1 = "preflight-%s-0011.txt" % DAY   # GO with an absurd footprint: reported, never gated
+        G2 = "preflight-%s-0012.txt" % DAY   # swap-churn NO-GO carrying a footprint
+        G3 = "preflight-%s-0013.txt" % DAY   # INPUT GAP: NaN footprint
+        G4 = "preflight-%s-0014.txt" % DAY   # GO with a modest footprint
+        FP_FIX = {
+            G1: {"engine_vmswap_mib": "30000", "swap_cached_mib": "500"},
+            G2: {"swap_in_mib_per_s": "120.0", "swap_out_mib_per_s": "40.0",
+                 "swap_total_peak_mib_per_s": "300.0",
+                 "engine_vmswap_mib": "12000", "swap_cached_mib": "8000"},
+            G3: {"engine_vmswap_mib": "NaN", "swap_cached_mib": "500",
+                 # the NaN peak keeps this file an input gap in the key-stripped control too, so
+                 # the (e) comparison below compares like with like
+                 "swap_total_peak_mib_per_s": "NaN"},
+            G4: {"engine_vmswap_mib": "6000", "swap_cached_mib": "200"},
+        }
+        NOFP_FIX = {k: {kk: vv for kk, vv in v.items()
+                        if kk not in ("engine_vmswap_mib", "swap_cached_mib")}
+                    for k, v in FP_FIX.items()}
+        d3 = tempfile.mkdtemp(prefix="pub-census-fp-")
+        try:
+            write_fixtures(d3, FP_FIX)
+            rc12, out12 = run(["--dir", d3, "--as-of", "%s-0014" % DAY])
+            check(rc12 == 0, "the footprint census runs green, got %r" % out12[-400:])
+            check(int_cell(out12, "gate verdict GO") == 2,
+                  "a 30 GiB engine footprint must NOT flip the verdict (no footprint ceiling "
+                  "exists), got %r" % cell(out12, "gate verdict GO"))
+            check(int_cell(out12, "gate verdict NO-GO") == 1,
+                  "the swap-churn reading still NO-GOs, got %r" % cell(out12, "gate verdict NO-GO"))
+            check(int_cell(out12, "gate verdict input gap") == 1,
+                  "a NaN engine footprint is an input gap, never healthy, got %r"
+                  % cell(out12, "gate verdict input gap"))
+            fc = cell(out12, "readings carrying `engine_vmswap_mib`") or ""
+            check(fc == "4 (NaN 1, parseable 3)",
+                  "the footprint coverage cell counts key-present, NaN and parseable separately, "
+                  "got %r" % fc)
+            fgo = cell(out12, "footprint on gate-GO windows (launchable)") or ""
+            check(fgo == "2 (median 18000 MiB, max 30000 MiB)",
+                  "the footprint arming census counts only launchable windows and reports the "
+                  "median of the two (18000 is the median of 6000/30000, never their mean), got %r"
+                  % fgo)
+            fnogo = cell(out12, "footprint on gate-NO-GO windows") or ""
+            check(fnogo == "1 (median 12000 MiB, min 12000 MiB)",
+                  "the NO-GO footprint group is reported separately, got %r" % fnogo)
+            sh = cell(out12, "page-cache share of swap in use (`swap_cached_mib` / used)") or ""
+            check(sh.startswith("4 readings, median 6.2 percent, max 99.7 percent"),
+                  "the page-cache share divides by the used column of the SAME reading "
+                  "(8000/8028 = 99.7 percent, 500/8028 = 6.2 percent), got %r" % sh)
+            armb = cell(out12, "footprint arming counter (launchable windows carrying it)") or ""
+            check(armb == "2 of 30", "the footprint has its own arming counter, got %r" % armb)
+            # (e) non-retroactivity: same fixtures, keys stripped — verdicts and the whole peak band
+            # must be byte-identical, only the footprint cells may differ.
+            d4 = tempfile.mkdtemp(prefix="pub-census-nofp-")
+            try:
+                write_fixtures(d4, NOFP_FIX)
+                rc13, out13 = run(["--dir", d4, "--as-of", "%s-0014" % DAY])
+                check(rc13 == 0, "the footprint-free control run is green, got %r" % out13[-300:])
+                for lab in ("gate verdict GO", "gate verdict NO-GO", "gate verdict input gap",
+                            "readings carrying the swap-peak key",
+                            "swap-mean-passing windows with a peak",
+                            "swap-mean-failing windows with a peak",
+                            "highest peak inside a swap-mean-PASSING window",
+                            "lowest peak inside a swap-mean-FAILING window",
+                            "arming counter (launchable windows carrying the peak)"):
+                    check(cell(out12, lab) == cell(out13, lab),
+                          "adding the footprint keys must not move %r: %r vs %r"
+                          % (lab, cell(out12, lab), cell(out13, lab)))
+                check(cell(out13, "readings carrying `engine_vmswap_mib`")
+                      == "0 (NaN 0, parseable 0)",
+                      "a corpus with no footprint key reports zero coverage honestly, not a "
+                      "healthy-looking blank")
+            finally:
+                shutil.rmtree(d4, ignore_errors=True)
+        finally:
+            shutil.rmtree(d3, ignore_errors=True)
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()

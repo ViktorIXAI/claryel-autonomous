@@ -223,7 +223,8 @@ def main() -> int:
     rc, out = run(dict(live0928, health_loaded="true", engine_serve_procs=1,
                        swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0,
                        blk_read_mib_per_s=0.0, blk_top_reader="basalt",
-                       gpu_util_mean_pct=0.0, gpu_util_peak_pct=0))
+                       gpu_util_mean_pct=0.0, gpu_util_peak_pct=0,
+                       engine_vmswap_mib=0.0, swap_cached_mib=0.0))
     ck(rc == 0 and "(coverage)" not in out,
        f"a fully covered reading must not print a coverage warning, got exit {rc}: {out}")
     rc, out = run(dict(live0928, health_loaded="true", engine_serve_procs=1,
@@ -324,6 +325,53 @@ def main() -> int:
     rc, out = run(variant(swap_total_peak_mib_per_s=34.6))
     ck(rc == 0 and "not present in this reading" in out,
        f"a peak with no mean window in the file is still reportable (no cross-check possible), got {rc}: {out}")
+
+    # Engine swap FOOTPRINT (2026-11-14, tick 159, tooling release: no contour stamp, no published
+    # byte). Every swap rule above is a 6 s RATE and is burst-blind at both ends — measured on the
+    # endpoint box 21:31-21:38 the same evening: three back-to-back 5 s windows took 320 MiB / 0 / 0
+    # of swap-in, the producer window read 134.3 in / 0.0 out, a second producer-shaped window 3 min
+    # later read ONE page in, and across that whole span pswpout moved 1 741.9 MiB that not one of
+    # those windows saw. State does not burst: the engine's own VmSwap grew 5 478 008 kB (5.22 GiB)
+    # to 6 004 096 kB (5.72 GiB) in eight minutes with MemAvailable 19-21 GiB and SwapFree 53.6 GiB,
+    # and 35 359 of 35 361 major faults in a 6 s window (235 700 pswpin pages = 920.7 MiB) belonged
+    # to the engine pid — the next process in the whole table scored 1. SwapCached 6 198 128 kB is
+    # 56.5 % of the 10.48 GiB of swap in use, which is why the DEVICE rule cannot see the traffic
+    # (blk_read_mib_per_s answered 0.1 through the whole storm). No ceiling is registered here yet —
+    # the same pre-armed rule as the peak, 30 launchable windows carrying the statistic first.
+    rc, out = run(variant(engine_vmswap_mib=300.0, swap_cached_mib=199.0))
+    ck(rc == 0 and "engine swap footprint 300 MiB of 391 MiB swap in use" in out
+       and "50.9 %" in out,
+       f"a consistent footprint must be printed with its page-cache share and must NOT change the "
+       f"verdict, got {rc}: {out}")
+    rc, out = run(variant(engine_vmswap_mib=8000.0, swap_cached_mib=300.0))
+    ck(rc == 0, "a footprint far above any plausible future ceiling must still GO while NO footprint "
+                f"ceiling is registered — this pins the decision on purpose, got {rc}")
+    rc, out = run(variant(engine_vmswap_mib=391.0, swap_cached_mib=391.0))
+    ck(rc == 0, "cached swap EQUAL to swap in use is the legal boundary (every swapped page cached) "
+                f"and must not be an input gap, got {rc}: {out}")
+    rc, out = run(variant(engine_vmswap_mib=5346.0, swap_cached_mib=500.0))
+    ck(rc == 1 and "exceeds swap in use" in out,
+       f"cached swap above swap in use is arithmetically impossible and can only be a split /proc "
+       f"pass (tick 78 class), got {rc}: {out}")
+    rc, out = run(variant(engine_vmswap_mib="NaN", swap_cached_mib=199.0))
+    ck(rc == 1 and "unreadable number(s): engine_vmswap_mib" in out,
+       f"a NaN footprint is a failed /proc read of a 58 GiB process (the engine_pcpu EAGAIN class) "
+       f"and must be an input gap, got {rc}: {out}")
+    rc, out = run(variant(engine_vmswap_mib=-1.0, swap_cached_mib=199.0))
+    ck(rc == 1 and "is negative" in out, f"a negative footprint must be an input gap, got {rc}: {out}")
+    rc, out = run(variant(engine_vmswap_mib=300.0, swap_cached_mib="NaN"))
+    ck(rc == 1 and "unreadable number(s): swap_cached_mib" in out,
+       f"a NaN page-cache read must be an input gap, got {rc}: {out}")
+    rc, out = run(variant(engine_vmswap_mib=300.0))
+    ck(rc == 0 and "no reading for swap_cached_mib" not in out
+       and "carries no swap_cached_mib" in out,
+       f"one footprint key without the other is a COVERAGE gap that keeps the verdict (an optional "
+       f"key is never required), got {rc}: {out}")
+    rc, out = run(variant())
+    ck(rc == 0 and "engine swap footprint" not in out
+       and "carries no engine_vmswap_mib/swap_cached_mib" in out,
+       f"a stored reading with neither key must keep its verdict and name the coverage hole, "
+       f"got {rc}: {out}")
 
     # Foreign block I/O (2026-11-14, tooling release, no contour stamp, no published benchmark byte).
     # The swap-throughput rule measured 17.4 MiB/s on this box at 10:59 — the highest value this line

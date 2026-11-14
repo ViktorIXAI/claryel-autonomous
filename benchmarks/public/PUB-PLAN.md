@@ -11148,3 +11148,124 @@ refusals in a row on one engine with every other rule green (a 35-minute apart p
 236.9), and the peak statistic's observed range on the current engine grew to 560.3 MiB/s while the
 gate-judged band set reached 18 windows — the peak still has no ceiling, and the arming counter that
 would give it one sits at 9 of 30 launchable windows.
+
+## Tick 159 — 2026-11-14 21:45 CET: scoreboard unmoved; every swap rule the gate has was found blind at
+BOTH ends, and the fix is a STATE variable instead of another rate — two optional readings shipped
+(`engine_vmswap_mib`, `swap_cached_mib`), 0 verdict moves over all 118 stored readings, live reading
+`21:42` already carries them (footprint 3 357 MiB, 65.2 % of swap in use page-cache resident); census
+119 = 66 GO / 47 NO-GO / 6 gap, arming 9/30, footprint arming 0/30; queue empty, zero legs, zero calls
+
+**Why this tick exists.** The endpoint has been parked at GO-3 since 20:54 (engine pid 175316 reloaded,
+GPU 0 %, `/health` `loaded=true`) and a fresh preflight window answered
+`swap_in_mib_per_s=134.3 swap_out_mib_per_s=0.0` — a NO-GO at 6.7x the 20.0 MiB/s ceiling, so the launch
+did not happen. The honest next question was not "is the number high" but "who is moving those bytes",
+and answering it needed an instrument on the box. That instrument (a scratch probe, NOT the shipped
+producer) had its own name defect worth recording: `awk '/^nvme/' /proc/diskstats` read 0.1 MiB/s while
+`/proc/vmstat` moved 1 741.9 MiB in the same span, because this box's swap partition sits on the md
+RAID (`/dev/md127p3`), which that pattern never matches. The shipped producer has been name-agnostic
+since tick 151 (it enumerates `/sys/block/*` membership), so nothing published is wrong — but the same
+class of bug bit twice in one day, which is why the rule "never guess a device name" stays written down.
+
+**The measurement that changes the rule shape.** Three back-to-back 5 s windows on the box took
+**320 MiB / 0 / 0** of swap-in (one refault burst, then dead air). A producer-shaped 6 s window read
+**134.3 MiB/s in, 0.0 out**; a second producer-shaped window 3 min later read **ONE page** in. Across
+that whole 7-minute span `pswpout` moved **1 741.9 MiB** that not one of those 6 s windows saw. So the
+rate rules are blind at both ends: a ceiling cannot stop the outward storm the machine note says
+restarts the engine mid-leg, and it cannot see the refault load that precedes one. State does not
+burst, so this tick adds state.
+
+**Attribution is unambiguous, and it is not the device's fault.** In a 6.01 s window carrying 235 700
+pages (920.7 MiB, **153.2 MiB/s**) of `pswpin`, **35 359 of 35 361** major faults in the entire process
+table belonged to the engine pid 175316; the next process in the table scored **1**. The two counters
+disagree by fault-around readahead (920 MiB read in against 138 MiB of faulted pages), which is exactly
+why the durable statistic is the process's own footprint rather than any counter ratio. The traffic
+never reaches the device rule because it does not hit the device: `SwapCached` was 5 979 260 kB at
+21:30 (52.5 % of the 11 674 MiB of swap in use) and 6 198 128 kB at 21:33 (57.1 % of 10 600 MiB) — over
+half the swapped volume was ALSO resident in RAM, so the refaults are served from RAM at
+`blk_read_mib_per_s=0.1`. That is the complement of what tick 151 measured from the other side (a
+443.8 MiB/s swap window at 0.1 MiB/s of device reads): swap on this box is page-cache-resident in both
+directions, and the device rule cannot be the swap guard.
+
+**What shipped (tooling release: no contour stamp, no hard-bank byte, no published percent).** Two
+optional STATE readings, emitted from one /proc pass by the untracked producer and parsed by the repo
+gate: `engine_vmswap_mib` — the engine process's own `VmSwap` from `/proc/<pid>/status`, the quantity
+the machine note calls "swap saturation" (it grew 5 478 008 → 6 004 096 kB across eight minutes at
+21:30-21:38, 0.30 GiB of that in the last two, while `MemAvailable` read 19-21 GiB and `SwapFree` read
+53.6 GiB: the free columns stay green while the model's own pages leave RAM) — and `swap_cached_mib`,
+which names why the device rule is blind. Neither key gates anything in this release: a footprint
+ceiling needs its own measured band and the pre-registered arming rule (30 launchable windows carrying
+the statistic, exactly as for the swap peak) is what will decide it. Absent = a coverage line and no
+verdict change; present but NaN or negative = an input gap, because a /proc read of a 58 GiB process
+intermittently fails — the same EAGAIN class that owns `engine_pcpu` — and a failed read is never
+healthy. One real rule does ride on them: `swap_cached_mib > swap_used_mib` (+64 MiB rounding
+tolerance) is an input gap, because a cached swap page occupies a swap slot by definition, so that
+inequality can only mean the two numbers did not come from one pass — the tick-78 producer-column
+class. The producer therefore now takes its swap columns from a single `/proc/meminfo` read instead of
+`free -m` (`used = total - free` by construction) and reads `VmSwap` from `status`, not
+`smaps_rollup`: 0.42 s against 0.01 s on this process, and a sampler that blocks is a sampler that
+gets killed.
+
+**Non-retroactivity, proven the standing way.** The pre-fix and post-fix gate were run side by side over
+every stored reading — **118 files** — and the verdict triple is identical: **66 GO / 46 NO-GO / 6 input
+gap**, **0 moved verdicts**. On a reading that carries neither key the only difference in the whole
+report is one added coverage line naming the footprint hole. The contract suite grew the same way:
+`harness/pub_preflight_test.py` **103 → 112** checks, including one that pins the decision on purpose
+(a 8 000 MiB footprint must still GO while no ceiling exists) and one that refuses cached swap above
+swap in use. `harness/pub_preflight_census_test.py` gained a footprint case and is **70/70** green; its
+control run strips the two keys from byte-identical fixtures and asserts that no verdict cell and no
+peak-band cell moves, which is the mechanical form of "this key is not retroactive".
+
+**Machine-derived census (the tool, not prose), `as-of 2026-11-14 21:42`, gate sha16
+`890ed7db1f912f64`:** 119 stored readings — **66 GO / 47 NO-GO / 6 input gaps**; as-of day 47 files =
+29 GO / 14 NO-GO / 4 gap; device scope 20 whole-disk (`50.0`) / 99 unscoped (`100.0`) / 0 unknown;
+swap-peak coverage 24 readings carrying the key (2 NaN, 22 parseable), **20** of them gate-judged with
+a parseable peak (was 18); swap-mean-passing windows with a peak 12, swap-mean-failing windows with a
+peak **6 → 8** (the 21:28 and 21:42 readings); band unchanged at **67.6 / 107.0 MiB/s**, separation
+intact, peak still reported and not gated; peak arming **9 of 30**. New footprint block: **1** reading
+carries `engine_vmswap_mib` (0 NaN, 1 parseable), the footprint on launchable windows is **0** with
+median/max `n/a`, the NO-GO group shows **3 357 MiB**, the page-cache share reads **65.2 percent**, and
+the footprint arming counter starts at **0 of 30** — an honest zero about stored history, not a health
+claim. `--check` matches the regenerated table byte-for-byte.
+
+**Endpoint now (reading `preflight-20261114-2142.txt`, gate exit 3 = NO-GO).** Engine pid 175316, age
+05:10:53 — the same process since the ops-attributed 16:31:23 restart, no restart this tick. Swap mean
+**35.1 in + 0.0 out = 35.1 MiB/s** over a measured 6.14 s window (>= 20.0) with in-window peak **214.6**;
+`swap_used_mib` 10 342 of 65 535; footprint 3 357 MiB (down from the 5.7 GiB peak at 21:38 — the engine
+pulled its pages back in, which no rate in the file records); `MemAvailable` 19 653 MiB, RSS 57 400
+MiB, sampled engine CPU 7.3 %, state `S`; GPU window mean 0.5 % / peak 3 % at 27.63 W with one
+instantaneous sample of 0 %; device 0.1 MiB/s whole-disk with `blk_top_reader=basalt`;
+`foreign_legs=0`; `/health` 200 `loaded=true`, one serve process. GO-3 therefore stays parked: the
+third consecutive swap-only refusal on this engine, and the launch that the 20:54 GO authorised has
+still not been spent.
+
+**Gates and tests at this HEAD.** All six PUB publication gates exit **0** unshielded
+(`pub_arms_index --check` 0 drift, `pub_derived_percent_check` 42 recomputed / 0 findings,
+`pub_grok_cell_check` 9 documents / 0 findings, `pub_superseded_cell_check` 9 documents / 0 findings,
+`pub_digest_row_check` 49 rows / 0 findings, `pub_three_arm_parity_check` 0 findings with every
+in-force set carrying bare + codex + contour-matched at `0.0.2.56`), `pub_preflight_census.py --check`
+= **0**, `pub_grok_resume_check --as-of 2026-11-14` exits **3** with the in-force cancellation record —
+the cancel marker `~/pub-bench/GROK-CANCELLED` is untouched and the runner still refuses Grok arms.
+Contract tests green: `pub_preflight_test` 112/112, `pub_preflight_census_test` 70/70,
+`pub_taskfile_shape_test` 43/43. `scripts/security/secret_scan.py --dir . --strict` is run unshielded
+before the commit.
+
+**Frozen-line hygiene.** No contour stamp registered, no hard-bank pair launched, no hard-bank byte
+edited, no new branch. Legacy watcher `f23cf5d48e11` and sibling `a808c7f205a6` still fire every 5 min
+and complete (executions DB: both `completed` at 21:41-21:45); drain guard `9a12508f8a69` completed at
+21:40; the Mac v2.2 marker exists at the literal path (dated 2026-11-02 14:05, `ls`-ed per the tick-111
+lesson). Daily docs job `ef7ea47ff99b` next runs 2026-11-15T02:00Z; this tick's edits are committed
+before that run, so the standing "dirty tree at 03:00" error has no tree to trip on tonight.
+Second-worktree census (`~/projects/strata-autonomous-harness`): HEAD still detached at `8ccef67`
+(an ancestor of `origin/main`, per tick 158's `merge-base` proof), staged diff empty, and the same
+**7** untracked files still sitting there — three scratch files inside the published
+`benchmarks/public/raw/` namespace and four `hardware/os-snapshots/` JSON files dated 2026-11-11…14.
+Sixth tick of that gap; it is the owning workstreams' decision and this line commits nothing foreign.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+**no engine action** (the box probes were bounded reads of `/proc` — no signal, no restart, and the
+engine stayed pid 175316 throughout), **no published benchmark percent moved**. The moved artifacts are
+the gate, its contract suite, the census tool, its contract suite, the regenerated census table and
+this plan block. What this tick adds to the record: the swap guard's coverage gap is now named by a
+number rather than by intuition — a rate can refuse a burst and still certify a box whose engine already
+holds GiB of swap, and this evening both halves of that sentence were measured on the same engine in
+the same hour.

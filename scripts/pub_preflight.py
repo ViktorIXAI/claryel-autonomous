@@ -129,6 +129,40 @@ peak is reported) is NO-GO, absent is not covered so all 106 stored readings kee
 a non-number, a negative, a value above 100 %, only one of the two keys, or a peak below the window
 mean is an input gap.
 
+Two OPTIONAL STATE readings describe how deep the engine already sits in swap (tooling release
+2026-11-14, tick 159):
+
+    engine_vmswap_mib=<float>   the engine process's own VmSwap from /proc/<pid>/status, MiB
+    swap_cached_mib=<float>     SwapCached from /proc/meminfo, read in the SAME pass as the Swap row
+
+Every swap rule this gate has is a RATE over a 6 s window, and rates are burst-blind at BOTH ends.
+Measured on the endpoint box at 21:31-21:38 the same evening: three back-to-back 5 s windows took
+320 MiB / 0 / 0 of swap-in (one refault burst, then dead air), the producer's 6 s window read 134.3
+MiB/s in and 0.0 out, and a second producer-shaped window 3 min later read 1 page in — while across
+that whole 7-minute span `pswpout` moved 1 741.9 MiB that NOT ONE 6 s window saw. State does not
+burst. `engine_vmswap_mib` is the quantity the machine note actually warns about ("swap saturation
+can restart the engine mid-leg"): measured 2026-11-14 21:30-21:38 on the live engine, VmSwap grew
+5 478 008 kB (5.22 GiB) to 6 004 096 kB (5.72 GiB) in eight minutes while `MemAvailable` read 19-21
+GiB and `SwapFree` read 53.6 GiB — free columns stay green while the model's own pages leave RAM,
+and the attribution is unambiguous: in a 6 s window with 235 700 pages (920.7 MiB, 153.2 MiB/s) of
+`pswpin`, 35 359 of 35 361 major faults belong to the engine pid (the next process in the whole
+process table scored 1) — the two counters differ by fault-around readahead (920 MiB in, 138 MiB of
+faulted pages), but both point at the same process, so the attribution holds either way.
+`swap_cached_mib` is why the DEVICE rule cannot see that traffic: at 21:30 SwapCached was
+5 979 260 kB (5.70 GiB) of 11 674 MiB (11.40 GiB) of swap in use, 52.5 %, and three minutes later
+6 198 128 kB (6.05 GiB) of 10 600 MiB, 57.1 % — over half the swapped volume was ALSO resident in
+RAM, so the refaults are served from RAM while `blk_read_mib_per_s` answers 0.1 MiB/s (tick 151
+measured the
+same complementarity the other way: a 443.8 MiB/s swap window at 0.1 MiB/s of device reads).
+Neither key gates anything in this release: a footprint ceiling needs its own measured band, and
+the pre-registered arming rule (30 launchable windows carrying the statistic, as for the swap peak)
+is what will decide it. Absent = a coverage line, no verdict change, so all 118 stored readings keep
+byte-identical verdicts. Present but unreadable, NaN or negative is an input gap (a /proc read of a
+58 GiB process intermittently fails — the same EAGAIN class as `engine_pcpu` — and a failed read is
+never healthy). `swap_cached_mib` above `swap_used_mib` is also an input gap: a cached swap page
+occupies a swap slot by definition, so that inequality can only come from two numbers that were not
+read in one pass.
+
 Usage:
     python3 scripts/pub_preflight.py READINGS.TXT
 
@@ -181,6 +215,18 @@ OPTIONAL_FLOATS = ("swap_in_mib_per_s", "swap_out_mib_per_s")
 # ceiling of 20.0 would retroactively refuse published legs. The band comes first, the ceiling after.
 # Absent key = no line printed, so the 95 stored readings keep byte-identical output.
 SWAP_PEAK_KEY = "swap_total_peak_mib_per_s"
+# Engine swap FOOTPRINT and the swap page cache (2026-11-14, tick 159). Reported, never a refusal
+# reason in this release: the numbers and why they are needed are in the module docstring. Rates are
+# burst-blind (one 6 s window read 0.0/0.0 while the box moved 1.7 GiB out over the next 7 minutes);
+# a footprint is a state variable and cannot hide between samples. The same pre-registered arming
+# rule as the peak — 30 launchable windows carrying the statistic before any ceiling — applies here,
+# so the keys are collected from the first reading that carries them and gate NOTHING until then.
+ENGINE_VMSWAP_KEY = "engine_vmswap_mib"
+SWAP_CACHED_KEY = "swap_cached_mib"
+# A cached swap page occupies a swap slot, so SwapCached can never exceed swap in use. The two
+# numbers come from one /proc/meminfo pass in the live producer; the tolerance only absorbs the
+# whole-MiB rounding, not a gap between passes.
+SWAP_CACHED_TOL_MIB = 64
 # Device-read SCOPE (2026-11-14, tick 146). The first producer summed every non-loop line in
 # /proc/diskstats, which counts each partition again on top of its parent disk (the disk line already
 # aggregates them). Proven live in one 8 s window: nvme0n1 35.8 MiB/s against p2 10.3 + p3 25.5 =
@@ -411,6 +457,52 @@ def main() -> int:
                       "window; this is a producer bug and is never treated as healthy.")
                 return 1
 
+    # Engine swap footprint and the swap page cache (2026-11-14, tick 159): shape-checked here, never
+    # a refusal reason in this release — no ceiling exists until the pre-registered arming rule
+    # (30 launchable windows carrying the statistic) is met. A footprint is the state the machine note
+    # actually warns about, and unlike every rate this gate reads it cannot hide between windows:
+    # measured 2026-11-14 21:31-21:38, three back-to-back 5 s windows took 320 MiB / 0 / 0 of swap-in
+    # while the engine's VmSwap grew 5.22 GiB -> 5.72 GiB.
+    eng_swap = None
+    if ENGINE_VMSWAP_KEY in vals:
+        try:
+            eng_swap = num(vals, ENGINE_VMSWAP_KEY)
+        except ValueError:
+            print(f"PREFLIGHT INPUT GAP: unreadable number(s): {ENGINE_VMSWAP_KEY}")
+            return 1
+        if not math.isfinite(eng_swap):
+            print(f"PREFLIGHT INPUT GAP: unreadable number(s): {ENGINE_VMSWAP_KEY} — a NaN footprint "
+                  "means the /proc read failed (a 58 GiB process answers EAGAIN intermittently, the "
+                  "same failure class as engine_pcpu), never that the engine holds no swap.")
+            return 1
+        if eng_swap < 0:
+            print(f"PREFLIGHT INPUT GAP: {ENGINE_VMSWAP_KEY}={vals[ENGINE_VMSWAP_KEY]} is negative — "
+                  "VmSwap cannot run below zero, so the sample is broken, not the box.")
+            return 1
+    swap_cache = None
+    if SWAP_CACHED_KEY in vals:
+        try:
+            swap_cache = num(vals, SWAP_CACHED_KEY)
+        except ValueError:
+            print(f"PREFLIGHT INPUT GAP: unreadable number(s): {SWAP_CACHED_KEY}")
+            return 1
+        if not math.isfinite(swap_cache):
+            print(f"PREFLIGHT INPUT GAP: unreadable number(s): {SWAP_CACHED_KEY} — a NaN page-cache "
+                  "read is a failed /proc pass, never healthy.")
+            return 1
+        if swap_cache < 0:
+            print(f"PREFLIGHT INPUT GAP: {SWAP_CACHED_KEY}={vals[SWAP_CACHED_KEY]} is negative — "
+                  "SwapCached cannot run below zero.")
+            return 1
+        used_now = int(num(vals, "swap_total_mib")) - int(num(vals, "swap_free_mib"))
+        if swap_cache > used_now + SWAP_CACHED_TOL_MIB:
+            print(f"PREFLIGHT INPUT GAP: {SWAP_CACHED_KEY}={vals[SWAP_CACHED_KEY]} exceeds swap in use "
+                  f"{used_now} MiB (tolerance {SWAP_CACHED_TOL_MIB}) — a cached swap page occupies a "
+                  "swap slot by definition, so this can only mean the two numbers were not read in "
+                  "one /proc/meminfo pass. A broken producer column is never treated as healthy "
+                  "(tick 78: the swap column alone once inverted this gate's answer).")
+            return 1
+
     # Foreign block I/O (2026-11-14, tooling release, no contour stamp, no published byte): the
     # device counter is the only reading that names WHY the pages are moving. Measured the same
     # morning, a fleet model push on this endpoint read the device at 1856.8 MiB/s while every other
@@ -548,7 +640,8 @@ def main() -> int:
         print(f"  {k:<18} {vals[k]}")
     for k in (("health_loaded", "engine_serve_procs") + OPTIONAL_FLOATS
               + (BLK_KEY, BLK_READER_KEY, SWAP_PEAK_KEY, BLK_SCOPE_KEY,
-                 GPU_UTIL_MEAN_KEY, GPU_UTIL_PEAK_KEY)):
+                 GPU_UTIL_MEAN_KEY, GPU_UTIL_PEAK_KEY,
+                 ENGINE_VMSWAP_KEY, SWAP_CACHED_KEY)):
         if k in vals:
             print(f"  {k:<18} {vals[k]}")
     if loaded_flag is None or serve_procs is None:
@@ -586,6 +679,28 @@ def main() -> int:
               "statistic needs its own measured band before it may refuse a leg (measured 2026-11-14 "
               "12:12: a 34.6 MiB/s peak in an 8 s matched window while the bracketing producer "
               "samples read 8.2 and 0.0)")
+    if eng_swap is None or swap_cache is None:
+        print("  (coverage) this reading carries no "
+              + "/".join(k for k, v in ((ENGINE_VMSWAP_KEY, eng_swap),
+                                        (SWAP_CACHED_KEY, swap_cache)) if v is None)
+              + " — the engine's swap FOOTPRINT is not covered; every swap rule above is a 6 s rate "
+                "and rates are burst-blind in both directions, so a box whose engine already holds "
+                "GiB of swap can still answer 0.0 MiB/s in a lucky window. The live producer emits "
+                "both from one /proc pass since the tick-159 fix of 2026-11-14, so this file "
+                "predates that fix.")
+    else:
+        used_now = int(num(vals, "swap_total_mib")) - int(num(vals, "swap_free_mib"))
+        share = (100.0 * swap_cache / used_now) if used_now > 0 else 0.0
+        print(f"  (diagnostic) engine swap footprint {eng_swap:.0f} MiB of {used_now} MiB swap in use; "
+              f"{swap_cache:.0f} MiB ({share:.1f} %) of that swap is page-cache resident "
+              f"(SwapCached) — reported, NOT gated: no footprint ceiling exists until the same "
+              "pre-registered arming rule is met (30 launchable windows carrying the statistic). "
+              "This is the state the machine note calls 'swap saturation', and it is invisible to "
+              "the free columns (measured 2026-11-14 21:30: VmSwap 5.22 GiB and growing 0.51 GiB "
+              "across the next 8 minutes — 0.30 GiB of it in the last 2 — while MemAvailable read "
+              "19 GiB and SwapFree 53.6 GiB, and 35 359 of 35 361 major faults belonged to the engine "
+              "pid) and to the device rule (52-57 % of swap in use was page-cache resident in RAM "
+              "while blk_read_mib_per_s answered 0.1)")
     if reasons:
         print("PREFLIGHT NO-GO:")
         for r in reasons:
