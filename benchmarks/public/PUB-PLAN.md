@@ -10932,3 +10932,64 @@ table. What moved: the census can no longer print a ceiling bound to the wrong s
 became a counted census dimension, and the tool's headline claim ("this table cannot disagree with the
 rule it reports") is now actually pinned — by a control that makes the same device number verdict-
 differently under the two scopes.
+
+## Tick 156 — 2026-11-14 19:42 CET: scoreboard unmoved; first GO on the current engine after two busy-brain NO-GOs — a GO with an empty queue buys one arming credit, nothing else; zero legs, zero calls, zero published benchmark percent moved
+
+Nothing launched — the queue in force is still empty (ticks 149–155's constraint, unchanged): every
+in-force set carries all three admissible arms, the Grok cells stay closed by the owner quota decision
+of 2026-11-12, and the "later" ladder rows remain owner decisions.
+
+**The endpoint flipped back quiet: `preflight-20261114-1942.txt` exits 0 (GO).** Sequence on the same
+engine pid **175316** (age 03:11:12, so still no restart since 16:31:23): 17:16 NO-GO (busy) → 17:51
+GO → 18:47 NO-GO (busy, GPU mean 98.0 %) → **19:42 GO**. The GO reading: GPU mean 0.0 % / peak 0 % at
+27.24 W, whole-disk device reads 0.1 MiB/s (top reader `basalt`), swap window mean 6.1 + 0.0 MiB/s
+below the 20.0 ceiling with peak 37.2, `MemAvailable` 19.6 GiB, `swap_free` 54.2 GiB, engine state S
+at 13.8 % sampled CPU, RSS 56 177 MiB (inside the warm band; the 57.7 GiB figure stays an idle-warm
+value), `/health` 200 `loaded=true`, one serve process, `foreign_legs=0`, load1 8.56. **A GO is only
+a permission, not an order**: the queue needs no local leg, so this window was not spent on anything
+and stands recorded as arming coverage — the GO-valid-for-its-own-reading rule and the
+queue-vs-window cell (36/35 GO windows vs 0 legs) both stay the operative findings.
+
+**Machine-derived census (the tool, not prose), `as-of 2026-11-14 19:42`, gate sha16
+`68705b7b41cb1239`:** 115 stored readings — **66 GO / 43 NO-GO / 6 input gaps**; the as-of day 43
+files = 29 GO / 10 NO-GO / 4 gaps; **launchable (GO) windows in the last 24 h unchanged at 35 against
+0 leg completions recorded in `queue.log`** in the same window, and the no-move is attributed
+mechanically: this tick's 19:42 GO adds one, the sliding cutoff (13 Nov 18:47 → 13 Nov 19:42) drops
+exactly `preflight-20261113-1850.txt`, a GO. Device scope row now **16 whole-disk (`50.0`) / 99
+unscoped (`100.0`) / 0 unknown**. Swap-peak coverage 20 readings carry the key (2 NaN, 18 parseable),
+band set 16 gate-judged, swap-mean-passing windows with a peak **11 → 12** (the new entry peaks 37.2,
+below the band floor), band unchanged at **67.6 (passing max) / 107.0 (failing min)**, peak still
+reported-not-gated, arming counter **9 of 30**. `--check` re-derives the committed
+`PREFLIGHT-CENSUS.md` byte-for-byte at this stamp.
+
+**Gates and tests.** All five PUB publication gates exit 0 at the tick's HEAD (`pub_arms_index
+--check`, `pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`,
+`pub_digest_row_check`), plus `pub_preflight_census.py --check` = 0. `pub_grok_resume_check --as-of
+2026-11-14` exits **3** with the in-force cancellation record — it also prints the stored-bytes census
+"**182 ids still unasked**" across the cancelled arms, which stays exactly the resume map a one-word
+owner reversal would need, spent by nothing. Contract tests: preflight **103/103**, census **50/50**,
+taskfile shape **43/43**; `scripts/security/secret_scan.py --dir . --strict` exits **0** unshielded.
+
+**Frozen-line hygiene.** Legacy hard-bank 5-min watcher `f23cf5d48e11` enabled and inert (runs
+19:23/19:29/19:35/19:41 all `completed`): the state marker `~/.hermes/mac-v22full-launch.state`
+exists at the literal path (dated 2026-11-02 14:05, per the tick-111 lesson the path was `ls`-ed, not
+regex-derived). Daily docs job `ef7ea47ff99b` active, its last recorded failure stays 2026-11-07 —
+the standing "dirty tree at 03:00" note remains unfired. Drain guard `9a12508f8a69` last runs
+19:30/19:40 `completed`.
+
+**Repository state.** `main` == `origin/main` == `bf846e2` at the tick start, working tree clean apart
+from this tick's two files. The newest commits are foreign to this line (P3032 / RX-580 hardware
+docs) and were read, not touched. Second-worktree census (`~/projects/strata-autonomous-harness`):
+HEAD still detached at `8ccef67`, `git merge-base --is-ancestor` after a fresh `git fetch` again
+proves it **is an ancestor of `origin/main`** — no orphan deviation; staged diff empty, so the
+staged-deletions hazard is clean; untracked accumulation still **7** files (three scratch files inside
+the published `benchmarks/public/raw/` namespace plus four `hardware/os-snapshots/`
+2026-11-11…2026-11-14), unchanged for a third tick. Recorded as the owning workstreams' decision;
+this line commits nothing foreign.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action, **no published benchmark percent moved** — the moved artifact is the regenerated
+census table. What this tick adds to the record: the first GO on the post-restart engine proves the
+18:47 busy verdict was endpoint state, not a persistent box condition, and it carries the arming
+counter to 9 of 30 with a new quiet-window peak datum (37.2 MiB/s) that sits below the band floor and
+moves nothing in it.
