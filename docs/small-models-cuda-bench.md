@@ -66,6 +66,35 @@ What that does and does not invalidate:
   on Vulkan has no fp16 and no int-dot path, Ampere on CUDA does. The clean test is the same host
   with both cards (see below).
 
+## Same-host card A/B — the RX 580 measured inside the Z220 (2026-11-14, done)
+
+The RX 580 was moved into P3032 and re-benched with the identical protocol (llama.cpp b12318,
+`-ngl 99`, `-fa off`, `-r 2`), so host, PSU, slot and OS are now constant. `backend = Vulkan`,
+device `AMD Radeon RX 580 2048SP (RADV POLARIS10)`; the card negotiated **Gen3 x16** in the same CPU
+port where the RTX 3050 trained x8.
+
+| model | RX 580 in Z420 (quad DDR3-1333, 62 GiB, 12c) | RX 580 in Z220 (dual DDR3-1333, 31.5 GiB, 4c) | host effect | RTX 3050 in Z220 (CUDA) | card effect |
+|---|---|---|---|---|---|
+| Qwen2.5-3B Q4_K_M | 392.0 / 60.0 | 396.8 / 56.8 | +1.2% / -5.3% | 3062 / 88.1 | x7.7 / x1.55 |
+| Nemotron-3-Nano-4B Q4_K_M | 268.0 / 40.2 | 269.7 / 39.1 | +0.6% / -2.7% | 2302 / 70.2 | x8.5 / x1.80 |
+| Nemotron-3.5-Bolt-E4B Q4_K_XL | 441.0 / 30.4 | 440.8 / 29.3 | -0.05% / -3.6% | 3165 / 48.9 | x7.2 / x1.67 |
+| Bonsai 2 9B Q2_0 | 170.0 / 27.4 | 172.0 / 26.9 | +1.2% / -1.7% | 1413 / 68.9 | x8.2 / x2.56 |
+| Bonsai 2 27B Q2_0 | 44.5 / 9.0 | 48.4 / 9.3 | +8.7% / +3.4% | 450 / 22.8 | x9.3 / x2.44 |
+
+Conclusion: the workstation around the RX 580 (quad-channel 62 GiB, 12 cores vs dual-channel
+31.5 GiB, 4 cores) is worth **nothing** to these models — every row lands within a few percent, and
+the host-sensitive 27B row was slightly *faster* on the weaker box. The card is the limit: within one
+Z220 the RTX 3050 is 7-9x faster on prefill and 1.5-2.6x faster on decode.
+
+Flash attention on Polaris is a net loss (3B 396.8 -> 386.0 prefill, Nano 269.7 -> 260.4, 9B 172.0 ->
+169.4; decode unchanged), which confirms the `-fa off` protocol used for the RX 580 columns.
+Load trace: peak **120.2 W**, peak **46 C**, no throttle across 178 samples. Answers are unchanged
+(all five models solve the same probe correctly at `--temp 0`).
+Artifacts: `/ai/bench-580-z220.txt`, `/ai/580-samples.csv`, `/ai/smoke-580-z220.txt`.
+
+Note for the serving stack: our engine build is CUDA-only, so the IQ3_S brain cannot run on this card;
+the Z220 needs the RTX 3050 back to serve it.
+
 ## Next: same-host card A/B
 
 Plan (started 2026-11-14): the RX 580 moves into P3032 (Z220) so the two 8 GiB cards are measured in
