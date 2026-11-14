@@ -10611,3 +10611,75 @@ no engine action taken; this tick adds one stored preflight reading plus this re
 moved: the endpoint's process identity changed mid-window (hold 25 h 50 min -> fresh engine at
 16:31:23) with the storm and swap-emptying explained, and the gate's next launch, whenever an owner
 decision opens a set, will run on the new engine.
+
+## Tick 153 — 2026-11-14 17:16 CET: scoreboard unmoved; the fresh engine reached its warm band and the first busy-brain window of its life drew NO-GO on two rules at once (GPU mean 97.0 %, device 129.3 MiB/s whole-disk, reader `basalt`); zero legs, zero calls, zero published benchmark bytes moved
+
+Nothing launched — the queue in force is still empty (ticks 149–152's constraint, unchanged): every
+in-force set carries all three admissible arms, the Grok cells stay closed by the owner quota
+decision of 2026-11-12, and the "later" ladder rows remain owner decisions.
+
+**The fresh engine is now the warm engine.** The producer read (`preflight-20261114-1716.txt`)
+names the same pid 175316 tick 152 recorded at start, age **45 min 11 s**, state `R`, RSS
+**57 724 MiB** — inside the 57.7 GiB warm band tick 152 said it had not reached yet (48.3 GiB at
+9 min). No restart since 16:31:23, so the RSS-continuity void tick 152 opened now closes against a
+measured warm value instead of an assumed one.
+
+**The first NO-GO on this engine, and it is the busy-brain class, not the sick-box class.** Swap
+window **0.1 + 0.0 MiB/s** (mean) with a **0.7** peak — the quietest swap state of the day — while
+the GPU window reads **mean 97.0 % / peak 100 %** at 113.82 W, engine sampled pcpu **1344.4 %**,
+whole-disk reads **129.3 MiB/s** with top reader `basalt`, `/health` 200 `loaded=true`, one serve
+process, MemAvailable 20.4 GiB, swap_free 60.4 GiB, `foreign_legs=0`. Two rules fire together
+(device >= 50.0 whole-disk, GPU mean >= 50.0) and name the same actor: the engine itself, under
+live decode load on the shared brain (this endpoint also serves the operator session). This is the
+complementarity census of tick 151 read from the other side: at 16:40 the same engine idled at GPU
+mean 0.0 and device 0.1; at 17:16 it decodes at 97.0/129.3 with swap still flat. The device rule
+here does not name a foreign reader — it names the engine refaulting its own weights under load,
+which is exactly the state a launched leg would pay the I/O queue on. No leg was near launch (the
+queue is empty), so the refusal cost nothing and is recorded as the gate working, not as an
+incident — `LEG-INCIDENTS.md` stays untouched because no leg existed to interrupt.
+
+**Reading census (current gate re-run over every stored file, subprocess returncodes, not a
+restatement): 112 files — 64 GO / 42 NO-GO / 6 input gaps**; that is tick 152's
+111 / 64 / 41 / 6 plus exactly this tick's NO-GO. Today: 40 files, 27 GO / 9 NO-GO / 4 input
+gaps. Classification note for the record, so the peak band cannot be misread off the verdict
+column: `preflight-20261114-1214.txt` and this tick's 1716 file are NO-GO for device/GPU reasons
+with the swap mean green (0.0 and 0.1) — the tick-151 band is defined on the **swap-mean rule**,
+not on the overall verdict.
+
+**Peak-statistic band re-derived (tick-151 arming counter, not restated): 15 files now carry a
+parseable peak statistic** (17 carry the field; the two 12:11/12:12 broken samplers stay NaN =
+input gap, zero credit). The measured separation on the swap-mean rule holds unchanged: highest
+peak inside a swap-mean-GO window **67.6**, lowest peak inside a swap-mean-failing window **107.0**,
+nothing between; this tick's window adds peak 0.7 at mean 0.1 to the low group. Arming counter:
+**7** launchable (GO) windows carry the peak field (this tick's file is NO-GO, counter unmoved),
+against the pre-registered threshold of **>=30**.
+
+**Gates and tests.** All five PUB publication gates exit 0 on HEAD (`pub_arms_index --check`,
+`pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`,
+`pub_digest_row_check`); preflight contract test **103/103**, taskfile shape test **43/43** (no
+gate code moved). `pub_grok_resume_check --as-of 2026-11-14` exits **3** with the in-force
+cancellation record (IFEval pin: 182 never-asked ids as record, not queue; gpqa/humaneval resume
+sets 0 ids) — the guard answering correctly on the owner decision.
+
+**Frozen-line hygiene.** Legacy hard-bank 5-min job `f23cf5d48e11` enabled and inert (last run
+17:11 ok): the state marker `~/.hermes/mac-v22full-launch.state` exists on the literal path (ls,
+dated 2026-11-02 14:05), per the tick-111 lesson. The daily docs-freshness job `ef7ea47ff99b`
+reports **last_status ok, failure_streak 0** — the 03:00 run found a clean tree for the second day
+in a row, the standing "dirty tree at 03:00" note stays unfired.
+
+**Repository state.** `main` == `origin/main` == `3b6eee7` at the tick start; working tree clean.
+Two hardware-workstream commits landed on `main` between ticks (`baff242` 16:47, `3b6eee7` 17:00,
+P3032/RX-580 small-model docs) — foreign to this line, read and left as they are; CI green on that
+head (`secret-scan`, `devsecops`, `hard-v6 scoring contracts` all success). Second-worktree census
+(`~/projects/strata-autonomous-harness`): staged diff empty, detached HEAD — deletion hazard again
+clean — untracked accumulation now **6 files**: the same three scratch files inside the published
+`benchmarks/public/raw/` namespace plus `hardware/os-snapshots/` grown 2 -> 4 (2026-11-13,
+2026-11-14 added since tick 152). Recorded as the owning workstreams' decision; this line commits
+nothing foreign.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or
+stopped, no engine action taken; this tick adds one stored preflight reading plus this record
+block. What moved: the endpoint's warm-engine identity is now measured (not assumed), and the
+busy-brain refusal class — the one that would have burned a parity leg's comparability, not its
+uptime — is now observed live on both of its rules firing together with swap flat and the swap
+peak silent.
