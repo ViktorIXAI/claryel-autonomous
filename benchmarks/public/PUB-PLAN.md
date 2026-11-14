@@ -9005,7 +9005,13 @@ against the API host (05:01, 05:04, 05:06 via `gh run list`; 05:07 via direct HT
 connection i/o timeouts to `api.github.com`. The **git transport is healthy**: `git fetch` at 05:00
 moved nothing (local `main` = `origin/main` = `989c18b`), and the SHA-pinned raw URL for this
 plan file returns **200**. So CI on head `989c18b` is **unread this tick** — re-read next tick;
-tick 135 read CI all-green on `077b013`.
+tick 135 read CI all-green on `077b013`. **Amend (05:12 CET, same tick):** the API host answered on
+the fifth attempt — CI on `989c18b` came back **success** across the read workflows (hard-v6
+scoring contracts, devsecops, pages-build-deployment; the secret-scan and contour-self-test runs
+for that head had left the eight-row window, the readback was partial), and this tick's head
+`68f3c9f` carries five queued runs. Same rule as the keep-up-log and fleet-path reads: re-read
+after a transport timeout and the entry says so; the fail-closed reading stands only when it does
+not recover.
 
 **Standing gates, all seven re-proven this tick on the pushed head `989c18b` (exits read
 unshielded, gates invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3**
@@ -9044,8 +9050,8 @@ eight paths.
 benchmark bytes moved. What moved: the engine hold passed **14 h 47 min** on one process with the
 band at **22 GO of 24**, the watchdog clone's stranded-file gap **grew by today's snapshot**, two
 citation-path errors were corrected (ops launchers live in `~/basalt` on the box, not `~/fleet`),
-and the CI read failed on four api-host timeouts while git and raw transports serve normally — CI
-on the standing head is unread, not red.
+and the CI read timed out four times before recovering on the fifth — CI on the standing head is
+**green**, not red (amended block above).
 
 **Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
 Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench
