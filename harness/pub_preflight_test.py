@@ -33,7 +33,20 @@ What it pins:
      gap, an absent window changes no verdict and prints a coverage line, and reasons accumulate;
   8. every parsed number must be FINITE: the producer emits NaN when a sample window was cut, and
      Python's `float()` parses `NaN`/`inf`, so a cut sample used to reach the comparison stage where
-     every threshold answer is False — a silent GO on all the numeric rules (found 2026-11-14).
+     every threshold answer is False — a silent GO on all the numeric rules (found 2026-11-14);
+  9. the optional in-window peak `swap_total_peak_mib_per_s` (2026-11-14, tick 146) is validated and
+     REPORTED but never a refusal reason in this release: the measured storm peak (34.6 MiB/s swap-in
+     in one 8 s window, matched by 34.7 MiB/s of nvme0n1 reads) must print and must not flip the
+     verdict, a missing key must leave the report unchanged, a peak below the window mean / NaN /
+     negative / unreadable is an input gap, and a peak equal to the mean is the legal GO boundary.
+     Registering a peak ceiling is a deliberate future change, pinned by the 1000 MiB/s-stays-GO check.
+  10. the optional `blk_scope` marker (2026-11-14, tick 146): the producer's original device sum
+     counted disk AND partition lines and so printed ~2x the device (measured: nvme0n1 35.8 against
+     p2 10.3 + p3 25.5), which means every stored `blk_read_mib_per_s` is on an inflated scale. Files
+     with no scope key keep the 100.0 ceiling (never re-judged); `blk_scope=whole-disk` is judged at
+     50.0, the same physical point — the two scales must verdict-match on the measured window, the
+     corrected boundary is conditional (49.9 GO / 50.0 NO-GO) and the NO-GO names the scope; an
+     unknown scope value is an input gap, never a borrowed ceiling.
 
 The real readings that motivated this gate (2026-11-10, tick 23) are reproduced as
 the swap/D-state tamper case: 3 MiB swap free, engine state Dl, 602 % CPU at 0 % GPU.
@@ -256,6 +269,52 @@ def main() -> int:
     rc, out = run(variant(engine_serve_procs="n/a"))
     ck(rc == 1, f"an unreadable engine_serve_procs must exit 1, got {rc}")
 
+    # Peak swap throughput INSIDE the window (2026-11-14, tick 146): validated and reported, not gated.
+    # Measured on the live endpoint with a MATCHED instrument — the swap counters and the device
+    # counter read in the SAME 8 s window: pswpin +70 876 pages = 276.9 MiB = 34.6 MiB/s in / 0.0 out,
+    # nvme0n1 +568 568 sectors = 277.6 MiB = 34.7 MiB/s. The two counters agree to 99.7 %, so they
+    # name ONE physical event (a refault burst off the NVMe swapfiles; zswap is disabled there and
+    # SwapCached grew by the same 277 MiB), and the two producer readings bracketing the burst
+    # (12:05, 12:07) recorded 8.2 and 0.0 MiB/s: a once-per-tick mean cannot see a burst that lives
+    # between samples. The producer now reports a peak; the ceiling stays unregistered until a peak
+    # band exists, because SWAP_RATE_MAX_MIB_S = 20.0 was pre-registered against MEAN windows and this
+    # box runs permanently over-committed (engine 57.3 GiB RSS of 61.9 GiB, 15.5 GiB in swap) —
+    # published legs already ran inside that state.
+    storm = variant(swap_in_mib_per_s=8.2, swap_out_mib_per_s=0.0,
+                    swap_total_peak_mib_per_s=34.6)
+    rc, out = run(storm)
+    ck(rc == 0 and "(diagnostic) peak swap throughput" in out and "34.6" in out,
+       f"the measured storm peak must be printed and must NOT flip the verdict in this release, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=8.2, swap_out_mib_per_s=0.0))
+    ck(rc == 0 and "(diagnostic)" not in out,
+       f"without the peak key the report must stay byte-identical to the old reading, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0,
+                          swap_total_peak_mib_per_s=1000.0))
+    ck(rc == 0, "a 1000 MiB/s peak must still GO while NO peak ceiling is registered — this check pins "
+                f"that decision on purpose; a release that gates the peak must change it deliberately, got {rc}")
+    rc, out = run(variant(swap_in_mib_per_s=5.3, swap_out_mib_per_s=6.6,
+                          swap_total_peak_mib_per_s=11.9))
+    ck(rc == 0 and "(diagnostic)" in out,
+       f"a peak EQUAL to the window mean is the legal boundary and must not be an input gap, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=5.3, swap_out_mib_per_s=6.6,
+                          swap_total_peak_mib_per_s=5.0))
+    ck(rc == 1 and "below the window mean" in out,
+       f"a peak below the window mean is arithmetically impossible and must be an input gap, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0,
+                          swap_total_peak_mib_per_s="NaN"))
+    ck(rc == 1 and "unreadable number(s): swap_total_peak_mib_per_s" in out,
+       f"a NaN peak (the producer's cut-window marker) must be an input gap, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0,
+                          swap_total_peak_mib_per_s=-4.0))
+    ck(rc == 1 and "cannot be below zero" in out,
+       f"a negative peak must be an input gap, got {rc}: {out}")
+    rc, out = run(variant(swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0,
+                          swap_total_peak_mib_per_s="n/a"))
+    ck(rc == 1, f"an unreadable peak must exit 1, got {rc}")
+    rc, out = run(variant(swap_total_peak_mib_per_s=34.6))
+    ck(rc == 0 and "not present in this reading" in out,
+       f"a peak with no mean window in the file is still reportable (no cross-check possible), got {rc}: {out}")
+
     # Foreign block I/O (2026-11-14, tooling release, no contour stamp, no published benchmark byte).
     # The swap-throughput rule measured 17.4 MiB/s on this box at 10:59 — the highest value this line
     # has recorded, 87 % of its own ceiling — and answered GO. The device counters name the cause the
@@ -308,6 +367,33 @@ def main() -> int:
     rc, out = run(dict(variant(blk_read_mib_per_s=1400.0, blk_top_reader="rsync"), engine_state="Dl"))
     ck(rc == 3 and "block-device reads" in out and "uninterruptible" in out,
        f"reasons must accumulate (foreign I/O + D state), got exit {rc}: {out}")
+
+    # Device-read SCOPE (2026-11-14, tick 146). The producer's first version summed /proc/diskstats
+    # DISK lines AND PARTITION lines, and the disk line already aggregates its partitions, so every
+    # number it emitted was ~2x the device. Proven live in one 8 s window on the endpoint box:
+    # nvme0n1 35.8 MiB/s against nvme0n1p2 10.3 + nvme0n1p3 25.5 = 35.8, sum 71.6. Files with no
+    # blk_scope keep the inflated scale and the 100.0 ceiling they were judged with (no stored reading
+    # is re-judged); blk_scope=whole-disk is judged at 50.0 — the same physical point, truthful number.
+    whole = dict(live_push, blk_scope="whole-disk")
+    rc, out = run(dict(whole, blk_read_mib_per_s=35.8, blk_top_reader="basalt"))
+    ck(rc == 0, f"a measured engine refault window (35.8 MiB/s whole-disk) must GO on the corrected "
+                f"scale, got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=71.6, blk_top_reader="basalt"))
+    ck(rc == 0, f"the SAME physical state on the stored inflated scale (71.6, no scope key) must also "
+                f"GO — the two scales verdict-match, got exit {rc}: {out}")
+    rc, out = run(dict(whole, blk_read_mib_per_s=49.9))
+    ck(rc == 0, f"49.9 MiB/s whole-disk sits under the corrected ceiling and must GO, got exit {rc}: {out}")
+    rc, out = run(dict(whole, blk_read_mib_per_s=50.0))
+    ck(rc == 3 and "(>= 50.0, scope whole-disk)" in out,
+       f"exactly the corrected ceiling must NO-GO and NAME the scope, got exit {rc}: {out}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=60.0))
+    ck(rc == 0, f"60.0 on the stored scale stays GO — stored files are never re-judged by the new "
+                f"scope rule, got exit {rc}: {out}")
+    rc, out = run(dict(whole, blk_read_mib_per_s=60.0))
+    ck(rc == 3, f"60.0 whole-disk is a real 60 MiB/s storm and must NO-GO on the corrected scale, got exit {rc}")
+    rc, out = run(dict(live_push, blk_read_mib_per_s=10.0, blk_scope="diskstats-all"))
+    ck(rc == 1 and "not a known device scope" in out,
+       f"an unknown scope must be an input gap, never a borrowed ceiling, got exit {rc}: {out}")
 
     # NaN fails CLOSED (found 2026-11-14 while wiring the device window). The producer emits NaN by
     # design when its sample window was cut, and Python's float() parses "NaN"/"inf" — so before this

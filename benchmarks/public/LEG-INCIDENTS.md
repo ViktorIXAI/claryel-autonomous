@@ -399,3 +399,53 @@ recorded here next to the other guard failures a future tick must read before ar
   `PREFLIGHT NO-GO: /health answered 200 but reports "loaded": false`, exit 3, where the pre-fix gate
   said GO.
 * Credit: zero model calls, zero cloud calls, zero discarded files, no leg ever started on a bad GO.
+
+## 2026-11-14 (tick 146) — two defects inside the preflight sampler; no arm touched
+
+**Device-read scope double-counted partitions.** The sampler's `blk_read_mib_per_s` summed every
+non-loop line of `/proc/diskstats`, which adds each partition **on top of** its parent disk even
+though the disk line already aggregates its partitions. Proven in one 8 s window on the endpoint
+box: `nvme0n1` 35.8 MiB/s against `nvme0n1p2` 10.3 + `nvme0n1p3` 25.5 = 35.8, so the sampler printed
+71.6 — exactly 2x the device. Every device number this rule has emitted is therefore inflated about
+2x: the 2026-11-14 "224.4 MiB/s rsync tail phase" was ~112 MiB/s on the device, and the "0.2 MiB/s
+idle" reading was ~0.1 MiB/s. The error runs STRICTER than the stated ceiling, so no leg was ever
+launched on a false GO because of it; it cost refusals, not safety. Fix (tooling only, no contour
+stamp, no published benchmark byte): the sampler now restricts itself to whole-disk lines by
+`/sys/block` membership and emits `blk_scope=whole-disk`; the repo gate honours that marker at
+50.0 MiB/s — the same physical point as the pre-registered 100.0 on the inflated scale — while files
+without the marker keep the verdict they were given, because stored readings are never re-judged by a
+rule they were never fed. An unrecognised scope value is an input gap, never a borrowed ceiling.
+Proof over stored bytes: running the pre-fix and post-fix gate side by side over all 102 stored
+readings moves exactly **two** verdicts, both GO → input-gap, and both sit on files this same tick's
+sampler wrote while broken (next bullet); no leg was launched on either.
+
+**Sampled engine CPU was a constant zero, not a measurement.** The sampler's `cpu()` helper read
+`$(( $12 + $13 ))`, and bash parses `$12` as `${1}2` — the first field (the state letter, e.g. `S`)
+followed by the digit 2, i.e. the name `S2`, which bash arithmetic evaluates to 0. So the utime+stime
+pair always came back 0, `engine_pcpu=0.0` was printed for every process, and it has been printed on
+every reading since the sampled-delta change of 2026-11-12. Proven live: that engine's own
+`/proc/<pid>/stat` says utime+stime = 26 275 205 jiffies while the helper returned `0` four times in
+a row. Consequences, in order of harm: (a) the gate's idle-spin guard (`engine_pcpu` above 300 % at
+GPU 0 %) **could never fire** — a dead guard, and it never produced a false NO-GO, only a missed one;
+(b) every plan sentence that cited "sampled pcpu 0.0" as evidence the endpoint was idle is
+unsupported by that field — the idle verdicts there rest on the independent GPU readings (0 % util,
+27 W) and `/health`, which were recorded alongside and still stand; (c) no published percent, row or
+sign test depends on this field. After the brace fix the sampler reports a real number (5.5 % in its
+own 6 s window) and an independent 6 s window taken immediately after reads 1.2 % — two different
+windows, both non-zero, which is the point: the field is alive again.
+`/proc/<pid>/stat` of a 58 GiB process in D state also intermittently returns EAGAIN, which is what
+made the field alternate `0.0` / `NaN`; the sampler now retries that read once and still prints NaN
+(fail closed) if it fails twice.
+
+**Peak instrumentation shipped broken for two readings (self-inflicted, zero credit).** The first
+version of the one-second swap sampler emitted `swap_total_peak_mib_per_s=NaN`: the here-string that
+feeds the max computation appends a trailing empty record, and the empty record poisoned the
+accumulator. The gate fail-closed on it exactly as designed (a non-finite number is a cut sample,
+never healthy), which is why the breakage is loud rather than silent. Affected exactly
+`preflight-20261114-1211.txt` and `preflight-20261114-1212.txt` — the two files whose verdicts moved
+GO → input-gap above. They carry zero peak evidence and stay on disk untouched; no leg was launched
+on either.
+
+**Credit:** zero model calls, zero cloud calls, zero discarded arm files, no leg started or stopped
+by any of this. One gate hole closed twice over (device scope, live CPU), contract test
+71 → 87 checks.

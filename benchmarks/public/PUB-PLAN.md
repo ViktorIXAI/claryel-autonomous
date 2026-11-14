@@ -10186,3 +10186,115 @@ question for the hardware line, not for this line to fix: a 78 GiB model seeding
 the benchmark endpoint box degrades that endpoint for the ten minutes it runs and after; launching such
 pushes from a third host, or scheduling them outside leg windows, costs the hardware line nothing and
 keeps this line's endpoint quiet.
+
+## Tick 146 — 2026-11-14 12:40 CET: scoreboard unmoved; the preflight sampler loses two silent defects — its device-read figure double-counted partitions (71.6 printed against 35.8 on the device) and its engine-CPU field has been a **constant 0.0** since 2026-11-12 (`$12` is `${1}2` in bash), so the idle-spin guard could never fire; the new swap-peak statistic catches 113.1 MiB/s inside a window whose mean says 18.9; band 59 GO of 102; engine hold 22 h 15 min on one process; contract test 71 → 87 checks; zero legs, zero calls, zero published benchmark bytes moved
+
+**Single-writer check, read before any file was touched.** `~/.hermes/cron/executions.db` holds
+exactly one `running` row: execution `74cdf8cc22bb427eb1eb56716bbe621b` of job `288a66f93167`, started
+12:04:26 — this tick itself. `systemctl --user list-units 'parb-pub-*'` is empty and
+`pgrep -f 'scripts/pub_bench_(run|cloud).py'` returns nothing: no unit, no leg, no cloud call in
+flight, and the queue stays empty because every in-force set already carries its three admissible arms.
+One cron job is paused in the scheduler (`8a4fabbe5a78`, a non-line watcher parked since 11-05,
+`paused_reason: null` = operator pause, not a runtime-restart artifact) — correctly left alone by the
+resume self-heal, and left alone by this tick.
+
+**Defect A — the device rule was reading arithmetic, not the device.** `blk_read_mib_per_s` summed
+every non-loop line of `/proc/diskstats`. The whole-disk line already aggregates its partitions, so
+the sum counted each partition a second time. One 8 s window on the endpoint settles it:
+`nvme0n1` 35.8 MiB/s against `nvme0n1p2` 10.3 + `nvme0n1p3` 25.5 = **35.8**, and the old sum printed
+**71.6 = exactly 2x**. Every device number this rule has produced is inflated about 2x — tick 145's
+"224.4 MiB/s rsync tail phase" was ~112 MiB/s on the device, and the "0.2 MiB/s idle" reading was
+~0.1 MiB/s. Direction matters: the bug made the rule **stricter** than its stated ceiling, so it cost
+refusals and never a false GO. Fixed in the sampler (whole-disk lines only, selected by `/sys/block`
+membership) plus a `blk_scope=whole-disk` marker that the repo gate judges at 50.0 MiB/s — the same
+physical point as the pre-registered 100.0 — while unmarked stored files keep the ceiling they were
+given. The scales must therefore agree on verdicts while the numbers stop lying, and a non-finite or
+unknown scope stays an input gap.
+Proof over stored bytes rather than argument: the pre-fix and post-fix gate were run side by side over
+**all 102 stored readings** — 59 GO → GO, 37 NO-GO → NO-GO, 4 input-gap → input-gap, and exactly
+**two** moves, both GO → input-gap, both on files this same tick's sampler wrote with a broken peak
+field (third bullet under LEG-INCIDENTS). No leg was launched on either.
+
+**Defect B — `engine_pcpu` has been a constant since 2026-11-12.** The sampler's CPU helper read
+`$(( $12 + $13 ))` out of `/proc/<pid>/stat`. Bash parses `$12` as `${1}2`: the first field (the state
+letter) followed by the digit 2, i.e. the identifier `S2`, which arithmetic evaluates to **0**. So
+utime+stime always came back 0 for every process and every reading printed `engine_pcpu=0.0`. Proven
+live: that engine's own stat line says utime+stime = 26 275 205 jiffies while the helper returned `0`
+four samples in a row. What it cost and what it did not: the gate's idle-spin guard
+(`engine_pcpu` above 300 % at GPU 0 %) **could never fire** — a dead guard, and the failure mode is a
+missed refusal, never a false one; every plan sentence citing "sampled pcpu 0.0" as evidence the
+endpoint was idle is unsupported **by that field**, and those idle verdicts stand on the independent
+GPU numbers recorded beside them (0 % util, 27 W) and on `/health`. No published percent, digest row or
+sign test touches this field. After the brace fix the field is alive: 5.5 % in the sampler's own 6 s
+window, 1.2 % in an independent 6 s window immediately after (different windows, both non-zero, which
+is the whole point). The intermittent `NaN` that alternated with the zeros is `/proc/<pid>/stat`
+returning EAGAIN for a 58 GiB process in `D` state; the sampler now retries once and still prints NaN
+after a second failure, so a cut sample stays an input gap.
+
+**The swap-peak statistic is live and already earns its keep — but stays ungated.** The sampler now
+re-reads `pswpin`/`pswpout` once per second inside the same 6 s window and reports the worst 1 s
+sub-window as `swap_total_peak_mib_per_s`; the gate validates and prints it and refuses to gate on it,
+pinned by a check that a 1000 MiB/s peak still GOs. Measured band over the five valid peak rows so far:
+
+| reading | swap-in mean | swap-out mean | 6 s mean | peak 1 s | peak/mean |
+|---|---|---|---|---|---|
+| 1213 | 0.0 | 0.0 | 0.0 | 0.0 | — |
+| 1214 | 0.0 | 0.0 | 0.0 | 0.0 | — |
+| 1223 | 0.1 | 0.0 | 0.1 | 0.2 | 2.0 |
+| 1226 | 18.9 | 0.0 | 18.9 | **113.1** | 6.0 |
+| 1227 | 14.0 | 0.0 | 14.0 | **67.6** | 4.8 |
+
+Two things fall out. First, the mean ceiling is close: 18.9 MiB/s against 20.0 is 94 % of the
+pre-registered limit, so the swap rule is about to refuse on means alone. Second, peaks run 2.0-6.0x
+the window mean and reach 113.1 MiB/s in one second while that window still passes — exactly the
+burst-between-samples class that motivated the instrument. No peak ceiling is registered: four valid
+rows are not a band, this box is permanently over-committed (engine RSS 57 501 MiB of 61 953 MiB,
+15 812 MiB in swap) and every published leg ran inside that state, and a peak rule near the observed
+peak would refuse nearly every window without evidence that those bursts cost an answer. Registering
+one is a separate decision with a measured band behind it.
+
+**Band census (in-process returncode census, not a grep).** 102 stored readings: 59 GO, 37 NO-GO,
+6 input-gap. Today alone: 30 readings, 22 GO, 4 NO-GO, 4 input-gap — the input gaps are this tick's
+own sampler failures, which is what fail-closed looks like in a tally. Device reads on the corrected
+whole-disk scope swing 0.1 → 149.4 MiB/s across twenty minutes, attributed to the engine's own refault
+work, and 50.0 is where the gate now refuses.
+
+**Endpoint state at 12:27.** Engine pid 10597, age 22 h 15 min, state `S`, RSS 57 501 MiB of
+61 953 MiB total, MemAvailable 19 215 MiB, swap 15 812 MiB used of 65 535, GPU 0 % at 27.76 W,
+`/health` 200 with `"loaded": true`, one serve process, zero foreign legs. `load1` is falsified a
+**sixth** time as an activity proxy: 12.75 alongside 0.1 MiB/s of device reads and 5.5 % engine CPU —
+that load average is the lagging tail of the model-seeding run the hardware line launched from this box
+on 11-13, not decode.
+
+**Standing reads and CI.** All seven standing gates behave: Grok resume NO-GO **by design** (22 checks,
+"do not spend quota"), grok cell 0 findings, arms index drift 0, derived percents 42 recomputed /
+0 findings, superseded cells 0, digest rows 49 / 0 findings, three-arm parity 49 rows over 9 sets /
+0 findings (contour stamp 0.0.2.56, Grok not an arm). The 14 `pub_*test.py` contracts are green with
+the preflight contract at 87 checks. `main` moved under this tick by one record,
+`7626ac3 docs(audit #25)` — a docs file, zero benchmark paths; this tick rebased onto it and carries
+exactly three paths (`scripts/pub_preflight.py`, `harness/pub_preflight_test.py`,
+`benchmarks/public/PUB-PLAN.md`) plus the incident record.
+The watchdog clone (`~/projects/strata-autonomous-harness`) still deviates by seven untracked paths
+and now lags `main` by five records: the four stranded `hardware/os-snapshots/2026-11-11..-14.json`
+and three **14-byte** placeholders inside the published raw namespace
+(`arceasy-test.jsonl`, `ifeval-input.jsonl`, `x.bin`) — the scanner reports 0 findings on that
+directory, so nothing sensitive is sitting there, but the paths are still not this line's to commit or
+delete; the sync call belongs to the hardware line.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the device rule's number is now the device's number and its ceiling
+moved with it (100.0 inflated ≡ 50.0 whole-disk, verdicts proven identical over 102 stored readings),
+a guard that has been unable to fire since 2026-11-12 can fire again, and the swap-peak statistic is
+measuring bursts 6x its own window mean. Two claims in this plan's own history are now marked
+unsupported by the field that made them ("sampled pcpu 0.0" as idle evidence) — they rest on the GPU
+and `/health` readings recorded beside them, which still hold.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; Grok
+cells stay closed by owner decision 2026-11-12; the "later" ladder rows (Terminal-Bench, SWE-bench
+Verified subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads in kind: the
+`/proc/vmstat` counter-delta swap read plus its new 1 s peak, the whole-disk device window with its
+scope marker, the corrected live CPU delta, the in-process returncode census of the band, and the
+running-job single-writer census at the start of every tick. Two owner-side questions stand, neither
+this line's to fix: the hardware line's habit of launching model seeding **from** this endpoint box
+(the ten-minute 1856.8 MiB/s window is the last measured cost), and whether the three placeholder
+files in the published raw namespace of the watchdog clone should be removed at all.

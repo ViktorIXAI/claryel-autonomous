@@ -146,6 +146,33 @@ SWAP_RATE_MAX_MIB_S = 20.0  # live swap throughput ceiling, pre-registered ABOVE
                             # so a box thrashing with NOTHING asking for RAM is the predictor of the
                             # mid-leg restart the machine note warns about.
 OPTIONAL_FLOATS = ("swap_in_mib_per_s", "swap_out_mib_per_s")
+# Peak swap throughput INSIDE the sample window: validated and reported, deliberately NOT a refusal
+# reason in this release. Measured 2026-11-14 12:12 with a matched instrument on the endpoint box:
+# an 8 s window took pswpin +70 876 pages = 276.9 MiB = **34.6 MiB/s in / 0.0 out** (1.73x the
+# window-mean ceiling above) while the two producer readings bracketing it (12:05, 12:07) reported
+# 8.2 and 0.0 MiB/s — the burst lives between samples, so a once-per-tick mean cannot see it. The
+# same window read nvme0n1 +568 568 sectors = 277.6 MiB = 34.7 MiB/s: the swap counter and the
+# device counter agree to 99.7 %, i.e. they name ONE physical event (a refault burst off the NVMe
+# swapfiles; zswap is disabled on that box, `SwapCached` grew by the same 277 MiB), which is why the
+# 100.0 MiB/s device ceiling MISSES it while a swap-rate sample inside it would catch it.
+# No ceiling is registered for this statistic yet: a peak is a different quantity from a window mean
+# and SWAP_RATE_MAX_MIB_S = 20.0 was pre-registered against MEAN windows. This endpoint runs
+# permanently over-committed (engine RSS 57.3 GiB of 61.9 GiB, 15.5 GiB already in swap) and refault
+# bursts are its steady state — legs this line published ran inside exactly that state — so a peak
+# ceiling of 20.0 would retroactively refuse published legs. The band comes first, the ceiling after.
+# Absent key = no line printed, so the 95 stored readings keep byte-identical output.
+SWAP_PEAK_KEY = "swap_total_peak_mib_per_s"
+# Device-read SCOPE (2026-11-14, tick 146). The first producer summed every non-loop line in
+# /proc/diskstats, which counts each partition again on top of its parent disk (the disk line already
+# aggregates them). Proven live in one 8 s window: nvme0n1 35.8 MiB/s against p2 10.3 + p3 25.5 =
+# 35.8, so the old sum printed 71.6 = exactly 2x the device. Readings without a scope key are therefore
+# on the INFLATED scale and keep the 100.0 ceiling they were judged with — no stored file is
+# re-judged. `blk_scope=whole-disk` marks the corrected scale, whose ceiling is the SAME physical
+# point (100.0 / 2 = 50.0): the two scales verdict-match everywhere, the number is just now truthful.
+# An unrecognised scope value is an input gap, never a guess.
+BLK_SCOPE_KEY = "blk_scope"
+BLK_SCOPE_WHOLE = "whole-disk"
+BLK_READ_MAX_MIB_S_WHOLE = 50.0
 BLK_READ_MAX_MIB_S = 100.0   # device-read ceiling, pre-registered INSIDE a measured 1000x gap.
                              # Idle endpoint (2026-11-14 11:12, push finished): the whole non-removable
                              # device set answers **0.2 MiB/s** across two 10 s windows, the engine
@@ -299,6 +326,35 @@ def main() -> int:
               "window, so a one-sided window is a cut sample, never a healthy reading.")
         return 1
 
+    # Peak swap throughput inside the window (2026-11-14, tick 146): validated and reported, never a
+    # refusal reason in this release (see SWAP_PEAK_KEY for why the ceiling is not registered yet).
+    # A peak below the window mean is arithmetically impossible for a non-negative sub-series, so it
+    # can only mean the two numbers came from different windows — the producer-column bug family this
+    # gate already refuses on the swap columns, and it is an input gap here too.
+    swap_peak = None
+    if SWAP_PEAK_KEY in vals:
+        try:
+            swap_peak = num(vals, SWAP_PEAK_KEY)
+        except ValueError:
+            print(f"PREFLIGHT INPUT GAP: unreadable number(s): {SWAP_PEAK_KEY}")
+            return 1
+        if not math.isfinite(swap_peak):
+            print(f"PREFLIGHT INPUT GAP: unreadable number(s): {SWAP_PEAK_KEY} — a NaN peak is a "
+                  "cut sub-window (the producer emits NaN), never healthy.")
+            return 1
+        if swap_peak < 0:
+            print(f"PREFLIGHT INPUT GAP: {SWAP_PEAK_KEY}={vals[SWAP_PEAK_KEY]} is negative — a "
+                  "throughput peak cannot be below zero, so the sample is broken, not the box.")
+            return 1
+        if len(swap_rate) == len(OPTIONAL_FLOATS):
+            mean_total = sum(swap_rate.values())
+            if swap_peak + 1e-9 < mean_total:
+                print(f"PREFLIGHT INPUT GAP: {SWAP_PEAK_KEY}={vals[SWAP_PEAK_KEY]} is below the "
+                      f"window mean {mean_total:.1f} MiB/s — a peak inside a window can never sit "
+                      "below that window's mean, so the two numbers were not sampled from one "
+                      "window; this is a producer bug and is never treated as healthy.")
+                return 1
+
     # Foreign block I/O (2026-11-14, tooling release, no contour stamp, no published byte): the
     # device counter is the only reading that names WHY the pages are moving. Measured the same
     # morning, a fleet model push on this endpoint read the device at 1856.8 MiB/s while every other
@@ -319,6 +375,22 @@ def main() -> int:
             print(f"PREFLIGHT INPUT GAP: {BLK_KEY}={vals[BLK_KEY]} is negative — a /proc/diskstats "
                   "sector counter cannot run backwards outside a reboot, so the sample window is "
                   "broken, not the box; a broken reading is never healthy.")
+            return 1
+
+    # Which SCALE this device number is on (2026-11-14, tick 146): absent = the producer's original
+    # diskstats sum, which double-counts partitions (about 2x the device), and such files keep the
+    # ceiling they were judged with. `whole-disk` = the corrected scope, judged at half the number,
+    # i.e. the same physical point.
+    blk_ceiling = BLK_READ_MAX_MIB_S
+    blk_scope = vals.get(BLK_SCOPE_KEY)
+    if blk_scope is not None:
+        blk_scope = blk_scope.strip()
+        if blk_scope == BLK_SCOPE_WHOLE:
+            blk_ceiling = BLK_READ_MAX_MIB_S_WHOLE
+        else:
+            print(f"PREFLIGHT INPUT GAP: {BLK_SCOPE_KEY}={vals[BLK_SCOPE_KEY]!r} is not a known "
+                  f"device scope ('{BLK_SCOPE_WHOLE}') — the ceiling depends on the scope, so an "
+                  "unknown scope is never judged by borrowing one.")
             return 1
 
     if int(vals["health_code"]) != 200:
@@ -344,11 +416,11 @@ def main() -> int:
                 "this traffic, but this is the state from which the engine gets restarted mid-leg")
     if int(vals["mem_available_mib"]) < MEM_AVAILABLE_MIN_MIB:
         reasons.append(f"MemAvailable {vals['mem_available_mib']} MiB < {MEM_AVAILABLE_MIN_MIB}")
-    if blk_rate is not None and blk_rate >= BLK_READ_MAX_MIB_S:
+    if blk_rate is not None and blk_rate >= blk_ceiling:
         who = vals.get(BLK_READER_KEY)
         reasons.append(
             f"block-device reads {blk_rate:.1f} MiB/s over the sample window "
-            f"(>= {BLK_READ_MAX_MIB_S})"
+            f"(>= {blk_ceiling}, scope {blk_scope or 'diskstats-sum (partitions double-counted)'})"
             + (f", largest attributed reader: {who}" if who else "")
             + " — a foreign reader is saturating the device the model weights live on, and the "
               "engine pays for it in major faults (measured 2026-11-14: 1856.8 MiB/s of rsync "
@@ -367,7 +439,8 @@ def main() -> int:
     print("endpoint readings:")
     for k in REQUIRED:
         print(f"  {k:<18} {vals[k]}")
-    for k in ("health_loaded", "engine_serve_procs") + OPTIONAL_FLOATS + (BLK_KEY, BLK_READER_KEY):
+    for k in (("health_loaded", "engine_serve_procs") + OPTIONAL_FLOATS
+              + (BLK_KEY, BLK_READER_KEY, SWAP_PEAK_KEY, BLK_SCOPE_KEY)):
         if k in vals:
             print(f"  {k:<18} {vals[k]}")
     if loaded_flag is None or serve_procs is None:
@@ -384,6 +457,15 @@ def main() -> int:
         print("  (coverage) this reading carries no blk_read_mib_per_s device window — the foreign "
               "block-I/O rule is not covered; the live producer emits it since 2026-11-14, so this "
               "file predates that fix.")
+    if swap_peak is not None:
+        mean_txt = (f"{sum(swap_rate.values()):.1f} MiB/s"
+                    if len(swap_rate) == len(OPTIONAL_FLOATS) else "not present in this reading")
+        print(f"  (diagnostic) peak swap throughput inside the window: {swap_peak:.1f} MiB/s against "
+              f"a window mean of {mean_txt} — reported, NOT gated in this release: "
+              f"SWAP_RATE_MAX_MIB_S = {SWAP_RATE_MAX_MIB_S} is a mean-window ceiling and a peak "
+              "statistic needs its own measured band before it may refuse a leg (measured 2026-11-14 "
+              "12:12: a 34.6 MiB/s peak in an 8 s matched window while the bracketing producer "
+              "samples read 8.2 and 0.0)")
     if reasons:
         print("PREFLIGHT NO-GO:")
         for r in reasons:
