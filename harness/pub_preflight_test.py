@@ -56,6 +56,13 @@ What it pins:
      of exactly 100 % in a quiet mean must still print; one key without the other, a non-finite
      number, a negative, a value above GPU_UTIL_MAX_PCT, or a peak below the window mean is an input
      gap; absent keys change no verdict, so all 105 stored readings keep their verdicts.
+  12. the idle-spin premise fix (2026-11-14, tick 160): when the GPU WINDOW is present, the spin
+     guard's "GPU idle" premise is the window mean (0.0 = every 1 Hz sample idle), never the
+     burst-blind instantaneous sample — the 21:50 bytes fired "engine 1113.0 % CPU at GPU 0 %"
+     inside a 78.8 %-mean busy window; a truly idle window still fires the guard, a windowed reading
+     whose instantaneous sample is non-zero but whose window is idle still fires, a mid-band window
+     neither fires nor fakes (it prints a DECLINED diagnostic), and a windowless reading keeps the
+     old premise so stored pre-window files are never re-judged.
 
 The real readings that motivated this gate (2026-11-10, tick 23) are reproduced as
 the swap/D-state tamper case: 3 MiB swap free, engine state Dl, 602 % CPU at 0 % GPU.
@@ -507,6 +514,37 @@ def main() -> int:
     rc, out = run(dict(live_burst, gpu_util_mean_pct=0.0, gpu_util_peak_pct=0))
     ck(rc == 0 and "mean 0.0 %" in out,
        f"a genuinely idle endpoint must GO and print its window, got exit {rc}: {out}")
+
+    # Idle-spin premise (2026-11-14, tick 160, tooling release). The guard's "GPU idle" claim is
+    # carried by the WINDOW when the window exists; the instantaneous sample is burst-blind. The
+    # measured misfire is the 21:50 stored bytes: "engine 1113.0 % CPU at GPU 0 %" inside a window
+    # whose mean was 78.8 % / peak 100 % — a busy shared brain, not a spin-wait. The verdict there
+    # stayed NO-GO on two other rules, but a guard whose premise contradicts another instrument in
+    # the same file is a false NO-GO waiting to fire alone.
+    rc, out = run(variant(engine_pcpu=1113.0, gpu_util_pct=0.0,
+                          gpu_util_mean_pct=78.8, gpu_util_peak_pct=100))
+    ck(rc == 3 and "idle-spin signature" not in out and "shared brain was busy" in out,
+       f"the 21:50 bytes must NO-GO on the contention rule alone, not on a burst-blind idle-spin "
+       f"premise, got exit {rc}: {out}")
+    rc, out = run(variant(engine_pcpu=602.0, gpu_util_pct=0.0,
+                          gpu_util_mean_pct=0.0, gpu_util_peak_pct=0))
+    ck(rc == 3 and "idle-spin signature" in out and "across the whole sample window" in out,
+       f"engine spin over a truly idle window must still NO-GO and name the window, got exit "
+       f"{rc}: {out}")
+    rc, out = run(variant(engine_pcpu=602.0, gpu_util_pct=5.0,
+                          gpu_util_mean_pct=0.0, gpu_util_peak_pct=0))
+    ck(rc == 3 and "idle-spin signature" in out,
+       f"the window carries the premise even when the instantaneous sample is non-zero, got exit "
+       f"{rc}: {out}")
+    rc, out = run(variant(engine_pcpu=1113.0, gpu_util_pct=0.0,
+                          gpu_util_mean_pct=2.2, gpu_util_peak_pct=3))
+    ck(rc == 0 and "idle-spin guard DECLINED" in out,
+       f"a mid-band window (GPU worked inside the window, mean under the contention ceiling) must "
+       f"neither fire the spin guard nor stay silent about the contradiction, got exit {rc}: {out}")
+    rc, out = run(variant(engine_pcpu=602.0, gpu_util_pct=0.0))
+    ck(rc == 3 and "idle-spin signature" in out,
+       f"a windowless reading must keep the old premise (stored pre-window files are never "
+       f"re-judged), got exit {rc}: {out}")
 
     # NaN fails CLOSED (found 2026-11-14 while wiring the device window). The producer emits NaN by
     # design when its sample window was cut, and Python's float() parses "NaN"/"inf" — so before this

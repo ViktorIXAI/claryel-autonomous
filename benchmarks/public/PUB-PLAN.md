@@ -11293,3 +11293,82 @@ this plan block. What this tick adds to the record: the swap guard's coverage ga
 number rather than by intuition — a rate can refuse a burst and still certify a box whose engine already
 holds GiB of swap, and this evening both halves of that sentence were measured on the same engine in
 the same hour.
+
+## Tick 160 — 2026-11-14 22:35 CET: scoreboard unmoved; the idle-spin premise defect named at tick 159 is fixed — the "GPU idle" claim is carried by the window, and the standing side-by-side replay over all 120 stored readings moves **0 verdicts** and exactly **1 reason**; the 22:39 live window is the first launchable reading ever carrying the engine footprint (peak arming 9→10/30, footprint arming 0→1/30); census 121 = 67 GO / 48 NO-GO / 6 gap; queue empty, zero legs, zero calls
+
+**What shipped (tooling release: no contour stamp, no hard-bank byte, no published percent).** The
+idle-spin guard used to read `engine_pcpu > 200 AND gpu_util_pct == 0` — its "GPU idle" premise
+resting on ONE instantaneous nvidia-smi sample, the same sample tick 148 proved burst-blind when it
+was the reason a saturated brain stayed GO. A guard may not claim with one instrument what another
+instrument in the same file contradicts, so the premise now moves with the evidence: when the reading
+carries the 1 Hz window, "GPU idle" is `gpu_util_mean_pct == 0.0` — every sample in the window saw an
+idle GPU, which is exactly the measured spin signature (602-629 % CPU at 0 % GPU / 35-37 W). When the
+window CONTRADICTS the instantaneous sample at high engine CPU (sample 0 %, mean > 0), the guard no
+longer appends a reason; it prints what it declined to claim, so a declined refusal is on the record
+instead of silently dropped. A windowless reading keeps the old premise verbatim: the 105 stored
+pre-window files are never re-judged by a rule they were never fed.
+
+**The defect this closes (measured 21:50, tick 159).** The stored bytes at
+`preflight-20261114-2150.txt` carry an instantaneous `gpu_util_pct=0` inside a window whose mean was
+78.8 % / peak 100 %, and the old guard appended "idle-spin signature: engine 1113.0 % CPU at GPU 0 %"
+to a NO-GO that was already refused by the engine's D state and the contention rule. The conclusion
+was safe; the premise was false — a busy shared brain, not a spin-wait — and a guard that fires on a
+false premise is one lone firing away from a false NO-GO.
+
+**The replay proof (the standing rule for any new or moved gate rule).** Pre-fix gate (extracted from
+`HEAD`) and post-fix gate run side by side over all 120 stored readings: verdicts identical,
+**66 GO / 48 NO-GO / 6 input gap before and after — 0 moves**. The idle-spin reason appears 18 times
+pre-fix and 17 post-fix; the single difference is the 21:50 file, which loses the false reason and
+gains the DECLINED diagnostic while staying NO-GO on the other two rules. All 17 windowless idle-spin
+NO-GOs (the 2026-11-11 series) keep their reasons byte-for-byte — non-retroactivity proven, not
+asserted. The contract suite goes 112 -> 117 checks: the real 21:50 bytes (NO-GO on contention alone,
+no `idle-spin signature` string), a truly idle window at 602 % CPU still fires, a windowed reading
+whose instantaneous sample is non-zero but whose window is idle still fires (the window owns the
+claim in both directions), the mid-band contradiction prints the DECLINED line, and the windowless
+legacy premise stays. The class boundary is drawn honestly: with a window present, an engine at high
+CPU and a mean of 0 < mean < 50 no longer fires the spin guard — a mean at or above 50 is refused by
+the contention rule anyway, and between 0 and the ceiling a high engine CPU WITH real GPU work in the
+window is what a busy shared brain looks like, which is not the 0 %-GPU/35 W spin signature the guard
+was measured on.
+
+**Endpoint at 22:39 (reading `preflight-20261114-2239.txt`, gate exit 0 read unshielded — the wrapper
+trailing `echo` makes its own `$?` meaningless).** GO: engine pid 175316, age 06:08:00 — same process
+as ticks 157-159, no restart, no engine action this tick; state `S`, sampled CPU 1.1 %; GPU window
+mean 0.0 % / peak 0 % at six 1 Hz samples against an instantaneous 0 %; swap 0.0 in / 0.0 out over a
+measured 6.17 s window with in-window peak 0.0; `swap_free` 54 937 MiB, `MemAvailable` 17 728 MiB;
+footprint 3 576 MiB of 10 598 MiB swap in use with 6 776 MiB (63.9 %) page-cache resident; device
+0.1 MiB/s whole-disk; `/health` 200 `loaded=true`, one serve process; `foreign_legs=0`; `load1` 12.28
+printed only — falsified as a proxy at ticks 142/143. This is the first launchable (GO) window that
+carries the footprint key, so footprint arming moves 0 -> 1 of 30 and peak arming 9 -> 10 of 30. A GO
+against an empty queue buys those arming credits and nothing else.
+
+**Census at as-of 22:39 (regenerated, `--check` 0, gate sha16 `890ed7db1f912f64` -> `dd2f0e4fa0255fa5`
+with this guard edit).** 121 readings = 67 GO / 48 NO-GO / 6 gap (120 at the 21:50 pass; +1 is the
+22:39 GO). As-of-day rows: 49 = 30 GO / 15 NO-GO / 4 gap. Launchable windows in the last 24 h stay at
+32 net: the 22:39 GO joined exactly as `preflight-20261113-2206.txt` aged past the sliding cutoff
+(aged-out file named per the tick-155 rule — a falling count with no reclassification is a window
+slide, and the slide is attributed, not asserted). Swap-peak coverage 26 (2 NaN, 24 parseable),
+swap-mean-passing windows with a peak 13 -> 14, failing 8, band **67.6 / 107.0** unmoved. Footprint
+coverage 3, band deliberately not started (20 of 30 launchable windows still to collect).
+
+**Gates and tests at this HEAD.** All six PUB publication gates exit 0 unshielded (arms index 0
+drift, derived percents, grok cells 9 documents / 0 findings, superseded cells, digest rows 49/0,
+three-arm parity 0 findings with every in-force set carrying bare + codex + contour-matched at
+`0.0.2.56`), `pub_preflight_census.py --check` = 0, `pub_grok_resume_check --as-of 2026-11-14` exits
+3 with the in-force cancellation record, the marker `~/pub-bench/GROK-CANCELLED` untouched and the
+runner still refusing Grok arms. Contract tests: `pub_preflight_test` 117/117,
+`pub_preflight_census_test` 70/70. `scripts/security/secret_scan.py --dir . --strict` run unshielded
+before the commit.
+
+**Frozen-line hygiene.** No contour stamp registered, no hard-bank pair launched, no hard-bank byte
+edited, no new branch. Legacy watchers `f23cf5d48e11` / `a808c7f205a6` completed 22:35-22:40 (inert,
+marker `~/.hermes/mac-v22full-launch.state` verified at the literal path, dated 2026-11-02 14:05);
+drain guard `9a12508f8a69` completed 22:40. Second-worktree census unchanged: detached HEAD, empty
+staged diff, the same 7 untracked files — still the owning workstreams' decision, seventh tick.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action, **no published benchmark percent moved**. The moved artifacts are the gate, its
+contract suite, the regenerated census table and this plan block. What the record gains: the last
+guard on this gate that still trusted a single instantaneous sample now reads the window, and the
+18-file idle-spin history shows the old premise was never contradicted except in the one file that
+names the defect.

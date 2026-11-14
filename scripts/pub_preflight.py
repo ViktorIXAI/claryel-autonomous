@@ -184,10 +184,17 @@ SWAP_BALANCE_TOL_MIB = 64   # used + free must re-sum to total within this: free
                             # column independently (measured 2026-11-12: 8159 + 32 = 8191 exactly),
                             # so a bigger gap means the producer moved columns, not that RAM moved
 MEM_AVAILABLE_MIN_MIB = 2048  # the resident engine plus its cache needs headroom to re-admit KV
-IDLE_SPIN_PCPU = 200        # idle-spin signature: engine >200 % CPU with GPU util 0 %; measured
+IDLE_SPIN_PCPU = 200        # idle-spin signature: engine >200 % CPU with the GPU idle; measured
                             # 602-629 % CPU at 0 % GPU / 35-37 W. Per-task seconds in that state run
                             # 20-220x the last paired median, so the leg scores but the timing and
-                            # energy columns are garbage.
+                            # energy columns are garbage. SINCE TICK 160 the "GPU idle" premise of
+                            # this guard is the WINDOW mean (gpu_util_mean_pct == 0.0 — every 1 Hz
+                            # sample saw an idle GPU), not the instantaneous nvidia-smi sample: the
+                            # sample is burst-blind (tick 148), and 2026-11-14 21:50 measured the
+                            # guard firing "engine 1113.0 % CPU at GPU 0 %" inside a window whose
+                            # mean was 78.8 % / peak 100 % — a busy brain, not a spin-wait. A
+                            # reading without the window keeps the old premise: stored files are
+                            # never re-judged by a rule they were never fed.
 SWAP_RATE_MAX_MIB_S = 20.0  # live swap throughput ceiling, pre-registered ABOVE every launchable
                             # window this line recorded: 0.0/0.0 (2026-11-14, r=0 b=0 at eight
                             # vmstat samples), ~0.2 MiB/s in + 0 out (2026-11-14 tick 142), and
@@ -616,10 +623,29 @@ def main() -> int:
               "in this state; a leg launched here pays the I/O queue on every refault")
     if "D" in vals["engine_state"]:
         reasons.append(f"engine in uninterruptible I/O (state {vals['engine_state']}): thrashing")
-    if num(vals, "engine_pcpu") > IDLE_SPIN_PCPU and num(vals, "gpu_util_pct") == 0:
-        reasons.append(
-            f"idle-spin signature: engine {vals['engine_pcpu']} % CPU at GPU "
-            f"{vals['gpu_util_pct']} % — per-task seconds and energy columns would be junk")
+    # Idle-spin guard premise (2026-11-14, tick 160). "GPU idle" is claimed by the WINDOW when the
+    # window is present: gpu_util_mean_pct == 0.0 means every 1 Hz sample saw an idle GPU, which is
+    # exactly the measured spin signature (602-629 % CPU at 0 % GPU / 35-37 W). The instantaneous
+    # gpu_util_pct sample cannot carry that premise — it is burst-blind (tick 148) and fired this
+    # guard inside a 78.8 %-mean window at 21:50 on 2026-11-14. A reading without the window keeps
+    # the old premise so the 105 stored pre-window files are never re-judged by a rule they never
+    # carried. When the window CONTRADICTS the instantaneous sample at high engine CPU, the guard
+    # prints what it declined to claim instead of appending a reason.
+    spin_blind = False
+    if num(vals, "engine_pcpu") > IDLE_SPIN_PCPU:
+        if gpu_mean is not None:
+            if gpu_mean == 0.0:
+                reasons.append(
+                    f"idle-spin signature: engine {vals['engine_pcpu']} % CPU with the GPU idle "
+                    f"across the whole sample window (window mean 0.0 % / peak "
+                    f"{gpu_peak:.0f} %, instantaneous sample {vals['gpu_util_pct']} %) — per-task "
+                    "seconds and energy columns would be junk")
+            elif num(vals, "gpu_util_pct") == 0:
+                spin_blind = True
+        elif num(vals, "gpu_util_pct") == 0:
+            reasons.append(
+                f"idle-spin signature: engine {vals['engine_pcpu']} % CPU at GPU "
+                f"{vals['gpu_util_pct']} % — per-task seconds and energy columns would be junk")
     if gpu_mean is not None and gpu_mean >= GPU_UTIL_MAX_MEAN_PCT:
         peak_txt = (f", peak {gpu_peak:.0f} % inside the same window" if gpu_peak is not None else "")
         reasons.append(
@@ -670,6 +696,15 @@ def main() -> int:
               f"GPU_UTIL_MAX_MEAN_PCT = {GPU_UTIL_MAX_MEAN_PCT} gates the MEAN only, the peak is "
               "reported because a burst inside a quiet mean is exactly what the single sample used "
               "to miss")
+        if spin_blind:
+            print("  (diagnostic) the idle-spin guard DECLINED on the window's evidence: the "
+                  f"instantaneous sample said GPU {vals['gpu_util_pct']} % at engine "
+                  f"{vals['engine_pcpu']} % CPU, but the window mean is {gpu_mean:.1f} % — the GPU "
+                  "was NOT idle across the window, so the spin signature is not proven (2026-11-14 "
+                  "21:50: the old premise fired exactly this way on a 78.8 %-mean busy brain). "
+                  "Above GPU_UTIL_MAX_MEAN_PCT the contention rule refuses anyway; between 0 and "
+                  "the ceiling a high engine CPU with real GPU work in the window is what a busy "
+                  "shared brain looks like, not a spin-wait.")
     if swap_peak is not None:
         mean_txt = (f"{sum(swap_rate.values()):.1f} MiB/s"
                     if len(swap_rate) == len(OPTIONAL_FLOATS) else "not present in this reading")
