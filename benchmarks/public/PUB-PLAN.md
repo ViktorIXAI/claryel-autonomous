@@ -10545,3 +10545,69 @@ this tick adds one stored preflight reading plus this record block. What moved: 
 rule has now refused a window 22x its ceiling with the engine never in `D`, the swap/device rule
 complementarity is proven on live bytes, and the peak statistic has a measured (thin) band with a
 pre-registered arming condition instead of an open question.
+
+## Tick 152 — 2026-11-14 16:40 CET: scoreboard unmoved; the 25 h engine hold ended inside the window (restart 16:31:23, ops-attributed, not this line, not the watchdog); a GO opened on the fresh engine onto the same empty queue (zero legs, zero calls, zero published benchmark bytes moved)
+
+Nothing launched — the queue in force is still empty (ticks 149–151's constraint, unchanged): every
+in-force set carries all three admissible arms, the Grok cells stay closed by the owner quota
+decision of 2026-11-12, and the "later" ladder rows remain owner decisions.
+
+**The tracked engine hold ended inside this window.** The fresh producer read (`preflight-20261114-1640.txt`)
+names engine pid 175316 with age 8 min 55 s: `ps lstart` says **started Sat 11-14 16:31:23 CET**, so the
+**25 h 50 min** single-process hold that ticks 150 and 151 tracked ended between the 16:03 read and
+this one. Attribution, per the standing rule to name the actor before calling churn a fault: the
+`keep-up` watchdog is **not** it (its log still holds exactly one restart line, 2026-11-13 13:07),
+and the box shows ops activity in the window — `placement.prof` touched 16:20, and the ops config
+ladder has grown a `p2005_v10_ab.sh` (it was `p2005_v4..v8_ab.sh` at the 11-13 incident). The new
+serve is `basalt-033/bin/basalt` with the same model/`--max-context 196608` family flags. The
+tick-151 swap storm (443.8 MiB/s at 16:03) sits immediately before the restart and swap went from
+9.8 GiB used to **59 MiB used / 65 476 MiB free** after it, so storm and hold-end read as one
+sequence: churn around the old engine's teardown and reload. This line started no leg in the window,
+restarted nothing (skill rule: never restart the engine from this line), and no arm byte was touched;
+the restart is machine state, recorded here, not a leg incident — `LEG-INCIDENTS.md` stays
+untouched because no leg existed to interrupt. New-engine RSS is still warming (48.3 GiB at 9 min
+against the 57.7 GiB warm band), so RSS-continuity watches carried across ticks are void, as the
+skill prescribes for any restart.
+
+**The GO that opened onto the empty queue, on the fresh engine.** Swap window **0.0 + 0.0 MiB/s**
+(mean and peak), whole-disk reads **0.1 MiB/s** top reader `basalt`, GPU window **mean 0.0 % / peak
+0 %** at 26.99 W, engine state S with sampled pcpu 9.8 %, MemAvailable 23.0 GiB, `/health` 200
+`loaded=true`, one serve process, `foreign_legs=0`, load1 9.49 (printed only — falsified as a proxy,
+tick 142).
+
+**Reading census (current gate re-run over every stored file, in-process returncodes): 111 files —
+64 GO / 41 NO-GO / 6 input gaps**; that is tick 151's 110 / 63 / 41 / 6 plus exactly this tick's GO.
+Today: 39 files, 27 GO / 8 NO-GO / 4 input gaps.
+
+**Peak-statistic band re-derived (tick-151 arming counter, not restated): 14 files carry a parseable
+peak statistic** (16 carry the field; the two 12:11/12:12 broken samplers stay NaN = input gap, zero
+credit). The measured separation holds unchanged: highest peak inside a mean-GO window **67.6**,
+lowest peak inside a mean-failing window **107.0**, nothing between; this tick's window adds peak
+0.0. Arming counter: **7** launchable (GO) windows now carry the peak field, against the
+pre-registered threshold of **>=30** before a peak ceiling may be proposed.
+
+**Gates and tests.** All five PUB publication gates exit 0 on HEAD (`pub_arms_index --check`,
+`pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`,
+`pub_digest_row_check`); preflight contract test **103/103**, taskfile shape test **43/43** (no gate
+code moved). `pub_grok_resume_check --as-of 2026-11-14` exits **3** with the in-force cancellation
+record (182 never-asked ids as VOID, not a queue). Frozen-line hygiene re-census: the legacy
+hard-bank 5-min job `f23cf5d48e11` ran at 16:41 and completed — inert exactly as censused, because
+`~/.hermes/mac-v22full-launch.state` exists on the literal path (dated 2026-11-02 14:05); the marker
+was checked by `ls` on the expanded path, per the tick-111 lesson, not through a regex that strips
+`$HOME`. The daily docs-freshness job (`ef7ea47ff99b`) reports **last_status ok, failure_streak 0** —
+the 03:00 run found a clean tree today, so the standing "dirty tree at 03:00" note did not fire this
+day.
+
+**Repository state.** `main` == `origin/main` == `091aaa9` at the tick start; `~/sah-main` working
+tree clean. CI green on that head (`contour self-tests`, `secret-scan`, `devsecops` all success).
+Second-worktree census (`~/projects/strata-autonomous-harness`): staged diff empty, detached HEAD —
+the deletion hazard again clean — but it still accumulates untracked data files no index check sees:
+three scratch files inside the published `benchmarks/public/raw/` namespace (`arceasy-test.jsonl`,
+`ifeval-input.jsonl`, `x.bin`) and two `hardware/os-snapshots/` files (2026-11-11, 2026-11-12).
+Recorded as the owning workstreams' decision; this line commits nothing foreign.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action taken; this tick adds one stored preflight reading plus this record block. What
+moved: the endpoint's process identity changed mid-window (hold 25 h 50 min -> fresh engine at
+16:31:23) with the storm and swap-emptying explained, and the gate's next launch, whenever an owner
+decision opens a set, will run on the new engine.
