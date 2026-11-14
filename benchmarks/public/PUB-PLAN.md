@@ -8434,3 +8434,126 @@ local leg; `bash preflight.sh` without an outer redirect; PUB gates invoked as `
 with exits read unshielded; censuses by exit code and exact column equality, cross-checked against
 each gate's own row count before the delta is trusted; daily-docs fire 2026-11-14 02:00 UTC from a
 passing precondition.
+
+
+## Tick 132 — 2026-11-14 02:12 CET: scoreboard unmoved; the preflight caught its second state-D storm of the band and the box self-cleared in 90 s — engine not restarted, zero legs, zero calls, zero published bytes moved
+
+**Scoreboard: unmoved.** Nine in-force sets complete on the three-arm standard (bare local /
+contour `0.0.2.56` matched shape / ChatGPT codex), re-certified this tick by
+`scripts/pub_three_arm_parity_check.py`: **49 rows / 9 sets, 0 findings** (contour stamp
+`0.0.2.56`, Grok not an arm; Grok percent absent by the 2026-11-12 owner cancel on `bfcl`,
+`ifeval`, `livecodebench`, cell sentence on the other six). `PUB-DIGEST.md` byte-stable since
+`ad8d8c0`: sha256-16 `9d5ac7c3a60fb9dd`, 16 517 B, mtime 2026-11-12 03:23:17 — re-hashed this tick,
+identical to tick 131's record. No contour stamp or feature registered, no hard-bank pair launched,
+no hard-bank byte touched.
+
+**Legs: none, and none launched.** `systemctl --user list-units 'parb-pub-*'` empty (0 lines); no
+`pub_bench_run` / `pub_bench_cloud` process on this host; on the endpoint box
+`pgrep -cf 'gate_ru[n].py'`, `pgrep -cf 'pub_bench_ru[n].py'` and `pgrep -cf 'p2005_v[0-9]*_a[b].sh'`
+all 0. The queue is empty: the three-arm standard is complete on every in-force set, the Grok line
+is closed by the owner decision of 2026-11-12, and SimpleBench stays closed as unpinnable. Zero
+model calls, zero cloud calls this tick.
+
+**Endpoint read: a NO-GO, then a GO ninety seconds later — the band's second state-D sample.**
+`bash preflight.sh` bare (no outer redirect), gate re-run unshielded on the produced file:
+**`preflight-20261114-0207.txt` → PREFLIGHT NO-GO, gate exit 3** on one finding, `engine in
+uninterruptible I/O (state D): thrashing`. Readings with that verdict: swap 13 981 MiB used of
+65 535 (51 554 free, balance inside tolerance), MemAvailable 20 204 MiB, engine RSS 56 991 MiB,
+sampled-delta pcpu 0.0, GPU 0 % / 27.20 W, `health_code=200`, `health_loaded=true`,
+`engine_serve_procs=1`, foreign legs 0, **load1 12.02**. A second bare reading 90 s later
+(**`preflight-20261114-0208.txt` → GO**) shows the same engine process at state `S`, load1 **5.32**,
+MemAvailable 21 380 MiB, RSS 57 053 MiB, GPU 0 % / 9.32 W. So the storm was transient and the gate
+refused exactly the interval it exists to refuse; no leg was in force, so nothing was exposed to it.
+Corroborating box reads taken between the two: `load 12.39 / 9.03 / 4.86`; a one-second `vmstat`
+sample with one blocked process and live swap traffic si 2 243 / so 2 537 KiB/s; PSI `io some
+avg10=1.75 avg300=2.08`, `io full avg10=1.75`, `memory some avg300=0.31`; `SwapCached 5 422 356 kB`,
+lifetime `pswpin 26 260 248 / pswpout 29 859 260` pages; `nvidia-smi` 0 %, 23 574 MiB, 45.35 W, 59 °C.
+A `ps` snapshot taken in the same window caught **no** process in `D`, which is why the state-D
+signal is a sampled condition and not something a single `ps` can be trusted to miss or confirm.
+This is the machine-note condition (an endpoint holding ~57 GiB RSS plus ~14 GiB of swap on a
+62 GiB box), reported as a box decision — no contour, bank or harness change was made, and the
+remedy line in the gate output is unchanged.
+
+**Band census, taken by exit code and cross-checked before it was trusted.** Reading `0207` and
+`0208` one at a time through the gate: the engine-hold band is now **20 readings, 18 GO, 2 NO-GO**;
+the sole non-GOs are `preflight-20261113-1923.txt` (the transient state-D sample of tick 122) and
+this tick's `preflight-20261114-0207.txt`. Whole-workspace census over every stored
+`preflight-*.txt`, counted per file by gate exit: **77 files, 41 GO / 34 NO-GO / 2 input gaps** —
+exactly tick 131's 75 / 40 / 33 / 2 plus this tick's one NO-GO and one GO, so no stored reading
+changed verdict.
+
+**Engine continuity, read on the box, not inferred.** The same engine process as ticks 117–131
+(`basalt --serve`, pid 10597, `lstart Fri Nov 13 14:12:51 2026`), age at the GO read **11:55:33**;
+no restart between the NO-GO and the GO. `keep-up.log` on the box is still 44 B with one restart
+line, `2026-11-13_13:07:49 keep-up restart` — the watchdog is not the actor in this window.
+Ops tuning campaign: fourteenth idle read, newest `p2005_v*_ab.sh` still `p2005_v10_ab.sh`
+(`~/basalt/`, mtime 2026-11-13 09:15:33 UTC = 10:15:33 CET, the same file and stamp tick 131 named),
+and no such script running now.
+
+**Standing gates, all seven re-proven this tick on the pushed head `bdd5e7b` (exits read
+unshielded, gates invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3**
+(by design — the cancel): `checks: 22 | RESUME GATE: NO-GO - do not spend quota`, the 182 unasked
+ids in the pin are a record, not a queue. `pub_grok_cell_check.py` exit 0 — 9 documents, 0 findings.
+`pub_arms_index.py --check` exit 0 — index drift 0. `pub_derived_percent_check.py` exit 0 —
+**42 recomputed from shipped bytes, 0 findings**. `pub_superseded_cell_check.py` exit 0 — 9
+documents, 0 findings. `pub_digest_row_check.py` exit 0 — 49 rows, 0 findings. Three-arm parity gate
+exit 0 — 49 rows / 9 sets, 0 findings. `scripts/security/secret_scan.py --dir . --strict` exit 0.
+
+**The hermetic PUB contract suite re-executed: 14 tests, 0 failures, 414 checks.** Counted by exit
+code first, then the per-test summaries summed by hand because the check-count formats differ across
+tests: 34 (`pub_arms_index_test`) + 22 (`pub_cloud_blank_purge`) + 41 (`pub_derived_percent`) +
+22 (`pub_digest_row_gate`) + 7 (`pub digest writer`) + 9 (`pub_grok_cancel`) + 27 (`pub_grok_cell`)
++ 39 (`--write-pin`) + 33 (`pub_grok_resume_check`) + 41 (`pub_preflight`, printed `41/41 green`) +
+42 (`pub_bench_run engine-stamp`) + 34 (`pub_superseded_cell`) + 43 (`pub_taskfile_shape`) +
+20 (`three-arm parity`) = **414**, reproducing ticks 128–131 exactly. Still zero model calls (temp
+fixtures, stubbed transports).
+
+**Daily-docs job: the recorded cause is the stale status date, not the dirty tree.** Read from the
+scheduler, not assumed: `GitHub docs freshness daily` (`0 2 * * *`, no-agent, script
+`docs_freshness_daily.sh`) — **last run 2026-11-13 03:00:19 CET, error, script exit 1**, stdout
+`DOCS POLICY: FAIL — README status date is stale: 2026-11-11 is 2 days old`, streak counter
+10. That is the pre-repair self-lock named in `scripts/qa/refresh_docs_status.py` (the precondition
+was the push-mode policy, so a late marker made the repair itself unreachable); it is **not** the
+brief's "working tree is dirty during its 03:00 run", which stays unreproduced on this surface —
+this clone's tree is clean (0 paths) and local `main` equals `origin/main` (0/0). The repair is in
+force (`--push` precondition, marker write outside the marker branch, `SAH_LINK_MODE=offline` for
+`static_checks.py`) and the script sets the hook-required env var itself as an operator-scheduled
+daily job. Precondition right now: `docs_policy.py --daily` prints **PASS** under both the system
+`python3` and the scheduler's venv `python3`; README line 100 carries `Status checked: 2026-11-13`,
+marker commits `195c9d1` (2026-11-13) and `945df05` (2026-11-11). Next fire **2026-11-14 02:00 UTC**
+(03:00 CET), after this tick's read, and it passes the precondition as recorded.
+
+**CI, read back rather than assumed.** Tick 131's own head `d496f55` is green on the last readable
+job (hard-v6 scoring contracts, completed/success, 6 m 16 s). On the head this tick stands on
+(`bdd5e7b`, the daily 02:00 status snapshot): **all five jobs completed / success** — secret-scan
+(42 s), contour self-tests (53 s), pages-build-deployment (27 s), hard-v6 scoring contracts (7 m 06 s),
+devsecops (7 m 24 s). The two long jobs were still in progress at the first read (4 m 03 s) and were
+re-read to completion rather than assumed. No retry needed; no transport-timeout class this tick.
+
+**Frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state` re-read on the
+literal path: present, 26 B, `Nov 2 14:05`. The two legacy hard-bank-era jobs are still enabled and
+still firing (`Mac v2.2 full after v2.1`, every 5 min; `P2005 paired full 2.1→2.2 watch`, `*/5` — a
+permanent five-minute ssh round-trip onto this line's endpoint box). Both reported as an owner
+decision, not edited.
+
+**Watchdog clone: the deletion-hazard surface reads clean (again).** `git diff --cached --stat` is
+empty (0 lines) and the clone is detached (`git branch --show-current` prints nothing), so there is
+no index that could stage deletions of published arms.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the preflight answered its **second state-D NO-GO of the band**
+at 02:07 (load1 12.0–12.4, live swap-in/out ~2.3 MiB/s) and a GO 90 s later on the same engine
+process — the endpoint box is the thing to watch, not the contour; the band is now **18 GO of 20
+readings**, all seven gates plus the 414-check contract suite are green, and CI is green on **all
+five jobs** on the standing head `bdd5e7b`. IFEval / LiveCodeBench / BFCL
+rows and the repair-family census are unchanged from ticks 121–131.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
+Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench
+Verified subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads unchanged: a
+fresh preflight GO **plus** `PARB_ENGINE_NOTE` **plus** `--run-record` before any owner-gated local
+leg — and after any NO-GO, one second reading before a box symptom is called sustained;
+`bash preflight.sh` without an outer redirect; PUB gates invoked as `python3 <script>` with exits
+read unshielded; censuses by exit code and exact column equality, cross-checked against each gate's
+own row count; per-test check counts summed from each test's own summary line because the formats
+differ; daily-docs fire 2026-11-14 02:00 UTC from a passing precondition.
