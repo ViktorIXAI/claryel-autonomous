@@ -9302,3 +9302,130 @@ force and gained its falsification test this tick: attribute a climbing load1 fr
 PSI cpu vs PSI io and `vmstat` si/so **before** calling it a symptom, and expect the attribution to
 predict the decay — this tick the burst hit si/so = 0 inside the window the mechanism requires,
 with swap occupancy flat at 14.8 GiB.
+
+
+**Queue status 2026-11-14 06:57 CET (tick 139):** nothing launched — the queue stays empty: every
+in-force set carries all three admissible arms (bare / contour 0.0.2.56 matched shape / ChatGPT
+codex), the Grok line stays closed by the owner decision of 2026-11-12, SimpleBench stays closed as
+unpinnable, and the "later" ladder rows need a fresh owner decision. 0 leg units
+(`systemctl --user list-units 'parb-pub-*'` empty), no `pub_bench_run`/`pub_bench_cloud` process,
+0 foreign legs on the endpoint. Zero model calls, zero cloud calls this tick.
+
+**Endpoint read (twenty-seventh stored reading of the engine-hold band, a THIRD NO-GO).**
+`bash preflight.sh` bare (no outer redirect): **`preflight-20261114-0651.txt` → PREFLIGHT NO-GO**
+(`python3 scripts/pub_preflight.py <file>` unshielded: exit 3) — `engine in uninterruptible I/O
+(state D): thrashing`. Readings: swap 14 432 MiB used of 65 535 (51 103 free), MemAvailable
+18 712 MiB, engine state **D**, live-delta pcpu 0.0 (6 s sample), RSS 57 253 MiB, GPU 0 % / 26.99 W,
+`health_code=200`, `health_loaded=true`, `engine_serve_procs=1`, foreign legs 0, load1 **6.52**.
+The in-box ssh re-read seconds later shows the same engine pid in state `Sl` — the D is a **flicker**
+(the same `Sl`↔`D` alternation recorded for the 2026-11-11/12 band), which is why the gate catches it
+in roughly one sampling in nine rather than every time. No leg was queued, so the NO-GO cost nothing;
+machine state **reported, not acted on** — no engine restart was performed or requested.
+
+**Band and workspace census, returncodes taken in-process.** Engine-hold band (first
+`preflight-20261113-1428.txt`, last `preflight-20261114-0651.txt`): **27 readings, 24 GO / 3 NO-GO**.
+All three non-GOs are one class, all state D: `preflight-20261113-1923.txt`,
+`preflight-20261114-0207.txt`, `preflight-20261114-0651.txt`. Whole workspace: **84 files,
+47 GO / 35 NO-GO / 2 input gaps** — tick 138's 83 / 47 / 34 / 2 plus exactly this tick's one NO-GO;
+the gaps stay `preflight-20261111-0948.txt` and `preflight-20261111-1144.txt`.
+
+**Engine continuity, read on the box, not inferred.** Same process as ticks 117–138
+(`basalt --serve`, pid 10597, `lstart Fri Nov 13 14:12:51 2026`), elapsed **16 h 38 m**, state `Sl`
+at the ssh read, RSS 58 426 756 KiB. `/health` names the served alias
+`qwen3.8-flash-next-iq3_s-basalt`, `"loaded": true`, `"loading": false`, max context 196 608.
+`~/basalt/keep-up.log` still 44 B with its single restart line `2026-11-13_13:07:49 keep-up restart`
+— the watchdog is still not the actor. Box uptime 17 h 44 m: every reading of this band sits behind
+the same 2026-11-13 13:07 box boot.
+
+**A reading defect in this line's own evidence, found on the box and corrected the day it was
+cited.** Tick 138 quoted "`vmstat 2 3` … first 2 s sample **si 2 142 / so 2 363 KiB/s**, both
+following samples **si 0 / so 0**" as a swap-return burst that collapsed inside one window, and
+called that the falsification test of tick 137's attribution. That comparison was invalid: **the
+first printed line of `vmstat <delay> <n>` is the since-boot average, not a live sample**, and this
+tick proved it mechanically on the live box two ways.
+(a) The line-1 values barely move across ticks — 2 142/2 363 (06:15), 2 158/2 366 (06:51),
+2 175/2 407 (06:57) — and match the boot average computed from the counters exactly: at 06:57
+`/proc/vmstat` holds `pswpin 34 807 825`, `pswpout 38 517 417` pages at uptime 63 993.9 s →
+**2 175.6 / 2 407.0 KiB/s**, identical to that `vmstat` run's line 1.
+(b) Counter-delta windows read what a live sample actually is, and they catch real bursts: the
+~06:52 window (9.24 s) recorded **pswpin +179 935 pages = 77.9 MiB/s live swap-in**, and the
+06:56:54→06:57:03 window (9.47 s) recorded **pswpin delta 0 (si live = 0)** with **pswpout +22 671
+pages = 9.6 MiB/s live swap-out** (one 3 s `vmstat` live sample caught it at so = 30 228 KiB/s).
+Swap occupancy rose from 14 778 416 to 15 159 288 KiB (+372 MiB in six minutes). So the burst class
+tick 137 attributed is real and observable — with the **counter delta**, not with vmstat line 1.
+Consequences, stated precisely: tick 138's "burst drained inside the window" sentence is **withdrawn**
+— it compared a boot average against live samples — and its "falsification test gained" claim is
+**void**; the load-decay itself stands on clean evidence (load1/load5/load15 **9.22 / 2.38 / 1.88**
+at 06:51, load1 **6.52** this tick, across-tick load1 4.96 → 7.39 → 10.31 → 9.22 → 6.52). And the swap class is **not dormant**: at this tick's read the box is actively
+swapping OUT at ~9 MiB/s average while the engine flickers D — the third same-class preflight NO-GO
+and the live pswpout delta are the same condition seen twice. From this tick the standing read for
+this box is the **/proc/vmstat pswpin/pswpout counter delta over a timed window**, never `vmstat`
+line 1; no published benchmark byte depends on the withdrawn sentence.
+
+**Ops tuning campaign: twenty-first idle read.** No `p2005_v[0-9]` process runs on either machine;
+the box holds nine launcher scripts, newest still `~/basalt/p2005_v10_ab.sh` mtime `Nov 13 10:15`.
+Machine state, never acted on.
+
+**Daily-docs job: green at its own fire.** `GitHub docs freshness daily` (id `ef7ea47ff99b`,
+`0 2 * * *`) last completed **2026-11-14 03:02:14 CET, ok, failure_streak 0**; next fire
+2026-11-15 02:00 UTC. The brief's daily dirty-tree error stays unreproduced since 2026-11-14 03:00
+(tick 133). This clone is clean (0 paths) with local `main` equal to `origin/main` (0/0 after fetch).
+
+**CI: green on the standing head, read on the first attempt.** `gh run list` at 06:52: on the
+tick-138 head `608e1c1` **all five workflows are `success`** — secret-scan, contour self-tests,
+hard-v6 scoring contracts, devsecops, pages-build-deployment. No api-host timeout since tick 136's
+amendment.
+
+**Standing gates, all seven re-proven this tick on the pushed head (exits read unshielded, gates
+invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3** (by design — the
+cancel): `checks: 22 | RESUME GATE: NO-GO - do not spend quota`, **182 unasked ids**
+(`ifeval-286..ifeval-3757`, stored 359 rows, sha256-16 `01c1ee0b6e7f6d5d` unchanged) held as a
+`VOID` record, not a queue. `pub_grok_cell_check.py` exit 0 — 9 documents, 0 findings.
+`pub_arms_index.py --check` exit 0 — index drift 0. `pub_derived_percent_check.py` exit 0 —
+**42 recomputed from shipped bytes, 0 findings**. `pub_superseded_cell_check.py` exit 0 — 9
+documents, 0 findings. `pub_digest_row_check.py` exit 0 — 49 rows, 0 findings. Three-arm parity
+gate exit 0 — 49 rows / 9 sets, 0 findings. `scripts/security/secret_scan.py --dir . --strict`
+exit 0, `total_findings: 0`.
+
+**The hermetic PUB contract suite re-executed: 14 tests, 0 failures, 414 checks.** Exit codes all
+0, counts from each test's own summary line: 34 (`pub_arms_index`, "PUB PIN CONTRACT") + 22
+(`pub_cloud_blank_purge`) + 41 (`pub_derived_percent`, prints `CHECKS 41, FAILED 0`) + 22
+(`pub_digest_row_gate`) + 7 (digest writer) + 9 (`pub_grok_cancel`) + 27 (`pub_grok_cell`) + 39
+(`pub_grok_resume_check --write-pin`) + 33 (`pub_grok_resume_check`) + 41 (`pub_preflight`) + 42
+(`pub_bench_run engine-stamp`) + 34 (`pub_superseded_cell`) + 43 (`pub_taskfile_shape`) + 20
+(three-arm parity) = **414**, reproducing ticks 128–138 exactly. Zero model calls (temp fixtures,
+stubbed transports).
+
+**Frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state` re-read on the
+literal path: present, 26 B, `Nov 2 14:05`, contents `2026-11-02T14:05:30+01:00` unchanged. Both
+legacy hard-bank-era jobs are still enabled and still firing ok — `Mac v2.2 full after v2.1`
+(id `f23cf5d48e11`, every 5 m, last 06:47:26 CET) and `P2005 paired full 2.1→2.2 watch`
+(id `a808c7f205a6`, `*/5 * * * *`, last 06:50:26 CET — a permanent five-minute ssh round-trip onto
+this line's endpoint box). Reported as an owner decision, not edited.
+
+**Watchdog clone: the deviation set is stable at eight paths.** `~/projects/strata-autonomous-harness`:
+staged index empty (0 lines), detached (branch name empty, `HEAD aa4e4d6` while `main` is
+`608e1c1`), and `git status --porcelain` returns exactly the eight paths of ticks 136–138 — modified
+`hardware/os-snapshots/latest.json`, the four stranded snapshots 2026-11-11/-12/-13/-14, and the
+three untracked scratch files in the published raw namespace. Nothing committed or deleted there;
+it stays the hardware/ops line's decision.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the engine hold passed **16 h 38 min** on one process, the band
+took its **third same-class state-D NO-GO** (24 GO of 27, engine flickering `Sl`↔`D` with live
+swap-out ~9 MiB/s at the read), and this line's own evidence got corrected the day it was cited: the
+tick-138 "vmstat burst drained in one window" sentence compared vmstat's **since-boot line 1** with
+live samples and is withdrawn — proven by exact agreement of line 1 (2 175/2 407) with the
+boot-average counter arithmetic (2 175.6/2 407.0 KiB/s) while live counter windows read si
+77.9 MiB/s in one 9.24 s sample and si 0 / so 9.6 MiB/s in the next. The load decay stands (load1 10.31 → 9.22 → 6.52); the standing read is now
+the `/proc/vmstat` pswpin/pswpout **counter delta over a timed window**, never vmstat line 1. CI
+green at first read, all seven gates and the 414-check contract suite green, Grok cancel
+armed-but-closed with its resume record intact.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
+Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench
+Verified subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads unchanged
+plus one new: a `vmstat` line printed **before** the first delay interval is the since-boot average,
+not a sample — swap IO claims on this box go through the `/proc/vmstat` counter delta (same family
+as the preflight rule's refusal of `ps -o pcpu` lifetime averages), and a claim about the line's own
+evidence is re-verified on live counters the tick it is quoted, not carried.
