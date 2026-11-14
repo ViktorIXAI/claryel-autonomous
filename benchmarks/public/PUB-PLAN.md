@@ -11153,7 +11153,8 @@ would give it one sits at 9 of 30 launchable windows.
 BOTH ends, and the fix is a STATE variable instead of another rate — two optional readings shipped
 (`engine_vmswap_mib`, `swap_cached_mib`), 0 verdict moves over all 118 stored readings, live reading
 `21:42` already carries them (footprint 3 357 MiB, 65.2 % of swap in use page-cache resident); census
-119 = 66 GO / 47 NO-GO / 6 gap, arming 9/30, footprint arming 0/30; queue empty, zero legs, zero calls
+120 readings = 66 GO / 48 NO-GO / 6 gap (119 at the 21:42 pass, 120 after the 21:50 reading), peak
+arming 9/30, footprint arming 0/30; queue empty, zero legs, zero calls
 
 **Why this tick exists.** The endpoint has been parked at GO-3 since 20:54 (engine pid 175316 reloaded,
 GPU 0 %, `/health` `loaded=true`) and a fresh preflight window answered
@@ -11227,7 +11228,30 @@ median/max `n/a`, the NO-GO group shows **3 357 MiB**, the page-cache share read
 the footprint arming counter starts at **0 of 30** — an honest zero about stored history, not a health
 claim. `--check` matches the regenerated table byte-for-byte.
 
-**Endpoint now (reading `preflight-20261114-2142.txt`, gate exit 3 = NO-GO).** Engine pid 175316, age
+**A second reading before the tick closed (`preflight-20261114-2150.txt`, gate exit 3 = NO-GO on three
+rules), and it exposes the next defect.** The engine sat in uninterruptible I/O (state `D`), the shared
+brain was busy with **0 legs of this line running** — GPU window mean **78.8 %**, peak 100 % inside the
+same 6 s window, against the 50.0 mean ceiling — and the swap mean rule **passed**: 10.8 MiB/s over the
+window against 20.0, carrying an in-window peak of **65.1 MiB/s**. That peak joins the swap-mean-PASSING
+group (13 windows) and leaves the band's 67.6 / 107.0 separation untouched, while the reading as a whole
+is NO-GO: the two-denominators warning in the census, caught in the wild. The window rule also did
+exactly what it shipped for — the instantaneous `gpu_util_pct` sample in the same file reads **0 %**, so
+without the window a launcher would have seen "GPU idle" at the moment a foreign tenant was peaking at
+100 %. The new footprint keys came through on both consecutive readings with no NaN: footprint
+3 537 MiB and `swap_cached_mib` 6 752 MiB of 10 482 MiB swap in use (64.4 % still page-cache resident),
+engine still pid 175316. **Open defect named, not yet fixed:** the idle-spin guard still reads the
+INSTANTANEOUS sample for its premise and fired here as "engine 1113.0 % CPU at GPU 0 %" in a window
+whose mean GPU utilization was 78.8 % — a busy box, not a spin-wait. The conclusion happened to be safe
+(two other rules refused the window) but the premise was false, and a guard whose premise contradicts
+another instrument in the same file is a false-NO-GO waiting for a reading where it fires alone. The fix
+is to make that guard's premise use `gpu_util_mean_pct` when the window is present — and it needs the
+standing side-by-side replay over every stored reading before it lands, so it is next tick's change, not
+this commit's. Regenerated census at `as-of 21:50`: **120 readings = 66 GO / 48 NO-GO / 6 gap**,
+swap-peak coverage 25 (2 NaN, 23 parseable), passing-with-peak **12 → 13**, failing-with-peak 8, band
+**67.6 / 107.0** unmoved, peak arming 9/30; footprint coverage **2** (median 3 447 MiB, min 3 357),
+footprint arming **0 of 30**, `--check` green at HEAD.
+
+**Endpoint at 21:42 (reading `preflight-20261114-2142.txt`, gate exit 3 = NO-GO).** Engine pid 175316, age
 05:10:53 — the same process since the ops-attributed 16:31:23 restart, no restart this tick. Swap mean
 **35.1 in + 0.0 out = 35.1 MiB/s** over a measured 6.14 s window (>= 20.0) with in-window peak **214.6**;
 `swap_used_mib` 10 342 of 65 535; footprint 3 357 MiB (down from the 5.7 GiB peak at 21:38 — the engine
