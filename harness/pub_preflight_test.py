@@ -47,6 +47,15 @@ What it pins:
      50.0, the same physical point — the two scales must verdict-match on the measured window, the
      corrected boundary is conditional (49.9 GO / 50.0 NO-GO) and the NO-GO names the scope; an
      unknown scope value is an input gap, never a borrowed ceiling.
+  11. the optional GPU contention WINDOW `gpu_util_mean_pct` + `gpu_util_peak_pct` (2026-11-14, tick
+     148): the 6 saturated stored readings and the 13:54 live sample that read `gpu_util_pct=0` at
+     108.35 W while 93k/96k-token prefills ran on the shared brain are the motivation. A window mean
+     at or above GPU_UTIL_MAX_MEAN_PCT NO-GOs and names the state; the CEILING IS ON THE MEAN ONLY, so
+     a 96 % peak inside a 12 % mean stays GO and is reported (registering a peak ceiling would gate a
+     quantity with no measured idle band, the same mistake the swap peak deliberately avoids); a peak
+     of exactly 100 % in a quiet mean must still print; one key without the other, a non-finite
+     number, a negative, a value above GPU_UTIL_MAX_PCT, or a peak below the window mean is an input
+     gap; absent keys change no verdict, so all 105 stored readings keep their verdicts.
 
 The real readings that motivated this gate (2026-11-10, tick 23) are reproduced as
 the swap/D-state tamper case: 3 MiB swap free, engine state Dl, 602 % CPU at 0 % GPU.
@@ -213,7 +222,8 @@ def main() -> int:
        f"got exit {rc}: {out}")
     rc, out = run(dict(live0928, health_loaded="true", engine_serve_procs=1,
                        swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0,
-                       blk_read_mib_per_s=0.0, blk_top_reader="basalt"))
+                       blk_read_mib_per_s=0.0, blk_top_reader="basalt",
+                       gpu_util_mean_pct=0.0, gpu_util_peak_pct=0))
     ck(rc == 0 and "(coverage)" not in out,
        f"a fully covered reading must not print a coverage warning, got exit {rc}: {out}")
     rc, out = run(dict(live0928, health_loaded="true", engine_serve_procs=1,
@@ -394,6 +404,61 @@ def main() -> int:
     rc, out = run(dict(live_push, blk_read_mib_per_s=10.0, blk_scope="diskstats-all"))
     ck(rc == 1 and "not a known device scope" in out,
        f"an unknown scope must be an input gap, never a borrowed ceiling, got exit {rc}: {out}")
+
+    # GPU contention WINDOW (2026-11-14, tooling release, no contour stamp, no published benchmark
+    # byte). `gpu_util_pct` was one instantaneous nvidia-smi read, and it is burst-blind: live at
+    # 13:54 it printed 0 % at 108.35 W / 59 C while the serve log's last two lines were completions of
+    # prefills of 93 554 and 96 301 prompt tokens. The census over 105 stored readings makes the other
+    # half of the blindness mechanical: 94 of the 104 numeric readings report 0 %, 3 report 0-20 %, and
+    # only 7 report >= 20 % (five at 96-100 % at 114.13-153.62 W, plus 29 % at 39.4 W and 47 % at
+    # 27.2 W), and foreign_legs=0 in EVERY stored reading because that key counts
+    # only this line's two runners — so a saturated SHARED brain never blocked this gate on its own
+    # evidence: the pre-fix gate answered GO on 2026-11-11 10:30 and 2026-11-13 15:50 of those five, and
+    # blocked the other three only by accident (one engine state D, two engine_pcpu NaN input gaps).
+    # 2026-11-14: the current serve log on that box holds 59 876 completed requests, 2 793 of them with
+    # prompts over 150 000 tokens (largest pp=260052 with a 78.3 s prefill), and `pgrep` for this line's
+    # runners on the endpoint box is empty — all of that traffic is other tenants. The cost here is
+    # comparability, not safety: the frozen hard-bank
+    # rule measures 2-4 discordant cell flips from a parallel consumer on the same serve.
+    live_burst = dict(live_today, gpu_util_pct=0.0, gpu_power_w=108.35)
+    rc, out = run(live_burst)
+    ck(rc == 0 and "carries no gpu_util_mean_pct" in out,
+       f"the 2026-11-14 13:54 live bytes (gpu_util_pct=0 at 108.35 W) have no window and must stay "
+       f"not covered, got exit {rc}: {out}")
+    rc, out = run(dict(live_burst, gpu_util_mean_pct=99.4, gpu_util_peak_pct=100))
+    ck(rc == 3 and "the shared brain was busy in the sample window" in out,
+       f"a window mean of 99.4 % (2026-11-13 15:50 stored shape) must NO-GO, got exit {rc}: {out}")
+    rc, out = run(dict(live_burst, gpu_util_mean_pct=6.6, gpu_util_peak_pct=100))
+    ck(rc == 0 and "peak 100 %" in out,
+       f"a quiet mean with a saturated burst is launchable and must be REPORTED (the single sample "
+       f"used to print 0 here), got exit {rc}: {out}")
+    rc, out = run(dict(live_burst, gpu_util_mean_pct=12.0, gpu_util_peak_pct=96))
+    ck(rc == 0, f"the ceiling gates the MEAN only, a peak of 96 % in a 12 % mean must GO, got {rc}")
+    rc, out = run(dict(live_burst, gpu_util_mean_pct=49.9, gpu_util_peak_pct=60))
+    ck(rc == 0, f"a 49.9 % window mean sits under the 50.0 ceiling and must GO, got exit {rc}: {out}")
+    rc, out = run(dict(live_burst, gpu_util_mean_pct=50.0, gpu_util_peak_pct=91))
+    ck(rc == 3, f"a 50.0 % window mean is at the ceiling and must NO-GO, got exit {rc}: {out}")
+    rc, out = run(dict(live_burst, gpu_util_mean_pct=99.4, gpu_util_peak_pct=100, foreign_legs=1))
+    ck(rc == 3 and "other leg(s) on this endpoint" in out and "shared brain was busy" in out,
+       f"a busy window AND a live leg must both be named, got exit {rc}: {out}")
+    for bad, why in (("gpu_util_mean_pct=NaN", "cut sample window"),
+                     ("gpu_util_peak_pct=NaN", "cut peak sample"),
+                     ("gpu_util_mean_pct=101.5", "impossible percentage"),
+                     ("gpu_util_peak_pct=-3", "negative utilization"),
+                     ("gpu_util_mean_pct=n/a", "non-numeric"),
+                     ("gpu_util_peak_pct=2.0", "peak below the window mean")):
+        key, val = bad.split("=", 1)
+        other: dict[str, object] = {"gpu_util_mean_pct": 30.0, "gpu_util_peak_pct": 40.0}
+        other[key] = val
+        rc, out = run(dict(live_burst, **other))
+        ck(rc == 1, f"{bad} ({why}) must be an input gap, never a GO, got exit {rc}: {out}")
+    for half in ("gpu_util_mean_pct", "gpu_util_peak_pct"):
+        rc, out = run(dict(live_burst, **{half: 30.0}))
+        ck(rc == 1 and "the window is incomplete" in out,
+           f"{half} alone cannot be judged as a window, got exit {rc}: {out}")
+    rc, out = run(dict(live_burst, gpu_util_mean_pct=0.0, gpu_util_peak_pct=0))
+    ck(rc == 0 and "mean 0.0 %" in out,
+       f"a genuinely idle endpoint must GO and print its window, got exit {rc}: {out}")
 
     # NaN fails CLOSED (found 2026-11-14 while wiring the device window). The producer emits NaN by
     # design when its sample window was cut, and Python's float() parses "NaN"/"inf" — so before this

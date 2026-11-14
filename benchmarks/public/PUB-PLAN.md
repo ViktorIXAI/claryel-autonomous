@@ -10343,3 +10343,80 @@ arms (bare / contour 0.0.2.56 matched shape / codex), Grok cells stay closed by 
 of 2026-11-12, and the "later" ladder rows need a fresh owner decision. Zero model calls, zero cloud
 calls, zero published benchmark bytes moved this tick; `main` was not under local edit pressure (the
 two records that landed since tick 146 are hardware-line P3032 docs, no benchmark paths).
+
+### Tick 148 (2026-11-14 14:00 CET): the preflight gate could not see the endpoint being BUSY — GPU contention window added (tooling release, no contour stamp, no benchmark byte)
+
+A pre-launch gate that cannot see interference prints a confident GO and the arm pays for it later, exactly as the two
+tick-146 gaps did. This is the third hole in the same file and the widest one: the gate had ONE instantaneous GPU sample and
+no window at all, and its only "someone else is here" reading (`foreign_legs`) counts only this line's own two runners.
+
+Measured live at 13:54: `gpu_util_pct=0` (at 108.35 W, 59 C, engine up 23h42m) while the serve log's last two lines were
+completions of prefills of 93 554 and 96 301 prompt tokens. The census over all 106 stored readings makes the rest mechanical:
+105 carry `gpu_util_pct` (one, 2026-11-11 11:44, carries it EMPTY and is an input gap by rule), and of the 104 numeric ones 94
+read exactly 0.0, 3 read 0-20 % and only 7 read >= 20 %. Five of those seven read 96-100 % at 114.13-153.62 W — 2026-11-11
+10:30 (99 %, 126.50 W), 2026-11-13 13:00 (99 %, 116.58 W), 2026-11-13 15:50 (96 %, 139.19 W), 2026-11-14 12:23 (99 %, 153.62 W)
+and 2026-11-14 12:26 (100 %, 114.13 W); the other two are 29 % at 39.4 W and 47 % at 27.2 W. `foreign_legs` is 0 in EVERY stored
+reading, because a PUB leg is by definition not running at the instant its own preflight runs.
+
+How big the hole actually was, measured rather than assumed: re-running the PRE-FIX gate over exactly those five saturated
+readings answers GO on two of them (2026-11-11 10:30, 2026-11-13 15:50 — the GPU never entered the decision) and refuses the
+other three only by accident: 2026-11-13 13:00 NO-GOs on engine state D and both 2026-11-14 readings are input gaps
+(`engine_pcpu` NaN, fail-closed by the tick-146 NaN rule). Not one of the five was ever refused for the reason that mattered.
+
+Who: the endpoint is the park's SHARED brain. Its current serve log holds 59 876 completed requests, 2 793 of them with
+prompts over 150 000 tokens; the largest is `pp=260052/0c 78.3s 3322t/s ... end=length` — a 78-second prefill. None of that
+traffic comes from this line: `pgrep` for `gate_run.py` / `pub_bench_run.py` on the endpoint box returned nothing at 14:07 and
+again at 14:12. Adjacent serve-log lines `pp=93554/92483c 1.3s 832t/s` and `pp=96301/94341c 1.7s 1145t/s` completed while a
+live probe read `gpu_util_pct=0` at 108.35 W. The pairing was re-measured at 14:1x: five consecutive 1 Hz utilization reads all
+answered 0 % while power fell 96.49 -> 40.66 -> 34.43 -> 31.05 -> 27.51 W — utilization sits at 0 between requests, so a
+one-instant sample lands outside the burst and only the power tail names it.
+
+What it costs: not safety, COMPARABILITY. The frozen hard-bank rule measures 2-4 discordant cell flips from a parallel
+consumer on the same serve with no contour event on them, and this line's cross-arm standard is a three-arm matched
+comparison (bare / contour 0.0.2.56 matched shape / codex). A leg launched into a 99 % window is not comparable to a
+quiet-window pair. No PUB arm has been launched into a busy window during this series (every launch so far happened at GPU
+0-2 %), so this is caught before it costs a leg rather than after — no discarded bytes to credit here.
+
+Fix, tooling only (`scripts/pub_preflight.py` + the untracked producer `~/pub-bench/preflight_read.sh`):
+
+    gpu_util_mean_pct=<float>   GPU utilization sampled at 1 Hz over the producer's own window, MEAN
+    gpu_util_peak_pct=<float>   the worst 1 s sample inside that same window
+
+  * the ceiling `GPU_UTIL_MAX_MEAN_PCT = 50.0` gates the MEAN only, so a burst inside a quiet mean stays launchable and is
+    REPORTED instead of hidden; a peak ceiling is deliberately NOT registered (idle windows measure 0-6 %, saturated ones
+    96-100 %: the separation is ~16x so the mean ceiling is not marginal, but a peak statistic still has no idle band of its
+    own — the same discipline that keeps the swap peak ungated in tick 146);
+  * `GPU_UTIL_MAX_PCT = 100.0` is a domain limit (a utilization percentage cannot leave 0-100 %), so a value above it is an
+    input gap; `NaN`, a negative, a non-number, only ONE of the two keys, or a peak below the window mean (arithmetically
+    impossible inside one window) are all input gaps, exit 1, never a GO;
+  * absent keys = not covered, so no stored reading is re-judged.
+
+Producer additions around the same window: the 1 Hz GPU sample rides the loop that already samples the swap counters, and the
+window's REAL length is now MEASURED (`swap-window-measured=6.17s` in the comment line) because every iteration costs a
+`swapc` fork plus an nvidia-smi fork — dividing a counter delta by the nominal 6 s understated every MiB/s and %CPU rate by
+roughly 10 %, which matters at 18.9 MiB/s against a 20.0 MiB/s ceiling. An unmeasurable duration makes those numbers NaN
+(fail closed). The wrapper `~/pub-bench/preflight.sh` also stopped masking the verdict: it used to end with `echo`, so its
+own exit code was 0 whatever the gate decided — a launcher that checked `$?` would have launched into a NO-GO.
+
+Proof (all produced this tick):
+
+  * `harness/pub_preflight_test.py` 103/103 green (the committed version before this tick was 87 checks;
+    16 added). Non-vacuity controls on stored bytes: the
+    2026-11-13 15:50 reading (GPU 96 %, 139.19 W) and the 2026-11-11 10:30 reading (99 %, 126.5 W) get the window injected at
+    the file's own instantaneous value — an ILLUSTRATIVE injection, not a remeasurement of a closed window — and the pre-fix
+    gate answers GO while the post-fix gate answers NO-GO naming the contention. A 96 % peak inside a 12 % mean stays GO,
+    49.9 % mean GO / 50.0 % mean NO-GO, peak == mean is the legal boundary, peak < mean is an input gap, one key alone is an
+    input gap, a genuinely idle window prints `mean 0.0 %, peak 0 %` and GOes.
+  * Non-retroactivity by side-by-side run over ALL 106 stored readings, pre-fix gate vs post-fix gate: 61 GO / 39 NO-GO /
+    6 input gap on BOTH sides, verdict moves = 0. The rule bites only from this tick's readings onward, which carry it.
+  * First real reading from the fixed producer (13:58, `preflight-20261114-1358.txt`): `gpu_util_mean_pct=1.0`,
+    `gpu_util_peak_pct=6`, `gpu_util_pct=0` at 27.63 W — a quiet GPU inside a 6.17 s window — and the same reading NO-GOs on
+    swap (83.7 MiB/s window mean, 456.2 MiB/s peak inside it) while `blk_read_mib_per_s` reads 0.1. The two windows are not
+    in contradiction: `pswpin` moves 83.7 MiB/s of pages back WITHOUT device reads because the swap lives in a file whose
+    pages are already page-cache resident, so the swap rule sees reclaim churn and the device rule correctly sees no I/O
+    storm. That is the highest swap mean this line has recorded (previous max 33.5) and the strongest NO-GO evidence yet; no
+    leg was launched into it.
+
+Next on this axis: the PUB queue is empty (IFEval bare/matched/codex all published), so the gate has nothing to block and the
+next local launch needs a new set decision, not a gate change. The idle band for the GPU mean (0-6 %) is now on record, so a
+peak ceiling can be sized from measurement if a future set actually needs one.

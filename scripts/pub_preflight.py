@@ -110,6 +110,25 @@ engine is already resident — so the settled endpoint answers 0.2 MiB/s of devi
 10 s windows, engine 0.1 MiB/s, 0 major faults/s) and any sustained hundred-MiB/s stream is somebody
 else saturating the device the model weights live on.
 
+Two OPTIONAL readings describe the GPU itself (tooling release 2026-11-14, tick 148):
+
+    gpu_util_mean_pct=<float>   GPU utilization sampled at 1 Hz over the producer's own window, mean
+    gpu_util_peak_pct=<float>   the worst 1 s sample inside that same window
+
+`gpu_util_pct` is ONE instantaneous nvidia-smi read, and it is burst-blind: at 13:54 the same reading
+printed `gpu_util_pct=0` at 108.35 W / 59 C while the serve log's last two lines were completions of
+prefills of 93 554 and 96 301 prompt tokens. Worse, the endpoint is the park's SHARED brain and
+`foreign_legs` counts only this line's two runners: five stored readings show a saturated GPU
+(96-100 %, 114.13-153.62 W) with `foreign_legs=0` — somebody else decoding — and the pre-fix gate
+answered GO on two of them (2026-11-11 10:30, 2026-11-13 15:50), the other three being blocked by
+unrelated rules. A leg
+launched into that window is not comparable to a quiet-leg pair (the hard bank measured 2-4 discordant
+cell flips from a parallel consumer on the same serve, with no contour event on them). Same
+optional-but-binding semantics: present and at or above `GPU_UTIL_MAX_MEAN_PCT` (the MEAN only, the
+peak is reported) is NO-GO, absent is not covered so all 106 stored readings keep their verdicts, and
+a non-number, a negative, a value above 100 %, only one of the two keys, or a peak below the window
+mean is an input gap.
+
 Usage:
     python3 scripts/pub_preflight.py READINGS.TXT
 
@@ -189,6 +208,43 @@ BLK_READ_MAX_MIB_S = 100.0   # device-read ceiling, pre-registered INSIDE a meas
                              # model still loading is a state a leg must not start into either.
 BLK_KEY = "blk_read_mib_per_s"
 BLK_READER_KEY = "blk_top_reader"
+# GPU contention window (2026-11-14, tick 148, tooling release: no contour stamp, no benchmark byte).
+# The endpoint is the park's SHARED brain, and this gate could not see anyone using it. Census over
+# the 106 stored readings: 105 carry `gpu_util_pct` (one, 2026-11-11 11:44, carries it EMPTY and is an
+# input gap by rule), and of the 104 numeric ones 94 read exactly 0.0, 3 read 0-20 % and only 7 read
+# >= 20 %. FIVE of those seven read 96-100 % at 114.13-153.62 W with `foreign_legs=0` in the same file:
+# 2026-11-11 10:30 (99 %, 126.50 W), 2026-11-13 13:00 (99 %, 116.58 W), 2026-11-13 15:50 (96 %,
+# 139.19 W), 2026-11-14 12:23 (99 %, 153.62 W) and 2026-11-14 12:26 (100 %, 114.13 W).
+# `foreign_legs` is 0 in EVERY stored reading and counts only THIS line's runners (`pub_bench_run.py` +
+# `gate_run.py`), so a busy brain with no runner of this line is another tenant decoding. Re-running the
+# pre-fix gate over exactly those five files names the size of the hole honestly: 2026-11-11 10:30 and
+# 2026-11-13 15:50 were answered GO (the GPU never entered the decision), 2026-11-13 13:00 NO-GOed on
+# engine state D and the two 2026-11-14 readings were input gaps (engine_pcpu NaN, fail-closed by the
+# tick-146 NaN rule) — so the gate blocked three of five by accident, never by seeing the contention.
+# That costs measurement, not safety: the paired-delta rule of the hard bank says a parallel arm on the
+# same serve changes batching/queue state and flips 2-4 discordant cells with no contour event on them.
+# Why a WINDOW and not the existing single sample: `gpu_util_pct` is one instantaneous nvidia-smi
+# read and it is burst-blind. Live probe 2026-11-14 13:54 read `gpu_util_pct=0` at 108.35 W / 59 C
+# (a direct nvidia-smi read, not a stored reading) while the serve log's adjacent lines are
+# `pp=93554/92483c 1.3s 832t/s` and `pp=96301/94341c 1.7s 1145t/s` — re-verified by grep at 14:12.
+# The pairing was re-measured at 14:1x: five consecutive 1 Hz reads gave utilization 0 % with power
+# falling 96.49 -> 40.66 -> 34.43 -> 31.05 -> 27.51 W, i.e. utilization is 0 between requests while
+# the power tail names the burst that just happened. The log itself sizes the traffic this line never
+# sees: 59 876 completed requests in the current serve log, 2 793 of them with prompts over 150 000
+# tokens, the largest `pp=260052/0c 78.3s 3322t/s ... end=length` — none of it produced by this line
+# (`pgrep` for gate_run/pub_bench_run on the endpoint box: empty). A 1 Hz sample over the producer's
+# own 6 s window sees the excursions; the single sample did not.
+# 50.0 is pre-registered INSIDE the measured gap: every idle-class reading is <= 19 % (94 of the 104
+# numeric readings are exactly 0.0) and the mildest saturated reading is 96 %, so the ceiling sits
+# 31 pp above the idle class and 46 pp below the busy class. The two partial single-sample catches
+# (29 % at 39.4 W, 47 % at 27.2 W) fall BELOW the ceiling on purpose: un-windowed single samples
+# cannot be told from the tail of a leg that just finished, and a false GO here is recoverable while
+# a false NO-GO is paid by every tick.
+# Absent key = not covered, so all 106 stored readings keep byte-identical output and verdicts.
+GPU_UTIL_MEAN_KEY = "gpu_util_mean_pct"
+GPU_UTIL_PEAK_KEY = "gpu_util_peak_pct"
+GPU_UTIL_MAX_MEAN_PCT = 50.0
+GPU_UTIL_MAX_PCT = 100.0
 REQUIRED = (
     "mem_total_mib", "mem_available_mib", "swap_total_mib", "swap_free_mib",
     "engine_state", "engine_pcpu", "engine_rss_mib", "gpu_util_pct", "gpu_power_w",
@@ -393,6 +449,45 @@ def main() -> int:
                   "unknown scope is never judged by borrowing one.")
             return 1
 
+    # GPU contention WINDOW (2026-11-14, tick 148): mean and peak utilization sampled at 1 Hz over
+    # the producer's own 6 s window. Present = binding; absent = not covered (the 106 stored readings
+    # keep their verdicts); NaN / negative / above 100 % = input gap; a peak below the window mean is
+    # arithmetically impossible and means the two numbers came from different windows.
+    gpu_mean = gpu_peak = None
+    for key in (GPU_UTIL_MEAN_KEY, GPU_UTIL_PEAK_KEY):
+        if key in vals:
+            try:
+                v = num(vals, key)
+            except ValueError:
+                print(f"PREFLIGHT INPUT GAP: unreadable number(s): {key}")
+                return 1
+            if not math.isfinite(v):
+                print(f"PREFLIGHT INPUT GAP: unreadable number(s): {key} — a NaN GPU sample is a "
+                      "cut window (the producer emits NaN), never healthy.")
+                return 1
+            if v < 0 or v > GPU_UTIL_MAX_PCT:
+                print(f"PREFLIGHT INPUT GAP: {key}={vals[key]} is outside 0..{GPU_UTIL_MAX_PCT} — "
+                      "a GPU utilization percentage cannot leave that range, so the sample or its "
+                      "units are broken; a broken reading is never treated as healthy.")
+                return 1
+            if key == GPU_UTIL_MEAN_KEY:
+                gpu_mean = v
+            else:
+                gpu_peak = v
+    if (gpu_mean is None) != (gpu_peak is None):
+        present = GPU_UTIL_MEAN_KEY if gpu_mean is not None else GPU_UTIL_PEAK_KEY
+        missing = GPU_UTIL_PEAK_KEY if gpu_mean is not None else GPU_UTIL_MEAN_KEY
+        print(f"PREFLIGHT INPUT GAP: {present} is present but {missing} is not — the window is "
+              "incomplete, and a mean without its peak (or the reverse) cannot be reported as one "
+              "window; an incomplete reading is never treated as healthy.")
+        return 1
+    if gpu_mean is not None and gpu_peak is not None and gpu_peak + 1e-9 < gpu_mean:
+        print(f"PREFLIGHT INPUT GAP: {GPU_UTIL_PEAK_KEY}={vals[GPU_UTIL_PEAK_KEY]} is below the "
+              f"window mean {gpu_mean:.1f} % — a peak inside a window can never sit below that "
+              "window's mean, so the two numbers were not sampled from one window; this is a "
+              "producer bug and is never treated as healthy.")
+        return 1
+
     if int(vals["health_code"]) != 200:
         reasons.append(f"/health answered {vals['health_code']}, not 200")
     if loaded_flag is False:
@@ -433,6 +528,18 @@ def main() -> int:
         reasons.append(
             f"idle-spin signature: engine {vals['engine_pcpu']} % CPU at GPU "
             f"{vals['gpu_util_pct']} % — per-task seconds and energy columns would be junk")
+    if gpu_mean is not None and gpu_mean >= GPU_UTIL_MAX_MEAN_PCT:
+        peak_txt = (f", peak {gpu_peak:.0f} % inside the same window" if gpu_peak is not None else "")
+        reasons.append(
+            f"the shared brain was busy in the sample window: GPU utilization "
+            f"{gpu_mean:.1f} % mean{peak_txt} over the producer's window "
+            f"(>= {GPU_UTIL_MAX_MEAN_PCT}) with {vals['foreign_legs']} leg(s) of this line running "
+            "— someone else is decoding on this endpoint. A leg launched here is not comparable to "
+            "a quiet-leg pair: batching/queue state changes under a parallel consumer and flips "
+            "2-4 discordant cells with no contour event on them (hard-bank paired-delta rule), and "
+            "the single instantaneous gpu_util_pct sample cannot see this state at all (live probe "
+            "2026-11-14 13:54: gpu_util_pct=0 at 108.35 W while 93 554- and 96 301-token prefills "
+            "completed in the serve log)")
     if int(vals["foreign_legs"]) > 0:
         reasons.append(f"{vals['foreign_legs']} other leg(s) on this endpoint: one leg per endpoint")
 
@@ -440,7 +547,8 @@ def main() -> int:
     for k in REQUIRED:
         print(f"  {k:<18} {vals[k]}")
     for k in (("health_loaded", "engine_serve_procs") + OPTIONAL_FLOATS
-              + (BLK_KEY, BLK_READER_KEY, SWAP_PEAK_KEY, BLK_SCOPE_KEY)):
+              + (BLK_KEY, BLK_READER_KEY, SWAP_PEAK_KEY, BLK_SCOPE_KEY,
+                 GPU_UTIL_MEAN_KEY, GPU_UTIL_PEAK_KEY)):
         if k in vals:
             print(f"  {k:<18} {vals[k]}")
     if loaded_flag is None or serve_procs is None:
@@ -457,6 +565,18 @@ def main() -> int:
         print("  (coverage) this reading carries no blk_read_mib_per_s device window — the foreign "
               "block-I/O rule is not covered; the live producer emits it since 2026-11-14, so this "
               "file predates that fix.")
+    if gpu_mean is None:
+        print("  (coverage) this reading carries no gpu_util_mean_pct/gpu_util_peak_pct window — the "
+              "shared-brain contention rule is not covered, and the single `gpu_util_pct` sample is "
+              "burst-blind; the live producer emits the 1 Hz window since 2026-11-14 14:00, so this "
+              "file predates that fix.")
+    elif gpu_peak is not None:
+        print(f"  (diagnostic) GPU utilization over the producer's window: mean {gpu_mean:.1f} %, "
+              f"peak {gpu_peak:.0f} %, against one instantaneous nvidia-smi sample of "
+              f"{vals['gpu_util_pct']} % at {vals['gpu_power_w']} W — the ceiling "
+              f"GPU_UTIL_MAX_MEAN_PCT = {GPU_UTIL_MAX_MEAN_PCT} gates the MEAN only, the peak is "
+              "reported because a burst inside a quiet mean is exactly what the single sample used "
+              "to miss")
     if swap_peak is not None:
         mean_txt = (f"{sum(swap_rate.values()):.1f} MiB/s"
                     if len(swap_rate) == len(OPTIONAL_FLOATS) else "not present in this reading")
