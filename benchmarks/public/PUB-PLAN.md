@@ -11433,3 +11433,110 @@ census table plus this plan block. What the record gains: the peak statistic's a
 empirically crossed rather than merely unmoved, and the footprint series shows the endpoint's swap
 growth (0.5 -> 6.1 GiB in one evening) that the free columns and the device rule cannot see — if the
 engine restarts under a future leg, this curve is the pre-existing evidence, not a mystery.
+
+## Tick 162 — 2026-11-14 23:47 CET: scoreboard unmoved; the generated census was caught asserting a band the data had already withdrawn — the swap-peak band state and the footprint group separation become COMPUTED cells (census `v1` -> `v2`, contract test 70 -> 87 checks) and the pre/post replay over the same 122 stored readings changes 0 verdicts and adds exactly 2 rows; the live 23:47 window is the third swap-only refusal of the day (92.7 MiB/s in, 4.6x the ceiling) with the device and the GPU both quiet; queue empty, zero legs, zero calls
+
+**The defect is in a generated table, and it is the same class as tick 155's.**
+`scripts/pub_preflight_census.py` ended its prose with `Band: nothing between <pass_max> and
+<fail_min> MiB/s` — a sentence whose truth depends on the ORDER of the two numbers it prints, and
+which therefore asserts a separation it never checks. At 23:13 that order reversed: one live
+gate-`GO` window carried an in-window swap peak of 111.4 MiB/s while the lowest peak inside a
+mean-failing window is 107.0. Running the pre-fix tool from `git show HEAD:scripts/pub_preflight_census.py`
+over the same corpus and the same window leaves the false claim at line 64 of its own output
+(`... Band: nothing between` / `111.4 and 107.0`). A presence check cannot catch that — the number
+pair is right, the claim about them is wrong.
+
+**Fix (tooling release, no contour feature, no published byte of any arm touched).** The state is
+computed from the two group extremes and printed as its own row: `SEPARATED` (an admissible gap
+exists, and the honest note that a ceiling in it fires only where the mean rule already refuses),
+`CROSSED` (the groups overlap: a ceiling high enough to spare every launchable window lets a
+mean-failing window through, a lower one refuses a window the mean rule launches — on this corpus a
+peak rule adds no refusal the mean rule does not already make) and `NO-DATA` (one group holds no
+parseable peak, so there is no interval to classify). The prose branches on the same value, and an
+empty group prints `n/a` through a new `rate()` helper instead of the word `None`, which a reader
+cannot tell apart from a measurement. The census stamp moves `pub-preflight-census-v1` -> `v2` with
+the reason in the header line; v1 tables stay published as they were written.
+
+**Replay proof, the standing form.** Pre-fix tool (HEAD bytes, run from a scratch tree against the
+same gate bytes) versus post-fix, same corpus, same frozen window `as-of 20261114-2313`: the diff of
+every table row is **2 added lines and 0 changed lines** — the two new state rows — and the verdict
+triple is identical (68 GO / 48 NO-GO / 6 input gap), as are the peak coverage cells, the band
+extremes and both arming counters. A reporting-only change, proven non-retroactive over all 122
+readings inside that window.
+
+**Test: `harness/pub_preflight_census_test.py` 70 -> 87 checks.** The base fixtures (launchable max
+5.0, mean-fail min 300.0) must read SEPARATED *and* print the separated CONCLUSION, so that branch is
+live code and not only the crossed one; one GO fixture with a 500.0 peak over the same 300.0
+mean-fail minimum must read CROSSED, must explain what a crossed band means for a ceiling, and must
+NOT print a numeric `Band: nothing between <number>` sentence (regex, not a substring, because the
+header now quotes the v1 wording as the thing being fixed); a corpus with an empty mean-failing group
+is NO-DATA with `n/a`, never a separation.
+
+**The second computed row is the anti-hazard for a STATE variable.** `footprint group separation`
+prints `SEPARATED` / `OVERLAPPING` / `INVERTED` / `NO-DATA` with its sample size. As-of 23:13 the
+class was **INVERTED** — launchable footprints 3576-6291 MiB against refused ones 3357-3537 MiB, i.e.
+every launchable window sat ABOVE every refused one — and adding the 23:47 reading makes it
+**OVERLAPPING** (launchable 3576-6291 vs refused 3357-3965, n=2/3). So the direction a naive footprint
+ceiling assumes is not merely unsupported, it is contradicted by the sample that exists; two medians
+printed side by side read to a human as a band a ceiling could be drawn from, and the cell now refuses
+that reading. Arming counters unchanged: peak 11/30, footprint 2/30, both still below the
+pre-registered 30 launchable windows.
+
+**The footprint is the state, and it walks by itself.** Engine continuity is proven by pid, not RSS:
+pid 175316 across all three footprint-carrying windows (age 06:08 -> 06:41 -> 07:16,
+`engine_serve_procs=1`, `health_loaded=true`), and its own `VmSwap` went 3576 -> 6291 -> 3965 MiB at
+22:39 / 23:13 / 23:47. +2 715 MiB between two gate-`GO` readings whose sampled 6 s windows took 0.0
+and 18.1 MiB/s in; then -2 326 MiB into a window that sampled 92.7 MiB/s in and 0.0 out while total
+swap in use fell 12 573 -> 10 967 MiB, i.e. the pages coming back home. A 2.7 GiB round trip in 34
+minutes with zero legs running is the same blindness tick 151 measured from the device side, and it
+is now a sentence in the generated census, not only in this plan block — which is exactly why the
+footprint is censused and NOT banded.
+
+**The live window (one ssh reading, no leg launched).** 23:47 answers NO-GO on exactly one rule:
+`swap_in 92.7 + swap_out 0.0 = 92.7 MiB/s`, 4.6x `SWAP_RATE_MAX_MIB_S = 20.0`, with a 297.2 MiB/s
+peak inside the same window; GPU mean 2.3 % (peak 9), device 0.1 MiB/s whole-disk, `MemAvailable`
+19 762 MiB, `SwapFree` 54 568 of 65 535 — every free column green while the model's pages move. Third
+swap-only refusal of the day (after ticks 157 and 158) and the largest mean of the three; the two
+windows between them passed at 0.0 and 18.1 MiB/s, the second of them 1.9 MiB/s under the ceiling
+(tick 161).
+
+**Census arithmetic (regenerated, `--check` back to 0 drift).** 123 stored readings = 68 GO /
+49 NO-GO / 6 input gap; as-of-day 51 readings (31 GO / 16 NO-GO / 4 gap); peak coverage 28 (NaN 2,
+parseable 26), band set 24 gate-judged, passing 15 / failing 9. `launchable (GO) windows in the last
+24 h` moved 32 -> 31 with **zero reclassification**: one named file, `preflight-20261113-2332.txt`
+(gate rc 0, and it carries none of the post-fix window keys), aged past the sliding cutoff between
+the 23:13 and 23:47 windows. Leg completions in that window: 0.
+
+**Queue.** `scripts/pub_three_arm_parity_check.py`: 49 digest rows / 9 in-force sets / **0 findings**
+— every in-force set already carries bare + codex + contour-matched, and every Grok cell carries the
+cancellation sentence. A GO window today would have bought one arming credit and nothing else; the
+23:47 window refused anyway, and there was nothing for it to refuse.
+
+**Hygiene (nothing acted on).** Legacy hard-bank watchers `f23cf5d48e11` / `a808c7f205a6` completed
+23:41 and 23:45 — still enabled, still inert, only because
+``~/.hermes/mac-v22full-launch.state`` exists (verified on the literal path, 26 B,
+2026-11-02 14:05); drain guard `9a12508f8a69` completed 23:40. The executions DB shows exactly one
+running tick, this one (23:46:26). The daily GitHub docs-freshness job `ef7ea47ff99b` (02:00) is
+`last_status=ok`, `failure_streak=0` — no dirty-tree docs failure to report today. Second worktree
+`~/projects/strata-autonomous-harness`: detached HEAD `8ccef67` is now PROVEN an ancestor of `main`
+(`git merge-base --is-ancestor`), which closes tick 134's orphan-CHG-001 question as "already on
+main, nothing lost"; staged index empty; deviation set = 7 UNTRACKED paths (3 scratch files inside
+the published `benchmarks/public/raw/` namespace + 4 fleet OS snapshots 2026-11-11..2026-11-14) —
+the owning workstream's decision, nothing committed or deleted there.
+
+**Gates on this head.** `scripts/push_ready.sh` (manifest, links, docs policy, gitleaks, and the five
+PUB gates: arms index, derived percents, grok cells, superseded cells, digest rows) and
+`scripts/security/secret_scan.py --dir . --strict` run unshielded, rc 0. Hermetic PUB contract
+suite: **15 tests, 0 failures, 536 checks** (519 -> 536; the delta is exactly this tick's 17 new
+census checks) — 34 `pub_arms_index` + 22 `pub_cloud_blank_purge` + 41 `pub_derived_percent` + 22
+`pub_digest_row_gate` + 7 digest writer + 9 `pub_grok_cancel` + 27 `pub_grok_cell` + 39
+`pub_grok_resume_check --write-pin` + 33 `pub_grok_resume_check` + 87 `pub_preflight_census` + 117
+`pub_preflight` + 42 `pub_bench_run engine-stamp` + 34 `pub_superseded_cell` + 43
+`pub_taskfile_shape` + 20 three-arm parity. Zero model calls: temp fixtures and stubbed transports.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action, **no published benchmark percent moved**. Moved: the census tool, its contract
+test, the regenerated `PREFLIGHT-CENSUS.md` (stamp v2, window `as-of 2026-11-14 23:47`), and this
+block. What the record gains: the peak band is no longer described as separated when it is not, the
+footprint's group direction is named instead of implied, and the evening's ±2.7 GiB engine-swap
+oscillation is on the record before any leg can be blamed for it.

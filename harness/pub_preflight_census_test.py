@@ -45,6 +45,15 @@ What it pins:
      the coverage/arming cells count only what they name, the page-cache share divides by the
      reading's own `swap_used_mib`, and stripping the keys from identical fixtures moves no verdict
      and no peak-band cell — the non-retroactivity proof for a key no stored reading carries.
+  11. the swap-peak band STATE is computed from the two group extremes, never asserted by a fixed
+     sentence (census v2, 2026-11-14 23:13). v1 always printed "Band: nothing between X and Y"; when
+     one live GO window carried an 111.4 MiB/s in-window peak against a 107.0 mean-failing minimum,
+     the interval it described was empty and the table said nothing about that. SEPARATED, CROSSED
+     and NO-DATA must be distinguishable on fixtures, a crossed corpus must NOT print the separated
+     sentence, and an empty group prints `n/a`, never `None`.
+  12. the FOOTPRINT group separation is computed too, with its sample size printed: SEPARATED,
+     OVERLAPPING, INVERTED or NO-DATA. Two medians printed side by side read to a human as a band a
+     ceiling could be drawn from, and at n=2/2 (the live coverage) nothing supports one.
 """
 import os
 import re
@@ -377,6 +386,101 @@ def main():
                 shutil.rmtree(d4, ignore_errors=True)
         finally:
             shutil.rmtree(d3, ignore_errors=True)
+
+        # 11. band STATE is computed, never asserted (measured 2026-11-14 23:13). v1 of the census
+        #     printed "Band: nothing between <pass_max> and <fail_min>" unconditionally. One live GO
+        #     window then carried an in-window swap peak of 111.4 MiB/s while the lowest
+        #     mean-failing peak is 107.0: the two groups overlap, that interval is empty, and the
+        #     generated table kept describing it as if it existed — the same defect class as the
+        #     scope-mislabelled device ceiling (tick 155). Three states must be distinguishable from
+        #     the fixtures, and the crossed corpus must NOT print the separated sentence.
+        base_state = cell(out, "swap-peak band state (computed, never asserted)") or ""
+        check(base_state.startswith("SEPARATED — no gate-judged window has a peak between 5.0 and "
+                                    "300.0 MiB/s"),
+              "the base fixture set (launchable max 5.0, mean-fail min 300.0) is SEPARATED, got %r"
+              % base_state)
+        check("so a ceiling placed in that gap fires only" in " ".join(out.split()),
+              "the separated corpus prints the separated CONCLUSION, so that prose branch is live "
+              "code and not only the crossed one")
+        crossed = dict(FIXTURES)
+        crossed[F1] = {"swap_total_peak_mib_per_s": "500.0"}   # GO window, peak above fail_min
+        with tempfile.TemporaryDirectory() as tmpx:
+            write_fixtures(tmpx, crossed)
+            rcx, outx = run(["--dir", tmpx, "--as-of", "%s-0005" % DAY])
+            check(rcx == 0, "the crossed-band census run exits 0, got %s" % rcx)
+            xs = cell(outx, "swap-peak band state (computed, never asserted)") or ""
+            check(xs.startswith("CROSSED — the highest launchable peak 500.0 MiB/s"),
+                  "one GO window with a 500.0 peak over a 300.0 mean-fail minimum must read "
+                  "CROSSED, got %r" % xs)
+            flatx = " ".join(outx.split())
+            check("the groups overlap" in flatx,
+                  "the crossed state says what a crossed band means for a ceiling")
+            check(not re.search(r"Band: nothing between [0-9]", outx),
+                  "a crossed corpus must NOT print a numeric 'Band: nothing between X and Y' "
+                  "sentence (the v1 defect)")
+            check("so a ceiling placed in that gap fires only" not in flatx,
+                  "the separated-state conclusion must not be printed for a crossed band")
+        # no-data: a corpus whose mean-failing group is empty has no interval to classify at all
+        nodata = {k: v for k, v in FIXTURES.items() if k in (F1, F3, F5)}
+        with tempfile.TemporaryDirectory() as tmpy:
+            write_fixtures(tmpy, nodata)
+            rcn, outn = run(["--dir", tmpy, "--as-of", "%s-0005" % DAY])
+            check(rcn == 0, "the no-band census run exits 0, got %s" % rcn)
+            ns = cell(outn, "swap-peak band state (computed, never asserted)") or ""
+            check(ns.startswith("NO-DATA"),
+                  "an empty mean-failing group is NO-DATA, not a separation, got %r" % ns)
+            check(cell(outn, "lowest peak inside a swap-mean-FAILING window") == "n/a MiB/s",
+                  "the failing-group minimum prints n/a, never None, got %r"
+                  % cell(outn, "lowest peak inside a swap-mean-FAILING window"))
+        # the band state is a property of the swap window, not of the footprint keys
+        check(cell(out12, "swap-peak band state (computed, never asserted)")
+              == cell(out13, "swap-peak band state (computed, never asserted)"),
+              "adding the footprint keys must not move the band state")
+
+        # 12. footprint group separation, also computed. The footprint is a STATE and no ceiling is
+        # registered for it, so the risk here is the opposite of the peak risk: two medians printed
+        # side by side read as a band to a human. The cell must name the class AND the sample size.
+        fs = cell(out12, "footprint group separation (computed, never asserted)") or ""
+        check(fs.startswith("OVERLAPPING (launchable 2 window(s) 6000-30000 MiB, refused 1 "
+                            "window(s) 12000-12000 MiB; n=2/1"),
+              "the footprint groups here overlap (6000-30000 launchable vs 12000 refused) and the "
+              "cell must say so with its sample size, got %r" % fs)
+        SEP_FIX = {
+            "preflight-%s-0021.txt" % DAY: {"engine_vmswap_mib": "1000", "swap_cached_mib": "200"},
+            "preflight-%s-0022.txt" % DAY: {"swap_in_mib_per_s": "120.0",
+                                            "swap_out_mib_per_s": "40.0",
+                                            "swap_total_peak_mib_per_s": "300.0",
+                                            "engine_vmswap_mib": "12000", "swap_cached_mib": "8000"},
+        }
+        with tempfile.TemporaryDirectory() as tmpz:
+            write_fixtures(tmpz, SEP_FIX)
+            rcs, outs = run(["--dir", tmpz, "--as-of", "%s-0022" % DAY])
+            check(rcs == 0, "the separated-footprint census exits 0, got %s" % rcs)
+            ss = cell(outs, "footprint group separation (computed, never asserted)") or ""
+            check(ss.startswith("SEPARATED (launchable 1 window(s) 1000-1000 MiB, refused 1 "
+                                "window(s) 12000-12000 MiB; n=1/1"),
+                  "a launchable footprint strictly below the refused one must read SEPARATED, "
+                  "got %r" % ss)
+        INV_FIX = {
+            "preflight-%s-0021.txt" % DAY: {"engine_vmswap_mib": "20000", "swap_cached_mib": "200"},
+            "preflight-%s-0022.txt" % DAY: {"swap_in_mib_per_s": "120.0",
+                                            "swap_out_mib_per_s": "40.0",
+                                            "swap_total_peak_mib_per_s": "300.0",
+                                            "engine_vmswap_mib": "12000", "swap_cached_mib": "8000"},
+        }
+        with tempfile.TemporaryDirectory() as tmpw:
+            write_fixtures(tmpw, INV_FIX)
+            rci, outi = run(["--dir", tmpw, "--as-of", "%s-0022" % DAY])
+            check(rci == 0, "the inverted-footprint census exits 0, got %s" % rci)
+            isi = cell(outi, "footprint group separation (computed, never asserted)") or ""
+            check(isi.startswith("INVERTED (launchable 1 window(s) 20000-20000 MiB, refused 1 "
+                                 "window(s) 12000-12000 MiB; n=1/1"),
+                  "a launchable footprint strictly ABOVE the refused one must read INVERTED, "
+                  "never a band a ceiling could be drawn from, got %r" % isi)
+        # a corpus with no footprint key at all must not invent a class
+        fs_none = cell(out13, "footprint group separation (computed, never asserted)") or ""
+        check(fs_none.startswith("NO-DATA"),
+              "no footprint coverage reports NO-DATA, not a separation")
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()

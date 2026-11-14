@@ -168,6 +168,20 @@ def band(rows, swap_max):
     failing = [r for r in withpeak if r["mean"] is not None and r["mean"] >= swap_max]
     verdict_nogo_peaks = [r["peak"] for r in judged if r["rc"] == 3 and r["peak"] is not None]
     verdict_go_peaks = [r["peak"] for r in judged if r["rc"] == 0 and r["peak"] is not None]
+    pass_max = max((r["peak"] for r in passing), default=None)
+    fail_min = min((r["peak"] for r in failing), default=None)
+    # Band state, computed not asserted. The first version of this tool always printed
+    # "Band: nothing between <pass_max> and <fail_min>", which is a claim about the ORDER of the
+    # two numbers. Measured 2026-11-14 23:13 the order reversed: one live GO window carried an
+    # in-window peak of 111.4 MiB/s while the lowest mean-failing peak is 107.0, so the printed
+    # sentence described an empty interval that no longer exists — the same defect class tick 155
+    # caught (a generated table disagreeing with the data it reports).
+    if pass_max is None or fail_min is None:
+        state = "no-data"
+    elif pass_max < fail_min:
+        state = "separated"
+    else:
+        state = "crossed"
     return dict(
         n_carried=sum(1 for r in rows if r["peak_present"]),
         n_nan=sum(1 for r in rows if r["peak_present"] and r["peak"] is None),
@@ -175,8 +189,7 @@ def band(rows, swap_max):
         n_parseable=len(withpeak),
         n_no_mean=len(withpeak) - len(passing) - len(failing),
         pass_n=len(passing), fail_n=len(failing),
-        pass_max=max((r["peak"] for r in passing), default=None),
-        fail_min=min((r["peak"] for r in failing), default=None),
+        pass_max=pass_max, fail_min=fail_min, band_state=state,
         go_max=max(verdict_go_peaks, default=None),
         nogo_min=min(verdict_nogo_peaks, default=None),
         arming=sum(1 for r in judged if r["rc"] == 0 and r["peak"] is not None),
@@ -203,6 +216,44 @@ def pct(v):
     return "n/a" if v is None else ("%.1f" % v)
 
 
+def rate(v):
+    """MiB/s cell text with the same n/a rule as `mib`: an empty group must never print the word
+    None, which a reader cannot tell apart from a measured value."""
+    return "n/a" if v is None else ("%.1f" % v)
+
+
+def band_state_text(b):
+    """The band's ORDER as one computed cell, so the table cannot assert a separation the data
+    withdrew. A ceiling is only worth proposing when the two groups are separated; once the
+    launchable maximum sits at or above the mean-failing minimum, every candidate threshold either
+    fires where the mean rule already fires or cuts a launchable window."""
+    pm, fm = b["pass_max"], b["fail_min"]
+    if b["band_state"] == "no-data":
+        return ("NO-DATA (one of the two groups holds no parseable peak, so no interval exists "
+                "to classify)")
+    if b["band_state"] == "separated":
+        return ("SEPARATED — no gate-judged window has a peak between %s and %s MiB/s, so a peak "
+                "ceiling could be placed in that gap without refusing any window the mean rule "
+                "launches (it would still only fire where the mean rule already refuses)"
+                % (pm, fm))
+    return ("CROSSED — the highest launchable peak %s MiB/s already sits AT OR ABOVE the lowest "
+            "mean-failing peak %s MiB/s, so the groups overlap: a ceiling high enough to spare "
+            "every launchable window lets a mean-failing window through, and a lower ceiling "
+            "refuses a window the mean rule launches. On this corpus a peak rule adds no refusal "
+            "the mean rule does not already make" % (pm, fm))
+
+
+def footprint_sep_text(fp):
+    """Footprint-group separation, also computed. At the current coverage (a handful of readings
+    carry the key) this cell exists to stop the medians from reading as a band."""
+    return "%s (launchable %d window(s) %s-%s MiB, refused %d window(s) %s-%s MiB; n=%d/%d cannot " \
+           "support a ceiling in either direction)" % (
+        fp["sep_state"].upper(),
+        fp["n_go_launchable"], mib(fp["go_min"]), mib(fp["go_max"]),
+        fp["n_nogo"], mib(fp["nogo_min"]), mib(fp["nogo_max"]),
+        fp["n_go_launchable"], fp["n_nogo"])
+
+
 def footprint(rows):
     """Coverage and distribution of the engine swap FOOTPRINT (added 2026-11-14, tick 159).
 
@@ -220,16 +271,33 @@ def footprint(rows):
     nogo = [r for r in judged if r["rc"] == 3 and r["vmswap"] is not None]
     shares = [100.0 * r["cached"] / r["used"] for r in rows
               if r["cached"] is not None and r["used"] and r["used"] > 0]
+    go_vals = [r["vmswap"] for r in launchable]
+    nogo_vals = [r["vmswap"] for r in nogo]
+    # Same rule as the peak band: the separation is COMPUTED from the two groups, never asserted by
+    # a fixed sentence. With n=2 per group on the live corpus this classifies nothing yet, and the
+    # table has to say so instead of printing two medians side by side and letting a reader draw a
+    # line through them.
+    if not go_vals or not nogo_vals:
+        sep = "no-data"
+    elif max(go_vals) < min(nogo_vals):
+        sep = "separated"
+    elif min(go_vals) > max(nogo_vals):
+        sep = "inverted"
+    else:
+        sep = "overlapping"
     return dict(
+        sep_state=sep,
         n_carried=len(carried),
         n_nan=sum(1 for r in carried if r["vmswap"] is None),
         n_parseable=len(have),
         n_go_launchable=len(launchable),
         n_nogo=len(nogo),
-        go_median=median([r["vmswap"] for r in launchable]),
-        go_max=max((r["vmswap"] for r in launchable), default=None),
-        nogo_median=median([r["vmswap"] for r in nogo]),
-        nogo_min=min((r["vmswap"] for r in nogo), default=None),
+        go_median=median(go_vals),
+        go_max=max(go_vals, default=None),
+        go_min=min(go_vals, default=None),
+        nogo_median=median(nogo_vals),
+        nogo_min=min(nogo_vals, default=None),
+        nogo_max=max(nogo_vals, default=None),
         n_share=len(shares),
         share_median=median(shares),
         share_max=max(shares, default=None),
@@ -255,9 +323,14 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
     L.append("CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over")
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
-    L.append("Census stamp: `pub-preflight-census-v1`, gate sha16 `%s`, window `as-of %s` "
-             "(%d stored readings, %d inside the window)." % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"),
-                                                              total_files, len(rows)))
+    L.append("Census stamp: `pub-preflight-census-v2`, gate sha16 `%s`, window `as-of %s` "
+             "(%d stored readings, %d inside the window). v2 adds two COMPUTED group-state rows — "
+             "the swap-peak band state and the footprint group separation — because v1 printed "
+             "\"Band: nothing between X and Y\" unconditionally, and at 23:13 on 2026-11-14 the "
+             "order of X and Y reversed: the table went on asserting an empty interval the data had "
+             "withdrawed. v1 tables are left as published; a v1 file and a v2 file are not the same "
+             "table shape." % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"),
+                               total_files, len(rows)))
     L.append("")
     L.append("Ceilings read out of the gate source at run time, so this table cannot disagree with "
              "the rule it reports: `SWAP_RATE_MAX_MIB_S = %s` (window MEAN; the peak statistic is "
@@ -300,8 +373,9 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
                  b["n_parseable"], b["n_parseable_all"] - b["n_parseable"]))
     L.append("| swap-mean-passing windows with a peak | %d |" % b["pass_n"])
     L.append("| swap-mean-failing windows with a peak | %d |" % b["fail_n"])
-    L.append("| highest peak inside a swap-mean-PASSING window | %s MiB/s |" % b["pass_max"])
-    L.append("| lowest peak inside a swap-mean-FAILING window | %s MiB/s |" % b["fail_min"])
+    L.append("| highest peak inside a swap-mean-PASSING window | %s MiB/s |" % rate(b["pass_max"]))
+    L.append("| lowest peak inside a swap-mean-FAILING window | %s MiB/s |" % rate(b["fail_min"]))
+    L.append("| swap-peak band state (computed, never asserted) | %s |" % band_state_text(b))
     L.append("| arming counter (launchable windows carrying the peak) | %d of %d |" % (
         b["arming"], ARMING_THRESHOLD))
     L.append("")
@@ -315,6 +389,7 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
         fp["n_go_launchable"], mib(fp["go_median"]), mib(fp["go_max"])))
     L.append("| footprint on gate-NO-GO windows | %d (median %s MiB, min %s MiB) |" % (
         fp["n_nogo"], mib(fp["nogo_median"]), mib(fp["nogo_min"])))
+    L.append("| footprint group separation (computed, never asserted) | %s |" % footprint_sep_text(fp))
     L.append("| page-cache share of swap in use (`swap_cached_mib` / used) | %d readings, median %s "
              "percent, max %s percent |" % (fp["n_share"], pct(fp["share_median"]),
                                             pct(fp["share_max"])))
@@ -334,7 +409,14 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
     L.append("a 6 s window belonged to the engine pid, and 52.5-57.1 % of the swap in use was ALSO")
     L.append("page-cache resident in RAM, which is why the device rule saw 0.1 MiB/s of reads through")
     L.append("the whole event (tick 151 measured the same complementarity from the other side: a")
-    L.append("443.8 MiB/s swap window at 0.1 MiB/s of device reads). No ceiling is proposed here:")
+    L.append("443.8 MiB/s swap window at 0.1 MiB/s of device reads). The footprint series that joined")
+    L.append("the census the same evening shows that state walking on its own: one engine process")
+    L.append("(pid unchanged since 16:31) held 3 576 -> 6 291 -> 3 965 MiB of `VmSwap` at 22:39 / 23:13")
+    L.append("/ 23:47 — +2 715 MiB between two gate-`GO` readings whose sampled 6 s windows took 0.0 and")
+    L.append("18.1 MiB/s in, then -2 326 MiB into a window that sampled 92.7 MiB/s in and 0.0 out while")
+    L.append("swap in use fell 12 573 -> 10 967 MiB, i.e. the pages coming back home. A state variable")
+    L.append("that moves 2.7 GiB in 34 minutes with no leg running is exactly why the footprint is")
+    L.append("censused and NOT banded. No ceiling is proposed here:")
     L.append("arming this statistic needs the same pre-registered threshold as the peak, and the")
     L.append("footprint column starts filling with the first reading that carries the key, so this")
     L.append("table's zeros are a coverage fact about stored history, not a measurement of health.")
@@ -342,14 +424,31 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
     L.append("**The two denominators, side by side, because they are not the same set.** The band above")
     L.append("is defined on the **swap-mean rule**, not on the verdict column: the highest peak in a")
     L.append("gate-`GO` window is %s MiB/s and the lowest peak in a gate-`NO-GO` window is %s MiB/s, and"
-             % (b["go_max"], b["nogo_min"]))
+             % (rate(b["go_max"]), rate(b["nogo_min"])))
     L.append("the second number is the trap - a reading can be NO-GO on the device or the GPU-mean rule")
     L.append("while its swap window is quiet at 0.0, and a NaN-carrying reading is an INPUT GAP the gate")
-    L.append("never judges at all (%d such readings carry the peak key). Band: nothing between" % b["n_nan"])
-    L.append("%s and %s MiB/s, so a peak ceiling anywhere in that interval would refuse windows the mean"
-             % (b["pass_max"], b["fail_min"]))
-    L.append("rule passes. The peak stays REPORTED, not gated, until the pre-registered arming threshold")
-    L.append("(%d launchable windows carrying the statistic) is met." % ARMING_THRESHOLD)
+    L.append("never judges at all (%d such readings carry the peak key)." % b["n_nan"])
+    if b["band_state"] == "crossed":
+        L.append("**The band has CROSSED**: the highest launchable peak (%s MiB/s) now sits at or above"
+                 % b["pass_max"])
+        L.append("the lowest mean-failing peak (%s MiB/s), so the two groups overlap. A threshold high"
+                 % b["fail_min"])
+        L.append("enough to spare every launchable window leaves at least one mean-failing window")
+        L.append("unrefused, and any lower threshold refuses a window the mean rule launches — on this")
+        L.append("corpus a peak rule adds no refusal the mean rule does not already make. The arming")
+        L.append("counter (%d of %d launchable windows carrying the statistic) counts COVERAGE, not"
+                 % (b["arming"], ARMING_THRESHOLD))
+        L.append("support for a ceiling, and reaching 30 would not change that conclusion.")
+    elif b["band_state"] == "separated":
+        L.append("Band: nothing between %s and %s MiB/s, so a ceiling placed in that gap fires only"
+                 % (b["pass_max"], b["fail_min"]))
+        L.append("where the mean rule already refuses — it is safe to add, not informative. The peak")
+        L.append("stays REPORTED, not gated, until the pre-registered arming threshold")
+        L.append("(%d launchable windows carrying the statistic) is met." % ARMING_THRESHOLD)
+    else:
+        L.append("Band: NO-DATA — one of the two groups holds no parseable peak, so no interval exists")
+        L.append("to classify yet. The peak stays REPORTED, not gated, until the pre-registered arming")
+        L.append("threshold (%d launchable windows carrying the statistic) is met." % ARMING_THRESHOLD)
     L.append("")
     return "\n".join(L) + "\n"
 
