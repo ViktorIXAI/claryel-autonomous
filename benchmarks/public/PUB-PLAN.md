@@ -10436,3 +10436,47 @@ Nothing launched. The in-force queue is empty — every in-force set carries all
 **Repository state.** `main` == `origin/main` == `ec3ba16`, `git fsck --connectivity-only --no-dangling` clean, working tree clean. The seven dirty paths that sat in `git status` since tick 143 are gone: the four stranded `hardware/os-snapshots/2026-11-11..-14.json` and three siblings were resolved by the hardware line, which owns those paths — the 11-11..-14 files are no longer on disk or in the index, and this line does not resurrect them. Machine-note consequence checked at the job's own record, not inferred from the clean tree: the daily docs-freshness job (`ef7ea47ff99b`) completed its 2026-11-14 03:00 run, `failure_streak` 0 — the daily "repo is dirty at 03:00" error class no longer reproduces.
 
 **Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, zero published benchmark bytes moved; this tick adds only this record block. What three ticks of gate work bought in one day: the preflight can now see a busy shared endpoint (GPU window), a page-refault storm (device window) and a live swap burst (counter window) — the next leg's comparability depends on the box being quiet at launch, and the series data says that window opens and closes within the hour.
+
+## Tick 150 — 2026-11-14 15:30 CET: scoreboard unmoved; a GO window opened and there is nothing to launch in it — the queue, not the gate, is the binding constraint; engine hold passes 25 h (zero legs, zero calls, zero published benchmark bytes moved)
+
+Nothing launched. The fresh producer read at 15:30 (`preflight-20261114-1530.txt`) answers
+**PREFLIGHT GO, exit 0** — the first GO since the 14:15 reading, sandwiched between the 13:58 and
+14:56 swap-churn NO-GOs — and the queue in force is empty, so the window opened onto no candidate
+leg. This is the third consecutive tick whose blocking input is a new-set decision rather than a
+gate change: every in-force set carries all three admissible arms (bare / contour 0.0.2.56
+matched shape / codex), every Grok cell stays closed by the owner quota decision of 2026-11-12,
+and the "later" ladder rows (Terminal-Bench, SWE-bench Verified subset, GAIA-lite) are owner
+decisions, not this line's to open.
+
+**Why the GO is clean on every axis the gate now has.** Swap-in window mean **3.9 MiB/s** against
+the 20.0 ceiling — the churn signature of 13:58 (83.7) and 14:56 (56.9) had subsided; the window's
+**peak swap statistic read 24.0 MiB/s, above the mean ceiling and correctly NOT gated** (the
+peak is a reported statistic until it has its own measured band, tick-146 discipline), whole-disk
+reads **0.1 MiB/s** with top reader `basalt`, GPU window **mean 0.0 % / peak 0 %** at 26.41 W,
+MemAvailable 18.5 GiB, swap_free 49.5 GiB, engine state S with sampled pcpu 6.7 % (the live field
+tick 146 restored), `/health` 200 with `loaded=true`, one serve process, `foreign_legs=0`.
+Engine hold: one process, age **1 d 01:17 — 25 h 17 min**, the longest of the band.
+
+**Reading census (re-run of the current gate over every stored file, in-process returncodes, not a
+restatement): 109 files — 63 GO / 40 NO-GO / 6 input gaps.** That is tick 149's 108 / 62 / 40 / 6
+plus exactly this tick's GO; the input-gap count is unchanged. Today's files: 37, with 26 GO /
+7 NO-GO / 4 input gaps.
+
+**Gates and tests.** All five PUB publication gates green: `pub_arms_index --check`,
+`pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`,
+`pub_digest_row_check`. The preflight contract test is green at **103/103** (unchanged this tick —
+no gate code moved). `pub_grok_resume_check --as-of 2026-11-14` exits 3 with the in-force
+cancellation finding (IFEval pin: 182 unasked ids as record, not queue; gpqa/humaneval/mmlu-pro
+resume sets 0 ids) — the guard answering correctly on the owner decision, not an incident.
+
+**Repository state.** `main` == `origin/main` == `0e7be82` at the tick start, working tree clean.
+CI green on that head (`contour self-tests`, `secret-scan`, `hard-v6 scoring contracts` all
+success); the first `gh` read of the tick failed transiently and the retry read green — recorded,
+like tick 136, as an api-host flake with git transport healthy throughout (`ls-remote` answered on
+the first attempt).
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, zero published benchmark
+bytes moved; this tick adds only this record block plus one stored preflight reading. What the
+GO-onto-an-empty-queue tick shows: the gate work of ticks 145–148 is now the easy part of the next
+leg — finding a launchable window costs one 6 s producer read and it comes open often enough (26 GO
+of 37 today), and what actually stops a leg is the absence of a next set.
