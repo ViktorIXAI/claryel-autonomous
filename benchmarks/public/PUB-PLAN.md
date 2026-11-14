@@ -176,6 +176,18 @@ the same window; swap-peak coverage 18 readings carry the key (2 NaN, 16 parseab
 gate-judged, band unchanged at **67.6 / 107.0**, arming counter **8 of 30**. The 36-vs-0 cell is the
 line's actual state in one number: the gate is no longer the constraint, the absence of a next set is.
 
+*(corrected 2026-11-14 18:47, tick 155 — no stored reading, no verdict and no band number in this
+section moved)*: the phrase "reads the three ceilings out of the gate source at run time" understates
+the rule it reports. The gate's device ceiling is **scope-dependent**, and the first version of the
+table printed only `BLK_READ_MAX_MIB_S = 100.0` while annotating it as the whole-disk ceiling; the
+number actually enforced on every reading carrying `blk_scope=whole-disk` is
+`BLK_READ_MAX_MIB_S_WHOLE = 50.0`, and 100.0 applies only to readings with no scope key at all. The
+census now parses four constants (fail-closed on a missing one), binds each device number to its scope
+in words, counts the readings per scope as its own row, and the contract test (**40 -> 50 checks**)
+proves both scales by driving the real gate on one device number - 60.0 MiB/s: NO-GO when scoped, GO
+when unscoped, input gap for an unknown scope value. Tick 155 carries the finding plus the replay proof
+that no stored verdict moved.
+
 ## Publication-completeness census (2026-11-12, zero model calls)
 
 Every shipped public arm was re-scored from its shipped answer bytes with the pinned checker, and
@@ -10804,3 +10816,119 @@ no engine action, **no published benchmark byte moved** — the new census table
 a percent row. What moved: the tick's own census arithmetic is now reproducible and falsifiable
 instead of restated, and the queue-vs-window question the last four ticks kept answering in prose has
 a number (36 GO windows, 0 legs).
+
+## Tick 155 — 2026-11-14 18:47 CET: scoreboard unmoved; the census tool was caught disagreeing with the gate it reports — the device ceiling is SCOPE-DEPENDENT and the table printed only the other scale's number (40 checks -> 50, two-sided control through the real gate); NO-GO busy-brain window, zero legs, zero calls, zero published benchmark percent moved
+
+Nothing launched — the queue in force is still empty (ticks 149-154's constraint, unchanged): every
+in-force set carries all three admissible arms, the Grok cells stay closed by the owner quota decision
+of 2026-11-12, and the "later" ladder rows remain owner decisions.
+
+**What moved this tick is a defect in the tool tick 154 shipped, found by reading its own table
+against its own verdicts.** The new census prints "Ceilings read out of the gate source at run time,
+so this table cannot disagree with the rule it reports" and then names one device number:
+`BLK_READ_MAX_MIB_S = 100.0`, annotated "(whole-disk scope; readings without a scope key stay on the
+old inflated scale ...)". That annotation is the reverse of the gate's rule. The gate
+(`scripts/pub_preflight.py`, since the tick-146 scope fix) keeps two ceilings:
+
+* `BLK_READ_MAX_MIB_S_WHOLE = 50.0` — applied to every reading that carries `blk_scope=whole-disk`;
+* `BLK_READ_MAX_MIB_S = 100.0` — applied **only** to readings with no scope key at all (the old
+  diskstats sum, which counted each partition on top of its parent disk, i.e. about 2x the device);
+* an unrecognised `blk_scope` value is an input gap the gate refuses to judge, never a borrowed
+  ceiling.
+
+So the table stated 100.0 as the whole-disk ceiling and never printed the 50.0 that is actually in
+force for every scope-marked reading — a factor-of-2 misstatement of the device rule for exactly the
+readings the current producer writes. It is not a cosmetic label bug, and the evidence sits in this
+tick's own reading: `preflight-20261114-1847.txt` reports **56.2 MiB/s whole-disk** and the gate
+refused it ("block-device reads 56.2 MiB/s ... >= 50.0, scope whole-disk"). A reader of the census
+table would have called that window launchable on the device rule. Same class as the two standing
+lessons on this line — a guard that fires by accident is not a guard, and a printed number beside a
+verdict is not the verdict: the pre-registered swap-peak **arming** decision (30 launchable windows,
+then a ceiling strictly above the highest launchable peak) will be set against a ceiling number, and a
+table that mislabels which scale that number belongs to is how the next ceiling gets armed 2x wrong.
+
+Why the green suite did not see it: tick 154's test asserted, for each ceiling name, that the string
+`` `NAME = value` `` appears in the table. It did appear — bound to the wrong scope. **A presence pin
+cannot pin a binding.** The fix therefore pins the binding mechanically:
+
+* the census now parses **four** constants out of the gate source at run time (`SWAP_RATE_MAX_MIB_S`,
+  `GPU_UTIL_MAX_MEAN_PCT`, `BLK_READ_MAX_MIB_S`, `BLK_READ_MAX_MIB_S_WHOLE`) and fails closed if any
+  is missing, so a future rename in the gate reddens the census instead of silently dropping a rule;
+* the ceiling paragraph binds each device number to its scope in words ("applies to every reading
+  carrying `blk_scope=whole-disk`" / "applies only to readings with NO scope key"), states that the
+  two numbers are the same physical point, and carries the dated measured counter-example above;
+* new census row `device scope of the readings in this window`: **15 whole-disk (`50.0` ceiling) /
+  99 unscoped (`100.0` ceiling) / 0 unknown scope** — the scope is now a counted dimension of the
+  census, not an assumption;
+* `harness/pub_preflight_census_test.py` **40 -> 50 checks**, the new ones being a two-sided control
+  that drives the REAL gate on one device number (60.0 MiB/s) in three shapes: scoped
+  (`blk_scope=whole-disk`) -> **NO-GO**, no scope key -> **GO**, unknown scope value -> **input gap**.
+  Non-vacuity of the phrase pins is proven on the pre-fix bytes: the table committed at tick 154
+  contains **0** occurrences of `BLK_READ_MAX_MIB_S_WHOLE` and does carry the sentence
+  "`BLK_READ_MAX_MIB_S = 100.0` (whole-disk scope; ..." — the new checks fail on those bytes and pass
+  on the new ones.
+
+**No stored verdict moved.** The gate code was not touched (its contract test stays **103/103**); only
+the census's reporting changed, and the census re-runs the gate over every retained reading, which is
+itself the replay proof: 113 readings at tick 154 = 65 GO / 42 NO-GO / 6 input gaps, and 114 readings
+now = **65 GO / 43 NO-GO / 6 input gaps** — exactly this tick's new NO-GO added, zero re-judgements.
+The generated `benchmarks/public/PREFLIGHT-CENSUS.md` was rewritten by the tool (`--as-of
+20261114-1847`) and `--check` re-derives it byte-for-byte.
+
+**Machine-derived census (the tool, not prose), `as-of 2026-11-14 18:47`, gate sha16
+`68705b7b41cb1239`:** 114 stored readings — **65 GO / 43 NO-GO / 6 input gaps**; the as-of day 42
+files = 28 GO / 10 NO-GO / 4 gaps; **35 launchable (GO) windows in the last 24 h against 0 leg
+completions recorded** in `queue.log` in the same window. The 36 -> 35 move is the window sliding, not
+a reclassification, and it is attributed mechanically: the 2026-11-13 readings 17:06 / 17:42 / 18:16 /
+18:50 are all GO, and the 24 h cutoff moved from 13 Nov 17:51 to 13 Nov 18:47, which drops exactly
+`preflight-20261113-1816.txt`. Swap-peak coverage 19 readings carry the key (2 NaN, 17 parseable),
+band set 15 gate-judged (11 swap-mean-passing / 4 failing), band unchanged at **67.6 (passing max) /
+107.0 (failing min)**, nothing between, peak still reported-not-gated; arming counter **8 of 30**
+(this tick's window is NO-GO, so it adds band coverage but no arming credit).
+
+**The endpoint: a second busy-brain NO-GO on the current engine.** `preflight-20261114-1847.txt`
+exits 3 on two rules naming one actor: whole-disk device reads **56.2 MiB/s** (>= 50.0, top reader
+`basalt`) and GPU utilization **mean 98.0 % / peak 100 %** inside the producer window (>= 50.0 mean)
+with `foreign_legs=0` — the shared brain is decoding for someone else, at 137.46 W with the engine at
+1378.5 % sampled CPU. Swap is the quietest of the day (mean 0.0 + 0.0, peak 0.1 MiB/s), `MemAvailable`
+19.1 GiB, `swap_free` 55.7 GiB, `/health` 200 `loaded=true`, one serve process, load1 13.16. Engine
+identity: pid **175316**, age **02:16:21** — the same process tick 152-154 tracked, so no restart
+since 16:31:23 and the RSS-continuity watch stays voided only across that restart. One warm-band note
+for the record: the same pid read RSS **57 374 MiB** idle at 17:51 and **54 310 MiB** under load at
+18:47, i.e. the 57.7 GiB warm figure is an idle-warm value, and process identity (pid + `serve_procs`
++ `/health`), not RSS, is what proves engine continuity. 17:16 NO-GO (busy) -> 17:51 GO (quiet) ->
+18:47 NO-GO (busy) is the same box alternating inside 90 minutes, which is why a GO is valid for its
+own reading only.
+
+**Gates and tests.** All five PUB publication gates exit 0 at the tick's HEAD (`pub_arms_index
+--check`, `pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`,
+`pub_digest_row_check`); the census adds `pub_preflight_census.py --check` = 0 against the rewritten
+table. `pub_grok_resume_check --as-of 2026-11-14` exits **3** with the in-force cancellation record
+(the guard answering correctly on the owner decision). Contract tests: preflight **103/103** (gate
+bytes untouched), census **50/50**, taskfile shape **43/43**.
+`scripts/security/secret_scan.py --dir . --strict` exits **0** unshielded.
+
+**Frozen-line hygiene.** Legacy hard-bank 5-min watcher `f23cf5d48e11` enabled and inert (last run
+18:47 ok): the state marker `~/.hermes/mac-v22full-launch.state` exists on the literal path (dated
+2026-11-02 14:05), checked with `ls` per the tick-111 lesson. Daily docs job `ef7ea47ff99b` last run
+**03:02 ok, failure_streak 0** — green for the third day running, the standing "dirty tree at 03:00"
+note stays unfired. Drain guard `9a12508f8a69` active, last run 18:50 ok.
+
+**Repository state.** `main` == `origin/main` == `c71c63b` at the tick start, working tree clean,
+`git rev-list --left-right --count main...origin/main` = 0/0. CI green on that head (`contour
+self-tests`, `secret-scan`, `devsecops`, `hard-v6 scoring contracts`, `pages-build-deployment` all
+success). The newest commits before this tick are foreign to this line (P3032 / RX-580 hardware docs)
+and were read, not touched. Second-worktree census (`~/projects/strata-autonomous-harness`): HEAD
+still detached at `8ccef67`, which `git merge-base --is-ancestor` again proves **is an ancestor of
+`origin/main`** — no orphan deviation; staged diff empty, so the staged-deletions hazard is clean;
+untracked accumulation still **7** files (three scratch files inside the published
+`benchmarks/public/raw/` namespace plus four `hardware/os-snapshots/` dated 2026-11-11..2026-11-14),
+unchanged since tick 154. Recorded as the owning workstreams' decision; this line commits nothing
+foreign.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action, **no published benchmark percent moved** — the corrected artifact is a gate census
+table. What moved: the census can no longer print a ceiling bound to the wrong scale, the device scale
+became a counted census dimension, and the tool's headline claim ("this table cannot disagree with the
+rule it reports") is now actually pinned — by a control that makes the same device number verdict-
+differently under the two scopes.

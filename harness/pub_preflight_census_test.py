@@ -33,7 +33,11 @@ What it pins:
   7. `--check` is byte-exact against the committed table, and editing a stored reading inside the
      window makes it drift — stored readings are immutable evidence;
   8. the ceilings printed in the table are read out of the gate source at run time, so the census
-     can never print a number the gate does not enforce;
+     can never print a number the gate does not enforce, AND each number sits next to the scope it
+     governs: the device ceiling is scope-dependent (50.0 for `blk_scope=whole-disk`, 100.0 only for
+     readings carrying no scope key). Non-vacuity runs the REAL gate on one device number (60.0)
+     three ways - scoped (NO-GO), unscoped (GO), unknown scope value (input gap) - which is the only
+     control that separates a correct ceiling table from one that mislabels the number;
   9. the table is deterministic over a frozen `--as-of` window, and that bound really excludes
      later readings.
 """
@@ -111,6 +115,8 @@ def write_fixtures(d, fixtures=None):
     for name, over in (fixtures if fixtures is not None else FIXTURES).items():
         vals = dict(HEALTHY)
         vals.update(over)
+        # an override value of None deletes the key: how the unscoped/old-scale reading is built
+        vals = {k: v for k, v in vals.items() if v is not None}
         with open(os.path.join(d, name), "w", encoding="utf-8") as fh:
             for k, v in vals.items():
                 fh.write("%s=%s\n" % (k, v))
@@ -228,12 +234,47 @@ def main():
 
         # 8. ceilings come out of the gate source, so the table cannot disagree with the rule
         gate_src = open(GATE, encoding="utf-8").read()
-        for const in ("SWAP_RATE_MAX_MIB_S", "GPU_UTIL_MAX_MEAN_PCT", "BLK_READ_MAX_MIB_S"):
+        for const in ("SWAP_RATE_MAX_MIB_S", "GPU_UTIL_MAX_MEAN_PCT",
+                      "BLK_READ_MAX_MIB_S", "BLK_READ_MAX_MIB_S_WHOLE"):
             m = re.search(r"^%s\s*=\s*([0-9.]+)" % const, gate_src, re.M)
             check(bool(m), "the gate defines %s" % const)
             if m:
                 check("`%s = %s`" % (const, m.group(1)) in out,
                       "the census prints the gate's own %s = %s" % (const, m.group(1)))
+        # 8b. the DEVICE ceiling is scope-dependent, and printing the number is not enough: the
+        #     first version of this table printed only the 100.0 and labelled it "whole-disk
+        #     scope", which contradicted its own verdict column (the gate refused a whole-disk
+        #     56.2 MiB/s reading). Each number must sit next to the scope it governs.
+        flat = " ".join(out.split())
+        check("BLK_READ_MAX_MIB_S_WHOLE = 50.0` applies to every reading carrying "
+              "`blk_scope=whole-disk" in flat,
+              "the whole-disk ceiling is printed WITH its scope")
+        check("BLK_READ_MAX_MIB_S = 100.0` applies only to readings with NO scope key" in flat,
+              "the old inflated-scale ceiling is printed WITH its scope")
+        check("unknown scope" in flat, "an unknown scope value is named as its own class")
+        with tempfile.TemporaryDirectory() as tmp2:
+            rows = {
+                "preflight-%s-0001.txt" % DAY: {"blk_read_mib_per_s": "60.0"},
+                "preflight-%s-0002.txt" % DAY: {"blk_read_mib_per_s": "60.0",
+                                                "blk_scope": None},
+                "preflight-%s-0003.txt" % DAY: {"blk_read_mib_per_s": "60.0",
+                                                "blk_scope": "diskstats-sum"},
+            }
+            write_fixtures(tmp2, rows)
+            rc2a, out2a = run(["--dir", tmp2, "--as-of", "%s-0003" % DAY])
+            check(rc2a == 0, "census over the scope-control fixtures exits 0 (rc=%s)" % rc2a)
+            check(int_cell(out2a, "gate verdict NO-GO") == 1,
+                  "the same device number 60.0 IS refused when blk_scope=whole-disk "
+                  "(ceiling 50.0), got NO-GO=%r" % cell(out2a, "gate verdict NO-GO"))
+            check(int_cell(out2a, "gate verdict GO") == 1,
+                  "the same 60.0 passes with NO scope key (ceiling 100.0) - the two scales "
+                  "give different verdicts, so one printed number cannot cover both")
+            check(int_cell(out2a, "gate verdict input gap") == 1,
+                  "an unrecognised blk_scope value is never judged by borrowing a ceiling")
+            sc = cell(out2a, "device scope of the readings in this window") or ""
+            check(sc.startswith("1 whole-disk (`50.0` ceiling) / 1 unscoped (`100.0` ceiling) "
+                                "/ 1 unknown scope"),
+                  "the census counts readings per device scale, got %r" % sc)
 
         # 9. determinism over a frozen window, and the bound really windows
         rc9, out9 = run(["--dir", tmp, "--as-of", "%s-0005" % DAY])

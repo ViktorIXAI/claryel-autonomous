@@ -16,7 +16,19 @@ NOT the same set:
 So the census is a tool: it runs `scripts/pub_preflight.py` as a subprocess over every stored
 reading (the gate's returncode, never a restatement), and derives the band and the arming
 counter from the rule the band is defined on, printing both denominators side by side so the
-misreading cannot recur. It moves no published benchmark byte and registers no contour feature.
+misreading cannot recur.
+
+A third denominator the first version of this tool got wrong (2026-11-14 18:47): the gate's own
+device ceiling is SCOPE-DEPENDENT (`BLK_READ_MAX_MIB_S_WHOLE = 50.0` for readings carrying
+`blk_scope=whole-disk`, `BLK_READ_MAX_MIB_S = 100.0` only for readings with no scope key, the old
+diskstats sum that double-counts partitions). The first table named only 100.0 and labelled it
+"whole-disk scope", so the printed table contradicted the verdicts it was reporting: the 18:47
+reading (whole-disk, 56.2 MiB/s) is a gate NO-GO while the table implied its ceiling was 100.0.
+The table now prints both numbers beside their scope and counts the readings per scope; the
+contract test pins both ceilings by driving the REAL gate on the same device number with and
+without the scope key (60.0: NO-GO scoped, GO unscoped).
+
+It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
 keeps connection material out of the repo), so this census is not CI-enrolled: its arithmetic is
@@ -59,12 +71,28 @@ def gate_constants():
     """Read the ceilings out of the gate source so the census can never disagree with it."""
     src = open(GATE, encoding="utf-8").read()
     out = {}
-    for key in ("SWAP_RATE_MAX_MIB_S", "GPU_UTIL_MAX_MEAN_PCT", "BLK_READ_MAX_MIB_S"):
+    for key in ("SWAP_RATE_MAX_MIB_S", "GPU_UTIL_MAX_MEAN_PCT",
+                "BLK_READ_MAX_MIB_S", "BLK_READ_MAX_MIB_S_WHOLE"):
         m = re.search(r"^%s\s*=\s*([0-9.]+)" % key, src, re.M)
         if not m:
             raise SystemExit("CENSUS GAP: gate source has no %s constant" % key)
         out[key] = float(m.group(1))
     return out
+
+
+def device_scope(txt):
+    """Which device-read scale a stored reading is on (mirrors the gate's own rule).
+
+    The gate refuses at `BLK_READ_MAX_MIB_S_WHOLE` when `blk_scope=whole-disk` and at
+    `BLK_READ_MAX_MIB_S` only when the key is ABSENT (the old doubled diskstats sum); an
+    unrecognised value is an input gap. Naming one ceiling without naming its scope is how a
+    table ends up disagreeing with the rule it claims to report, so the census reads the key per
+    file and counts both groups.
+    """
+    m = re.search(r"^blk_scope\s*=\s*(\S*)", txt, re.M)
+    if not m:
+        return "unscoped"
+    return "whole-disk" if m.group(1).strip() == "whole-disk" else "unknown"
 
 
 def parse_stamp(path):
@@ -116,6 +144,7 @@ def census(directory, as_of, day, window_hours):
         rows.append(dict(ts=ts, name=os.path.basename(f), rc=rc,
                          peak=pk if (pk_present and pk_ok) else None,
                          peak_present=pk_present,
+                         scope=device_scope(txt),
                          mean=(si + so) if (si is not None and so is not None) else None))
     return rows, unnamed, as_of
 
@@ -165,17 +194,33 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
              "(%d stored readings, %d inside the window)." % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"),
                                                               total_files, len(rows)))
     L.append("")
-    L.append("Ceilings read out of the gate source at run time, so this table cannot disagree with the")
-    L.append("rule it reports: `SWAP_RATE_MAX_MIB_S = %s`, `GPU_UTIL_MAX_MEAN_PCT = %s`, "
-             "`BLK_READ_MAX_MIB_S = %s` (whole-disk scope; readings without a scope key stay on the old"
-             % (consts["SWAP_RATE_MAX_MIB_S"], consts["GPU_UTIL_MAX_MEAN_PCT"], consts["BLK_READ_MAX_MIB_S"]))
-    L.append("inflated scale and are judged by the ceiling they were judged with).")
+    L.append("Ceilings read out of the gate source at run time, so this table cannot disagree with "
+             "the rule it reports: `SWAP_RATE_MAX_MIB_S = %s` (window MEAN; the peak statistic is "
+             "reported, not gated), `GPU_UTIL_MAX_MEAN_PCT = %s` (the window mean, never the peak), "
+             "and the device-read ceiling is SCOPE-DEPENDENT: `BLK_READ_MAX_MIB_S_WHOLE = %s` applies "
+             "to every reading carrying `blk_scope=whole-disk`, while `BLK_READ_MAX_MIB_S = %s` "
+             "applies only to readings with NO scope key (the old diskstats sum, which double-counts "
+             "partitions, i.e. about 2x the device). The two numbers are the SAME physical point; a "
+             "file with an unrecognised scope value is an input gap the gate never judges. Naming one "
+             "of these numbers without its scope is exactly how a generated table starts disagreeing "
+             "with the rule it claims to report (measured 2026-11-14 18:47: a whole-disk reading of "
+             "56.2 MiB/s was refused by the gate while the first version of this table printed 100.0 "
+             "as the whole-disk ceiling)."
+             % (consts["SWAP_RATE_MAX_MIB_S"], consts["GPU_UTIL_MAX_MEAN_PCT"],
+                consts["BLK_READ_MAX_MIB_S_WHOLE"], consts["BLK_READ_MAX_MIB_S"]))
     L.append("")
     L.append("| census cell | value |")
     L.append("|---|---|")
     L.append("| gate verdict GO | %d |" % len(go))
     L.append("| gate verdict NO-GO | %d |" % len(nogo))
     L.append("| gate verdict input gap | %d |" % len(gap))
+    L.append("| device scope of the readings in this window | %d whole-disk (`%s` ceiling) / %d unscoped "
+             "(`%s` ceiling) / %d unknown scope |" % (
+                 sum(1 for r in rows if r["scope"] == "whole-disk"),
+                 consts["BLK_READ_MAX_MIB_S_WHOLE"],
+                 sum(1 for r in rows if r["scope"] == "unscoped"),
+                 consts["BLK_READ_MAX_MIB_S"],
+                 sum(1 for r in rows if r["scope"] == "unknown")))
     L.append("| readings of the as-of day | %d (%d GO / %d NO-GO / %d gap) |" % (
         len(day_rows),
         sum(1 for r in day_rows if r["rc"] == 0),
