@@ -95,6 +95,8 @@ Artifacts: `/ai/bench-580-z220.txt`, `/ai/580-samples.csv`, `/ai/smoke-580-z220.
 Note for the serving stack: our engine build is CUDA-only, so the IQ3_S brain cannot run on this card;
 the Z220 needs the RTX 3050 back to serve it.
 
+> **Editorial chronology note (2026-11-14, issue #25):** The following “Next” section is an earlier, pre-completion plan and Vulkan setup troubleshooting record, retained for provenance. The same-host RX 580 / RTX 3050 measurements reported in “Same-host card A/B — the RX 580 measured inside the Z220 (2026-11-14, done)” above are the later operator-reported outcome. The reported same-host comparison controls the workstation but not the Vulkan-versus-CUDA backend; the RTX 5090 results remain cross-host, and none of the local raw artifacts were independently replayed in this documentation audit. Do not treat the earlier plan as current operational status or the measurements as an independently verified GPU-only causal comparison.
+
 ## Next: same-host card A/B
 
 Plan (started 2026-11-14): the RX 580 moves into P3032 (Z220) so the two 8 GiB cards are measured in
