@@ -8947,3 +8947,109 @@ own row count; per-test check counts summed from each test's own summary line;
 **`refresh_docs_status.py` is a mutation, never a dry run**; transport counts taken in standalone
 calls so a bracketed pattern cannot self-match a line that also greps the literal; the keep-up log
 lives at `~/basalt/keep-up.log` on the endpoint box; daily-docs next fire 2026-11-15 02:00 UTC.
+
+---
+
+## Tick 136 — 2026-11-14 05:00 CET: engine hold 14 h 48 min on one process; band 22 GO of 24; watchdog-clone gap grows by one stranded snapshot; the CI read itself failed (api host unreachable), git transport healthy; zero legs, zero calls
+
+**Queue and legs: none, and none launched.** `systemctl --user list-units 'parb-pub-*'` empty and
+`pgrep -f 'scripts/pub_bench_(run|cloud).py'` 0 on this host; on the endpoint box
+`pgrep -cf 'gate_ru[n].py'` and `pgrep -cf '[p]ub_bench_ru[n].py'` both 0. The queue stays empty:
+every in-force set carries all three admissible arms (bare / contour 0.0.2.56 matched shape /
+ChatGPT codex), the Grok line stays closed by the owner decision of 2026-11-12 (resume gate NO-GO
+by design below), SimpleBench stays closed as unpinnable, and the "later" ladder rows need a fresh
+owner decision. Zero model calls, zero cloud calls this tick.
+
+**One instance of this brief, read from the durable scheduler store.**
+`~/.hermes/cron/executions.db` holds exactly one `running` row overall — this job
+(`PUB benchmark loop 30m`, id `288a66f93167`, started 04:59:26 CET) of 1 001 total rows. No
+double-spend.
+
+**Endpoint read (twenty-fourth stored reading of the engine-hold band, a twenty-second GO).**
+`bash preflight.sh` bare (no outer redirect): **`preflight-20261114-0500.txt` → PREFLIGHT GO**.
+Readings: swap 14 107 MiB used of 65 535 (51 428 free), MemAvailable 18 532 MiB, engine state `S`,
+live-delta pcpu 0.0 (6 s sample), RSS 56 882 MiB, GPU 0 % / 26.19 W, `health_code=200`,
+`health_loaded=true`, `engine_serve_procs=1`, foreign legs 0, load1 **7.39** — up from 4.96 but
+well below both NO-GO samples (12.0, 12.4), and this reading is a GO, not a symptom.
+
+**Band and workspace census, returncodes taken in-process.** Engine-hold band (first
+`preflight-20261113-1428.txt`, last `preflight-20261114-0500.txt`): **24 readings, 22 GO / 2 NO-GO**,
+the two non-GOs unchanged — `preflight-20261113-1923.txt` and `preflight-20261114-0207.txt`, both
+`engine in uninterruptible I/O (state D): thrashing`. Whole workspace: **81 files, 45 GO / 34 NO-GO
+/ 2 input gaps** — tick 135's 80 / 44 / 34 / 2 plus exactly this tick's one GO; the gaps stay
+`preflight-20261111-0948.txt` and `preflight-20261111-1144.txt`.
+
+**Engine continuity, read on the box, not inferred.** Same process as ticks 117–135
+(`basalt --serve`, pid 10597, `lstart Fri Nov 13 14:12:51 2026`), elapsed **53 265 s = 14 h 47 m
+45 s**, state `S`, RSS 58 405 392 KiB. `/health` names the served alias
+`qwen3.8-flash-next-iq3_s-basalt`, `"loaded": true`, `"loading": false`, max context 196 608.
+`~/basalt/keep-up.log` still 44 B with its single restart line `2026-11-13_13:07:49 keep-up
+restart` — the watchdog is still not the actor in this window.
+
+**Ops tuning campaign: eighteenth idle read, with a citation-path correction.** No `p2005_v[0-9]`
+process runs on either machine. Ticks 134–135 cited "the newest `~/fleet/p2005_v*_ab.sh`" **on the
+endpoint box; that path does not hold the launchers** — a find over the box's home puts the A/B
+scripts in `~/basalt/` (newest still `p2005_v10_ab.sh`), while `~/fleet/` holds `fleet_checkin.py`,
+`data/announce.log` and a key file, with the directory last touched **2026-11-13 15:36**, before
+both citing ticks. No file move happened during this line's window that this read can prove; the
+quote was the path, not the box. Machine state, reported, never acted on.
+
+**Daily-docs job: green at its own fire.** `GitHub docs freshness daily` (id `ef7ea47ff99b`,
+`0 2 * * *`) last completed **2026-11-14 03:02:14 CET**, failure streak 0 (the 2026-11-13 failure
+is marked recovered); next fire 2026-11-15 02:00 UTC. The brief's daily dirty-tree error stays
+unreproduced since 2026-11-14 03:00 (tick 133). This clone is clean (0 paths) with local `main`
+equal to `origin/main` (0/0 after fetch).
+
+**CI: the read failed, and that is reported as a read failure, not a CI failure.** Four attempts
+against the API host (05:01, 05:04, 05:06 via `gh run list`; 05:07 via direct HTTPS) all ended in
+connection i/o timeouts to `api.github.com`. The **git transport is healthy**: `git fetch` at 05:00
+moved nothing (local `main` = `origin/main` = `989c18b`), and the SHA-pinned raw URL for this
+plan file returns **200**. So CI on head `989c18b` is **unread this tick** — re-read next tick;
+tick 135 read CI all-green on `077b013`.
+
+**Standing gates, all seven re-proven this tick on the pushed head `989c18b` (exits read
+unshielded, gates invoked as `python3 <script>`).** `pub_grok_resume_check.py` **NO-GO exit 3**
+(by design — the cancel): `checks: 22 | RESUME GATE: NO-GO - do not spend quota`, **182 unasked
+ids** (`ifeval-286..ifeval-3757`, stored 359 rows) held as a record, not a queue.
+`pub_grok_cell_check.py` exit 0 — 9 documents, 0 findings. `pub_arms_index.py --check` exit 0 —
+index drift 0. `pub_derived_percent_check.py` exit 0 — **42 recomputed from shipped bytes, 0
+findings** (digest citations 44, doc citations 188, uncovered 0). `pub_superseded_cell_check.py`
+exit 0 — 9 documents, 0 findings. `pub_digest_row_check.py` exit 0 — 49 rows, contracts named 26,
+pre-rule exceptions 23/23 used, 0 findings. Three-arm parity gate exit 0 — 49 rows / 9 sets,
+0 findings. `scripts/security/secret_scan.py --dir . --strict` exit 0, `total_findings: 0`.
+
+**The hermetic PUB contract suite re-executed: 14 tests, 0 failures, 414 checks.** Exit codes
+first, then each test's own summary line: 34 (`pub_arms_index`) + 22 (`pub_cloud_blank_purge`) +
+41 (`pub_derived_percent`) + 22 (`pub_digest_row_gate`) + 7 (digest writer) + 9 (`pub_grok_cancel`)
++ 27 (`pub_grok_cell`) + 39 (`pub_grok_resume_check --write-pin`) + 33 (`pub_grok_resume_check`) +
+41 (`pub_preflight`) + 42 (`pub_bench_run engine-stamp`) + 34 (`pub_superseded_cell`) + 43
+(`pub_taskfile_shape`) + 20 (three-arm parity) = **414**, reproducing ticks 128–135 exactly.
+Zero model calls (temp fixtures, stubbed transports).
+
+**Frozen-line hygiene (nothing acted on).** `~/.hermes/mac-v22full-launch.state` re-read on the
+literal path: present, 26 B, `Nov 2 14:05`, contents unchanged. Both legacy hard-bank-era jobs are
+still enabled and still firing completed — `Mac v2.2 full after v2.1` (last 04:59:26 CET) and
+`P2005 paired full 2.1→2.2 watch` (a permanent five-minute ssh round-trip onto this line's
+endpoint box). Reported as an owner decision, not edited.
+
+**Watchdog clone: the deviation set GREW, 7 paths → 8.** `~/projects/strata-autonomous-harness`:
+staged index empty, detached, and `git status --porcelain` now returns the seven paths censused at
+ticks 134–135 (modified `hardware/os-snapshots/latest.json`, the three stranded snapshots
+2026-11-11/-12/-13, the three untracked scratch files in the published raw namespace) **plus a new
+untracked `hardware/os-snapshots/2026-11-14.json`** — today's OS snapshot landed in the stale clone
+too. Nothing was committed or deleted there; it stays the hardware/ops line's decision, now on
+eight paths.
+
+**Verdict:** unchanged on the scoreboard — zero model calls, zero cloud calls, zero published
+benchmark bytes moved. What moved: the engine hold passed **14 h 47 min** on one process with the
+band at **22 GO of 24**, the watchdog clone's stranded-file gap **grew by today's snapshot**, two
+citation-path errors were corrected (ops launchers live in `~/basalt` on the box, not `~/fleet`),
+and the CI read failed on four api-host timeouts while git and raw transports serve normally — CI
+on the standing head is unread, not red.
+
+**Next in force:** unchanged and empty — every in-force set carries all three admissible arms; the
+Grok cells stay closed by owner decision; the "later" ladder rows (Terminal-Bench, SWE-bench
+Verified subset, GAIA-lite) need a fresh owner decision before any leg. Standing reads unchanged
+plus two new: the ops A/B launchers on the endpoint box are under `~/basalt`, not `~/fleet`; an
+unreachable CI api host is a **read failure** — record the attempts, keep the last known CI state
+attributed to its own head, and re-read next tick rather than calling CI red or green.
