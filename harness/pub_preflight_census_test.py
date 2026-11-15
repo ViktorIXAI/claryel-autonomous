@@ -605,6 +605,104 @@ def main():
             check("the print stopped at" not in outd,
                   "no truncation note when the whole body fits under the cap")
 
+    # 15. tick 172 (2026-11-15 07:14): the window TRANSITION must be computed, not hand-attributed.
+    #     Every census note since tick 145 has asserted, in prose, which reading aged out of the
+    #     24 h launchable window and what that did to the count. The table never carried that
+    #     attribution, so nothing could contradict it. On the real corpus it was wrong: the published
+    #     note for the window `as-of 2026-11-15 06:37` claims launchable "22 -> 23 (this reading
+    #     inside; nothing aged out this window)", while the tool's own tables for the two consecutive
+    #     windows say 22 -> 22 and one GO did age out (`preflight-20261114-0614.txt`, gate rc 0) —
+    #     one entering GO minus one leaving GO nets zero, the exact shape the sentence cannot express.
+    #     This case pins `--prev-as-of`: it names the aged-out and newly-entered readings with their
+    #     gate rc and a launchable marker, states the delta as arithmetic, fails closed on a malformed
+    #     or not-earlier bound, and writes NOTHING into the committed table (byte-identical with or
+    #     without the flag). The fixture reproduces the net-zero trap hermetically: a naive "+1"
+    #     claim about the entering GO is contradicted by the printed arithmetic.
+    NEXT = "preflight-20300102-0006.txt"          # next-day healthy GO: enters the later window
+    with tempfile.TemporaryDirectory() as d7:
+        write_fixtures(d7, dict(FIXTURES, **{NEXT: {}}))   # F2 NO-GO / F3 NO-GO / F4 F5 gaps kept
+        rc0, out0 = run(["--dir", d7, "--as-of", "20300102-0006",
+                         "--prev-as-of", "%s-2359" % DAY])
+        check(rc0 == 0, "--prev-as-of transition exits 0 (rc=%s: %s)" % (rc0, out0[:300]))
+        tl = out0.splitlines()
+        blk = [l for l in tl if "WINDOW TRANSITION" in l]
+        check(len(blk) == 1, "stdout carries exactly one WINDOW TRANSITION block, got %r" % blk[:2])
+        aged_block = [l for l in tl if F1 in l or F2 in l or F3 in l or NEXT in l]
+        check(any(F1 in l and "rc 0" in l and "launchable" in l for l in aged_block),
+              "the aged-out GO is named with rc 0 AND the launchable marker, got %r" % aged_block[:3])
+        check(any(NEXT in l and "rc 0" in l and "launchable" in l for l in aged_block),
+              "the entering GO is named with rc 0 AND the launchable marker, got %r" % aged_block[:3])
+        ar = [l for l in tl if l.strip().startswith("launchable delta:")]
+        check(len(ar) == 1 and ar[0].strip() ==
+              "launchable delta: 1 -> 1 = +1 entering GO - 1 aged-out GO",
+              "the launchable delta is stated as its own arithmetic and nets ZERO here (a prose "
+              "'+1 for this reading' would be the tick-171 defect), got %r" % ar[:1])
+        # the two windows' own tables agree with the arithmetic: the count never moved
+        ta = os.path.join(d7, "T.prev.md")
+        tb = os.path.join(d7, "T.now.md")
+        rcp, outp = run(["--dir", d7, "--as-of", "%s-2359" % DAY, "--markdown", ta])
+        rcn, outn = run(["--dir", d7, "--as-of", "20300102-0006", "--markdown", tb])
+        check(rcp == 0 and rcn == 0, "both window tables written (rc=%s/%s)" % (rcp, rcn))
+        check(int_cell(open(ta, encoding="utf-8").read(),
+                       "launchable (GO) windows in the last 24 h") == 1
+              and int_cell(open(tb, encoding="utf-8").read(),
+                           "launchable (GO) windows in the last 24 h") == 1,
+              "the launchable cell really is 1 in both windows, so the transition arithmetic is "
+              "the whole move and no count changed")
+        # a second transition with NO entering reading: three files age out, only one is launchable
+        rc1, out1 = run(["--dir", d7, "--as-of", "20300102-0003",
+                         "--prev-as-of", "%s-2359" % DAY])
+        check(rc1 == 0, "a transition with no entering reading still answers (rc=%s: %s)"
+              % (rc1, out1[:200]))
+        l1 = out1.splitlines()
+        check(any(l.strip() == "aged out of the window (3):" for l in l1),
+              "the aged-out header counts all three files, got %r"
+              % [l for l in l1 if "aged out" in l][:2])
+        check(all(any(n in l and "rc " in l for l in l1) for n in (F1, F2, F3)),
+              "every aged-out reading is named with its gate rc, got %r"
+              % [l for l in l1 if ".txt" in l][:4])
+        check(any(F1 in l and "launchable" in l for l in l1)
+              and not any((n in l and "launchable" in l) for l in l1 for n in (F2, F3)),
+              "only the GO among the aged files carries the launchable marker")
+        ar1 = [l for l in l1 if l.strip().startswith("launchable delta:")]
+        check(len(ar1) == 1 and ar1[0].strip() ==
+              "launchable delta: 1 -> 0 = +0 entering GO - 1 aged-out GO",
+              "a NO-GO aging out changes no launchable count and the arithmetic says so, got %r"
+              % ar1[:1])
+        # fail-closed bounds, and no byte may enter the committed table because of this flag
+        rcb, outb2 = run(["--dir", d7, "--as-of", "20300102-0006", "--prev-as-of", "nonsense"])
+        check(rcb == 1 and "--prev-as-of must be YYYYMMDD-HHMM" in outb2,
+              "a malformed --prev-as-of is an input gap naming the flag, got rc=%s %r"
+              % (rcb, outb2[:200]))
+        rcl, outl = run(["--dir", d7, "--as-of", "20300102-0006", "--prev-as-of", "20300102-0006"])
+        check(rcl == 1 and "not earlier than --as-of" in outl,
+              "a --prev-as-of that is not earlier fails closed, got rc=%s %r" % (rcl, outl[:200]))
+        m_plain = os.path.join(d7, "T.plain.md")
+        m_flag = os.path.join(d7, "T.flag.md")
+        rcA, _ = run(["--dir", d7, "--as-of", "20300102-0006", "--markdown", m_plain])
+        rcB, _ = run(["--dir", d7, "--as-of", "20300102-0006", "--prev-as-of", "%s-2359" % DAY,
+                      "--markdown", m_flag])
+        check(rcA == 0 and rcB == 0
+              and open(m_plain, encoding="utf-8").read() == open(m_flag, encoding="utf-8").read(),
+              "the generated table is BYTE-IDENTICAL with and without --prev-as-of")
+        check("WINDOW TRANSITION" not in open(m_flag, encoding="utf-8").read(),
+              "the transition block is stdout evidence only and never joins a committed table")
+        # the attribution must be the DEFAULT, not something a later tick can forget to ask for
+        rcD, outD = run(["--dir", d7, "--as-of", "20300102-0006"])
+        dline = [l for l in outD.splitlines() if "prev window" in l]
+        check(rcD == 0 and "WINDOW TRANSITION" in outD
+              and "[derived: previous stored reading]" in outD
+              and any("as-of 2030-01-01 00:05 [derived" in l for l in dline),
+              "flagless, the census derives the previous window bound from the previous stored "
+              "reading and says so, got %r" % dline[:1])
+        d_ar = [l for l in outD.splitlines() if l.strip().startswith("launchable delta:")]
+        check(d_ar == ar,
+              "the derived bound and the operator-supplied bound state the same arithmetic "
+              "(%r vs %r)" % (d_ar[:1], ar[:1]))
+        rcN, outN = run(["--dir", d7, "--as-of", "20300102-0006", "--no-transition"])
+        check(rcN == 0 and "WINDOW TRANSITION" not in outN and "launchable delta:" not in outN,
+              "--no-transition silences the block and changes nothing else (rc=%s)" % rcN)
+
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()
     for bad in ("ssh ", "requests", "urllib", "socket."):

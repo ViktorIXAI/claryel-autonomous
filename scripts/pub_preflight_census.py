@@ -39,6 +39,23 @@ retained", and the corpus count was the one cell that broke that promise, so the
 prints only the window-scoped count and the corpus count is reported on stdout, outside the
 committed file. Census stamp `v2` -> `v3`; v1 and v2 tables stay published as written.
 
+A fifth cell this tool did not compute, and the tick note that got it wrong (2026-11-15 07:14,
+tick 172): every tick since tick 145 has hand-attributed the 24 h launchable-window count with a
+sentence of the form "N -> M with zero reclassification - exactly one named file aged past the
+cutoff, X, re-run at rc 0". The table never carried that attribution, so nothing checked it. At the
+committed window `as-of 2026-11-15 06:37` the published tick note claimed the launchable count went
+"22 -> 23 (this reading inside; nothing aged out this window)". The tool's own tables for the two
+consecutive windows say **22 -> 22**, and a launchable window DID age out:
+`preflight-20261114-0614.txt`, gate rc 0 (GO), between the 05:57 cutoff (2026-11-14 05:57) and the
+06:37 cutoff (2026-11-14 06:37). One entering GO and one leaving GO net to zero, which is exactly
+the case the hand sentence could not see. Same class as ticks 155/162/163/166 — a report that states
+what it did not compute — and this time the un-computed part is now the tool's job: every census run
+prints the window transition on stdout (bound = the previous stored reading unless `--prev-as-of
+YYYYMMDD-HHMM` names one; `--no-transition` silences it). It names the readings that aged out and
+the ones that newly entered, each with its gate returncode and a `launchable` marker, plus the
+launchable delta written as its own arithmetic `A -> B = +n_new_GO - n_aged_GO`. The block is stdout
+evidence only: it joins no committed table, which stays byte-identical with or without it.
+
 It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
@@ -53,8 +70,16 @@ Usage:
   pub_preflight_census.py --markdown OUT.md   write the generated table
   pub_preflight_census.py --check OUT.md      re-derive and diff vs the committed table
                                               (exit 1 on any drift, like the bank census --check)
+  pub_preflight_census.py --as-of W [--prev-as-of W2]   ALSO print the window transition on stdout
+                                              only (aged-out / newly-entered readings, each with
+                                              its gate rc and a launchable marker, and the
+                                              launchable delta as its own arithmetic). W2 defaults
+                                              to the PREVIOUS stored reading; --no-transition
+                                              suppresses the block. The committed table is
+                                              byte-identical with or without it.
 Exit codes: 0 census written / matches, 1 census gap (missing dir, unreadable file, gate
-returned something other than GO/NO-GO/input-gap, or --check drift).
+returned something other than GO/NO-GO/input-gap, --check drift, or a malformed /
+not-earlier --prev-as-of).
 """
 import argparse
 import datetime
@@ -173,6 +198,66 @@ def census(directory, as_of, day, window_hours):
                          scope=device_scope(txt),
                          mean=(si + so) if (si is not None and so is not None) else None))
     return rows, unnamed, as_of
+
+
+RC_WORD = {0: "GO", 3: "NO-GO", 1: "input gap"}
+
+
+def window_rows(rows, as_of, window_hours):
+    """Subset of already-judged readings that this window covers: cut < ts <= as_of."""
+    cut = as_of - datetime.timedelta(hours=window_hours)
+    return [r for r in rows if cut < r["ts"] <= as_of]
+
+
+def transition(all_rows, as_of, prev_as_of, window_hours):
+    """What actually moved between two census windows — the attribution ticks 145-171 hand-wrote.
+
+    `all_rows` is every reading judged up to `as_of` (one gate call per file, so the same file
+    cannot carry two different verdicts inside one run — this function cannot and does not claim
+    to detect a reclassification caused by a gate-byte change between ticks; that surfaces in the
+    --check diff). Returns the aged-out set, the newly-entered set, and the launchable delta
+    written as its own arithmetic, because "+1 entering -1 leaving = 0" is precisely the case the
+    hand sentence got wrong at the 06:37 window on 2026-11-15.
+    """
+    now = window_rows(all_rows, as_of, window_hours)
+    prev = window_rows(all_rows, prev_as_of, window_hours)
+    now_names = set(r["name"] for r in now)
+    prev_names = set(r["name"] for r in prev)
+    aged = sorted((r for r in all_rows if r["name"] in prev_names - now_names),
+                  key=lambda r: r["ts"])
+    new = sorted((r for r in all_rows if r["name"] in now_names - prev_names),
+                 key=lambda r: r["ts"])
+    la = sum(1 for r in prev if r["rc"] == 0)
+    lb = sum(1 for r in now if r["rc"] == 0)
+    return dict(now=now, prev=prev, aged=aged, new=new,
+                launchable_prev=la, launchable_now=lb,
+                aged_go=sum(1 for r in aged if r["rc"] == 0),
+                new_go=sum(1 for r in new if r["rc"] == 0))
+
+
+def transition_text(t, as_of, prev_as_of, window_hours, bound_note=None):
+    L = ["WINDOW TRANSITION (stdout evidence only; the committed census table does not carry it):"]
+    for tag, a_of, rows, launchable, note in (
+            ("prev window ", prev_as_of, t["prev"], t["launchable_prev"], bound_note),
+            ("this window ", as_of, t["now"], t["launchable_now"], None)):
+        cut = a_of - datetime.timedelta(hours=window_hours)
+        L.append("  %s as-of %s%s (covers %s < t <= as-of): %d readings, %d launchable (GO)"
+                 % (tag, a_of.strftime("%Y-%m-%d %H:%M"), (" [" + note + "]") if note else "",
+                    cut.strftime("%Y-%m-%d %H:%M"), len(rows), launchable))
+    L.append("  aged out of the window (%d):" % len(t["aged"]))
+    for r in t["aged"]:
+        L.append("      %-42s rc %d  %-10s%s" % (r["name"], r["rc"], RC_WORD.get(r["rc"], "?"),
+                                                 "  <- launchable" if r["rc"] == 0 else ""))
+    L.append("  newly inside the window (%d):" % len(t["new"]))
+    for r in t["new"]:
+        L.append("      %-42s rc %d  %-10s%s" % (r["name"], r["rc"], RC_WORD.get(r["rc"], "?"),
+                                                 "  <- launchable" if r["rc"] == 0 else ""))
+    L.append("  launchable delta: %d -> %d = +%d entering GO - %d aged-out GO"
+             % (t["launchable_prev"], t["launchable_now"], t["new_go"], t["aged_go"]))
+    L.append("  (one run judges every file with the SAME gate bytes, so a reading cannot change "
+             "verdict between these two windows here; a gate-byte change BETWEEN ticks moves "
+             "verdicts and surfaces in the --check diff, not in this block)")
+    return "\n".join(L) + "\n"
 
 
 def band(rows, swap_max):
@@ -482,6 +567,13 @@ def main():
     ap.add_argument("--window-hours", type=int, default=24)
     ap.add_argument("--markdown", default=None)
     ap.add_argument("--check", default=None)
+    ap.add_argument("--prev-as-of", default=None,
+                    help="earlier window bound (YYYYMMDD-HHMM) for the window transition printed "
+                         "on stdout only; defaults to the previous stored reading, so the "
+                         "attribution is never composed by hand again. The committed table is "
+                         "byte-identical with or without it.")
+    ap.add_argument("--no-transition", action="store_true",
+                    help="suppress the stdout window-transition block")
     a = ap.parse_args()
 
     if not os.path.isdir(a.dir):
@@ -505,12 +597,39 @@ def main():
             return 1
         as_of = max(good)
     day = a.day or as_of.strftime("%Y%m%d")
+    prev_as_of = None
+    derived_bound = None
+    if a.prev_as_of:
+        derived_bound = "operator-supplied bound"
+        # Validate before any gate call: a bad bound must cost nothing.
+        try:
+            prev_as_of = datetime.datetime.strptime(a.prev_as_of, "%Y%m%d-%H%M")
+        except ValueError:
+            print("CENSUS GAP: --prev-as-of must be YYYYMMDD-HHMM, got %r" % a.prev_as_of)
+            return 1
+        if prev_as_of >= as_of:
+            print("CENSUS GAP: --prev-as-of %s is not earlier than --as-of %s — a window "
+                  "transition needs an earlier bound"
+                  % (prev_as_of.strftime("%Y%m%d-%H%M"), as_of.strftime("%Y%m%d-%H%M")))
+            return 1
 
     rows, unnamed, as_of = census(a.dir, as_of, day, a.window_hours)
     if unnamed:
         print("CENSUS GAP: %d file(s) whose name is not preflight-YYYYMMDD-HHMM.txt: %s"
               % (len(unnamed), ", ".join(os.path.basename(f) for _, f in unnamed)))
         return 1
+    if prev_as_of is None and not a.no_transition:
+        # The default bound is the PREVIOUS stored reading, which is exactly what a tick compares
+        # against when it writes "N -> M with X aged out". Making it the default is the point: the
+        # sentence stops being composed by hand, so the net-zero case cannot be missed again.
+        earlier = [r["ts"] for r in rows if r["ts"] < as_of]
+        if earlier:
+            prev_as_of = max(earlier)
+            derived_bound = "derived: previous stored reading"
+    if prev_as_of:
+        # stdout evidence only: this block is written in no mode and joins no committed table.
+        sys.stdout.write(transition_text(transition(rows, as_of, prev_as_of, a.window_hours),
+                                         as_of, prev_as_of, a.window_hours, derived_bound))
     consts = gate_constants()
 
     legs = 0
