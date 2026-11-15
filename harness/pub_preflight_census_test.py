@@ -783,8 +783,8 @@ def main():
         write_fixtures(d8)
         rcd, outd = run(["--dir", d8, "--as-of", "%s-0005" % DAY])
         hdr = [l for l in outd.splitlines() if l.startswith("Census stamp:")]
-        check(rcd == 0 and len(hdr) == 1 and "pub-preflight-census-v5" in hdr[0],
-              "the census names its v5 shape, got rc=%s %r" % (rcd, hdr[:1]))
+        check(rcd == 0 and len(hdr) == 1 and "pub-preflight-census-v6" in hdr[0],
+              "the census names its v6 shape, got rc=%s %r" % (rcd, hdr[:1]))
         # F1 GO at 0.005x, F2 swap refusal at 8.0x, F3 GPU refusal at 0.0x, F4/F5 input gaps
         check((cell(outd, "day launchable (GO) swap draws") or "").startswith("1 (band 0.01-0.01"),
               "one GO draw with quiet swap, got %r"
@@ -863,6 +863,116 @@ def main():
               "counted, got %r / %r" % (c_fp, c_tr))
     finally:
         shutil.rmtree(d8, ignore_errors=True)
+
+    # 17. tick 193 (2026-11-16): the day table resets at midnight, so a streak that started on the
+    # previous evening disappears from every day-scoped cell. Measured live at the first reading of
+    # 2026-11-16: the day cells printed a run of 1 and `n/a — no GO of this day` while the box had
+    # refused four readings in a row across midnight and its last GO was 162 minutes back. The
+    # window-scoped continuity rows carry the streak, and the divergence gets a state word.
+    d9 = tempfile.mkdtemp(prefix="pubcensus-night-")
+    NIGHT = {  # GO at 23:40, then refusals at 23:50, 00:01 and 00:05 — three across midnight
+        "preflight-20300101-2340.txt": {},
+        "preflight-20300101-2350.txt": {"swap_in_mib_per_s": "120.0",
+                                        "swap_out_mib_per_s": "40.0",
+                                        "swap_total_peak_mib_per_s": "300.0"},
+        "preflight-20300102-0001.txt": {"swap_in_mib_per_s": "60.0",
+                                        "swap_out_mib_per_s": "0.0",
+                                        "swap_total_peak_mib_per_s": "80.0"},
+        "preflight-20300102-0005.txt": {"swap_in_mib_per_s": "90.0",
+                                        "swap_out_mib_per_s": "0.0",
+                                        "swap_total_peak_mib_per_s": "120.0"},
+    }
+    try:
+        write_fixtures(d9, NIGHT)
+        rcn, outn = run(["--dir", d9, "--as-of", "20300102-0005"])
+        check(rcn == 0, "the midnight fixture census exits 0 (rc=%s: %s)" % (rcn, outn[-300:]))
+        # the day table alone would report a young day: 3 readings, all NO-GO, run of 3
+        check(cell(outn, "readings of the as-of day") == "2 (0 GO / 2 NO-GO / 0 gap)"
+              and cell(outn, "longest consecutive NO-GO run inside the day")
+              == "2 readings (any-verdict non-GO run: 2)"
+              and cell(outn, "readings since the day's last gate-GO") == "n/a — no GO of this day",
+              "the DAY cells see only the new day, which is what the window rows must correct, "
+              "got %r / %r / %r" % (cell(outn, "readings of the as-of day"),
+                                    cell(outn, "longest consecutive NO-GO run inside the day"),
+                                    cell(outn, "readings since the day's last gate-GO")))
+        check(cell(outn, "trailing consecutive NO-GO run ending at the newest reading "
+                         "(last 24 h, crosses the day boundary)")
+              == "3 readings (any-verdict non-GO run: 3)",
+              "the window row carries the refusal streak across midnight, got %r"
+              % cell(outn, "trailing consecutive NO-GO run ending at the newest reading "
+                           "(last 24 h, crosses the day boundary)"))
+        check(cell(outn, "readings since the last gate-GO (last 24 h, any day)")
+              == "3 (last GO preflight-20300101-2340.txt at 2030-01-01 23:40, 25 min before "
+                 "as-of)",
+              "the window since-GO row names the GO and ages it, got %r"
+              % cell(outn, "readings since the last gate-GO (last 24 h, any day)"))
+        check(cell(outn, "window run vs day run (computed, never asserted)")
+              == "MIDNIGHT RESET — the current refusal run starts on an earlier day: window 3 "
+                 "reading(s) vs day 2",
+              "the scope divergence is stated as a computed state word, got %r"
+              % cell(outn, "window run vs day run (computed, never asserted)"))
+        # non-vacuity A: a GO at the newest reading leaves no run to carry at all
+        night_a = dict(NIGHT)
+        night_a["preflight-20300102-0005.txt"] = {}
+        write_fixtures(d9, night_a)
+        rca, outa = run(["--dir", d9, "--as-of", "20300102-0005"])
+        check(rca == 0 and cell(outa, "trailing consecutive NO-GO run ending at the newest reading "
+                                      "(last 24 h, crosses the day boundary)")
+              == "0 readings (any-verdict non-GO run: 0)",
+              "a trailing GO means no refusal run, got %r"
+              % cell(outa, "trailing consecutive NO-GO run ending at the newest reading "
+                           "(last 24 h, crosses the day boundary)"))
+        check(cell(outa, "window run vs day run (computed, never asserted)")
+              == "NO TRAILING REFUSAL RUN (the newest reading is a gate GO; any-verdict non-GO run "
+                 "0 reading(s))",
+              "the state word follows the verdict stream, it is not a fixed midnight claim, got %r"
+              % cell(outa, "window run vs day run (computed, never asserted)"))
+        # non-vacuity B: the same streak fully inside the new day reads MATCHED, not RESET
+        night_b = dict(NIGHT)
+        del night_b["preflight-20300101-2350.txt"]
+        write_fixtures(d9, night_b)
+        for gone in ("preflight-20300101-2350.txt",):
+            p = os.path.join(d9, gone)
+            if os.path.exists(p):
+                os.remove(p)
+        rcb, outb = run(["--dir", d9, "--as-of", "20300102-0005"])
+        check(rcb == 0 and cell(outb, "trailing consecutive NO-GO run ending at the newest reading "
+                                      "(last 24 h, crosses the day boundary)")
+              == "2 readings (any-verdict non-GO run: 2)"
+              and cell(outb, "window run vs day run (computed, never asserted)")
+              == "MATCHED (the current refusal run starts inside the as-of day)",
+              "a run that starts inside the day must not claim a midnight reset, got %r / %r"
+              % (cell(outb, "trailing consecutive NO-GO run ending at the newest reading "
+                            "(last 24 h, crosses the day boundary)"),
+                 cell(outb, "window run vs day run (computed, never asserted)")))
+        # non-vacuity C: an input gap at the newest position is a cut sample, not a refusal
+        night_c = dict(NIGHT)
+        night_c["preflight-20300102-0005.txt"] = {"engine_pcpu": "NaN"}
+        write_fixtures(d9, night_c)
+        rcc2, outc2 = run(["--dir", d9, "--as-of", "20300102-0005"])
+        check(rcc2 == 0 and cell(outc2, "trailing consecutive NO-GO run ending at the newest "
+                                        "reading (last 24 h, crosses the day boundary)")
+              == "0 readings (any-verdict non-GO run: 3)",
+              "an input gap breaks the refusal run but stays a non-GO reading, got %r"
+              % cell(outc2, "trailing consecutive NO-GO run ending at the newest reading "
+                            "(last 24 h, crosses the day boundary)"))
+        check(cell(outc2, "window run vs day run (computed, never asserted)")
+              == "NO TRAILING REFUSAL RUN (the newest reading is an input gap; any-verdict non-GO "
+                 "run 3 reading(s))",
+              "the state word names the input gap rather than inventing a refusal streak, got %r"
+              % cell(outc2, "window run vs day run (computed, never asserted)"))
+        # --check on a snapshot of the midnight set must be stable (the rows are generated, not typed)
+        tbl9 = os.path.join(d9, "CEN.md")
+        write_fixtures(d9, NIGHT)
+        rcw9, outw9 = run(["--dir", d9, "--as-of", "20300102-0005", "--markdown", tbl9])
+        check(rcw9 == 0, "writing the midnight snapshot exits 0, got %r" % outw9[-300:])
+        rcv9, outv9 = run(["--dir", d9, "--as-of", "20300102-0005", "--check", tbl9])
+        check(rcv9 == 0, "the midnight snapshot checks clean, got %r" % outv9[-300:])
+        text9 = open(tbl9, encoding="utf-8").read()
+        check(text9.count("| window run vs day run (computed, never asserted) |") == 1,
+              "the continuity block appears exactly once in the committed table")
+    finally:
+        shutil.rmtree(d9, ignore_errors=True)
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()

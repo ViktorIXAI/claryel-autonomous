@@ -70,6 +70,19 @@ word and the count inside it, the longest consecutive-refusal run, readings sinc
 GO, and the age of the launchable-footprint maximum plus how many trailing day windows sit above
 it. Census stamp `v4` -> `v5`; v1-v4 tables stay published as written.
 
+A seventh set of cells the DAY table cannot answer (2026-11-16 00:04, tick 193): the day table is
+scoped to the calendar day, so at the first reading of a new day it prints a longest refusal run of
+**1** and `n/a — no GO of this day` even when the box has been refusing readings continuously since
+the previous evening. Measured live at that reading: four consecutive NO-GOs across midnight
+(21:57, 22:32, 23:08 on 15 Nov, 00:04 on 16 Nov) and the last GO 162 minutes earlier at 21:22, one
+of the 7 launchable windows the same table counts in the last 24 h — so the day cells were true as
+labelled and misleading as a streak, the same failure class one level down from the stale median
+above. The tool now also prints a window-scoped continuity block over the sliding `--window-hours`
+span: the trailing NO-GO run ending at the newest reading (any-verdict non-GO run beside it), the
+readings since the last gate-GO with that reading named and its age in minutes, and a computed
+window-run-vs-day-run state word (`MATCHED` or `MIDNIGHT RESET` with both counts). Census stamp
+`v5` -> `v6`; v1-v5 tables stay published as written.
+
 It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
@@ -548,6 +561,80 @@ def day_band(day_rows, swap_max):
     )
 
 
+def window_streak(win_rows, day_rows, as_of):
+    """Window-scoped verdict continuity (census v6, 2026-11-16, tick 193).
+
+    Why this joins the tool next to the day band: the day table is scoped to the calendar day and
+    resets at midnight, which is correct as labelled and misleading as a streak. Measured live at
+    the first reading of 2026-11-16 (`preflight-20261116-0004.txt`, gate NO-GO): the day cells
+    printed a longest NO-GO run of 1 reading and `n/a — no GO of this day`, while the box had
+    refused FOUR readings in a row across midnight (15 Nov 21:57, 22:32, 23:08 and 16 Nov 00:04)
+    and its last GO was 162 minutes earlier at 21:22 — the same launchable set the table itself
+    counts as 7 GO in the last 24 h. A tick reading only the day cells would have reported a fresh
+    day with one refusal. This is tick 192's class again (a figure that lives only in prose stops
+    being recomputed), so the streak is computed here from the same per-file gate returncodes as
+    the verdict column, and the divergence between the two scopes gets a state word.
+    """
+    ordered = sorted(win_rows, key=lambda r: r["ts"])
+    day_ordered = sorted(day_rows, key=lambda r: r["ts"])
+
+    def trail(rows, pred):
+        n = 0
+        for r in reversed(rows):
+            if pred(r):
+                n += 1
+            else:
+                break
+        return n
+
+    w_nogo = trail(ordered, lambda r: r["rc"] == 3)
+    w_notgo = trail(ordered, lambda r: r["rc"] != 0)
+    d_nogo = trail(day_ordered, lambda r: r["rc"] == 3)
+    last_go = None
+    for r in ordered:
+        if r["rc"] == 0:
+            last_go = r
+    since_go = None if last_go is None else sum(1 for r in ordered if r["ts"] > last_go["ts"])
+    age_min = None if last_go is None else int(round((as_of - last_go["ts"]).total_seconds() / 60.0))
+    newest = ordered[-1] if ordered else None
+    if newest is None:
+        state = "NO READINGS inside the window — nothing to carry across a day boundary"
+    elif w_nogo == 0:
+        state = ("NO TRAILING REFUSAL RUN (the newest reading is %s; any-verdict non-GO run %d "
+                 "reading(s))" % ("a gate GO" if newest["rc"] == 0 else "an input gap", w_notgo))
+    elif w_nogo == d_nogo:
+        state = "MATCHED (the current refusal run starts inside the as-of day)"
+    else:
+        state = ("MIDNIGHT RESET — the current refusal run starts on an earlier day: window %d "
+                 "reading(s) vs day %d" % (w_nogo, d_nogo))
+    return dict(w_nogo=w_nogo, w_notgo=w_notgo, d_nogo=d_nogo,
+                since_go=since_go, last_go=(last_go["ts"] if last_go else None),
+                last_go_name=(last_go["name"] if last_go else None), age_min=age_min,
+                state=state, n_win=len(ordered))
+
+
+def window_streak_text(w, window_hours):
+    """Window-scoped continuity rows, every cell computed from the same gate verdicts.
+
+    The scope word in each label is the sliding `--window-hours` span the launchable-count row
+    already uses, so a reader cannot mistake these for corpus-wide figures: a trailing run is the
+    same walk either way, but `readings since the last GO` is only meaningful against a named span.
+    """
+    return [
+        "| trailing consecutive NO-GO run ending at the newest reading (last %d h, crosses the "
+        "day boundary) | %d readings (any-verdict non-GO run: %d) |" % (
+            window_hours, w["w_nogo"], w["w_notgo"]),
+        "| readings since the last gate-GO (last %d h, any day) | %s%s |" % (
+            window_hours,
+            ("n/a — no GO inside the %d h window" % window_hours if w["since_go"] is None
+             else w["since_go"]),
+            ("" if w["last_go"] is None else
+             " (last GO %s at %s, %d min before as-of)"
+             % (w["last_go_name"], w["last_go"].strftime("%Y-%m-%d %H:%M"), w["age_min"]))),
+        "| window run vs day run (computed, never asserted) | %s |" % w["state"],
+    ]
+
+
 def day_band_text(d, swap_max):
     """The day-band table, every cell computed from the same gate verdicts the census prints."""
     return [
@@ -583,9 +670,11 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     day_rows = [r for r in rows if r["ts"].strftime("%Y%m%d") == day]
     cut = as_of - datetime.timedelta(hours=window_hours)
     win_go = [r for r in go if r["ts"] > cut]
+    win_rows = [r for r in rows if r["ts"] > cut]
     b = band(rows, consts["SWAP_RATE_MAX_MIB_S"])
     fp = footprint(rows)
     db = day_band(day_rows, consts["SWAP_RATE_MAX_MIB_S"])
+    ws = window_streak(win_rows, day_rows, as_of)
     L = []
     L.append("# PUB preflight reading census (generated)")
     L.append("")
@@ -596,8 +685,17 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over")
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
-    L.append("Census stamp: `pub-preflight-census-v5`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v5 adds the DAY rule-band table (8 computed cells: "
+    L.append("Census stamp: `pub-preflight-census-v6`, gate sha16 `%s`, window `as-of %s` "
+             "(%d readings inside the window). v6 adds three COMPUTED continuity rows over the "
+             "sliding 24 h window — the trailing consecutive-refusal run ending at the newest "
+             "reading, readings/hours since the last gate-GO with that GO named and aged, and a "
+             "window-run-vs-day-run state word — because the v5 DAY table resets at midnight: at "
+             "the first reading of 2026-11-16 (00:04) the day cells printed a run of 1 and "
+             "`n/a — no GO of this day` while the box had refused FOUR readings in a row across "
+             "midnight and its last GO was 162 minutes back, one of the 7 launchable windows this "
+             "same table counts in the last 24 h. The day cells were correct as labelled and useless "
+             "as a streak, which is tick 192's class (a figure that lives only in prose stops being "
+             "recomputed) one level down. v5 adds the DAY rule-band table (8 computed cells: "
              "the GO and swap-refusal ratio bands, the refusal median, refusals decided by a rule "
              "other than swap, the GO-to-refusal dead zone with its EMPTY/POPULATED state word and "
              "the count inside it, the longest consecutive-refusal run, readings since the last GO, "
@@ -620,9 +718,9 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
              "file. v2 added two COMPUTED group-state rows — the swap-peak band state and the "
              "footprint group separation — because v1 printed \"Band: nothing between X and Y\" "
              "unconditionally, and at 23:13 on 2026-11-14 the order of X and Y reversed: the "
-             "table went on asserting an empty interval the data had withdrawn. v1, v2, v3, v4 and "
-             "v5 tables are left as published; a v1, v2, v3, v4 and v5 file are not the same table "
-             "shape."
+             "table went on asserting an empty interval the data had withdrawn. v1, v2, v3, v4, v5 "
+             "and v6 tables are left as published; a v1, v2, v3, v4, v5 and v6 file are not the "
+             "same table shape."
              % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"), len(rows)))
     L.append("")
     L.append("Ceilings read out of the gate source at run time, so this table cannot disagree with "
@@ -710,6 +808,20 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("row is the same warning for the state variable: the ceiling the dry-run uses was set by")
     L.append("one launchable window, and every reading since then may sit far above it without that")
     L.append("ceiling meaning anything about the box right now.")
+    L.append("")
+    L.append("Verdict continuity across the sliding window (added 2026-11-16, tick 193) — the day")
+    L.append("table above is scoped to the calendar day and resets at midnight, which is correct as")
+    L.append("labelled and misleading as a streak. At the first reading of 2026-11-16 (00:04, gate")
+    L.append("NO-GO) the day cells printed a longest run of 1 reading and `n/a — no GO of this day`,")
+    L.append("while the box had refused four readings in a row across midnight (21:57, 22:32, 23:08")
+    L.append("on 15 Nov and 00:04 on 16 Nov) and its last GO sat 162 minutes earlier at 21:22, one of")
+    L.append("the 7 launchable windows this same table counts in the last 24 h. A tick that reads only")
+    L.append("the day cells would report a fresh day with one refusal, so the streak is computed here")
+    L.append("too, from the same per-file gate returncodes, and the scope divergence gets a state word:")
+    L.append("")
+    L.append("| window cell (last %d h) | value |" % window_hours)
+    L.append("|---|---|")
+    L.extend(window_streak_text(ws, window_hours))
     L.append("")
     L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")
     L.append("over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14")
