@@ -72,6 +72,10 @@ NAME_RE = re.compile(r"^preflight-(\d{8})-(\d{4})\.txt$")
 # Pre-registered by tick 151 and unchanged since: the peak statistic may only become a refusal
 # reason once this many launchable (gate-GO) windows carry it.
 ARMING_THRESHOLD = 30
+# Printing bound on the `--check` drift evidence (tick 166, 2026-11-15), set far above the size of
+# one census table (~70 lines) so a normal drift is printed IN FULL; if it is ever hit, the tool
+# says so in words and the count line above the body already carries the whole drift.
+DIFF_PRINT_MAX = 400
 
 
 def sha16(path):
@@ -542,9 +546,27 @@ def main():
             return 0
         print("CENSUS DRIFT: the committed table is not what the current gate + readings produce")
         import difflib
-        for line in list(difflib.unified_diff(old.splitlines(), md.splitlines(),
-                                              "committed", "recomputed", lineterm=""))[:40]:
+        # Tick 166 (2026-11-15), tooling only: this print used `[:40]` SILENTLY. Measured on the real
+        # corpus at the 03:08 window: the drift was 63 diff lines / 30 changed table lines, and the
+        # cap hid the last 10 changed lines — EVERY engine-footprint row plus the band prose sentence.
+        # The exit code stayed correct, so the only damage was evidence: a tick reading this output
+        # would have attributed 20 of 30 moved cells and missed the whole footprint section. That is
+        # this line's own class ("the number printed beside a verdict is not the verdict"), so the
+        # total is printed BEFORE the body (a pipe to `head` still carries it), the body is printed in
+        # full up to DIFF_PRINT_MAX, and a hit cap names itself instead of ending the output.
+        dl = list(difflib.unified_diff(old.splitlines(), md.splitlines(),
+                                       "committed", "recomputed", lineterm=""))
+        n_changed = sum(1 for l in dl
+                        if l[:1] in "+-" and l[:3] not in ("+++", "---"))
+        print("DRIFT LINES: %d total, %d changed table lines, %d printed, %d not printed%s"
+              % (len(dl), n_changed, min(len(dl), DIFF_PRINT_MAX),
+                 max(0, len(dl) - DIFF_PRINT_MAX),
+                 "" if len(dl) <= DIFF_PRINT_MAX else " (print cap %d hit)" % DIFF_PRINT_MAX))
+        for line in dl[:DIFF_PRINT_MAX]:
             print(line)
+        if len(dl) > DIFF_PRINT_MAX:
+            print("(the print stopped at %d diff lines; the DRIFT LINES count above is the "
+                  "whole drift)" % DIFF_PRINT_MAX)
         return 1
     if a.markdown:
         with open(a.markdown, "w", encoding="utf-8") as fh:

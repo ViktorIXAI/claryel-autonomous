@@ -60,7 +60,13 @@ What it pins:
       2026-11-15 01:00: `123 stored readings` -> `124 stored readings`, no verdict moved). The header
       now names only the window count, the corpus count lives on stdout, and an edited reading INSIDE
       the window still reddens the check.
+  14. the drift EVIDENCE is complete (tick 166, 2026-11-15). `--check` printed at most 40 diff lines
+      with no total and no truncation note; on the real corpus at the 03:08 window that hid 10 of the
+      30 changed table lines — the whole engine-footprint section and the band prose — while the exit
+      code stayed right. The count is printed before the body, every changed line must appear, and the
+      print bound is a named constant far above one table's size.
 """
+import difflib
 import os
 import re
 import shutil
@@ -533,6 +539,71 @@ def main():
                   % (rce, oute[-300:]))
         finally:
             shutil.rmtree(d5, ignore_errors=True)
+
+    # 14. tick 166 (2026-11-15): the `--check` drift EVIDENCE must be complete, not a silent slice.
+    #     The print was `list(unified_diff(...))[:40]` with no count and no truncation note. Measured
+    #     on the REAL corpus at the 2026-11-15 03:08 window: the drift was 63 diff lines / 30 changed
+    #     table lines, and the cap hid the last 10 changed lines — every `engine_vmswap_mib` footprint
+    #     row plus the band prose sentence. The exit code stayed correct (1), so the damage is
+    #     evidence only, and it is this line's own class: a tick attributing a drift from this output
+    #     names 20 of 30 moved cells and the whole footprint section silently disappears. The fixture
+    #     below reproduces the class hermetically (43 changed lines, well past the old 40-line cap) and
+    #     pins: the total line printed BEFORE the body (so `| head` still carries the truth), every
+    #     changed line present in stdout, and a cap that may only be hit far above this table's size
+    #     and must then say so.
+    cap_m = re.search(r"^DIFF_PRINT_MAX\s*=\s*(\d+)", open(TOOL, encoding="utf-8").read(), re.M)
+    check(cap_m is not None,
+          "the census names its own print bound DIFF_PRINT_MAX — a bare slice is the defect")
+    DIFF_MAX = int(cap_m.group(1)) if cap_m else 0
+    with tempfile.TemporaryDirectory() as d6:
+        write_fixtures(d6, {F1: {}, F3: {}})
+        tbl_small = os.path.join(d6, "CENSUS.small.md")
+        rcs, outs = run(["--dir", d6, "--as-of", "%s-0003" % DAY, "--markdown", tbl_small])
+        check(rcs == 0, "small fixture table written (rc=%s: %s)" % (rcs, outs[:200]))
+        # grow the corpus: the two input gaps, the churn NO-GO, and two footprint-carrying readings
+        write_fixtures(d6)
+        for hh, over in (("0006", {"engine_vmswap_mib": "3000", "swap_cached_mib": "1000"}),
+                         ("0007", {"engine_vmswap_mib": "9000", "swap_cached_mib": "5000",
+                                   "swap_used_mib": "9000"})):
+            vals = dict(HEALTHY)
+            vals.update(over)
+            with open(os.path.join(d6, "preflight-%s-%s.txt" % (DAY, hh)), "w",
+                      encoding="utf-8") as fh:
+                for k, v in vals.items():
+                    fh.write("%s=%s\n" % (k, v))
+        tbl_big = os.path.join(d6, "CENSUS.big.md")
+        rcb, outb = run(["--dir", d6, "--as-of", "%s-0007" % DAY, "--markdown", tbl_big])
+        check(rcb == 0, "grown fixture table written (rc=%s: %s)" % (rcb, outb[:200]))
+        dl = list(difflib.unified_diff(open(tbl_small, encoding="utf-8").read().splitlines(),
+                                       open(tbl_big, encoding="utf-8").read().splitlines(),
+                                       "committed", "recomputed", lineterm=""))
+        changed = [l for l in dl if l[:1] in "+-" and l[:3] not in ("+++", "---")]
+        # non-vacuity: a 40-line window over this drift MUST hide lines, or the case tests nothing
+        check(len(dl) > 40,
+              "this fixture drift is bigger than the old silent 40-line cap (got %d lines), "
+              "otherwise the truncation case proves nothing" % len(dl))
+        rcd, outd = run(["--dir", d6, "--as-of", "%s-0007" % DAY, "--check", tbl_small])
+        check(rcd == 1, "a drifted table still reddens --check (rc=%s)" % rcd)
+        lines = outd.splitlines()
+        cnt = [l for l in lines if l.startswith("DRIFT LINES:")]
+        check(len(cnt) == 1, "the drift output carries exactly one DRIFT LINES count line, got %r"
+              % cnt[:2])
+        if cnt:
+            want = ("%d total, %d changed table lines, %d printed, %d not printed"
+                    % (len(dl), len(changed), min(len(dl), DIFF_MAX),
+                       max(0, len(dl) - DIFF_MAX)))
+            check(want in cnt[0],
+                  "the count line states the WHOLE drift (%r), got %r" % (want, cnt[0]))
+            check(lines.index(cnt[0]) < min([i for i, l in enumerate(lines)
+                                             if l.startswith(("+++", "---"))] or [len(lines)]),
+                  "the count line is printed BEFORE the diff body, so a pipe to `head` keeps it")
+            missing = [l for l in changed if l not in lines]
+            check(not missing,
+                  "every changed table line of the drift is printed (%d hidden: %r)"
+                  % (len(missing), missing[:2]))
+        if len(dl) <= DIFF_MAX:
+            check("the print stopped at" not in outd,
+                  "no truncation note when the whole body fits under the cap")
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()
