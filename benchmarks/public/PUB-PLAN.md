@@ -11604,10 +11604,15 @@ immutability rule survives the fix — injecting `swap_in_mib_per_s=999.0` into 
 
 **Test: `harness/pub_preflight_census_test.py` 87 -> 94 checks** (case 13: frozen snapshot +
 grown corpus + window-only header + stdout corpus count + the edit-inside-the-window tamper).
+Same tick, one wording slip in the generated v3 header ("the data had withdrawed" -> "withdrawn"),
+corrected in the tool and regenerated: the diff between the two published v3 files is **one line,
+zero cells**, `--check` green and the contract test still 94/94 — v3 existed for eleven minutes and
+no verdict or number moved, so this is a wording fix inside the same census version, not a v4.
 The whole hermetic PUB contract suite at this head: **15 tests, 0 failures, 584 checks**, the total
 now machine-summed from each test's own last line rather than typed. That recount also exposes a
 stale total in the previous tick's record: it printed "536 checks" while the fifteen components it
-enumerates in the same sentence sum to **577**; the 584 here is 577 plus this tick's 7 new census
+enumerates in the same sentence parse (in code, from that sentence's own text) to **577**; the 584
+here is 577 plus this tick's 7 new census
 checks. Nothing in that discrepancy touches a score, a digest row or a verdict — it is the same
 habitat this line keeps clearing: a restated total that no code re-derives.
 

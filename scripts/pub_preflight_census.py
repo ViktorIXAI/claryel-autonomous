@@ -345,7 +345,7 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
              "file. v2 added two COMPUTED group-state rows — the swap-peak band state and the "
              "footprint group separation — because v1 printed \"Band: nothing between X and Y\" "
              "unconditionally, and at 23:13 on 2026-11-14 the order of X and Y reversed: the "
-             "table went on asserting an empty interval the data had withdrawed. v1 and v2 "
+             "table went on asserting an empty interval the data had withdrawn. v1 and v2 "
              "tables are left as published; a v1, v2 and v3 file are not the same table shape."
              % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"), len(rows)))
     L.append("")
