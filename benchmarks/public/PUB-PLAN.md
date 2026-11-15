@@ -12222,6 +12222,15 @@ secret-scan, contour self-tests, pages) **completed success**. The daily docs jo
 "reports an error daily because the tree is dirty" did **not** reproduce for a second day, and the
 GitHub `docs-freshness.yml` workflow's last scheduled run (2026-11-14 10:40:43Z) is `success` too.
 
+**Ladder state, counted from the published digest rather than restated:** all three admissible arms —
+bare local, contour `0.0.2.56` matched shape, ChatGPT codex (`gpt-6.1-sol`) — are published for every
+in-force set: gsm8k, arc-easy, arc-challenge, gpqa-diamond, humaneval, mmlu-pro, ifeval,
+livecodebench, bfcl (the two repair families are extra arms beside them). The only empty arm cells are
+Grok's on ifeval, livecodebench and bfcl, cancelled by the owner quota decision of 2026-11-12 and never
+resumed. **There is therefore no unfinished leg to continue this tick and nothing was launched**; the
+next admissible work on the ladder is an owner decision (a new set, or lifting the Grok cancel), not a
+tick action.
+
 **Reading taken (the only endpoint action): 2026-11-15 08:57, gate GO.** `swap_in 4.4 / swap_out 0.0
 MiB/s` over a 6.14 s measured window, swap peak 27.1 MiB/s, GPU 1 Hz mean 0.0 % (peak 0 %),
 engine `%CPU` 6.0, device 0.1 MiB/s `whole-disk`, `health_loaded=true`, engine pid unchanged (age
@@ -12291,11 +12300,19 @@ all 17 readings carrying the pair — **median 51.0 %, max 65.2 %**; the newest 
 *cheapest* cache case at 37.4 %, which is exactly why its `blk_read` stayed at 0.1 while the engine
 carried 8.3 GiB in swap: refaults are no longer being served from RAM, and the rule that sees this
 footprint does not exist. *(c) Swap-peak arming counter:* **13 of 30** launchable windows carry the
-peak (was 11), and the peak band stays **CROSSED** (highest launchable 111.4 vs lowest mean-failing
-95.4 MiB/s) — the peak stays reported, never gated.
+peak (was **12** in the `v3` table published at the 08:18 window; this block's first draft said 11 and
+is corrected here against the published table), and the peak band stays **CROSSED** (highest launchable
+111.4 vs lowest mean-failing 95.4 MiB/s) — the peak stays reported, never gated.
 
 **Coverage honesty:** footprint arming counter **4 of 30** launchable windows, swap-peak counter
 **13 of 30**, 17 of 135 readings carry `engine_vmswap_mib`. No rule was armed, no ceiling registered.
+
+**Second worktree (`<LOCAL_PATH>/projects/strata-autonomous-harness`), censused again as every tick:**
+HEAD still detached at `8ccef67`, branch empty, `git diff --cached --stat` empty (no pending mass
+deletion), **8 untracked** paths (3 scratch files inside the published `benchmarks/public/raw/`
+namespace + 5 fleet OS snapshots 2026-11-11…15) and **1 tracked modification**,
+`hardware/os-snapshots/latest.json` — the same shape as the previous tick, owned by the Fleet OS audit
+and Security Guard lines. This line committed nothing there and edited nothing there.
 
 **Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
 one bounded remote reading inside the standing producer seam (engine pid 175316 untouched). **No
