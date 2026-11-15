@@ -11693,3 +11693,76 @@ how many readings come after it, so the guard's green answer means the table aga
 endpoint's swap-refusal series now has four measured means (99.2 / 236.9 / 92.7 / 87.9 MiB/s) all
 with the device and the GPU quiet, which is the shape of the machine note's "the engine gets
 restarted mid-leg" condition, recorded while no leg is running.
+
+## Tick 164 — 2026-11-15 01:54 CET: scoreboard unmoved; the swap-refusal tail reaches three consecutive windows — fifth swap-only refusal since 20:53 (84.5 MiB/s mean, 270.4 MiB/s in-window peak, state back to `S`); census 125 = 68 GO / 51 NO-GO / 6 gap, launchable-in-24h 29 -> 28 with a named aged-out file and zero reclassification; queue empty, zero legs, zero calls
+
+**Live preflight 01:54 — NO-GO on the swap-throughput rule** (`preflight-20261115-0154.txt`,
+gate exit 3 read unshielded, wrapper rc equal to the gate rc since tick 148). Engine pid 175316,
+age 09:23:00 — the same process since the ops-attributed 2026-11-14 16:31 restart, no restart,
+**no engine action this tick**; state `S` (the `D` of the 01:00 window cleared), sampled CPU 8.9 %;
+swap **84.5 in + 0.0 out = 84.5 MiB/s** over a measured 6.15 s window, 4.2x
+`SWAP_RATE_MAX_MIB_S = 20.0`, with an in-window peak of **270.4 MiB/s**; GPU window mean 3.2 % /
+peak 16 % at six 1 Hz samples against an instantaneous 0 % at 26.53 W; device 0.1 MiB/s whole-disk
+with `blk_top_reader=basalt`; `swap_free` 52 732 of 65 535 (used grew 11 218 -> 12 803 MiB since
+01:00, +1 585 MiB in 54 min), `MemAvailable` 19 635 MiB; `/health` 200 `loaded=true`, one serve
+process; `foreign_legs=0`; `load1` 5.51 printed only. Fifth swap-only refusal since 20:53
+(means 99.2 / 236.9 / 92.7 / 87.9 / 84.5 MiB/s) and now the **third consecutive refused window**
+(23:47, 01:00, 01:54) — every free column green in all three while the model's pages move.
+
+**Census at as-of 2026-11-15 01:54 (regenerated, `--check` back to 0).** 125 stored readings =
+**68 GO / 51 NO-GO / 6 input gap** — the only verdict cell that moved is NO-GO 50 -> 51, this
+tick's own reading. As-of day 2 (0 GO / 2 NO-GO). Device scope split 26 whole-disk (`50.0`) /
+99 unscoped (`100.0`) / 0 unknown. Launchable (GO) windows in the last 24 h **29 -> 28** with
+**zero reclassification**: one named file aged past the sliding cutoff,
+`preflight-20261114-0131.txt`, re-run through the gate at rc 0 (GO) — the attribution the
+tick-155 rule demands. Leg completions in that window: 0.
+
+**What the window adds to the two unstarted statistics.** Swap-peak coverage 29 -> **30**
+readings (NaN 2, parseable 28; gate-judged with a parseable peak 26); the mean-failing group with
+a peak moved 10 -> **11**, and the 270.4 MiB/s peak lands inside that already-failing group, so
+band extremes stay **111.4 / 107.0**, state **CROSSED**, unmoved for the third tick. The two
+launchable-window arming counters do not move at all — an NO-GO window buys neither: peak
+**11 of 30**, footprint **2 of 30**. Footprint coverage 6 -> **7**: `engine_vmswap_mib`
+3 576 / 6 291 / 3 965 / 6 070 / **5 847 MiB** at 22:39 / 23:13 / 23:47 / 01:00 / 01:54, one engine
+pid throughout — **−223 MiB in the 54 minutes since the last reading**, after the +2 105 climb that
+ended at 01:00, the refused group staying 3 357-6 070 (n=5) against launchable 3 576-6 291 (n=2),
+separation **OVERLAPPING**, n=2/5 cannot support a ceiling in either direction. Page-cache share
+median 62.9 -> **61.9 %** of swap in use (6 707 of 12 803 MiB at 01:54, max 65.2 %), so refaults
+stay RAM-served and the device rule stays blind to them by construction.
+
+**Queue.** `scripts/pub_three_arm_parity_check.py`: **49 digest rows / 9 in-force sets / 0
+findings** — every in-force set already carries bare + codex + contour-matched at `0.0.2.56`, the
+six Grok cells carry the cancellation sentence, `bfcl`/`ifeval`/`livecodebench` named separately
+as sets that never had a Grok arm. The ladder items named by the standing brief (IFEval, then
+LiveCodeBench, then BFCL with its AST checker) are all shipped and armed, so the empty queue is
+again the mechanical answer: what moves the scoreboard now is a new owner-set item, not this loop.
+
+**Gates on this head.** All six PUB publication gates exit 0 unshielded (arms index drift 0;
+derived percents 42 recomputed / 0 findings; grok cells 0 findings; superseded cells 0; digest
+rows 49 / 0; three-arm parity 49 / 9 / 0), `pub_preflight_census.py --check` = **0** at the new
+window, `pub_grok_resume_check --as-of 2026-11-15` exits **3** with the in-force cancellation
+record (22 checks; the 182 never-asked IFEval ids reported VOID, not a queue), and the marker
+`~/pub-bench/GROK-CANCELLED` is untouched with the runner still refusing Grok arms.
+`scripts/security/secret_scan.py --dir . --strict` run unshielded, rc 0.
+
+**Frozen-line hygiene.** No contour stamp registered, no hard-bank pair launched, no hard-bank
+byte edited, no new branch. Legacy watchers `f23cf5d48e11` / `a808c7f205a6` completed 01:53 and
+01:55 — still enabled every 5 min, still inert only because
+`~/.hermes/mac-v22full-launch.state` exists (26 B, 2026-11-02 14:05, verified on the literal path
+again); drain guard `9a12508f8a69` completed 01:50. The executions DB shows exactly one `running`
+row, this tick (`288a66f93167` "PUB benchmark loop 30m", started 01:53:26) — no sibling instance
+in the clone. Daily docs job `ef7ea47ff99b` `ok` / streak 0, next 03:00 CET, tree clean when it
+fires. Second worktree `~/projects/strata-autonomous-harness`: HEAD still detached at `8ccef67`,
+re-proven an ancestor of `main`, staged index empty, the same **7** untracked paths (3 scratch
+files inside the published `benchmarks/public/raw/` namespace + 4 fleet OS snapshots
+2026-11-11…14) — tenth tick as the owning workstreams' decision; this line commits nothing foreign.
+
+**Repository state.** `main` == `origin/main` == **`53ad443`** before this tick's commit; CI is
+green on that head, five jobs (secret-scan, contour self-tests, devsecops, hard-v6 scoring
+contracts, pages). This tick adds one commit on the same fast-forward line, pushed as plain
+`HEAD:main` with the repo guard variable; no other branch created or pushed.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or
+stopped, no engine action (bounded `/proc` reads only, pid 175316 unchanged), **no published
+benchmark percent moved**. Moved: the regenerated `benchmarks/public/PREFLIGHT-CENSUS.md`
+(window `as-of 2026-11-15 01:54`) and this block.
