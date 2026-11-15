@@ -45,9 +45,16 @@ rule plus the two-sample loss rule. A second event at 19:04 was a self-inflicted
 not a network event.
 
 ## Credential hygiene
-The one-time password printed on the product label must be treated as **burned**: it appeared in agent
-transcript databases and a helper script embedded a hash of it. Rules now enforced: helper scripts never embed
-credentials or derivatives of them; secrets live only in a `chmod 600` `.env`; a replacement password is
-collected under a separate key and only replaces the old one after it has really been applied on the router
-(overwriting early locks us out of the only box we are trying to reach); no secret, MAC or LAN address in
-this repository.
+The one-time password printed on the product label now lives in exactly one place: a `chmod 600` `.env` in the
+campaign directory. A filesystem audit (search for the value read back from that file, report only the paths that
+matched) found two incidental copies — inside a subagent's live delegation transcript and in an automatic scratch
+snapshot — and both were scrubbed; the session databases never held the literal, because agent transcript output is
+redacted on the way to disk. Earlier a helper script embedded a SHA-256 of it, which is forbidden practice but is
+not exposure of the password itself.
+
+Rotation is still recommended before configuration starts (factory password is one-time, per device), and the
+replacement is collected under a separate key and only replaces the old one after it has really been applied on the
+router — overwriting early locks us out of the only box we are trying to reach. Standing rules: helper scripts never
+embed credentials or derivatives of them; secrets live only in a `chmod 600` `.env`; campaign artifacts live outside
+any agent profile home, because a profile delete is destructive and there is no restore command. No secret, MAC or
+LAN address in this repository.
