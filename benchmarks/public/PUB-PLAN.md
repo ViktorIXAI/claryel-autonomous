@@ -11675,6 +11675,15 @@ an ancestor of `main` this tick, staged index empty, and the same **7** untracke
 files inside the published `benchmarks/public/raw/` namespace + 4 fleet OS snapshots
 2026-11-11…14) — the owning workstreams' decision, ninth tick; this line commits nothing foreign.
 
+**Repository state.** `main` == `origin/main` == **`ac3ccad`** after this tick's first two commits
+(`fd9c7bb` the v3 fix, `ac3ccad` the header wording correction); the commit carrying this sentence is
+the third on the same fast-forward line, all pushes plain `HEAD:main` with the repo guard variable,
+no other branch created or pushed, no foreign commit on the branch during the tick. CI is green on
+**both** pushed heads, five jobs each (secret-scan, contour self-tests, devsecops, hard-v6 scoring
+contracts, pages); the two long jobs ran **7m01s** at this head, and the census contract test is
+auto-enrolled in devsecops by the `harness/*test.py` glob, so its 94 subprocess checks sit inside
+that wall time — recorded so a slow green is not later mis-read as a hang.
+
 **Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
 no engine action (bounded `/proc` reads only, pid 175316 unchanged), **no published benchmark
 percent moved**. Moved: the census tool, its contract suite, the regenerated
