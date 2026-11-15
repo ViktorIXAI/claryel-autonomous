@@ -12322,3 +12322,71 @@ What the record gains: the footprint ceiling's arming rule is now known — mech
 to be inert on the whole corpus, and the largest launchable footprint ever measured on this endpoint
 (8 520 MiB, 60.8 % of swap in use) is a clean GO, which is the strongest evidence on record that the
 footprint statistic is not the separator and must not be armed as one.
+
+## Tick 175 — 2026-11-15 10:17 CET: scoreboard unmoved; the endpoint posts its **first same-day back-to-back GO pair** (08:57 + 10:17) and between the two launchable windows the engine's footprint **fell 8 520 -> 6 356 MiB while the page-cache share of swap in use jumped 37.4 -> 53.1 %** — the tick-174 "cheapest cache case" turned out to be an instant, not a property of the launchable state. Queue still mechanically empty, so the GO is again census evidence, not a launch order; zero legs, zero calls, zero published percent moved
+
+**The reading (`preflight-20261115-1017.txt`, gate sha16 unchanged `dd2f0e4fa0255fa5`).** Swap in
+**0.0 + 0.0 out = 0.0 MiB/s** against `SWAP_RATE_MAX_MIB_S = 20.0`, in-window peak **0.0** (below both
+bounds of the still-CROSSED peak band, 111.4 launchable / 95.4 refused-side — neither bound moved);
+MemAvailable 19 131, SwapFree 51 478 of 65 535 (swap in use 14 057), engine state `S`, engine CPU 1.0 %,
+RSS 56 920, `engine_vmswap_mib` **6 356**, SwapCached **7 458 = 53.1 % of swap in use**; GPU window
+mean 0.0 % peak 0 against one instantaneous sample of 0 % at 26.58 W; `/health` 200 loaded,
+`engine_serve_procs` 1, engine pid 175316 continuous since the ops restart 14 Nov 16:31 (age 17:46),
+foreign legs 0, `blk_read` 0.1 MiB/s whole-disk. The true gate exit is **rc 0 re-proven unshielded** —
+the wrapper's trailing `echo` again masks it (the named class), and the same class bit the grok-gate
+read this tick: `pub_grok_resume_check.py | tail` printed `rc 0` where the real exit is 3; re-run
+unshielded before anything was quoted.
+
+**Continuity across the two GO windows (08:57 -> 10:17).** VmSwap 8 520 -> 6 356 (-2 164), SwapCached
+5 241 -> 7 458 (+2 217), swap in use +50, RSS -578, MemAvailable -2 044, swap rates 4.4/0.0 -> 0.0/0.0.
+Tick 174 called the 08:57 window "the *cheapest* cache case at 37.4 %, which is exactly why its
+`blk_read` stayed at 0.1" — one hour later the same launchable state sits **at the corpus median**
+(median 51.0 -> 51.7 %). The cheap-cache property was a transient of one window, not a signature of
+launchability; the footprint range on launchable windows stays 3 576-8 520 (new 6 356 falls inside),
+so the group separation and the inert dry-run ceiling are untouched by this pair.
+
+**Census (`--markdown` regen, then `--check` 0).** Window `as-of 2026-11-15 10:17`, **136 readings =
+71 GO / 59 NO-GO / 6 gap**; launchable-in-24 h **20 -> 19 by ageing only** (the tool names both
+aged-out GOs: `preflight-20261114-0920.txt`, `preflight-20261114-0926.txt`) plus this reading entering.
+Arming counters move with the new GO: swap-peak **13 -> 14 of 30**, footprint **4 -> 5 of 30**
+(25 launchable windows still owed before a ceiling proposal is admissible); readings carrying
+`engine_vmswap_mib` 17 -> 18, whole-disk scope 36 -> 37, as-of-day readings 13 (3 GO / 10 NO-GO).
+Group separation stays **OVERLAPPING** (launchable 5 windows 3 576-8 520 vs refused 13 windows
+3 357-6 957, n=5/13) and the computed dry-run sentence is unchanged: the lowest ceiling the arming
+rule allows fires on **0 of 5 launchable and 0 of 13 refused** stored windows — inert if armed. Every
+one of the 16 changed table lines is predicted by the one new reading plus the two named aged-out GOs;
+nothing else moved.
+
+**Queue: mechanically empty, so no leg.** Three-arm parity **49 rows / 9 in-force sets / 0 findings**
+(every in-force set carries bare + codex + contour-matched 0.0.2.56; SimpleBench closed as unpinnable).
+Grok excluded by the owner cancellation — resume gate **rc 3, cancelled mode**, ifeval pin unchanged at
+359 rows (sha unchanged `01c1ee0b6e7f6d5d`), the 182 unasked ids a record, not a queue.
+
+**Gates.** `push_ready.sh` green (manifest PASS, 155 links, docs PASS, no leaks; five PUB gates rc 0:
+arms index drift 0, 42 derived percents 0 findings, grok cells 0, superseded cells 0, digest 49 rows
+0 findings), `secret_scan --strict` rc 0, census `--check` rc 0. Hermetic PUB contract suite
+**15 files / 622 checks / 0 failures** — the sum grew from the 594 published at tick 171 because the
+census test took the tick-172/174 dry-run and attribution cases (now 132 checks); per-file counts are
+reproducible and the convention difference (`pub_derived_percent_test` prints
+`CHECKS 41, FAILED 0`) is unchanged. CI green on HEAD `7225077` (contour self-tests, secret-scan,
+devsecops).
+
+**Machine state.** Second worktree 17th tick, shape unchanged: detached `8ccef67`, staged index empty,
+8 untracked paths (5 fleet OS snapshots 2026-11-11…15 + 3 scratch files inside the published
+`benchmarks/public/raw/` namespace, the tick-134 class) and 1 tracked modification
+`hardware/os-snapshots/latest.json` — owned by the Fleet OS audit / Security Guard lines; this line
+committed nothing there. Frozen-line watchers still firing and still an owner decision: the Mac v2.2
+job completed 10:11 and 10:17 and is inert **only while** its one-shot state marker exists (verified
+on the literal path, dated 2026-11-02 14:05 — the `$HOME`-expansion trap respected), and the P2005
+paired 2.1→2.2 watch completed 10:05/10:10/10:15, a permanent ~1 150 dead ssh round-trips/day onto
+the pub endpoint box. Never edited from this line. The docs-freshness job **succeeded** at 03:00 today
+(marker commit `f6d319b` "Daily docs freshness check: 2026-11-15", failure streak 0) — the standing
+dirty-tree note did not reproduce. This line's job scheduled (`288a66f93167`, this tick).
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+one bounded remote reading inside the standing producer seam (engine pid 175316 untouched). **No
+published benchmark percent moved.** Moved: the regenerated census (window `as-of 2026-11-15 10:17`,
+stamp `v4`, gate sha16 unchanged) and this block. What the record gains: launchable windows exist in
+pairs now, and a page-cache share measured inside one GO window does not describe the next one —
+which is another reason the footprint/page-cache statistics cannot be armed as separators from
+single-window readings.
