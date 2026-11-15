@@ -11766,3 +11766,118 @@ contracts, pages). This tick adds one commit on the same fast-forward line, push
 stopped, no engine action (bounded `/proc` reads only, pid 175316 unchanged), **no published
 benchmark percent moved**. Moved: the regenerated `benchmarks/public/PREFLIGHT-CENSUS.md`
 (window `as-of 2026-11-15 01:54`) and this block.
+
+## Tick 165 — 2026-11-15 02:29 CET: scoreboard unmoved; the swap-refusal tail reaches four consecutive windows and the newest one is the second-heaviest window the corpus has ever stored (257.2 MiB/s mean, 419.7 peak, `pswpout` moving for only the second time in 126 readings) while every free column read green; the free-swap floor is now mechanically inert at this box's footprint (15 of 125 readings below it, all of them in the pre-enlargement era); census 126 = 68 GO / 52 NO-GO / 6 gap, launchable-in-24h 28 -> 27 with the aged-out file named and zero reclassification; arming unmoved 11/30 and 2/30 — three consecutive NO-GOs buy zero coverage; queue empty, zero legs, zero calls, zero published benchmark percent moved
+
+**Endpoint window (`preflight-20261115-0229.txt`, engine pid 175316 age 09:58:17 — the same
+process since the ops restart at 16:31 on 2026-11-14, so nothing restarted during this window).**
+`PREFLIGHT NO-GO` (gate rc 3, wrapper rc 3, `.err` empty 0 B): live swap throughput **249.8 MiB/s
+in + 7.4 MiB/s out = 257.2 MiB/s** over the measured 6.23 s window against
+`SWAP_RATE_MAX_MIB_S = 20.0` — 12.9x the ceiling, and by the `in + out` ranking over the 38 stored
+windows that carry the key it is **2nd of 38**, the heaviest since `20261114-2052` (236.9) and
+behind only the 443.8 MiB/s complementarity window of 14 Nov 16:03. In-window peak 419.7 MiB/s.
+Everything else stayed quiet: engine state `S`, sampled `engine_pcpu` 27.8 %, RSS 57 374 MiB,
+GPU window mean **0.0 %** / peak 0 % at 27.21 W, device reads **0.1 MiB/s** (whole-disk scope, top
+reader `basalt`), `MemAvailable` 19 041 of 61 953 MiB, `health_code` 200 with `health_loaded=true`
+and one `basalt --serve` process, `foreign_legs=0`. This is the third independent observation of
+the tick-151/tick-159 complementarity, and the sharpest: 257 MiB/s of swap pages with 0.1 MiB/s of
+device reads, because 7 521 MiB — **57.2 %** of the 13 153 MiB of swap in use — is page-cache
+resident in RAM.
+
+**Direction of travel, which no earlier window of this tail showed.** `swap_out_mib_per_s` is
+non-zero in only **2 of 126** stored readings: 2026-11-14 16:03 (211.9 out / 231.9 in) and today
+(7.4 out / 249.8 in). So this is the first window since that one in which pages are moving both
+ways — churn rather than a one-directional reclaim — while swap in use has climbed for three
+readings running: 11 218 -> 12 803 -> **13 153** MiB.
+
+**The footprint moved the opposite way, which is itself the attribution.** Engine `VmSwap`
+5 847 -> **5 380 MiB** (−467) while total swap in use rose +350 MiB in the same 35 minutes: the
+growth is therefore **not** the engine's own pages. The footprint stays censused and unbanded —
+coverage 7 -> 8 readings, launchable n=2 (3 576–6 291 MiB), refused n=6 (3 357–6 070), separation
+**OVERLAPPING**, n=2/6 cannot support a ceiling in either direction. Page-cache share of swap in
+use median 61.9 -> **59.6 %** (max 65.2 %).
+
+**The free-swap floor no longer reaches this box.** Reading the corpus for `swap_total_mib`: the
+corpus opens (2026-11-11 03:36) with **51** readings at **8 191** plus one junk 294 911
+(2026-11-11 09:48) and one file where the key is absent, and **all 73 readings from
+`preflight-20261113-1132.txt` on carry 65 535** — the enlargement therefore landed between the
+10:42 and the 11:32 reading of 2026-11-13, a 50-minute gap, and it predates the standing gate rule
+(2026-11-14) by a day. Consequence measured, not asserted: **15 of the
+125** readings with a parseable `swap_free_mib` sit below the gate's 256 MiB floor, and every one
+of them is dated 2026-11-11 03:36 … 2026-11-12 20:32, i.e. entirely inside the 8 GiB era. Since the
+enlargement the floor has refused nothing and never come close — today's free column read
+52 382 MiB of 65 535 in the same window the rate rule refused. The refusals of this line are now
+carried entirely by the two rate rules (and, if it is ever armed, the footprint), not by the free
+columns — which is the corpus form of the machine note's "the free columns stay green while the
+model's pages leave RAM". No threshold was changed by this tick; the rule is reported as
+in-operative at observed values, not removed.
+
+**Why the arming counters are frozen.** A NO-GO window buys neither coverage nor credit: peak
+arming stays **11 of 30**, footprint arming **2 of 30**, after three consecutive refusals
+(01:00, 01:54, 02:29) — 3.5 h in which the footprint statistic could not gain one of the 30
+launchable windows its pre-registered arming rule demands. Arming progress is gated by the box's
+swap state, not by tooling; the peak counter is moot anyway because its band already **CROSSED**
+(highest launchable peak 111.4 >= lowest mean-failing peak 107.0, so a peak ceiling adds no refusal
+the mean rule does not already make). Nothing is proposed: the rule is applied as pre-registered.
+
+**Census.** `benchmarks/public/PREFLIGHT-CENSUS.md` regenerated at window `as-of 2026-11-15 02:29`
+(stamp `pub-preflight-census-v3`, gate sha16 `dd2f0e4fa0255fa5`): **126** readings judged —
+**68 GO / 52 NO-GO / 6 input gap**; day-of-as-of 3 readings, 0 GO / 3 NO-GO / 0 gap;
+launchable (GO) windows in the last 24 h **28 -> 27**, and the fall is ageing, not
+reclassification: the 24 h cutoff moved past `preflight-20261114-0208.txt` (gate rc 0), re-proven
+by running the gate over every 2026-11-14 00:00-03:00 file (`0009` GO, `0055` GO, `0131` GO,
+`0207` NO-GO, `0208` GO, `0254` GO); device scope mix 27 whole-disk / 99 unscoped / 0 unknown;
+peak-carrying readings 31 (2 NaN), band set 27, swap-mean-passing-with-peak 15 vs mean-failing 12;
+leg completions in the window 0. `--check` returns **0** on the committed table.
+
+**Queue.** `scripts/pub_three_arm_parity_check.py`: **49 digest rows / 9 in-force sets / 0
+findings** — every in-force set carries bare + codex + contour-matched at `0.0.2.56`, the six Grok
+cells carry the cancellation sentence verbatim, `bfcl`/`ifeval`/`livecodebench` named separately as
+sets that never had a Grok arm. The ladder items of the standing brief (IFEval, LiveCodeBench,
+BFCL) are shipped and armed, so the empty queue is again the mechanical answer: only a new
+owner-set item moves the scoreboard. No leg was launched to look busy; the endpoint stays refused by
+its own gate.
+
+**Gates on this head.** All six PUB publication gates exit **0** unshielded: arms index drift 0;
+derived percents 42 recomputed / 0 findings; grok cells 9 documents / 0 findings; superseded cells
+9 documents / 0 findings; digest rows 49 / 0; three-arm parity 49 / 9 / 0.
+`pub_preflight_census.py --check` = **0** at the new window.
+`pub_grok_resume_check.py --as-of 2026-11-15` exits **3** with the in-force cancellation record
+(22 checks; gsm8k 300/300, arc-easy 300/300, arc-challenge 300/300, gpqa-diamond 198/198, humaneval
+164/164, mmlu-pro 500/500 stored complete; ifeval 359 rows sha256-16 `01c1ee0b6e7f6d5d` unchanged,
+182 never-asked ids reported **VOID**, not a queue; "RESUME GATE: NO-GO - do not spend quota").
+The marker `~/pub-bench/GROK-CANCELLED` is untouched (121 B, 2026-11-12 06:54) and the runner still
+refuses Grok arms. `scripts/security/secret_scan.py --dir . --strict` run unshielded, rc **0**
+(vendored IFEval exception list only, `gpt4_sample.jsonl@ff57ec6d17688771`).
+
+**Transport note (one transient, recorded not fixed).** The first `git ls-remote origin main` of
+this tick died after 135 s with `Failed to connect to github.com port 443`. Re-checked in the same
+tick: `github.com` 200, `api.github.com` 200, `raw.githubusercontent.com` 301, DNS resolves, and a
+second `ls-remote` returned `63dbed2` == `HEAD`. Same class as the 2026-11-12 docs-job capture
+(`Could not resolve host: github.com`) — transient egress, not a repo or ref problem. It matters
+tonight because the daily docs job `ef7ea47ff99b` (`0 2 * * *` UTC = 03:00 CET) had **not** fired
+when this block was written: its stored record is last run 2026-11-14 03:02, `last_status ok`,
+`failure_streak 0`, next 2026-11-15 02:00 UTC.
+
+**Frozen-line hygiene.** No contour stamp registered, no hard-bank pair launched, no hard-bank byte
+edited, no bank edit, no new branch created or pushed. Legacy watchers `f23cf5d48e11`
+("Mac v2.2 full after v2.1", every 5 min) and `a808c7f205a6` ("P2005 paired full 2.1->2.2 watch",
+every 5 min) completed 02:29 and 02:25 — still enabled, still inert only because
+`~/.hermes/mac-v22full-launch.state` exists (26 B, 2026-11-02 14:05, re-verified on the literal
+path); they remain an owner decision, and this line edited no other job's state. Drain guard
+`9a12508f8a69` completed 02:20. The executions DB shows exactly one `running` row, this tick
+(`288a66f93167` "PUB benchmark loop 30m", started 02:28:26) — no sibling instance in the clone.
+Second worktree `~/projects/strata-autonomous-harness`: HEAD still detached at `8ccef67`, staged
+index empty, the same **7** untracked paths (3 scratch files inside the published
+`benchmarks/public/raw/` namespace + 4 fleet OS snapshots 2026-11-11…14) — eleventh tick as the
+owning workstreams' decision; nothing foreign committed here.
+
+**Repository state.** `main` == `origin/main` == **`63dbed2`** before this tick's commit, and CI is
+green on that head (`devsecops`, `hard-v6 scoring contracts`, `secret-scan`, `contour self-tests`
+all `success`). This tick adds one commit on the same fast-forward line, pushed as plain
+`HEAD:main` with the repo guard variable; no other branch created or pushed.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or
+stopped, no engine action (bounded `/proc` and `/sys` reads inside the standing producer only, pid
+175316 unchanged), **no published benchmark percent moved**. Moved: the regenerated
+`benchmarks/public/PREFLIGHT-CENSUS.md` (window `as-of 2026-11-15 02:29`) and this block.
