@@ -12207,3 +12207,101 @@ slots rather than the swap cache, attributed **80 %** to the engine's own footpr
 maximum above the launchable maximum), with the 6 s rate rule's out-side and the reads-only device rule
 both blind to it — which is the clearest argument yet on record for the footprint state rule, and the
 clearest statement of why that rule still may not be armed.
+
+## Tick 174 — 2026-11-15 09:0x CET: the footprint ceiling the arming rule allows is **mechanically inert** on the whole corpus, so the census now computes that fact at every reading (census `v4`); no benchmark byte moved
+
+Standing first: no `parb-pub-*` unit, no `scripts/pub_bench_(run|cloud).py` process, queue empty
+(`pub_arms_index --check` 47 arms / 9 sets / 0 findings, `pub_digest_row_check` 49 rows / 0 findings,
+`pub_derived_percent_check` 42 rows / 0 findings, `pub_grok_cell_check` 9 docs / 0 findings,
+`pub_superseded_cell_check` 9 docs / 0 findings, `pub_grok_resume_check --as-of 2026-11-15` exit 3 =
+the cancel marker refuses transport, `pub_three_arm_parity_check` 30 cells unchanged). The hermetic
+PUB suite is 15 files 0 failures; `push_ready.sh` exit 0; `secret_scan --strict` exit 0;
+`verify_manifest --v6` PASS. CI at `baaac06`: all five jobs (hard-v6 scoring contracts, devsecops,
+secret-scan, contour self-tests, pages) **completed success**. The daily docs job ran **ok** at
+03:05:32 (`last_error: null`; the recorded failure is from 2026-11-13), so the machine note's
+"reports an error daily because the tree is dirty" did **not** reproduce for a second day, and the
+GitHub `docs-freshness.yml` workflow's last scheduled run (2026-11-14 10:40:43Z) is `success` too.
+
+**Reading taken (the only endpoint action): 2026-11-15 08:57, gate GO.** `swap_in 4.4 / swap_out 0.0
+MiB/s` over a 6.14 s measured window, swap peak 27.1 MiB/s, GPU 1 Hz mean 0.0 % (peak 0 %),
+engine `%CPU` 6.0, device 0.1 MiB/s `whole-disk`, `health_loaded=true`, engine pid unchanged (age
+16:25:55). Swap in use 14 007 MiB (down from 18.4 GiB in the previous tail), SwapCached 5 241 MiB
+(**37.4 %** of it — the lowest page-cache share of any GO window carrying the key), and the engine's
+own `VmSwap` **8 520 MiB**, which is **60.8 % of the swap in use** and the **largest footprint ever
+recorded in this corpus**.
+
+**The finding, computed by the tool: `INERT-AT-MINIMUM-CEILING`.** The footprint ceiling
+pre-registered at tick 159 has to sit *above every launchable footprint*. Across all 135 stored
+readings the launchable group is `3576 / 4304 / 6291 / 8520 MiB` (4 windows) and the refused group
+tops out at **6 957 MiB** (13 windows, median 5 847). So:
+
+* the minimum ceiling the rule allows, `> 8520 MiB`, fires on **0 of the 13 refused readings** —
+  arming it buys nothing;
+* any ceiling that *would* refuse a refused-class window sits at or below 6 957 MiB, i.e. **below a
+  footprint the gate already launched and judged GO** (the 08:57 reading itself, 8 520 MiB, clean GO
+  on every rule in force). A `> 6957` ceiling fires on 1 launchable and still 0 refused.
+
+The arming rule and the guard's purpose are therefore **contradictory in this corpus**: the rule
+guarantees a ceiling above the worst launchable state, and the worst launchable state is already worse
+than every refused state. That is the mirror image of the tick-159 lesson — a guard that fires by
+accident is not a guard, and a guard that can only be armed where it fires on **nothing** is not a
+guard either. Decision: **the footprint ceiling stays un-armed**, and accumulating 30 launchable
+windows of this statistic does not satisfy the rule, because the separation the rule assumes does not
+exist (the census classifies the groups **OVERLAPPING**, n=4/13). The state rules that *do* work keep
+their places: the swap-mean rule refused the 08:18 reading (`swap_in 74.9 > 20`, footprint 6 957) and
+the 08:57 reading passes it (`4.4`) — the rate rule, not the footprint, is what separates those two
+minutes.
+
+**What shipped (tooling, allowed under the freeze): the census computes the dry-run.**
+`scripts/pub_preflight_census.py` gains two COMPUTED rows and its stamp moves
+`pub-preflight-census-v3` → **`v4`**: `footprint ceiling dry-run (computed; it arms NOTHING)` — the
+candidate ceiling, how many launchable windows it spares, how many refused windows it fires on, and
+both numbers a firing ceiling would have to beat — plus `footprint ceiling state (computed)`:
+`INERT-AT-MINIMUM-CEILING` / `FIRING-AT-MINIMUM-CEILING` / `NO-DATA`. Live cell: `ceiling > 8520 MiB
+fires on 0 of 4 launchable and 0 of 13 refused stored windows`. It registers no ceiling, gates
+nothing, and changes no verdict — the tick-172 lesson ("a hand-composed census sentence belongs to
+the tool") applied to this arithmetics.
+
+**Contract tests** (`harness/pub_preflight_census_test.py`, 123 → **132 checks**, all green): the
+ceiling candidate comes from the launchable maximum (a SEPARATED fixture — launchable 1 000, refused
+12 000 — must read `ceiling > 1000 MiB fires on 0 of 1 launchable and 1 of 1 refused` and state
+`FIRING-AT-MINIMUM-CEILING`); the inert cases (INVERTED and OVERLAPPING shapes read 0 refused
+windows); the **n/a** case (no footprint key present prints n/a, never 0-of-0 arithmetic that would
+read as measured inertness); and the non-vacuity pair: the **same** refused window with the launchable
+footprint moved 1 000 → 20 000 flips the state word FIRING → INERT.
+
+**Non-retroactivity, proven by running both tools over every stored reading.** The HEAD census and
+the modified census were run at the identical window `as-of 2026-11-15 08:57`: verdict cells identical
+(**70 GO / 59 NO-GO / 6 input gap**), footprint coverage, medians and page-cache cells identical — the
+whole diff is **three lines**: the stamp sentence and the two new rows. The gate sha16 is unchanged
+(`dd2f0e4fa0255fa5`), so no stored reading can receive a different verdict. Census window re-pinned
+`as-of 2026-11-15 08:18` → **08:57** (135 readings) and the re-pin verified mechanically in the same
+tick: `--check` exit 0.
+
+**The tick-173 Next items, answered.** *(a) Device ceiling inside the window:* the 08:57 GO reading
+carries `blk_read 0.1 MiB/s` whole-disk against the pre-registered 50.0, and the 24 h window holds
+readings above 50.0 that the device rule actually refused (56.2 at 2026-11-14 18:47 is the lowest
+exceedance). But the tick-173 sentence "max GO 0.071 vs min refused 2.151" **must not be repeated as
+separation**: over the 24 h window the highest launchable device rate is **0.500 MiB/s** (16 GO
+readings carrying the key) while the 24 refused readings that carry it go down to **0.1 MiB/s** — those
+refusals came from other rules. On the device axis there is no GO/refused band at all; the device rule
+guards only the top of the axis, and it still works there. *(b) Page-cache share of swap in use:* the
+census prints it over
+all 17 readings carrying the pair — **median 51.0 %, max 65.2 %**; the newest GO window is the
+*cheapest* cache case at 37.4 %, which is exactly why its `blk_read` stayed at 0.1 while the engine
+carried 8.3 GiB in swap: refaults are no longer being served from RAM, and the rule that sees this
+footprint does not exist. *(c) Swap-peak arming counter:* **13 of 30** launchable windows carry the
+peak (was 11), and the peak band stays **CROSSED** (highest launchable 111.4 vs lowest mean-failing
+95.4 MiB/s) — the peak stays reported, never gated.
+
+**Coverage honesty:** footprint arming counter **4 of 30** launchable windows, swap-peak counter
+**13 of 30**, 17 of 135 readings carry `engine_vmswap_mib`. No rule was armed, no ceiling registered.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+one bounded remote reading inside the standing producer seam (engine pid 175316 untouched). **No
+published benchmark percent moved.** Moved: the regenerated census (window `as-of 2026-11-15 08:57`,
+stamp `v4`), `scripts/pub_preflight_census.py`, `harness/pub_preflight_census_test.py`, and this block.
+What the record gains: the footprint ceiling's arming rule is now known — mechanically, per reading —
+to be inert on the whole corpus, and the largest launchable footprint ever measured on this endpoint
+(8 520 MiB, 60.8 % of swap in use) is a clean GO, which is the strongest evidence on record that the
+footprint statistic is not the separator and must not be armed as one.

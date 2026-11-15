@@ -354,6 +354,28 @@ def footprint_sep_text(fp):
         fp["n_go_launchable"], fp["n_nogo"])
 
 
+def footprint_ceiling_text(fp):
+    """The footprint ceiling DRY-RUN as two computed cells: the candidate ceiling with the exact
+    windows it would fire on, and the state word. This answers the arming rule's question at every
+    reading instead of letting a tick hand-compute it, and it names the inert case out loud: a
+    ceiling armed above every launchable footprint is worthless if no refused window in the corpus
+    exceeds that footprint."""
+    if fp["dry_state"] == "no-data":
+        return ("n/a — no gate-GO window in this window carries `engine_vmswap_mib` (or no refused "
+                "window does), so there is no ceiling to dry-run")
+    base = ("ceiling > %s MiB fires on %d of %d launchable and %d of %d refused stored windows"
+            % (mib(fp["dry_ceiling"]), fp["dry_fires_go"], fp["n_go_launchable"],
+               fp["dry_fires_nogo"], fp["n_nogo"]))
+    if fp["dry_state"] == "inert-at-minimum-ceiling":
+        return "%s. The lowest ceiling the arming rule allows spares every launchable window and " \
+               "refuses NOTHING in this corpus, while any ceiling low enough to refuse a refused " \
+               "window (highest refused footprint %s MiB) sits at or below a launchable footprint " \
+               "(highest launchable %s MiB): armed on this corpus the rule would be mechanically " \
+               "inert" % (base, mib(fp["nogo_max"]), mib(fp["go_max"]))
+    return "%s. A ceiling above every launchable footprint also refuses at least one refused " \
+           "window, so on this corpus the state rule would have real work to do" % base
+
+
 def footprint(rows):
     """Coverage and distribution of the engine swap FOOTPRINT (added 2026-11-14, tick 159).
 
@@ -385,7 +407,34 @@ def footprint(rows):
         sep = "inverted"
     else:
         sep = "overlapping"
+    # Ceiling DRY-RUN (added 2026-11-15, tick 174) — census arithmetic, NOT a rule, and it arms
+    # nothing. The pre-registered arming rule places a footprint ceiling ABOVE every launchable
+    # window, so the question the rule must answer on the day it is armed is: at that ceiling, does
+    # anything actually fire? A guard that can only be armed at a value nothing in the corpus
+    # exceeds is not a guard — the mirror image of the tick-159 lesson ("a guard that fires by
+    # accident is not a guard"). Measured live at the 08:57 reading on 2026-11-15: the launchable
+    # footprint maximum (8 520 MiB) had grown PAST the refused-group maximum (6 957 MiB), so the
+    # minimum admissible ceiling fires on zero stored windows while every ceiling that fires on one
+    # refuses a window the gate launches. Computing this per reading is what stops the next tick
+    # from hand-deriving the sentence (tick 172's class of defect).
+    ceiling = max(go_vals) if go_vals else None
+    fires_go = sum(1 for v in go_vals if ceiling is not None and v > ceiling)
+    fires_nogo = sum(1 for v in nogo_vals if ceiling is not None and v > ceiling)
+    if ceiling is None or not nogo_vals:
+        # Nothing to dry-run: no launchable footprint coverage means no candidate ceiling, and no
+        # refused footprint coverage means nothing could ever fire. Both print n/a, never 0/0
+        # arithmetic that would read as a measured inertness.
+        dry = "no-data"
+    elif fires_nogo == 0:
+        # The whole point of the cell: the only ceiling the arming rule allows refuses nothing here.
+        dry = "inert-at-minimum-ceiling"
+    else:
+        dry = "firing-at-minimum-ceiling"
     return dict(
+        dry_state=dry,
+        dry_ceiling=ceiling,
+        dry_fires_go=fires_go,
+        dry_fires_nogo=fires_nogo,
         sep_state=sep,
         n_carried=len(carried),
         n_nan=sum(1 for r in carried if r["vmswap"] is None),
@@ -423,8 +472,13 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over")
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
-    L.append("Census stamp: `pub-preflight-census-v3`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v3 removes the CORPUS-WIDE reading count from "
+    L.append("Census stamp: `pub-preflight-census-v4`, gate sha16 `%s`, window `as-of %s` "
+             "(%d readings inside the window). v4 adds two COMPUTED footprint ceiling rows — the "
+             "ceiling dry-run and its state word — because at the 08:57 reading on 2026-11-15 the "
+             "launchable footprint maximum (8 520 MiB) grew ABOVE the refused-group maximum "
+             "(6 957 MiB), so the only footprint ceiling the arming rule allows fires on nothing in "
+             "the corpus; that consequence was hand-derived in a tick note and now belongs to the "
+             "tool (tick 172's class of defect). v3 removes the CORPUS-WIDE reading count from "
              "that window-identity sentence: the number counted every `preflight-*.txt` file "
              "present at run time, so taking one reading after the frozen window made `--check` "
              "of an untouched snapshot report drift (measured 2026-11-15 01:00 at the committed "
@@ -434,8 +488,8 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
              "file. v2 added two COMPUTED group-state rows — the swap-peak band state and the "
              "footprint group separation — because v1 printed \"Band: nothing between X and Y\" "
              "unconditionally, and at 23:13 on 2026-11-14 the order of X and Y reversed: the "
-             "table went on asserting an empty interval the data had withdrawn. v1 and v2 "
-             "tables are left as published; a v1, v2 and v3 file are not the same table shape."
+             "table went on asserting an empty interval the data had withdrawn. v1, v2 and v3 "
+             "tables are left as published; a v1, v2, v3 and v4 file are not the same table shape."
              % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"), len(rows)))
     L.append("")
     L.append("Ceilings read out of the gate source at run time, so this table cannot disagree with "
@@ -496,6 +550,9 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("| footprint on gate-NO-GO windows | %d (median %s MiB, min %s MiB) |" % (
         fp["n_nogo"], mib(fp["nogo_median"]), mib(fp["nogo_min"])))
     L.append("| footprint group separation (computed, never asserted) | %s |" % footprint_sep_text(fp))
+    L.append("| footprint ceiling dry-run (computed; it arms NOTHING) | %s |"
+             % footprint_ceiling_text(fp))
+    L.append("| footprint ceiling state (computed) | %s |" % str(fp["dry_state"]).upper())
     L.append("| page-cache share of swap in use (`swap_cached_mib` / used) | %d readings, median %s "
              "percent, max %s percent |" % (fp["n_share"], pct(fp["share_median"]),
                                             pct(fp["share_max"])))

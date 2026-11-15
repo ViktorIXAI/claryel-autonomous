@@ -65,6 +65,18 @@ What it pins:
       30 changed table lines — the whole engine-footprint section and the band prose — while the exit
       code stayed right. The count is printed before the body, every changed line must appear, and the
       print bound is a named constant far above one table's size.
+  15. the FOOTPRINT CEILING DRY-RUN (census v4, added 2026-11-15, tick 174) is computed at every
+      reading, because the pre-registered arming rule will one day have to answer "at the lowest
+      ceiling that spares every launchable window, how many stored windows actually fire?" — and that
+      answer must never be a hand-composed sentence. Measured live at the 08:57 reading: the
+      launchable footprint maximum (8 520 MiB) grew above the refused maximum (6 957 MiB), so the
+      only admissible ceiling fires on NOTHING. Pinned: the firing case (SEPARATED fixture, ceiling >
+      1000 fires on 1 of 1 refused), the inert cases (INVERTED and OVERLAPPING fixtures, 0 refused
+      windows fire), the n/a case (no footprint key present, never 0-of-0 arithmetic that would read
+      as measured inertness), and the non-vacuity pair: the SAME refused window with the launchable
+      footprint moved 1000 -> 20000 flips the state word FIRING-AT-MINIMUM-CEILING ->
+      INERT-AT-MINIMUM-CEILING. The dry-run registers no ceiling, gates nothing and changes no
+      verdict: it is a census of what a future ceiling WOULD do.
 """
 import difflib
 import os
@@ -473,6 +485,17 @@ def main():
                                 "window(s) 12000-12000 MiB; n=1/1"),
                   "a launchable footprint strictly below the refused one must read SEPARATED, "
                   "got %r" % ss)
+            # 12b. the ceiling dry-run on the SAME fixture: a separated corpus is the one case where
+            # the pre-registered ceiling (above every launchable footprint) actually fires.
+            ds = cell(outs, "footprint ceiling dry-run (computed; it arms NOTHING)") or ""
+            check(ds.startswith("ceiling > 1000 MiB fires on 0 of 1 launchable and 1 of 1 refused "
+                                "stored windows"),
+                  "a separated corpus must report the minimum admissible ceiling AND the refused "
+                  "window it fires on, got %r" % ds)
+            check(cell(outs, "footprint ceiling state (computed)") == "FIRING-AT-MINIMUM-CEILING",
+                  "a ceiling that fires on a refused window while sparing every launchable one is "
+                  "FIRING-AT-MINIMUM-CEILING, got %r"
+                  % cell(outs, "footprint ceiling state (computed)"))
         INV_FIX = {
             "preflight-%s-0021.txt" % DAY: {"engine_vmswap_mib": "20000", "swap_cached_mib": "200"},
             "preflight-%s-0022.txt" % DAY: {"swap_in_mib_per_s": "120.0",
@@ -489,6 +512,40 @@ def main():
                                  "window(s) 12000-12000 MiB; n=1/1"),
                   "a launchable footprint strictly ABOVE the refused one must read INVERTED, "
                   "never a band a ceiling could be drawn from, got %r" % isi)
+            # 12c. the dry-run must MOVE with the footprint keys on a fixture whose verdicts,
+            # separation class and swap windows are otherwise identical to the SEPARATED run above:
+            # same refused window (12000), launchable footprint moved 1000 -> 20000, and the state
+            # word flips FIRING -> INERT. That pair is the non-vacuity control for the new cells.
+            di = cell(outi, "footprint ceiling dry-run (computed; it arms NOTHING)") or ""
+            check(di.startswith("ceiling > 20000 MiB fires on 0 of 1 launchable and 0 of 1 refused "
+                                "stored windows"),
+                  "an inverted corpus must report a ceiling that fires on NOTHING, got %r" % di)
+            check(cell(outi, "footprint ceiling state (computed)") == "INERT-AT-MINIMUM-CEILING",
+                  "the minimum admissible ceiling firing on no stored window is "
+                  "INERT-AT-MINIMUM-CEILING, got %r"
+                  % cell(outi, "footprint ceiling state (computed)"))
+            check(cell(outs, "footprint ceiling state (computed)")
+                  != cell(outi, "footprint ceiling state (computed)"),
+                  "the dry-run state cell must be a property of the footprint groups, not a fixed "
+                  "sentence: SEPARATED reads FIRING and INVERTED reads INERT on the same refused "
+                  "window")
+        # the live-shape case (launchable 6000/30000 straddling a refused 12000): overlapping groups
+        # are INERT too, because the ceiling is set by the launchable MAXIMUM.
+        dlive = cell(out12, "footprint ceiling dry-run (computed; it arms NOTHING)") or ""
+        check(dlive.startswith("ceiling > 30000 MiB fires on 0 of 2 launchable and 0 of 1 refused"),
+              "an overlapping corpus whose launchable maximum exceeds the refused one must read "
+              "as firing on nothing, got %r" % dlive)
+        check(cell(out12, "footprint ceiling state (computed)") == "INERT-AT-MINIMUM-CEILING",
+              "the launchable-side maximum sets the candidate ceiling, so this shape is inert, got %r"
+              % cell(out12, "footprint ceiling state (computed)"))
+        # a corpus with no footprint key at all must print n/a, never 0/0 arithmetic
+        dnone = cell(out13, "footprint ceiling dry-run (computed; it arms NOTHING)") or ""
+        check(dnone.startswith("n/a"),
+              "no footprint coverage has no candidate ceiling: n/a, never 0-of-0 arithmetic, got %r"
+              % dnone)
+        check(cell(out13, "footprint ceiling state (computed)") == "NO-DATA",
+              "the dry-run state of a footprint-free corpus is NO-DATA, got %r"
+              % cell(out13, "footprint ceiling state (computed)"))
         # a corpus with no footprint key at all must not invent a class
         fs_none = cell(out13, "footprint group separation (computed, never asserted)") or ""
         check(fs_none.startswith("NO-DATA"),
