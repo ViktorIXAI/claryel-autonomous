@@ -9,7 +9,8 @@ It sits inside the house LAN: `ether1` is a slave of `bridge1`, it sends RSTP BP
 - RouterOS 7.1x has **MNDP off by default** — an MNDP/CDP multicast capture proves nothing about presence.
 - Presence probe that needs no root and no IP: the box's own **IPv6 link-local address derived from its label
   MAC** (modified EUI-64), pinged with `ping6`. Steady 3/3 replies at ~0.5 ms.
-- No IPv4: the box has no address in our LAN's ARP table, and it never answers on the factory `192.168.88.0/24`
+- No IPv4: the box has no address in our LAN's ARP table, and it never answers on the factory-default
+  management network (address masked `<LAN_IP>/24` here; the literal lives in the campaign notes)
   (probed from a throwaway macvlan container, cleaned up afterwards).
 
 ## Why we cannot configure it (measured, not assumed)
@@ -21,11 +22,13 @@ It sits inside the house LAN: `ether1` is a slave of `bridge1`, it sends RSTP BP
   `PyWinBox` is an X11 window-geometry library, not a RouterOS client. No router setting has been changed.
 
 ## Decision
-1. Cable test (2 min, no config change): a laptop with a static `192.168.88.10/24` plugged into a free port of
-   the box, then try `192.168.88.1`. This only works if the box is still factory-defaulted.
+1. Cable test (2 min, no config change): a laptop with a static address inside the factory-default
+   management network (masked; the literal lives in the campaign notes) plugged into a free port of
+   the box, then try the factory-default gateway address (masked). This only works if the box is still
+   factory-defaulted.
 2. If that fails, hardware reset: **unplug the cable carrying the box into the house LAN first** (a
    factory-defaulted box re-joins the LAN as a bridge and can loop it), hold RESET ~10 s until the ACT LED
-   blinks, then reach `192.168.88.1` directly. This wipes whatever config existed; the evidence that nothing
+   blinks, then reach the factory-default gateway address (masked) directly. This wipes whatever config existed; the evidence that nothing
    valuable is on it is that it has no IPv4, no listening service and does nothing but participate in RSTP.
 3. First action after access: read-only `/export verbose` snapshot into the campaign `configs/` directory,
    then rotate the admin password, only then start dual-WAN work.
