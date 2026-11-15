@@ -12072,3 +12072,138 @@ engine request). **No published benchmark percent moved.** Moved: the regenerate
 sampling instant is now measured against a 60 s window on the same engine — over the ceiling at 6 s,
 under it at 60 s with the out-flow running — so the arming question for any long-window statistic is
 now a measurement, not a hypothesis.
+
+## Tick 173 — 2026-11-15 08:18 CET: scoreboard unmoved; the endpoint is back to refusing its own gate (**second refusal after the first GO in 7 h 24 min**), and this hour belongs to a **different regime** than the previous tail: swap in use grew **+1 755 MiB** while the two 6 s `pswpout` samples bracketing it read **0.0 and 0.0** and the device rule read 0.1 MiB/s — the growth spent **real swap slots** (page-cache share of swap fell 50.6 -> 46.5 %), so neither rate rule saw the dominant event of the hour, and the engine's own footprint carried **80 % of it** (`VmSwap` 5 553 -> **6 957**, a new corpus maximum, above the highest launchable footprint 6 291). The rule, its ceiling and its 6 s window stay exactly as pre-registered; the state rule that would see this is the footprint ceiling, and it is still blocked by its own arming rule (launchable coverage 12/30 and 3/30). Census 134 = 69 GO / 59 NO-GO / 6 gap, launchable-in-24 h 22 -> 20 with the two aged-out files **named by the tool**, zero reclassification; queue empty (49 rows / 9 sets / 0 findings), zero legs, zero calls, zero published benchmark percent moved
+
+**Endpoint window (`preflight-20261115-0818.txt`, producer run bare, gate run by the producer; wrapper
+rc and gate rc both **3**, captured unshielded before anything else ran).** Live swap throughput
+**74.9 MiB/s in + 0.0 MiB/s out** over the measured 6.13 s window against `SWAP_RATE_MAX_MIB_S = 20.0`
+= **3.75x**, **34th of the 46** stored windows that carry both counters (13th heaviest; the five
+heaviest are 443.8 / 269.3 / 257.2 / 253.0 / 236.9). In-window peak 268.3 MiB/s. Everything the free
+columns look at stayed healthy: `MemAvailable` 19 707 of 61 953, `SwapFree` 52 071 of 65 535, engine
+state `R`, sampled `engine_pcpu` 9.8 %, RSS 57 182 MiB, GPU window mean **4.2 %** / peak 23 % against
+an instantaneous nvidia-smi sample of 0 % at 27.54 W, device reads **0.1 MiB/s** (whole-disk scope,
+top reader `basalt`), `/health` 200 with `health_loaded=true` and one `basalt --serve` process,
+`foreign_legs=0`; `load1` 13.59 printed only (falsified as a proxy at ticks 142/143). Engine pid
+**175316**, age 15:46:47 — the same process since the ops restart at 16:31 on 2026-11-14, so there
+was no engine action and no restart in this window.
+
+**The tail, per-file gate returncodes re-run this tick** (`03:08` 3, `03:58` 3, `04:38` 3, `05:21` 3,
+`05:57` 3, `06:37` **0**, `07:14` 3, `08:18` 3): nine consecutive refusals ended at 06:37 (tick 171)
+and this is the second refusal since that GO. The box now alternates launchable and refused on roughly
+an hourly scale, which is the arithmetic behind the arming counters being stuck: a launchable window
+appears a couple of times a day, and both counters count launchable windows only.
+
+**What changed between the two readings one hour apart (state columns, both stored).** The previous
+tail (ticks 167-171) was a cache-served refault regime: pages moved, slots did not. This hour is the
+opposite regime and the difference is arithmetic:
+
+| column | `07:14` (NO-GO, mean 24.2) | `08:18` (NO-GO, mean 74.9) | delta |
+|---|---|---|---|
+| swap in use | 11 709 MiB | 13 464 MiB | **+1 755** |
+| `SwapFree` | 53 826 MiB | 52 071 MiB | -1 755 (mirrors exactly) |
+| `SwapCached` | 5 922 MiB (50.6 % of used) | 6 261 MiB (**46.5 %**) | +339 only |
+| engine `VmSwap` | 5 553 MiB | **6 957 MiB** | **+1 404 = 80 % of the growth** |
+| engine RSS | 56 443 MiB | 57 182 MiB | +739 |
+| 6 s `pswpin` / `pswpout` | 24.2 / 0.0 | 74.9 / 0.0 | out-side blind in both |
+
+Three measurements, not a rule change. (a) **The growth spent real slots**: `SwapCached` moved +339 MiB
+while swap in use moved +1 755 MiB, so the page-cache share fell — this is not the tick-168/170
+"refault with zero slots spent" pattern. (b) **The rate rule's out-side cannot see it**: `pswpout` read
+**0.0 in both 6 s windows** while the state columns record 1 755 MiB of swap consumed across the hour;
+`pswpout` is non-zero in only **2 of the 46** stored 6 s windows, and the gate's device rule samples
+**reads only**, so a RAM-to-swap write-out of this size is invisible to every rate rule this gate has.
+(c) **The state rule that would see it is unarmed**: `engine_vmswap_mib` is exactly the field, it is
+reported and deliberately not gated, and the pre-registered arming rule (30 launchable windows carrying
+the statistic, then a ceiling above every launchable one, then a side-by-side replay proving zero
+verdict moves) sits at **12 of 30** for the peak and **3 of 30** for the footprint. Nothing was retuned
+this tick; the honest statement is that the state rule is the right shape and the corpus still owes 18
+launchable windows before it may be proposed.
+
+**Census.** `benchmarks/public/PREFLIGHT-CENSUS.md` regenerated at window `as-of 2026-11-15 08:18`
+(stamp `pub-preflight-census-v3`, gate sha16 `dd2f0e4fa0255fa5`): **134** readings judged — **69 GO /
+59 NO-GO / 6 input gap**; as-of day 11 readings, 1 GO / 10 NO-GO / 0 gap; device scope 35 whole-disk
+(`50.0`) / 99 unscoped (`100.0`) / 0 unknown; launchable (GO) windows in the last 24 h **22 -> 20**.
+This is the first live use of the window attribution tick 172 made mechanical, and the tool — not this
+tick's prose — names why the number fell: **two** GO files aged past the sliding 08:18 cutoff
+(`preflight-20261114-0728.txt`, `preflight-20261114-0807.txt`, both re-judged rc 0) and **zero** GO
+entered (the new reading is NO-GO), i.e. `+0 entering - 2 aged-out`, with zero reclassification. Leg
+completions in that window: 0. Peak coverage 38 -> **39** (judged 34 -> 35, mean-failing-with-peak
+18 -> 19); band stays **CROSSED with neither bound moved** (highest launchable peak 111.4, lowest
+mean-failing peak 95.4; this reading's 268.3 sits above the band). Footprint coverage 15 -> **16**,
+refused group n=12 -> **13** with median 5 700 -> 5 847 MiB and its **maximum 6 444 -> 6 957 MiB**, a
+new corpus maximum that sits 666 MiB above the highest launchable footprint (6 291), so the separation
+stays **OVERLAPPING (3576-6291 launchable vs 3357-6957 refused)** and no ceiling is admissible in
+either direction. Page-cache share 15 -> 16 readings, median 52.4 -> **51.7 %**, max 65.2 % unchanged.
+Every changed table line is predicted by the one new NO-GO reading plus those two aged-out GO files.
+`--check` returns **0** on the regenerated table.
+
+**Queue.** `scripts/pub_three_arm_parity_check.py`: **49 digest rows / 9 in-force sets / 0 findings** —
+every in-force set carries bare + codex + contour-matched at `0.0.2.56`, the six Grok cells carry the
+cancellation sentence verbatim, `bfcl`/`ifeval`/`livecodebench` named separately as sets that never had
+a Grok arm. The standing brief's ladder items (IFEval, LiveCodeBench, BFCL) are shipped and armed, so
+the empty queue remains the mechanical answer. No leg was launched to look busy — and none could have
+been spent anyway: on a GO window this line still has no open item, and this window was a NO-GO.
+
+**Gates on this head.** All five PUB publication gates exit **0** unshielded (arms index drift 0;
+derived percents 42 recomputed / 0 findings over 44 digest + 188 doc citations, 0 uncovered; grok cells
+9 documents / 0 findings with the in-force sentence read from the pin; superseded cells 9 / 0; digest
+rows 49 / 0, contracts named 26, pre-rule exceptions 23/23), plus `pub_preflight_census.py --check` =
+**0** and `scripts/push_ready.sh` rc **0** (manifest VERIFY PASS, 155 links across 339 markdown files,
+DOCS POLICY PASS, no leaks). `pub_grok_resume_check.py --as-of 2026-11-15` exits **3** read unshielded
+(22 checks; the six complete Grok arms stored intact — gsm8k 300, arc-easy 300, arc-challenge 300,
+gpqa-diamond 198, humaneval 164, mmlu-pro 500; ifeval **359** rows sha256-16 `01c1ee0b6e7f6d5d`
+unchanged, its 182 never-asked ids reported **VOID**, "RESUME GATE: NO-GO - do not spend quota").
+Marker `<LOCAL_PATH>/pub-bench/GROK-CANCELLED` untouched (121 B, 2026-11-12 06:54) and the runner still
+refuses Grok arms. `scripts/security/secret_scan.py --dir . --strict` rc **0**; `harness/verify_manifest.py --v6` rc **0**.
+
+**Contract-suite sum: 613, and why it is no longer the 594 the last four ticks quoted.** The hermetic
+PUB suite is **15 files / 0 failures / 613 checks** machine-summed (the 14 files print `<N> checks`,
+summing 572, plus `pub_derived_percent_test.py`'s `CHECKS 41`). Ticks 167-171 printed 594 legitimately
+— no tool byte moved in those ticks. The +19 belongs to **tick 172**, which grew
+`harness/pub_preflight_census_test.py` from **104 -> 123 checks** with its window-attribution cases and
+did not restate the suite sum in its message. Naming the delta here keeps the number a reader quotes
+current; no published percent or verdict changed because of it.
+
+**Record hygiene, checked not assumed.** Ticks **169-172** carried their entire verdict in the commit
+message and added **no `## Tick` block** to `PUB-PLAN.md` — `grep -n 'tick 169|tick 171' benchmarks/public/*.md`
+returns nothing, and the file's last heading is Tick 168. The numbers themselves are not lost (each
+commit message is a full record, and the census file is regenerated output), so nothing published is
+wrong; but the line's running log has a four-tick gap, and a reader who works from `PUB-PLAN.md` rather
+than `git log` will not see those four windows' attributions. This tick restores the block and records
+the gap rather than silently back-filling four prose blocks from commit messages after the fact.
+
+**Frozen-line hygiene.** No contour stamp registered, no hard-bank pair launched, no hard-bank or bank
+byte edited, no new branch created or pushed; the only moved files are generated census output and this
+block, allowed by the 2026-11-08 freeze. Legacy watchers `f23cf5d48e11` ("Mac v2.2 full after v2.1",
+every 5 min) and `a808c7f205a6` ("P2005 paired full 2.1->2.2 watch", every 5 min) completed 08:17 and
+08:15 — still enabled, still inert only because `~/.hermes/mac-v22full-launch.state` exists (26 B,
+2026-11-02 14:05, re-verified on the literal path); an owner decision, and this line edited no other
+job's state. Drain guard `9a12508f8a69` completed 08:10 ok. Pause set read from `~/.hermes/cron/jobs.json`:
+**7** jobs carry `enabled: false`, **every one with `paused_reason: null`** (operator-paused, none by a
+runtime restart). This line's job `288a66f93167` "PUB benchmark loop 30m" is enabled, `last_status ok`,
+`failure_streak 0`; it is the **only** `running` row in the executions DB, so no sibling instance is in
+the clone. Daily docs job `ef7ea47ff99b` completed **03:00:26 -> 03:05:32 ok** this morning (marker
+commit `f6d319b`), so the standing "errors daily because the tree is dirty" machine note did **not**
+reproduce; next run 2026-11-16 02:00 UTC.
+
+**Second worktree (`<LOCAL_PATH>/projects/strata-autonomous-harness`).** HEAD still detached at
+`8ccef67`, branch empty, `git diff --cached --stat` empty (no pending mass deletion). Untracked paths
+**8** (3 scratch files inside the published `benchmarks/public/raw/` namespace + 5 fleet OS snapshots
+2026-11-11…15) and **one tracked modification**, `hardware/os-snapshots/latest.json` — attributed by
+date to the Fleet OS audit (`823538126971`) and Security Guard (`740d0ef9a9f2`) workstreams, not to
+this line. Seventeenth tick of that shape; it stays the owning workstreams' decision and this line
+committed nothing foreign and edited nothing there.
+
+**Repository state.** `main` == `origin/main` == **`baaac06`** before this tick. This tick adds one
+commit on the same fast-forward line (regenerated `benchmarks/public/PREFLIGHT-CENSUS.md`, this block),
+pushed as plain `HEAD:main` with the repo guard variable; no other branch created or pushed.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped, no
+engine action (one bounded remote reading inside the standing producer seam; pid 175316 untouched).
+**No published benchmark percent moved.** Moved: the regenerated census (window `as-of 2026-11-15
+08:18`) and this block. What the record gains: the first hour in this tail whose swap growth spent real
+slots rather than the swap cache, attributed **80 %** to the engine's own footprint (a new corpus
+maximum above the launchable maximum), with the 6 s rate rule's out-side and the reads-only device rule
+both blind to it — which is the clearest argument yet on record for the footprint state rule, and the
+clearest statement of why that rule still may not be armed.
