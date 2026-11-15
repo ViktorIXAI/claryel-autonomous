@@ -12390,3 +12390,109 @@ stamp `v4`, gate sha16 unchanged) and this block. What the record gains: launcha
 pairs now, and a page-cache share measured inside one GO window does not describe the next one —
 which is another reason the footprint/page-cache statistics cannot be armed as separators from
 single-window readings.
+
+## Tick 176 — 2026-11-15 10:53 CET: scoreboard unmoved; the endpoint posts its **first same-day triple GO streak** (08:57 + 10:17 + 10:53, today's four GOs named one by one by an unshielded per-file gate loop), and the newest window shows arithmetically that **the gate's 6 s swap mean is one 1 s sample divided by the window**: peak 33.5 ÷ mean 5.4 = 6.20 = exactly the producer's own measured window (`swap-window-measured=6.20s`), so one sample carried the whole window's 33.5 MiB. A bounded 60 s `/proc/vmstat` window on the same engine two minutes later moved **7 pages = 28 KiB in a minute**, ratio **≈11 800x**, the largest sampling-instant pair this line has. Queue still mechanically empty, so the GO streak stays census evidence, not a launch order; zero legs, zero calls, zero published percent moved
+
+**The reading (`preflight-20261115-1053.txt`, gate sha16 unchanged `dd2f0e4fa0255fa5`).** Swap in
+**5.4 + 0.0 out = 5.4 MiB/s** against `SWAP_RATE_MAX_MIB_S = 20.0` (3.7x under); in-window peak
+**33.5 MiB/s**, below both bounds of the still-CROSSED peak band (highest launchable 111.4, lowest
+mean-failing 95.4 — neither bound moved); MemAvailable 19 033, SwapFree 51 413 of 65 535 (swap in use
+**14 122**), engine state `S`, engine CPU 6.6 % (sampled 6 s delta), RSS 56 810,
+`engine_vmswap_mib` **6 340**, SwapCached **7 530 = 53.3 % of swap in use**; GPU window mean 1.0 %
+peak 6 % against one instantaneous sample of 0 % at 26.60 W; `/health` 200 loaded,
+`engine_serve_procs` 1, engine pid 175316 continuous since the ops restart 14 Nov 16:31 (age
+18:21:56); foreign legs 0, `blk_read` 0.1 MiB/s whole-disk. The gate exit is **rc 0 re-proven
+unshielded on the stored file**, and the same unshielded loop was run over every reading of today
+(14 files: 4 GO / 10 NO-GO / 0 gap), which reproduces the generated census day-row exactly — the
+wrapper propagates the gate code since tick 148, but no verdict quoted below comes from a piped or
+echo-shielded read. The aged-out file `preflight-20261114-1023.txt` also re-reads rc 0.
+
+**The mean is one sample, and it is provable from the two numbers the producer emits (first time
+seen on a launchable window).** The peak is the max over the 1 s sub-windows of the SAME window
+(tick 146), so within printed resolution: window total = 5.4 MiB/s x 6.20 s = **33.5 MiB** and the
+largest 1 s sub-window = **33.5 MiB**. peak ÷ mean = 6.20 = the measured window length exactly, which
+can only happen if one sample carried essentially all the counted traffic and the remaining ~5.2 s
+carried at most the rounding remainder. The number this rule compares against 20.0 on this window is
+therefore not a rate at all — it is a single burst divided by six.
+
+**The sustained instrument agrees, and in the safe direction (pair 5, the largest this line has).** A
+bounded 60 s `/proc/vmstat` window on the same pid 175316 taken two minutes later: `pswpin` **+2
+pages** (0.0078 MiB) and `pswpout` **+5 pages** (0.0195 MiB) over 60 s = **0.00013 + 0.00033 =
+0.00046 MiB/s**, so the 6 s mean over-reads by **~11 800x** — corpus maximum, against the pairs 3.4x,
+253x, 641x and 20x. Inside those 60 s: SwapFree moved **0** MiB, SwapCached moved **0**, `VmSwap`
+−34, MemAvailable −5. The box moved 28 KiB of swap in a minute. Direction matters for the rule's own
+risk class: a false GO into churn is the dangerous error, and here the sustained window reads
+**quieter** than the 6 s verdict, so this GO was conservative, not lucky. The class is no longer a
+property of refusing windows — two of the five pairs sit on the launchable side (20x at 06:39,
+~11 800x here). The two windows are 2 min apart, as in every published pair; no simultaneous reading
+exists.
+
+**Continuity across the three GO windows (08:57 -> 10:17 -> 10:53).** `VmSwap` 8 520 -> 6 356 ->
+**6 340** (−2 180), SwapCached 5 241 -> 7 458 -> **7 530** (+2 289), page-cache share 37.4 -> 53.1 ->
+**53.3 %**, swap in use 14 007 -> 14 057 -> **14 122** (+115), RSS 57 498 -> 56 920 -> 56 810 (−688),
+MemAvailable 21 175 -> 19 131 -> 19 033 (−2 142), swap rates 4.4/0.0 -> 0.0/0.0 -> 5.4/0.0. Across one
+launchable streak the engine's own swap footprint fell 2.1 GiB while the swap slots in use **rose**,
+and the slot growth is page-cache-backed (SwapCached +2 289 against swap in use +115): three GO
+windows are three different cache states, not one state sampled three times. The launchable footprint
+maximum stays 8 520, so the tick-174 inert-dry-run conclusion is untouched by this streak.
+
+**Census (`--markdown` regen, then `--check` 0).** Window `as-of 2026-11-15 10:53`, **137 readings =
+72 GO / 59 NO-GO / 6 gap**; launchable-in-24 h **19 -> 19**: one GO entered (this reading) and one
+aged out (`preflight-20261114-1023.txt`, rc 0 re-proven on the file) — the tool's transition block
+names both. Arming counters move with the new GO: swap-peak **14 -> 15 of 30**, footprint **5 -> 6 of
+30** (**15 and 24 launchable windows still owed** before either ceiling proposal is admissible). The
+aged-out file carries neither the swap-peak key nor the footprint key (both landed 14 Nov 21:42),
+which is why both coverage counters move +1 instead of netting zero — stated because a naive
+"one in, one out" reading of those counters would be wrong. Readings carrying `engine_vmswap_mib`
+18 -> 19, whole-disk scope 37 -> 38, as-of-day readings 14 (4 GO / 10 NO-GO / 0 gap), swap-mean-passing
+windows with a peak 18 -> 19. Group separation stays **OVERLAPPING** (launchable 6 windows
+3 576-8 520 vs refused 13 windows 3 357-6 957, n=6/13) and the computed dry-run sentence is unchanged:
+the lowest ceiling the arming rule allows fires on **0 of 6 launchable and 0 of 13 refused** stored
+windows — inert if armed. One arithmetic cross-check that the tool inserted the value instead of
+replacing a bound: the launchable footprint median moved 6 291 -> 6 316, exactly the mean of the old
+median (6 291) and the new value (6 340) for a set that grew 5 -> 6. All **30** changed table lines
+are predicted by the one new reading plus the named aged-out GO; nothing else moved.
+
+**Queue: mechanically empty, so no leg.** Three-arm parity **49 rows / 9 in-force sets / 0 findings**
+(every in-force set carries bare + codex + contour-matched 0.0.2.56; SimpleBench closed as
+unpinnable). Grok excluded by the owner cancellation — resume gate **rc 3, cancelled mode**
+(22 checks, unshielded), ifeval pin unchanged at 359 rows (sha unchanged `01c1ee0b6e7f6d5d`), the
+182 unasked ids a record, not a queue. This is the third consecutive launchable window of the day and
+the ladder still holds no open item to spend one on: a GO streak buys coverage for the preflight
+statistics and nothing else. What this line is waiting on is an owner decision about a NEW set or
+hypothesis, not a leg.
+
+**Gates.** `push_ready.sh` green (manifest PASS, 155 links across 339 markdown files, docs PASS, no
+leaks; five PUB gates rc 0: arms index drift 0, 42 derived percents 0 findings, grok cells 9 documents
+0 findings, superseded cells 9 documents 0 findings, digest 49 rows 0 findings),
+`secret_scan --strict` rc 0, census `--check` rc 0 after the regen. Hermetic PUB contract suite
+**15 files / 622 checks / 0 failures**, per-file sum reproducible
+(34+22+41+22+7+9+27+39+33+132+117+42+34+43+20 = 622), unmoved because no tool byte changed this tick;
+the convention difference (`pub_derived_percent_test` prints `CHECKS 41, FAILED 0`) is unchanged.
+CI green on `1e8d9c7` (contour self-tests, hard-v6 scoring contracts, secret-scan, devsecops, pages).
+
+**Machine state.** Second worktree 18th tick, shape unchanged: detached `8ccef67`, staged index empty,
+8 untracked paths (5 fleet OS snapshots 2026-11-11...15 + 3 scratch files inside the published
+`benchmarks/public/raw/` namespace, the tick-134 class) and 1 tracked modification
+`hardware/os-snapshots/latest.json` — owned by the Fleet OS audit / Security Guard lines; this line
+committed nothing there. Frozen-line watchers still firing and still an owner decision:
+`Mac v2.2 full after v2.1` (`f23cf5d48e11`, every 5 min, last run 10:53) is inert **only while** its
+one-shot marker exists — verified on the literal path `~/.hermes/mac-v22full-launch.state`, dated
+2026-11-02 14:05 (the `$HOME`-expansion trap respected) — and `P2005 paired full 2.1->2.2 watch`
+(`a808c7f205a6`, every 5 min, last run 10:55) is a permanent ~1 150 dead ssh round-trips/day onto the
+pub endpoint box. Never edited from this line. Pause set read from `jobs.json`: 34 jobs, 7
+`enabled=false`, every one with `paused_reason: null` (operator-paused, never a drain). The
+docs-freshness job (`ef7ea47ff99b`) last run ok, failure streak 0, marker commit `f6d319b`
+"Daily docs freshness check: 2026-11-15" — the standing dirty-tree note did not reproduce. This
+line's job scheduled (`288a66f93167`, every 30 min, workdir this repo, this tick).
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped.
+Two bounded remote readings inside the standing seam — the producer's own sampling window and one
+read-only 60 s `/proc/vmstat` window (engine pid 175316 untouched, no restart, no config write) —
+plus the census regen. **No published benchmark percent moved.** Moved: the regenerated census
+(window `as-of 2026-11-15 10:53`, stamp `v4`, gate sha16 unchanged) and this block. What the record
+gains: the 6 s mean's single-sample structure is now provable from two fields the producer already
+emits, so any future peak-band or footprint-ceiling proposal inherits a stated resolution limit — a
+peak statistic built from the SAME 1 Hz sub-windows cannot separate "one burst" from "sustained
+churn", and that separation is exactly what the arming rule needs before either state rule may be
+armed.
