@@ -11561,3 +11561,121 @@ sentence + scanner sha16 `6e96c8eb04e526b1` -> `9bf2cf7046bd1b82` with the new s
 all 8 verdict rows byte-identical, no gate verdict moved. Full entry with the tamper controls:
 `benchmarks/hard/REVIEW-INBOX.md`, 2026-11-15 entry "the bank gate census asked the
 environment TWICE". This pub tick's own artifacts and percents are unchanged by it.
+
+## Tick 163 — 2026-11-15 01:00 CET: scoreboard unmoved; the census guard was reddening on its own calendar — a frozen `--as-of` snapshot must survive corpus growth, so the CORPUS-WIDE count leaves the window-identity sentence (census `v2` -> `v3`, contract test 87 -> 94 checks) and the standing pre/post replay over the same 124 stored readings moves **0 verdicts**; the 01:00 window is the fourth swap refusal of the night (87.9 MiB/s mean, 277.8 peak, engine in `D`) with every free column green; census 124 = 68 GO / 50 NO-GO / 6 gap; queue empty, zero legs, zero calls
+
+**The defect is in the guard that polices the other guards.** `scripts/pub_preflight_census.py`
+printed inside its window-identity sentence: "(`%d` stored readings, `%d` inside the window)".
+The first number is `len(files)` — the count of `preflight-*.txt` files present **in the corpus at
+run time**, not inside the frozen window. So `--check` of an untouched committed snapshot drifts
+the moment any later reading is taken. Reproduced on the real bytes at 00:59, before anything was
+edited: `python3 scripts/pub_preflight_census.py --as-of 20261114-2347 --check
+benchmarks/public/PREFLIGHT-CENSUS.md` exited **1**, and its own diff was exactly one line —
+`-…(123 stored readings, 123 inside the window)` / `+…(124 stored readings, 123 inside the
+window)`. No verdict moved, no reading was edited, no band cell moved: a publication guard that
+reddens on the calendar is a guard that stops being believed, and the tool's own usage note had
+promised the opposite ("a committed snapshot is reproducible while the readings are retained").
+This is the third reporting-only cell in this tool that outlived its own evidence (tick 155:
+the device ceiling labelled with the wrong scope; tick 162: the band sentence asserting an
+interval the data had withdrawn) — all three are the same class: **a generated table asserting
+something it never computes**.
+
+**Fix (tooling release, no contour feature, no arm byte touched).** The committed table now prints
+only the window-scoped count ("124 readings inside the window"); the corpus count survives where a
+stale number cannot falsify a snapshot — on stdout, in the `CENSUS CHECK` / `CENSUS WRITTEN` lines,
+labelled "not part of the window identity". Census stamp `pub-preflight-census-v2` -> **v3**, with
+the reason in the header; v1 and v2 tables stay published exactly as written, and the header names
+that a v1, v2 and v3 file are not the same table shape.
+
+**Replay proof, the standing form, plus a non-vacuity control on a copy of the real corpus.**
+(a) Real bytes: pre-fix tool (extracted from `git show HEAD`) versus post-fix tool over the same
+124-file corpus at the same frozen window `as-of 2026-11-14 23:47` — the verdict triple is identical
+(**68 GO / 49 NO-GO / 6 input gap** before and after) and exactly one line of the whole table
+differs — the header, which the diff prints as two lines, one removed and one added. (b) Control,
+run on a copy of the real readings (`~/pub-bench` read-only, zero model calls): take the **123**
+readings dated at or before the bound, write a snapshot at that bound, `--check` green; copy in the
+ONE reading that exists after the bound (`preflight-20261115-0100.txt`); the OLD tool then answers
+**rc 1** with exactly **2** diff lines, both the v2 header, differing only in "`123 stored r…`"
+versus "`124 stored r…`" — the wild failure reproduced from a clean state, deterministically — while
+the v3 tool on the same grown corpus answers **rc 0** with **0** drift lines. (c) Tamper control: the
+immutability rule survives the fix — injecting `swap_in_mib_per_s=999.0` into the newest
+**inside-window** reading of the copy (`preflight-20261114-2347.txt`) reddens v3's `--check` with
+**14** drifted rows, the verdict counters among them (NO-GO 49 -> 48, gap 6 -> 7).
+
+**Test: `harness/pub_preflight_census_test.py` 87 -> 94 checks** (case 13: frozen snapshot +
+grown corpus + window-only header + stdout corpus count + the edit-inside-the-window tamper).
+The whole hermetic PUB contract suite at this head: **15 tests, 0 failures, 584 checks**, the total
+now machine-summed from each test's own last line rather than typed. That recount also exposes a
+stale total in the previous tick's record: it printed "536 checks" while the fifteen components it
+enumerates in the same sentence sum to **577**; the 584 here is 577 plus this tick's 7 new census
+checks. Nothing in that discrepancy touches a score, a digest row or a verdict — it is the same
+habitat this line keeps clearing: a restated total that no code re-derives.
+
+**Live preflight 01:00 — NO-GO on two rules** (`preflight-20261115-0100.txt`, gate exit 3 read
+unshielded; the wrapper's own exit code has carried the gate's returncode since tick 148, so this
+time `$?` and the printed line agree). Engine pid 175316, age 08:29:01 — the same process since the
+ops-attributed 2026-11-14 16:31 restart, no restart, **no engine action this tick**; state `D`
+(uninterruptible I/O), sampled CPU 8.3 %; swap **87.9 in + 0.0 out = 87.9 MiB/s** over a measured
+6.13 s window, 4.4x `SWAP_RATE_MAX_MIB_S = 20.0`, with an in-window peak of **277.8 MiB/s**; GPU
+window mean 0.3 % / peak 2 % at six 1 Hz samples against an instantaneous 0 % at 27.30 W; device
+0.1 MiB/s whole-disk with `blk_top_reader=basalt`; `swap_free` 54 317 of 65 535, `MemAvailable`
+21 460 MiB — every free column green while the model's pages move; `/health` 200 `loaded=true`,
+one serve process; `foreign_legs=0`; `load1` 10.97 printed only, falsified as a proxy at ticks
+142/143. Fourth swap-throughput refusal since 20:53 (99.2, 236.9, 92.7, now 87.9 MiB/s means) and
+the second of them also naming the D state; between them two windows passed (0.0 and 18.1 MiB/s).
+
+**What the window adds to the two unstarted statistics.** Footprint coverage 5 -> **6** readings:
+`engine_vmswap_mib` 3 576 -> 6 291 -> 3 965 -> **6 070 MiB** at 22:39 / 23:13 / 23:47 / 01:00, one
+engine pid throughout — +2 105 MiB in the 73 minutes since the last reading, after tick 162's
++2 715 / -2 326 round trip, with `SwapFree` between 52 962 and 54 317 MiB the whole time and the
+device at 0.1 MiB/s. The generated group-state cell moved to **OVERLAPPING** with n=2/4 (launchable
+3 576-6 291 MiB against refused 3 357-6 070), and the page-cache share is now median 62.9 % of swap
+in use, so refaults stay RAM-served. Arming counters: peak **11 of 30** (an NO-GO window buys no
+launchable credit; the mean-failing group with a parseable peak moved 9 -> 10), footprint **2 of 30**.
+Band extremes unmoved at **111.4 / 107.0 MiB/s**, state still **CROSSED** — the 277.8 peak lands in
+the already-failing group, so it cannot separate anything new either.
+
+**Census at as-of 2026-11-15 01:00 (regenerated, `--check` back to 0 at the new window).** 124
+stored readings = **68 GO / 50 NO-GO / 6 input gap**; as-of-day (2026-11-15) 1 reading (0 GO / 1
+NO-GO / 0 gap); device scope split 25 whole-disk (`50.0`) / 99 unscoped (`100.0`) / 0 unknown;
+launchable (GO) windows in the last 24 h **31 -> 29** with **zero reclassification** — two named
+files aged past the sliding cutoff, `preflight-20261114-0009.txt` and `preflight-20261114-0055.txt`,
+both re-run through the gate at rc 0 (GO) by a scratch census, which is the attribution the tick-155
+rule demands. Leg completions in that window: 0.
+
+**Queue.** `scripts/pub_three_arm_parity_check.py`: **49 digest rows / 9 in-force sets / 0
+findings** — every in-force set already carries bare + codex + contour-matched at `0.0.2.56`, the
+six Grok cells carry the cancellation sentence, and `bfcl`/`ifeval`/`livecodebench` are named
+separately as sets that never had a Grok arm. Nothing was queued for the 01:00 window to unlock,
+and the window refused anyway.
+
+**Gates on this head.** All six PUB publication gates exit 0 unshielded (arms index 0 drift; derived
+percents 42 recomputed / 0 findings; grok cells 9 documents / 0 findings; superseded cells 9 / 0;
+digest rows 49 / 0; three-arm parity 49 / 9 / 0), `pub_preflight_census.py --check` = **0** at the
+new window, `pub_grok_resume_check --as-of 2026-11-15` exits **3** with the in-force cancellation
+record (22 checks; the 182 never-asked IFEval ids are reported as VOID, not a queue), and the marker
+`~/pub-bench/GROK-CANCELLED` is untouched with the runner still refusing Grok arms.
+`scripts/security/secret_scan.py --dir . --strict` run unshielded, rc 0.
+
+**Frozen-line hygiene.** No contour stamp registered, no hard-bank pair launched, no hard-bank byte
+edited, no new branch. Legacy watchers `f23cf5d48e11` / `a808c7f205a6` completed 01:11 and 01:10 with
+`last_status=ok`, `failure_streak=0` and next runs at 01:16 / 01:15 — still enabled every 5 min,
+still inert only because ``~/.hermes/mac-v22full-launch.state`` exists, verified on the literal path
+(26 B, 2026-11-02 14:05); drain guard `9a12508f8a69` completed 01:10, same clean record. The
+executions DB shows exactly one `running` row, this tick (`288a66f93167` "PUB benchmark loop 30m",
+started 00:59:26). Daily docs job `ef7ea47ff99b` is `ok` / streak 0, last run 2026-11-14 03:02, next
+02:00 UTC = 03:00 CET, and it will find a clean tree because this tick's work is committed before it.
+Second worktree `~/projects/strata-autonomous-harness`: HEAD still detached at `8ccef67`, re-proven
+an ancestor of `main` this tick, staged index empty, and the same **7** untracked paths (3 scratch
+files inside the published `benchmarks/public/raw/` namespace + 4 fleet OS snapshots
+2026-11-11…14) — the owning workstreams' decision, ninth tick; this line commits nothing foreign.
+
+**Credit.** Zero model calls, zero cloud calls, zero discarded arm bytes, no leg started or stopped,
+no engine action (bounded `/proc` reads only, pid 175316 unchanged), **no published benchmark
+percent moved**. Moved: the census tool, its contract suite, the regenerated
+`benchmarks/public/PREFLIGHT-CENSUS.md` (stamp v3, window `as-of 2026-11-15 01:00`) and this block.
+What the record gains: a committed census snapshot is now re-derivable at its own window no matter
+how many readings come after it, so the guard's green answer means the table again — and the
+endpoint's swap-refusal series now has four measured means (99.2 / 236.9 / 92.7 / 87.9 MiB/s) all
+with the device and the GPU quiet, which is the shape of the machine note's "the engine gets
+restarted mid-leg" condition, recorded while no leg is running.

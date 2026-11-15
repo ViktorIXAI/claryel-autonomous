@@ -52,8 +52,14 @@ What it pins:
      and NO-DATA must be distinguishable on fixtures, a crossed corpus must NOT print the separated
      sentence, and an empty group prints `n/a`, never `None`.
   12. the FOOTPRINT group separation is computed too, with its sample size printed: SEPARATED,
-     OVERLAPPING, INVERTED or NO-DATA. Two medians printed side by side read to a human as a band a
-     ceiling could be drawn from, and at n=2/2 (the live coverage) nothing supports one.
+      OVERLAPPING, INVERTED or NO-DATA. Two medians printed side by side read to a human as a band a
+      ceiling could be drawn from, and at n=2/2 (the live coverage) nothing supports one.
+  13. a frozen `--as-of` snapshot stays re-derivable after the corpus GROWS (census v3). The committed
+      table used to print the corpus-wide count of reading files inside its window-identity sentence,
+      so one reading taken after the snapshot made `--check` of untouched bytes report drift (measured
+      2026-11-15 01:00: `123 stored readings` -> `124 stored readings`, no verdict moved). The header
+      now names only the window count, the corpus count lives on stdout, and an edited reading INSIDE
+      the window still reddens the check.
 """
 import os
 import re
@@ -481,6 +487,52 @@ def main():
         fs_none = cell(out13, "footprint group separation (computed, never asserted)") or ""
         check(fs_none.startswith("NO-DATA"),
               "no footprint coverage reports NO-DATA, not a separation")
+
+        # 13. a frozen `--as-of` snapshot must stay re-derivable after the CORPUS grows
+        #     (census v3, measured 2026-11-15 01:00 on the real bytes). v1/v2 printed the
+        #     corpus-wide count of `preflight-*.txt` files inside the window-identity sentence
+        #     ("N stored readings, M inside the window"). Taking one reading AFTER a committed
+        #     window moved N, so `--check` of an untouched snapshot reported drift: at the
+        #     committed window `as-of 2026-11-14 23:47` the line went from `123 stored readings`
+        #     to `124 stored readings` while the window count, every verdict and every band cell
+        #     stayed identical. A guard that reddens on its own calendar is a guard that stops
+        #     being believed, and the tool's own usage note promised that "a committed snapshot is
+        #     reproducible while the readings are retained". What this case pins: the header names
+        #     ONLY the window count, the corpus count survives on stdout (operator context), and
+        #     the immutability rule still bites — an edited stored reading INSIDE the window must
+        #     redden the check.
+        d5 = tempfile.mkdtemp(prefix="pub-census-frozen-")
+        try:
+            write_fixtures(d5)                                  # F1..F5, all inside the window
+            tbl = os.path.join(d5, "TABLE.md")
+            rcw, outw = run(["--dir", d5, "--as-of", "%s-0004" % DAY, "--markdown", tbl])
+            check(rcw == 0, "writing a snapshot at a frozen window exits 0, got %r" % outw[-300:])
+            rcc, outc = run(["--dir", d5, "--as-of", "%s-0004" % DAY, "--check", tbl])
+            check(rcc == 0, "the fresh snapshot checks clean, got %r" % outc[-300:])
+            # one reading taken AFTER the frozen bound: outside the window, so the table may not move
+            write_fixtures(d5, {"preflight-%s-0006.txt" % DAY: {}})
+            rcg, outg = run(["--dir", d5, "--as-of", "%s-0004" % DAY, "--check", tbl])
+            check(rcg == 0,
+                  "a reading taken after the frozen window must NOT make an untouched snapshot "
+                  "drift (the v1/v2 corpus-count defect), got rc=%s %r" % (rcg, outg[-500:]))
+            head_w = [l for l in open(tbl, encoding="utf-8").read().splitlines()
+                      if l.startswith("Census stamp:")]
+            check(len(head_w) == 1 and "4 readings inside the window" in head_w[0],
+                  "the header names the WINDOW count and nothing else, got %r" % head_w[:1])
+            check("stored readings," not in (head_w[0] if head_w else ""),
+                  "the header must print no corpus-wide file count, got %r" % head_w[:1])
+            check("6 preflight-*.txt files retained in the corpus" in outg,
+                  "stdout still reports the corpus size and labels it as NOT window identity, "
+                  "got %r" % outg[:300])
+            # tamper control: editing a stored reading INSIDE the frozen window still reddens —
+            # stored readings are immutable evidence and this fix must not have weakened that
+            write_fixtures(d5, {F2: {}})                         # NO-GO churn -> healthy GO
+            rce, oute = run(["--dir", d5, "--as-of", "%s-0004" % DAY, "--check", tbl])
+            check(rce == 1 and "CENSUS DRIFT" in oute,
+                  "an edited reading inside the window must still drift the check, got rc=%s %r"
+                  % (rce, oute[-300:]))
+        finally:
+            shutil.rmtree(d5, ignore_errors=True)
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()

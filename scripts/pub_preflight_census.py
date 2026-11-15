@@ -28,6 +28,17 @@ The table now prints both numbers beside their scope and counts the readings per
 contract test pins both ceilings by driving the REAL gate on the same device number with and
 without the scope key (60.0: NO-GO scoped, GO unscoped).
 
+A fourth cell the first two versions got wrong (2026-11-15 01:00): the header printed
+"N stored readings, M inside the window", where N is the CORPUS-WIDE count of reading files
+present at run time. That number moves when a reading is taken AFTER the frozen window, so a
+`--check` of an untouched snapshot reported drift on correct bytes: at the committed window
+`as-of 2026-11-14 23:47` the line went from "123 stored readings, 123 inside the window" to
+"124 stored readings, 123 inside the window" — no verdict moved, no reading was edited. The
+usage note had promised that "a committed snapshot is reproducible while the readings are
+retained", and the corpus count was the one cell that broke that promise, so the table now
+prints only the window-scoped count and the corpus count is reported on stdout, outside the
+committed file. Census stamp `v2` -> `v3`; v1 and v2 tables stay published as written.
+
 It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
@@ -304,7 +315,7 @@ def footprint(rows):
     )
 
 
-def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
+def build(rows, as_of, consts, day, window_hours, legs_started):
     go = [r for r in rows if r["rc"] == 0]
     nogo = [r for r in rows if r["rc"] == 3]
     gap = [r for r in rows if r["rc"] == 1]
@@ -323,14 +334,20 @@ def build(rows, as_of, consts, day, window_hours, legs_started, total_files):
     L.append("CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over")
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
-    L.append("Census stamp: `pub-preflight-census-v2`, gate sha16 `%s`, window `as-of %s` "
-             "(%d stored readings, %d inside the window). v2 adds two COMPUTED group-state rows — "
-             "the swap-peak band state and the footprint group separation — because v1 printed "
-             "\"Band: nothing between X and Y\" unconditionally, and at 23:13 on 2026-11-14 the "
-             "order of X and Y reversed: the table went on asserting an empty interval the data had "
-             "withdrawed. v1 tables are left as published; a v1 file and a v2 file are not the same "
-             "table shape." % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"),
-                               total_files, len(rows)))
+    L.append("Census stamp: `pub-preflight-census-v3`, gate sha16 `%s`, window `as-of %s` "
+             "(%d readings inside the window). v3 removes the CORPUS-WIDE reading count from "
+             "that window-identity sentence: the number counted every `preflight-*.txt` file "
+             "present at run time, so taking one reading after the frozen window made `--check` "
+             "of an untouched snapshot report drift (measured 2026-11-15 01:00 at the committed "
+             "window `as-of 2026-11-14 23:47`: `123 stored readings` became `124 stored "
+             "readings`, while the window count, every verdict and every band cell stayed "
+             "identical). The corpus count is now printed on stdout only, outside the committed "
+             "file. v2 added two COMPUTED group-state rows — the swap-peak band state and the "
+             "footprint group separation — because v1 printed \"Band: nothing between X and Y\" "
+             "unconditionally, and at 23:13 on 2026-11-14 the order of X and Y reversed: the "
+             "table went on asserting an empty interval the data had withdrawed. v1 and v2 "
+             "tables are left as published; a v1, v2 and v3 file are not the same table shape."
+             % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"), len(rows)))
     L.append("")
     L.append("Ceilings read out of the gate source at run time, so this table cannot disagree with "
              "the rule it reports: `SWAP_RATE_MAX_MIB_S = %s` (window MEAN; the peak statistic is "
@@ -508,7 +525,10 @@ def main():
                 legs += 1
 
     total_files = len(files)
-    md = build(rows, as_of, consts, day, a.window_hours, legs, total_files)
+    # The corpus-wide count is operator context, NOT window identity: it changes when a reading
+    # is taken after a frozen --as-of, so it lives on stdout only and never in the committed
+    # table (see the module docstring, 2026-11-15).
+    md = build(rows, as_of, consts, day, a.window_hours, legs)
 
     if a.check:
         if not os.path.exists(a.check):
@@ -516,7 +536,9 @@ def main():
             return 1
         old = open(a.check, encoding="utf-8").read()
         if old == md:
-            print("CENSUS CHECK: matches the committed table (%d readings judged)" % len(rows))
+            print("CENSUS CHECK: matches the committed table (%d readings judged in the window; "
+                  "%d preflight-*.txt files retained in the corpus at run time, corpus count is "
+                  "not part of the window identity)" % (len(rows), total_files))
             return 0
         print("CENSUS DRIFT: the committed table is not what the current gate + readings produce")
         import difflib
@@ -527,8 +549,9 @@ def main():
     if a.markdown:
         with open(a.markdown, "w", encoding="utf-8") as fh:
             fh.write(md)
-        print("CENSUS WRITTEN: %s (%d readings judged: %d GO / %d NO-GO / %d gap)"
-              % (a.markdown, len(rows),
+        print("CENSUS WRITTEN: %s (%d readings judged in the window; %d files in the corpus at "
+              "run time: %d GO / %d NO-GO / %d gap)"
+              % (a.markdown, len(rows), total_files,
                  sum(1 for r in rows if r["rc"] == 0),
                  sum(1 for r in rows if r["rc"] == 3),
                  sum(1 for r in rows if r["rc"] == 1)))
