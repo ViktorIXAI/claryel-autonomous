@@ -77,6 +77,19 @@ What it pins:
       footprint moved 1000 -> 20000 flips the state word FIRING-AT-MINIMUM-CEILING ->
       INERT-AT-MINIMUM-CEILING. The dry-run registers no ceiling, gates nothing and changes no
       verdict: it is a census of what a future ceiling WOULD do.
+  16. the DAY rule band (census v5, added 2026-11-15, tick 192): the day's GO/refusal swap-ratio
+      bands, the refusal MEDIAN, refusals decided by a rule other than swap, the dead zone with its
+      EMPTY/POPULATED/NO-DATA state word, the longest consecutive-refusal run, the readings since the
+      day's last GO, and the age of the launchable-footprint maximum are printed from the SAME
+      per-file gate returncodes the verdict census uses. Reason measured live: those figures existed
+      only in tick prose, and prose is re-typed rather than recomputed — two consecutive ticks quoted
+      a 4.22x refusal median while the same parser gives 3.985x at the 30th reading and 3.745x at the
+      31st. Pinned: the split of the refusal column (a GPU-contention refusal at 0.00x swap is NAMED
+      and kept out of the swap band), a run of input gaps never reported as a refusal run, an empty
+      GO group printing n/a instead of a nonsense band, the footprint rows printing n/a when no
+      footprint key exists, and two non-vacuity controls — a refusal moved INTO the dead zone flips
+      EMPTY -> POPULATED, and a GO draw moved above the ceiling moves the median 8.000 -> 4.750 and
+      erases the dead-zone bounds.
 """
 import difflib
 import os
@@ -759,6 +772,97 @@ def main():
         rcN, outN = run(["--dir", d7, "--as-of", "20300102-0006", "--no-transition"])
         check(rcN == 0 and "WINDOW TRANSITION" not in outN and "launchable delta:" not in outN,
               "--no-transition silences the block and changes nothing else (rc=%s)" % rcN)
+
+    # 16. tick 192 (2026-11-15): the DAY rule band. The refusal band, the refusal median, the
+    # GO-to-refusal dead zone and the streaks existed only as tick sentences, and a sentence is
+    # not recomputed: two consecutive ticks quoted a 4.22x median that this tool's own arithmetic
+    # gives as 3.985x at the 30th reading and 3.745x at the 31st. These cells now come from the
+    # same per-file gate returncodes as the verdict column, so they are pinned like any other.
+    d8 = tempfile.mkdtemp(prefix="pubcensus-day-")
+    try:
+        write_fixtures(d8)
+        rcd, outd = run(["--dir", d8, "--as-of", "%s-0005" % DAY])
+        hdr = [l for l in outd.splitlines() if l.startswith("Census stamp:")]
+        check(rcd == 0 and len(hdr) == 1 and "pub-preflight-census-v5" in hdr[0],
+              "the census names its v5 shape, got rc=%s %r" % (rcd, hdr[:1]))
+        # F1 GO at 0.005x, F2 swap refusal at 8.0x, F3 GPU refusal at 0.0x, F4/F5 input gaps
+        check((cell(outd, "day launchable (GO) swap draws") or "").startswith("1 (band 0.01-0.01"),
+              "one GO draw with quiet swap, got %r"
+              % cell(outd, "day launchable (GO) swap draws"))
+        check(cell(outd, "day refusals at or above the swap-mean ceiling")
+              == "1 (band 8.00-8.00 x, **median 8.000 x recomputed at this cut**)",
+              "the swap-refusal band and median are the mean-rule refusals only, got %r"
+              % cell(outd, "day refusals at or above the swap-mean ceiling"))
+        c_other = cell(outd, "day refusals decided by a rule OTHER than swap (window below ceiling)")
+        check(c_other == "1: %s at 0.00 x" % F3,
+              "the GPU-contention refusal is named and kept OUT of the swap band, got %r" % c_other)
+        c_zone = cell(outd, "day dead zone, highest GO draw to lowest swap-rule refusal")
+        check(c_zone == "0.01-8.00 x — EMPTY (0 windows inside)",
+              "the dead zone is printed with a computed state word, got %r" % c_zone)
+        c_run = cell(outd, "longest consecutive NO-GO run inside the day")
+        check(c_run == "2 readings (any-verdict non-GO run: 4)",
+              "an input-gap run must not be reported as a refusal run, got %r" % c_run)
+        check(cell(outd, "readings since the day's last gate-GO") == "4 (last GO 00:01)",
+              "readings since the last GO, got %r"
+              % cell(outd, "readings since the day's last gate-GO"))
+        check(cell(outd, "launchable footprint maximum of the day and its age")
+              == "n/a MiB set at n/a, n/a reading(s) ago"
+              and cell(outd, "trailing consecutive day windows with footprint above that maximum")
+              == "0",
+              "a corpus with no footprint key prints n/a and 0, never a fabricated ceiling")
+        # tamper A: a refusal whose swap window sits INSIDE the zone flips the state word
+        write_fixtures(d8, {F3: {"gpu_util_pct": "100", "gpu_util_mean_pct": "97.0",
+                                 "gpu_util_peak_pct": "100", "gpu_power_w": "128.0",
+                                 "swap_in_mib_per_s": "2.0", "swap_out_mib_per_s": "0.0",
+                                 "swap_total_peak_mib_per_s": "3.0"}})
+        rcz, outz = run(["--dir", d8, "--as-of", "%s-0005" % DAY])
+        c_z2 = cell(outz, "day dead zone, highest GO draw to lowest swap-rule refusal")
+        check(rcz == 0 and c_z2 == "0.01-8.00 x — POPULATED (1 windows inside)",
+              "the EMPTY state word is data-dependent, not boilerplate, got %r" % c_z2)
+        # tamper B: the GO draw becomes a swap refusal — median must move, the zone must not
+        # invent bounds, and the streak/since-GO cells must follow
+        write_fixtures(d8, {F1: {"swap_in_mib_per_s": "30.0", "swap_out_mib_per_s": "0.0",
+                                 "swap_total_peak_mib_per_s": "90.0"}})
+        rcy, outy = run(["--dir", d8, "--as-of", "%s-0005" % DAY])
+        c_y = cell(outy, "day refusals at or above the swap-mean ceiling")
+        check(rcy == 0 and c_y == "2 (band 1.50-8.00 x, **median 4.750 x recomputed at this cut**)",
+              "the median is recomputed from the current cut, not carried, got %r" % c_y)
+        check((cell(outy, "day launchable (GO) swap draws") or "").startswith("0 (band n/a-n/a"),
+              "an empty GO group prints n/a rather than a nonsense band, got %r"
+              % cell(outy, "day launchable (GO) swap draws"))
+        check("NO-DATA" in (cell(outy, "day dead zone, highest GO draw to lowest swap-rule refusal")
+                            or ""),
+              "a day with no GO draws has no dead zone to state, got %r"
+              % cell(outy, "day dead zone, highest GO draw to lowest swap-rule refusal"))
+        check(cell(outy, "longest consecutive NO-GO run inside the day")
+              == "3 readings (any-verdict non-GO run: 5)"
+              and cell(outy, "readings since the day's last gate-GO")
+              == "n/a — no GO of this day",
+              "streaks and the since-GO counter follow the verdicts, got %r / %r"
+              % (cell(outy, "longest consecutive NO-GO run inside the day"),
+                 cell(outy, "readings since the day's last gate-GO")))
+        # the footprint age rows: a launchable window sets the ceiling, everything after it is above
+        write_fixtures(d8, {F1: {"engine_vmswap_mib": "1000"},
+                            F2: {"swap_in_mib_per_s": "120.0", "swap_out_mib_per_s": "40.0",
+                                 "swap_total_peak_mib_per_s": "300.0",
+                                 "engine_vmswap_mib": "12000"},
+                            F3: {"gpu_util_pct": "100", "gpu_util_mean_pct": "97.0",
+                                 "gpu_util_peak_pct": "100", "gpu_power_w": "128.0",
+                                 "swap_in_mib_per_s": "0.0", "swap_out_mib_per_s": "0.0",
+                                 "swap_total_peak_mib_per_s": "0.0",
+                                 "engine_vmswap_mib": "12000"},
+                            F4: {"engine_pcpu": "NaN", "swap_total_peak_mib_per_s": "400.0",
+                                 "engine_vmswap_mib": "12000"},
+                            F5: {"swap_total_peak_mib_per_s": "NaN",
+                                 "engine_vmswap_mib": "12000"}})
+        rcf, outf = run(["--dir", d8, "--as-of", "%s-0005" % DAY])
+        c_fp = cell(outf, "launchable footprint maximum of the day and its age")
+        c_tr = cell(outf, "trailing consecutive day windows with footprint above that maximum")
+        check(rcf == 0 and c_fp == "1000 MiB set at 00:01, 4 reading(s) ago" and c_tr == "4",
+              "the launchable-footprint ceiling ages in public and every window above it is "
+              "counted, got %r / %r" % (c_fp, c_tr))
+    finally:
+        shutil.rmtree(d8, ignore_errors=True)
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()

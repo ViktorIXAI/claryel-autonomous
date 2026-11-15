@@ -56,6 +56,20 @@ the ones that newly entered, each with its gate returncode and a `launchable` ma
 launchable delta written as its own arithmetic `A -> B = +n_new_GO - n_aged_GO`. The block is stdout
 evidence only: it joins no committed table, which stays byte-identical with or without it.
 
+A sixth set of cells this tool did not compute, and the tick prose that went stale over them
+(2026-11-15 23:08, tick 192): the day's refusal band, refusal MEDIAN and the GO/refusal "dead
+zone" existed only as sentences in tick notes, and each tick re-typed them. Recomputed with a
+scratch parser over the same reading files, the swap-rule refusal median is **4.225x at the
+24-reading cut, 3.985x at the 30th and 3.745x at the 31st**, while two consecutive ticks quoted
+"4.22x" as the current day's figure — the number was never wrong for its own cut, it simply stopped
+being recomputed. The band edges and the dead-zone bounds had the same exposure. The census now
+prints a DAY table whose rows come from the same per-file gate returncodes as the verdict census:
+GO/refusal swap-ratio bands, the recomputed median, refusals decided by a rule OTHER than swap
+(named, so they cannot pollute the swap band), the dead zone with a computed EMPTY/POPULATED state
+word and the count inside it, the longest consecutive-refusal run, readings since the day's last
+GO, and the age of the launchable-footprint maximum plus how many trailing day windows sit above
+it. Census stamp `v4` -> `v5`; v1-v4 tables stay published as written.
+
 It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
@@ -453,6 +467,115 @@ def footprint(rows):
     )
 
 
+def xrate(v, nd=2):
+    """Multiple-of-ceiling cell text with the same n/a rule as `mib`/`rate`."""
+    return "n/a" if v is None else ("%%.%df" % nd) % v
+
+
+def day_band(day_rows, swap_max):
+    """Day-scoped rule-band arithmetic (census v5, 2026-11-15, tick 192).
+
+    Why this joins the tool instead of living in a tick note: the day's refusal band, median and
+    GO/refusal dead zone were quoted in prose from a cut taken several readings earlier. Measured
+    live at the 2026-11-15 23:08 reading with a scratch parser over the same files: the swap-rule
+    refusal median is 4.225x at the 24-reading cut, 3.985x at 30 and 3.745x at 31, while two
+    consecutive ticks repeated "4.22x" as today's number. The arithmetic is trivial; what was
+    missing is that nobody re-ran it. These cells now come out of the SAME per-file gate call as
+    the verdict column, so a stale median becomes impossible rather than merely discouraged —
+    the same class tick 155 (a ceiling attributed to the wrong scope) and tick 166 (a drift
+    report printing a silent subset of its own evidence) close mechanically.
+
+    Ratio = the reading's own sampled swap window (`swap_in + swap_out`) divided by the gate's
+    `SWAP_RATE_MAX_MIB_S`, i.e. the number the swap-mean rule actually compares. Refusals whose
+    swap window sits BELOW that ceiling are counted separately, because they were decided by the
+    device or the GPU-mean rule and must never enter the swap-rule band (measured live 19:24 on
+    2026-11-15: 0.00x swap traffic, 179.3 MiB/s of whole-disk reads, GPU mean 99.7 %).
+    """
+    judged = [r for r in day_rows if r["rc"] in (0, 3)]
+    ratios = [(r, (r["mean"] / swap_max) if r["mean"] is not None else None) for r in judged]
+    go = [v for r, v in ratios if r["rc"] == 0 and v is not None]
+    swap_ref = [v for r, v in ratios if r["rc"] == 3 and v is not None and v >= 1.0]
+    other_ref = [(r["name"], v) for r, v in ratios
+                 if r["rc"] == 3 and v is not None and v < 1.0]
+    lo, hi = (max(go) if go else None), (min(swap_ref) if swap_ref else None)
+    inside = sum(1 for r, v in ratios if v is not None and lo is not None and hi is not None
+                 and lo < v < hi)
+    # streaks over the day in reading order
+    best_nogo = cur = 0
+    for r in day_rows:
+        cur = cur + 1 if r["rc"] == 3 else 0
+        best_nogo = max(best_nogo, cur)
+    best_notgo = cur = 0
+    for r in day_rows:
+        cur = cur + 1 if r["rc"] != 0 else 0
+        best_notgo = max(best_notgo, cur)
+    last_go = None
+    for r in day_rows:
+        if r["rc"] == 0:
+            last_go = r
+    since_go = None
+    if last_go is not None:
+        since_go = sum(1 for r in day_rows if r["ts"] > last_go["ts"])
+    fp_go = [(r["vmswap"], r) for r in day_rows if r["rc"] == 0 and r["vmswap"] is not None]
+    fp_max, fp_at = (max((v for v, _ in fp_go), default=None), None)
+    if fp_go and fp_max is not None:
+        fp_at = max((r for v, r in fp_go if v == fp_max), key=lambda r: r["ts"])
+    trail = 0
+    for r in reversed(day_rows):
+        if r["vmswap"] is not None and fp_max is not None and r["vmswap"] > fp_max:
+            trail += 1
+        else:
+            break
+    return dict(
+        n_day=len(day_rows),
+        n_go=len(go), go_min=(min(go) if go else None), go_max=lo,
+        n_swap_ref=len(swap_ref), ref_min=hi,
+        ref_max=(max(swap_ref) if swap_ref else None),
+        ref_median=median(swap_ref),
+        n_other_ref=len(other_ref), other_ref=other_ref,
+        inside=inside,
+        zone_state=(("NO-DATA (one group holds no parseable swap window)"
+                     if (lo is None or hi is None) else
+                     ("POPULATED (%d windows inside)" % inside if inside else
+                      "EMPTY (%d windows inside)" % inside))),
+        best_nogo=best_nogo, best_notgo=best_notgo,
+        since_go=since_go,
+        last_go=(last_go["ts"] if last_go else None),
+        fp_go_max=fp_max,
+        fp_go_at=(fp_at["ts"] if fp_at else None),
+        fp_go_ago=(sum(1 for r in day_rows if r["ts"] > fp_at["ts"]) if fp_at else None),
+        fp_trail_above=trail,
+    )
+
+
+def day_band_text(d, swap_max):
+    """The day-band table, every cell computed from the same gate verdicts the census prints."""
+    return [
+        "| day launchable (GO) swap draws | %d (band %s-%s x the %s mean ceiling) |" % (
+            d["n_go"], xrate(d["go_min"]), xrate(d["go_max"]), swap_max),
+        "| day refusals at or above the swap-mean ceiling | %d (band %s-%s x, **median %s x "
+        "recomputed at this cut**) |" % (d["n_swap_ref"], xrate(d["ref_min"]), xrate(d["ref_max"]),
+                                         xrate(d["ref_median"], 3)),
+        "| day refusals decided by a rule OTHER than swap (window below ceiling) | %d%s |" % (
+            d["n_other_ref"],
+            (": " + ", ".join("%s at %s x" % (n, xrate(v)) for n, v in d["other_ref"])
+             if d["other_ref"] else " (none)")),
+        "| day dead zone, highest GO draw to lowest swap-rule refusal | %s-%s x — %s |" % (
+            xrate(d["go_max"]), xrate(d["ref_min"]), d["zone_state"]),
+        "| longest consecutive NO-GO run inside the day | %d readings (any-verdict non-GO run: "
+        "%d) |" % (d["best_nogo"], d["best_notgo"]),
+        "| readings since the day's last gate-GO | %s%s |" % (
+            ("n/a — no GO of this day" if d["since_go"] is None else d["since_go"]),
+            ("" if d["last_go"] is None else " (last GO %s)" % d["last_go"].strftime("%H:%M"))),
+        "| launchable footprint maximum of the day and its age | %s MiB set at %s, %s reading(s) "
+        "ago |" % (mib(d["fp_go_max"]),
+                   ("n/a" if d["fp_go_at"] is None else d["fp_go_at"].strftime("%H:%M")),
+                   ("n/a" if d["fp_go_ago"] is None else d["fp_go_ago"])),
+        "| trailing consecutive day windows with footprint above that maximum | %d |"
+        % d["fp_trail_above"],
+    ]
+
+
 def build(rows, as_of, consts, day, window_hours, legs_started):
     go = [r for r in rows if r["rc"] == 0]
     nogo = [r for r in rows if r["rc"] == 3]
@@ -462,6 +585,7 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     win_go = [r for r in go if r["ts"] > cut]
     b = band(rows, consts["SWAP_RATE_MAX_MIB_S"])
     fp = footprint(rows)
+    db = day_band(day_rows, consts["SWAP_RATE_MAX_MIB_S"])
     L = []
     L.append("# PUB preflight reading census (generated)")
     L.append("")
@@ -472,8 +596,16 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over")
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
-    L.append("Census stamp: `pub-preflight-census-v4`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v4 adds two COMPUTED footprint ceiling rows — the "
+    L.append("Census stamp: `pub-preflight-census-v5`, gate sha16 `%s`, window `as-of %s` "
+             "(%d readings inside the window). v5 adds the DAY rule-band table (8 computed cells: "
+             "the GO and swap-refusal ratio bands, the refusal median, refusals decided by a rule "
+             "other than swap, the GO-to-refusal dead zone with its EMPTY/POPULATED state word and "
+             "the count inside it, the longest consecutive-refusal run, readings since the last GO, "
+             "and the age of the launchable-footprint maximum with the trailing windows above it) — "
+             "those figures had lived only in tick prose and had been re-typed from a stale cut: on "
+             "2026-11-15 the refusal median is 4.225x at 24 readings, 3.985x at 30 and 3.745x at 31, "
+             "while two consecutive ticks quoted 4.22x as today's number. v4 adds two COMPUTED "
+             "footprint ceiling rows — the "
              "ceiling dry-run and its state word — because at the 08:57 reading on 2026-11-15 the "
              "launchable footprint maximum (8 520 MiB) grew ABOVE the refused-group maximum "
              "(6 957 MiB), so the only footprint ceiling the arming rule allows fires on nothing in "
@@ -488,8 +620,9 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
              "file. v2 added two COMPUTED group-state rows — the swap-peak band state and the "
              "footprint group separation — because v1 printed \"Band: nothing between X and Y\" "
              "unconditionally, and at 23:13 on 2026-11-14 the order of X and Y reversed: the "
-             "table went on asserting an empty interval the data had withdrawn. v1, v2 and v3 "
-             "tables are left as published; a v1, v2, v3 and v4 file are not the same table shape."
+             "table went on asserting an empty interval the data had withdrawn. v1, v2, v3, v4 and "
+             "v5 tables are left as published; a v1, v2, v3, v4 and v5 file are not the same table "
+             "shape."
              % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"), len(rows)))
     L.append("")
     L.append("Ceilings read out of the gate source at run time, so this table cannot disagree with "
@@ -558,6 +691,25 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
                                             pct(fp["share_max"])))
     L.append("| footprint arming counter (launchable windows carrying it) | %d of %d |" % (
         fp["n_go_launchable"], ARMING_THRESHOLD))
+    L.append("")
+    L.append("The as-of **DAY** rule band (added 2026-11-15, tick 192) — today's verdicts only, every")
+    L.append("ratio taken against `SWAP_RATE_MAX_MIB_S = %s` and every number recomputed at this"
+             % consts["SWAP_RATE_MAX_MIB_S"])
+    L.append("reading, because the same three figures quoted in tick prose had been carried forward")
+    L.append("from an earlier cut instead of re-derived (the median reads 4.225x at 24 readings,")
+    L.append("3.985x at 30 and 3.745x at 31 on this day's files):")
+    L.append("")
+    L.append("| day cell | value |")
+    L.append("|---|---|")
+    L.extend(day_band_text(db, consts["SWAP_RATE_MAX_MIB_S"]))
+    L.append("")
+    L.append("The `rule OTHER than swap` row is the day's honest split of the refusal column: a")
+    L.append("refusal whose swap window is quiet was decided by the device or the GPU-mean rule and")
+    L.append("must not enter the swap-rule band (the 19:24 reading on 2026-11-15 is that case at")
+    L.append("0.00x swap traffic with 179.3 MiB/s of whole-disk reads). The launchable-footprint age")
+    L.append("row is the same warning for the state variable: the ceiling the dry-run uses was set by")
+    L.append("one launchable window, and every reading since then may sit far above it without that")
+    L.append("ceiling meaning anything about the box right now.")
     L.append("")
     L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")
     L.append("over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14")

@@ -7,23 +7,23 @@ connection seam on this line), so this census runs on the workstation only and i
 CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over
 synthetic readings, and `--check` re-derives this table from the retained readings.
 
-Census stamp: `pub-preflight-census-v4`, gate sha16 `dd2f0e4fa0255fa5`, window `as-of 2026-11-15 22:32` (153 readings inside the window). v4 adds two COMPUTED footprint ceiling rows — the ceiling dry-run and its state word — because at the 08:57 reading on 2026-11-15 the launchable footprint maximum (8 520 MiB) grew ABOVE the refused-group maximum (6 957 MiB), so the only footprint ceiling the arming rule allows fires on nothing in the corpus; that consequence was hand-derived in a tick note and now belongs to the tool (tick 172's class of defect). v3 removes the CORPUS-WIDE reading count from that window-identity sentence: the number counted every `preflight-*.txt` file present at run time, so taking one reading after the frozen window made `--check` of an untouched snapshot report drift (measured 2026-11-15 01:00 at the committed window `as-of 2026-11-14 23:47`: `123 stored readings` became `124 stored readings`, while the window count, every verdict and every band cell stayed identical). The corpus count is now printed on stdout only, outside the committed file. v2 added two COMPUTED group-state rows — the swap-peak band state and the footprint group separation — because v1 printed "Band: nothing between X and Y" unconditionally, and at 23:13 on 2026-11-14 the order of X and Y reversed: the table went on asserting an empty interval the data had withdrawn. v1, v2 and v3 tables are left as published; a v1, v2, v3 and v4 file are not the same table shape.
+Census stamp: `pub-preflight-census-v5`, gate sha16 `dd2f0e4fa0255fa5`, window `as-of 2026-11-15 23:08` (154 readings inside the window). v5 adds the DAY rule-band table (8 computed cells: the GO and swap-refusal ratio bands, the refusal median, refusals decided by a rule other than swap, the GO-to-refusal dead zone with its EMPTY/POPULATED state word and the count inside it, the longest consecutive-refusal run, readings since the last GO, and the age of the launchable-footprint maximum with the trailing windows above it) — those figures had lived only in tick prose and had been re-typed from a stale cut: on 2026-11-15 the refusal median is 4.225x at 24 readings, 3.985x at 30 and 3.745x at 31, while two consecutive ticks quoted 4.22x as today's number. v4 adds two COMPUTED footprint ceiling rows — the ceiling dry-run and its state word — because at the 08:57 reading on 2026-11-15 the launchable footprint maximum (8 520 MiB) grew ABOVE the refused-group maximum (6 957 MiB), so the only footprint ceiling the arming rule allows fires on nothing in the corpus; that consequence was hand-derived in a tick note and now belongs to the tool (tick 172's class of defect). v3 removes the CORPUS-WIDE reading count from that window-identity sentence: the number counted every `preflight-*.txt` file present at run time, so taking one reading after the frozen window made `--check` of an untouched snapshot report drift (measured 2026-11-15 01:00 at the committed window `as-of 2026-11-14 23:47`: `123 stored readings` became `124 stored readings`, while the window count, every verdict and every band cell stayed identical). The corpus count is now printed on stdout only, outside the committed file. v2 added two COMPUTED group-state rows — the swap-peak band state and the footprint group separation — because v1 printed "Band: nothing between X and Y" unconditionally, and at 23:13 on 2026-11-14 the order of X and Y reversed: the table went on asserting an empty interval the data had withdrawn. v1, v2, v3, v4 and v5 tables are left as published; a v1, v2, v3, v4 and v5 file are not the same table shape.
 
 Ceilings read out of the gate source at run time, so this table cannot disagree with the rule it reports: `SWAP_RATE_MAX_MIB_S = 20.0` (window MEAN; the peak statistic is reported, not gated), `GPU_UTIL_MAX_MEAN_PCT = 50.0` (the window mean, never the peak), and the device-read ceiling is SCOPE-DEPENDENT: `BLK_READ_MAX_MIB_S_WHOLE = 50.0` applies to every reading carrying `blk_scope=whole-disk`, while `BLK_READ_MAX_MIB_S = 100.0` applies only to readings with NO scope key (the old diskstats sum, which double-counts partitions, i.e. about 2x the device). The two numbers are the SAME physical point; a file with an unrecognised scope value is an input gap the gate never judges. Naming one of these numbers without its scope is exactly how a generated table starts disagreeing with the rule it claims to report (measured 2026-11-14 18:47: a whole-disk reading of 56.2 MiB/s was refused by the gate while the first version of this table printed 100.0 as the whole-disk ceiling).
 
 | census cell | value |
 |---|---|
 | gate verdict GO | 75 |
-| gate verdict NO-GO | 72 |
+| gate verdict NO-GO | 73 |
 | gate verdict input gap | 6 |
-| device scope of the readings in this window | 54 whole-disk (`50.0` ceiling) / 99 unscoped (`100.0` ceiling) / 0 unknown scope |
-| readings of the as-of day | 30 (7 GO / 23 NO-GO / 0 gap) |
-| launchable (GO) windows in the last 24 h | 9 |
+| device scope of the readings in this window | 55 whole-disk (`50.0` ceiling) / 99 unscoped (`100.0` ceiling) / 0 unknown scope |
+| readings of the as-of day | 31 (7 GO / 24 NO-GO / 0 gap) |
+| launchable (GO) windows in the last 24 h | 8 |
 | leg completions recorded in that window | 0 |
-| readings carrying the swap-peak key | 58 (NaN 2, parseable 56) |
-| ...of those, gate-JUDGED readings with a parseable peak (the band's set) | 54 (the other 2 sit in readings the gate refuses to judge at all) |
+| readings carrying the swap-peak key | 59 (NaN 2, parseable 57) |
+| ...of those, gate-JUDGED readings with a parseable peak (the band's set) | 55 (the other 2 sit in readings the gate refuses to judge at all) |
 | swap-mean-passing windows with a peak | 23 |
-| swap-mean-failing windows with a peak | 31 |
+| swap-mean-failing windows with a peak | 32 |
 | highest peak inside a swap-mean-PASSING window | 111.4 MiB/s |
 | lowest peak inside a swap-mean-FAILING window | 95.4 MiB/s |
 | swap-peak band state (computed, never asserted) | CROSSED — the highest launchable peak 111.4 MiB/s already sits AT OR ABOVE the lowest mean-failing peak 95.4 MiB/s, so the groups overlap: a ceiling high enough to spare every launchable window lets a mean-failing window through, and a lower ceiling refuses a window the mean rule launches. On this corpus a peak rule adds no refusal the mean rule does not already make |
@@ -33,14 +33,39 @@ Engine swap FOOTPRINT (added 2026-11-14, tick 159) — reported, never banded:
 
 | footprint cell | value |
 |---|---|
-| readings carrying `engine_vmswap_mib` | 35 (NaN 0, parseable 35) |
+| readings carrying `engine_vmswap_mib` | 36 (NaN 0, parseable 36) |
 | footprint on gate-GO windows (launchable) | 9 (median 6356 MiB, max 8520 MiB) |
-| footprint on gate-NO-GO windows | 26 (median 6358 MiB, min 3357 MiB) |
-| footprint group separation (computed, never asserted) | OVERLAPPING (launchable 9 window(s) 3576-8520 MiB, refused 26 window(s) 3357-10279 MiB; n=9/26 cannot support a ceiling in either direction) |
-| footprint ceiling dry-run (computed; it arms NOTHING) | ceiling > 8520 MiB fires on 0 of 9 launchable and 4 of 26 refused stored windows. A ceiling above every launchable footprint also refuses at least one refused window, so on this corpus the state rule would have real work to do |
+| footprint on gate-NO-GO windows | 27 (median 6444 MiB, min 3357 MiB) |
+| footprint group separation (computed, never asserted) | OVERLAPPING (launchable 9 window(s) 3576-8520 MiB, refused 27 window(s) 3357-10279 MiB; n=9/27 cannot support a ceiling in either direction) |
+| footprint ceiling dry-run (computed; it arms NOTHING) | ceiling > 8520 MiB fires on 0 of 9 launchable and 5 of 27 refused stored windows. A ceiling above every launchable footprint also refuses at least one refused window, so on this corpus the state rule would have real work to do |
 | footprint ceiling state (computed) | FIRING-AT-MINIMUM-CEILING |
-| page-cache share of swap in use (`swap_cached_mib` / used) | 35 readings, median 50.6 percent, max 65.2 percent |
+| page-cache share of swap in use (`swap_cached_mib` / used) | 36 readings, median 50.2 percent, max 65.2 percent |
 | footprint arming counter (launchable windows carrying it) | 9 of 30 |
+
+The as-of **DAY** rule band (added 2026-11-15, tick 192) — today's verdicts only, every
+ratio taken against `SWAP_RATE_MAX_MIB_S = 20.0` and every number recomputed at this
+reading, because the same three figures quoted in tick prose had been carried forward
+from an earlier cut instead of re-derived (the median reads 4.225x at 24 readings,
+3.985x at 30 and 3.745x at 31 on this day's files):
+
+| day cell | value |
+|---|---|
+| day launchable (GO) swap draws | 7 (band 0.00-0.74 x the 20.0 mean ceiling) |
+| day refusals at or above the swap-mean ceiling | 23 (band 1.06-15.61 x, **median 3.745 x recomputed at this cut**) |
+| day refusals decided by a rule OTHER than swap (window below ceiling) | 1: preflight-20261115-1924.txt at 0.00 x |
+| day dead zone, highest GO draw to lowest swap-rule refusal | 0.74-1.06 x — EMPTY (0 windows inside) |
+| longest consecutive NO-GO run inside the day | 8 readings (any-verdict non-GO run: 8) |
+| readings since the day's last gate-GO | 3 (last GO 21:22) |
+| launchable footprint maximum of the day and its age | 8520 MiB set at 08:57, 19 reading(s) ago |
+| trailing consecutive day windows with footprint above that maximum | 3 |
+
+The `rule OTHER than swap` row is the day's honest split of the refusal column: a
+refusal whose swap window is quiet was decided by the device or the GPU-mean rule and
+must not enter the swap-rule band (the 19:24 reading on 2026-11-15 is that case at
+0.00x swap traffic with 179.3 MiB/s of whole-disk reads). The launchable-footprint age
+row is the same warning for the state variable: the ceiling the dry-run uses was set by
+one launchable window, and every reading since then may sit far above it without that
+ceiling meaning anything about the box right now.
 
 **Why a state variable joins a table of rates.** Every swap rule the gate has is a rate
 over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14
