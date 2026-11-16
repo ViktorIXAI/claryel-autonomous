@@ -137,6 +137,24 @@ also cross-checked against the band: the set of refusals whose swap window sits 
 (the gate's own claim about itself). Two independent derivations of one set: a parser change, a ceiling
 change, or a rule edit shows up as a named disagreement instead of a band quietly misclassifying rows.
 
+A tenth set of cells (2026-11-16 07:19, tick 201): the v9 attribution reads the gate's text for EVERY
+rule, but only ONE rule was ever re-derived from the readings themselves — the swap band. The state
+rule is the cheapest rule in the gate to re-derive (no ceiling, no scope, one substring test: the gate
+fires when `engine_state` contains `D`, so a `Dl` state fires too) and the one whose refusal text is the
+least checked: a gate reading the launcher's state instead of the model's, a renamed anchor, or a
+producer sampling the wrong pid would move refusals while no printed cell disagreed. The census now
+derives the engine-state-D set from the reading's own key and requires it to equal the set the gate's
+reason line names, at all three scopes, naming the disagreeing files and moving the exit code to 4.
+The same rows answer a physical question this line has been asserting in prose: among the state-D
+refusals, how many sit on a device the device rule calls quiet. Measured at the 07:19 reading: swap-in
+161.3 MiB/s (8.07x the mean ceiling) with `blk_read_mib_per_s=0.1` at whole-disk scope and 7 274 MiB —
+43.2 % of swap in use — page-cache resident, i.e. an uninterruptible wait served out of RAM rather than
+off the NVMe, which is tick 200's finding seen from the state side. The row prints that count at three
+scopes WITH its denominator (state-D refusals carrying a parseable device window), because a state-D
+reading taken before the device key existed cannot be classified either way and a silent smaller
+denominator is how a band starts describing only the sampler era. Census stamp `v9` -> `v10`; v1-v9
+tables stay published as written.
+
 A stale enumeration in this tool's OWN header, found while extending it (same tick): the stamp sentence
 closed with "v1, v2, v3, v4, v5 and v6 tables are left as published; a v1, v2, v3, v4, v5 and v6 file
 are not the same table shape" — written when the stamp was v7 and never touched again, so the v7 change
@@ -172,8 +190,9 @@ Exit codes: 0 census written / matches, 1 census gap (missing dir, unreadable fi
 returned something other than GO/NO-GO/input-gap, --check drift, a malformed /
 not-earlier --prev-as-of, or a refusal-rule table that no longer matches the gate source),
 4 census FINDING (the table was produced but a cell could not be filled honestly: a refusal
-reason the rule table cannot attribute, gate output whose verdict line cannot be parsed, or
-the swap-band refusal set disagreeing with the gate's own swap-rule reason set).
+reason the rule table cannot attribute, gate output whose verdict line cannot be parsed, the
+swap-band refusal set disagreeing with the gate's own swap-rule reason set, or the
+engine-state-D set derived from the readings disagreeing with the gate's own state-D reason).
 """
 import argparse
 import datetime
@@ -198,7 +217,7 @@ DIFF_PRINT_MAX = 400
 # Table-shape stamp. Bumping it must not require typing the "which earlier shapes are preserved"
 # sentence: that sentence is GENERATED from this number (tick 197 found the hand-typed version two
 # stamps short, announcing v7 and v8 shape changes while claiming only v1-v6 are preserved).
-CENSUS_STAMP = 9
+CENSUS_STAMP = 10
 
 
 def census_stamp_name():
@@ -334,6 +353,38 @@ def device_scope(txt):
     return "whole-disk" if m.group(1).strip() == "whole-disk" else "unknown"
 
 
+# The gate's OWN key=value regex (scripts/pub_preflight.py, KEY_VALUE). The state cross-check below
+# must read the field exactly as the rule that fires on it reads it: `key=value` tokens are found
+# PER LINE anywhere in the line (the gate also accepts the single space-separated line the remote
+# read prints, where no key sits at a line start), and a repeated key keeps its LAST value. A
+# line-anchored parse here would see a state the gate never saw and the cross-check would report a
+# disagreement that is only a parser difference.
+GATE_KV = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)=\s*(\S+)")
+
+
+def gate_kv(txt):
+    """The gate's parse: every key=value token, comment lines skipped, last occurrence wins."""
+    vals = {}
+    for line in txt.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        for m in GATE_KV.finditer(line):
+            vals[m.group(1)] = m.group(2)
+    return vals
+
+
+def state_of(txt):
+    """The reading's own engine-state string, parsed the way the gate parses it (None if absent).
+
+    The gate's state rule is `if "D" in vals["engine_state"]` — a SUBSTRING test, so `Dl` (uninterruptible
+    plus lightweight) fires and a lowercase `d` does not. The cross-check mirrors that test literally
+    rather than the intuitive equality test, because an equality test here would call a `Dl` refusal an
+    unexplained rule firing.
+    """
+    return gate_kv(txt).get("engine_state")
+
+
 def parse_stamp(path):
     m = NAME_RE.match(os.path.basename(path))
     if not m:
@@ -396,6 +447,19 @@ def census(directory, as_of, day, window_hours):
             tot, tot_p, tot_f = num(txt, "swap_total_mib")
             fre, fre_p, fre_f = num(txt, "swap_free_mib")
             used = (tot - fre) if (tot is not None and fre is not None) else None
+        # Census v10 fields, read through the GATE's parser (see gate_kv): the engine-state
+        # cross-check compares what the rule sees with what the rule says, and the device-quiet
+        # complement needs the same device number the device rule compared. The older keys keep
+        # their existing line-anchored parse so no published band cell moves retroactively.
+        vals = gate_kv(txt)
+        st = vals.get("engine_state")
+        b_raw = vals.get("blk_read_mib_per_s")
+        try:
+            blk = float(b_raw) if b_raw is not None else None
+        except ValueError:
+            blk = None
+        if blk is not None and blk != blk:
+            blk = None    # a NaN device rate is a cut sample, never a quiet device
         rows.append(dict(ts=ts, name=os.path.basename(f), rc=rc,
                          decision=kind, reasons=texts,
                          rules=[rule_of(t) for t in texts] if kind == "NO-GO" else [],
@@ -407,6 +471,7 @@ def census(directory, as_of, day, window_hours):
                          cached=sc if (sc_present and sc_ok) else None,
                          used=used,
                          scope=device_scope(txt),
+                         state=st, blk=blk,
                          mean=(si + so) if (si is not None and so is not None) else None))
     return rows, unnamed, as_of
 
@@ -1067,7 +1132,7 @@ def day_band_text(d, swap_max):
     ]
 
 
-def rule_attribution_text(scopes, swap_max):
+def rule_attribution_text(scopes, swap_max, consts):
     """WHICH gate rule refused, counted per scope (census v9, tick 197).
 
     `scopes` is a list of (label, rows) — the as-of day, the sliding window, the whole corpus. The
@@ -1075,6 +1140,14 @@ def rule_attribution_text(scopes, swap_max):
     produces the verdict column produces the reason lines. Two fail-closed cells (unattributable
     reason, unparsable verdict line) and one cross-check are part of the block, because the point of
     counting rules is that a rule can start or stop firing without anyone noticing.
+
+    Census v10 (tick 201) adds the SECOND independent derivation: the engine-state-D set computed
+    from each reading's own `engine_state` key (substring test, the gate's parse) against the set
+    whose refusal line names the state rule, plus the device-quiet complement of the state-D
+    refusals — how many of them sat on a device the device rule calls quiet, which is the number
+    that separates "uninterruptible because the NVMe is saturated" from "uninterruptible on a page
+    wait served from RAM". The denominator of that row is printed with it: a state-D refusal taken
+    before the device key existed cannot be classified at all.
     Returns (lines, findings); a non-empty findings list moves the census exit code to 4.
     """
     L = []
@@ -1102,11 +1175,26 @@ def rule_attribution_text(scopes, swap_max):
         ratio_set = {r["name"] for r in refusals
                      if r["mean"] is not None and r["mean"] >= swap_max}
         reason_set = {r["name"] for r in captured if "swap-rate" in r["rules"]}
+        # v10: the state rule derived from the reading, and the same rule as the gate reports it
+        state_set = {r["name"] for r in refusals if r["state"] and "D" in r["state"]}
+        state_reason = {r["name"] for r in captured if "engine-state-D" in r["rules"]}
+        state_missing = sum(1 for r in rows if r["state"] is None)
+        d_named = [r for r in captured if "engine-state-D" in r["rules"]]
+        d_with_blk = [r for r in d_named if r["blk"] is not None]
+        d_quiet = sum(1 for r in d_with_blk
+                      if r["blk"] < (consts["BLK_READ_MAX_MIB_S_WHOLE"]
+                                     if r["scope"] == "whole-disk"
+                                     else consts["BLK_READ_MAX_MIB_S"]))
         per.append(dict(label=label, n_ref=len(refusals), n_cap=len(captured), counts=counts,
                         multi=multi, sole=sole, unattr=unattr, unparsed=unparsed,
                         ratio=len(ratio_set), reason=len(reason_set),
                         only_ratio=sorted(ratio_set - reason_set),
-                        only_reason=sorted(reason_set - ratio_set)))
+                        only_reason=sorted(reason_set - ratio_set),
+                        n_rows=len(rows), state_missing=state_missing,
+                        s_derived=len(state_set), s_reason=len(state_reason),
+                        only_state=sorted(state_set - state_reason),
+                        only_state_reason=sorted(state_reason - state_set),
+                        d_named=len(d_named), d_blk=len(d_with_blk), d_quiet=d_quiet))
 
     def cell(fn):
         return " / ".join("%s: %s" % (p["label"], fn(p)) for p in per)
@@ -1135,6 +1223,25 @@ def rule_attribution_text(scopes, swap_max):
                                     "reason-only %s)" % (p["ratio"], p["reason"],
                                                          ", ".join(p["only_ratio"]) or "none",
                                                          ", ".join(p["only_reason"]) or "none"))))
+    L.append("| state-rule cross-check: the reading's own `engine_state` contains `D` (the gate's "
+             "substring test, so `Dl` fires) vs the gate's engine-state-D reason | %s |"
+             % cell(lambda p: ("AGREES (%d = %d)" % (p["s_derived"], p["s_reason"])
+                               if not p["only_state"] and not p["only_state_reason"]
+                               else "DISAGREES (derived-set %d, reason-set %d; derived-only %s; "
+                                    "reason-only %s)" % (p["s_derived"], p["s_reason"],
+                                                         ", ".join(p["only_state"]) or "none",
+                                                         ", ".join(p["only_state_reason"]) or "none"))))
+    L.append("| readings with no `engine_state` key (this cross-check cannot see them; the gate "
+             "judges such a reading an input gap, never healthy) | %s |"
+             % cell(lambda p: "%d of %d readings" % (p["state_missing"], p["n_rows"])))
+    L.append("| state-D refusals on a device the device rule calls quiet (device window present and "
+             "below its ceiling, %s whole-disk / %s unscoped; denominator named) | %s |"
+             % (consts["BLK_READ_MAX_MIB_S_WHOLE"], consts["BLK_READ_MAX_MIB_S"],
+                cell(lambda p: ("%d of %d state-D refusals carry a device window (%d named by the "
+                                "gate)" % (p["d_quiet"], p["d_blk"], p["d_named"])
+                                if p["d_blk"] else
+                                "no denominator — none of the %d state-D refusals carries a device "
+                                "window" % p["d_named"]))))
     gap_by = []
     for label, rows in scopes:
         c = {}
@@ -1154,6 +1261,11 @@ def rule_attribution_text(scopes, swap_max):
             findings.append("%s: swap-band/refusal-reason sets disagree (ratio-only %s, reason-only %s)"
                             % (p["label"], ", ".join(p["only_ratio"]) or "none",
                                ", ".join(p["only_reason"]) or "none"))
+        if p["only_state"] or p["only_state_reason"]:
+            findings.append("%s: engine-state-D derived/refusal-reason sets disagree "
+                            "(derived-only %s, reason-only %s)"
+                            % (p["label"], ", ".join(p["only_state"]) or "none",
+                               ", ".join(p["only_state_reason"]) or "none"))
     return L, sorted(set(findings))
 
 
@@ -1183,7 +1295,13 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
     L.append("Census stamp: `%s`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v9 counts WHICH GATE RULE refused each reading, read "
+             "(%d readings inside the window). v10 derives the engine-state-D refusal set from the "
+             "readings' own `engine_state` key and requires it to equal the set the gate's reason line "
+             "names, at all three scopes, and prints how many state-D refusals sat on a device the "
+             "device rule calls quiet, with the denominator of state-D refusals that carry a device "
+             "window: until now only the swap rule was ever re-derived from the columns, and the state "
+             "rule is the one rule with no ceiling to disagree about (the gate fires when "
+             "`engine_state` contains `D`, so a `Dl` state fires). v9 counts WHICH GATE RULE refused each reading, read "
              "out of the gate's own refusal text at the three published scopes, and cross-checks the "
              "swap-band refusal set (derived here from the key=value columns) against the set whose "
              "gate reason line names the swap rule (the gate's own claim): every tick sentence that "
@@ -1377,17 +1495,26 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("refusal lines, from the same subprocess run that produced the verdict column, so a rule that")
     L.append("starts or stops firing moves a cell here instead of hiding in a report. The rule table is")
     L.append("BOUND to the gate source (every anchor must appear in it and the refusal-site count must")
-    L.append("match), an unmappable reason names its file and moves the exit code to 4, and the")
-    L.append("cross-check row compares two independent derivations of one set: the refusals whose sampled")
-    L.append("swap window sits at or above `SWAP_RATE_MAX_MIB_S` (computed here from the key=value")
-    L.append("columns) and the refusals whose gate reason line names the swap rule (the gate speaking")
-    L.append("about itself). A rule that fired on nothing still gets a row: a missing row and a zero row")
+    L.append("match), an unmappable reason names its file and moves the exit code to 4, and TWO rows")
+    L.append("compare two independent derivations of one set. The swap row (v9) takes the refusals whose")
+    L.append("sampled window sits at or above `SWAP_RATE_MAX_MIB_S` against the refusals whose gate")
+    L.append("reason line names the swap rule. The state row (v10) takes the refusals whose own")
+    L.append("`engine_state` key contains `D` — the gate's exact substring test, so `Dl` fires, read")
+    L.append("through the gate's own key=value parser — against the refusals whose reason line names the")
+    L.append("state rule; a gate that sampled the launcher instead of the model, or a reason string")
+    L.append("renamed under the rule table, moves that cell instead of quietly changing refusals. The")
+    L.append("device-quiet row then splits the state-D refusals physically: a state-D wait on a device")
+    L.append("the device rule calls quiet is a page wait served from RAM (tick 200's re-admission class),")
+    L.append("a state-D wait at a saturated device is the foreign-reader class that motivated that rule,")
+    L.append("and the row prints how many state-D refusals have a device window at all, because a")
+    L.append("refusal taken before that key existed belongs to neither class. A rule that fired on")
+    L.append("nothing still gets a row: a missing row and a zero row")
     L.append("read the same way in prose, which is how a rule that never fires gets mistaken for a rule")
     L.append("nobody counted:")
     L.append("")
     attr_lines, attr_findings = rule_attribution_text(
         [("DAY `%s`" % day, day_rows), ("last %d h" % window_hours, win_rows),
-         ("whole corpus", rows)], consts["SWAP_RATE_MAX_MIB_S"])
+         ("whole corpus", rows)], consts["SWAP_RATE_MAX_MIB_S"], consts)
     L.extend(attr_lines)
     L.append("")
     L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")

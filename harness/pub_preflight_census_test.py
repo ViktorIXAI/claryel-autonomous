@@ -1329,6 +1329,59 @@ def main():
         # gap classes are named by the gate's own phrase, not invented here
         gc = [l for l in out15.splitlines() if l.startswith("| input-gap")]
         check(gc and "0" in gc[0], "the gap-class row states its scopes, got %r" % gc)
+
+        # (g) census v10 (tick 201): the state rule re-derived from the readings, its own
+        # missing-key denominator, and the device-quiet complement with its denominator.
+        sxc = [l for l in out15.splitlines() if l.startswith("| state-rule cross-check")]
+        check(len(sxc) == 1 and sxc[0].count("AGREES (1 = 1)") == 3,
+              "the engine-state-D set derived from the readings' own key equals the gate's reason "
+              "set (1 = 1) at all three scopes, got %r" % sxc)
+        sm = [l for l in out15.splitlines()
+              if l.startswith("| readings with no `engine_state` key")]
+        check(len(sm) == 1 and sm[0].count(": 0 of 13 readings") == 3,
+              "the state cross-check prints its own missing-key denominator (0 of 13 here), got %r"
+              % sm)
+        dq = [l for l in out15.splitlines() if l.startswith("| state-D refusals on a device")]
+        check(len(dq) == 1 and dq[0].count("1 of 1 state-D refusals carry a device window "
+                                           "(1 named by the gate)") == 3,
+              "the one state-D refusal sits on a quiet device (0.1 MiB/s at whole-disk scope) and "
+              "the row names its denominator at all three scopes, got %r" % dq)
+        # the state-D refusal taken WITHOUT a device window must print no denominator rather than
+        # join a smaller band silently — that is how a corpus figure starts describing only the
+        # sampler era (tick 195's denominator rule applied to the new row).
+        d15d = tempfile.mkdtemp(prefix="pubcensus-state-nodev-")
+        try:
+            write_fixtures(d15d, {"preflight-%s-0101.txt" % DAY: {},
+                                  "preflight-%s-0102.txt" % DAY: {
+                                      "engine_state": "D", "blk_read_mib_per_s": None,
+                                      "blk_scope": None, "blk_top_reader": None}})
+            rcd, outd = run(["--dir", d15d, "--no-transition"])
+            dqd = [l for l in outd.splitlines() if l.startswith("| state-D refusals on a device")]
+            sxd = [l for l in outd.splitlines() if l.startswith("| state-rule cross-check")]
+            check(rcd == 0 and len(dqd) == 1
+                  and dqd[0].count("no denominator — none of the 1 state-D refusals carries a "
+                                   "device window") == 3
+                  and sxd and sxd[0].count("AGREES (1 = 1)") == 3,
+                  "a state-D refusal with no device window prints 'no denominator' and still "
+                  "cross-checks, got rc=%s %r" % (rcd, dqd))
+        finally:
+            shutil.rmtree(d15d, ignore_errors=True)
+        # the gate's state test is a SUBSTRING test (`Dl` fires). An equality test here would call
+        # that refusal an unexplained rule firing, so the derived set must follow the same test.
+        d15e = tempfile.mkdtemp(prefix="pubcensus-state-dl-")
+        try:
+            write_fixtures(d15e, {"preflight-%s-0101.txt" % DAY: {},
+                                  "preflight-%s-0102.txt" % DAY: {"engine_state": "Dl"}})
+            rce, oute = run(["--dir", d15e, "--no-transition"])
+            sxe = [l for l in oute.splitlines() if l.startswith("| state-rule cross-check")]
+            rule_e = [l for l in oute.splitlines()
+                      if l.startswith("| rule fired:") and "`engine-state-D`" in l]
+            check(rce == 0 and sxe and sxe[0].count("AGREES (1 = 1)") == 3
+                  and rule_e and rule_e[0].count("1 fired, 1 sole") == 3,
+                  "a `Dl` state counts as uninterruptible I/O exactly as the gate counts it and "
+                  "both derivations still agree, got rc=%s %r / %r" % (rce, sxe, rule_e))
+        finally:
+            shutil.rmtree(d15e, ignore_errors=True)
     finally:
         shutil.rmtree(d15, ignore_errors=True)
 
@@ -1417,6 +1470,51 @@ def main():
                   % (r3.returncode, o3[:260]))
         finally:
             shutil.rmtree(d3, ignore_errors=True)
+
+        # (g1)/(g2) census v10 non-vacuity: the state cross-check must fire in BOTH directions.
+        # Both manglings keep the gate's refusal-site count intact (the `reasons.append(` line
+        # stays), so what reddens the census is the set comparison, not the rule-table guard.
+        # (g1) the rule fires on a state the readings do not report as D (reason-only).
+        dg1, sg1 = scratch_pair("state-reason", [
+            ('    if "D" in vals["engine_state"]:',
+             '    if "D" in vals["engine_state"] or "S" in vals["engine_state"]:')])
+        try:
+            rg1 = subprocess.run([sys.executable, os.path.join(sg1, "pub_preflight_census.py"),
+                                  "--dir", dfix, "--no-transition"], cwd=dg1,
+                                 capture_output=True, text=True)
+            og1 = rg1.stdout + rg1.stderr
+            check(rg1.returncode == 4
+                  and "engine-state-D derived/refusal-reason sets disagree" in og1
+                  and "DISAGREES" in og1 and "reason-only" in og1
+                  and ("preflight-%s-0104.txt" % DAY) in og1,
+                  "a state rule firing on a reading whose own key says S names the file and exits 4 "
+                  "(rc=%s) %r" % (rg1.returncode, og1[:300]))
+        finally:
+            shutil.rmtree(dg1, ignore_errors=True)
+        # (g2) the rule cannot fire at all while a D-carrying reading is still refused by another
+        # rule (derived-only): the reading's own key says D, the gate says nothing about state.
+        dfix2 = tempfile.mkdtemp(prefix="pubcensus-guard-stateoff-fx-")
+        write_fixtures(dfix2, {"preflight-%s-0101.txt" % DAY: {},
+                               "preflight-%s-0110.txt" % DAY: {
+                                   "engine_state": "D",
+                                   "swap_in_mib_per_s": "120.0", "swap_out_mib_per_s": "40.0",
+                                   "swap_total_peak_mib_per_s": "300.0"}})
+        dg2, sg2 = scratch_pair("state-off", [('    if "D" in vals["engine_state"]:',
+                                               '    if "Z" in vals["engine_state"]:')])
+        try:
+            rg2 = subprocess.run([sys.executable, os.path.join(sg2, "pub_preflight_census.py"),
+                                  "--dir", dfix2, "--no-transition"], cwd=dg2,
+                                 capture_output=True, text=True)
+            og2 = rg2.stdout + rg2.stderr
+            check(rg2.returncode == 4
+                  and "engine-state-D derived/refusal-reason sets disagree" in og2
+                  and "DISAGREES" in og2 and "derived-only" in og2
+                  and ("preflight-%s-0110.txt" % DAY) in og2,
+                  "a state rule that cannot fire while the reading says D names the file and exits 4 "
+                  "(rc=%s) %r" % (rg2.returncode, og2[:300]))
+        finally:
+            shutil.rmtree(dg2, ignore_errors=True)
+            shutil.rmtree(dfix2, ignore_errors=True)
     finally:
         shutil.rmtree(dfix, ignore_errors=True)
 
