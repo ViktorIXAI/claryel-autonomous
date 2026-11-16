@@ -291,3 +291,61 @@ at 157 W at 10:35 while the producer's 6 s window averaged 4.7 %. A percent row 
 somebody else's version campaign is not attributable to a named engine build, so the next tick
 launches only after a fresh reading taken at launch time, and the footprint ceiling stays
 GENERATION-STALE until windows of the live generation carry it.
+
+## Tick 203 — 2026-11-16 11:14 CET: the new engine generation's first launchable windows all read a zero swap footprint — the census moves its counters, the ceiling still binds to a retired process
+
+No leg launched, and the empty queue is the mechanical answer, not a reading: three-arm parity
+49 rows / 9 sets / 0 findings (contour stamp 0.0.2.56, Grok not an arm), and the grok resume pin
+exits 3 by design with the pin intact — its 182-id resume set prints VOID under the 2026-11-12
+owner cancellation. Nothing in force needs a row.
+
+**The endpoint went quiet and the gate took it.** The foreign Basalt-version campaign that held
+the box at GPU 99 % / 157 W at 10:35 is over. A fresh reading at 11:14
+(`preflight-20261116-1114.txt`, wrapper bare, gate rc captured unshielded) returns **GO**: engine
+pid 438502 (up since 09:59) state R, sampled pcpu 4.6 %, RSS 54 158 MiB, **VmSwap 0 MiB**, GPU
+mean 0.0 % peak 0 % at 26.47 W, whole-disk read 0.1 MiB/s (top reader `basalt`), swap free
+65 470 of 65 535 MiB with SwapCached 9 MiB, `foreign_legs=0`, `/health` 200 +
+`health_loaded=true` + one serve process.
+
+**Census re-run to the 11:14 cut** (same v11 shape, gate sha16 `dd2f0e4fa0255fa5`, gate bytes
+unmoved; `--check` drift → 0 after `--markdown`). The committed-vs-recomputed diff is a re-count,
+every cell attributed: readings in window 166→168, corpus GO 78→80, day scope 12→14 readings
+(3 GO → 5 GO; the day refusal band unchanged 1.27-10.69x, median 6.223x — both new GO draws sit
+at 0.0x), swap-peak arming 21→23 of 30, footprint arming 12→14 of 30, and one file
+(`preflight-20261115-1053.txt`, a GO) aged out of the sliding 24 h window — the launchable-24h
+count stays at 8 with nothing reclassified.
+
+**Tick 202's re-draw question answered in a sharper form than it was asked.** Generation 438502
+now holds three launchable windows — 10:07, 10:35, 11:14 — and all three carry
+`engine_vmswap_mib=0`. The 10:35 draw was taken *inside* that generation's own GPU-99 %/157 W
+campaign, and even then the engine held zero bytes of swap. The retired generation 175316, by
+contrast, held 6 970-10 770 MiB across 15-16 Nov (the swap total was 65 535 MiB in every file of
+that range — the size change predates this corpus and is not a box event today). Consequences, as
+published by the table: the pooled dry-run ceiling (binding value > 9499 MiB, fires 0 of 14
+launchable / 6 of 36 refused windows) stays GENERATION-STALE at all three scopes — its binding
+number belongs to pid 175316, last sampled 07:19 — while a ceiling drawn only from the live
+generation's windows could be pre-registered as "> 0 MiB" and nothing more: arming from zeros
+arms a rule whose failure mode the live process has not demonstrated once. Decision stays open;
+the counter counts coverage, not information, and that distinction becomes a real question if the
+live generation keeps reading zeros as the counter approaches 30.
+
+**Tick 202's other question, re-checked:** the three rules `health-code-not-200`,
+`mem-available-low`, `foreign-legs` still fire 0 / 0 / 0 at all three scopes at this cut — their
+v11 derivations remain AGREES (0 = 0) against a corpus that has never exercised them. That is an
+honest zero, not evidence; only a real occurrence on the box would move it.
+
+**Repo hygiene.** `origin/main` moved under this tick with one foreign commit,
+`69390e6` (CHG-002 MACSTUDIO hardware drift, `hardware/` paths only) — fetched and
+fast-forwarded; the two workstreams share no path. The GitHub docs-freshness job
+(`ef7ea47ff99b`) failed its 03:00 run today with "repo is dirty; refusing daily docs refresh"
+(its stdout names `scripts/pub_preflight_census.py` modified — the previous tick's work in
+flight at 03:00, exactly the standing machine-note class); failure_streak 1, self-clears when
+03:00 catches a clean tree, and in-flight work is deliberately not committed to paper over it.
+The frozen-line watchers (`P2005 paired full 2.1→2.2 watch`, `Mac v2.2 full`) still fire on
+schedule and stay inert — owner decision, untouched.
+
+**Suites.** `harness/pub_preflight_census_test.py` 254/254 green, `harness/pub_preflight_test.py`
+117/117 with unchanged gate bytes; digest-row gate 49 rows / 0 findings, superseded-cell rule
+9/0, grok cell rule 9/0, arms index drift 0, derived percents 42 recomputed / 0 findings.
+No leg ran, so `LEG-INCIDENTS.md` is untouched, zero model calls, zero cloud calls, and no
+published percent moved.
