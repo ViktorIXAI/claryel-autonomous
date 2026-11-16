@@ -1555,8 +1555,9 @@ def main():
     # says which rule the gate says fired but never which KEY and which CONSTANT produced it. On
     # 2026-11-14 the device ceiling moved (100.0 inflated -> 50.0 whole-disk) without changing the
     # SHAPE of any refusal line, so a table that only reads reason text cannot see that class at all.
-    check(re.search(r"^CENSUS_STAMP = 11$", src9, re.M) is not None,
-          "the census stamp is 11: the rule derivations and the generation block add published rows")
+    check(re.search(r"^CENSUS_STAMP = (1[1-9]|[2-9][0-9])$", src9, re.M) is not None,
+          "the census stamp is at least 11: the rule derivations and the generation block added "
+          "published rows, and any shape change must move the stamp rather than reuse the old one")
     for const in ("SWAP_FREE_MIN_MIB", "MEM_AVAILABLE_MIN_MIB", "IDLE_SPIN_PCPU", "BOOL_FALSE"):
         check(re.search(r"for key in \([^)]*%s" % const, src9, re.M | re.S) is not None,
               "gate_constants reads %s out of the GATE source — a derivation that hardcodes 200 or "
@@ -1571,6 +1572,20 @@ def main():
           and "true" in mod9.gate_constants()["BOOL_TRUE"],
           "the boolean vocabulary is the GATE's own, so a flag spelled differently in the two tools "
           "becomes a loud census failure instead of a rule silently never firing")
+
+    # ---- census v12 (2026-11-16, tick 204): footprint COVERAGE vs INFORMATION ------------------
+    # Why: the arming counter counts launchable windows CARRYING `engine_vmswap_mib`, and a window
+    # reading 0 MiB carries it. On live bytes the newest generation answered 0 in every window it
+    # produced, so the counter was buying coverage while the statistic that sets a footprint ceiling
+    # was never observed on the live process. Coverage and information now have separate cells.
+    check(stamp_n >= 12,
+          "census v12 moved the stamp: the footprint block publishes the non-zero/zero split and an "
+          "informative-coverage state word (stamp reads %d)" % stamp_n)
+    check(re.search(r"def footprint_info_text\(", src9) is not None,
+          "the coverage-vs-information verdict is a function, not prose beside the counter")
+    for key in ("go_nonzero", "go_zero", "nogo_nonzero", "nogo_zero", "fp_go_nz", "fp_no_nz"):
+        check(key in src9, "footprint coverage is counted by %s out of the stored column, not "
+                           "inferred from the maximum" % key)
 
     # the coverage guard runs BOTH ways: a gate rule with no derivation, and a derivation with no
     # gate rule, are both published fiction
@@ -1751,6 +1766,72 @@ def main():
               "(rc=%s)" % rc14)
     finally:
         shutil.rmtree(d14, ignore_errors=True)
+
+    # coverage vs INFORMATION in the footprint arming counter (census v12, 2026-11-16, tick 204): a
+    # window that answers `engine_vmswap_mib=0` carries the key and feeds the counter, but it cannot
+    # set a ceiling. Three states, all computed, and a zero draw must STAY in the coverage count —
+    # dropping it would be the opposite bug (an armed rule that never saw the statistic).
+    d15 = tempfile.mkdtemp(prefix="pubcensus-fpinfo-zero-")
+    try:
+        for hh in ("0501", "0502"):
+            path = os.path.join(d15, "preflight-20300101-%s.txt" % hh)
+            write_fixtures(d15, {os.path.basename(path): {"engine_vmswap_mib": "0"}})
+            with_pid_comment(path, "5000")
+        rc15, out15 = run(["--dir", d15, "--no-transition", "--as-of", "20300101-1200"])
+        split = [l for l in out15.splitlines() if "of those launchable draws: non-zero footprint" in l]
+        rsplit = [l for l in out15.splitlines() if "same split on the refused side" in l]
+        state = [l for l in out15.splitlines() if "informative-coverage state" in l]
+        genrow = [l for l in out15.splitlines() if "ever recorded a footprint above 0 MiB" in l]
+        arm = [l for l in out15.splitlines() if "footprint arming counter" in l]
+        check(rc15 == 0 and len(split) == 1 and "0 non-zero / 2 zero" in split[0],
+              "the arming counter prints its coverage split, got rc=%s %r" % (rc15, split[:1]))
+        check(len(rsplit) == 1 and "0 non-zero / 0 zero" in rsplit[0],
+              "the refused side prints its own split instead of inheriting the launchable one: %r"
+              % (rsplit[:1],))
+        check(state and "ALL-ZERO" in state[0] and "> 0 MiB" in state[0],
+              "an all-zero launchable group must not read as a measured ceiling: %r" % (state[:1],))
+        check(genrow and "ZERO-FOOTPRINT GENERATION" in genrow[0],
+              "a newest generation that only ever answers 0 MiB is named as an unexercised failure "
+              "mode: %r" % (genrow[:1],))
+        check(int_cell("\n".join(arm), "footprint arming counter (launchable windows carrying it)")
+              == 2, "the two zero draws still count as coverage — the fix splits cells, it does not "
+                    "delete measurements, got %r" % (arm[:1],))
+    finally:
+        shutil.rmtree(d15, ignore_errors=True)
+    d16 = tempfile.mkdtemp(prefix="pubcensus-fpinfo-dom-")
+    try:
+        for hh, v in (("0601", "0"), ("0602", "0"), ("0603", "9000")):
+            path = os.path.join(d16, "preflight-20300101-%s.txt" % hh)
+            write_fixtures(d16, {os.path.basename(path): {"engine_vmswap_mib": v}})
+            with_pid_comment(path, "6000")
+        rc16, out16 = run(["--dir", d16, "--no-transition", "--as-of", "20300101-1200"])
+        st16 = [l for l in out16.splitlines() if "informative-coverage state" in l]
+        gen16 = [l for l in out16.splitlines() if "ever recorded a footprint above 0 MiB" in l]
+        check(rc16 == 0 and st16 and "ZERO-DRAW-DOMINATED" in st16[0]
+              and "1 informative draw" in st16[0] and "9000 MiB" in st16[0],
+              "a launchable group dominated by zeros states that the ceiling rests on one draw: %r"
+              % (st16[:1],))
+        check(gen16 and "ZERO-FOOTPRINT" not in gen16[0] and "is exercised" in gen16[0],
+              "a generation that HAS swapped somewhere must not carry the unexercised word: %r"
+              % (gen16[:1],))
+    finally:
+        shutil.rmtree(d16, ignore_errors=True)
+    d17 = tempfile.mkdtemp(prefix="pubcensus-fpinfo-inf-")
+    try:
+        for hh, v in (("0701", "0"), ("0702", "9000")):
+            path = os.path.join(d17, "preflight-20300101-%s.txt" % hh)
+            write_fixtures(d17, {os.path.basename(path): {"engine_vmswap_mib": v}})
+            with_pid_comment(path, "7000")
+        rc17, out17 = run(["--dir", d17, "--no-transition", "--as-of", "20300101-1200"])
+        st17 = [l for l in out17.splitlines() if "informative-coverage state" in l]
+        det17 = [l for l in out17.splitlines() if "non-zero footprint draws" in l]
+        check(rc17 == 0 and st17 and "INFORMATIVE" in st17[0]
+              and "ZERO-DRAW" not in st17[0] and "ALL-ZERO" not in st17[0],
+              "half-informative coverage reads INFORMATIVE, not a warning: %r" % (st17[:1],))
+        check(det17 and "non-zero footprint draws 1 of 2 launchable / 0 of 0 refused" in det17[0],
+              "the per-generation detail prints the informative/coverage pair, got %r" % (det17[:1],))
+    finally:
+        shutil.rmtree(d17, ignore_errors=True)
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()

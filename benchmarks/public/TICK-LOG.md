@@ -349,3 +349,73 @@ schedule and stay inert — owner decision, untouched.
 9/0, grok cell rule 9/0, arms index drift 0, derived percents 42 recomputed / 0 findings.
 No leg ran, so `LEG-INCIDENTS.md` is untouched, zero model calls, zero cloud calls, and no
 published percent moved.
+
+## Tick 204 — 2026-11-16 11:50 CET: the footprint arming counter was buying coverage, not information — census v12 prints the non-zero/zero split and names a generation that has never swapped
+
+No leg launched: three-arm parity **49 rows / 9 sets / 0 findings** (contour stamp 0.0.2.56, Grok not
+an arm), the standing pre-push gate `scripts/push_ready.sh` rc=0 with all six pub-gate rows green, and
+the grok resume pin exits 3 by design — **182 ids VOID** under the 2026-11-12 owner cancellation,
+`ifeval` stored 359 rows / 359 ok (sha256-16 `01c1ee0b6e7f6d5d`), pin intact. The queue is empty, so
+this tick spent its budget on the measurement stack instead of manufacturing a leg.
+
+**One new reading, and it is a GO.** `preflight-20261116-1149.txt` (wrapper run bare, gate rc captured
+unshielded): engine pid 438502 state S, sampled pcpu 1.0 %, RSS 54 244 MiB, **VmSwap 0 MiB**, GPU mean
+0.0 % / peak 0 % at 26.84 W, whole-disk read 0.1 MiB/s (top reader `basalt`), swap 65 of 65 535 MiB in
+use with SwapCached 9 MiB, `foreign_legs=0`, `/health` 200 with `health_loaded=true` and one serve
+process → `PREFLIGHT GO`, gate rc 0. Nothing was launched: a GO is available capacity, not a reason to
+spend it, and no in-force set is missing a cell.
+
+**Census to the 11:50 cut** (gate sha16 `dd2f0e4fa0255fa5`, gate bytes unmoved,
+`harness/pub_preflight_test.py` 117/117). Readings in window 168→169; corpus 81 GO / 82 NO-GO / 6 input
+gap; day scope 14→15 readings (5 GO → 6 GO), the day's last GO aged 1 minute and the trailing 24 h
+refusal run is 0. Swap-peak arming 23→24 of 30, footprint arming 14→15 of 30. Day cells recomputed at
+this cut: launchable band 0.00-0.05 x the 20.0 mean ceiling, refusals 1.27-10.69 x (median 6.223 x),
+the rule's own boundary accepted ≤ 0.94 x and refused ≥ 1.27 x, `EMPTY BY CONSTRUCTION`.
+
+**The change (census v12: coverage is not information).** Tick 203 left the sentence "the counter counts
+coverage, not information, and that distinction becomes a real question if the live generation keeps
+reading zeros as the counter approaches 30". It is now a printed cell rather than a warning beside the
+number. The pre-registered arming rule counts launchable windows that CARRY `engine_vmswap_mib`, and a
+window reading 0 MiB carries it — so a ceiling drawn over an all-zero launchable group is `> 0 MiB`, a
+rule armed against a failure mode nobody has observed on that process. Three rows join the footprint
+block (launchable split non-zero / exactly 0, the same split on the refused side, and a computed
+informative-coverage state `INFORMATIVE` / `ZERO-DRAW-DOMINATED` / `ALL-ZERO`), and the generation block
+gains per-generation `non-zero footprint draws N of M launchable / K of L refused` plus a row that asks
+whether the NEWEST sampled generation has ever recorded a footprint above 0 MiB. The zero draws stay in
+the coverage count — they are measurements — they only stop being able to pose as a ceiling.
+
+**What those cells read on live bytes.** Corpus at this cut: 15 launchable footprint draws = 11 non-zero
+/ 4 zero (`INFORMATIVE`), refused side 36 non-zero / 0 zero. The coverage went 14→15 while the
+informative count stayed at 11: the new draw is another zero. Per generation, the retired 175316 is
+informative in every window it produced (day 2 of 2 launchable / 9 of 9 refused; last 24 h 5 of 5 /
+22 of 22) while the live 438502 prints `0 of 4 launchable / 0 of 0 refused` — its four windows (10:07,
+10:35, 11:14, 11:49) all read 0 MiB, including the one taken inside its own GPU-99 %/157 W campaign —
+so the new row states `ZERO-FOOTPRINT GENERATION: the only ceiling this coverage admits is > 0 MiB, so
+arming on it arms a rule whose failure mode this very process has never demonstrated once`, at all three
+scopes. The pooled dry-run ceiling (> 9499 MiB, firing on 0 of 15 launchable and 6 of 36 refused
+windows) stays `GENERATION-STALE` at all three scopes.
+
+**Non-retroactivity, proved rather than asserted.** The v11 bytes were restored inside `scripts/` (the
+tool resolves its gate relative to its own directory) and re-run at the committed cut: its output is
+**byte-identical to the committed table**, which is what licenses the second half — the v12 tool at the
+same `as-of 2026-11-16 11:14` cut differs from those committed bytes by exactly the stamp sentence
+(gate sha16 unchanged), **4 added labels, 0 removed**, and **1 label whose cell gained counters** (the
+generation detail row, appended counters only: every reading count, first/last file name and footprint
+maximum byte-identical). Across the 36 verdict / band / ceiling / arming / counter cells, **0 moved**.
+The restore was sha-verified and the replay file deleted; `git status` names only the four paths of
+this tick.
+
+**Decision.** The arming threshold is untouched (30 launchable windows carrying the key, as
+pre-registered) and no footprint rule is armed or proposed — at 15 of 30 the question is not live. What
+changed is that when the counter does reach 30, the table will already have printed whether those 30
+windows carry a ceiling at all, so arming off a zero-footprint generation can no longer be justified by
+the counter alone. If the live generation keeps reading 0, the decision is `no ceiling from this
+generation`: the count of unexercised windows says nothing about swapping.
+
+**Suites and hygiene.** `harness/pub_preflight_census_test.py` **271/271** green (254 at tick 203; +17
+for the split rows, the three state words over ALL-ZERO / ZERO-DRAW-DOMINATED / INFORMATIVE fixtures,
+and the source-level v12 keys) and its stamp check no longer pins `CENSUS_STAMP = 11` exactly — it
+asserts the floor plus the v12 structure, because an exact-stamp pin goes red on every legitimate shape
+change (tick 197's class). `--check` green against the committed v12 table. `origin/main` unmoved since
+tick 203 (ahead 0 / behind 0), no foreign paths in the tree. No leg ran, so `LEG-INCIDENTS.md` is
+untouched: zero model calls, zero cloud calls, no published percent moved.

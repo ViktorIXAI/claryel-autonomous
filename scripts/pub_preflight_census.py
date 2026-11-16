@@ -217,7 +217,7 @@ DIFF_PRINT_MAX = 400
 # Table-shape stamp. Bumping it must not require typing the "which earlier shapes are preserved"
 # sentence: that sentence is GENERATED from this number (tick 197 found the hand-typed version two
 # stamps short, announcing v7 and v8 shape changes while claiming only v1-v6 are preserved).
-CENSUS_STAMP = 11
+CENSUS_STAMP = 12
 
 
 def census_stamp_name():
@@ -980,6 +980,38 @@ def footprint_sep_text(fp):
         fp["n_go_launchable"], fp["n_nogo"])
 
 
+def footprint_info_text(fp):
+    """Coverage vs INFORMATION in the footprint arming counter (census v12, 2026-11-16, tick 204).
+
+    The pre-registered arming rule counts launchable windows CARRYING `engine_vmswap_mib`. That is a
+    coverage rule, and tick 203 caught it reading as an information rule: the live engine generation
+    answered 0 MiB in every window it produced, so the counter was climbing while the statistic that
+    would actually set the ceiling was not being observed at all. A ceiling drawn from an all-zero
+    launchable group is `> 0 MiB` — a rule armed against a failure mode nobody in the corpus has
+    demonstrated on a launchable window. The cell therefore states which of the two the counter is
+    buying, and refuses to let a zero draw look like a measured ceiling."""
+    n = fp["n_go_launchable"]
+    if n == 0:
+        return ("no denominator — no gate-GO window in this window carries `engine_vmswap_mib`, so "
+                "the launchable side has neither coverage nor information")
+    nz, z = fp["go_nonzero"], fp["go_zero"]
+    if nz == 0:
+        return ("ALL-ZERO — every launchable footprint draw in this window reads exactly 0 MiB (%d "
+                "draw(s)). A zero is a real measurement (that process held no swap in that window), but "
+                "it sets no ceiling: the only value the arming rule allows on this coverage is "
+                "`> 0 MiB`, and the refused side holds %d non-zero draw(s), so arming now would arm a "
+                "rule whose failure mode has never once been observed on a launchable window of this "
+                "corpus" % (n, fp["nogo_nonzero"]))
+    if z > nz:
+        return ("ZERO-DRAW-DOMINATED — %d of the %d launchable draws read exactly 0 MiB and only %d "
+                "carry a non-zero footprint, so the arming counter is mostly coverage: the ceiling it "
+                "will admit is set by %d informative draw(s), highest %s MiB"
+                % (z, n, nz, nz, mib(fp["go_nz_max"])))
+    return ("INFORMATIVE — a non-zero footprint in %d of the %d launchable draws (highest %s MiB), "
+            "exactly 0 MiB in %d; the refused side holds %d non-zero draw(s)"
+            % (nz, n, mib(fp["go_nz_max"]), z, fp["nogo_nonzero"]))
+
+
 def footprint_ceiling_text(fp):
     """The footprint ceiling DRY-RUN as two computed cells: the candidate ceiling with the exact
     windows it would fire on, and the state word. This answers the arming rule's question at every
@@ -1021,6 +1053,19 @@ def footprint(rows):
               if r["cached"] is not None and r["used"] and r["used"] > 0]
     go_vals = [r["vmswap"] for r in launchable]
     nogo_vals = [r["vmswap"] for r in nogo]
+    # Census v12 (2026-11-16, tick 204): a footprint draw of EXACTLY 0 MiB is a real measurement —
+    # that process held no swap in that window — but it carries NO INFORMATION for a ceiling whose
+    # whole job is to refuse a window where the process has swapped gigabytes. Measured on the live
+    # corpus: the engine generation pid 438502 (up 09:59) recorded `engine_vmswap_mib=0` in every
+    # window it produced, including one taken inside its own GPU-99 %/157 W campaign at 10:35, while
+    # the retired generation 175316 held 6 970-10 770 MiB across 15-16 Nov. The arming counter counts
+    # launchable windows CARRYING THE KEY, so it climbs through zeros: armed at 30 such windows the
+    # only ceiling the pre-registered rule allows would be `> 0 MiB`, i.e. a guard whose failure mode
+    # the live process has never demonstrated once. Coverage and information are now separate cells.
+    go_nonzero = [v for v in go_vals if v > 0]
+    go_zero = [v for v in go_vals if v == 0]
+    nogo_nonzero = [v for v in nogo_vals if v > 0]
+    nogo_zero = [v for v in nogo_vals if v == 0]
     # Same rule as the peak band: the separation is COMPUTED from the two groups, never asserted by
     # a fixed sentence. With n=2 per group on the live corpus this classifies nothing yet, and the
     # table has to say so instead of printing two medians side by side and letting a reader draw a
@@ -1067,6 +1112,11 @@ def footprint(rows):
         n_parseable=len(have),
         n_go_launchable=len(launchable),
         n_nogo=len(nogo),
+        go_nonzero=len(go_nonzero),
+        go_zero=len(go_zero),
+        go_nz_max=(max(go_nonzero) if go_nonzero else None),
+        nogo_nonzero=len(nogo_nonzero),
+        nogo_zero=len(nogo_zero),
         go_median=median(go_vals),
         go_max=max(go_vals, default=None),
         go_min=min(go_vals, default=None),
@@ -1519,16 +1569,31 @@ def engine_generation_text(scopes):
                                                first=r["ts"], last=r["ts"],
                                                first_name=r["name"], last_name=r["name"],
                                                fp_go=None, fp_go_name=None,
-                                               fp_no=None, fp_no_name=None))
+                                               fp_no=None, fp_no_name=None,
+                                               fp_key=0, fp_go_n=0, fp_go_nz=0,
+                                               fp_no_n=0, fp_no_nz=0))
             g["n"] += 1
+            if r["vmswap"] is not None:
+                # Census v12: per-generation footprint coverage AND information. A generation that
+                # answers 0 MiB in every window carries the key and demonstrates nothing; a generation
+                # that never carries the key at all carries neither. The two must not print alike.
+                g["fp_key"] += 1
             if r["rc"] == 0:
                 g["go"] += 1
                 if r["vmswap"] is not None and (g["fp_go"] is None or r["vmswap"] > g["fp_go"]):
                     g["fp_go"], g["fp_go_name"] = r["vmswap"], r["name"]
+                if r["vmswap"] is not None:
+                    g["fp_go_n"] += 1
+                    if r["vmswap"] > 0:
+                        g["fp_go_nz"] += 1
             elif r["rc"] == 3:
                 g["nogo"] += 1
                 if r["vmswap"] is not None and (g["fp_no"] is None or r["vmswap"] > g["fp_no"]):
                     g["fp_no"], g["fp_no_name"] = r["vmswap"], r["name"]
+                if r["vmswap"] is not None:
+                    g["fp_no_n"] += 1
+                    if r["vmswap"] > 0:
+                        g["fp_no_nz"] += 1
             else:
                 g["gap"] += 1
             if r["ts"] < g["first"]:
@@ -1557,11 +1622,13 @@ def engine_generation_text(scopes):
         parts = []
         for pid, g in items[:GENERATION_PRINT_MAX]:
             parts.append("pid %s — %d readings (%d GO / %d NO-GO / %d input gap), first %s last %s, "
-                         "footprint max launchable %s / refused %s"
+                         "footprint max launchable %s / refused %s, non-zero footprint draws %d of %d "
+                         "launchable / %d of %d refused"
                          % (pid, g["n"], g["go"], g["nogo"], g["gap"], g["first_name"],
                             g["last_name"],
                             ("%d MiB" % g["fp_go"]) if g["fp_go"] is not None else "no key",
-                            ("%d MiB" % g["fp_no"]) if g["fp_no"] is not None else "no key"))
+                            ("%d MiB" % g["fp_no"]) if g["fp_no"] is not None else "no key",
+                            g["fp_go_nz"], g["fp_go_n"], g["fp_no_nz"], g["fp_no_n"]))
         withheld = len(items) - len(parts)
         txt = "%d generations over %d readings" % (len(items), p["n"] - p["nopid"])
         if withheld > 0:
@@ -1612,6 +1679,44 @@ def engine_generation_text(scopes):
                    p["gens"][b["pid"]]["last_name"]))
     L.append("| the footprint dry-run ceiling's binding value, and the generation that produced it | %s |"
              % cell(stale))
+
+    def neverobs(p):
+        """Has this generation ever demonstrated a non-zero footprint (census v12, tick 204)?
+
+        Tick 203's open question, made mechanical. The arming counter is per-window coverage, so a
+        generation that answers 0 MiB in every window still feeds it; the question a decision needs is
+        not "how many windows carry the key" but "has THIS process ever swapped at all", because a
+        ceiling over an all-zero launchable group is `> 0 MiB` and every refusal it makes would be a
+        first occurrence of an unexercised failure mode."""
+        keyed = {pid: g for pid, g in p["gens"].items() if g["fp_key"]}
+        if not keyed:
+            return ("no denominator — no generation in this scope carries `engine_vmswap_mib` in any "
+                    "window, so none of them has footprint coverage at all")
+        obs = sorted(pid for pid, g in keyed.items() if g["fp_go_nz"] + g["fp_no_nz"] > 0)
+        zero = sorted(pid for pid, g in keyed.items() if g["fp_go_nz"] + g["fp_no_nz"] == 0)
+        txt = ("%d generation(s) carry the footprint key here: %d recorded a footprint above 0 MiB in "
+               "at least one window (%s), %d recorded only zeros in every window it produced (%s)"
+               % (len(keyed), len(obs), ", ".join(obs) or "none",
+                  len(zero), ", ".join(zero) or "none"))
+        if p["newest"] is None:
+            return txt + "; no newest sampled pid to compare with"
+        npid = p["newest"]["pid"]
+        g = keyed.get(npid)
+        if g is None:
+            return (txt + "; the newest sampled pid %s carries no footprint key in this scope → "
+                    "NO FOOTPRINT COVERAGE for the live process" % npid)
+        nz = g["fp_go_nz"] + g["fp_no_nz"]
+        if nz == 0:
+            return (txt + "; the NEWEST generation pid %s (`%s`) carries the key in %d window(s) and "
+                    "answered exactly 0 MiB in every one → ZERO-FOOTPRINT GENERATION: the only ceiling "
+                    "this coverage admits is `> 0 MiB`, so arming on it arms a rule whose failure mode "
+                    "this very process has never demonstrated once"
+                    % (npid, p["newest"]["name"], g["fp_key"]))
+        return (txt + "; the NEWEST generation pid %s records a non-zero footprint in %d of its %d "
+                "footprint window(s), so a ceiling drawn from this generation is exercised"
+                % (npid, nz, g["fp_key"]))
+    L.append("| has the newest sampled engine generation ever recorded a footprint above 0 MiB? | %s |"
+             % cell(neverobs))
     return L
 
 
@@ -1784,6 +1889,14 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
                                             pct(fp["share_max"])))
     L.append("| footprint arming counter (launchable windows carrying it) | %d of %d |" % (
         fp["n_go_launchable"], ARMING_THRESHOLD))
+    L.append("| ...of those launchable draws: non-zero footprint / exactly 0 MiB | %d non-zero / %d "
+             "zero (the counter above counts COVERAGE; a 0 MiB draw says that process held no swap in "
+             "that window, which is a measurement and sets no ceiling) |" % (
+        fp["go_nonzero"], fp["go_zero"]))
+    L.append("| ...the same split on the refused side | %d non-zero / %d zero (the non-zero refused "
+             "draws are the only work a footprint rule could ever be given) |" % (
+        fp["nogo_nonzero"], fp["nogo_zero"]))
+    L.append("| footprint informative-coverage state (computed) | %s |" % footprint_info_text(fp))
     L.append("")
     L.append("The as-of **DAY** rule band (added 2026-11-15, tick 192) — today's verdicts only, every")
     L.append("ratio taken against `SWAP_RATE_MAX_MIB_S = %s` and every number recomputed at this"
@@ -1877,6 +1990,21 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.extend(engine_generation_text([("DAY `%s`" % day, day_rows),
                                      ("last %d h" % window_hours, win_rows),
                                      ("whole corpus", rows)]))
+    L.append("")
+    L.append("**Coverage is not information (census v12, 2026-11-16, tick 204).** The footprint arming")
+    L.append("counter counts launchable windows that CARRY `engine_vmswap_mib`, and a window reading")
+    L.append("`engine_vmswap_mib=0` carries it. Tick 203 caught the consequence on live bytes: the")
+    L.append("generation the endpoint runs now answered 0 MiB in every window it produced — including")
+    L.append("one taken inside its own GPU-99 %/157 W campaign — while the pooled dry-run ceiling still")
+    L.append("bound to a retired process. Arming a footprint rule off that coverage admits exactly one")
+    L.append("value, `> 0 MiB`, i.e. a guard against a failure mode the live process has never")
+    L.append("demonstrated once. The split is now printed rather than argued: the footprint block")
+    L.append("separates non-zero from exactly-zero draws on BOTH sides and states what the counter is")
+    L.append("buying (INFORMATIVE / ZERO-DRAW-DOMINATED / ALL-ZERO), and the generation block reports")
+    L.append("per generation how many of its footprint draws are non-zero and whether the NEWEST")
+    L.append("sampled generation has ever recorded a footprint above 0 MiB (ZERO-FOOTPRINT GENERATION).")
+    L.append("A zero draw is never dropped from the coverage count — it is a real measurement — it just")
+    L.append("stops being able to pose as a ceiling.")
     L.append("")
     L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")
     L.append("over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14")
