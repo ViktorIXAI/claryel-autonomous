@@ -486,3 +486,43 @@ corpus keeps the verdict it was given.
 **Credit:** zero model calls, zero cloud calls, zero discarded files, zero legs affected. One corpus
 fact made explicit, and two published census rows (v11 generation attribution, v13 headroom
 trajectory) exist because of it.
+
+## 2026-11-16 14:00 CET (tick 206) — three 14-byte `404: Not Found` files were still sitting inside the published `benchmarks/public/raw/` namespace of the primary worktree; quarantined with zero credit, no leg touched
+
+This is a residue entry, not a launch entry. Every tick censuses the second worktree
+(`~/projects/strata-autonomous-harness`, the primary worktree of the `main` ref, which the
+publication watchdog and the daily docs job cd into) because a lagging worktree there has twice
+before produced mass staged deletions and silently accumulates **untracked** files that no index
+check sees.
+
+**State read at 13:52 CET.** `git diff --cached --name-only | wc -l` = **0** — the deletion hazard is
+NOT armed. HEAD is detached at `69390e6`, and `git merge-base --is-ancestor 69390e6 main` says **yes,
+ancestor**: `git log --oneline 69390e6..main` = **5 commits**, so that worktree is merely 5 commits
+stale on the shared line, with no orphan work to rescue (the 14.11 patch-id question does not arise
+this tick).
+
+**Untracked census: 9 paths.** Five belong to the fleet workstream (`hardware/os-snapshots/2026-11-10
+… 2026-11-14.json`, newer than the newest tracked snapshot `2026-11-09.json`) plus a modified
+`hardware/os-snapshots/latest.json` — reported, not touched: committing another line's data from the
+benchmark line is forbidden by AGENTS.md and by the two-clones rule.
+
+The other three were inside **this line's** namespace: `benchmarks/public/raw/arceasy-test.jsonl`,
+`benchmarks/public/raw/ifeval-input.jsonl`, `benchmarks/public/raw/x.bin`, all 14 bytes with mtime
+2026-11-08 15:23. They are the same trio already census'd in PUB-PLAN (ticks on 11-10/11-12) and
+already **removed from `main`**: `benchmarks/public/raw/README.md` records their deletion with
+sha256/16 `d5558cd419c8d46b` for each, content `404: Not Found` — an upstream fetch that wrote an HTTP
+error page into the task-file name, so `ifeval-input.jsonl` is NOT an IFEval input and never was. No
+script, plan or launcher in the repo or in the untracked producer references any of the three names
+(grep over `*.py`, `*.md`, `*.sh` and the producer scripts: only the README and PUB-PLAN census
+mentions).
+
+**Decision taken rather than escalated:** quarantined, not deleted. `sha256sum` before the move gave
+`d5558cd419c8d46b` on all three (byte-identical to what the published README pins), all three were
+moved to host scratch `~/.hermes/cache/scratch/sah-worktree-raw-20261116/` and `sha256sum` after the
+move gives the same three hashes and 14 B each. `benchmarks/public/raw/` in that worktree now holds
+exactly the 8 tracked names and `git status --porcelain benchmarks/public/raw` is **empty**, so the
+published namespace no longer carries untracked look-alikes of pinned task bytes. Nothing was removed
+from git, no published byte moved, and the trio stays recoverable.
+
+**Credit:** zero model calls, zero cloud calls, zero legs affected, zero published bytes changed.
+Zero credit for the three files: they are error pages, never scored, never an input to any arm.

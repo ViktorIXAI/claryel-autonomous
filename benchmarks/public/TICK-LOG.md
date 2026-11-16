@@ -624,8 +624,23 @@ runs the census test by glob) and `harness/verify_manifest.py --v6` **VERIFY PAS
 — the standing daily failure because the working tree is dirty during its run, reported not fixed, no
 in-flight work committed to make it green.
 
-**LEG-INCIDENTS.md: nothing to add.** No leg started, no engine restart, no partial file discarded, no
-duplicate launch; the two gate runs above re-judged stored readings and touched no byte.
+**LEG-INCIDENTS.md: no leg entry, one residue entry.** No leg started, no engine restart, no partial
+file discarded, no duplicate launch; the two gate runs above re-judged stored readings and touched no
+byte. One entry was added for untracked residue found in a published namespace (below), which is a
+census finding with zero credit rather than a leg incident.
+
+**Second-worktree census (every tick, because that worktree shares the `main` ref):** staged files
+**0** — the staged-deletion hazard is not armed. HEAD detached at `69390e6` and
+`git merge-base --is-ancestor 69390e6 main` says **ancestor**, `git log --oneline 69390e6..main` =
+**5 commits**: merely stale, no orphan work, so the 14.11 patch-id duplicate question does not arise.
+**9 untracked paths**: five fleet snapshots (`hardware/os-snapshots/2026-11-10…14.json`, newer than
+the newest tracked `2026-11-09.json`) plus a modified `latest.json` — that line's decision, not
+committed from here; and three 14-byte files inside **this** line's published namespace
+(`benchmarks/public/raw/{arceasy-test.jsonl,ifeval-input.jsonl,x.bin}`), all three content
+`404: Not Found`, sha256/16 `d5558cd419c8d46b`, i.e. the exact trio `benchmarks/public/raw/README.md`
+already records as removed from `main` and which no script or launcher references. Quarantined to host
+scratch with the hash proved identical before and after — see the 14:00 CET LEG-INCIDENTS entry, zero
+credit, zero published bytes moved.
 
 Next: the reading-count band is recomputed at every cut, so the only forward-looking number on this
 line now carries the sampling cadence it was divided by. If a future draw prints `BELOW the floor`,
