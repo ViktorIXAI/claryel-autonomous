@@ -540,3 +540,94 @@ Next: the trend row is now recomputed at every cut, so the headroom question sto
 question. If a future draw prints `BELOW the floor`, that is the gate's own `mem-available-low` rule
 refusing, attributed by the v9 rule table in the same run. No new rule was armed and no ceiling
 registered this tick.
+
+## Tick 206 — 2026-11-16 13:37 CET: the headroom projection labelled itself a projection but its second number rested on an unstated uniform-cadence assumption — census v14 puts the sampling interval in the cell
+
+**No leg launched: the queue is empty as arithmetic.** `scripts/pub_three_arm_parity_check.py`
+**49 rows / 9 sets / 0 findings** (contour stamp 0.0.2.56, Grok not an arm), so there is no set whose
+bare row is waiting for a matched contour row. `scripts/pub_grok_resume_check.py --as-of 2026-11-16`
+read unshielded, code captured on the next line: **22 checks, exit 3, `RESUME GATE: NO-GO — do not
+spend quota`**; `ifeval` stored **359 rows / 359 ok** sha256-16 `01c1ee0b6e7f6d5d`, **182 ids never
+asked** and printed as VOID (the owner cancellation, not a queue). `~/pub-bench/GROK-CANCELLED`
+untouched, no window guard re-armed, zero model calls this tick.
+
+**Two stored readings, both gated fresh with the return code captured on the line after the call**
+(the tick-173 rc trap): `preflight-20261116-1305.txt` **rc 0 GO** — `mem_available_mib=4789`,
+`engine_rss_mib=54542`, `engine_state=S`, `swap_used_mib=65`, `engine_pcpu=1.1`,
+`gpu_util_mean_pct=0.0`; `preflight-20261116-1337.txt` **rc 0 GO** — **4729 / 54597 / S / 65 / 1.0 /
+0.0**. The producer wrapper was re-read rather than trusted and still ends `exit "$GATE_RC"`, so its
+return code is the gate's. Window transition 13:05 → 13:37 (stdout evidence only): both windows hold
+**32 readings**, launchable **12 → 13**, one NO-GO aged out (`preflight-20261115-1337.txt`) and one
+GO entered (the 13:37 draw). Corpus **173 readings**.
+
+**A number this line quoted is not in the corpus, and the correction goes in the log rather than
+silently.** A reading time of `13:11` with `MemAvailable 3 717 MiB` was carried forward from the
+compacted notes of the previous run and repeated in chat. There is no `preflight-20261116-1311.txt`,
+and `grep -l mem_available_mib=3717` over all 173 stored readings returns **nothing** — the value
+never existed in any file. The two real readings are the 13:05 and 13:37 draws above. Same class as
+tick 205's phantom `gpqa-diamond` codex leg: a figure that survives context compaction stops being
+re-derived, and this line's own rule (every statistic is COMPUTED by the reporter at every run, prose
+may only quote the printed cell) applies to numbers quoted from notes as much as to numbers in a
+table.
+
+**The census finding of this tick: the projection's second number had an undeclared denominator.**
+The headroom trend row v13 prints at this cut is correct in its first half and unsound in its second:
+the newest engine generation (pid 438502) fell **1 889 MiB over 210 min = −539.7 MiB/h** across 8
+consecutive decreasing draws (`preflight-20261116-1007.txt` → `preflight-20261116-1337.txt`), and the
+gate's own `mem-available-low` floor of **2 048 MiB** sits **≈298 min** past the newest draw at that
+slope. v13 then divided 298 by the run's **mean cadence 30.0 min** and printed **`about 9 further
+readings`**. The mean is not the run: the seven intervals behind it are **28, 39, 35, 51, 9, 16 and
+32 min** — a **5.7x** spread containing a 9-minute gap, because these draws are taken by ticks and
+reports, not by a scheduler. The same 298 minutes is **5 readings** at this run's slowest interval and
+**33 at its fastest**, so `9` was not a conservative bound, it was an assumption about how often the
+producer runs. That is the producer rule already written on this line — *divide by a MEASURED window,
+never a nominal count* (the 6 s loop that measured 6.17 s, tick 14.11) — arriving one level further
+down, inside a cell that had the honesty to label itself a projection.
+
+**Census v14.** The minutes stay the primary quantity; the reading count is printed as the band the
+run's own intervals support, with its denominator in the cell: `in READINGS 5-33 further draws,
+because the run's own intervals span 9-51 min (7 interval(s), 9-51 min, mean 30.0), a 5.7x spread:
+v13 divided the minutes by that mean alone and printed the single number 9, which this run's interval
+range refutes by 5.7x`. It collapses to one count only when the intervals are uniform within
+`MEM_INTERVAL_FLAT_RATIO = 1.5` (then `≈9 further draws, a single count being admissible at this
+cadence (7 interval(s), 30-30 min, mean 30.0)`), and prints **no count at all** when no positive
+interval exists — two draws sharing a timestamp must never reach a denominator. The cell also names
+the old number instead of replacing it, so the published history stays citable. **Nothing armed, no
+threshold touched, no ceiling registered**: the floor is the gate's own `MEM_AVAILABLE_MIN_MIB =
+2048`, the 13:37 draw sits at 4 729 MiB = 2.31x above it, and the row is still a projection, not a
+forecast — one generation, n=8.
+
+**Reporter-only proof by replay, at the SAME cut, parsed as (label → value) pairs and not as lines.**
+Old bytes (`git show HEAD:scripts/pub_preflight_census.py`, `CENSUS_STAMP = 13`) and new bytes
+(`CENSUS_STAMP = 14`) run side by side over all 173 readings at `--as-of 20261116-1337
+--no-transition`: **110 table rows in both, 0 rows removed, 0 rows added, exactly 1 cell moved** — the
+headroom trend row — plus the stamp sentence and one new prose block. Gate sha16 `dd2f0e4fa0255fa5`
+printed identical in both runs (the gate was not touched). The committed table is now the v14 tool's
+own output at the 13:37 window and `pub_preflight_census.py --check` re-derives it with **0 diff
+lines, rc 0**.
+
+**Gates on this head.** `harness/pub_preflight_census_test.py` **308/308 green** (was 297: 7 new
+checks, the band pair being non-vacuity twins — the same eight values at a uniform 30 min cadence
+must collapse to `≈9` and must NOT print a band, so the band is provably arithmetic over the cadence
+and not a template; plus the printed denominator, the named old number, a direct pin of
+`_positive_intervals` dropping zero and negative gaps so the fail-closed branch is not decorative, and
+two structural pins that v13's mean-only phrasing cannot come back). `harness/pub_preflight_test.py`
+**117/117**. Five pub publication gates unshielded: `pub_arms_index --check` (index drift 0),
+`pub_derived_percent_check` (42 recomputed from shipped bytes, 0 findings), `pub_grok_cell_check` (9
+documents, 0 findings), `pub_superseded_cell_check` (9 documents, 0 findings), `pub_digest_row_check`
+(49 rows, 0 findings) — all **rc 0**. `scripts/qa/static_checks.py` **rc 0** (the local CI-parity loop
+runs the census test by glob) and `harness/verify_manifest.py --v6` **VERIFY PASS**.
+`scripts/security/secret_scan.py --dir . --strict` re-run after the commit, unshielded.
+
+**Cron state read from the job table, not assumed:** `PUB benchmark loop 30m` last **ok** 13:06,
+`sah-publication-watchdog` last **ok** 11:13, `GitHub docs freshness daily` last **error** at 03:00:40
+— the standing daily failure because the working tree is dirty during its run, reported not fixed, no
+in-flight work committed to make it green.
+
+**LEG-INCIDENTS.md: nothing to add.** No leg started, no engine restart, no partial file discarded, no
+duplicate launch; the two gate runs above re-judged stored readings and touched no byte.
+
+Next: the reading-count band is recomputed at every cut, so the only forward-looking number on this
+line now carries the sampling cadence it was divided by. If a future draw prints `BELOW the floor`,
+that is the gate's own `mem-available-low` rule refusing, attributed by the v9 rule table in the same
+run. The queue stays empty until a new ladder item is pre-registered.

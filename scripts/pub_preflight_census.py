@@ -217,7 +217,7 @@ DIFF_PRINT_MAX = 400
 # Table-shape stamp. Bumping it must not require typing the "which earlier shapes are preserved"
 # sentence: that sentence is GENERATED from this number (tick 197 found the hand-typed version two
 # stamps short, announcing v7 and v8 shape changes while claiming only v1-v6 are preserved).
-CENSUS_STAMP = 13
+CENSUS_STAMP = 14
 
 
 def census_stamp_name():
@@ -1771,6 +1771,29 @@ MEM_PROJECTION_MIN_DRAWS = 3       # a straight line through two points is not a
 MEM_GEN_PRINT = 3                  # generations printed per scope: the NEWEST ones, because a
                                    # trajectory row exists to say what happens next, and the whole-
                                    # corpus scope would otherwise print 15 of them
+MEM_INTERVAL_FLAT_RATIO = 1.5      # widest/narrowest interval inside a monotone run at or below
+                                   # which the reading-count projection collapses to ONE number
+                                   # (census v14). Above it the cell prints the band the intervals
+                                   # actually support, because a reading count derived from a mean
+                                   # cadence is only a count when the cadence is the one observed.
+
+
+def _positive_intervals(rows):
+    """Consecutive timestamp gaps in MINUTES, oldest-first, dropping any gap <= 0.
+
+    A census that converts a projected time into "how many more readings until X" is dividing by
+    the sampling cadence, so the cadence needs the same treatment as every other rate on this
+    line: a measured window, never a nominal one. Rows sharing a timestamp (two producers reading
+    the same minute, or a fixture with one name) contribute a zero gap, which must never reach a
+    denominator, so they are dropped rather than averaged in. No positive gap at all is reported
+    as an empty list and the caller prints no reading count (fail closed).
+    """
+    out = []
+    for prev, cur in zip(rows, rows[1:]):
+        gap = (cur["ts"] - prev["ts"]).total_seconds() / 60.0
+        if gap > 0:
+            out.append(gap)
+    return out
 
 
 def _monotone_tail(rows, key):
@@ -1985,9 +2008,41 @@ def memory_headroom_text(scopes, consts):
         if last <= floor:
             return base + "; the newest draw already sits at or below the floor"
         mins = (last - floor) * 60.0 / per_h
+        # Census v14 (2026-11-16, tick 206): a projection that converts MINUTES into READINGS
+        # through the run's MEAN cadence owes that cadence a denominator. Measured at the
+        # 2026-11-16 13:37 cut: the newest generation's monotone fall spans 210 min with
+        # intervals 28, 39, 35, 51, 9, 16 and 32 min (a 5.7x spread), and v13 printed
+        # "about 9 further readings" from 298.0 min / 30.0 min mean. The same 298 minutes are
+        # 33 readings at this run's fastest observed interval and 5 at its slowest, so the
+        # single number was not a conservative estimate, it was an unstated assumption —
+        # tick 196's missing denominator, now inside a cell that already labels itself a
+        # projection. The minutes stay the primary quantity (a rate, divided by a measured
+        # window); the reading count becomes a band over the run's OWN intervals, with the
+        # interval denominator printed, and collapses to one number only when the intervals
+        # are uniform. A run whose draws share timestamps has no measured interval at all and
+        # prints no reading count (fail closed, never a division by zero and never a guess).
+        gaps = _positive_intervals(run)
+        if not gaps:
+            return (base + "; PROJECTION (not a promise, one generation, n=%d): at that constant "
+                    "slope the gate's own %s MiB floor arrives ≈%.0f min after `%s`; NO reading "
+                    "count — the monotone draws share timestamps, so no measured interval exists "
+                    "to convert minutes into readings"
+                    % (len(run), mib(floor), mins, run[-1]["name"]))
+        lo, hi = min(gaps), max(gaps)
+        denom = ("%d interval(s), %.0f-%.0f min, mean %.1f" % (len(gaps), lo, hi, cadence))
+        if hi <= lo * MEM_INTERVAL_FLAT_RATIO:
+            tail = ("in READINGS ≈%d further draws, a single count being admissible at this "
+                    "cadence (%s)" % (int(mins // lo), denom))
+        else:
+            tail = ("in READINGS %d-%d further draws, because the run's own intervals span "
+                    "%.0f-%.0f min (%s), a %.1fx spread: v13 divided the minutes by that mean "
+                    "alone and printed the single number %d, which this run's interval range "
+                    "refutes by %.1fx"
+                    % (int(mins // hi), int(mins // lo), lo, hi, denom, hi / lo,
+                       int(mins // cadence), hi / lo))
         return (base + "; PROJECTION (not a promise, one generation, n=%d): at that constant slope "
-                "the gate's own %s MiB floor arrives ≈%.0f min after `%s`, about %d further readings"
-                % (len(run), mib(floor), mins, run[-1]["name"], int(mins // cadence)))
+                "the gate's own %s MiB floor arrives ≈%.0f min after `%s`; %s"
+                % (len(run), mib(floor), mins, run[-1]["name"], tail))
     L.append("| headroom trend of the newest generation, and what it projects against that floor | %s |"
              % cell(trend))
 
@@ -2088,7 +2143,20 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
     L.append("Census stamp: `%s`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v10 derives the engine-state-D refusal set from the "
+             "(%d readings inside the window). v14 gives the READINGS half of the headroom "
+             "projection its cadence denominator: v13 converted a projected number of MINUTES into "
+             "a number of READINGS by dividing by the monotone run's MEAN cadence and printed one "
+             "integer, while the intervals inside that same run were 28, 39, 35, 51, 9, 16 and 32 "
+             "min (a 5.7x spread), so at the 2026-11-16 13:37 cut its `about 9 further readings` was "
+             "one value drawn from a 5-33 range — the projection was labelled a projection, but its "
+             "second number rested on an unstated uniform-cadence assumption, which is the producer "
+             "rule 'divide by a measured window, never a nominal count' arriving one level further "
+             "down. v14 keeps the minutes primary (rate over a measured span), prints the reading "
+             "count as the band the run's own intervals support, names that denominator in the cell "
+             "(interval count, min-max, mean), collapses to a single count only when the intervals "
+             "are uniform within `MEM_INTERVAL_FLAT_RATIO`, and prints NO reading count when no "
+             "positive interval exists, because two draws sharing a timestamp must never reach a "
+             "denominator. v10 derives the engine-state-D refusal set from the "
              "readings' own `engine_state` key and requires it to equal the set the gate's reason line "
              "names, at all three scopes, and prints how many state-D refusals sat on a device the "
              "device rule calls quiet, with the denominator of state-D refusals that carry a device "
@@ -2369,6 +2437,29 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
                                    ("last %d h" % window_hours, win_rows),
                                    ("whole corpus", rows)], consts))
     L.append("")
+    L.append("**A projection that counts READINGS has a sampling cadence in its denominator (census "
+             "v14, 2026-11-16, tick 206).** The trend row above answers two different questions and "
+             "v13 answered the second one badly. `≈298 min after the newest draw` is a rate over a "
+             "measured span and is quotable. `about 9 further readings` is that same quantity "
+             "divided by a CADENCE, and v13 used the run's mean cadence without naming it. At the "
+             "2026-11-16 13:37 cut the newest generation's monotone fall spans 210 min over 8 draws, "
+             "so the mean cadence is 30.0 min — and the intervals behind that mean are 28, 39, 35, "
+             "51, 9, 16 and 32 min, a 5.7x spread with a 9-minute interval inside it, because these "
+             "readings are taken by ticks and reports, not by a scheduler. The projected 298 minutes "
+             "is therefore 5 readings at the run's slowest interval and 33 at its fastest, and v13's "
+             "printed `9` was neither bound: it was the mean assumption wearing the costume of a "
+             "measurement. This is the same defect the producer rules already forbid one level up "
+             "(MiB/s computed over a nominal 6 s loop instead of the measured 6.17 s, tick 14.11) and "
+             "the same one the band rows were corrected for twice (scope, then denominator): a rate "
+             "or a conversion may only be quoted with the window it was divided by. The row now "
+             "prints the interval count, the min-max range and the mean beside the count, states the "
+             "count as a band whenever the intervals are not uniform within "
+             "`MEM_INTERVAL_FLAT_RATIO` = %s, and prints NO count at all when the monotone draws "
+             "share timestamps — a zero interval must never reach a denominator. Nothing in the gate "
+             "moved: the projection describes when the gate's own `mem-available-low` floor would be "
+             "reached at the observed slope, and the floor, the ceiling set and the rule order are "
+             "byte-identical to the run that produced every stored verdict in this table."
+             % (MEM_INTERVAL_FLAT_RATIO,))
     L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")
     L.append("over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14")
     L.append("21:31-21:38, three back-to-back 5 s windows on the endpoint box took 320 MiB / 0 / 0 of")

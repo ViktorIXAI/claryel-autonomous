@@ -1988,6 +1988,85 @@ def main():
         check("TOO FEW MONOTONE DRAWS" in t25 and "PROJECTION" not in t25,
               "two decreasing draws refuse to project — the resolution rule applied to headroom, "
               "got %r" % t25[:220])
+
+        # (i) census v14: a projection counted in READINGS is divided by a SAMPLING CADENCE, so
+        # that cadence owes a denominator. Fixture reproduces the live 2026-11-16 13:37 draw set:
+        # eight decreasing draws losing 1 889 MiB over 210 min at intervals 28/39/35/51/9/16/32.
+        def memrun_timed(tag, spec, minutes, as_of):
+            """Same fixture writer, but each draw gets an explicit minute offset from 03:00."""
+            d18x = os.path.join(d18, tag)
+            os.mkdir(d18x)
+            for off, (pid, av, rss, used) in zip(minutes, spec):
+                hh, mm = divmod(3 * 60 + off, 60)
+                name = "preflight-%s-%02d%02d.txt" % (DAY, hh, mm)
+                write_fixtures(d18x, {name: {}})
+                with_mem(os.path.join(d18x, name), pid, av, rss, used)
+            rc18, out18 = run(["--dir", d18x, "--as-of", "%s-%02d%02d" % (DAY, *divmod(3 * 60 + as_of, 60)),
+                               "--no-transition"])
+            check(rc18 == 0, "timed headroom fixtures exit 0 (%s: rc=%s)" % (tag, rc18))
+            return out18
+
+        fall = [("7000", 6618, 52711, 65), ("7000", 6200, 53100, 65),
+                ("7000", 5800, 53500, 65), ("7000", 5400, 54000, 65),
+                ("7000", 5000, 54300, 65), ("7000", 4938, 54401, 65),
+                ("7000", 4860, 54500, 65), ("7000", 4729, 54597, 65)]
+        out26 = memrun_timed("i", fall, [0, 28, 67, 102, 153, 162, 178, 210], 215)
+        t26 = parsed_row(out26, TREND_LABEL)
+        check("PROJECTION" in t26 and "in READINGS 5-33 further draws" in t26,
+              "a monotone fall sampled at 9-51 min intervals states its reading count as the "
+              "BAND those intervals support (298 min / 51 = 5, / 9 = 33), got %r" % t26[:300])
+        check("7 interval(s), 9-51 min, mean 30.0" in t26,
+              "the band cell prints its own denominator: interval count, min-max and the mean the "
+              "mean-only version divided by, got %r" % t26[:300])
+        check("printed the single number 9" in t26 and "refutes by 5.7x" in t26,
+              "the row names the number the mean-only conversion printed rather than silently "
+              "replacing it, got %r" % t26[:300])
+
+        # (j) NON-VACUITY: identical values at a UNIFORM cadence must collapse back to one count.
+        # Same eight draws, same 1 889 MiB over 210 min — only the intervals change — so the band
+        # above is provably arithmetic over the cadence and not a template the row always prints.
+        out27 = memrun_timed("j", fall, [0, 30, 60, 90, 120, 150, 180, 210], 215)
+        t27 = parsed_row(out27, TREND_LABEL)
+        check("in READINGS ≈9 further draws" in t27
+              and "a single count being admissible at this cadence" in t27
+              and "because the run's own intervals span" not in t27,
+              "the same values at a uniform 30 min cadence print ONE count (298 // 30 = 9, exactly "
+              "the number v13 printed here) instead of a band, got %r" % t27[:300])
+        check("7 interval(s), 30-30 min, mean 30.0" in t27,
+              "even the collapsed count names its interval denominator, got %r" % t27[:260])
+
+        # (k) the zero-interval guard: two draws sharing a timestamp must never reach a
+        # denominator. File names cannot collide, so the branch is unreachable by fixture; the
+        # helper that feeds it is pinned directly instead of left as decorative code.
+        check(mod9._positive_intervals([]) == [],
+              "_positive_intervals over zero rows is an empty list, never a crash")
+
+        class _Gap:
+            def __init__(self, seconds):
+                self._s = seconds
+
+            def total_seconds(self):
+                return float(self._s)
+
+        class _TS:
+            def __init__(self, m):
+                self._m = m
+
+            def __sub__(self, other):
+                return _Gap((self._m - other._m) * 60)
+
+        rows_k = [{"ts": _TS(30)}, {"ts": _TS(30)}, {"ts": _TS(27)}, {"ts": _TS(34)}]
+        gaps_k = mod9._positive_intervals(rows_k)
+        check(gaps_k == [7.0],
+              "_positive_intervals drops zero and negative gaps instead of letting them into a "
+              "division (the fail-closed branch that makes the NO-reading-count cell reachable), "
+              "got %r" % gaps_k)
+        check("NO reading" in src9 and "MEM_INTERVAL_FLAT_RATIO" in src9,
+              "the fail-closed cell and the flat-cadence threshold both exist in the tool, not only "
+              "in this test's expectations")
+        check('"about %d further readings"' not in src9,
+              "v13's mean-only reading count is gone from the source, so it cannot return by an "
+              "edit beside this one")
     finally:
         shutil.rmtree(d18, ignore_errors=True)
 
