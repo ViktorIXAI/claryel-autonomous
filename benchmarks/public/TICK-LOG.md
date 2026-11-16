@@ -958,3 +958,142 @@ counter remains the only unarmed one (24 of a 30 threshold, 6 short, 11 non-zero
 launchable side). Honest note for whoever next touches either counter: the live generation cannot
 re-arm the peak counter by itself — every launchable draw of pid 438502 reads exactly 0.0 MiB/s — so
 any future arming decision must be taken on the coverage split, never on the threshold count again.
+
+## Tick 210 — 2026-11-16 17:03 CET: a GO that reset the streak and fed both arming counters with zero draws — and the memory-floor clock moved 44 minutes OUTWARD in one tick without a single MiB of headroom coming back, because the slope itself was re-derived
+
+**Queue check first.** `systemctl --user list-units 'parb-pub-*' --no-legend` empty,
+`pgrep -f 'scripts/pub_bench_(run|cloud).py'` 0 hits. Nothing launched, nothing resumed: the
+queue is mechanically empty (every in-force set carries bare / contour-0.0.2.56 matched-shape /
+codex rows, three-arm parity census 0 findings), `~/pub-bench/GROK-CANCELLED` untouched (121 B
+marker), no grok transport. A new set is an owner decision, not a tick decision.
+
+**One standing producer reading: `preflight-20261116-1703.txt` -> GO.** The wrapper
+`preflight.sh` was run **bare** (never wrapped in a redirect) and propagated the verdict itself,
+exit 0. Every rate rule idle in the same 6 s window: swap **0.0 in + 0.0 out = 0.0 MiB/s** mean
+with in-window **peak 0.0**, whole-disk reads **0.1** (largest attributed reader `basalt`), GPU
+mean **0.0 %** / peak **0 %** at one sample **26.77 W**, engine state **S** at sampled pcpu
+**1.0**, RSS **55 587** MiB, MemAvailable **3 745** of 61 953, SwapFree **65 470** of 65 535
+(65 MiB of swap in use, 11 of it SwapCached), load1 **7.83**, `/health` **200** + `loaded`,
+`engine_serve_procs 1`, `foreign_legs 0`. Engine continuity from the producer's own pid line,
+no extra ssh: pid **438502**, age **07:03:54** — the same process ticks 207-209 recorded — and
+the build identity from the same `/health` body, **`b4d6a41750d9eafd`** advertising ctx
+**196 608**. The census day rows now read that pid at **14 GO / 0 NO-GO / 0 input gap** — the
+live process has never been refused — and the build row names **5** identity-bearing readings,
+**5 GO / 0 NO-GO**, span 15:29 -> 17:03; the pid<->build anomaly row still prints none.
+
+**The streak, with its scope word.** Readings since the last gate-GO: **0** — the last GO is
+this reading (`preflight-20261116-1703.txt`, 0 min before as-of). The longest consecutive NO-GO
+run inside the day stays **5**. Day table at the 25th reading: **16 GO / 9 NO-GO / 0 gap**.
+
+**Census (`pub-preflight-census-v16`, gate sha16 unchanged `624d0d3cc50718c2` — no tool byte,
+no gate byte moved this tick, re-hashed at this tick).** Window **as-of 2026-11-16 17:03**:
+**179 readings = 91 GO / 82 NO-GO / 6 input gaps**; day **24 -> 25 (16 GO / 9 NO-GO)**;
+launchable-in-24 h **18 -> 19**, the transition line reading `+1 entering GO − 0 aged-out GO`
+with this reading the only new file in the span — it also answers for the 16:32 PUB-loop
+dispatch, which took no reading and committed nothing (HEAD unchanged since tick 209).
+`--check` on the committed bytes exits **0** (the table is byte-exact at this cut). The pinned
+pair was re-run on untouched files: `harness/pub_preflight_census_test.py` **350/350**,
+`harness/pub_preflight_test.py` **129/129** — the expected numbers for a tick that moves no
+rule, and both quoted from fresh runs, not from the previous tick's memory.
+
+**Both arming counters moved +1 and both moved on zero draws.** Peak: **34 launchable windows
+carry the statistic** (threshold MET, first reached at `preflight-20261116-1529.txt`), and the
+coverage split row now reads **13 non-zero / 21 zero** on the launchable side —
+**ZERO-DRAW-DOMINATED**, this window's peak draw being 0.0 MiB/s. The arming DECISION row is
+unchanged as a verdict and re-computed as a number: **INERT ON THIS WINDOW** — **38** stored
+refusals carry a peak above the highest launchable draw (111.4 MiB/s) and all 38 are already
+refused by the swap-mean rule, so a ceiling at the minimum admissible point adds **0** refusals.
+Footprint: **25 launchable windows carry the key, 5 short of 30 — NOT MET**, split **11
+non-zero / 14 zero**, again **ZERO-DRAW-DOMINATED** (the entering draw reads VmSwap **0 MiB**).
+The dry-run row still fires the `> 9 499 MiB` ceiling on **0 of 25** launchable and **6 of 36**
+refused windows (state **FIRING-AT-MINIMUM-CEILING**), while the binding-value row keeps that
+9 499 MiB **GENERATION-STALE** (pid 175316, last sampled 07:19) and the generation block keeps
+the live process a **ZERO-FOOTPRINT GENERATION**. Tick 209's warning is now arithmetic instead
+of prose: the footprint threshold is exactly 5 live GO draws away, and each of those draws will
+carry the statistic without ever having seen the failure mode — the informative set stays 11
+draws, all of them retired pids.
+
+**The moving number of the day is memory, and its clock moved ≈44 min outward with no headroom
+returned.** Tick 209's published cell put 13 decreasing draws at **−443.5 MiB/h** and the floor
+at ≈245 min after 16:20 (≈20:25). At this cut the run is **14 consecutive decreasing draws**
+(`preflight-20261116-1007.txt -> preflight-20261116-1703.txt`), **2 873 MiB lost over 416 min =
+−414.4 MiB/h**, MemAvailable **3 745 MiB** — **1 697 MiB** above the gate's own 2 048 MiB floor
+(that difference is this tick's subtraction from two printed cells, labelled as such) — and the
+printed projection puts the floor at **≈246 min after 17:03 (≈21:09)**, in **4-35 further
+draws**, because the run's own 13 intervals span 7-61 min at mean 32.0 (8.7x spread, census
+v14's denominator rule). The clock moved out while the number moved down: the added draw
+(3 861 -> 3 745 MiB over 43 min ≈ −162 MiB/h) is slower than the run's mean, and at n=14 it
+drags the mean slope down by 29 MiB/h. That is what "PROJECTION (not a promise, one generation,
+n=14)" means in this cell — the honest content is that the floor is approached monotonically and
+the ETA is re-derived at every cut, not that ≈21:09 is a time anyone may act on. The attribution
+row pins who eats it: engine RSS **+2 876 MiB** against a headroom fall of **2 873 MiB** over
+the same 416 min — **ATTRIBUTED TO THE SAMPLED ENGINE**, residual 3 MiB — while swap in use sat
+at **65 -> 65 MiB** the whole run. The live process is spending headroom on residency, not on
+swapping; the 10 GiB-swap-out failure mode belongs to the retired generation, and the live one
+has answered footprint **0 MiB in 14 of 14** windows. Nothing is queued to launch, so the clock
+costs nothing today; a leg window after ≈21:00 would be re-checked against the floor with a
+fresh reading, never assumed.
+
+**The day-band cells at this cut, quoted with scope words and denominators.** 16 day launchable
+swap draws, band **0.00-0.05 x** the 20.0 ceiling; **8** day swap-rule refusals, band
+**1.27-10.69 x**, refusal median **6.223 x recomputed at this cut**; the rule's own decision
+boundary accepted up to **0.94 x**, refused from **1.27 x**, **EMPTY BY CONSTRUCTION** (0 judged
+draws inside); the verdict-scoped launchable-column gap **0.05-1.27 x POPULATED (1 window
+inside)** — still the 02:14 draw the swap rule accepted while other rules refused. Band
+denominators as printed: day 25 of 25 bandable, last 24 h 35 of 35, whole corpus 87 of 179.
+
+**No historical verdict moved, and this time no replay proof is owed:** the gate bytes and the
+census-tool bytes are untouched (`git diff` names exactly two tracked files, the generated table
+and this log), the census `--check` at the new cut is byte-exact, and the table moved only
+because a real reading entered the window.
+
+**Gates on this head.** `scripts/push_ready.sh` **rc 0**, `pub gate rows: 6`, each row with its
+own status 0: manifest `VERIFY PASS` (id `05efb4b1dd703597`, unchanged), links **155 across 345
+markdown files**, docs `DOCS POLICY: PASS (push)`, gitleaks **status 0**, infra-sec
+`"total_findings": 0`, arms index **drift 0**, derived percents **42 recomputed / 0 findings**,
+grok cells **9 / 0**, superseded cells **9 / 0**, digest rows **49 / 0**, three-arm parity
+**49 / 9 / 0**. `scripts/security/secret_scan.py --dir . --strict` **0 findings**, and a targeted
+re-grep of the added census lines for host label / LAN IP / local-path / key-path patterns
+returned **zero**. The wider PUB contract suite was not re-run and that is stated, not silent:
+no gate, scorer, bank or contour byte moved this tick, and CI's `static-qa` re-runs the pinned
+tests by glob on the pushed commit regardless.
+
+**Credit.** **Zero model calls, zero cloud calls, zero GPU seconds, zero discarded arm bytes,
+no leg started or stopped**, hence **no `LEG-INCIDENTS.md` entry owed** (no leg restart, no
+duplicate leg, no engine restart mid-leg, no discarded partial file). Against the endpoint: one
+read-only producer reading with its own sampler, `/proc` and GPU windows — nothing written on the
+box, engine untouched, pid unchanged. Plus the census regen and this block. **No published
+benchmark percent moved, none needed to.**
+
+**Machine state.** `jobs.json`: **36 jobs, 6 disabled** (the same six as ticks 208-209), **0 with
+a non-null `paused_reason`** — nothing for the drain-resumer to self-heal (`9a12508f8a69` ok
+17:00). Frozen-line watchers `f23cf5d48e11` / `a808c7f205a6` still fire every 5 min (ok **16:59**
+/ **17:00**) and remain inert only behind the launch-state marker; closing them stays an
+**owner decision**. This job `288a66f93167` is the only `running` row in `executions.db`
+(started 17:02:37). Docs freshness: **the brief's daily dirty-tree error reproduced again** —
+`ef7ea47ff99b` `last_status = error` at **03:00:40** today, detail `repo is dirty; refusing daily
+docs refresh · M scripts/pub_preflight_census.py` (tick 209's in-flight census edit at the
+moment its run took the tree state), exactly the brief's condition; reported per the brief, not
+silenced by committing in-flight work; next run 2026-11-17 02:00 UTC. CI on tick 209's commit
+`0a3c412` read green across the board this tick: `secret-scan`, `contour self-tests`,
+`hard-v6 scoring contracts`, `devsecops`. `origin/main` **equals** HEAD at check time — no
+sibling writer since tick 209 — so this push is a plain fast-forward. Second worktree
+(`~/projects/strata-autonomous-harness`) **40th tick**: detached at `69390e6`, which
+`merge-base --is-ancestor` confirms is an **ancestor** of `main` (stale on the shared line, no
+orphan work, no staged deletions — `git diff --cached` empty); `git status --porcelain` exactly
+**7 paths** = 1 modified (`hardware/os-snapshots/latest.json`) + 6 untracked fleet OS snapshots
+(2026-11-11 … 2026-11-16). The three `benchmarks/public/raw/` error-page files tick 206
+quarantined have **not reappeared**: that published namespace is clean in that worktree too. The
+fleet-snapshot custody gap is still the ops line's call, and **no foreign path is committed** by
+this line.
+
+**Next.** The queue stays mechanically empty (owner decision): every in-force set carries all
+three admissible arms, the grok legs are closed by the owner quota decision of 2026-11-12 and
+not resumed, and SimpleBench stays closed as unpinnable. Standing leftovers unchanged: issues
+#42/#44, the LCB hidden-battery release asset, the still-firing frozen-line watchers, and the
+ops line's calls (fleet-snapshot custody, the masked doc's serial/MAC prose).
+
+One line for the next tick: **quote the memory cell at the cut, never carry the clock** — the
+floor ETA moved 44 minutes in one tick without any headroom coming back (slope −443.5 ->
+−414.4 MiB/h at n=14), and the footprint threshold is now 5 live-GO draws away from a second
+counter crossing bought entirely by zero draws (informative set frozen at 11, all retired pids).
