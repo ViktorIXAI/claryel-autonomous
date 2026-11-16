@@ -90,6 +90,13 @@ What it pins:
       footprint key exists, and two non-vacuity controls — a refusal moved INTO the dead zone flips
       EMPTY -> POPULATED, and a GO draw moved above the ceiling moves the median 8.000 -> 4.750 and
       erases the dead-zone bounds.
+  17. the engine BUILD axis (census v15, 2026-11-16, tick 208): the pid comment names a PROCESS and
+      only the /health body hash names the BUILD; on 2026-11-16 the axes disagreed (nine refusals on
+      a retired pid, zero on the live one) and the 09:59 build swap left no byte in 174 readings.
+      Pinned: the pair/one-sided/malformed/unrecorded coverage split, per-build verdict mix with ctx
+      and pid sets, the newest-reading pid<->build crosswalk, both anomaly directions NAMED, a
+      malformed hash reaching NO build row, and an identity-free corpus printing NO build
+      denominator (its five readings' verdicts moved by nothing — non-retroactivity).
 """
 import difflib
 import importlib.util
@@ -2069,6 +2076,102 @@ def main():
               "edit beside this one")
     finally:
         shutil.rmtree(d18, ignore_errors=True)
+
+    # v15 (tick 208, 2026-11-16): the engine BUILD axis. The pid comment names a PROCESS; only the
+    # /health body hash names the BUILD, and on 2026-11-16 the two axes disagreed over a whole day
+    # (all nine refusals on retired pid 175316, live pid 438502 with nine GOs and zero refusals),
+    # while the 09:59 restart that also swapped the build (ctx 262 144 -> 196 608) left no byte in
+    # any of the 174 stored readings. Pinned here: the coverage split (valid pair / one-sided /
+    # malformed / unrecorded — a malformed value never lends its hash to a build row), per-build
+    # verdict mix + span + pid set, the newest-reading pid<->build crosswalk, and both anomaly
+    # cells. Non-retroactivity is pinned by the MAIN fixture run above: those five readings carry
+    # no identity key at all and their GO/NO-GO/input-gap counts did not move.
+    SHA_A = "a1b2c3d4e5f60718"
+    SHA_B = "0f1e2d3c4b5a6978"
+    d19 = tempfile.mkdtemp()
+    try:
+        def bfile(name, pid, over, idk):
+            vals = dict(HEALTHY)
+            vals.update(over)
+            with open(os.path.join(d19, name), "w", encoding="utf-8") as fh:
+                fh.write("# engine pid=%d age=10s pcpu=sampled-delta 6s serve_procs=1\n" % pid)
+                for k, v in vals.items():
+                    fh.write("%s=%s\n" % (k, v))
+                for k, v in idk.items():
+                    fh.write("%s=%s\n" % (k, v))
+        bfile("preflight-%s-0010.txt" % DAY, 111, {},
+              {"health_body_sha16": SHA_A, "health_max_context": "196608"})       # GO, build A
+        bfile("preflight-%s-0011.txt" % DAY, 222,
+              {"swap_in_mib_per_s": "120.0", "swap_out_mib_per_s": "40.0",
+               "swap_total_peak_mib_per_s": "300.0"},
+              {"health_body_sha16": SHA_A, "health_max_context": "196608"})       # NO-GO, build A
+        bfile("preflight-%s-0012.txt" % DAY, 111, {},
+              {"health_body_sha16": SHA_B, "health_max_context": "262144"})       # GO, build B on
+                                                                                 # pid 111: the
+                                                                                 # pinned anomaly
+        bfile("preflight-%s-0013.txt" % DAY, 111, {}, {"health_body_sha16": SHA_A})   # one-sided
+        bfile("preflight-%s-0014.txt" % DAY, 111, {},
+              {"health_body_sha16": "NOTAHASH000000", "health_max_context": "196608"})  # malformed
+        bfile("preflight-%s-0015.txt" % DAY, 111, {}, {})                          # no identity
+        rc, out = run(["--dir", d19, "--as-of", "%s-0016" % DAY])
+        check(rc == 0, "census over the build fixtures exits 0 (rc=%s: %s)" % (rc, out[:400]))
+        check(int_cell(out, "gate verdict GO") == 3
+              and int_cell(out, "gate verdict NO-GO") == 1
+              and int_cell(out, "gate verdict input gap") == 2,
+              "the gate itself must classify one-sided and malformed identity as input gaps "
+              "(3 GO / 1 NO-GO / 2 gap), got %r / %r / %r"
+              % (cell(out, "gate verdict GO"), cell(out, "gate verdict NO-GO"),
+                 cell(out, "gate verdict input gap")))
+
+        def bcell(label_frag):
+            m = re.search(r"^\| %s.*? \| (.*?) \|$" % re.escape(label_frag), out, re.M)
+            return m.group(1) if m else None
+
+        v = bcell("readings carrying a VALID build-identity pair")
+        check(v is not None and "3 of 6 readings" in v,
+              "the pair-coverage cell must count 3 of 6 at every scope, got %r" % v)
+        v = bcell("readings carrying a BROKEN identity")
+        check(v is not None and "1 one-sided / 1 malformed" in v,
+              "the broken-identity cell must split one-sided from malformed (1/1), got %r" % v)
+        v = bcell("readings carrying NO identity key")
+        check(v is not None and "1 of 6 readings" in v,
+              "the no-identity cell must count 1 of 6, got %r" % v)
+        v = bcell("distinct engine BUILDs recorded in this scope")
+        check(v is not None and "2 distinct build(s) over 3 identity-bearing reading(s)" in v
+              and "`%s` (ctx 196608) — 2 reading(s) (1 GO / 1 NO-GO / 0 input gap)" % SHA_A in v
+              and "engine pids: 111, 222" in v
+              and "`%s` (ctx 262144) — 1 reading(s) (1 GO / 0 NO-GO / 0 input gap)" % SHA_B in v,
+              "the build row must name BOTH builds with verdict mix, ctx and pid sets, got %r" % v)
+        v = bcell("the newest reading's BUILD vs its engine pid")
+        check(v is not None and "carries NO build identity (pid 111; 2 of its 5 reading(s) "
+                                "here do) -> BUILD-UNRECORDED" in v,
+              "the crosswalk must mark the newest (identity-less) reading BUILD-UNRECORDED and "
+              "count how much of its pid IS recorded (2 of 5), got %r" % v)
+        v = bcell("pid<->build anomalies")
+        check(v is not None and "pid 111 -> %s, %s" % (SHA_B, SHA_A) in v
+              and "`%s` on pids 111, 222" % SHA_A in v,
+              "both anomaly directions must be NAMED when present (one pid two builds; one build "
+              "two pids), got %r" % v)
+        # malformed input credits NOTHING: the fake hash must not appear in any build row
+        check("NOTAHASH000000" not in out,
+              "a malformed body hash must never reach a build row (fail closed, not best effort)")
+        # the MAIN fixture set carries no identity key at all: it must print NO build denominator
+        # (the non-retroactivity half: those five readings' verdicts did not move above, and no
+        # pooled build statistic may be invented for a corpus that never recorded a build)
+        d20 = tempfile.mkdtemp()
+        try:
+            write_fixtures(d20)
+            rc2, out2 = run(["--dir", d20, "--as-of", "%s-0005" % DAY])
+            check(rc2 == 0 and "no denominator: this scope has 0 valid identity pairs" in out2,
+                  "an identity-free corpus must print NO build denominator rather than pool "
+                  "processes into a fake build statistic (rc=%s)" % rc2)
+            check("5 of 5 readings" in out2 and "carrying NO identity key" in out2,
+                  "the identity-free corpus must count 5/5 unrecorded at every scope, got a "
+                  "coverage cell that does not say so")
+        finally:
+            shutil.rmtree(d20, ignore_errors=True)
+    finally:
+        shutil.rmtree(d19, ignore_errors=True)
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()

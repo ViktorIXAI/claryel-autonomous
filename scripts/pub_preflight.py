@@ -163,6 +163,27 @@ never healthy). `swap_cached_mib` above `swap_used_mib` is also an input gap: a 
 occupies a swap slot by definition, so that inequality can only come from two numbers that were not
 read in one pass.
 
+Two OPTIONAL IDENTITY readings name the engine BUILD behind the numbers (tooling release 2026-11-16,
+tick 208, no contour stamp, no published benchmark byte; they never gate and add no refusal reason):
+
+    health_body_sha16=<16 hex>    SHA-256/16 of the /health body this reading already fetched
+    health_max_context=<int>      the `"max_context"` the same body advertises
+
+Why: measured 2026-11-16 (tick 207). The endpoint's engine was restarted at 09:59 — new binary path,
+serve context 262 144 -> 196 608, the sampling header (`top_p=0.95 top_k=20`) gone from the log — and
+NONE of the 174 readings stored that day can see it. The corpus can attribute every reading to a
+process id (the producer's own `# engine pid=` comment), but a pid answers "did this process swap?",
+never "was this build ever refused": at that cut all nine of the day's refusals belonged to a pid no
+longer running while the live pid had produced nine GOs and zero refusals. A BUILD generation is a
+different axis, and the only byte the corpus already carries that names it is the /health body itself
+— the producer reads that body once (the `health_loaded` rule), so its hash and its advertised context
+cost zero extra requests. Same optional-but-binding semantics as every other addition: ABSENT = a
+coverage line and an unchanged verdict (no stored reading carries these keys, so none is re-judged);
+PRESENT = validated (the hash must be exactly 16 lowercase hex, the context a positive integer, and
+the two keys come from ONE body so exactly one of them is a broken producer = an input gap, never a
+guess). Malformed identity is fail-closed because an identity silently wrong is worse than none: it
+would let a table name the wrong build as the one a verdict was recorded against.
+
 Usage:
     python3 scripts/pub_preflight.py READINGS.TXT
 
@@ -298,6 +319,18 @@ GPU_UTIL_MEAN_KEY = "gpu_util_mean_pct"
 GPU_UTIL_PEAK_KEY = "gpu_util_peak_pct"
 GPU_UTIL_MAX_MEAN_PCT = 50.0
 GPU_UTIL_MAX_PCT = 100.0
+# Engine BUILD identity (2026-11-16, tick 208, tooling release: no contour stamp, no benchmark byte,
+# NO refusal reason — these keys never gate). The corpus can name the PROCESS behind every reading
+# (the producer's pid comment) but never the BUILD: the 2026-11-16 09:59 engine swap (context
+# 262 144 -> 196 608, sampling header gone, binary path moved) is invisible to all 174 readings
+# stored that day, and at that cut the two axes disagreed — every refusal belonged to a retired pid
+# while the live pid had produced nine GOs and zero refusals. The /health body the producer already
+# fetches once is the only stored byte that names the build, so the identity costs zero requests:
+# body SHA-256/16 + the advertised max_context. Validation is fail-closed because an identity
+# silently wrong would let a table credit or blame the wrong build for a verdict.
+HEALTH_BODY_SHA_KEY = "health_body_sha16"
+HEALTH_BODY_SHA16_LEN = 16
+HEALTH_MAXCTX_KEY = "health_max_context"
 REQUIRED = (
     "mem_total_mib", "mem_available_mib", "swap_total_mib", "swap_free_mib",
     "engine_state", "engine_pcpu", "engine_rss_mib", "gpu_util_pct", "gpu_power_w",
@@ -587,6 +620,39 @@ def main() -> int:
               "producer bug and is never treated as healthy.")
         return 1
 
+    # Engine BUILD identity (2026-11-16, tick 208): validated here, NEVER a refusal reason and never
+    # a coverage promise — the whole stored corpus predates the key and keeps byte-identical verdicts.
+    # The pair comes from ONE /health body, so exactly one of the two keys is a broken producer (the
+    # swap-window and GPU-window pair rules above), and a malformed identity is fail-closed: an
+    # identity silently wrong is worse than none, it would let the next table blame the wrong build.
+    body_sha = None
+    max_ctx = None
+    if HEALTH_BODY_SHA_KEY in vals:
+        body_sha = vals[HEALTH_BODY_SHA_KEY].strip()
+        if not re.fullmatch(r"[0-9a-f]{%d}" % HEALTH_BODY_SHA16_LEN, body_sha):
+            print(f"PREFLIGHT INPUT GAP: {HEALTH_BODY_SHA_KEY}={vals[HEALTH_BODY_SHA_KEY]!r} is not "
+                  f"{HEALTH_BODY_SHA16_LEN} lowercase hex — the /health body hash is never guessed "
+                  "and never carried pasted-through unvalidated.")
+            return 1
+    if HEALTH_MAXCTX_KEY in vals:
+        try:
+            max_ctx = int(vals[HEALTH_MAXCTX_KEY])
+        except ValueError:
+            print("PREFLIGHT INPUT GAP: unreadable number(s): " + HEALTH_MAXCTX_KEY)
+            return 1
+        if max_ctx < 1:
+            print(f"PREFLIGHT INPUT GAP: {HEALTH_MAXCTX_KEY}={vals[HEALTH_MAXCTX_KEY]} is not a "
+                  "positive integer — an advertised serve context cannot be zero or negative, so "
+                  "the field or the parse is broken, never healthy.")
+            return 1
+    if (body_sha is None) != (max_ctx is None):
+        half = HEALTH_BODY_SHA_KEY if body_sha is not None else HEALTH_MAXCTX_KEY
+        other = HEALTH_MAXCTX_KEY if body_sha is not None else HEALTH_BODY_SHA_KEY
+        print(f"PREFLIGHT INPUT GAP: {half} is present but {other} is not — both identity keys "
+              "come from ONE /health body, so a one-sided pair is a broken producer, never "
+              "healthy.")
+        return 1
+
     if int(vals["health_code"]) != 200:
         reasons.append(f"/health answered {vals['health_code']}, not 200")
     if loaded_flag is False:
@@ -667,7 +733,8 @@ def main() -> int:
     for k in (("health_loaded", "engine_serve_procs") + OPTIONAL_FLOATS
               + (BLK_KEY, BLK_READER_KEY, SWAP_PEAK_KEY, BLK_SCOPE_KEY,
                  GPU_UTIL_MEAN_KEY, GPU_UTIL_PEAK_KEY,
-                 ENGINE_VMSWAP_KEY, SWAP_CACHED_KEY)):
+                 ENGINE_VMSWAP_KEY, SWAP_CACHED_KEY,
+                 HEALTH_BODY_SHA_KEY, HEALTH_MAXCTX_KEY)):
         if k in vals:
             print(f"  {k:<18} {vals[k]}")
     if loaded_flag is None or serve_procs is None:
@@ -736,6 +803,20 @@ def main() -> int:
               "19 GiB and SwapFree 53.6 GiB, and 35 359 of 35 361 major faults belonged to the engine "
               "pid) and to the device rule (52-57 % of swap in use was page-cache resident in RAM "
               "while blk_read_mib_per_s answered 0.1)")
+    if body_sha is None and max_ctx is None:
+        print("  (coverage) this reading carries no " + HEALTH_BODY_SHA_KEY + "/" + HEALTH_MAXCTX_KEY
+              + " build-identity pair — the verdict is unaffected, but this file cannot name the "
+                "engine BUILD it describes: the 2026-11-16 09:59 endpoint swap (context 262 144 -> "
+                "196 608, sampling header gone, binary path moved) is invisible to every reading "
+                "stored before the live producer started hashing the /health body on 2026-11-16, so "
+                "this file predates that fix.")
+    elif body_sha is not None:
+        print(f"  (diagnostic) engine build identity: /health body sha256/16 {body_sha} advertising "
+              f"max_context {max_ctx} — identity only, it NEVER gates (no refusal reason reads it); "
+              "it exists because the pid axis and the build axis disagree in the live corpus: on "
+              "2026-11-16 every refusal of the day belonged to a retired pid while the live pid "
+              "had only GOs, and the build behind the numbers changed at 09:59 without any stored "
+              "byte recording it")
     if reasons:
         print("PREFLIGHT NO-GO:")
         for r in reasons:

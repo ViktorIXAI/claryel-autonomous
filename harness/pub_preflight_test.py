@@ -231,9 +231,11 @@ def main() -> int:
                        swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0,
                        blk_read_mib_per_s=0.0, blk_top_reader="basalt",
                        gpu_util_mean_pct=0.0, gpu_util_peak_pct=0,
-                       engine_vmswap_mib=0.0, swap_cached_mib=0.0))
+                       engine_vmswap_mib=0.0, swap_cached_mib=0.0,
+                       health_body_sha16="ab12cd34ef560718", health_max_context=196608))
     ck(rc == 0 and "(coverage)" not in out,
-       f"a fully covered reading must not print a coverage warning, got exit {rc}: {out}")
+       f"a fully covered reading (the build-identity pair included since tick 208) must not print "
+       f"a coverage warning, got exit {rc}: {out}")
     rc, out = run(dict(live0928, health_loaded="true", engine_serve_procs=1,
                        swap_in_mib_per_s=0.0, swap_out_mib_per_s=0.0))
     ck(rc == 0 and "blk_read_mib_per_s device window" in out and "not covered" in out,
@@ -559,6 +561,58 @@ def main() -> int:
            f"{key}=NaN must be an input gap, never a silent GO, got exit {rc}: {out}")
     rc, out = run(variant(blk_read_mib_per_s="inf"))
     ck(rc == 1, f"blk_read_mib_per_s=inf must be an input gap, got exit {rc}")
+
+    # Engine BUILD identity (tick 208, 2026-11-16). The corpus names the engine PROCESS (the pid
+    # comment) and never the engine BUILD; on 2026-11-16 the axes disagreed (nine refusals on a
+    # retired pid, zero on the live one) and the 09:59 restart swapped the BUILD (serve context
+    # 262 144 -> 196 608) invisibly to all 174 stored readings. The pair `health_body_sha16` +
+    # `health_max_context` names the build from the SAME /health body the loaded rule fetches.
+    # The keys validate as INPUT and NEVER gate: absence is a coverage line, a malformed or
+    # one-sided pair is an input gap (an identity silently wrong would let the next table blame
+    # the wrong build), and no refusal reason may read them.
+    rc, out = run(variant())
+    ck(rc == 0 and "carries no health_body_sha16/health_max_context build-identity pair" in out,
+       f"a pre-v208-shaped reading must keep its verdict and name the build hole, got exit {rc}")
+    rc, out = run(variant(health_body_sha16="ab12cd34ef560718", health_max_context=196608))
+    ck(rc == 0 and "engine build identity: /health body sha256/16 ab12cd34ef560718 advertising "
+                   "max_context 196608" in out
+       and "carries no health_body_sha16" not in out,
+       f"a valid pair must print the identity diagnostic and no identity coverage line, "
+       f"got exit {rc}")
+    for over, why in ((dict(health_body_sha16="ab12cd34ef560718"), "hash without context"),
+                      (dict(health_max_context=196608), "context without hash")):
+        rc, out = run(variant(**over))
+        ck(rc == 1 and "one-sided pair" in out,
+           f"a one-sided identity ({why}) must be an input gap, never a partial identity, "
+           f"got exit {rc}")
+    for over, why in ((dict(health_body_sha16="AB12CD34EF560718", health_max_context=196608),
+                       "uppercase"),
+                      (dict(health_body_sha16="ab12cd34ef56071", health_max_context=196608),
+                       "15 chars"),
+                      (dict(health_body_sha16="zz12cd34ef560718", health_max_context=196608),
+                       "non-hex")):
+        rc, out = run(variant(**over))
+        ck(rc == 1 and "lowercase hex" in out,
+           f"a malformed body hash ({why}) must fail closed, got exit {rc}")
+    for over, why in ((dict(health_body_sha16="ab12cd34ef560718", health_max_context="0"),
+                       "zero context"),
+                      (dict(health_body_sha16="ab12cd34ef560718", health_max_context="-5"),
+                       "negative context"),
+                      (dict(health_body_sha16="ab12cd34ef560718", health_max_context="NaN"),
+                       "NaN context")):
+        rc, out = run(variant(**over))
+        ck(rc == 1, f"a malformed advertised context ({why}) must fail closed, got exit {rc}")
+    rc, out = run(dict(live0928, health_loaded="false", engine_serve_procs=0,
+                       health_body_sha16="ab12cd34ef560718", health_max_context=196608))
+    ck(rc == 3 and '"loaded": false' in out,
+       f"a valid build identity must not soften a refusal by one byte (identity NEVER gates), "
+       f"got exit {rc}")
+    rc, out = run(variant(health_body_sha16="ab12cd34ef560718", health_max_context=196608,
+                          gpu_util_mean_pct=97.0, gpu_util_peak_pct=100, gpu_util_pct=100,
+                          gpu_power_w=128.0))
+    ck(rc == 3 and "engine build identity" in out,
+       f"a NO-GO reading with identity must still print the identity (the refusal and the build "
+       f"are separate facts the next table needs together), got exit {rc}")
 
     if FAILED:
         print(f"PUB PREFLIGHT TEST: {CHECKS - len(FAILED)}/{CHECKS} FAILED:")

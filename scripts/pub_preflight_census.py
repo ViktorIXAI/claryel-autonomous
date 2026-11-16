@@ -165,6 +165,22 @@ prevent. The sentence is now generated from the stamp number, and the contract t
 v1..(stamp-1) for the current stamp AND for a hypothetical later one, so the next bump cannot quietly
 reintroduce the gap.
 
+A ninth set of cells this tool could not compute, and the live cut that proved it mattered
+(2026-11-16, tick 207): the corpus attributes every reading to an engine PROCESS (the producer's
+`# engine pid=` comment) and never to an engine BUILD. The two axes answer different questions —
+a pid asks "did this process swap?", a build answers "was this build ever refused?" — and on
+2026-11-16 they disagreed: every one of the day's nine refusals was recorded against pid 175316
+(retired at 09:59) while the live pid 438502 had produced nine GOs and zero refusals. The 09:59
+restart was simultaneously a BUILD swap (serve context 262 144 -> 196 608, the sampling header
+gone from the log, the binary path moved), and not one of the 174 readings stored that day carries
+a byte naming the build. The producer now emits `health_body_sha16` (SHA-256/16 of the /health body
+the `health_loaded` rule already fetches — zero extra fetches) and `health_max_context` (the same
+body's advertised context), and the gate validates the pair without ever gating on it (absent =
+coverage line, malformed or one-sided = input gap). The table gains the build-coverage split, the
+per-build detail (verdict mix, span, pid set) and the pid-vs-build crosswalk, so a verdict can
+finally be credited or blamed to a named build instead of an possibly-retired process. Census
+stamp `v14` -> `v15`; v1-v14 tables stay published as written.
+
 It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
@@ -217,7 +233,7 @@ DIFF_PRINT_MAX = 400
 # Table-shape stamp. Bumping it must not require typing the "which earlier shapes are preserved"
 # sentence: that sentence is GENERATED from this number (tick 197 found the hand-typed version two
 # stamps short, announcing v7 and v8 shape changes while claiming only v1-v6 are preserved).
-CENSUS_STAMP = 14
+CENSUS_STAMP = 15
 
 
 def census_stamp_name():
@@ -643,6 +659,10 @@ def census(directory, as_of, day, window_hours):
             blk = None
         if blk is not None and blk != blk:
             blk = None    # a NaN device rate is a cut sample, never a quiet device
+        # Census v15 (2026-11-16, tick 208): the engine BUILD axis. The pid comment names a
+        # process; only the /health body hash names the build, and on 2026-11-16 the two axes
+        # disagreed over a whole day (nine refusals on a retired pid, zero on the live one).
+        id_sha, id_ctx, id_class = identity_of(vals)
         rows.append(dict(ts=ts, name=os.path.basename(f), rc=rc,
                          decision=kind, reasons=texts,
                          rules=[rule_of(t) for t in texts] if kind == "NO-GO" else [],
@@ -660,6 +680,7 @@ def census(directory, as_of, day, window_hours):
                          rss=rss_val,
                          rss_present=rs_present, rss_bad=rss_bad, mem_total=(mt if mt_ok else None),
                          rf=rule_fields(txt), pid=engine_pid_of(txt),
+                         id_sha=id_sha, id_ctx=id_ctx, id_class=id_class,
                          mean=(si + so) if (si is not None and so is not None) else None))
     return rows, unnamed, as_of
 
@@ -1567,6 +1588,183 @@ def rule_attribution_text(scopes, swap_max, consts):
 GENERATION_PRINT_MAX = 8
 
 
+BUILD_PRINT_MAX = 8
+BODY_SHA_RE = re.compile(r"[0-9a-f]{16}")
+
+
+def identity_of(vals):
+    """The reading's engine-BUILD identity, classed the way the GATE rules class it (census v15).
+
+    (sha, ctx, class) where class is:
+      "pair"      both keys present and valid (16 lowercase hex; positive integer)
+      "onesided"  exactly one key — the two come from ONE /health body, the gate answers input gap
+      "malformed" both present but a value fails the format (hash not 16-hex, ctx not > 0)
+      "none"      neither key — the pre-v15 corpus: verdict stands, build unnamed
+
+    The census never re-derives the gate's verdict here (it runs the gate); this classes only which
+    readings may be credited to a NAMED build and which must not, so a malformed value can never
+    lend its hash to a build row.
+    """
+    s = vals.get("health_body_sha16")
+    c = vals.get("health_max_context")
+    if s is None and c is None:
+        return None, None, "none"
+    if s is None or c is None:
+        return None, None, "onesided"
+    try:
+        civ = int(c)
+    except ValueError:
+        civ = None
+    if BODY_SHA_RE.fullmatch(s) and civ is not None and civ > 0:
+        return s, civ, "pair"
+    return None, None, "malformed"
+
+
+def engine_build_text(scopes):
+    """Which engine BUILD each reading was recorded against (census v15, 2026-11-16, tick 208).
+
+    The pid comment names a PROCESS, and a pid answers only "did this process swap?". The /health
+    body hash names the BUILD, and that answers "was this build ever refused?" — measured 2026-11-16,
+    the two axes disagreed over one day: every refusal belonged to a retired pid while the live pid
+    recorded only GOs, and the 09:59 restart that split the day was simultaneously a build swap no
+    stored byte could see. The block prints the COVERAGE split first (a pair / one-sided / malformed /
+    unrecorded — the first cut has no pair anywhere and must say so rather than print silence), then
+    the per-build detail, then the crosswalk between the newest reading's build and its pid, then the
+    two anomaly counts (one pid naming two builds = a build changed under a live process, impossible
+    on a restart-based engine and named the day it is seen; one build under two pids = the same build
+    restarted, normal and worth naming). No gate rule reads these keys, so no verdict here can move.
+    """
+    L = []
+    per = []
+    for label, rows in scopes:
+        builds = {}
+        cnt = dict(pair=0, onesided=0, malformed=0, none=0)
+        newest = None
+        for r in rows:
+            cnt[r["id_class"]] += 1
+            if r["id_class"] == "pair":
+                b = builds.setdefault(r["id_sha"], dict(ctx=r["id_ctx"], n=0, go=0, nogo=0,
+                                                        gap=0, first=r["ts"], last=r["ts"],
+                                                        first_name=r["name"], last_name=r["name"],
+                                                        pids=set()))
+                b["n"] += 1
+                if r["rc"] == 0:
+                    b["go"] += 1
+                elif r["rc"] == 3:
+                    b["nogo"] += 1
+                else:
+                    b["gap"] += 1
+                if r["pid"]:
+                    b["pids"].add(r["pid"])
+                if r["ts"] < b["first"]:
+                    b["first"], b["first_name"] = r["ts"], r["name"]
+                if r["ts"] > b["last"]:
+                    b["last"], b["last_name"] = r["ts"], r["name"]
+            if newest is None or r["ts"] > newest["ts"]:
+                newest = r
+        per.append(dict(label=label, builds=builds, cnt=cnt, n=len(rows), newest=newest,
+                        rows=rows))
+
+    def cell(fn):
+        return " / ".join("%s: %s" % (p["label"], fn(p)) for p in per)
+
+    L.append("| readings carrying a VALID build-identity pair (`health_body_sha16` + "
+             "`health_max_context`, both keys from ONE /health body; census v15) | %s |"
+             % cell(lambda p: "%d of %d readings" % (p["cnt"]["pair"], p["n"])))
+    L.append("| readings carrying a BROKEN identity (exactly one key, or a value failing the "
+             "format — the gate answers an input gap on every one of these, so they credit no "
+             "build and lose no verdict) | %s |"
+             % cell(lambda p: "%d one-sided / %d malformed"
+                    % (p["cnt"]["onesided"], p["cnt"]["malformed"])))
+    L.append("| readings carrying NO identity key (the pre-v15 corpus: the verdict stands, the "
+             "BUILD is unnamed — every statistic pooled over them pools processes, not builds) | %s |"
+             % cell(lambda p: "%d of %d readings" % (p["cnt"]["none"], p["n"])))
+
+    def build_txt(p):
+        items = sorted(p["builds"].items(), key=lambda kv: kv[1]["first"])
+        if not items:
+            return ("no denominator: this scope has 0 valid identity pairs over %d readings, so no "
+                    "verdict in it can be credited or blamed to a named BUILD (the pid rows above "
+                    "are the only generation axis this scope has)" % p["n"])
+        parts = []
+        for sha, b in items[:BUILD_PRINT_MAX]:
+            parts.append("`%s` (ctx %d) — %d reading(s) (%d GO / %d NO-GO / %d input gap), first %s "
+                         "last %s, engine pids: %s"
+                         % (sha, b["ctx"], b["n"], b["go"], b["nogo"], b["gap"],
+                            b["first_name"], b["last_name"],
+                            ", ".join(sorted(b["pids"])) or "no pid comment"))
+        withheld = len(items) - len(parts)
+        txt = "%d distinct build(s) over %d identity-bearing reading(s)" % (
+            len(items), p["cnt"]["pair"])
+        if withheld > 0:
+            txt += " (%d listed, %d not printed)" % (len(parts), withheld)
+        return txt + ": " + "; ".join(parts)
+    L.append("| distinct engine BUILDs recorded in this scope (body sha16 -> advertised context, "
+             "verdict mix, span, pid set; at most %d listed, count precedes the list) | %s |"
+             % (BUILD_PRINT_MAX, cell(build_txt)))
+
+    def cross(p):
+        nw = p["newest"]
+        if nw is None:
+            return "no denominator — empty scope"
+        if nw["id_class"] == "pair":
+            span = [r for r in p["rows"] if r["pid"] and r["pid"] == nw["pid"]]
+            rec = [r for r in span if r["id_class"] == "pair"]
+            same = [r for r in rec if r["id_sha"] == nw["id_sha"]]
+            if not span:
+                word = ("the newest reading names a build but its pid is unknown, so the crosswalk "
+                        "cannot run")
+            elif len(rec) < len(span):
+                word = ("COVERAGE BOUNDARY INSIDE ONE PID: pid %s has %d reading(s) here without an "
+                        "identity key — the coverage boundary is the KEY shipping, not the process, "
+                        "and the pid rows must not be read as build rows"
+                        % (nw["pid"], len(span) - len(rec)))
+            elif len(same) < len(rec):
+                others = sorted({r["id_sha"] for r in rec} - {nw["id_sha"]})
+                word = ("PID SPANS %d BUILD(S): pid %s also appears under %s — a build changed "
+                        "under a live pid, impossible on a restart-based engine: name it, do not "
+                        "average it" % (len({r["id_sha"] for r in rec}),
+                                        nw["pid"], ", ".join(others)))
+            else:
+                word = ("MATCHED: every identity-bearing reading of pid %s names this one build, so "
+                        "this pid's GOs and refusals may be quoted as this build's record"
+                        % nw["pid"])
+            return ("newest reading `%s` (pid %s) -> build `%s` ctx %d; that pid carries a valid "
+                    "pair in %d of its %d reading(s) in scope -> %s"
+                    % (nw["name"], nw["pid"] or "unknown", nw["id_sha"], nw["id_ctx"],
+                       len(rec), len(span), word))
+        pid = nw["pid"]
+        span = [r for r in p["rows"] if r["pid"] and r["pid"] == pid] if pid else []
+        nrec = sum(1 for r in span if r["id_class"] == "pair")
+        return ("newest reading `%s` carries NO build identity (pid %s; %d of its %d reading(s) "
+                "here do) -> BUILD-UNRECORDED: this scope cannot name the build the newest verdict "
+                "was recorded against, only the process"
+                % (nw["name"], pid or "unknown", nrec, len(span)))
+    L.append("| the newest reading's BUILD vs its engine pid (the two axes crosswalked; a pid whose "
+             "readings split recorded/unrecorded means the KEY arrived mid-process, not the build) "
+             "| %s |" % cell(cross))
+
+    def anom(p):
+        pid2b = {}
+        for r in p["rows"]:
+            if r["id_class"] == "pair" and r["pid"]:
+                pid2b.setdefault(r["pid"], set()).add(r["id_sha"])
+        multi_b = {pid: s for pid, s in pid2b.items() if len(s) > 1}
+        multi_p = {sha: sorted(b["pids"]) for sha, b in p["builds"].items() if len(b["pids"]) > 1}
+        a = ("none" if not multi_b else
+             "; ".join("pid %s -> %s" % (pid, ", ".join(sorted(s)))
+                       for pid, s in sorted(multi_b.items())))
+        q = ("none" if not multi_p else
+             "; ".join("`%s` on pids %s" % (sha, ", ".join(ps))
+                       for sha, ps in sorted(multi_p.items())))
+        return "one pid naming more than one build: %s / one build under more than one pid " \
+               "(restart of the SAME build, normal): %s" % (a, q)
+    L.append("| pid<->build anomalies (a pid spanning builds = a live change of build, never "
+             "happens on this engine and gets NAMED the day it does; a build under several pids = "
+             "the same build restarted, ordinary) | %s |" % cell(anom))
+    return L
+
+
 def engine_generation_text(scopes):
     """Which ENGINE GENERATION each pooled statistic in this table actually belongs to.
 
@@ -2143,7 +2341,20 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
     L.append("Census stamp: `%s`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v14 gives the READINGS half of the headroom "
+             "(%d readings inside the window). v15 adds the BUILD axis the corpus never had "
+             "(tick 208, 2026-11-16): the producer now emits `health_body_sha16` (SHA-256/16 of "
+             "the /health body the `health_loaded` rule already fetches — zero extra fetches) and "
+             "`health_max_context` (the same body's advertised context); the gate validates the "
+             "pair as INPUT — exactly one key, or a value failing its format, is an input gap, "
+             "absence is a coverage line, and no refusal rule reads either key, so every stored "
+             "reading keeps a byte-identical verdict — and the table groups readings by build, "
+             "crosswalks build against pid, and names the pid<->build anomalies, because at the "
+             "16.11 cut the two axes disagreed: all nine refusals of the day sat on pid 175316 "
+             "(retired 09:59) while live pid 438502 knew only GOs, and the 09:59 restart that also "
+             "swapped the build (serve context 262 144 -> 196 608, sampling header gone, binary "
+             "path moved) was invisible to every stored byte. Until a reading carries a valid "
+             "pair, every build cell prints its coverage split and no verdict may be credited or "
+             "blamed to a named build. v14 gives the READINGS half of the headroom "
              "projection its cadence denominator: v13 converted a projected number of MINUTES into "
              "a number of READINGS by dividing by the monotone run's MEAN cadence and printed one "
              "integer, while the intervals inside that same run were 28, 39, 35, 51, 9, 16 and 32 "
@@ -2400,6 +2611,24 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.extend(engine_generation_text([("DAY `%s`" % day, day_rows),
                                      ("last %d h" % window_hours, win_rows),
                                      ("whole corpus", rows)]))
+    L.append("")
+    L.append("**A pid generation and a build generation are different axes, and on 2026-11-16 they")
+    L.append("disagreed (census v15, tick 208).** Every generation row above is a PROCESS id, and a")
+    L.append("pid answers only \"did this process swap?\". At the 14:38 cut the live pid 438502 had")
+    L.append("nine readings and zero refusals while all nine of the day's refusals belonged to pid")
+    L.append("175316, retired at 09:59 — and that same 09:59 restart was a BUILD swap (serve context")
+    L.append("262 144 -> 196 608, sampling header gone, binary path moved) that not one of the 174")
+    L.append("stored readings named in a byte. A refusal set that belongs to a retired PROCESS tells")
+    L.append("you nothing about the endpoint you are about to launch into, and it tells you less about")
+    L.append("the BUILD you are actually quoting. The producer now hashes the /health body it already")
+    L.append("fetches for the `health_loaded` rule (`health_body_sha16`, SHA-256/16) and emits the")
+    L.append("context that body advertises (`health_max_context`); the gate validates the pair and")
+    L.append("never gates on it, so the whole stored corpus keeps byte-identical verdicts. The")
+    L.append("build rows below print the coverage split first — until the first post-change reading")
+    L.append("lands, every scope says 0 pairs and no verdict may be credited to a named build:")
+    L.extend(engine_build_text([("DAY `%s`" % day, day_rows),
+                                ("last %d h" % window_hours, win_rows),
+                                ("whole corpus", rows)]))
     L.append("")
     L.append("**Coverage is not information (census v12, 2026-11-16, tick 204).** The footprint arming")
     L.append("counter counts launchable windows that CARRY `engine_vmswap_mib`, and a window reading")

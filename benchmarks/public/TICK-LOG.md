@@ -814,3 +814,58 @@ same commit. Not started this tick: a gate-byte change without that proof is wor
 than a zero-change tick. One line for the next tick: **pid generations and build generations are
 different axes, and this cut proves the two can disagree** — the live build is 9-for-9 GO while
 every refusal in the table belongs to a build that is no longer running.
+
+
+## Tick 208 — 2026-11-16 15:29 CET: the build axis ships — every stored reading now knows what it does NOT know, and the first live reading names the build (`b4d6a41750d9eafd`, ctx 196 608) that tick 207 could only describe in prose
+
+**What moved.** Tick 207 named one candidate change and refused to half-land it without its replay
+proof; this tick lands it whole. The producer (`preflight_read.sh`, untracked) now keeps the `/health`
+body its `health_loaded` rule already fetched: it emits `health_body_sha16` (SHA-256/16 over the body
+as captured — zero extra HTTP) and `health_max_context` (the same body's advertised serve context).
+The repo gate gains validation, never a refusal rule: both keys absent = **coverage line** (verdict
+untouched); exactly one key, or a hash that is not 16 lowercase hex, or a context that is not a
+positive integer = **input gap** — an identity silently wrong is worse than none, it would let the
+next table blame the wrong build. A pair present prints one diagnostic naming the build beside the
+verdict, and a NO-GO keeps both facts. Census stamp `v14 -> v15`: the table gains six BUILD rows per
+scope (valid-pair / broken-identity / unrecorded coverage split, distinct builds with verdict mix +
+ctx + pid sets, the newest reading's pid<->build crosswalk, and both anomaly directions named).
+
+**The proof that historical verdicts did not move (the one tick 207 made a precondition).** Old gate
+bytes (HEAD, tick 207) versus new gate bytes, one process per file over **all 174 stored readings**:
+old `86 GO / 82 NO-GO / 6 input gap`, new `86 / 82 / 6`, **0 verdicts moved**. Table-level replay:
+the committed v14 table at `as-of 14:38` versus the new tool at the same cut differs by exactly
+**23 lines** — the stamp sentence (census stamp and gate sha16 `dd2f0e4fa0255fa5 -> 624d0d3cc50718c2`,
+honest: the GATE bytes moved this tick, which is why the per-file proof above, not sha equality,
+carries the non-retroactivity claim) plus the new build block. No existing cell changed.
+Contract tests: gate `129/129` (13 new: pair keeps verdict and prints identity, both one-sided
+shapes, uppercase/short/non-hex hashes, zero/negative/NaN contexts all input gaps, a valid pair
+never softens a `loaded:false` refusal, and a NO-GO with identity prints both), census `319/319`
+(11 new: the 3/1/2 verdict split on identity fixtures, the coverage split cells, both builds listed
+with verdict mix and pid sets, crosswalk `BUILD-UNRECORDED` with its recorded fraction, both anomaly
+directions NAMED, `NOTAHASH000000` reaching **no** build row, and an identity-free corpus printing
+NO build denominator instead of pooling processes into a fake build statistic).
+
+**The live cut.** Reading `preflight-20261116-1529.txt` — the first byte on this line that names a
+build: `health_body_sha16=b4d6a41750d9eafd`, `health_max_context=196608`, engine pid 438502, gate
+GO. At the 15:29 cut (175 readings: 87 GO / 82 NO-GO / 6 gap) the build rows print
+`1 of 175` pairs corpus-wide and the crosswalk already says the subtle true thing:
+**COVERAGE BOUNDARY INSIDE ONE PID** — pid 438502 has 10 readings in scope, one names the build and
+nine carry no key, so the coverage boundary is the KEY shipping, not the process, and the pid rows
+must not be read as build rows. The whole pre-09:59 corpus — including every one of today's nine
+refusals — stays BUILD-UNRECORDED forever, and the table now prints that as a number instead of a
+sentence: the build behind those refusals cannot be recovered, only named for whatever runs next.
+
+**Credit.** Zero model calls, zero cloud calls, zero GPU seconds, zero discarded arm bytes, no leg
+started or stopped, hence **no `LEG-INCIDENTS.md` entry owed**. Against the endpoint: the standing
+producer reading only (its one `/health` GET is the same request the loaded rule always made — the
+hash costs zero extra fetches). Plus the old-vs-new gate replay over the stored corpus (CPU only),
+the census regen and this block. **No published benchmark percent moved, none needed to.**
+
+**Next.** The queue is mechanically empty (plan line: the gate is no longer the constraint, the
+absence of a next set is; standing leftovers unchanged: issues #42/#44, the LCB hidden-battery
+release asset, the frozen-line watchers, the ops line's call on the masked doc's serial/MAC prose) —
+what runs next stays an owner decision. No new candidate is half-named: the build axis needs DRAW
+DEPTH before it can answer the question it was built for ("has this build ever been refused?"), and
+any arming or band on it before that depth would be tick 204's coverage-for-information trade again.
+One line for the coming ticks: the axis is shipped, the build is named, and the first honest
+generation boundary the corpus can prove is the KEY, not the engine.
