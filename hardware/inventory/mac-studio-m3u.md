@@ -20,6 +20,8 @@ silicon does not expose via the sampler) · memory via sysctl ✔. Cross-box
 **Drift history:** the drift-audit fingerprint tracks the external disk's
 `/dev/diskN` node names, which macOS reassigns on every boot/power cycle —
 boot 2026-11-02 exposed the drive as `disk4`/`disk5`, boot 2026-11-14 as
-`disk6`/`disk7`, same drive and same 2.0 TB layout. See
-`hardware/changes/MACSTUDIO.md` CHG-001 (2026-11-14, unannounced reboot +
-node renumbering, no physical change).
+`disk6`/`disk7`, boot 2026-11-16 back to `disk4`/`disk5`, always the same
+WD Blue SN5000 2 TB drive and the same 2.0 TB layout. Unannounced power cycles
+also recorded 2026-11-15 (no numbering change). See
+`hardware/changes/MACSTUDIO.md` CHG-001 (2026-11-14) and CHG-002 (2026-11-16) —
+both unannounced reboots with node renumbering, no physical change.

@@ -61,3 +61,55 @@ inspection.
 
 **Passport:** `hardware/inventory/mac-studio-m3u.md` gains an external-storage
 row (previously absent) and a drift-history note.
+
+## CHG-002 — unannounced hardware change detected (2026-11-16 09:43 UTC, status: detected)
+
+**Trigger:** the hourly fleet drift audit (`hw-fingerprint` probe script)
+reported a fingerprint change for MACSTUDIO. No operator-announced change existed.
+
+**Monitor diff (fingerprint, previous → current, verbatim):**
+
+```diff
+  3,4c3,4
+  <    1:                        EFI EFI                     209.7 MB   disk6s1
+  <    2:                 Apple_APFS Container disk7         2.0 TB     disk6s2
+  ---
+  >    1:                        EFI EFI                     209.7 MB   disk4s1
+  >    2:                 Apple_APFS Container disk5         2.0 TB     disk4s2
+```
+
+(RAM line `274877906944` B = 256 GiB and the `Apple M3 Ultra` GPU line are
+identical in both fingerprints; only the two external-storage node-name lines
+moved — exactly the inverse of the CHG-001 shift.)
+
+**Diagnosis (live re-inventory over SSH, 2026-11-16 09:44 UTC): no physical
+change — the box power-cycled again and macOS renumbered the external disk
+nodes back to their pre-2026-11-14 numbering.**
+
+| item | previous fingerprint | current fingerprint |
+|---|---|---|
+| boot producing it | boot chain 2026-11-14 08:50 → 2026-11-15 08:09 local | 2026-11-16 08:59:15 UTC (`kern.boottime`) |
+| external 2 TB NVMe node | `disk6` (+ APFS container `disk7`) | `disk4` (+ container `disk5`) |
+| drive identity | WD Blue SN5000 2TB, PCI-Express, SMART Verified (CHG-001 read) | WD Blue SN5000 2TB, PCI-Express, External, SMART Verified — identical |
+| layout | 2.0 TB GUID, 209.7 MB EFI, one full-size APFS container | byte-identical |
+
+- `last reboot` shows two further unannounced power cycles since CHG-001:
+  2026-11-15 08:09 and 2026-11-16 09:59 local (08:59:15 UTC). The 2026-11-15
+  boot kept the `disk6`/`disk7` enumeration (no drift fired that day); the
+  2026-11-16 boot re-enumerated the same drive as `disk4`/`disk5`.
+- Same failure mode as CHG-001 and P2005 CHG-001: the fingerprint probe
+  captures `/dev/diskN` node names, not drive serials, so every power cycle
+  that changes attach order reads as drift.
+- Serve on :8080 answered HTTP 200 at the 09:44 UTC check — the serving
+  endpoint is up after the reboot.
+
+**Impact: none detected.** No measurable hardware moved (identical RAM total,
+identical GPU line, identical drive identity and 2 TB layout). Benchmark
+comparison not applicable; no cold-ladder or contour re-run required.
+
+**Open maintainer decision:** the 2026-11-15 and 2026-11-16 reboots were not
+announced to the ledger. Nothing on the box was touched beyond read-only
+inspection.
+
+**Passport:** drift-history note in `hardware/inventory/mac-studio-m3u.md`
+extended with the 2026-11-16 boot.
