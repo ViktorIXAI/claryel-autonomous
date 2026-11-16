@@ -1833,6 +1833,164 @@ def main():
     finally:
         shutil.rmtree(d17, ignore_errors=True)
 
+    # ---- census v13 (2026-11-16, tick 205): the two FREE columns ------------------------------
+    # Why: every rule this table banded was a RATE over one 6 s window, while the gate's one
+    # threshold in force that is a STATE — `MEM_AVAILABLE_MIN_MIB`, rule `mem-available-low` — was
+    # never quoted with a distance to it, and `engine_rss_mib` was never differenced at all. On live
+    # bytes at the 16.11 12:40 cut the live generation had five consecutive decreasing MemAvailable
+    # draws (6618 → 4938 MiB, 658.8 MiB/h) with swap-in-use flat at 65 MiB, while the generation
+    # before the restart held 16-17 GiB of swap in use and 17-21 GiB of headroom: the two free
+    # columns moved in OPPOSITE directions across that restart, which is also why the morning's
+    # page-in storms stopped. A table that bands only rates cannot see that transition at all.
+    check(stamp_n >= 13,
+          "census v13 moved the stamp: MemAvailable / swap-in-use / engine-RSS are published as a "
+          "per-generation state with a computed trend (stamp reads %d)" % stamp_n)
+    check(re.search(r"def memory_headroom_text\(", src9) is not None,
+          "the headroom block is a function over the same scopes, not prose beside the table")
+
+    TREND_LABEL = ("headroom trend of the newest generation, and what it projects against that floor")
+    ATTR_LABEL = ("how much of the newest generation's headroom change its own RSS change explains")
+    FLIP_LABEL = ("do the two free columns move in OPPOSITE directions when the engine generation "
+                  "changes?")
+    FLOOR_LABEL = "the newest reading's headroom against that floor"
+    CLOSE_LABEL = "closest approach to that floor in this scope"
+    TRAJ_LABEL = ("MemAvailable / swap-in-use / engine-RSS trajectory per engine generation "
+                  "(the free columns belong to a process, not to the box)")
+    BAD_LABEL = ("readings whose `engine_rss_mib` exceeds the box's own `mem_total_mib` "
+                 "(an impossible field value: reported, named, and never used in arithmetic)")
+
+    def with_mem(path, pid, avail=None, rss=None, used=None):
+        """Fixture rewritten with explicit free-column values plus the producer's pid comment."""
+        keep = []
+        for ln in open(path, encoding="utf-8").read().splitlines():
+            if ln.split("=", 1)[0] in ("mem_available_mib", "engine_rss_mib", "swap_used_mib"):
+                continue
+            keep.append(ln)
+        for k, v in (("mem_available_mib", avail), ("engine_rss_mib", rss), ("swap_used_mib", used)):
+            if v is not None:
+                keep.append("%s=%s" % (k, v))
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("# engine pid=%s\n" % pid + "\n".join(keep) + "\n")
+
+    def parsed_row(md, label):
+        """The printed value of one label, parsed as a PAIR (v12's lesson: a cell whose text grew is
+        invisible to a line count, and every cell in this block is long)."""
+        for ln in md.splitlines():
+            m = re.match(r"^\| (.*?) \| (.*?) \|$", ln)
+            if m and m.group(1) == label:
+                return m.group(2)
+        return ""
+
+    d18 = tempfile.mkdtemp(prefix="pubcensus-headroom-")
+    try:
+        def memrun(tag, spec):
+            """spec: list of (pid, mem_available_mib, engine_rss_mib, swap_used_mib)."""
+            d18x = os.path.join(d18, tag)
+            os.mkdir(d18x)
+            for i, (pid, av, rss, used) in enumerate(spec):
+                name = "preflight-%s-03%02d.txt" % (DAY, i)
+                write_fixtures(d18x, {name: {}})
+                with_mem(os.path.join(d18x, name), pid, av, rss, used)
+            rc18, out18 = run(["--dir", d18x, "--as-of", "%s-0400" % DAY, "--no-transition"])
+            check(rc18 == 0, "headroom fixtures exit 0 (%s: rc=%s)" % (tag, rc18))
+            return out18
+
+        # (a) monotone fall, attributed to the sampled process, with its projection
+        out18 = memrun("a", [("7000", 6618, 52711, 65), ("7000", 6200, 53100, 65),
+                             ("7000", 5800, 53500, 65), ("7000", 5400, 54000, 65),
+                             ("7000", 4938, 54401, 65)])
+        t18 = parsed_row(out18, TREND_LABEL)
+        check("PROJECTION" in t18 and "not a promise" in t18,
+              "a five-draw monotone fall prints a projection AND the word projection in the same "
+              "cell, got %r" % t18[:200])
+        a18 = parsed_row(out18, ATTR_LABEL)
+        check("ATTRIBUTED TO THE SAMPLED ENGINE" in a18 and "UNATTRIBUTED" not in a18,
+              "a headroom fall matched by engine-RSS growth is attributed to the sampled engine, "
+              "got %r" % a18[:220])
+        c18 = parsed_row(out18, CLOSE_LABEL)
+        check("THE MINIMUM IS THE NEWEST DRAW" in c18,
+              "the scope minimum sitting on the newest draw is called falling, not resting, "
+              "got %r" % c18[:200])
+        tr18 = parsed_row(out18, TRAJ_LABEL)
+        check("monotonically down over the last 5 draw(s)" in tr18,
+              "the trajectory row states the trailing monotone run, which is what a headroom "
+              "decision follows, got %r" % tr18[:260])
+
+        # (b) NON-VACUITY of the projection: the same block on a rising series must not project
+        out19 = memrun("b", [("7000", 4938, 54401, 65), ("7000", 5400, 54000, 65),
+                             ("7000", 5800, 53500, 65), ("7000", 6200, 53100, 65),
+                             ("7000", 6618, 52711, 65)])
+        t19 = parsed_row(out19, TREND_LABEL)
+        check("PROJECTION" not in t19 and "NOT DECREASING" in t19,
+              "the same cell on a rising series says NOT DECREASING and projects nothing — the "
+              "projection is arithmetic over the printed draws, not a template, got %r" % t19[:200])
+        check("no attribution owed" in parsed_row(out19, ATTR_LABEL),
+              "headroom that did not fall owes no attribution instead of printing a 0%% ratio, "
+              "got %r" % parsed_row(out19, ATTR_LABEL)[:220])
+
+        # (c) a fall the sampled engine does NOT explain is named UNATTRIBUTED
+        out20 = memrun("c", [("7000", 20000, 57374, 8028), ("7000", 16000, 57374, 8028),
+                             ("7000", 12000, 57374, 8028), ("7000", 9000, 57374, 8028)])
+        a20 = parsed_row(out20, ATTR_LABEL)
+        check("UNATTRIBUTED" in a20 and "does not sample" in a20,
+              "11 GiB of headroom gone with an engine RSS that never moved is called UNATTRIBUTED: "
+              "the block refuses to charge the sampled process for memory it did not take, got %r"
+              % a20[:240])
+
+        # (d) below the floor: the census quotes the GATE's constant and the gate's own verdict
+        out21 = memrun("d", [("7000", 3000, 57374, 8028), ("7000", 1900, 57374, 8028)])
+        fl21 = parsed_row(out21, FLOOR_LABEL)
+        floor13 = mod9.gate_constants()["MEM_AVAILABLE_MIN_MIB"]
+        check("BELOW the floor" in fl21 and str(int(floor13)) in fl21,
+              "a 1900 MiB reading against the gate's own %s MiB floor prints BELOW the floor naming "
+              "the gate's constant, not a census literal, got %r" % (floor13, fl21[:240]))
+        check("this reading's verdict: NO-GO" in fl21,
+              "the same cell carries the verdict the gate actually gave for that reading, got %r"
+              % fl21[:300])
+        fired21 = parsed_row(out21, "rule fired: `mem-available-low`")
+        check(fired21.startswith("DAY `20300101`: 1 fired") or "mem-available-low` (gate reason" in out21,
+              "the rule-fire table agrees with the headroom block about which rule tripped (row=%r)"
+              % fired21[:160])
+
+        # (e) the regime flip: swap empties AND headroom falls across a restart
+        out22 = memrun("e", [("8000", 19297, 56654, 16839), ("8000", 18900, 56700, 16800),
+                             ("9000", 6618, 52711, 65), ("9000", 6100, 53000, 65)])
+        fp22 = parsed_row(out22, FLIP_LABEL)
+        check("REGIME FLIP" in fp22 and "swap in use fell" in fp22 and "MemAvailable fell" in fp22,
+              "across a restart where swap emptied while headroom fell the cell names BOTH "
+              "directions in one sentence — the transition the rate rules go blind to, got %r"
+              % fp22[:300])
+        tr22 = parsed_row(out22, TRAJ_LABEL)
+        check("pid 8000" in tr22 and "pid 9000" in tr22,
+              "both generations of the flip corpus appear in the trajectory row, got %r" % tr22[:240])
+
+        # (f) NON-VACUITY of the flip row: one generation gives NO denominator, not "no flip"
+        out23 = memrun("f", [("8000", 19297, 56654, 16839), ("8000", 18900, 56700, 16800)])
+        fp23 = parsed_row(out23, FLIP_LABEL)
+        check("no denominator" in fp23 and "REGIME FLIP" not in fp23,
+              "one generation prints NO denominator for the flip row rather than 'no flip observed', "
+              "which would read as evidence that flips do not happen, got %r" % fp23[:200])
+
+        # (g) an impossible field value is named and excluded, never averaged
+        out24 = memrun("g", [("7000", 6618, 58929928, 65), ("7000", 4938, 54401, 65)])
+        bd24 = parsed_row(out24, BAD_LABEL)
+        check("preflight-20300101-0300.txt" in bd24 and "58929928" in bd24,
+              "an engine RSS larger than the machine names the file and the value instead of letting "
+              "it enter a ratio, got %r" % bd24[:240])
+        check("no denominator" in parsed_row(out24, ATTR_LABEL),
+              "with the impossible draw excluded the attribution row holds 1 usable draw and says NO "
+              "DENOMINATOR rather than dividing by a KiB value inside a MiB column, got %r"
+              % parsed_row(out24, ATTR_LABEL)[:220])
+
+        # (h) two points are not a trend, even a steep one
+        out25 = memrun("h", [("7000", 6618, 52711, 65), ("7000", 4938, 54401, 65)])
+        t25 = parsed_row(out25, TREND_LABEL)
+        check("TOO FEW MONOTONE DRAWS" in t25 and "PROJECTION" not in t25,
+              "two decreasing draws refuse to project — the resolution rule applied to headroom, "
+              "got %r" % t25[:220])
+    finally:
+        shutil.rmtree(d18, ignore_errors=True)
+
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()
     for bad in ("ssh ", "requests", "urllib", "socket."):

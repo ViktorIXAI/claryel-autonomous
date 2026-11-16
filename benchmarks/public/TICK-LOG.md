@@ -419,3 +419,124 @@ asserts the floor plus the v12 structure, because an exact-stamp pin goes red on
 change (tick 197's class). `--check` green against the committed v12 table. `origin/main` unmoved since
 tick 203 (ahead 0 / behind 0), no foreign paths in the tree. No leg ran, so `LEG-INCIDENTS.md` is
 untouched: zero model calls, zero cloud calls, no published percent moved.
+
+## Tick 205 — 2026-11-16 12:49 CET: the table banded only RATES while the failure mode of this box moved to a STATE — census v13 publishes the memory-headroom trajectory per engine generation, and the 10:06 restart shows the two free columns moving in OPPOSITE directions
+
+No leg launched: three-arm parity **49 rows / 9 sets / 0 findings** (contour stamp 0.0.2.56, Grok not
+an arm), so the queue is empty as arithmetic, not as scheduling, and this tick again spent its budget
+on the measurement stack. `scripts/pub_grok_resume_check.py --as-of 2026-11-16` read unshielded with
+the code captured on the next line: **22 checks green, exit 3, `RESUME GATE: NO-GO - do not spend
+quota`**, one FINDING which is the owner cancellation itself ("the Grok line is CANCELLED by owner
+decision 2026-11-12 … the 182 unasked ids in the pin are a record, not a queue"), `ifeval` stored
+**359 rows / 359 ok** sha256-16 `01c1ee0b6e7f6d5d`. That exit 3 is the guard answering correctly on
+the owner decision, not an incident. `~/pub-bench/GROK-CANCELLED` untouched, no window guard re-armed.
+
+**A belief I carried into this tick and had to discard by checking, not by reasoning.** The compacted
+notes of the previous run described a `gpqa-diamond` codex leg "still pending after two transport
+timeouts, relaunch once with a longer timeout". There is no such pending leg: `git status` shows no
+running `parb-pub-*` unit and no `pub_bench_cloud.py` process, and the stored log
+`~/pub-bench/cloud-gpqa-codex.log` ends `codex done: ok=198 bad=0 wall 3553 s -> …/gpqa-diamond/pub-codex.jsonl`
+and `cloud gpqa codex exit=0`. The arm is complete at **198/198 stored rows**, published at
+**174/198 = 87.9 %**; a relaunch would have been a duplicate leg burning a subscription window on a
+set that already has its cell. Rule followed: read the artifact before honouring the note.
+
+**One new reading, and it is a GO.** `preflight-20261116-1249.txt` (wrapper run bare, rc captured
+unshielded): engine pid 438502 state S, sampled pcpu 1.0 %, RSS **54 483** MiB, `engine_vmswap_mib`
+**0**, GPU mean 0.0 % / peak 0 % at 27.17 W, whole-disk read 0.1 MiB/s (top reader `basalt`,
+`blk_scope=whole-disk`), swap in use **65** of 65 535 MiB with SwapCached 9 MiB, `foreign_legs=0`,
+`/health` 200 with `health_loaded=true`, one serve process, producer window measured **6.14 s** →
+`PREFLIGHT GO`, gate rc 0. Window transition as the tool derives it (previous bound = previous stored
+reading): prev window as-of 12:40 held 31 readings / 10 launchable, this window as-of 12:49 holds 32
+readings / **11 launchable**, aged out **0**, newly inside **1**, launchable delta **+1**. Corpus at
+run time: **171 files, 83 GO / 82 NO-GO / 6 input gap**.
+
+**The substantive change: the census had never quoted a distance to the only threshold in force that
+is a STATE.** Every rule this table bands is a rate over one 6 s window. The gate has always had a
+memory rule too — `mem-available-low`, floor `MEM_AVAILABLE_MIN_MIB = 2048`, read out of the gate
+source at run time like every other ceiling — and the producer has always printed `mem_available_mib`
+and `engine_rss_mib`, yet in 204 ticks no published cell ever carried a headroom band, a distance to
+that floor, or an RSS difference, because every tick wrote headroom into a prose sentence next to a
+verdict and moved on. That prose hid a regime change which the rate rules are structurally blind to:
+
+| engine generation (day scope, printed by the tool) | MemAvailable | swap in use | engine RSS |
+| --- | --- | --- | --- |
+| pid 175316, 11 draws, last at 07:19 | 18 647 → 19 297 MiB | **16 062 → 16 839 MiB** | 57 048 → 56 654 MiB |
+| pid 438502, 6 draws, last at 12:49 | **6 618 → 4 855 MiB** | **65 → 65 MiB** | 52 711 → **54 483** MiB |
+
+The row the block exists for: `pid 175316 (preflight-20261116-0719.txt) → pid 438502
+(preflight-20261116-1007.txt): REGIME FLIP — swap in use fell 16 774 MiB (16 839 → 65) while
+MemAvailable fell 12 679 MiB (19 297 → 6 618) across the restart`. The two free columns moved in
+**opposite** directions: the new process re-admitted into RAM what the old one held in swap and spent
+almost 13 GiB of headroom doing it. That is also, mechanically, why the page-in storms this line
+spent ticks 196/199/200 on (6.82×, 6.91×, **10.69×** of the 20.0 MiB/s swap ceiling) simply stopped —
+there was nothing left swapped to page in. The box's risk moved from swap throughput to distance to
+the gate's own memory floor, and a table of rates could not see the transition at all: the 05:41 and
+06:43 refusals belong to the old generation, and every window the new generation has sampled prints a
+swap peak of **0.0 MiB/s** with 65 MiB of swap in use — the two halves of the day are not the same
+machine state, and the rate bands pool them as if they were.
+
+What v13 prints (10 new rows at three scopes, all computed): headroom coverage; the MemAvailable band
+with the file that set the minimum (**min 4 855 MiB (`preflight-20261116-1249.txt`), median 18 647,
+max 21 441 over 17 readings** at day scope, median 19 188 over 32 at 24 h, median 19 041 over 170 at
+corpus); the newest draw against the floor (**4 855 MiB = 2 807 MiB above 2 048, 2.37× the floor,
+verdict GO**); the closest approach with a state word (**THE MINIMUM IS THE NEWEST DRAW — headroom is
+falling, not resting**); the per-generation MemAvailable / swap-in-use / RSS trajectory with the
+trailing monotone run; an attribution row (**RSS grew 1 772 MiB against a headroom fall of 1 763 MiB,
+the sampled engine accounts for 101 % of it, residual 9 MiB — `ATTRIBUTED TO THE SAMPLED ENGINE`**,
+and the same cell prints `UNATTRIBUTED` when the engine's RSS did not grow, i.e. it refuses to charge
+the sampled process for memory it did not take); the trend row (**6 consecutive decreasing draws lost
+1 763 MiB over 162 min = −653.0 MiB/h, mean cadence 32.4 min; `PROJECTION (not a promise, one
+generation, n=6)`: at that constant slope the gate's own 2 048 MiB floor arrives ≈258 min after
+`preflight-20261116-1249.txt`, about 7 further readings** — the row carries the word projection inside
+the cell, and it needs ≥3 monotone draws to say anything, two points being a line and not a trend);
+the restart flip row; the pid-less-reading count; and an impossible-field row.
+
+**Two honesty notes on that projection, both published rather than smoothed.** (a) The cadence inside
+the run is not a uniform cron cadence: 12:40 and 12:49 are two manual draws 9 minutes apart, so
+"about 7 further readings" is cadence-dependent and the minute figure (≈258 min) is the one to read.
+(b) A headroom fall ending in a floor breach is a *refusal*, not a crash, and the rule that fires is
+already wired — so nothing was armed here and no ceiling was registered. The block prints the evidence
+a decision needs, not the decision.
+
+**A published field caught being physically impossible.** The impossible-field row reports
+`preflight-20261111-0336.txt` carrying `engine_rss_mib=58 929 928` against `mem_total_mib=61 953` —
+an RSS 951× the machine's whole memory, in a corpus where the same process reads 57 470 MiB two
+windows later, i.e. a KiB value inside a MiB column. It is now named in the table and **excluded from
+every delta**, because that is exactly the scale bug that would have made an attribution ratio read
+~1000 % instead of 101 %. No published percent, band or sign test consumes an RSS delta, so nothing
+published needs correcting; the guard exists so the next such reading cannot enter arithmetic quietly.
+Coverage at this cut: 170 of 171 corpus readings carry a parseable `mem_available_mib`.
+
+**Non-retroactivity, proved by replay, not asserted.** Old bytes (HEAD blob `9343efd5…`, verified
+against `git rev-parse HEAD:scripts/pub_preflight_census.py`, `CENSUS_STAMP = 12`) and new bytes
+(`CENSUS_STAMP = 13`) run side by side over every stored reading at the same
+`--as-of 20261116-1255 --no-transition`, each in its own directory of symlinks so neither sees the
+other. Diffed as parsed **(label → value) pairs, not lines** (tick 204's lesson: a long cell that grew
+is invisible to a line count): **old 100 rows, new 110 rows, cells moved 0, rows removed 0, rows added
+10** — every added row is a headroom row. Gate sha16 `dd2f0e4fa0255fa5` printed identical in both runs
+(the gate was not touched), only the stamp sentence moved, and the preserved-shape sentence regenerated
+itself to "v1 … v12 tables are left published exactly as written; a file stamped any of them is not the
+same table shape as this v13 one".
+
+**Gates on this head.** `harness/pub_preflight_census_test.py` **297/297 green** (was 278: 19 new
+checks, each with its non-vacuity twin — a rising series must NOT project, one engine generation must
+print `no denominator` rather than "no flip", a headroom fall with a flat RSS must print `UNATTRIBUTED`,
+two decreasing draws must refuse, an RSS above `mem_total_mib` must be named and must cost the
+attribution row its denominator). `pub_preflight_census.py --check` **0** against the committed v13
+table at the 12:49 window. Five pub publication gates unshielded: `pub_arms_index --check`,
+`pub_derived_percent_check`, `pub_grok_cell_check`, `pub_superseded_cell_check`, `pub_digest_row_check`
+all **rc 0**. `scripts/qa/static_checks.py` and `verify_manifest.py --v6` re-run on the tree below.
+`scripts/security/secret_scan.py --dir . --strict` re-run after the commit, unshielded.
+
+**LEG-INCIDENTS.md got one entry, written retrospectively.** The engine restart that moved the
+endpoint from pid 175316 to pid 438502 (between the 07:19 refusal and the 10:07 GO, which is also a
+Basalt restart — the alias/serve pair came up 2 h 49 min before the 12:49 draw) had never been
+recorded, because no leg was in flight when it happened. Zero arm bytes touched, zero verdict moved;
+what it did change is which process owns every pooled footprint and headroom figure in the corpus,
+which is the event census v11 and v13 now print. Recorded late rather than never, and labelled as
+late.
+
+Next: the trend row is now recomputed at every cut, so the headroom question stops being a prose
+question. If a future draw prints `BELOW the floor`, that is the gate's own `mem-available-low` rule
+refusing, attributed by the v9 rule table in the same run. No new rule was armed and no ceiling
+registered this tick.

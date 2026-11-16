@@ -449,3 +449,40 @@ on either.
 **Credit:** zero model calls, zero cloud calls, zero discarded arm files, no leg started or stopped
 by any of this. One gate hole closed twice over (device scope, live CPU), contract test
 71 → 87 checks.
+
+## 2026-11-16 12:55 CET (recorded late, at tick 205) — the serve restarted mid-day from pid 175316 to pid 438502; no leg was in flight, and it changes which process owns every pooled figure in the corpus
+
+Recorded now rather than never, and labelled as late: the incident happened between the
+`preflight-20261116-0719.txt` refusal and the `preflight-20261116-1007.txt` GO, and at the time no
+entry was written because no arm was involved. The record is worth having because the restart, not any
+rule change, is what separates the two halves of 16 Nov.
+
+**What changed.** The sampled engine process moved from pid **175316** (last sampled 07:19) to pid
+**438502** (first sampled 10:07; `age=02:49:30` at the 12:49 draw puts the serve start near 10:00).
+No `gate_run.py` / `pub_bench_*` process was alive across that window and no leg was launched on this
+line all day — ticks 201-205 record zero legs, zero model calls, zero cloud calls — so no arm file,
+ledger, state or log was touched, nothing was discarded, and no percent row moved.
+
+**What it did change about the measurement.** Two things the published tables had to learn to say:
+
+- The footprint ceiling the preflight arming rule allows binds to **30 launchable windows all produced
+  by pid 175316**, so the ceiling belongs to a process this endpoint no longer runs. Census v11 added
+  the per-generation attribution row that says so; v12 added the coverage-vs-information split (that
+  generation's footprint was informative in only 3 windows, and the new generation has never recorded a
+  footprint above 0 MiB in any of its 6).
+- The **swap regime flipped**. Under pid 175316 the day ran with 16 062-16 839 MiB of swap in use and
+  produced the page-in storms of 05:41 (6.91×) and 06:43 (10.69×) of the 20.0 MiB/s mean ceiling. Under
+  pid 438502 swap in use is **65 MiB in every one of its 6 windows**, with a peak swap rate of
+  **0.0 MiB/s** in every one of them, while MemAvailable fell from 6 618 to **4 855** MiB across those
+  same 6 windows. The two free columns moved in opposite directions, and a corpus that pools them
+  reports a swap-rate story that no longer describes the box it runs on.
+
+**Retroactivity check, run at this entry's time.** Census v12 bytes (HEAD blob `9343efd5…`) and v13
+bytes were run side by side over every stored reading at the same `--as-of 20261116-1255` cut: **0
+published cells moved, 0 rows removed, 10 rows added, gate sha16 `dd2f0e4fa0255fa5` identical**. So
+this entry does not reinterpret any verdict that was published before it: every refusal and GO in the
+corpus keeps the verdict it was given.
+
+**Credit:** zero model calls, zero cloud calls, zero discarded files, zero legs affected. One corpus
+fact made explicit, and two published census rows (v11 generation attribution, v13 headroom
+trajectory) exist because of it.

@@ -217,7 +217,7 @@ DIFF_PRINT_MAX = 400
 # Table-shape stamp. Bumping it must not require typing the "which earlier shapes are preserved"
 # sentence: that sentence is GENERATED from this number (tick 197 found the hand-typed version two
 # stamps short, announcing v7 and v8 shape changes while claiming only v1-v6 are preserved).
-CENSUS_STAMP = 12
+CENSUS_STAMP = 13
 
 
 def census_stamp_name():
@@ -618,6 +618,24 @@ def census(directory, as_of, day, window_hours):
         # their existing line-anchored parse so no published band cell moves retroactively.
         vals = gate_kv(txt)
         st = vals.get("engine_state")
+        # Census v13 (2026-11-16, tick 205): the two FREE columns. `mem_available_mib` is already
+        # gated by the gate's own `MEM_AVAILABLE_MIN_MIB` rule and `engine_rss_mib` is printed in
+        # every reading, yet no published cell had ever banded either one — every headroom sentence
+        # in 204 ticks was hand-typed prose ("MemAvailable 20 664 of 61 953").
+        av, av_present, av_ok = num(txt, "mem_available_mib")
+        rs, rs_present, rs_ok = num(txt, "engine_rss_mib")
+        mt, mt_present, mt_ok = num(txt, "mem_total_mib")
+        rss_val = rs if (rs_present and rs_ok) else None
+        rss_bad = None
+        if rss_val is not None and mt_ok and mt and mt > 0 and rss_val > mt:
+            # A process cannot be more resident than the machine is large. Such a value is REPORTED
+            # (the impossible-field row) and EXCLUDED from every delta, because a 1024x-scaled entry
+            # silently poisons an attribution ratio: measured on the live corpus,
+            # `preflight-20261111-0336.txt` carries `engine_rss_mib=58929928` on a 61 953 MiB box
+            # while the same pid reads 57 470 MiB two windows later — a value emitted in KiB inside a
+            # corpus that otherwise says MiB.
+            rss_bad = (rss_val, mt)
+            rss_val = None
         b_raw = vals.get("blk_read_mib_per_s")
         try:
             blk = float(b_raw) if b_raw is not None else None
@@ -637,6 +655,10 @@ def census(directory, as_of, day, window_hours):
                          used=used,
                          scope=device_scope(txt),
                          state=st, blk=blk,
+                         avail=av if (av_present and av_ok) else None,
+                         avail_present=av_present,
+                         rss=rss_val,
+                         rss_present=rs_present, rss_bad=rss_bad, mem_total=(mt if mt_ok else None),
                          rf=rule_fields(txt), pid=engine_pid_of(txt),
                          mean=(si + so) if (si is not None and so is not None) else None))
     return rows, unnamed, as_of
@@ -1720,6 +1742,326 @@ def engine_generation_text(scopes):
     return L
 
 
+# ---------------------------------------------------------------------------
+# THE FREE COLUMNS: memory headroom as a state with a trend (census v13)
+# ---------------------------------------------------------------------------
+# Why this block exists, measured on the live corpus at the 2026-11-16 12:40 cut. The gate has
+# always had a memory rule (`mem-available-low`, `MEM_AVAILABLE_MIN_MIB = 2048`) and the producer has
+# always printed `mem_available_mib` and `engine_rss_mib`, and yet no published cell ever banded
+# either number: 204 ticks wrote headroom into prose ("MemAvailable 20 664 of 61 953") and moved on.
+# That prose hid a regime change. Through the whole of 16 Nov up to 07:19 the retired generation
+# 175316 sat at MemAvailable 17 675-21 441 MiB with 16 062-16 839 MiB of swap in use; the live
+# generation 438502, sampled five times from 10:07 to 12:40, reads MemAvailable 6 618 -> 4 938 MiB
+# with swap in use FLAT at 65 MiB. The two free columns moved in OPPOSITE directions across the
+# restart: the engine stopped swapping (which is why the morning's page-in storms — 6.82x, 6.91x,
+# 10.69x of the swap ceiling — simply stopped) and spent almost 15 GiB of RAM headroom re-holding in
+# RAM what it used to hold in swap. The failure mode this box carries has therefore moved from
+# "swap throughput" to "distance to the gate's own memory floor", and a table that bands only rates
+# cannot see that at all.
+#
+# What is deliberately NOT done here: no ceiling is registered, no rule is armed, and the projection
+# row is labelled a projection in its own cell. The floor this block quotes is the gate's OWN
+# constant, read out of the gate source by `gate_constants()`, so the table can disagree with a tick
+# note and never with the gate.
+
+MEM_SLOPE_FLAT_MIB_PER_H = 1.0     # below this the trend cell says FLAT instead of projecting
+MEM_ATTRIBUTION_MIN = 0.80         # share of a headroom fall an RSS growth must explain to be
+                                   # called ATTRIBUTED; below 0.20 it is called UNATTRIBUTED
+MEM_PROJECTION_MIN_DRAWS = 3       # a straight line through two points is not a trend
+MEM_GEN_PRINT = 3                  # generations printed per scope: the NEWEST ones, because a
+                                   # trajectory row exists to say what happens next, and the whole-
+                                   # corpus scope would otherwise print 15 of them
+
+
+def _monotone_tail(rows, key):
+    """The trailing strictly-monotone run of one column of a row list, oldest-first.
+
+    Returns (run, direction) where direction is 'down' / 'up' / 'flat' and `run` is a slice of the
+    ROWS, not of the numbers: every cell that needs the trend also needs the file names and the
+    timestamps behind it (taking the numeric slice and then reaching back for rows is how the first
+    draft of this cell crashed on live bytes). A series of one row has no direction, and a mixed
+    series still yields its trailing monotone run, because the decision this feeds ("what happens
+    next") only follows the run that is currently open.
+    """
+    if len(rows) < 2:
+        return rows, None
+    n = len(rows)
+    d = None
+    run = 1
+    for i in range(n - 1, 0, -1):
+        step = key(rows[i]) - key(rows[i - 1])
+        cur = "down" if step < 0 else ("up" if step > 0 else "flat")
+        if d is None:
+            d = cur
+        elif cur != d:
+            break
+        run += 1
+    return rows[n - run:], d
+
+
+def memory_headroom_text(scopes, consts):
+    """MemAvailable / swap-in-use / engine-RSS as a per-generation state with a computed trend.
+
+    Three claims this block refuses to merge, each because the corpus has already shown the merge
+    being wrong: (a) headroom belongs to an ENGINE GENERATION, not to the box (tick 202's lesson,
+    applied to a column that block never touched); (b) a headroom fall is either attributed to the
+    sampled process's own RSS growth or named unattributed, never assumed; (c) a slope is a
+    projection, so the cell that prints it prints the word."""
+    floor = consts["MEM_AVAILABLE_MIN_MIB"]
+    L = []
+    per = []
+    for label, rows in scopes:
+        have = [r for r in rows if r["avail"] is not None]
+        newest = None
+        for r in have:
+            if newest is None or r["ts"] > newest["ts"]:
+                newest = r
+        low = None
+        for r in have:
+            if low is None or r["avail"] < low["avail"]:
+                low = r
+        gens = {}
+        for r in sorted(rows, key=lambda r: r["ts"]):
+            if not r["pid"]:
+                continue
+            g = gens.setdefault(r["pid"], dict(rows=[], first=r["ts"], last=r["ts"]))
+            g["rows"].append(r)
+            if r["ts"] < g["first"]:
+                g["first"] = r["ts"]
+            if r["ts"] > g["last"]:
+                g["last"] = r["ts"]
+        newest_pid = newest["pid"] if newest and newest["pid"] else None
+        per.append(dict(label=label, n=len(rows), have=have, newest=newest, low=low,
+                        bad=[r for r in rows if r.get("rss_bad")],
+                        gens=gens, newest_pid=newest_pid,
+                        nopid=sum(1 for r in rows if not r["pid"])))
+
+    def cell(fn):
+        return " / ".join("%s: %s" % (p["label"], fn(p)) for p in per)
+
+    def cov(p):
+        miss = p["n"] - len(p["have"])
+        return ("%d of %d readings carry a parseable `mem_available_mib`%s"
+                % (len(p["have"]), p["n"], (", %d do not" % miss) if miss else ""))
+    L.append("| memory-headroom coverage in this scope | %s |" % cell(cov))
+
+    def band(p):
+        if not p["have"]:
+            return "no denominator — no reading in this scope carries `mem_available_mib`"
+        vs = sorted(r["avail"] for r in p["have"])
+        return ("min %s MiB (`%s`), median %s MiB, max %s MiB over %d reading(s)"
+                % (mib(p["low"]["avail"]), p["low"]["name"], mib(median(vs)),
+                   mib(vs[-1]), len(vs)))
+    L.append("| MemAvailable band in this scope | %s |" % cell(band))
+
+    def against_floor(p):
+        if not p["have"]:
+            return "no denominator — no `mem_available_mib` in this scope"
+        r = p["newest"]
+        d = r["avail"] - floor
+        base = ("newest draw `%s` reads %s MiB against the gate's own floor "
+                "`MEM_AVAILABLE_MIN_MIB` = %s MiB (rule `mem-available-low`) → "
+                % (r["name"], mib(r["avail"]), mib(floor)))
+        if d < 0:
+            if r["rc"] == 0:
+                return (base + "BELOW THE FLOOR AND THE GATE LAUNCHED IT — the gate's own memory "
+                        "rule did not fire on this reading: a gate/census contradiction, not a "
+                        "reporting difference")
+            return (base + "BELOW the floor by %s MiB — the memory rule refuses such a window "
+                    "(this reading's verdict: %s)" % (mib(-d), RC_WORD.get(r["rc"], r["rc"])))
+        return (base + "ABOVE the floor by %s MiB (%.2fx the floor; verdict %s)"
+                % (mib(d), r["avail"] / floor, RC_WORD.get(r["rc"], r["rc"])))
+    L.append("| the newest reading's headroom against that floor | %s |" % cell(against_floor))
+
+    def closest(p):
+        if not p["have"]:
+            return "no denominator — no `mem_available_mib` in this scope"
+        r = p["low"]
+        d = r["avail"] - floor
+        later = sum(1 for x in p["have"] if x["ts"] > r["ts"])
+        word = ("THE MINIMUM IS THE NEWEST DRAW (headroom is falling, not resting)"
+                if later == 0 else
+                "the minimum sits %d reading(s) before the newest draw, which reads %s MiB"
+                % (later, mib(p["newest"]["avail"])))
+        return ("closest approach to the floor in this scope: %s MiB (`%s`), %s MiB above it; %s"
+                % (mib(r["avail"]), r["name"], mib(d), word))
+    L.append("| closest approach to that floor in this scope | %s |" % cell(closest))
+
+    def traj(p):
+        if not p["gens"]:
+            return ("no denominator — no reading in this scope carries an engine pid, so no "
+                    "headroom trajectory can be attributed to a process")
+        items = sorted(p["gens"].items(), key=lambda kv: kv[1]["first"])
+        shown = items[-MEM_GEN_PRINT:]
+        parts = []
+        for pid, g in shown:
+            ser = [r for r in g["rows"] if r["avail"] is not None]
+            if not ser:
+                parts.append("pid %s — %d readings, no `mem_available_mib`" % (pid, len(g["rows"])))
+                continue
+            run, direction = _monotone_tail(ser, lambda r: r["avail"])
+            d = ("monotonically %s over the last %d draw(s)" % (direction, len(run))
+                 if direction else "single draw")
+            used = [r["used"] for r in g["rows"] if r["used"] is not None]
+            rss = [r["rss"] for r in g["rows"] if r["rss"] is not None]
+            parts.append("pid %s — %d draw(s), MemAvailable %s → %s MiB (Δ %s %s MiB, %s), "
+                         "swap in use %s → %s MiB, engine RSS %s → %s MiB"
+                         % (pid, len(ser), mib(ser[0]["avail"]), mib(ser[-1]["avail"]),
+                            ("+" if ser[-1]["avail"] >= ser[0]["avail"] else "−"),
+                            mib(abs(ser[-1]["avail"] - ser[0]["avail"])), d,
+                            (mib(used[0]) if used else "no key"),
+                            (mib(used[-1]) if used else "no key"),
+                            (mib(rss[0]) if rss else "no key"),
+                            (mib(rss[-1]) if rss else "no key")))
+        withheld = len(p["gens"]) - len(parts)
+        txt = "%d generation(s) with headroom draws: %s" % (len(p["gens"]), "; ".join(parts))
+        if withheld > 0:
+            txt += " (%d not printed)" % withheld
+        return txt
+    L.append("| MemAvailable / swap-in-use / engine-RSS trajectory per engine generation "
+             "(the free columns belong to a process, not to the box) | %s |" % cell(traj))
+
+    def attrib(p):
+        if p["newest_pid"] is None or p["newest_pid"] not in p["gens"]:
+            return "no denominator — the newest headroom draw carries no engine pid"
+        g = p["gens"][p["newest_pid"]]
+        ser = [r for r in g["rows"] if r["avail"] is not None and r["rss"] is not None]
+        if len(ser) < 2:
+            return ("no denominator — the newest generation pid %s has %d draw(s) carrying BOTH "
+                    "`mem_available_mib` and `engine_rss_mib`" % (p["newest_pid"], len(ser)))
+        a0, a1 = ser[0]["avail"], ser[-1]["avail"]
+        r0, r1 = ser[0]["rss"], ser[-1]["rss"]
+        span = (ser[-1]["ts"] - ser[0]["ts"]).total_seconds() / 60.0
+        base = ("newest generation pid %s, `%s` → `%s` over %.0f min: MemAvailable %s → %s MiB, "
+                "engine RSS %s → %s MiB. "
+                % (p["newest_pid"], ser[0]["name"], ser[-1]["name"], span,
+                   mib(a0), mib(a1), mib(r0), mib(r1)))
+        if a1 >= a0:
+            return base + ("headroom did NOT fall in this generation (Δ +%s MiB), no attribution owed"
+                           % mib(a1 - a0))
+        fall = a0 - a1
+        grow = r1 - r0
+        if grow <= 0:
+            return (base + "UNATTRIBUTED: the engine's own RSS did not grow (Δ %s MiB) while "
+                    "headroom fell %s MiB, so the memory went somewhere this producer does not "
+                    "sample" % ("−" + mib(-grow), mib(fall)))
+        frac = grow / fall
+        residual = fall - grow
+        word = ("ATTRIBUTED TO THE SAMPLED ENGINE" if frac >= MEM_ATTRIBUTION_MIN
+                else ("PARTIALLY ATTRIBUTED" if frac >= 0.20 else "UNATTRIBUTED"))
+        return (base + "%s: RSS grew %s MiB against a headroom fall of %s MiB — the sampled engine "
+                "accounts for %.0f %s of it, residual %s MiB"
+                % (word, mib(grow), mib(fall), 100.0 * frac, "%", mib(abs(residual))))
+    L.append("| how much of the newest generation's headroom change its own RSS change explains | %s |"
+             % cell(attrib))
+
+    def trend(p):
+        if p["newest_pid"] is None or p["newest_pid"] not in p["gens"]:
+            return "no denominator — the newest headroom draw carries no engine pid"
+        ser = [r for r in p["gens"][p["newest_pid"]]["rows"] if r["avail"] is not None]
+        run, direction = _monotone_tail(ser, lambda r: r["avail"])
+        if direction != "down":
+            return ("newest generation pid %s: %s — no projection is admissible"
+                    % (p["newest_pid"],
+                       ("only %d headroom draw(s)" % len(ser)) if len(ser) < 2
+                       else "NOT DECREASING"))
+        if len(run) < MEM_PROJECTION_MIN_DRAWS:
+            return ("newest generation pid %s: TOO FEW MONOTONE DRAWS (%d of %d) — a line through "
+                    "two points is not a trend, no projection" % (p["newest_pid"], len(run),
+                                                                  len(ser)))
+        span = (run[-1]["ts"] - run[0]["ts"]).total_seconds() / 60.0
+        if span <= 0:
+            return "newest generation pid %s: the monotone draws share one timestamp — no rate" % (
+                p["newest_pid"],)
+        per_h = (run[0]["avail"] - run[-1]["avail"]) * 60.0 / span
+        cadence = span / (len(run) - 1)
+        base = ("newest generation pid %s: %d consecutive decreasing draws `%s` → `%s` lost %s MiB "
+                "over %.0f min = −%.1f MiB/h, mean cadence %.1f min"
+                % (p["newest_pid"], len(run), run[0]["name"], run[-1]["name"],
+                   mib(run[0]["avail"] - run[-1]["avail"]), span, per_h, cadence))
+        if per_h < MEM_SLOPE_FLAT_MIB_PER_H:
+            return base + "; FLAT at this resolution — no projection"
+        last = run[-1]["avail"]
+        if last <= floor:
+            return base + "; the newest draw already sits at or below the floor"
+        mins = (last - floor) * 60.0 / per_h
+        return (base + "; PROJECTION (not a promise, one generation, n=%d): at that constant slope "
+                "the gate's own %s MiB floor arrives ≈%.0f min after `%s`, about %d further readings"
+                % (len(run), mib(floor), mins, run[-1]["name"], int(mins // cadence)))
+    L.append("| headroom trend of the newest generation, and what it projects against that floor | %s |"
+             % cell(trend))
+
+    def flip(p):
+        items = sorted(p["gens"].items(), key=lambda kv: kv[1]["first"])
+        pairs = []
+        for (pida, ga), (pidb, gb) in zip(items, items[1:]):
+            ra = next((r for r in reversed(ga["rows"]) if r["avail"] is not None), None)
+            rb = next((r for r in gb["rows"] if r["avail"] is not None), None)
+            if ra is None or rb is None:
+                continue
+            pairs.append((pida, pidb, ra, rb))
+        if not pairs:
+            return ("no denominator — this scope holds %d generation(s) with headroom draws, so "
+                    "there is no restart to compare across" % len(p["gens"]))
+        parts = []
+        for pida, pidb, ra, rb in pairs[-(MEM_GEN_PRINT - 1):]:
+            da = rb["avail"] - ra["avail"]
+            # The swap column is read from the SAME two rows the headroom delta comes from: the pair
+            # this row describes is one window of the old process and one window of the new one, so
+            # borrowing each column from a different row would invent a pairing.
+            ua, ub = ra["used"], rb["used"]
+            if ua is None or ub is None:
+                parts.append("pid %s → %s: ΔMemAvailable %s MiB, swap-in-use key absent → "
+                             "ONE-SIDED (only the headroom column is comparable)"
+                             % (pida, pidb, ("+" if da >= 0 else "−") + mib(abs(da))))
+                continue
+            du = ub - ua
+            if du < 0 and da < 0:
+                word = ("REGIME FLIP — swap in use fell %s MiB (%s → %s) while MemAvailable fell %s "
+                        "MiB (%s → %s) across the restart: the new process re-admitted what the old "
+                        "one held in swap and spent RAM headroom doing it, so the rate rules went "
+                        "quiet while the memory floor got closer"
+                        % (mib(-du), mib(ua), mib(ub), mib(-da), mib(ra["avail"]), mib(rb["avail"])))
+            elif du < 0 and da > 0:
+                word = ("RECOVERY — swap in use fell %s MiB while headroom ROSE %s MiB"
+                        % (mib(-du), mib(da)))
+            elif du > 0 and da < 0:
+                word = ("REGIME FLIP, OUTWARD — swap grew %s MiB while headroom fell %s MiB"
+                        % (mib(du), mib(-da)))
+            elif du == 0:
+                word = ("SWAP IN USE UNCHANGED (%s MiB both sides) while MemAvailable moved %s %s MiB"
+                        % (mib(ua), "+" if da >= 0 else "−", mib(abs(da))))
+            else:
+                word = ("ONE-SIDED — Δswap in use %s %s MiB, ΔMemAvailable %s %s MiB"
+                        % ("+" if du >= 0 else "−", mib(abs(du)),
+                           "+" if da >= 0 else "−", mib(abs(da))))
+            parts.append("pid %s (`%s`) → pid %s (`%s`): %s"
+                         % (pida, ra["name"], pidb, rb["name"], word))
+        withheld = len(pairs) - len(parts)
+        txt = "; ".join(parts)
+        if withheld > 0:
+            txt += " (%d older restart pair(s) not printed)" % withheld
+        return txt
+    L.append("| do the two free columns move in OPPOSITE directions when the engine generation "
+             "changes? | %s |" % cell(flip))
+    L.append("| readings in this scope with no engine pid, excluded from every trajectory above | %s |"
+             % cell(lambda p: "%d of %d readings" % (p["nopid"], p["n"])))
+
+    def badrss(p):
+        if not p["bad"]:
+            return "none (every `engine_rss_mib` in this scope is at or below `mem_total_mib`)"
+        det = ["`%s` reads %s MiB against `mem_total_mib` = %s MiB"
+               % (r["name"], mib(r["rss_bad"][0]), mib(r["rss_bad"][1])) for r in p["bad"][:3]]
+        return ("%d reading(s) carry an engine RSS larger than the machine's total memory and are "
+                "excluded from every delta above: %s%s"
+                % (len(p["bad"]), "; ".join(det),
+                   (" (%d more not printed)" % (len(p["bad"]) - 3)) if len(p["bad"]) > 3 else ""))
+    L.append("| readings whose `engine_rss_mib` exceeds the box's own `mem_total_mib` "
+             "(an impossible field value: reported, named, and never used in arithmetic) | %s |"
+             % cell(badrss))
+    return L
+
+
 def build(rows, as_of, consts, day, window_hours, legs_started):
     go = [r for r in rows if r["rc"] == 0]
     nogo = [r for r in rows if r["rc"] == 3]
@@ -2005,6 +2347,27 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("sampled generation has ever recorded a footprint above 0 MiB (ZERO-FOOTPRINT GENERATION).")
     L.append("A zero draw is never dropped from the coverage count — it is a real measurement — it just")
     L.append("stops being able to pose as a ceiling.")
+    L.append("")
+    L.append("**The two FREE columns, and the regime change that prose had been hiding (census v13,")
+    L.append("2026-11-16, tick 205).** Every rule this table bands is a RATE over one 6 s window, and")
+    L.append("the gate's memory rule (`mem-available-low`, floor `MEM_AVAILABLE_MIN_MIB`, read out of")
+    L.append("the gate source at run time like every other ceiling) was the one threshold in force that")
+    L.append("no published cell ever quoted a distance to. 204 ticks of prose wrote MemAvailable into a")
+    L.append("sentence next to a verdict and never trended it, and that prose hid a regime change:")
+    L.append("generation 175316 ran 15-16 Nov at MemAvailable 17 675-21 441 MiB with 16 062-16 839 MiB")
+    L.append("of swap in use, and the live generation 438502 runs at 4 938-6 618 MiB with swap in use")
+    L.append("flat at 65 MiB. The two free columns moved in OPPOSITE directions across that restart —")
+    L.append("which is also why the morning's page-in storms (6.82x, 6.91x and 10.69x of the swap")
+    L.append("ceiling, ticks 196/199/200) simply stopped: there was nothing left swapped to page in.")
+    L.append("The block below therefore states headroom as a per-generation STATE with a computed")
+    L.append("trend, attributes a headroom fall to the sampled process's own RSS growth or names it")
+    L.append("UNATTRIBUTED, and labels its own forward look a projection in the cell that prints it.")
+    L.append("No ceiling is registered here and no rule is armed: the numbers this block prints are the")
+    L.append("evidence a decision would need, not the decision.")
+    L.append("")
+    L.extend(memory_headroom_text([("DAY `%s`" % day, day_rows),
+                                   ("last %d h" % window_hours, win_rows),
+                                   ("whole corpus", rows)], consts))
     L.append("")
     L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")
     L.append("over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14")
