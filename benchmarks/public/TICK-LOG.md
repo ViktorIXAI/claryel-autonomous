@@ -646,3 +646,171 @@ Next: the reading-count band is recomputed at every cut, so the only forward-loo
 line now carries the sampling cadence it was divided by. If a future draw prints `BELOW the floor`,
 that is the gate's own `mem-available-low` rule refusing, attributed by the v9 rule table in the same
 run. The queue stays empty until a new ladder item is pre-registered.
+
+## Tick 207 — 2026-11-16 14:38 CET: the endpoint moved to a new engine build and no stored reading can show it — every refusal this line recorded today belongs to a process that no longer exists, while the live build has never once been refused (9 GO / 0 NO-GO)
+
+**Queue state (mechanical, zero judgement).** `scripts/pub_three_arm_parity_check.py`:
+**49 rows / 9 sets / 0 findings** (contour stamp `0.0.2.56`, Grok not an arm) — unchanged from ticks
+183-206, so item P0 stays empty and the ladder is empty as arithmetic, not scheduling.
+`scripts/pub_grok_resume_check.py --as-of 2026-11-16` read unshielded with the code captured on the
+next line: **22 checks, exit 3**, `RESUME GATE: NO-GO - do not spend quota`, **182 ids VOID, not a
+queue**, `ifeval` pin unchanged at **359 rows / 359 ok** sha256-16 `01c1ee0b6e7f6d5d`.
+`systemctl --user list-units --all 'parb-*' --no-legend` printed **0 lines**, `pgrep` for
+`pub_bench_run.py` and for `gate_ru[n].py` **0 hits each** (counted in a standalone call, so the
+measuring shell cannot self-match). Nothing launched or stopped this tick;
+`~/pub-bench/GROK-CANCELLED` untouched, no window guard re-armed.
+
+**One standing producer reading: `preflight-20261116-1438.txt` → GO, gate rc 0** (wrapper run bare,
+never wrapped in a redirect; the gate then re-run unshielded against the stored file with the code
+taken on the line after the call — tick 173's trap respected). Swap **0.0 in + 0.0 out = 0.00x** of
+the `SWAP_RATE_MAX_MIB_S = 20.0` mean ceiling, in-window peak **0.0**; footprint
+`engine_vmswap_mib` **0 MiB of 65 MiB** swap in use with `swap_cached` 10 MiB (15.4 %);
+**MemAvailable 4 430** of 61 953 while **SwapFree 65 470** of 65 535; engine **S** at sampled pcpu
+**1.1**, RSS **54 915** MiB; GPU mean **0.0 % / peak 0 %** at 26.40 W; whole-disk reads **0.1**
+(`blk_scope=whole-disk`, top reader `basalt`); load1 **4.86**; `/health` **200** + `loaded`,
+`engine_serve_procs 1`, `foreign_legs 0`. This is the **first GO since 03:49** — a five-reading
+refusal run ended (289 minutes). Window transition (stdout evidence only): both windows hold
+**32 readings**, launchable **13 → 14 = +1 entering GO − 0 aged-out GO**, the aged-out file named by
+the tool (`preflight-20261115-1414.txt`, rc 3) and the entering one this GO (rc 0).
+
+**The tick's finding: a generation counter built from process ids answers "did this process swap?",
+never "was this build ever refused" — today those two questions gave opposite answers.** The census
+attributes every reading to the producer's own `# engine pid=` line. At this cut the day splits
+**pid 175316 — 11 readings, 2 GO / 9 NO-GO** (last sampled `preflight-20261116-0719.txt`) versus
+**pid 438502 — 9 readings, 9 GO / 0 NO-GO** (first `preflight-20261116-1007.txt`, newest
+`preflight-20261116-1438.txt`, age 04:38:42 at the reading, i.e. started 09:59:18). So **all nine of
+today's refusals were recorded against a process this cut no longer samples**, and the live process
+has produced **zero refusals in nine windows**: the day's firing rules (`swap-rate` 8 fired / 7
+sole, `engine-state-D` 2, `device-read` 1, `gpu-busy` 1, `idle-spin` 0) are retired-generation
+evidence on the live endpoint, exactly the class the `GENERATION-STALE` sentence has been printing
+about the footprint ceiling's binding value (`9 499 MiB`, pid 175316) since tick 202 — today it
+applies to the whole refusal set, not just to one maximum. Meanwhile the one rule the live process
+is demonstrably walking toward, `mem-available-low` (floor `MEM_AVAILABLE_MIN_MIB = 2048`), has
+fired **0 times at all three scopes over 174 readings**.
+
+**The engine-build change, read three ways over the repo-standard key, read-only, zero model calls.**
+(a) The live engine process names a binary under a `<LOCAL_PATH>/basalt-040/` path, while the older
+serve log belongs to the pre-swap binary; (b) the **old** build's log header prints
+`[server] engine ctx=262144 kv=int8 resident-experts expert-cache=auto prefill=auto
+vram-reserve=512MiB (from config)` and `[server] sampling temp=1.0 top_p=0.95 top_k=20`, while the
+**live** build's log prints `[server] weights loaded, ctx=196608 images=on`,
+`reserve=500MiB resident-budget` and `kv 0.7/3.0GiB cuda0 elastic` — and **no sampling line at
+all**; (c) the live `/health` body advertises `"max_context": 196608` with
+`"model": "qwen3.8-flash-next-iq3_s-basalt"`, `loaded: true` (body sha256-16 `b4d6a41750d9eafd`).
+Two consequences, both measured rather than assumed:
+
+1. **Capacity.** The serve-side max context fell **262 144 → 196 608** (−65 536, −25 %). The margin
+   for this line's in-force sets was then computed offline: across the **12 published contour
+   ledgers** (4 641 rows carrying a positive `ptok`) the largest prompt token count on this line is
+   **2 812** (`gpqa-diamond` contour-matched ledger), i.e. **69.9x below** the new ceiling, and the
+   largest single prompt in any pinned task file is **5 700 characters** (`gpqa-diamond`; next
+   `mmlu-pro` 5 209, `livecodebench` 4 174, `bfcl` 3 804). The context drop therefore cannot produce
+   a capacity reject on any in-force set, and that was established at **zero model calls** — which is
+   the pre-launch check the brief asks for, done before any leg is conceivable rather than after.
+2. **Sampling tail.** Neither of this line's transports has ever sent `top_p`/`top_k`: the bare
+   runner sends `model/messages/temperature/max_tokens/stream` with `TEMP = 0.7` pinned, and the
+   bare-shape contour leg sends exactly those five keys (`harness/gate_shape_parity_test.py`,
+   `BARE_KEYS`; `harness/gate_run.py` pins `"temperature": 0.7` in both shape branches). So the
+   sampling tail has always been the serve's default — the difference is that the **old build
+   disclosed it** (`top_p=0.95 top_k=20`) and the **live build does not disclose it anywhere in its
+   log**. Any future percent row on this endpoint must state the tail as "serve default, undisclosed
+   by the live build"; `PARB_ENGINE_NOTE` (the launcher-captured engine note, tooling release
+   2026-11-13) is the only mechanism that captures engine identity at leg start.
+
+**The stamp that has still never been used.** A census over every shipped
+`benchmarks/public/arms/*answers*.jsonl` printed **files with the stamp: 0** — no published answer
+row carries `engine_sha256_16`. So every bare and contour percent this line publishes (the
+2026-11-08..11 local arms) remains attributable to a serving build only from dated prose, exactly as
+the 13.11 comparability note said. Today is the **first build change since that stamping shipped**,
+and it still moves no published row's attribution: the live body hash `b4d6a41750d9eafd` is the
+value a *new* leg's rows would carry, and there is no leg.
+
+**The state the box is actually walking toward (headroom, not a rate).** Newest draw reads
+**4 430 MiB** against the gate's own floor **2 048 MiB** — **ABOVE by 2 382 MiB (2.16x)** — and the
+closest approach in every scope **is the newest draw**, i.e. headroom is falling, not resting. The
+live generation's **9 consecutive decreasing draws** lost **2 188 MiB over 271 min = −484.4 MiB/h**,
+and the sampled engine explains it: RSS **52 711 → 54 915 MiB (+2 204)** = **101 %** of the fall,
+residual 16 MiB. The published projection at that constant slope: the 2 048 MiB floor arrives
+**≈295 min after the newest draw** (≈19:33 CET on this box's clock), expressed in readings as the
+band the run's own cadence supports — **4-32 further draws**, because its 8 intervals span **9-61
+min, mean 33.9** (a 6.8x spread). This is a projection, not a forecast (one generation, n=9), and a
+restart resets the series: the same block records the restart pair as a **REGIME FLIP** (swap in use
+fell 16 774 MiB while MemAvailable fell 12 679 MiB — the new process re-admitted what the old one
+held in swap and spent RAM headroom doing it).
+
+**Census (`pub-preflight-census-v14`, gate sha16 unchanged `dd2f0e4fa0255fa5`, re-hashed: no gate
+byte moved).** Window `as-of 2026-11-16 14:38`: **174 readings = 86 GO / 82 NO-GO / 6 input gaps**;
+as-of day **20 readings (11 GO / 9 NO-GO / 0 gap)**; launchable-in-24 h **14**. Coverage: swap-peak
+key **79** (NaN 2, parseable **77**), gate-judged with a parseable peak **75**; readings carrying
+`engine_vmswap_mib` **56**; page-cache share median **44.8 %**, max 65.2 %. Footprint groups:
+launchable **20** (median 3 940, max **9 499**), refused **36** (median 7 130, min 3 357, max
+10 770) → separation **OVERLAPPING**, dry-run ceiling `> 9 499 MiB` fires on **0 of 20** launchable
+and **6 of 36** refused, state **FIRING-AT-MINIMUM-CEILING**, ceiling owner pid 175316 →
+**GENERATION-STALE**; the newest generation answered **0 MiB in all 9** of its windows →
+**ZERO-FOOTPRINT GENERATION**. **Arming counters 29 of 30 (peak) and 20 of 30 (footprint, 11
+non-zero / 9 zero, state INFORMATIVE)**: one launchable window from the peak rule's arming
+threshold, and the published consequence already says reaching 30 changes nothing, because the peak
+band is **CROSSED** (highest launchable peak 111.4 MiB/s ≥ lowest mean-failing peak 95.4) — "on this
+corpus a peak rule adds no refusal the mean rule does not already make". Day band recomputed at this
+cut: launchable swap draws **11 (0.00-0.05x)**, swap-rule refusals **8 (1.27-10.69x, median 6.223x)**,
+rule's own boundary **accepted up to 0.94x / refused from 1.27x, EMPTY BY CONSTRUCTION**. Rule
+cross-check AGREES at all three scopes. `--check` before the regen **rc 1** (**214 drift lines /
+114 changed table lines**, every one an enumerated consequence of one entering GO at the 14:38 cut),
+after the regen **rc 0**.
+
+**Gates on this head.** `scripts/push_ready.sh` **rc 0** with `pub gate rows: 6`, each carrying its
+own status: manifest `VERIFY PASS` (id `05efb4b1dd703597`, unchanged), links **155 across 345
+markdown files**, docs `DOCS POLICY: PASS (push)`, gitleaks **status 0**, infra-sec
+`"total_findings": 0`, then arms index **drift 0**, derived percents **42 recomputed / 0 findings**,
+grok cells **9 / 0**, superseded cells **9 / 0**, digest rows **49 / 0**, three-arm parity
+**49 / 9 / 0** — all **status 0**, no `MISSING` row. Census `--check` **rc 0** at the 14:38 cut. The
+pinned pair was re-run on untouched files: `harness/pub_preflight_census_test.py` **308/308**,
+`harness/pub_preflight_test.py` **117/117**. The wider PUB contract suite beyond those was **not
+re-run and that is stated, not silent**: the only two tracked bytes this tick moves are the generated
+census table and this log block — no gate, scorer, bank, contour or census-tool byte changed — and
+CI's `static-qa` re-runs the pinned tests by glob on the pushed commit regardless.
+
+**Machine state.** `jobs.json`: **36 jobs** (the table grew by 2 since tick 199's 34 — other lines'
+jobs, named here only as a count because this tick did not create or edit them), **6
+`enabled=false`**, **zero jobs with a non-null `paused_reason`** — no drain-paused job to self-heal.
+`executions.db`: exactly **one** `status='running'` row, this job `288a66f93167` (started 14:37:37) —
+no sibling writer holds the tree, and `origin/main` equals `HEAD` at check time, so this push is a
+plain fast-forward. Frozen-line watchers `f23cf5d48e11` (`Mac v2.2 full after v2.1`) and `a808c7f205a6`
+(`P2005 paired full 2.1→2.2 watch`) still fire every 5 min (completed 14:35:37 / 14:40:37) and remain
+inert only behind the launch-state marker, re-verified on the literal path (26 B, mtime
+**2026-11-02 14:05**); closing them stays an **owner decision**. Drain-resumer `9a12508f8a69`
+completed 14:40:37. Docs freshness: **the brief's daily dirty-tree error reproduced again** —
+`ef7ea47ff99b` failed at **03:00:37** today; reported per the brief, not silenced by committing
+in-flight work; next run 2026-11-17 02:00 UTC. Second worktree (`~/projects/strata-autonomous-harness`)
+**40th tick**: `git diff --cached` **empty** (staged-deletion hazard not armed), detached at
+`69390e6`, `git merge-base --is-ancestor` says **ancestor of `main`**, `git log HEAD..main` = **6
+commits** (merely stale, no orphan work), `git status --porcelain` **7 paths** = 1 modified
+(`hardware/os-snapshots/latest.json`) + 6 untracked fleet snapshots 2026-11-11…16 — the owning
+workstream's decision, **no foreign path committed** by this line. Tick 206's quarantine held: that
+worktree's `benchmarks/public/raw` now holds **8 tracked names** and `git status --porcelain` there
+is **empty**.
+
+**Credit.** **Zero model calls, zero cloud calls, zero GPU seconds, zero discarded arm bytes, no leg
+started or stopped**, hence **no `LEG-INCIDENTS.md` entry owed** — including the endpoint restart at
+**09:59:18**, which was **not mid-leg for this line**: zero legs of this line ran today (ticks
+201-206 each record "no leg started or stopped"), zero `parb-*` units at the restart minute and now,
+and no arm file of this line changed mtime. Against the endpoint: one producer reading with its own
+sampler plus three bounded read-only reads (two log headers with `grep -m`/`head` bounds, one
+process line, one `/health` GET) — nothing written on the box. Plus the census regen and this block.
+**No published benchmark percent moved, none needed to.**
+
+**Next.** The queue is unchanged and mechanically empty, so what runs next is an **owner decision**
+(a new set, a new hypothesis, or the standing leftovers: issues #42/#44, the LCB hidden-battery
+release asset, the still-firing frozen-line watchers, and the ops line's call on the masked doc's
+serial/MAC prose). One candidate change is named for the next tick rather than half-landed here: the
+producer already reads one `/health` body for `health_loaded` + `engine_serve_procs` but keeps
+**neither the body nor its capacity field**, so the census can attribute a reading to a **pid** and
+never to a **build** — today's swap (max context −25 %, sampling header gone, binary path moved) is
+invisible to all 174 stored readings. The seam is the `health_loaded` pattern itself: two
+optional-but-binding keys (body hash, advertised `max_context`) so a build change becomes a
+generation boundary the table can name, shipped with a replay proof over the stored corpus
+(the key is absent from every one of them, so 0 verdict moves expected) and its contract test in the
+same commit. Not started this tick: a gate-byte change without that proof is worse on a frozen line
+than a zero-change tick. One line for the next tick: **pid generations and build generations are
+different axes, and this cut proves the two can disagree** — the live build is 9-for-9 GO while
+every refusal in the table belongs to a build that is no longer running.
