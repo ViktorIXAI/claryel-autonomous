@@ -252,3 +252,42 @@ Next tick's question: three rules (`health-code-not-200`, `mem-available-low`,
 so their derivations are pinned by fixtures, not by real bytes. And the footprint
 dry-run ceiling must be re-drawn from generation 438502's readings before any arming
 decision: pre-registering from 9499 MiB would be pre-registering a retired process.
+
+### 10:55 follow-up inside the same tick: the endpoint's engine moved twice while the census was being written
+
+The 10:07 gate-GO and a second gate-GO at 10:35 both belong to engine process `438502`, which
+started 09:59 and runs a **newer Basalt build from a different directory** than the one process
+`175316` served with (that process started 14 Nov 16:31 and was last sampled at 07:19). The day
+scope therefore prints 2 generations over 13 readings, and the row carrying the footprint ceiling's
+binding number still reads GENERATION-STALE at every cut: the launchable footprint maximum
+9499 MiB comes from `preflight-20261116-0019.txt` of pid 175316, while the newest reading of the
+scope sampled pid 438502. One honest limit of the new attribution: a reading names a **process**,
+not a build — the producer stores only the pid, so which engine binary that pid ran is a box-side
+fact this table cannot see. That is the second reason a footprint ceiling may not be carried across
+an engine swap, and it is why the census refuses to pool across generations instead of pretending
+the pid is enough.
+
+Two consequences, closed mechanically in this tick:
+- The local runner's fetched key/profile file still carried the **pre-swap model alias**. Launched as
+  it stood, every row would have finished in ~0.0 s with `HTTP Error 404` while the runner still
+  reported a full record count — the known broken-endpoint signature, not a model result. The alias
+  in that untracked profile now names the served model; the key bytes were verified unchanged by
+  hash only and never printed; live auth was confirmed with ONE bounded chat-completions call naming
+  that alias. On this engine `GET /v1/models` answers 401 even with a valid key, so it is not an
+  auth test — the probe has to be a completion.
+- The published local bare rows sit on the **pre-swap build**: the 2026-11-08..11 arms carry no
+  serving-engine stamp at all (recorded in the runner's own header). A bare row taken on the new
+  build describes a different endpoint state, so a contour-parity pair must be drawn inside one
+  engine window. The tooling already supports proving that: each leg writes a leg-level engine note
+  and every row carries `engine_sha256_16` from the `/health` body, so a mid-leg swap stays visible
+  per row and two rows can be shown to share one engine or not.
+
+No leg was launched at this cut, and that is a decision, not a stall. The three-arm parity census
+reports 0 findings across the 9 in-force sets (the ladder holds no open item), the footprint rule's
+arming counter stands at 13 of 30 launchable windows carrying the field (the swap-peak rule at
+22 of 30), and the endpoint box is inside a Basalt-version campaign of its own: the serve log was
+renamed at 10:00, probe and A/B scripts were written 09:53-10:01, and the GPU read 99 % utilisation
+at 157 W at 10:35 while the producer's 6 s window averaged 4.7 %. A percent row taken inside
+somebody else's version campaign is not attributable to a named engine build, so the next tick
+launches only after a fresh reading taken at launch time, and the footprint ceiling stays
+GENERATION-STALE until windows of the live generation carry it.
