@@ -100,6 +100,26 @@ prints the same band arithmetic at three scopes — the `as-of` calendar day, th
 state word naming the widest and narrowest interval at this cut. Census stamp `v6` -> `v7`; v1-v6
 tables stay published as written.
 
+A fourth defect in the SAME column (2026-11-16 02:55, tick 196): the band's bounds mixed two
+denominators while a single row quoted one claim. `go_max`/`ref_min` bound the interval on the gate
+VERDICT (the GO column), and the row label plus every tick sentence read it as the swap RULE's
+resolution. On the committed 2026-11-16 02:14 window the swap rule has accepted a draw the gate
+never launched: `preflight-20261116-0214.txt` measures swap 0.0 in + 18.8 out = **0.94 x** of the
+20.0 MiB/s ceiling and the swap rule PASSED it (the reading was refused instead by the device,
+state-D and GPU-mean rules), so the rule is measured accepting at 0.94 x while the v7 corpus row
+put the top of the "dead zone" at 0.905 x and counted that very accepted draw as `POPULATED (1
+windows inside)` evidence that the band is unmeasured. The rule's own band is **0.940-1.060 x
+(0.120 x = 2.4 MiB/s)** at corpus scope, not 0.905-1.060 x (0.155 x = 3.1 MiB/s), and the POPULATED
+word vanishes at all three scopes for a structural reason: a judged draw strictly between the
+accepted maximum and the refused minimum cannot exist, because such a draw is below the ceiling
+(accepted, so it moves the upper bound up) or at/above it (refused, so it moves the lower bound
+down). The census now prints BOTH quantities with their denominator in the label — the "swap-rule
+decision boundary" and the "launchable-column gap ... VERDICT-scoped" — the boundary row states its
+occupancy as EMPTY BY CONSTRUCTION and names input-gap readings inside the band separately, because
+an unjudged reading carries traffic without a rule decision, and a computed rule-boundary scope
+state compares widths only, since occupancy cannot differ there. Census stamp `v7` -> `v8`; v1-v7
+tables stay published as written.
+
 It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
@@ -298,6 +318,74 @@ def zone_scope_state(zones, swap_max):
                nar_k, xrate(nar_v, 3), xrate(nar_v * swap_max, 1), tail))
 
 
+def rule_boundary_row(d, swap_max, label):
+    """One scope's SWAP-RULE decision boundary, computed on the rule's own decisions.
+
+    Occupancy is not a column here: a judged draw strictly between the accepted maximum and the
+    refused minimum cannot exist, because such a draw is itself either below the ceiling (accepted,
+    so it moves the accepted bound up) or at/above it (refused, so it moves the refusal bound
+    down). That is a theorem of the definition, and the row says so instead of pretending the
+    band is an untested region the corpus might one day fill. What the band DOES measure is the
+    rule's resolution at this cut, and the input-gap readings inside it are named because they are
+    traffic evidence without a rule decision.
+    """
+    if d["accept_max"] is None or d["ref_min"] is None:
+        return ("| %s | %s |"
+                % (label, "NO BOUNDARY at this scope (no swap-rule-accepted draw or no swap-rule "
+                          "refusal with a parseable swap window)"))
+    w = d["ref_min"] - d["accept_max"]
+    return ("| %s | accepted up to %s x, refused from %s x, unresolved band %s x (%s MiB/s) — %s; "
+            "judged draws inside are impossible by the definition above, input-gap readings inside: "
+            "%s |"
+            % (label, xrate(d["accept_max"]), xrate(d["ref_min"]), xrate(w, 3),
+               xrate(w * swap_max, 1), d["rule_state"],
+               (", ".join("%s at %s x" % (n, xrate(v)) for n, v in d["gap_inside"])
+                if d["gap_inside"] else "none")))
+
+
+def boundary_scope_state(bands, swap_max):
+    """Computed word for how much the SCOPE matters for the rule's OWN boundary (census v8).
+
+    `bands` is a list of (scope label, boundary) where boundary is None when that row set cannot
+    state one (no accepted draw, or no refusal with a parseable window) or a tuple
+    (accepted_max, refusal_min). Unlike `zone_scope_state` there is no occupancy to compare — the
+    band is empty by construction at every scope — so the only thing that varies with the row set
+    is the WIDTH, i.e. the resolution the rule actually has, and which scopes may be quoted.
+    """
+    present = [(k, b) for k, b in bands if b]
+    missing = [k for k, b in bands if not b]
+
+    def fmt(b):
+        a, r = b
+        return ("accepted <= %s x, refused >= %s x, band %s x (%s MiB/s)"
+                % (xrate(a), xrate(r), xrate(r - a, 3), xrate((r - a) * swap_max, 1)))
+
+    if not present:
+        return ("NO RULE BOUNDARY AT ANY SCOPE — no scope holds both a swap-rule-accepted draw and "
+                "a swap-rule refusal with a parseable swap window at this cut")
+    if len(present) < len(bands):
+        same = len({b for _, b in present}) == 1
+        head = ("PARTLY UNMEASURABLE — a rule boundary exists only at %s (%s)"
+                % (", ".join(k for k, _ in present), fmt(present[0][1]))) if same else \
+               ("PARTLY UNMEASURABLE — " + "; ".join("%s: %s" % (k, fmt(b)) for k, b in present))
+        return ("%s; no boundary at %s. Quote the scope word with any rule boundary."
+                % (head, ", ".join(missing)))
+    if len({b for _, b in present}) == 1:
+        return ("IDENTICAL AT ALL THREE SCOPES (%s) — at this cut the scopes agree and any of them "
+                "may be quoted" % fmt(present[0][1]))
+    named = [(k, b[1] - b[0]) for k, b in present]
+    wide_k, wide_v = max(named, key=lambda kv: kv[1])
+    nar_k, nar_v = min(named, key=lambda kv: kv[1])
+    tail = ("quoting the boundary without its scope word misstates the rule's resolution by up to "
+            "%.1fx" % (wide_v / nar_v)) if nar_v > 1e-9 else \
+           ("at least one scope resolves the boundary exactly, so an unscoped quote carries no "
+            "information")
+    return ("SCOPE-DEPENDENT — the rule's unresolved band is %s x (%s MiB/s) wide at %s and %s x "
+            "(%s MiB/s) at %s: %s. Quote the scope word with any rule boundary."
+            % (xrate(wide_v, 3), xrate(wide_v * swap_max, 1), wide_k,
+               xrate(nar_v, 3), xrate(nar_v * swap_max, 1), nar_k, tail))
+
+
 def scope_band_text(scopes, swap_max, window_hours):
     """The DAY rule band of census v5 (see `day_band`) measured over three row sets at once.
 
@@ -334,18 +422,31 @@ def scope_band_text(scopes, swap_max, window_hours):
         L.append("| launchable (GO) swap draws, %s | %d, band %s the %s mean ceiling |"
                  % (label, d["n_go"], band_txt(d["go_min"], d["go_max"]), swap_max))
     for label, d in scopes:
+        L.append("| swap-rule ACCEPTED draws (any verdict, the rule's own denominator), %s | %d, "
+                 "band %s |" % (label, d["n_accept"],
+                                band_txt(d["accept_min"], d["accept_max"])))
+    for label, d in scopes:
         L.append("| swap-rule refusals (window at/above that ceiling), %s | %d, band %s, **median "
                  "%s x recomputed at this cut** |"
                  % (label, d["n_swap_ref"], band_txt(d["ref_min"], d["ref_max"]),
                     xrate(d["ref_median"], 3)))
     L.append("| refusals decided by a rule OTHER than swap (window below the ceiling) | %s |"
              % ", ".join("%s %d" % (label, d["n_other_ref"]) for label, d in scopes))
+    bands = []
+    for label, d in scopes:
+        L.append(rule_boundary_row(d, swap_max, "swap-rule decision boundary, %s" % label))
+        bands.append((label, ((d["accept_max"], d["ref_min"])
+                              if (d["accept_max"] is not None and d["ref_min"] is not None)
+                              else None)))
+    L.append("| rule-boundary scope state (computed, never asserted) | %s |"
+             % boundary_scope_state(bands, swap_max))
     zones = []
     for label, d in scopes:
         ztxt, z = zone(d)
         zones.append((label, z))
-        L.append("| dead zone, %s | %s |" % (label, ztxt))
-    L.append("| dead-zone scope state (computed, never asserted) | %s |"
+        L.append("| launchable-column gap (GO max to refusal min; VERDICT-scoped, not the rule "
+                 "boundary), %s | %s |" % (label, ztxt))
+    L.append("| launchable-column gap scope state (computed, never asserted) | %s |"
              % zone_scope_state(zones, swap_max))
     return L
 
@@ -630,6 +731,30 @@ def day_band(day_rows, swap_max):
     swap_ref = [v for r, v in ratios if r["rc"] == 3 and v is not None and v >= 1.0]
     other_ref = [(r["name"], v) for r, v in ratios
                  if r["rc"] == 3 and v is not None and v < 1.0]
+    # --- the RULE's own decision boundary (census v8, 2026-11-16, tick 196) ------------------
+    # The `go`/`swap_ref` pair above bounds an interval on the gate VERDICT (the GO column) and
+    # then gets quoted as a property of the SWAP RULE. Measured on the real corpus at the
+    # committed 2026-11-16 02:14 cut: the corpus row set puts the highest gate-GO swap draw at
+    # 0.905 x, while the swap rule itself accepted a draw at 0.940 x
+    # (`preflight-20261116-0214.txt`: swap 0.0 in + 18.8 out = 0.94 x of the 20.0 ceiling, refused
+    # instead by the device, state-D and GPU-mean rules). So the rule HAS been measured accepting
+    # at 0.94 x: its unresolved band is 0.940-1.060 x, not 0.905-1.060 x, and the v7 table's
+    # "POPULATED (1 windows inside)" at all three scopes was produced by that very reading — a
+    # draw the rule ACCEPTED counted as evidence that the rule's band is unmeasured. A claim about
+    # a rule takes the rule's own decisions as its denominator; this is tick 155's class (a cell
+    # whose denominator does not match the claim it reports) in the same column as ticks
+    # 192/193/195. Both quantities are now printed, each labelled with its denominator.
+    accept = [v for r, v in ratios if v is not None and v < 1.0]
+    a_max = (max(accept) if accept else None)
+    r_min = (min(swap_ref) if swap_ref else None)
+    inside_rule = sum(1 for r, v in ratios if v is not None
+                      and a_max is not None and r_min is not None and a_max < v < r_min)
+    # Readings the gate refused to JUDGE (input gap) can still carry a draw inside the band; they
+    # are evidence of traffic, never of a rule decision, so they are named separately.
+    gap_inside = sorted((r["name"], r["mean"] / swap_max) for r in day_rows
+                        if r["rc"] == 1 and r["mean"] is not None
+                        and a_max is not None and r_min is not None
+                        and a_max < r["mean"] / swap_max < r_min)
     lo, hi = (max(go) if go else None), (min(swap_ref) if swap_ref else None)
     inside = sum(1 for r, v in ratios if v is not None and lo is not None and hi is not None
                  and lo < v < hi)
@@ -668,6 +793,12 @@ def day_band(day_rows, swap_max):
         ref_median=median(swap_ref),
         n_other_ref=len(other_ref), other_ref=other_ref,
         inside=inside,
+        n_accept=len(accept), accept_min=(min(accept) if accept else None), accept_max=a_max,
+        n_refuse=len(swap_ref), refuse_min=r_min, inside_rule=inside_rule,
+        gap_inside=gap_inside,
+        rule_state=(("NO BOUNDARY (no accepted swap draw or no swap-rule refusal with a parseable "
+                     "swap window at this scope)" if (a_max is None or r_min is None)
+                     else "EMPTY BY CONSTRUCTION (%d judged draws inside)" % inside_rule)),
         zone_state=(("NO-DATA (one group holds no parseable swap window)"
                      if (lo is None or hi is None) else
                      ("POPULATED (%d windows inside)" % inside if inside else
@@ -768,7 +899,12 @@ def day_band_text(d, swap_max):
             d["n_other_ref"],
             (": " + ", ".join("%s at %s x" % (n, xrate(v)) for n, v in d["other_ref"])
              if d["other_ref"] else " (none)")),
-        "| day dead zone, highest GO draw to lowest swap-rule refusal | %s-%s x — %s |" % (
+        "| day swap-rule ACCEPTED draws (any verdict — the rule's own denominator) | %d (band "
+        "%s-%s x) |" % (d["n_accept"], xrate(d["accept_min"]), xrate(d["accept_max"])),
+        rule_boundary_row(d, swap_max,
+                          "day swap-rule decision boundary (accepted max to refusal min)"),
+        "| day launchable-column gap (GO max to lowest refusal; VERDICT-scoped, not the rule "
+        "boundary) | %s-%s x — %s |" % (
             xrate(d["go_max"]), xrate(d["ref_min"]), d["zone_state"]),
         "| longest consecutive NO-GO run inside the day | %d readings (any-verdict non-GO run: "
         "%d) |" % (d["best_nogo"], d["best_notgo"]),
@@ -809,8 +945,22 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over")
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
-    L.append("Census stamp: `pub-preflight-census-v7`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v7 prints the v5 rule band at THREE scopes "
+    L.append("Census stamp: `pub-preflight-census-v8`, gate sha16 `%s`, window `as-of %s` "
+             "(%d readings inside the window). v8 splits one row that carried two denominators: "
+             "the swap rule's OWN decision boundary (highest window the rule accepted, lowest "
+             "window it refused, judged on the rule's decision whatever the gate verdict was) and "
+             "the launchable-column gap (highest gate-GO draw to lowest refusal), which is what "
+             "v5-v7 printed as 'dead zone' and what every tick quoted as the rule's resolution. At "
+             "the committed 2026-11-16 02:14 cut the corpus gap is 0.905-1.060 x while the rule "
+             "boundary is 0.940-1.060 x, because `preflight-20261116-0214.txt` carries swap "
+             "18.8 MiB/s = 0.94 x of the 20.0 ceiling, which the swap rule ACCEPTED (the reading "
+             "was refused instead by the device, state-D and GPU-mean rules): the rule is measured "
+             "accepting at 0.94 x, and the v7 'POPULATED (1 windows inside)' at all three scopes "
+             "was produced by exactly that accepted draw. A judged draw inside the rule band is "
+             "impossible by definition — it would itself be an accepted or a refused point and move "
+             "the bound that excludes it — so the boundary row prints EMPTY BY CONSTRUCTION and "
+             "names input-gap readings inside the band separately. v7 prints the v5 rule band at "
+             "THREE scopes "
              "(the as-of calendar day, the sliding 24 h window, the whole corpus) with the scope "
              "word inside every row label and a computed dead-zone scope state, because a dead zone "
              "is a property of the row set it is measured over and only the day scope was ever "
