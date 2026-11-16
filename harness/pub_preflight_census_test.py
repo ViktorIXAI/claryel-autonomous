@@ -783,8 +783,8 @@ def main():
         write_fixtures(d8)
         rcd, outd = run(["--dir", d8, "--as-of", "%s-0005" % DAY])
         hdr = [l for l in outd.splitlines() if l.startswith("Census stamp:")]
-        check(rcd == 0 and len(hdr) == 1 and "pub-preflight-census-v6" in hdr[0],
-              "the census names its v6 shape, got rc=%s %r" % (rcd, hdr[:1]))
+        check(rcd == 0 and len(hdr) == 1 and "pub-preflight-census-v7" in hdr[0],
+              "the census names its v7 shape, got rc=%s %r" % (rcd, hdr[:1]))
         # F1 GO at 0.005x, F2 swap refusal at 8.0x, F3 GPU refusal at 0.0x, F4/F5 input gaps
         check((cell(outd, "day launchable (GO) swap draws") or "").startswith("1 (band 0.01-0.01"),
               "one GO draw with quiet swap, got %r"
@@ -973,6 +973,136 @@ def main():
               "the continuity block appears exactly once in the committed table")
     finally:
         shutil.rmtree(d9, ignore_errors=True)
+
+    # 18. tick 195 (2026-11-16): the rule band existed at ONE scope only. The dead zone between the
+    # highest launchable swap draw and the lowest swap-rule refusal is a property of the row set it
+    # is measured over, and every tick sentence that said "the dead zone" quoted the calendar-day
+    # row set as if it were the rule. These rows are computed from the same `day_band` arithmetic
+    # over three row sets, with a state word that says what the scopes disagree about.
+    d10 = tempfile.mkdtemp(prefix="pubcensus-scope-")
+    SCOPE = {
+        "preflight-20300101-2340.txt": {},                                   # GO, 0.005 x
+        "preflight-20300101-2350.txt": {"swap_in_mib_per_s": "120.0", "swap_out_mib_per_s": "40.0",
+                                        "swap_total_peak_mib_per_s": "300.0"},   # NO-GO, 8.00 x
+        "preflight-20300102-0001.txt": {"swap_in_mib_per_s": "60.0", "swap_out_mib_per_s": "0.0",
+                                        "swap_total_peak_mib_per_s": "80.0"},    # NO-GO, 3.00 x
+        "preflight-20300102-0005.txt": {"swap_in_mib_per_s": "90.0", "swap_out_mib_per_s": "0.0",
+                                        "swap_total_peak_mib_per_s": "120.0"},   # NO-GO, 4.50 x
+    }
+    GPU_MID = {"gpu_util_pct": "100", "gpu_util_mean_pct": "97.0", "gpu_util_peak_pct": "100",
+               "gpu_power_w": "128.0", "swap_in_mib_per_s": "10.0", "swap_out_mib_per_s": "0.0",
+               "swap_total_peak_mib_per_s": "12.0"}      # NO-GO by the GPU rule at 0.50 x
+
+    def run_fx(fx, as_of="20300102-0005"):
+        """Fresh directory per control: `write_fixtures` never deletes, so controls that share a
+        directory silently inherit each other's readings."""
+        d = tempfile.mkdtemp(prefix="pubcensus-fx-")
+        try:
+            write_fixtures(d, fx)
+            return run(["--dir", d, "--as-of", as_of])
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+
+    try:
+        write_fixtures(d10, SCOPE)
+        rcs, outs = run(["--dir", d10, "--as-of", "20300102-0005"])
+        hdrs = [l for l in outs.splitlines() if l.startswith("Census stamp:")]
+        check(rcs == 0 and len(hdrs) == 1 and "pub-preflight-census-v7" in hdrs[0],
+              "the census names its v7 shape, got rc=%s %r" % (rcs, hdrs[:1]))
+        c_den = cell(outs, "readings this scope can band at all (verdict GO or NO-GO AND a "
+                           "parseable `swap_in + swap_out` window)")
+        check(c_den == "DAY `20300102` 2 of 2, last 24 h 4 of 4, whole corpus 4 of 4",
+              "the band denominator is printed per scope, so a corpus band cannot be read as a "
+              "statement about the whole archive, got %r" % c_den)
+        check(cell(outs, "launchable (GO) swap draws, whole corpus")
+              == "1, band 0.01-0.01 x the 20.0 mean ceiling",
+              "the corpus GO band is the corpus row set, got %r"
+              % cell(outs, "launchable (GO) swap draws, whole corpus"))
+        check(cell(outs, "swap-rule refusals (window at/above that ceiling), last 24 h")
+              == "3, band 3.00-8.00 x, **median 4.500 x recomputed at this cut**",
+              "the window refusal band and median are computed for the window row set, got %r"
+              % cell(outs, "swap-rule refusals (window at/above that ceiling), last 24 h"))
+        cz_day = cell(outs, "dead zone, DAY `20300102`")
+        cz_win = cell(outs, "dead zone, last 24 h")
+        check(cz_day == "NO ZONE at this scope (no launchable draw or no swap-rule refusal with a "
+                        "parseable window)",
+              "the as-of day has no launchable draw, so it cannot state a dead zone at all, got %r"
+              % cz_day)
+        check(cz_win == "EMPTY (0 windows inside), bounds 0.01-3.00 x, width 2.995 x (59.9 MiB/s)",
+              "the window scope states the zone the day scope cannot, got %r" % cz_win)
+        c_state = cell(outs, "dead-zone scope state (computed, never asserted)")
+        check(c_state.startswith("PARTLY UNMEASURABLE — a zone exists only at last 24 h, whole "
+                                 "corpus") and "no zone at DAY `20300102`" in c_state,
+              "a scope with no zone is named, not silently averaged away, got %r" % c_state)
+        # non-vacuity A: one launchable draw ON the as-of day makes all three scopes agree
+        scope_a = dict(SCOPE)
+        scope_a["preflight-20300102-0003.txt"] = {}
+        rca, outa = run_fx(scope_a)
+        check(rca == 0 and cell(outa, "dead-zone scope state (computed, never asserted)")
+              .startswith("IDENTICAL AT ALL THREE SCOPES (bounds 0.01-3.00 x, width 2.995 x "
+                          "(59.9 MiB/s), EMPTY (0 inside))"),
+              "the scope state follows the row sets; a single GO on the as-of day collapses the "
+              "divergence, got %r"
+              % cell(outa, "dead-zone scope state (computed, never asserted)"))
+        # non-vacuity B: a GPU-rule refusal at 0.50 x sits INSIDE the zone, but only for the wider
+        # row sets — same bounds, different occupancy, which is the difference between a boundary
+        # the rule has never been tested against and one it has.
+        scope_b = dict(scope_a)
+        scope_b["preflight-20300101-2355.txt"] = GPU_MID
+        rcb, outb = run_fx(scope_b)
+        c_sb = cell(outb, "dead-zone scope state (computed, never asserted)")
+        check(rcb == 0 and c_sb.startswith("SAME BOUNDS, DIFFERENT OCCUPANCY")
+              and cell(outb, "dead zone, DAY `20300102`")
+              == "EMPTY (0 windows inside), bounds 0.01-3.00 x, width 2.995 x (59.9 MiB/s)"
+              and cell(outb, "dead zone, last 24 h")
+              == "POPULATED (1 windows inside), bounds 0.01-3.00 x, width 2.995 x (59.9 MiB/s)",
+              "the day scope calls the zone empty while the window scope has a reading inside it, "
+              "got %r / %r / %r" % (c_sb, cell(outb, "dead zone, DAY `20300102`"),
+                                    cell(outb, "dead zone, last 24 h")))
+        check(cell(outb, "refusals decided by a rule OTHER than swap (window below the ceiling)")
+              == "DAY `20300102` 0, last 24 h 1, whole corpus 1",
+              "the 0.50 x GPU refusal is counted outside the swap band at every scope that sees "
+              "it, got %r"
+              % cell(outb, "refusals decided by a rule OTHER than swap (window below the ceiling)"))
+        # non-vacuity C: a SECOND launchable draw, higher, on the PREVIOUS day moves the window and
+        # corpus GO bound but not the day's, so the widths differ and the state word names both
+        scope_c = dict(scope_a)
+        scope_c["preflight-20300101-2355.txt"] = {"swap_in_mib_per_s": "15.0",
+                                                  "swap_out_mib_per_s": "0.0",
+                                                  "swap_total_peak_mib_per_s": "40.0"}
+        rcc, outc = run_fx(scope_c)
+        c_sc = cell(outc, "dead-zone scope state (computed, never asserted)")
+        check(rcc == 0 and c_sc.startswith("SCOPE-DEPENDENT — the DAY `20300102` dead zone is "
+                                           "2.995 x (59.9 MiB/s) wide and the last 24 h one 2.250 x "
+                                           "(45.0 MiB/s)"),
+              "differing widths name both scopes and the factor, got %r" % c_sc)
+        check(cell(outc, "dead zone, whole corpus")
+              == "EMPTY (0 windows inside), bounds 0.75-3.00 x, width 2.250 x (45.0 MiB/s)",
+              "the corpus GO bound follows the previous day's draw, got %r"
+              % cell(outc, "dead zone, whole corpus"))
+        # non-vacuity D: with no launchable draw anywhere, no scope may state a zone
+        scope_d = {k: v for k, v in SCOPE.items() if k != "preflight-20300101-2340.txt"}
+        rcd2, outd2 = run_fx(scope_d)
+        check(rcd2 == 0 and cell(outd2, "dead-zone scope state (computed, never asserted)")
+              .startswith("NO DEAD ZONE AT ANY SCOPE")
+              and all(cell(outd2, lbl).startswith("NO ZONE at this scope")
+                      for lbl in ("dead zone, DAY `20300102`", "dead zone, last 24 h",
+                                  "dead zone, whole corpus")),
+              "no scope invents a dead zone out of a refusal column alone, got %r"
+              % cell(outd2, "dead-zone scope state (computed, never asserted)"))
+        # the block is generated, so a snapshot of it must check clean and appear exactly once
+        tbl10 = os.path.join(d10, "CEN.md")
+        write_fixtures(d10, SCOPE)
+        rcw10, outw10 = run(["--dir", d10, "--as-of", "20300102-0005", "--markdown", tbl10])
+        check(rcw10 == 0, "writing the scope-band snapshot exits 0, got %r" % outw10[-300:])
+        rcv10, outv10 = run(["--dir", d10, "--as-of", "20300102-0005", "--check", tbl10])
+        check(rcv10 == 0, "the scope-band snapshot checks clean, got %r" % outv10[-300:])
+        text10 = open(tbl10, encoding="utf-8").read()
+        check(text10.count("| dead-zone scope state (computed, never asserted) |") == 1
+              and text10.count("| rule band at three scopes (added 2026-11-16, tick 195) |") == 1,
+              "the three-scope block appears exactly once in a committed table")
+    finally:
+        shutil.rmtree(d10, ignore_errors=True)
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()

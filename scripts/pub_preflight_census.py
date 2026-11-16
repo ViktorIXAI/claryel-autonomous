@@ -83,6 +83,23 @@ readings since the last gate-GO with that reading named and its age in minutes, 
 window-run-vs-day-run state word (`MATCHED` or `MIDNIGHT RESET` with both counts). Census stamp
 `v5` -> `v6`; v1-v5 tables stay published as written.
 
+A third scope defect in the SAME cells (2026-11-16 01:50, tick 195): the rule band existed only at
+DAY scope, and a dead zone is a function of the row set it is measured over. Measured at this cut,
+the same 20 MiB/s ceiling gives a day-scoped dead zone **0.00-1.27 x wide** (25.3 MiB/s, 1 GO draw)
+while the whole corpus of 158 readings puts the highest launchable swap draw at **0.905 x** and the
+lowest swap-rule refusal at **1.06 x**: a **0.155 x = 3.1 MiB/s** band, empty across the 25
+launchable draws and 35 swap-rule refusals that carry a parseable swap window. Only 70 of those 158
+files carry `swap_in_mib_per_s` / `swap_out_mib_per_s` at all (the producer added them
+2026-11-14 09:26), so a corpus band is a statement about the sampler era since that hour and the
+excluded files are excluded by the rule, not silently, i.e. the corpus zone is **8.2x narrower**
+than the day cell a reader would quote. The day cell is
+correct as labelled, but every tick sentence that said "the dead zone" (2026-11-15: "0.38-1.06 x",
+then "0.74-1.06 x") was a day-scoped number presented as a property of the rule. The census now
+prints the same band arithmetic at three scopes — the `as-of` calendar day, the sliding
+`--window-hours` span, and the whole corpus — each labelled with its scope word, plus a computed
+state word naming the widest and narrowest interval at this cut. Census stamp `v6` -> `v7`; v1-v6
+tables stay published as written.
+
 It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
@@ -228,6 +245,109 @@ def census(directory, as_of, day, window_hours):
 
 
 RC_WORD = {0: "GO", 3: "NO-GO", 1: "input gap"}
+
+
+def zone_scope_state(zones, swap_max):
+    """Computed word for how much the SCOPE of a dead zone matters at this cut.
+
+    `zones` is a list of (scope label, zone) where zone is None when that row set cannot state a
+    zone (no launchable draw or no swap-rule refusal with a parseable window) or a tuple
+    (lo, hi, inside). Occupancy counts, not just width: a wider row set can put a reading INSIDE a
+    zone the narrower scope calls empty, and that is the difference between a boundary the rule has
+    never been tested against and one it has.
+    """
+    present = [(k, z) for k, z in zones if z]
+    missing = [k for k, z in zones if not z]
+
+    def fmt(z):
+        lo, hi, inside = z
+        return ("bounds %s-%s x, width %s x (%s MiB/s), %s"
+                % (xrate(lo), xrate(hi), xrate(hi - lo, 3), xrate((hi - lo) * swap_max, 1),
+                   ("EMPTY (0 inside)" if inside == 0 else "POPULATED (%d inside)" % inside)))
+
+    if not present:
+        return ("NO DEAD ZONE AT ANY SCOPE — no scope holds both a launchable swap draw and a "
+                "swap-rule refusal with a parseable swap window at this cut")
+    if len(present) < len(zones):
+        same = len({z for _, z in present}) == 1
+        head = ("PARTLY UNMEASURABLE — a zone exists only at %s (%s)"
+                % (", ".join(k for k, _ in present), fmt(present[0][1]))) if same else \
+               ("PARTLY UNMEASURABLE — " + "; ".join("%s: %s" % (k, fmt(z)) for k, z in present))
+        return ("%s; no zone at %s. Quote the scope word with any dead zone."
+                % (head, ", ".join(missing)))
+    if len({z for _, z in present}) == 1:
+        lo, hi, inside = present[0][1]
+        return ("IDENTICAL AT ALL THREE SCOPES (%s) — at this cut the scopes agree and any of them "
+                "may be quoted" % fmt(present[0][1]))
+    if len({(z[0], z[1]) for _, z in present}) == 1:
+        return ("SAME BOUNDS, DIFFERENT OCCUPANCY — %s; the wider row sets put readings inside a "
+                "zone a narrower scope calls empty: %s. Quote the scope word with any dead zone."
+                % (fmt(present[0][1]),
+                   "; ".join("%s %s" % (k, "EMPTY" if z[2] == 0 else "POPULATED (%d)" % z[2])
+                             for k, z in present)))
+    named = [(k, z[1] - z[0]) for k, z in present]
+    wide_k, wide_v = max(named, key=lambda kv: kv[1])
+    nar_k, nar_v = min(named, key=lambda kv: kv[1])
+    tail = ("a dead zone quoted without its scope word overstates the rule's resolution by up to "
+            "%.1fx" % (wide_v / nar_v)) if nar_v > 1e-9 else \
+           ("at least one scope resolves the boundary exactly, so an unscoped quote carries no "
+            "information")
+    return ("SCOPE-DEPENDENT — the %s dead zone is %s x (%s MiB/s) wide and the %s one %s x "
+            "(%s MiB/s): %s. Quote the scope word with any dead zone."
+            % (wide_k, xrate(wide_v, 3), xrate(wide_v * swap_max, 1),
+               nar_k, xrate(nar_v, 3), xrate(nar_v * swap_max, 1), tail))
+
+
+def scope_band_text(scopes, swap_max, window_hours):
+    """The DAY rule band of census v5 (see `day_band`) measured over three row sets at once.
+
+    Why (2026-11-16 01:50, tick 195): a dead zone is a property of the row set it is measured
+    over, and only the calendar-day row set was ever published. At that cut the day cell put the
+    zone at 0.00-1.27 x — 25.3 MiB/s wide — while the corpus put the highest launchable swap draw
+    at 0.905 x and the lowest swap-rule refusal at 1.06 x: 0.155 x = 3.1 MiB/s, 8.2x narrower,
+    empty over the 25 launchable draws and 35 swap-rule refusals that carry a swap window. Only 70
+    of the 158 stored files carry those keys at all (the producer added them 2026-11-14 09:26),
+    which is why the block prints its own band denominator instead of trusting the reader to know
+    it. Every tick sentence that said "the dead zone" (2026-11-15: "0.38-1.06 x", then
+    "0.74-1.06 x") was a day-scoped number presented as a property of the rule — the tick-192/193
+    scope-word defect a third time in the same column.
+    No new arithmetic: each cell below is exactly what `day_band` computes for that row set.
+    """
+    def band_txt(lo, hi):
+        return "%s-%s x" % (xrate(lo), xrate(hi)) \
+            if (lo is not None and hi is not None) else "n/a x"
+
+    def zone(d):
+        if d["go_max"] is None or d["ref_min"] is None:
+            return "NO ZONE at this scope (no launchable draw or no swap-rule refusal with a " \
+                   "parseable window)", None
+        z = (d["go_max"], d["ref_min"], d["inside"])
+        return ("%s, bounds %s-%s x, width %s x (%s MiB/s)"
+                % (d["zone_state"], xrate(z[0]), xrate(z[1]), xrate(z[1] - z[0], 3),
+                   xrate((z[1] - z[0]) * swap_max, 1))), z
+
+    L = ["| rule band at three scopes (added 2026-11-16, tick 195) | value |", "|---|---|"]
+    L.append("| readings this scope can band at all (verdict GO or NO-GO AND a parseable "
+             "`swap_in + swap_out` window) | %s |"
+             % ", ".join("%s %d of %d" % (label, d["n_window"], d["n_day"]) for label, d in scopes))
+    for label, d in scopes:
+        L.append("| launchable (GO) swap draws, %s | %d, band %s the %s mean ceiling |"
+                 % (label, d["n_go"], band_txt(d["go_min"], d["go_max"]), swap_max))
+    for label, d in scopes:
+        L.append("| swap-rule refusals (window at/above that ceiling), %s | %d, band %s, **median "
+                 "%s x recomputed at this cut** |"
+                 % (label, d["n_swap_ref"], band_txt(d["ref_min"], d["ref_max"]),
+                    xrate(d["ref_median"], 3)))
+    L.append("| refusals decided by a rule OTHER than swap (window below the ceiling) | %s |"
+             % ", ".join("%s %d" % (label, d["n_other_ref"]) for label, d in scopes))
+    zones = []
+    for label, d in scopes:
+        ztxt, z = zone(d)
+        zones.append((label, z))
+        L.append("| dead zone, %s | %s |" % (label, ztxt))
+    L.append("| dead-zone scope state (computed, never asserted) | %s |"
+             % zone_scope_state(zones, swap_max))
+    return L
 
 
 def window_rows(rows, as_of, window_hours):
@@ -541,6 +661,7 @@ def day_band(day_rows, swap_max):
             break
     return dict(
         n_day=len(day_rows),
+        n_window=sum(1 for r, v in ratios if v is not None),
         n_go=len(go), go_min=(min(go) if go else None), go_max=lo,
         n_swap_ref=len(swap_ref), ref_min=hi,
         ref_max=(max(swap_ref) if swap_ref else None),
@@ -674,6 +795,9 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     b = band(rows, consts["SWAP_RATE_MAX_MIB_S"])
     fp = footprint(rows)
     db = day_band(day_rows, consts["SWAP_RATE_MAX_MIB_S"])
+    wb = day_band(win_rows, consts["SWAP_RATE_MAX_MIB_S"])
+    cb = day_band(rows, consts["SWAP_RATE_MAX_MIB_S"])
+    scopes = [("DAY `%s`" % day, db), ("last %d h" % window_hours, wb), ("whole corpus", cb)]
     ws = window_streak(win_rows, day_rows, as_of)
     L = []
     L.append("# PUB preflight reading census (generated)")
@@ -685,8 +809,20 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over")
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
-    L.append("Census stamp: `pub-preflight-census-v6`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v6 adds three COMPUTED continuity rows over the "
+    L.append("Census stamp: `pub-preflight-census-v7`, gate sha16 `%s`, window `as-of %s` "
+             "(%d readings inside the window). v7 prints the v5 rule band at THREE scopes "
+             "(the as-of calendar day, the sliding 24 h window, the whole corpus) with the scope "
+             "word inside every row label and a computed dead-zone scope state, because a dead zone "
+             "is a property of the row set it is measured over and only the day scope was ever "
+             "published: at the 2026-11-16 01:50 cut the day cell put the GO-to-refusal zone 25.3 "
+             "MiB/s wide while the corpus put it at 3.1 MiB/s (highest launchable draw 0.905x, "
+             "lowest swap-rule refusal 1.06x, empty over the 25 launchable draws and 35 swap-rule "
+             "refusals that carry a swap window — only 70 of the 158 stored files carry those keys "
+             "at all, so the block prints its band denominator), and the 2026-11-15 tick sentences "
+             "that said \"the dead zone\" (0.38-1.06x, "
+             "then 0.74-1.06x) were day-scoped numbers presented as a property of the rule — tick "
+             "192 and 193's scope-word defect a third time in the same column. v6 adds three "
+             "COMPUTED continuity rows over the "
              "sliding 24 h window — the trailing consecutive-refusal run ending at the newest "
              "reading, readings/hours since the last gate-GO with that GO named and aged, and a "
              "window-run-vs-day-run state word — because the v5 DAY table resets at midnight: at "
@@ -808,6 +944,22 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("row is the same warning for the state variable: the ceiling the dry-run uses was set by")
     L.append("one launchable window, and every reading since then may sit far above it without that")
     L.append("ceiling meaning anything about the box right now.")
+    L.append("")
+    L.append("The SAME rule band at three scopes (added 2026-11-16, tick 195) — because a dead zone")
+    L.append("is a property of the row set it is measured over, and only the calendar-day row set was")
+    L.append("ever published. Measured at the 2026-11-16 01:50 cut (dated, not current): the day cell")
+    L.append("spanned a dead zone 25.3 MiB/s wide while the corpus put the highest launchable swap")
+    L.append("draw at 0.905x of the ceiling and the lowest swap-rule refusal at 1.06x, a 3.1 MiB/s")
+    L.append("band, 8.2x narrower. Every tick")
+    L.append("sentence that said \"the dead zone\" (2026-11-15: \"0.38-1.06x\", then \"0.74-1.06x\") was")
+    L.append("a day-scoped number presented as a property of the rule, so the scope word now travels")
+    L.append("with the cell, and the block prints its own band denominator: only a reading that")
+    L.append("carries `swap_in + swap_out` can be banded at all (the producer added those keys")
+    L.append("2026-11-14 09:26), so a corpus band describes the sampler era since that hour, never")
+    L.append("the whole archive. Each ratio is still the reading's own sampled window against the")
+    L.append("gate's current ceiling, which is what the swap-mean rule compares:")
+    L.append("")
+    L.extend(scope_band_text(scopes, consts["SWAP_RATE_MAX_MIB_S"], window_hours))
     L.append("")
     L.append("Verdict continuity across the sliding window (added 2026-11-16, tick 193) — the day")
     L.append("table above is scoped to the calendar day and resets at midnight, which is correct as")
