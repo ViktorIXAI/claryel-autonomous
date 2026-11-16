@@ -120,6 +120,33 @@ an unjudged reading carries traffic without a rule decision, and a computed rule
 state compares widths only, since occupancy cannot differ there. Census stamp `v7` -> `v8`; v1-v7
 tables stay published as written.
 
+An eighth set of cells this tool did not compute (2026-11-16 03:47, tick 197): the table counts WHICH
+VERDICT a reading got and — for the swap rule only — whether the sampled window passed its ceiling. It
+never counted WHICH GATE RULE refused. Every tick attributed refusals in prose ("the night's first
+out-heavy swap window", "02:14 died on the device, state-D and GPU-mean rules"), and no such sentence
+was ever computed. The census now reads the gate's own refusal text (the strings the gate appends to
+its NO-GO block, not a restatement) and counts every rule at the three published scopes, each rule row
+labelled with the gate's own reason prefix so a rename cannot hide behind a friendly id. Two fail-closed
+paths: a refusal reason the census cannot map to a rule prints as `UNATTRIBUTED`, is named, and moves
+the exit code to 4; and the rule table is BOUND to the gate source (every anchor prefix must appear in
+it, and the number of refusal sites in the gate must equal the number the table claims), so a gate edit
+that renames or adds a refusal reason reddens the census even when no stored reading exercises it — the
+pin-the-binding-not-the-presence rule of tick 155 applied to the rule vocabulary. The attribution is
+also cross-checked against the band: the set of refusals whose swap window sits at or above the ceiling
+(derived here from the key=value columns) must equal the set whose gate reason line names the swap rule
+(the gate's own claim about itself). Two independent derivations of one set: a parser change, a ceiling
+change, or a rule edit shows up as a named disagreement instead of a band quietly misclassifying rows.
+
+A stale enumeration in this tool's OWN header, found while extending it (same tick): the stamp sentence
+closed with "v1, v2, v3, v4, v5 and v6 tables are left as published; a v1, v2, v3, v4, v5 and v6 file
+are not the same table shape" — written when the stamp was v7 and never touched again, so the v7 change
+(30 rows added) and the v8 change (9 rows added, 5 relabelled) were each announced as the reason a shape
+differs while the sentence saying WHICH shapes are preserved stopped two stamps short. A reader following
+that sentence would treat a v6 and a v8 table as interchangeable, exactly the error the sentence exists to
+prevent. The sentence is now generated from the stamp number, and the contract test pins that it covers
+v1..(stamp-1) for the current stamp AND for a hypothetical later one, so the next bump cannot quietly
+reintroduce the gap.
+
 It moves no published benchmark byte and registers no contour feature.
 
 Readings live OUTSIDE this repository (the producer command is untracked by the same rule that
@@ -142,8 +169,11 @@ Usage:
                                               suppresses the block. The committed table is
                                               byte-identical with or without it.
 Exit codes: 0 census written / matches, 1 census gap (missing dir, unreadable file, gate
-returned something other than GO/NO-GO/input-gap, --check drift, or a malformed /
-not-earlier --prev-as-of).
+returned something other than GO/NO-GO/input-gap, --check drift, a malformed /
+not-earlier --prev-as-of, or a refusal-rule table that no longer matches the gate source),
+4 census FINDING (the table was produced but a cell could not be filled honestly: a refusal
+reason the rule table cannot attribute, gate output whose verdict line cannot be parsed, or
+the swap-band refusal set disagreeing with the gate's own swap-rule reason set).
 """
 import argparse
 import datetime
@@ -165,6 +195,111 @@ ARMING_THRESHOLD = 30
 # one census table (~70 lines) so a normal drift is printed IN FULL; if it is ever hit, the tool
 # says so in words and the count line above the body already carries the whole drift.
 DIFF_PRINT_MAX = 400
+# Table-shape stamp. Bumping it must not require typing the "which earlier shapes are preserved"
+# sentence: that sentence is GENERATED from this number (tick 197 found the hand-typed version two
+# stamps short, announcing v7 and v8 shape changes while claiming only v1-v6 are preserved).
+CENSUS_STAMP = 9
+
+
+def census_stamp_name():
+    return "pub-preflight-census-v%d" % CENSUS_STAMP
+
+
+def preserved_stamp_sentence(stamp):
+    """Which earlier census shapes stay published as written — derived, never hand-typed."""
+    if stamp <= 1:
+        return ""
+    names = ["v%d" % i for i in range(1, stamp)]
+    if len(names) == 1:
+        listed = names[0]
+    else:
+        listed = ", ".join(names[:-1]) + " and " + names[-1]
+    return ("%s tables are left published exactly as written; a file stamped any of them is not "
+            "the same table shape as this v%d one." % (listed, stamp))
+
+
+# ---------------------------------------------------------------------------
+# WHICH GATE RULE refused a reading (census v9, 2026-11-16, tick 197)
+# ---------------------------------------------------------------------------
+# (rule id, match kind, anchor taken from the gate's own printed reason, refusal sites in the gate)
+# ORDER MATTERS: the `loaded: false` reason also starts with `/health answered `, so the specific rule
+# is listed first and matching stops at the first hit. `sites` is how many places in
+# scripts/pub_preflight.py build this reason — refusal_rule_guard counts the real sites, so a NEW
+# refusal in the gate makes the census fail closed even when no stored reading triggers it.
+REFUSAL_RULES = [
+    ("health-loaded-false", "prefix", '/health answered 200 but reports', 1),
+    ("health-code-not-200", "prefix", '/health answered ', 1),
+    ("engine-process-absent", "prefix", 'no `basalt --serve` engine process', 1),
+    ("swap-free-low", "prefix", 'swap free ', 1),
+    ("swap-rate", "prefix", 'live swap throughput ', 1),
+    ("mem-available-low", "prefix", 'MemAvailable ', 1),
+    ("device-read", "prefix", 'block-device reads ', 1),
+    ("engine-state-D", "prefix", 'engine in uninterruptible I/O', 1),
+    ("idle-spin", "prefix", 'idle-spin signature:', 2),
+    ("gpu-busy", "prefix", 'the shared brain was busy', 1),
+    ("foreign-legs", "contains", 'other leg(s) on this endpoint: one leg per endpoint', 1),
+]
+
+
+def refusal_rule_guard():
+    """Bind the rule table to the gate source; return a problem list (empty = bound)."""
+    src = open(GATE, encoding="utf-8").read()
+    problems = []
+    for rid, _kind, anchor, _sites in REFUSAL_RULES:
+        if anchor not in src:
+            problems.append("rule `%s` anchor %r no longer appears in the gate source" % (rid, anchor))
+    sites = src.count("reasons.append(")
+    known = sum(s for _r, _k, _a, s in REFUSAL_RULES)
+    if sites != known:
+        problems.append("the gate builds %d refusal reasons, the census rule table knows %d"
+                        % (sites, known))
+    return problems
+
+
+def parse_decision(out):
+    """The gate's own verdict line: (kind, texts), kind in GO / NO-GO / GAP / UNPARSED."""
+    if "PREFLIGHT GO:" in out:
+        return "GO", []
+    if "PREFLIGHT NO-GO:" in out:
+        tail = out.split("PREFLIGHT NO-GO:", 1)[1]
+        return "NO-GO", [ln[4:] for ln in tail.splitlines() if ln.startswith("  - ")]
+    m = re.search(r"^PREFLIGHT INPUT GAP: (.+)$", out, re.M)
+    if m:
+        return "GAP", [m.group(1)]
+    return "UNPARSED", []
+
+
+def rule_of(reason):
+    for rid, kind, anchor, _sites in REFUSAL_RULES:
+        if kind == "prefix" and reason.startswith(anchor):
+            return rid
+        if kind == "contains" and anchor in reason:
+            return rid
+    return None
+
+
+def rule_label(rid):
+    for _id, _kind, anchor, _sites in REFUSAL_RULES:
+        if _id == rid:
+            how = "gate reason starts" if _kind == "prefix" else "gate reason contains"
+            # An anchor may itself contain inline code (the engine-process reason names the process
+            # by its full path); a nested single-backtick span renders wrong in markdown, so such an
+            # anchor gets a double-backtick span.
+            span = ("`` %s ``" % anchor) if "`" in anchor else ("`%s`" % anchor)
+            return "`%s` (%s %s)" % (rid, how, span)
+    return "`%s`" % rid
+
+
+def gap_class(text):
+    """Class label for an input-gap reason: the gate's own leading phrase, numbers normalised.
+    Printed IN FULL, never capped: the longest class in the corpus at the 2026-11-16 03:05 cut is
+    182 chars because that reading is missing 13 keys, and a label truncated in the middle of that
+    key list would hide WHICH keys are missing — the same defect as an unstated denominator.
+    A missing-key list is also its own fail-closed risk: if the producer stops emitting a key the
+    class appears with a count, and the count moving is the alarm."""
+    head = text.split(" — ")[0]
+    return re.sub(r"-?\d+(?:\.\d+)?", "N", head).strip()
+
 
 
 def sha16(path):
@@ -223,8 +358,12 @@ def num(txt, key):
 
 
 def run_gate(path):
-    return subprocess.run([sys.executable, GATE, path], cwd=ROOT,
-                          capture_output=True, text=True).returncode
+    """(returncode, stdout) from the REAL gate. The returncode is the verdict column; the stdout
+    carries the gate's own refusal / input-gap text, which is what the rule attribution reads
+    (census v9) — the census never restates the gate's rules in its own words."""
+    p = subprocess.run([sys.executable, GATE, path], cwd=ROOT,
+                       capture_output=True, text=True)
+    return p.returncode, p.stdout
 
 
 def census(directory, as_of, day, window_hours):
@@ -238,9 +377,14 @@ def census(directory, as_of, day, window_hours):
     inwin = [(ts, f) for ts, f in named if ts <= as_of]
     rows = []
     for ts, f in inwin:
-        rc = run_gate(f)
+        rc, out = run_gate(f)
         if rc not in (0, 1, 3):
             raise SystemExit("CENSUS GAP: gate returned %s on %s" % (rc, os.path.basename(f)))
+        kind, texts = parse_decision(out)
+        if (rc, kind) not in ((0, "GO"), (3, "NO-GO"), (1, "GAP")) or (kind == "NO-GO" and not texts):
+            # A returncode that disagrees with the gate's own verdict line is a finding, not a
+            # silently empty rule cell: the attribution would then be wrong by construction.
+            kind, texts = "UNPARSED", []
         txt = open(f, encoding="utf-8", errors="replace").read()
         pk, pk_present, pk_ok = num(txt, "swap_total_peak_mib_per_s")
         si, _, _ = num(txt, "swap_in_mib_per_s")
@@ -253,6 +397,9 @@ def census(directory, as_of, day, window_hours):
             fre, fre_p, fre_f = num(txt, "swap_free_mib")
             used = (tot - fre) if (tot is not None and fre is not None) else None
         rows.append(dict(ts=ts, name=os.path.basename(f), rc=rc,
+                         decision=kind, reasons=texts,
+                         rules=[rule_of(t) for t in texts] if kind == "NO-GO" else [],
+                         gap=gap_class(texts[0]) if kind == "GAP" else None,
                          peak=pk if (pk_present and pk_ok) else None,
                          peak_present=pk_present,
                          vmswap=vw if (vw_present and vw_ok) else None,
@@ -920,6 +1067,96 @@ def day_band_text(d, swap_max):
     ]
 
 
+def rule_attribution_text(scopes, swap_max):
+    """WHICH gate rule refused, counted per scope (census v9, tick 197).
+
+    `scopes` is a list of (label, rows) — the as-of day, the sliding window, the whole corpus. The
+    attribution reads the gate's OWN refusal text, never a restatement: the same subprocess run that
+    produces the verdict column produces the reason lines. Two fail-closed cells (unattributable
+    reason, unparsable verdict line) and one cross-check are part of the block, because the point of
+    counting rules is that a rule can start or stop firing without anyone noticing.
+    Returns (lines, findings); a non-empty findings list moves the census exit code to 4.
+    """
+    L = []
+    findings = []
+    per = []
+    for label, rows in scopes:
+        refusals = [r for r in rows if r["rc"] == 3]
+        captured = [r for r in refusals if r["decision"] == "NO-GO"]
+        counts, multi, sole = {}, 0, 0
+        unattr = []
+        for r in captured:
+            ids = sorted({rid for rid in r["rules"] if rid})
+            if any(rid is None for rid in r["rules"]):
+                unattr.append(r["name"])
+            if len(ids) > 1:
+                multi += 1
+            elif len(ids) == 1:
+                sole += 1
+            for rid in ids:
+                c = counts.setdefault(rid, [0, 0])
+                c[0] += 1
+                if len(ids) == 1:
+                    c[1] += 1
+        unparsed = [r["name"] for r in rows if r["decision"] == "UNPARSED"]
+        ratio_set = {r["name"] for r in refusals
+                     if r["mean"] is not None and r["mean"] >= swap_max}
+        reason_set = {r["name"] for r in captured if "swap-rate" in r["rules"]}
+        per.append(dict(label=label, n_ref=len(refusals), n_cap=len(captured), counts=counts,
+                        multi=multi, sole=sole, unattr=unattr, unparsed=unparsed,
+                        ratio=len(ratio_set), reason=len(reason_set),
+                        only_ratio=sorted(ratio_set - reason_set),
+                        only_reason=sorted(reason_set - ratio_set)))
+
+    def cell(fn):
+        return " / ".join("%s: %s" % (p["label"], fn(p)) for p in per)
+
+    L.append("| refusal-rule cell (every scope labelled) | value |")
+    L.append("|---|---|")
+    L.append("| refusals this scope can attribute (gate NO-GO with captured reason lines) | %s |"
+             % cell(lambda p: "%d of %d refusals" % (p["n_cap"], p["n_ref"])))
+    for rid, _kind, anchor, _sites in REFUSAL_RULES:
+        L.append("| rule fired: %s | %s |" % (
+            rule_label(rid),
+            cell(lambda p, rid=rid: ("%d fired, %d sole"
+                                     % tuple(p["counts"].get(rid, [0, 0]))
+                                     if rid in p["counts"] else "0 fired"))))
+    L.append("| refusals decided by exactly ONE rule | %s |" % cell(lambda p: "%d" % p["sole"]))
+    L.append("| refusals where TWO OR MORE rules fired together | %s |" % cell(lambda p: "%d" % p["multi"]))
+    L.append("| refusal reasons this rule table cannot attribute (fail closed) | %s |"
+             % cell(lambda p: ("0" if not p["unattr"] else ", ".join(p["unattr"]))))
+    L.append("| readings whose gate verdict line could not be parsed (fail closed) | %s |"
+             % cell(lambda p: ("0" if not p["unparsed"] else ", ".join(p["unparsed"]))))
+    L.append("| rule cross-check: swap-band refusals (key=value ratio at/above the ceiling) vs the "
+             "gate's OWN swap-rule reason | %s |"
+             % cell(lambda p: ("AGREES (%d = %d)" % (p["ratio"], p["reason"])
+                               if not p["only_ratio"] and not p["only_reason"]
+                               else "DISAGREES (ratio-set %d, reason-set %d; ratio-only %s; "
+                                    "reason-only %s)" % (p["ratio"], p["reason"],
+                                                         ", ".join(p["only_ratio"]) or "none",
+                                                         ", ".join(p["only_reason"]) or "none"))))
+    gap_by = []
+    for label, rows in scopes:
+        c = {}
+        for r in rows:
+            if r["decision"] == "GAP":
+                c[r["gap"]] = c.get(r["gap"], 0) + 1
+        gap_by.append((label, c))
+    L.append("| input-gap reason classes (the gate's own leading phrase, numbers as N) | %s |"
+             % " / ".join("%s: %s" % (lbl, ("; ".join("%s x%d" % (k, v) for k, v in sorted(c.items()))
+                                                if c else "0")) for lbl, c in gap_by))
+    for p in per:
+        if p["unattr"]:
+            findings.append("%s: unattributed refusal reason in %s" % (p["label"], ", ".join(p["unattr"])))
+        if p["unparsed"]:
+            findings.append("%s: gate verdict line unparsable in %s" % (p["label"], ", ".join(p["unparsed"])))
+        if p["only_ratio"] or p["only_reason"]:
+            findings.append("%s: swap-band/refusal-reason sets disagree (ratio-only %s, reason-only %s)"
+                            % (p["label"], ", ".join(p["only_ratio"]) or "none",
+                               ", ".join(p["only_reason"]) or "none"))
+    return L, sorted(set(findings))
+
+
 def build(rows, as_of, consts, day, window_hours, legs_started):
     go = [r for r in rows if r["rc"] == 0]
     nogo = [r for r in rows if r["rc"] == 3]
@@ -945,8 +1182,17 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("CI-enrolled; its arithmetic is pinned by `harness/pub_preflight_census_test.py` over")
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
-    L.append("Census stamp: `pub-preflight-census-v8`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v8 splits one row that carried two denominators: "
+    L.append("Census stamp: `%s`, gate sha16 `%s`, window `as-of %s` "
+             "(%d readings inside the window). v9 counts WHICH GATE RULE refused each reading, read "
+             "out of the gate's own refusal text at the three published scopes, and cross-checks the "
+             "swap-band refusal set (derived here from the key=value columns) against the set whose "
+             "gate reason line names the swap rule (the gate's own claim): every tick sentence that "
+             "attributed a refusal to a rule had never been computed. The rule table is BOUND to the "
+             "gate source — each anchor prefix must appear in it and the refusal-site count must match "
+             "— an unmappable reason prints UNATTRIBUTED and moves the exit code to 4, and the "
+             "preserved-shape sentence at the end of this paragraph is now GENERATED from the stamp "
+             "number, because the hand-typed one claimed only v1-v6 are preserved: two stamps short of "
+             "the v7 and v8 changes this same sentence describes. v8 splits one row that carried two denominators: "
              "the swap rule's OWN decision boundary (highest window the rule accepted, lowest "
              "window it refused, judged on the rule's decision whatever the gate verdict was) and "
              "the launchable-column gap (highest gate-GO draw to lowest refusal), which is what "
@@ -1004,10 +1250,9 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
              "file. v2 added two COMPUTED group-state rows — the swap-peak band state and the "
              "footprint group separation — because v1 printed \"Band: nothing between X and Y\" "
              "unconditionally, and at 23:13 on 2026-11-14 the order of X and Y reversed: the "
-             "table went on asserting an empty interval the data had withdrawn. v1, v2, v3, v4, v5 "
-             "and v6 tables are left as published; a v1, v2, v3, v4, v5 and v6 file are not the "
-             "same table shape."
-             % (sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"), len(rows)))
+             "table went on asserting an empty interval the data had withdrawn. %s"
+             % (census_stamp_name(), sha16(GATE), as_of.strftime("%Y-%m-%d %H:%M"), len(rows),
+                preserved_stamp_sentence(CENSUS_STAMP)))
     L.append("")
     L.append("Ceilings read out of the gate source at run time, so this table cannot disagree with "
              "the rule it reports: `SWAP_RATE_MAX_MIB_S = %s` (window MEAN; the peak statistic is "
@@ -1125,6 +1370,26 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("|---|---|")
     L.extend(window_streak_text(ws, window_hours))
     L.append("")
+    L.append("Which gate RULE refused (added 2026-11-16, tick 197) — the verdict column says a reading")
+    L.append("was refused and never says BY WHAT. Every tick attributed refusals in prose (\"the night's")
+    L.append("first out-heavy swap window\", \"02:14 died on the device, state-D and GPU-mean rules\") and")
+    L.append("not one of those sentences was ever computed. The counts below come out of the gate's own")
+    L.append("refusal lines, from the same subprocess run that produced the verdict column, so a rule that")
+    L.append("starts or stops firing moves a cell here instead of hiding in a report. The rule table is")
+    L.append("BOUND to the gate source (every anchor must appear in it and the refusal-site count must")
+    L.append("match), an unmappable reason names its file and moves the exit code to 4, and the")
+    L.append("cross-check row compares two independent derivations of one set: the refusals whose sampled")
+    L.append("swap window sits at or above `SWAP_RATE_MAX_MIB_S` (computed here from the key=value")
+    L.append("columns) and the refusals whose gate reason line names the swap rule (the gate speaking")
+    L.append("about itself). A rule that fired on nothing still gets a row: a missing row and a zero row")
+    L.append("read the same way in prose, which is how a rule that never fires gets mistaken for a rule")
+    L.append("nobody counted:")
+    L.append("")
+    attr_lines, attr_findings = rule_attribution_text(
+        [("DAY `%s`" % day, day_rows), ("last %d h" % window_hours, win_rows),
+         ("whole corpus", rows)], consts["SWAP_RATE_MAX_MIB_S"])
+    L.extend(attr_lines)
+    L.append("")
     L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")
     L.append("over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14")
     L.append("21:31-21:38, three back-to-back 5 s windows on the endpoint box took 320 MiB / 0 / 0 of")
@@ -1179,7 +1444,7 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
         L.append("to classify yet. The peak stays REPORTED, not gated, until the pre-registered arming")
         L.append("threshold (%d launchable windows carrying the statistic) is met." % ARMING_THRESHOLD)
     L.append("")
-    return "\n".join(L) + "\n"
+    return "\n".join(L) + "\n", attr_findings
 
 
 def main():
@@ -1205,6 +1470,14 @@ def main():
     files = sorted(glob.glob(os.path.join(a.dir, "preflight-*.txt")))
     if not files:
         print("CENSUS GAP: no preflight-*.txt readings under %s" % a.dir)
+        return 1
+    # Bound the refusal-rule table to the gate BEFORE paying for one gate subprocess per reading:
+    # if the gate renamed or added a refusal reason, every attribution cell would be wrong, and the
+    # census must say so rather than print a confident rule count (census v9, tick 197).
+    rule_problems = refusal_rule_guard()
+    if rule_problems:
+        print("CENSUS GAP: the refusal-rule table no longer matches the gate source — "
+              + "; ".join(rule_problems))
         return 1
     stamps = [parse_stamp(f) for f in files]
     if a.as_of:
@@ -1274,7 +1547,7 @@ def main():
     # The corpus-wide count is operator context, NOT window identity: it changes when a reading
     # is taken after a frozen --as-of, so it lives on stdout only and never in the committed
     # table (see the module docstring, 2026-11-15).
-    md = build(rows, as_of, consts, day, a.window_hours, legs)
+    md, attr_findings = build(rows, as_of, consts, day, a.window_hours, legs)
 
     if a.check:
         if not os.path.exists(a.check):
@@ -1285,6 +1558,12 @@ def main():
             print("CENSUS CHECK: matches the committed table (%d readings judged in the window; "
                   "%d preflight-*.txt files retained in the corpus at run time, corpus count is "
                   "not part of the window identity)" % (len(rows), total_files))
+            if attr_findings:
+                print("CENSUS FINDING (the table was produced, but a cell could not be filled "
+                      "honestly — the committed table names the same files):")
+                for f in attr_findings:
+                    print("  - " + f)
+                return 4
             return 0
         print("CENSUS DRIFT: the committed table is not what the current gate + readings produce")
         import difflib
@@ -1319,8 +1598,19 @@ def main():
                  sum(1 for r in rows if r["rc"] == 0),
                  sum(1 for r in rows if r["rc"] == 3),
                  sum(1 for r in rows if r["rc"] == 1)))
+        if attr_findings:
+            print("CENSUS FINDING (written, but a cell could not be filled honestly; the table "
+                  "names the same files):")
+            for f in attr_findings:
+                print("  - " + f)
+            return 4
         return 0
     sys.stdout.write(md)
+    if attr_findings:
+        print("CENSUS FINDING (the table above names the same files):")
+        for f in attr_findings:
+            print("  - " + f)
+        return 4
     return 0
 
 

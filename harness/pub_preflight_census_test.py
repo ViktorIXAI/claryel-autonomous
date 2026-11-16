@@ -92,6 +92,7 @@ What it pins:
       erases the dead-zone bounds.
 """
 import difflib
+import importlib.util
 import os
 import re
 import shutil
@@ -103,6 +104,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 TOOL = os.path.join(ROOT, "scripts", "pub_preflight_census.py")
 GATE = os.path.join(ROOT, "scripts", "pub_preflight.py")
+# The table-shape number is READ out of the tool, never typed here. Two earlier revisions pinned
+# the literal "…-v8" and went red on every honest shape bump; the shape is now mechanical in the
+# tool (its preserved-shape sentence is generated from this constant), so the test must follow the
+# constant rather than the news.
+_m = re.search(r"^CENSUS_STAMP = (\d+)", open(TOOL, encoding="utf-8").read(), re.M)
+STAMP_N = int(_m.group(1)) if _m else 0
+STAMP_NAME = ("pub-preflight-census-v%d" % STAMP_N) if _m else "CENSUS STAMP NOT DECLARED"
 
 CHECKS = 0
 FAILED = []
@@ -783,8 +791,8 @@ def main():
         write_fixtures(d8)
         rcd, outd = run(["--dir", d8, "--as-of", "%s-0005" % DAY])
         hdr = [l for l in outd.splitlines() if l.startswith("Census stamp:")]
-        check(rcd == 0 and len(hdr) == 1 and "pub-preflight-census-v8" in hdr[0],
-              "the census names its v8 shape, got rc=%s %r" % (rcd, hdr[:1]))
+        check(rcd == 0 and len(hdr) == 1 and STAMP_NAME in hdr[0],
+              "the census stamps itself with the declared shape, got rc=%s %r" % (rcd, hdr[:1]))
         # F1 GO at 0.005x, F2 swap refusal at 8.0x, F3 GPU refusal at 0.0x, F4/F5 input gaps
         check((cell(outd, "day launchable (GO) swap draws") or "").startswith("1 (band 0.01-0.01"),
               "one GO draw with quiet swap, got %r"
@@ -1007,8 +1015,9 @@ def main():
         write_fixtures(d10, SCOPE)
         rcs, outs = run(["--dir", d10, "--as-of", "20300102-0005"])
         hdrs = [l for l in outs.splitlines() if l.startswith("Census stamp:")]
-        check(rcs == 0 and len(hdrs) == 1 and "pub-preflight-census-v8" in hdrs[0],
-              "the census names its v8 shape, got rc=%s %r" % (rcs, hdrs[:1]))
+        check(rcs == 0 and len(hdrs) == 1 and STAMP_NAME in hdrs[0],
+              "the census stamps itself with the declared shape at every cut, got rc=%s %r"
+              % (rcs, hdrs[:1]))
         c_den = cell(outs, "readings this scope can band at all (verdict GO or NO-GO AND a "
                            "parseable `swap_in + swap_out` window)")
         check(c_den == "DAY `20300102` 2 of 2, last 24 h 4 of 4, whole corpus 4 of 4",
@@ -1222,6 +1231,225 @@ def main():
             shutil.rmtree(d14, ignore_errors=True)
     finally:
         shutil.rmtree(d11, ignore_errors=True)
+
+    # ---- census v9 (2026-11-16 03:47, tick 197): WHICH gate rule refused ----------------------
+    # Every tick before this one attributed refusals in prose ("the 02:14 reading died on the
+    # device, state-D and GPU-mean rules") and nothing computed it. The block must (a) count each
+    # rule out of the gate's OWN reason lines, (b) print a zero row for a rule that never fires
+    # instead of dropping it, (c) agree with the census's own ratio-derived swap-refusal set,
+    # (d) move when the row set (scope) moves, (e) exit 1 when the gate's refusal vocabulary no
+    # longer matches the rule table, and (f) exit 4 naming files on a reason it cannot map.
+    v9f = {
+        "preflight-%s-0101.txt" % DAY: {},                                        # GO
+        "preflight-%s-0102.txt" % DAY: {"swap_in_mib_per_s": "120.0", "swap_out_mib_per_s": "40.0",
+                                        "swap_total_peak_mib_per_s": "300.0"},    # swap-rate (sole)
+        "preflight-%s-0103.txt" % DAY: {"blk_read_mib_per_s": "60.0"},            # device-read
+        "preflight-%s-0104.txt" % DAY: {"gpu_util_pct": "100", "gpu_util_mean_pct": "97.0",
+                                        "gpu_util_peak_pct": "100"},              # gpu-busy
+        "preflight-%s-0105.txt" % DAY: {"engine_state": "D"},                     # engine-state-D
+        "preflight-%s-0106.txt" % DAY: {"swap_in_mib_per_s": "120.0", "swap_out_mib_per_s": "40.0",
+                                        "swap_total_peak_mib_per_s": "300.0",
+                                        "gpu_util_pct": "100", "gpu_util_mean_pct": "97.0",
+                                        "gpu_util_peak_pct": "100"},              # swap+gpu (multi)
+        "preflight-%s-0107.txt" % DAY: {"health_code": "503"},                    # health-code
+        "preflight-%s-0108.txt" % DAY: {"health_loaded": "false"},                # health-loaded
+        "preflight-%s-0109.txt" % DAY: {"engine_serve_procs": "0"},               # serve procs
+        "preflight-%s-0110.txt" % DAY: {"swap_free_mib": "100", "swap_used_mib": "65435"},
+        "preflight-%s-0111.txt" % DAY: {"mem_available_mib": "100"},              # mem-available
+        "preflight-%s-0112.txt" % DAY: {"foreign_legs": "1"},                     # foreign-legs
+        "preflight-%s-0113.txt" % DAY: {"engine_pcpu": "620.0"},                  # idle-spin
+    }
+    d15 = tempfile.mkdtemp(prefix="pubcensus-rules-")
+    try:
+        write_fixtures(d15, v9f)
+        rc15, out15 = run(["--dir", d15, "--no-transition"])
+
+        def rule_cell(rid):
+            return next((l for l in out15.splitlines()
+                         if l.startswith("| rule fired:") and ("`%s`" % rid) in l), "")
+
+        check(rc15 == 0,
+              "the refusal-rule census runs clean on a fixture set with one refusal per rule "
+              "(rc=%s)" % rc15)
+        # (a) every rule counted from the gate's own reason lines, at all three scopes
+        for rid, want in (("swap-rate", "2 fired, 1 sole"), ("device-read", "1 fired, 1 sole"),
+                          ("gpu-busy", "2 fired, 1 sole"), ("engine-state-D", "1 fired, 1 sole"),
+                          ("health-code-not-200", "1 fired, 1 sole"),
+                          ("health-loaded-false", "1 fired, 1 sole"),
+                          ("engine-process-absent", "1 fired, 1 sole"),
+                          ("swap-free-low", "1 fired, 1 sole"),
+                          ("mem-available-low", "1 fired, 1 sole"),
+                          ("foreign-legs", "1 fired, 1 sole"), ("idle-spin", "1 fired, 1 sole")):
+            c = rule_cell(rid) or ""
+            check(c.count(want) == 3,
+                  "rule %s counts %r at all three scopes, got %r" % (rid, want, c))
+        # (b) a rule that never fires prints a zero row: a dropped row and a zero row read alike
+        d15b = tempfile.mkdtemp(prefix="pubcensus-rules-none-")
+        try:
+            write_fixtures(d15b, {"preflight-%s-0101.txt" % DAY: {},
+                                  "preflight-%s-0102.txt" % DAY: {"engine_state": "D"}})
+            rcb, outb = run(["--dir", d15b, "--no-transition"])
+            zero = [l for l in outb.splitlines()
+                    if l.startswith("| rule fired:") and "`idle-spin`" in l]
+            check(rcb == 0 and len(zero) == 1 and "0 fired" in zero[0]
+                  and all(("0 fired" in l or "`engine-state-D`" in l)
+                          for l in outb.splitlines() if l.startswith("| rule fired:")),
+                  "a rule that never fires still gets its row and prints 0 fired, got rc=%s %r"
+                  % (rcb, zero))
+        finally:
+            shutil.rmtree(d15b, ignore_errors=True)
+        check(len([l for l in out15.splitlines() if l.startswith("| rule fired:")]) == 11,
+              "the table carries one row per refusal rule (11), got %d"
+              % len([l for l in out15.splitlines() if l.startswith("| rule fired:")]))
+        # multi vs sole
+        ms = [l for l in out15.splitlines() if l.startswith("| refusals where TWO OR MORE")]
+        so = [l for l in out15.splitlines() if l.startswith("| refusals decided by exactly ONE")]
+        check(ms and ms[0].count(": 1") == 3 and so and so[0].count(": 11") == 3,
+              "one multi-rule refusal (swap+GPU) and eleven single-rule refusals, got %r / %r"
+              % (ms, so))
+        # (c) the two independent derivations of the swap-refusal set agree on this fixture set
+        xc = [l for l in out15.splitlines() if l.startswith("| rule cross-check")]
+        check(xc and xc[0].count("AGREES (2 = 2)") == 3,
+              "the ratio-derived and reason-derived swap-refusal sets agree (2 = 2) at all three "
+              "scopes, got %r" % xc)
+        # the fail-closed cells say 0 when nothing is wrong
+        fc = [l for l in out15.splitlines()
+              if "cannot attribute" in l or "could not be parsed" in l]
+        check(len(fc) == 2 and all(l.count(": 0") == 3 for l in fc),
+              "the two fail-closed rows print 0 on a clean corpus, got %r" % fc)
+        # (d) the counts move with the row set: at the 0105 cut the multi-rule refusal is outside
+        rc15c, out15c = run(["--dir", d15, "--as-of", "%s-0105" % DAY, "--no-transition"])
+        swap_c = [l for l in out15c.splitlines()
+                  if l.startswith("| rule fired:") and "`swap-rate`" in l]
+        multi_c = [l for l in out15c.splitlines() if l.startswith("| refusals where TWO OR MORE")]
+        check(rc15c == 0 and swap_c and swap_c[0].count("1 fired, 1 sole") == 3
+              and multi_c and multi_c[0].count(": 0") == 3,
+              "the rule counts are scope-scoped: the 0105 cut holds one swap-rate refusal and no "
+              "multi-rule refusal, got rc=%s %r / %r" % (rc15c, swap_c, multi_c))
+        # gap classes are named by the gate's own phrase, not invented here
+        gc = [l for l in out15.splitlines() if l.startswith("| input-gap")]
+        check(gc and "0" in gc[0], "the gap-class row states its scopes, got %r" % gc)
+    finally:
+        shutil.rmtree(d15, ignore_errors=True)
+
+    # (e)/(f) the non-vacuity controls, on a scratch scripts/ pair (the census resolves its gate
+    # relative to its own directory, so both files travel together — tick 195's mechanism used on
+    # purpose here). Mangle the GATE copy only; the tool copy is the real one.
+    def scratch_pair(tag, mangle=None):
+        d = tempfile.mkdtemp(prefix="pubcensus-guard-" + tag + "-")
+        sd = os.path.join(d, "scripts")
+        os.makedirs(sd)
+        shutil.copy(TOOL, os.path.join(sd, os.path.basename(TOOL)))
+        gsrc = open(GATE, encoding="utf-8").read()
+        if mangle:
+            for old, new in mangle:
+                assert old in gsrc, "mangle anchor %r missing from the gate" % old
+                gsrc = gsrc.replace(old, new, 1)
+        with open(os.path.join(sd, "pub_preflight.py"), "w", encoding="utf-8") as fh:
+            fh.write(gsrc)
+        return d, sd
+
+    dfix = tempfile.mkdtemp(prefix="pubcensus-guard-fixtures-")
+    write_fixtures(dfix, {"preflight-%s-0101.txt" % DAY: {},
+                          "preflight-%s-0104.txt" % DAY: {"gpu_util_pct": "100",
+                                                          "gpu_util_mean_pct": "97.0",
+                                                          "gpu_util_peak_pct": "100"}})
+    try:
+        # control: an UNMANGLED copy pair still runs, so (e)/(f) below cannot be the scratch
+        # mechanism failing rather than the guard firing.
+        d0, s0 = scratch_pair("clean")
+        try:
+            r0 = subprocess.run([sys.executable, os.path.join(s0, "pub_preflight_census.py"),
+                                 "--dir", dfix, "--no-transition"], cwd=d0,
+                                capture_output=True, text=True)
+            check(r0.returncode == 0,
+                  "an unmodified scratch copy of tool+gate still runs the census (rc=%s) — the "
+                  "guard controls below are not the scratch mechanism failing: %s"
+                  % (r0.returncode, (r0.stdout + r0.stderr)[:200]))
+        finally:
+            shutil.rmtree(d0, ignore_errors=True)
+        # (e1) a renamed refusal reason: the anchor is gone, the census refuses to count rules
+        d1, s1 = scratch_pair("rename", [("the shared brain was busy in the sample window",
+                                          "the shared brain was BUSY in the sample window")])
+        try:
+            r1 = subprocess.run([sys.executable, os.path.join(s1, "pub_preflight_census.py"),
+                                 "--dir", dfix, "--no-transition"], cwd=d1,
+                                capture_output=True, text=True)
+            o1 = r1.stdout + r1.stderr
+            check(r1.returncode == 1 and "no longer matches the gate source" in o1
+                  and "gpu-busy" in o1,
+                  "a renamed gate refusal reason reddens the census before it counts anything "
+                  "(rc=%s) %r" % (r1.returncode, o1[:220]))
+        finally:
+            shutil.rmtree(d1, ignore_errors=True)
+        # (e2) a NEW refusal site the table has never heard of, every anchor still present
+        d2, s2 = scratch_pair("site", [("    if int(vals[\"foreign_legs\"]) > 0:",
+                                        "    reasons.append(\"a brand new refusal the census has "
+                                        "never counted\")\n    if int(vals[\"foreign_legs\"]) > 0:")])
+        try:
+            r2 = subprocess.run([sys.executable, os.path.join(s2, "pub_preflight_census.py"),
+                                 "--dir", dfix, "--no-transition"], cwd=d2,
+                                capture_output=True, text=True)
+            o2 = r2.stdout + r2.stderr
+            check(r2.returncode == 1 and "builds 13 refusal reasons" in o2 and "knows 12" in o2,
+                  "an added refusal site reddens the census even though no anchor moved (rc=%s) %r"
+                  % (r2.returncode, o2[:220]))
+        finally:
+            shutil.rmtree(d2, ignore_errors=True)
+        # (f) an UNMAPPABLE reason with the anchors kept (a comment carries the old phrase): the
+        # census still runs, but it names the file and exits 4 instead of printing a rule count.
+        d3, s3 = scratch_pair("unattr", [
+            ("the shared brain was busy in the sample window",
+             "brain busy, reworded by a gate edit \" + \"in the sample window"),
+            ("    spin_blind = False",
+             "    # the shared brain was busy  (this comment keeps the census anchor present so the "
+             "guard "
+             + chr(10) + "    # passes; the attribution below must still fail closed)"
+             + chr(10) + "    spin_blind = False")])
+        try:
+            r3 = subprocess.run([sys.executable, os.path.join(s3, "pub_preflight_census.py"),
+                                 "--dir", dfix, "--no-transition"], cwd=d3,
+                                capture_output=True, text=True)
+            o3 = r3.stdout + r3.stderr
+            check(r3.returncode == 4 and "cannot attribute" in o3
+                  and "preflight-%s-0104.txt" % DAY in o3,
+                  "an unattributable refusal reason names its file and exits 4 (rc=%s) %r"
+                  % (r3.returncode, o3[:260]))
+        finally:
+            shutil.rmtree(d3, ignore_errors=True)
+    finally:
+        shutil.rmtree(dfix, ignore_errors=True)
+
+    # ---- the preserved-shape sentence is GENERATED (tick 197: the typed one was two stamps short)
+    src9 = open(TOOL, encoding="utf-8").read()
+    mstamp = re.search(r"^CENSUS_STAMP = (\d+)", src9, re.M)
+    check(mstamp is not None, "the census names its table shape as a single CENSUS_STAMP constant")
+    stamp_n = int(mstamp.group(1)) if mstamp else 0
+    spec9 = importlib.util.spec_from_file_location("pub_preflight_census_v9", TOOL)
+    mod9 = importlib.util.module_from_spec(spec9)
+    spec9.loader.exec_module(mod9)
+    s_now = mod9.preserved_stamp_sentence(stamp_n)
+    s_ahead = mod9.preserved_stamp_sentence(stamp_n + 3)
+    check(all(("v%d" % i) in s_now for i in range(1, stamp_n))
+          and ("v%d" % stamp_n) not in s_now.split("as written")[0],
+          "the generated sentence covers v1..v%d for the current stamp, got %r" % (stamp_n - 1, s_now))
+    check(all(("v%d" % i) in s_ahead for i in range(1, stamp_n + 3)),
+          "the same sentence still covers every earlier shape three stamps from now, got %r" % s_ahead)
+    check(re.search(r'^\s*L\.append\("v1, v2, v3, v4, v5 and v6', src9, re.M) is None,
+          "no L.append prints the hand-typed enumeration that stopped at v6 (the phrase may appear "
+          "in a comment naming the bug; printing it is what this forbids)")
+    d16 = tempfile.mkdtemp(prefix="pubcensus-shape-")
+    try:
+        write_fixtures(d16)
+        rc16, out16 = run(["--dir", d16, "--no-transition"])
+        hdr16 = [l for l in out16.splitlines() if l.startswith("Census stamp:")]
+        check(rc16 == 0 and len(hdr16) == 1
+              and ("pub-preflight-census-v%d" % stamp_n) in hdr16[0]
+              and s_now in hdr16[0],
+              "the header stamps itself with the constant AND carries the generated preserved "
+              "sentence, got rc=%s %r" % (rc16, hdr16[:1]))
+    finally:
+        shutil.rmtree(d16, ignore_errors=True)
 
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()
