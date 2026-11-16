@@ -869,3 +869,92 @@ DEPTH before it can answer the question it was built for ("has this build ever b
 any arming or band on it before that depth would be tick 204's coverage-for-information trade again.
 One line for the coming ticks: the axis is shipped, the build is named, and the first honest
 generation boundary the corpus can prove is the KEY, not the engine.
+
+## Tick 209 — 2026-11-16 16:20 CET: the pre-registered peak arming threshold was MET, and the next cut would have printed `31 of 30` — census v16 prints the threshold state, the zero-draw dominance, and a computed verdict on whether arming the peak rule would refuse anything at all
+
+**What moved.** Census stamp `v15 -> v16`; the gate was not touched (its sha16 stays
+`624d0d3cc50718c2`), no rule, no ceiling, no stored verdict.
+1. **A threshold stopped being a fraction.** The peak rule's pre-registered arming threshold — 30
+   launchable windows carrying a parseable peak before the peak may be gated at all — was crossed at
+   the `15:29` cut, and the committed table printed `30 of 30`. The next cut would have printed
+   **`31 of 30`**: a denominator that is a threshold, not a total, so exceeding it reads as a broken
+   fraction. That rendering never reached a published table — v16 replaces both arming counters'
+   cell with a computed **THRESHOLD MET / NOT MET** state that names the reading where the count
+   first reached 30 (`preflight-20261116-1529.txt`).
+2. **The half that actually matters: the counter counts COVERAGE, and coverage is not information**
+   (tick 204's lesson, finally applied to the counter that just crossed). The peak block now carries
+   the same non-zero / exactly-`0.0 MiB/s` split v12 put on the footprint counter, per side, plus a
+   coverage state word. At the published `16:20` cut: **33 launchable windows carry the statistic,
+   20 of them read exactly 0.0 MiB/s → ZERO-DRAW-DOMINATED**, and the split is worse than the ratio:
+   every one of the live pid 438502's 13 launchable draws reads exactly zero, while the 13 non-zero
+   draws that carry the launchable maximum 111.4 MiB/s all belong to two retired generations
+   (pids 10597 and 175316). The threshold was reached by zero draws.
+3. **The arming DECISION number, computed.** New row
+   `peak rule effect at the minimum admissible ceiling (computed; it arms NOTHING)`: a ceiling may
+   only be placed above every launchable draw (tick 204's non-retroactivity requirement), so the
+   windows it can ever fire on are stored refusals. **38 stored refusals carry a peak above the
+   highest launchable draw (111.4 MiB/s) and ALL 38 are already refused by the swap-mean rule
+   (`swap-rate`) — arming at that ceiling adds 0 refusals**, so the cell prints **INERT ON THIS
+   WINDOW**. The refusal split reads the gate's OWN attributed reason (v9's rule-attribution
+   machinery), never a census-side re-derivation of the mean rule. The band row has said "a peak
+   rule adds no refusal the mean rule does not already make" in prose since v15; it is now a
+   computed cell with a state word — the tick 207 zero-fire / dead-target census in peak-rule form.
+
+**The proof that no historical verdict moved.** The committed v15 table IS the old tool's output at
+`as-of 15:29`, so the replay is a re-run of both tools at that same cut (old bytes restored inside
+their own `scripts/` dir, gate included, sha-verified by the tool's own printed hash): gate sha16
+`624d0d3cc50718c2` in BOTH outputs, **108 parsed `label -> value` rows byte-identical, exactly 2
+rows changed** (the two arming-counter cells), **6 rows new, 0 rows lost**, 4 hunks, 5 lines removed
+/ 13 added (stamp sentence, the arming cells, the peak block prose). Compared on parsed pairs, not
+line counts: several cells grew in text, which a line count cannot see.
+
+**Contract tests.** Census `350/350` (tick 208 left 319; **+31**): the per-side non-zero/exactly-zero
+split cells, all four coverage branches (`NO-DENOMINATOR`, `ALL-ZERO`, `ZERO-DRAW-DOMINATED`,
+`INFORMATIVE`), all four effect branches (`NO-DENOMINATOR`, `ZERO-FIRE`, `INERT ON THIS WINDOW`,
+`WOULD FIRE ON n WINDOW(S)`), a **tamper control** that moves one refusal's peak from 140.0 to 45.0
+MiB/s — under the launchable maximum — and requires the effect count to fall from 3 to 2, so the
+number is proven to read the readings rather than a typed total; the threshold text one window past
+(must not contain `31 of 30`) and one short (must say `1 short`); the call-site predicate at n=30
+(MET, naming the crossing file) and n=29 (NOT MET). Gate tests stay `129/129`, which is the expected
+result for a tick that did not touch the gate.
+One new invariant earned its keep the moment it was written: **every row label in the table is
+unique**. The first draft of the peak coverage row reused the footprint row's label, and three
+pre-existing footprint tests started reading the wrong row — a label collision inside a table that
+every tick line-filters by label substring is exactly how a peak cell gets quoted as a footprint
+cell. The published table (114 rows) is now clean, and the fixture table is asserted clean.
+
+**The live cut.** Two producer readings this tick, `16:13` and `16:20`, both **GO**, both carrying the
+build identity (`b4d6a41750d9eafd`, ctx 196 608, engine pid 438502, footprint 0 MiB, peak 0.0 MiB/s).
+At the published `16:20` cut: 178 readings inside the 24 h window, day `20261116` 24 readings
+(15 GO / 9 NO-GO / 0 gap), 18 launchable in the last 24 h. Peak arming **33 (MET, crossed 15:29)**;
+footprint arming **24 — NOT MET, 6 short**, so the footprint stays REPORTED and unarmed. Memory is
+the moving number: `MemAvailable` 3861 MiB, 1813 MiB above the gate's own 2048 MiB floor, with the
+newest generation in a **13-draw monotone fall of −443.5 MiB/h**; the printed projection puts the
+floor at **≈245 min after 16:20 (≈20:25)**, in **4-35 further readings** because that run's own
+intervals span 7-61 min (8.7x spread, census v14's denominator rule). Nothing is queued to launch,
+so that clock costs nothing today — but a leg window after ≈20:00 must be re-checked against the
+floor with a fresh reading, not assumed.
+
+**Credit.** Zero model calls, zero cloud calls, zero GPU seconds, zero discarded arm bytes, no leg
+started or stopped, hence **no `LEG-INCIDENTS.md` entry owed**. Against the endpoint: the standing
+producer readings only (one `/health` GET each, the request the loaded rule always made). Plus the
+old-vs-new census replay over the stored corpus (CPU only), the regen and this block. **No published
+benchmark percent moved, none needed to.**
+
+**Machine state.** 36 cron jobs, 6 disabled (the same six as tick 208: B2003 finish watch, Tool-eval
+full after B2003, gh-inbox-watch, contour-pair publish watcher, house-ground reminder, P3001
+supported-GPU watcher), **0 paused** — nothing to self-heal. CI on tick 208's commit read green this
+tick (`devsecops` 7m36s, `hard-v6 scoring contracts` 7m10s, `contour self-tests` 34s). The second
+worktree — the one the publication watchdog and the docs job use — is parked detached at `69390e6`
+while `main` sits at `233b02b`, `git diff --cached` empty, so no staged-deletion hazard; it still
+carries 7 paths this line never touches (modified `hardware/os-snapshots/latest.json` plus six
+untracked fleet snapshots, 2026-11-11 … 2026-11-16). Same data-custody gap tick 206 named, still the
+ops line's call, and nothing foreign is committed from the benchmark line.
+
+**Next.** The queue stays mechanically empty (owner decision), and this tick closes the peak-rule
+question with printed cells instead of argument: **threshold MET, band CROSSED, effect INERT** — there
+is nothing to arm, and the reason is now recomputed at every cut rather than remembered. The footprint
+counter remains the only unarmed one (24 of a 30 threshold, 6 short, 11 non-zero / 12 zero on the
+launchable side). Honest note for whoever next touches either counter: the live generation cannot
+re-arm the peak counter by itself — every launchable draw of pid 438502 reads exactly 0.0 MiB/s — so
+any future arming decision must be taken on the coverage split, never on the threshold count again.

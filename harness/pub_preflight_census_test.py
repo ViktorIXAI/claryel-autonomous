@@ -244,7 +244,8 @@ def main():
         bandset = cell(out, "...of those, gate-JUDGED readings with a parseable peak (the band's set)")
         check(bool(bandset) and bandset.startswith("3 (the other 1 sit in readings the gate refuses"),
               "band set is 3 and the input-gap 400.0 peak is named as excluded, got %r" % bandset)
-        m = re.search(r"\| arming counter \(launchable windows carrying the peak\) \| (\d+) of (\d+) \|", out)
+        m = re.search(r"\| arming counter \(launchable windows carrying the peak\) \| (\d+) "
+                      r"launchable window\(s\) carry a parseable peak; threshold (\d+) \|", out)
         check(bool(m), "arming counter cell present")
         if m:
             check(m.group(1) == "1",
@@ -412,7 +413,11 @@ def main():
                   "the page-cache share divides by the used column of the SAME reading "
                   "(8000/8028 = 99.7 percent, 500/8028 = 6.2 percent), got %r" % sh)
             armb = cell(out12, "footprint arming counter (launchable windows carrying it)") or ""
-            check(armb == "2 of 30", "the footprint has its own arming counter, got %r" % armb)
+            check(armb == "2 launchable window(s) carry a parseable footprint; threshold 30",
+                  "the footprint has its own arming counter, got %r" % armb)
+            check("of 30" not in armb,
+                  "the arming counter is a count against a THRESHOLD, not a fraction of it "
+                  "(census v16: `31 of 30` was the first cut past the peak threshold), got %r" % armb)
             # (e) non-retroactivity: same fixtures, keys stripped — verdicts and the whole peak band
             # must be byte-identical, only the footprint cells may differ.
             d4 = tempfile.mkdtemp(prefix="pub-census-nofp-")
@@ -1533,6 +1538,7 @@ def main():
     spec9 = importlib.util.spec_from_file_location("pub_preflight_census_v9", TOOL)
     mod9 = importlib.util.module_from_spec(spec9)
     spec9.loader.exec_module(mod9)
+    ARMING_T = mod9.ARMING_THRESHOLD
     s_now = mod9.preserved_stamp_sentence(stamp_n)
     s_ahead = mod9.preserved_stamp_sentence(stamp_n + 3)
     check(all(("v%d" % i) in s_now for i in range(1, stamp_n))
@@ -1839,6 +1845,160 @@ def main():
               "the per-generation detail prints the informative/coverage pair, got %r" % (det17[:1],))
     finally:
         shutil.rmtree(d17, ignore_errors=True)
+
+    # ---- census v16 (2026-11-16, tick 209): the arming counters are counts, not fractions -------
+    # Why: the peak block published `arming counter ... | 30 of 30 |`, and the next launchable
+    # window made it `31 of 30` — a denominator that is a THRESHOLD, not a total, printed as a
+    # fraction. Worse, the threshold had just been met on coverage: at the live 16:02 cut 31
+    # launchable windows carry a parseable peak, 18 of them read exactly 0.0 MiB/s, and the five
+    # draws that carried the count across the threshold were all zeros. The peak counter had never
+    # had v12's coverage-vs-information split, so a crossed threshold read as "the rule can now be
+    # armed" when the informative content was 13 draws of a retired generation.
+    check(stamp_n >= 16,
+          "census v16 moved the stamp: peak coverage split + computed THRESHOLD-MET/NOT-MET state "
+          "for both arming counters (stamp reads %d)" % stamp_n)
+    check(re.search(r"def arming_counter_text\(", src9) is not None,
+          "the arming threshold state is one computed function shared by BOTH counters, not two "
+          "hand-typed sentences")
+    check(re.search(r"def peak_coverage_text\(", src9) is not None,
+          "the peak coverage state is a function, mirroring footprint_info_text")
+    check("carry a parseable peak; threshold" in src9 and "carry a parseable footprint; threshold" in src9,
+          "both arming counters print a count against a threshold")
+    check(not re.search(r"arming counter \(launchable windows carrying the(?: peak| it)\) \| %d of %d",
+                        src9),
+          "the fraction form `%d of %d` is gone from BOTH arming counter rows, not just the one that "
+          "broke")
+
+    def peak_window(d, names_peaks, day="20300102"):
+        """GO windows carrying a parseable peak, one per minute, so the crossing reading is ordered.
+        A peak of 0.0 needs a window MEAN of 0.0 too: the gate refuses as an INPUT GAP any reading
+        whose peak sits below its own window mean (the two numbers must come from one window), so an
+        all-zero peak on a quiet-but-nonzero window is a producer bug, not a launchable draw."""
+        for hh, pk in names_peaks:
+            fn = "preflight-%s-%s.txt" % (day, hh)
+            over = {"swap_total_peak_mib_per_s": pk}
+            if float(pk) == 0.0:
+                over.update({"swap_in_mib_per_s": "0.0", "swap_out_mib_per_s": "0.0"})
+            write_fixtures(d, {fn: over})
+
+    d18 = tempfile.mkdtemp(prefix="pubcensus-peakcover-")
+    try:
+        # 3 launchable windows: two zeros and one non-zero peak -> ZERO-DRAW-DOMINATED
+        peak_window(d18, (("0401", "0.0"), ("0402", "0.0"), ("0403", "40.0")))
+        rc18, out18 = run(["--dir", d18, "--no-transition", "--as-of", "20300102-0500"])
+        psplit = cell(out18, "...of those launchable windows: non-zero peak / exactly 0.0 MiB/s") or ""
+        prsplit = cell(out18, "...refused windows with a parseable peak: non-zero / exactly 0.0 MiB/s") or ""
+        pst = cell(out18, "peak coverage state (computed)") or ""
+        check(rc18 == 0 and "1 non-zero / 2 zero" in psplit,
+              "the peak counter prints its own non-zero / exactly-0.0 split, got %r" % (psplit,))
+        check("0 non-zero / 0 zero" in prsplit,
+              "the peak block prints the refused-side split separately instead of inheriting the "
+              "launchable one, got %r" % (prsplit,))
+        check("ZERO-DRAW-DOMINATED" in pst and "40.0 MiB/s" in pst and "rests on 1 draw" in pst,
+              "a launchable peak group dominated by zeros says the maximum rests on one draw: %r"
+              % (pst,))
+        peff = cell(out18, "peak rule effect at the minimum admissible ceiling (computed; it arms "
+                           "NOTHING)") or ""
+        check("ZERO-FIRE" in peff and "40.0 MiB/s" in peff,
+              "a corpus whose only refusal-free peaks sit at the launchable maximum says the ceiling "
+              "would fire on nothing: %r" % (peff,))
+        labels = []
+        for l in out18.splitlines():
+            mm = re.match(r"^\| (.+?) \| (.*) \|$", l)
+            if mm and mm.group(2) != "value":
+                labels.append(mm.group(1))
+        dup = sorted({x for x in labels if labels.count(x) > 1})
+        check(not dup,
+              "every table row label is unique — a duplicated label makes every line-filter over "
+              "this table ambiguous, which is how a peak cell can be read as a footprint cell: %r"
+              % (dup[:4],))
+        check(len([l for l in out18.splitlines() if "| peak coverage state (computed) |" in l]) == 1
+              and len([l for l in out18.splitlines()
+                       if "| footprint informative-coverage state (computed) |" in l]) == 1,
+              "the peak coverage row and the footprint coverage row keep distinct labels")
+    finally:
+        shutil.rmtree(d18, ignore_errors=True)
+
+    # Direct pins on the two text functions, including the branch the fixtures cannot reach
+    # (an all-zero launchable peak group, and a threshold MET with no crossing name).
+    def pcover(nz, z, nzmax):
+        return mod9.peak_coverage_text(dict(arm_nonzero=nz, arm_zero=z, arm_nz_max=nzmax))
+
+    check("NO-DENOMINATOR" in pcover(0, 0, None),
+          "an empty launchable peak set refuses to state a coverage word about a set that does not exist")
+    check("ALL-ZERO" in pcover(0, 4, None) and "not the pre-registered rule" in pcover(0, 4, None),
+          "an all-zero launchable peak group says a ceiling above zero is not the rule")
+    check("INFORMATIVE" in pcover(3, 2, 88.0) and "88.0" in pcover(3, 2, 88.0),
+          "a majority-non-zero group states the maximum and the denominator it rests on")
+    check("THRESHOLD MET" in mod9.arming_counter_text(ARMING_T + 1) and
+          "31 of 30" not in mod9.arming_counter_text(ARMING_T + 1),
+          "one window past the threshold never renders a fraction")
+    check(str(ARMING_T - 1) in mod9.arming_counter_text(ARMING_T - 1)
+          and "1 short" in mod9.arming_counter_text(ARMING_T - 1),
+          "one window short states the shortfall, not a bare count")
+
+    # v16: the arming DECISION cell. The threshold says only that enough windows carry the statistic;
+    # what a peak ceiling at the minimum admissible point would DO is a separate computed number, and
+    # a rule that fires only where the swap-mean rule already fires buys a second signature, not a
+    # decision (the tick 207 dead-target census in peak-rule form).
+    def peffect(above, already, nzmax=111.4):
+        return mod9.peak_armed_effect_text(dict(arm_above_launch_max=above,
+                                                arm_above_swap_rule=already,
+                                                arm_new_refusals=above - already,
+                                                arm_nz_max=nzmax))
+
+    check("NO-DENOMINATOR" in mod9.peak_armed_effect_text(
+        dict(arm_above_launch_max=0, arm_above_swap_rule=0, arm_new_refusals=0, arm_nz_max=None)),
+          "with no non-zero launchable peak there is no floor to place a ceiling above")
+    check("ZERO-FIRE" in peffect(0, 0),
+          "no refusal above the launchable maximum says the ceiling would fire on nothing recorded")
+    check("INERT ON THIS WINDOW" in peffect(38, 38) and "adds 0 refusal" in peffect(38, 38),
+          "refusals above the floor that the swap-mean rule already refuses must say the rule adds "
+          "nothing: %r" % peffect(38, 38))
+    check("WOULD FIRE ON 2 WINDOW(S)" in peffect(5, 3) and "adds 2 refusal" in peffect(5, 3),
+          "refusals above the floor made by OTHER rules are counted as new work the mean rule misses")
+
+    def erow(rc, peak, mean, rules):
+        return dict(rc=rc, peak=peak, mean=mean, rules=list(rules), ts=0,
+                    name="preflight-eff-20300102-0600.txt", peak_present=True)
+
+    rows_eff = [erow(0, 50.0, 5.0, []), erow(3, 140.0, 25.0, ["swap-rate"]),
+                erow(3, 120.0, 25.0, ["swap-rate"]), erow(3, 60.0, 5.0, ["gpu-busy"])]
+    b_eff = mod9.band(rows_eff, 20.0)
+    check(b_eff["arm_above_launch_max"] == 3 and b_eff["arm_above_swap_rule"] == 2
+          and b_eff["arm_new_refusals"] == 1,
+          "the effect census splits refusals above the launchable maximum by the gate's OWN attributed "
+          "reason, never by a census-side re-derivation of the mean rule: %r"
+          % ({k: b_eff[k] for k in ("arm_above_launch_max", "arm_above_swap_rule",
+                                    "arm_new_refusals")},))
+    rows_eff[1]["peak"] = 45.0
+    b_tamper = mod9.band(rows_eff, 20.0)
+    check(b_tamper["arm_above_launch_max"] == 2 and b_tamper["arm_new_refusals"] == 1,
+          "tamper control — moving one refusal's peak under the launchable maximum takes it out of the "
+          "effect census, so the count is read from the readings and not typed")
+
+    # The call-site predicate: MET at exactly the threshold, NOT MET one window short.
+    for n, expect_word, expect_tail in ((ARMING_T, "THRESHOLD MET", "preflight-20300102-0030.txt"),
+                                        (ARMING_T - 1, "NOT MET", "1 short")):
+        d19 = tempfile.mkdtemp(prefix="pubcensus-peakarm-")
+        try:
+            # minutes 00:01..00:59 then 01:01.. so the n-th window in time order is nameable
+            slots = ["00%02d" % (i + 1) for i in range(min(n, 59))]
+            slots += ["01%02d" % (i + 1) for i in range(max(0, n - 59))]
+            peak_window(d19, [(s, "5.0") for s in slots])
+            rc19, out19 = run(["--dir", d19, "--no-transition", "--as-of", "20300102-0200"])
+            ast = cell(out19, "peak arming threshold state (computed)") or ""
+            acell = cell(out19, "arming counter (launchable windows carrying the peak)") or ""
+            check(rc19 == 0 and expect_word in ast,
+                  "%d launchable peak windows read %s, got %r" % (n, expect_word, (ast,)))
+            check("%d launchable window(s) carry a parseable peak" % n in acell,
+                  "the counter cell prints the count as a count at n=%d, got %r" % (n, acell))
+            check(expect_tail in ast,
+                  "at n=%d the threshold cell names %s, got %r" % (n, expect_tail, (ast,)))
+            check(not re.search(r"\| \d+ of \d+ \|", acell),
+                  "no fraction rendering at n=%d, got %r" % (n, acell))
+        finally:
+            shutil.rmtree(d19, ignore_errors=True)
 
     # ---- census v13 (2026-11-16, tick 205): the two FREE columns ------------------------------
     # Why: every rule this table banded was a RATE over one 6 s window, while the gate's one

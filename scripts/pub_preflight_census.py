@@ -233,7 +233,7 @@ DIFF_PRINT_MAX = 400
 # Table-shape stamp. Bumping it must not require typing the "which earlier shapes are preserved"
 # sentence: that sentence is GENERATED from this number (tick 197 found the hand-typed version two
 # stamps short, announcing v7 and v8 shape changes while claiming only v1-v6 are preserved).
-CENSUS_STAMP = 15
+CENSUS_STAMP = 16
 
 
 def census_stamp_name():
@@ -939,6 +939,21 @@ def band(rows, swap_max):
     verdict_go_peaks = [r["peak"] for r in judged if r["rc"] == 0 and r["peak"] is not None]
     pass_max = max((r["peak"] for r in passing), default=None)
     fail_min = min((r["peak"] for r in failing), default=None)
+    # census v16: the arming counter is a COVERAGE count, and coverage is not information (tick 204's
+    # lesson, applied to the counter that just crossed). Split it the way v12 split the footprint
+    # counter, and name the reading at which the count first reached the pre-registered threshold:
+    # that threshold was met at the 2026-11-16 15:29 cut, so the next cut prints `31 of 30`, which is
+    # not a fraction and reads as a broken denominator.
+    arm_rows = sorted((r for r in judged if r["rc"] == 0 and r["peak"] is not None),
+                      key=lambda r: r["ts"])
+    arm_nonzero = sum(1 for r in arm_rows if r["peak"] > 0)
+    ref_rows = [r for r in judged if r["rc"] == 3 and r["peak"] is not None]
+    ref_nonzero = sum(1 for r in ref_rows if r["peak"] > 0)
+    # The minimum admissible ceiling is one point above the highest launchable peak; the only windows
+    # such a ceiling can fire on are refusals, and the split below says whether the swap-mean rule
+    # already refuses them (rule id read out of the gate's own reason text).
+    arm_nz_max = max((r["peak"] for r in arm_rows if r["peak"] > 0), default=None)
+    above = [r for r in ref_rows if arm_nz_max is not None and r["peak"] > arm_nz_max]
     # Band state, computed not asserted. The first version of this tool always printed
     # "Band: nothing between <pass_max> and <fail_min>", which is a claim about the ORDER of the
     # two numbers. Measured 2026-11-14 23:13 the order reversed: one live GO window carried an
@@ -961,8 +976,93 @@ def band(rows, swap_max):
         pass_max=pass_max, fail_min=fail_min, band_state=state,
         go_max=max(verdict_go_peaks, default=None),
         nogo_min=min(verdict_nogo_peaks, default=None),
-        arming=sum(1 for r in judged if r["rc"] == 0 and r["peak"] is not None),
+        arming=len(arm_rows),
+        arm_nonzero=arm_nonzero, arm_zero=len(arm_rows) - arm_nonzero,
+        arm_nz_max=arm_nz_max,
+        arm_cross_name=(arm_rows[ARMING_THRESHOLD - 1]["name"]
+                        if len(arm_rows) >= ARMING_THRESHOLD else None),
+        n_refused_peak=len(ref_rows), ref_nonzero=ref_nonzero,
+        ref_zero=len(ref_rows) - ref_nonzero,
+        ref_nz_min=min((r["peak"] for r in ref_rows if r["peak"] > 0), default=None),
+        # census v16: the arming DECISION number. Arming a ceiling means placing it above every
+        # launchable draw (tick 204's non-retroactivity requirement), so the question is never "how
+        # high" but "what would it refuse that the swap-mean rule does not refuse already". Every
+        # stored refusal above that floor is counted and split by the gate's OWN attributed reason
+        # (v9's attribution machinery), never by a census-side re-derivation of the mean rule.
+        arm_above_launch_max=len(above),
+        arm_above_swap_rule=sum(1 for r in above if "swap-rate" in r["rules"]),
+        arm_new_refusals=sum(1 for r in above if "swap-rate" not in r["rules"]),
     )
+
+
+def arming_counter_text(n, cross_name=None):
+    """census v16 (tick 209): the arming counters arm at a THRESHOLD COUNT, not at a fraction of a
+    fixed denominator, so the cell must say which side of the threshold the corpus is on (and, where
+    the crossing is known, the reading that crossed it). Both counters used to print `%d of %d`, and
+    the first launchable window past the peak threshold made that render `31 of 30`."""
+    if n >= ARMING_THRESHOLD:
+        cross = ("; the count first reached %d at %s" % (ARMING_THRESHOLD, cross_name)
+                 if cross_name else "")
+        return ("THRESHOLD MET — %d launchable window(s) carry the statistic against the "
+                "pre-registered threshold of %d%s. The counter is a count reaching a limit, not a "
+                "fraction of it, so exceeding the threshold is normal and says nothing by itself. "
+                "Meeting the threshold arms NOTHING: the band/separation state decides whether a "
+                "ceiling can spare every launchable window and still refuse a failing one."
+                % (n, ARMING_THRESHOLD, cross))
+    return ("NOT MET — %d launchable window(s) carry the statistic, %d short of the pre-registered "
+            "threshold of %d, so the statistic stays REPORTED and no ceiling is armed."
+            % (n, ARMING_THRESHOLD - n, ARMING_THRESHOLD))
+
+
+def peak_coverage_text(b):
+    """census v16 (tick 209): the same coverage-vs-information split v12 put on the footprint
+    counter. A launchable window whose peak reads exactly 0.0 MiB/s is a real measurement, but it
+    cannot hold a ceiling above zero, so a counter that reaches the threshold on zeros has bought
+    coverage rather than information."""
+    nz, z = b["arm_nonzero"], b["arm_zero"]
+    if nz == 0 and z == 0:
+        return ("NO-DENOMINATOR — no launchable window carries a parseable peak, so the arming "
+                "counter counts nothing and any ceiling would be a hand-typed number")
+    if nz == 0:
+        return ("ALL-ZERO — all %d launchable windows carrying the statistic read exactly "
+                "0.0 MiB/s: a ceiling placed above them would sit above 0 and fire on every "
+                "non-zero draw, which is not the pre-registered rule" % z)
+    if z > nz:
+        return ("ZERO-DRAW-DOMINATED — %d of the %d launchable windows carrying the statistic read "
+                "exactly 0.0 MiB/s, so the launchable maximum (%s MiB/s) rests on %d draw(s) and the "
+                "threshold count is carried mostly by zeros"
+                % (z, nz + z, rate(b["arm_nz_max"]), nz))
+    return ("INFORMATIVE — %d of the %d launchable windows carrying the statistic are non-zero; the "
+            "launchable maximum %s MiB/s rests on those %d draws"
+            % (nz, nz + z, rate(b["arm_nz_max"]), nz))
+
+
+def peak_armed_effect_text(b):
+    """census v16 (tick 209): what arming the peak rule would actually DO, computed on the stored
+    corpus instead of argued in prose. The minimum admissible ceiling sits one point above the
+    highest launchable peak (tick 204: a new refusal rule must spare every window it did not refuse
+    when it lands), so the only windows it can fire on are stored refusals. Their attributed gate
+    reason (v9's machinery) says whether the swap-mean rule already refuses them. This is the
+    zero-fire / dead-target census in peak-rule form: a rule that fires only where another rule
+    already fired buys a second signature, not a decision."""
+    above, already = b["arm_above_launch_max"], b["arm_above_swap_rule"]
+    new = b["arm_new_refusals"]
+    if b["arm_nz_max"] is None:
+        return ("NO-DENOMINATOR — no launchable window carries a non-zero parseable peak, so there is "
+                "no floor to place a ceiling above and the effect of arming cannot be computed")
+    if above == 0:
+        return ("ZERO-FIRE — no stored refusal carries a peak above the highest launchable draw "
+                "(%s MiB/s), so a ceiling placed at the minimum admissible point would fire on "
+                "nothing this corpus has ever recorded" % rate(b["arm_nz_max"]))
+    if new == 0:
+        return ("INERT ON THIS WINDOW — %d stored refusal(s) carry a peak above the highest launchable "
+                "draw (%s MiB/s) and ALL %d are already refused by the swap-mean rule (`swap-rate`), "
+                "so arming the peak rule at that ceiling adds 0 refusal(s): it re-signs work the mean "
+                "rule already refuses" % (above, rate(b["arm_nz_max"]), already))
+    return ("WOULD FIRE ON %d WINDOW(S) — %d stored refusal(s) sit above the highest launchable draw "
+            "(%s MiB/s), %d of them already refused by the swap-mean rule and %d by other rules only, "
+            "so arming at that ceiling adds %d refusal(s) the mean rule does not make"
+            % (new, above, rate(b["arm_nz_max"]), already, new, new))
 
 
 def median(vals):
@@ -1154,6 +1254,8 @@ def footprint(rows):
         n_nan=sum(1 for r in carried if r["vmswap"] is None),
         n_parseable=len(have),
         n_go_launchable=len(launchable),
+        arm_cross_name=(sorted(launchable, key=lambda r: r["ts"])[ARMING_THRESHOLD - 1]["name"]
+                        if len(launchable) >= ARMING_THRESHOLD else None),
         n_nogo=len(nogo),
         go_nonzero=len(go_nonzero),
         go_zero=len(go_zero),
@@ -2341,7 +2443,26 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("synthetic readings, and `--check` re-derives this table from the retained readings.")
     L.append("")
     L.append("Census stamp: `%s`, gate sha16 `%s`, window `as-of %s` "
-             "(%d readings inside the window). v15 adds the BUILD axis the corpus never had "
+             "(%d readings inside the window). v16 puts the COVERAGE half of the swap-PEAK arming "
+             "counter into the cell and stops printing that counter as a fraction (tick 209, "
+             "2026-11-16): the pre-registered threshold — 30 launchable windows carrying a parseable "
+             "peak before the peak may be gated at all — was MET at the 2026-11-16 15:29 cut, and the "
+             "next cut printed `31 of 30`, a denominator that is a threshold rather than a total. The "
+             "peak block now carries the same non-zero / exactly-0.0 MiB/s split v12 put on the "
+             "footprint counter, per side, plus a computed peak-coverage state word, and both "
+             "arming counters print a computed THRESHOLD-MET / NOT-MET state naming the reading at "
+             "which the count first reached the threshold. It mattered the moment it crossed: at the "
+             "16:13 cut 32 launchable windows carry the statistic and 19 of them read exactly "
+             "0.0 MiB/s — the twelve most recent launchable draws, every reading of the live pid "
+             "438502, are zeros, while the 13 non-zero draws that carry the launchable maximum "
+             "111.4 MiB/s all belong to two retired generations (pids 10597 and 175316): coverage "
+             "bought, information left in the past. The block therefore prints the arming DECISION "
+             "number the threshold exists to feed: 38 stored refusals carry a peak above that "
+             "launchable maximum and ALL 38 are already refused by the swap-mean rule (`swap-rate`), "
+             "so a ceiling placed at the minimum admissible point adds 0 refusals — the band row's "
+             "\"a peak rule adds no refusal the mean rule does not already make\" is now a computed "
+             "cell with its own state word, not a tick argument. No gate byte moves: no rule, no "
+             "ceiling, no stored verdict changes. v15 adds the BUILD axis the corpus never had "
              "(tick 208, 2026-11-16): the producer now emits `health_body_sha16` (SHA-256/16 of "
              "the /health body the `health_loaded` rule already fetches — zero extra fetches) and "
              "`health_max_context` (the same body's advertised context); the gate validates the "
@@ -2488,8 +2609,20 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("| highest peak inside a swap-mean-PASSING window | %s MiB/s |" % rate(b["pass_max"]))
     L.append("| lowest peak inside a swap-mean-FAILING window | %s MiB/s |" % rate(b["fail_min"]))
     L.append("| swap-peak band state (computed, never asserted) | %s |" % band_state_text(b))
-    L.append("| arming counter (launchable windows carrying the peak) | %d of %d |" % (
-        b["arming"], ARMING_THRESHOLD))
+    L.append("| arming counter (launchable windows carrying the peak) | %d launchable window(s) "
+             "carry a parseable peak; threshold %d |" % (b["arming"], ARMING_THRESHOLD))
+    L.append("| ...of those launchable windows: non-zero peak / exactly 0.0 MiB/s | %d non-zero / %d "
+             "zero (the counter above counts COVERAGE; a 0.0 MiB/s draw says no page crossed to swap "
+             "inside that window's own sample, which sets no ceiling above zero) |"
+             % (b["arm_nonzero"], b["arm_zero"]))
+    L.append("| ...refused windows with a parseable peak: non-zero / exactly 0.0 MiB/s | %d non-zero / "
+             "%d zero (the non-zero refused draws are the only work a peak rule could ever be "
+             "given) |" % (b["ref_nonzero"], b["ref_zero"]))
+    L.append("| peak coverage state (computed) | %s |" % peak_coverage_text(b))
+    L.append("| peak rule effect at the minimum admissible ceiling (computed; it arms NOTHING) | %s |"
+             % peak_armed_effect_text(b))
+    L.append("| peak arming threshold state (computed) | %s |"
+             % arming_counter_text(b["arming"], b["arm_cross_name"]))
     L.append("")
     L.append("Engine swap FOOTPRINT (added 2026-11-14, tick 159) — reported, never banded:")
     L.append("")
@@ -2508,8 +2641,11 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
     L.append("| page-cache share of swap in use (`swap_cached_mib` / used) | %d readings, median %s "
              "percent, max %s percent |" % (fp["n_share"], pct(fp["share_median"]),
                                             pct(fp["share_max"])))
-    L.append("| footprint arming counter (launchable windows carrying it) | %d of %d |" % (
-        fp["n_go_launchable"], ARMING_THRESHOLD))
+    L.append("| footprint arming counter (launchable windows carrying it) | %d launchable window(s) "
+             "carry a parseable footprint; threshold %d |" % (
+                 fp["n_go_launchable"], ARMING_THRESHOLD))
+    L.append("| footprint arming threshold state (computed) | %s |"
+             % arming_counter_text(fp["n_go_launchable"], fp["arm_cross_name"]))
     L.append("| ...of those launchable draws: non-zero footprint / exactly 0 MiB | %d non-zero / %d "
              "zero (the counter above counts COVERAGE; a 0 MiB draw says that process held no swap in "
              "that window, which is a measurement and sets no ceiling) |" % (
@@ -2729,9 +2865,15 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
         L.append("enough to spare every launchable window leaves at least one mean-failing window")
         L.append("unrefused, and any lower threshold refuses a window the mean rule launches — on this")
         L.append("corpus a peak rule adds no refusal the mean rule does not already make. The arming")
-        L.append("counter (%d of %d launchable windows carrying the statistic) counts COVERAGE, not"
-                 % (b["arming"], ARMING_THRESHOLD))
-        L.append("support for a ceiling, and reaching 30 would not change that conclusion.")
+        L.append("counter (%d launchable windows carrying the statistic: %d non-zero, %d reading exactly "
+                 "0.0 MiB/s) counts COVERAGE, not"
+                 % (b["arming"], b["arm_nonzero"], b["arm_zero"]))
+        L.append("support for a ceiling, and reaching %d would not change that conclusion: the"
+                 % ARMING_THRESHOLD)
+        L.append("launchable maximum %s MiB/s rests on %d non-zero draw(s), so a threshold high enough"
+                 % (rate(b["arm_nz_max"]), b["arm_nonzero"]))
+        L.append("to spare those %d draws cannot refuse a mean-failing window below %s MiB/s."
+                 % (b["arm_nonzero"], rate(b["fail_min"])))
     elif b["band_state"] == "separated":
         L.append("Band: nothing between %s and %s MiB/s, so a ceiling placed in that gap fires only"
                  % (b["pass_max"], b["fail_min"]))
