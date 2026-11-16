@@ -147,3 +147,108 @@ only figures in the line with no diff, no replay and no scanner, and this tick
 proved they can drift into values no stored file carries. It is now a tracked file
 (first commit at this tick), so every future tick sentence is a diff, runs through
 the link checker and the secret scanner, and can be replayed against the corpus.
+
+## Tick 202 — 2026-11-16 10:30 CET: the footprint ceiling's binding number was produced by a process this endpoint no longer runs — census v11 re-derives the other nine gate rules from the stored columns and attributes every pooled footprint figure to the engine generation that sampled it
+
+The day's first gate-GO is the 10:07 reading, and it is also the first reading of a
+new engine process. Read out of the stored file: `engine_state=S`,
+`swap_used_mib=65`, `swap_free_mib=65470`, `swap_total_peak_mib_per_s=0.0`,
+`engine_vmswap_mib=0`, `health_code=200`, `health_loaded=true`,
+`engine_serve_procs=1`, `gpu_util_mean_pct=5.0` / `gpu_power_w=27.98`,
+`blk_read_mib_per_s=0.1` at `blk_scope=whole-disk`, `engine_pcpu=10.3`, and the
+producer comment `# engine pid=438502`. The eleven earlier readings of the day all
+carry pid 175316. The printed day cells: `readings of the as-of day` = 12
+(3 GO / 9 NO-GO / 0 gap), `longest consecutive NO-GO run inside the day` = 5,
+`readings since the day's last gate-GO` = 0 (last GO 10:07). The morning's swap
+storm left with the process that held it, not with a rule change on this line.
+
+**What the census could not see before this tick.** The producer names the pid it
+sampled in a comment line and the gate's parser skips comment lines, so every
+footprint, RSS and page-cache figure in the published table has always been pooled
+over whatever engine processes the corpus happened to contain. That is harmless
+while one process serves the window and wrong the moment the engine is restarted.
+At this cut the day scope prints **2 generations over 12 readings**: pid 175316
+(11 readings, 2 GO / 9 NO-GO, footprint max launchable 9499 MiB / refused
+10770 MiB, last sampled `preflight-20261116-0719.txt`) and pid 438502 (1 reading,
+1 GO, footprint max launchable 0 MiB, refused `no key`). The unattributable
+denominator is printed next to it: 0 of 12 day, 0 of 31 in the last 24 h, 2 of 166
+in the corpus — those two files predate the producer's pid comment. The overlap
+state is PARTIALLY OVERLAPPING (one generation carries both launchable and refused
+draws). And the row that matters for the pre-registered arming rule reads, at day
+scope: launchable footprint maximum 9499 MiB (`preflight-20261116-0019.txt`)
+belongs to pid 175316 while the newest reading sampled pid 438502 →
+**GENERATION-STALE: a footprint ceiling drawn from this value describes a process
+this cut no longer samples**. Same cut's dry-run row: a ceiling above 9499 MiB
+fires on 0 of 12 launchable and 6 of 36 refused stored windows. The state word is
+computed, and the harness pins STALE, CURRENT and `no denominator` separately, so
+the word cannot become a caption.
+
+**All nine remaining gate rules are now re-derived, not quoted.** v9 derived the
+swap band, v10 the engine-state rule; this tick adds health-loaded, health-code,
+engine-process-absent, swap-free, mem-available, device-read, idle-spin, GPU-busy
+and foreign-legs, each compared with the set of readings whose gate reason line
+names that rule. The coverage row prints 11 of 11 computed rules at all three
+scopes, and every cell agrees: `device-read` 1 = 1 (day) / 3 = 3 (24 h) / 8 = 8
+(corpus), `gpu-busy` 1 = 1 / 3 = 3 / 6 = 6, `swap-free-low` 15 = 15 in the corpus,
+`idle-spin` 17 = 17, `health-loaded-false` 1 = 1, and four rules never fired in the
+corpus. The blind counts are printed inside each cell rather than hidden: 35 of the
+82 corpus refusals carry no parseable device key, 38 no GPU key, 30 neither
+`health_loaded` nor `engine_serve_procs` (both keys joined the producer after the
+corpus's first week), 1 lacks the idle-spin pair. An AGREES over a shrunken
+denominator is not published as an agreement without that number beside it.
+
+**The guard that keeps the vocabulary honest.** Every rule anchor in the census rule
+table must still exist in the gate source, the gate's refusal-site count must equal
+the table's total, and every rule id in the table must have a derivation. Dropping
+one derivation reddens the run (exit 4), and so does a gate refusal site the table
+does not know — both directions are exercised by fixture in the harness, not
+asserted in prose.
+
+**Non-retroactivity, proved by replay.** v10 bytes and v11 bytes run at the same
+`--as-of 2026-11-16 03:05 --no-transition` differ by exactly one removed line (the
+stamp sentence) and 27 added lines (stamp sentence, the prose block, 9 rule rows,
+1 coverage row, 4 generation rows). Every published numeric cell is byte-identical,
+the printed gate sha16 is unchanged (`dd2f0e4fa0255fa5`, the gate was not touched),
+and `--check` against the regenerated table exits 0.
+
+**What the census cannot say, said plainly.** It sees only the pid. The endpoint's
+supervisor log carries no restart entry for 10:07 — its last entry is 2026-11-13 —
+and the process now serving, read from the box's own process table at 10:24, is the
+brain line's v0.4.0 launcher (`--vram-reserve-mib 500 --resident-budget-gib 46
+--resident-cpu-experts --vision --grammar on`, expert profile `placement-040.prof`).
+So this restart belongs to the brain line, not to this one, and no stored verdict
+moved: the gate never reads comments.
+
+**Readiness repair, no arm, one bounded probe.** The pinned local-arm profile
+`~/parb/p2005-profile.json` still named the Strata-era alias. Probed at 10:3x
+against the endpoint in force: old alias with the file's own key → `HTTP 404` with
+body `{"error": {"message": "The model '<alias>' does not exist", "code":
+"model_not_found"}}`; the served alias (read from the endpoint's own `/health`
+`model` field) with that same key → 200, `finish=stop`, usage 60 prompt / 32
+completion / 92 total, 55 prompt tokens cached. The key did not move: the profile's
+key and the endpoint's own key file hash identically (sha16 `faae108fefea011b`
+both sides). The untracked file was re-pointed to the served alias with its Strata
+bytes kept beside it (`p2005-profile.json.strata-era.bak-20261116`). This is the
+documented trap in its quiet form: an alias the endpoint no longer serves produces
+rows at ~0.0 s, an exit code of 0 and a full record count.
+
+**Trap re-measured while doing it, and it cost two false 401s.** An authorization
+scheme word assembled inline in a tool-call source comes back replaced by the
+redaction placeholder, and the placeholder is what actually executes — so the
+failure presents as *wrong API key* while the key is fine and the source is broken.
+Checked by printing the assembled shape and asserting the placeholder is absent
+from the value in memory, never by reading the echo. Nothing was rewritten on the
+endpoint on the strength of those two 401s.
+
+**Suites.** `harness/pub_preflight_census_test.py` 219 → 254 checks green.
+`harness/pub_preflight_test.py` stays 117/117 with unchanged gate bytes. Three-arm
+parity 49 rows / 9 sets / 0 findings at contour stamp 0.0.2.56 with Grok not an arm;
+digest-row gate 49 rows / 0 findings; superseded-cell rule 9 / 0; grok cell rule 9 /
+0; grok resume check exits 3 BY DESIGN with the pin intact. No leg ran this tick, so
+`LEG-INCIDENTS.md` is untouched and no published percent moved.
+
+Next tick's question: three rules (`health-code-not-200`, `mem-available-low`,
+`foreign-legs`) agree only against a zero set — the corpus has never exercised them,
+so their derivations are pinned by fixtures, not by real bytes. And the footprint
+dry-run ceiling must be re-drawn from generation 438502's readings before any arming
+decision: pre-registering from 9499 MiB would be pre-registering a retired process.

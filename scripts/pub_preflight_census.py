@@ -217,7 +217,7 @@ DIFF_PRINT_MAX = 400
 # Table-shape stamp. Bumping it must not require typing the "which earlier shapes are preserved"
 # sentence: that sentence is GENERATED from this number (tick 197 found the hand-typed version two
 # stamps short, announcing v7 and v8 shape changes while claiming only v1-v6 are preserved).
-CENSUS_STAMP = 10
+CENSUS_STAMP = 11
 
 
 def census_stamp_name():
@@ -272,6 +272,17 @@ def refusal_rule_guard():
     if sites != known:
         problems.append("the gate builds %d refusal reasons, the census rule table knows %d"
                         % (sites, known))
+    # Census v11: the binding runs BOTH ways now. A rule the gate can refuse with and the census
+    # cannot re-derive is a published attribution that rests on the gate's word alone, which is the
+    # defect this census exists to close; a rule the census derives that the gate no longer has is
+    # a derivation measuring nothing.
+    table = {rid for rid, _k, _a, _s in REFUSAL_RULES}
+    derived = set(DERIVED_RULES) | set(ALREADY_DERIVED_RULES)
+    for rid in sorted(table - derived):
+        problems.append("rule `%s` has a refusal site in the gate and no derivation in the census "
+                        "(every rule's firing set must be computed from the readings)" % rid)
+    for rid in sorted(derived - table):
+        problems.append("the census derives rule `%s`, which the gate rule table does not know" % rid)
     return problems
 
 
@@ -326,15 +337,29 @@ def sha16(path):
 
 
 def gate_constants():
-    """Read the ceilings out of the gate source so the census can never disagree with it."""
+    """Read the ceilings out of the gate source so the census can never disagree with it.
+
+    Census v11 pulled the three remaining thresholds the per-rule derivations need
+    (`SWAP_FREE_MIN_MIB`, `MEM_AVAILABLE_MIN_MIB`, `IDLE_SPIN_PCPU`) and the gate's own boolean
+    vocabulary in here as well: a derivation that hardcoded 256 or 200 would keep printing an
+    AGREES cell after the gate moved the number, which is the one failure this function exists to
+    prevent. A renamed or removed constant raises, so a gate edit reddens the census instead of
+    silently desynchronising it.
+    """
     src = open(GATE, encoding="utf-8").read()
     out = {}
     for key in ("SWAP_RATE_MAX_MIB_S", "GPU_UTIL_MAX_MEAN_PCT",
-                "BLK_READ_MAX_MIB_S", "BLK_READ_MAX_MIB_S_WHOLE"):
+                "BLK_READ_MAX_MIB_S", "BLK_READ_MAX_MIB_S_WHOLE",
+                "SWAP_FREE_MIN_MIB", "MEM_AVAILABLE_MIN_MIB", "IDLE_SPIN_PCPU"):
         m = re.search(r"^%s\s*=\s*([0-9.]+)" % key, src, re.M)
         if not m:
             raise SystemExit("CENSUS GAP: gate source has no %s constant" % key)
         out[key] = float(m.group(1))
+    for key in ("BOOL_TRUE", "BOOL_FALSE"):
+        m = re.search(r"^%s\s*=\s*\(([^)]*)\)" % key, src, re.M)
+        if not m:
+            raise SystemExit("CENSUS GAP: gate source has no %s tuple" % key)
+        out[key] = tuple(x.strip().strip('"\'') for x in m.group(1).split(",") if x.strip())
     return out
 
 
@@ -383,6 +408,146 @@ def state_of(txt):
     unexplained rule firing.
     """
     return gate_kv(txt).get("engine_state")
+
+
+# ---------------------------------------------------------------------------
+# EVERY gate rule re-derived from the reading's own columns (census v11, 2026-11-16)
+# ---------------------------------------------------------------------------
+# The gate refuses with a reason STRING. v9 counted those strings, v10 re-derived two of the eleven
+# rules from the stored bytes (the swap band, the engine-state substring); the other nine were the
+# gate's bare word in a published table. The ceiling rules are the dangerous family: their verdict
+# depends on WHICH key and WHICH constant the rule read, and 2026-11-14 measured a ceiling move
+# (the whole-disk double-count, 100.0 -> 50.0 for scoped readings) that changed no refusal line's
+# SHAPE at all — a rule table that only reads reason text cannot see that class. This block computes
+# each rule's firing set from the columns using the constants read out of the gate source at run
+# time, and requires the two sets to be equal at every published scope. `DERIVABLE_RULES` is checked
+# against `REFUSAL_RULES` in `refusal_rule_guard`, so a gate that gains a refusal site reddens the
+# census until its derivation exists.
+
+def rule_fields(txt):
+    """The columns the remaining gate rules compare, read through the GATE's own parse.
+
+    None means "the columns cannot evaluate this rule": the key is absent (the rule was never fed,
+    so the gate could not have fired it either — the pre-window readings) or unreadable (the gate
+    answers input gap on the whole file, so that reading is not in the refusal set at all). The
+    parse is `gate_kv`, not the census's line-anchored `num`, for the same reason v10 moved the
+    state test: a different parser would see a different fact and report a parser difference as a
+    rule disagreement.
+    """
+    v = gate_kv(txt)
+
+    def f(key):
+        raw = v.get(key)
+        if raw is None:
+            return None
+        try:
+            x = float(raw)
+        except ValueError:
+            return None
+        return x if x == x else None      # NaN = a cut sample, never a value
+
+    flag = v.get("health_loaded")
+    return dict(health_code=f("health_code"),
+                loaded=(flag.strip().lower() if flag is not None else None),
+                serve_procs=f("engine_serve_procs"),
+                swap_free=f("swap_free_mib"),
+                mem_avail=f("mem_available_mib"),
+                blk=f("blk_read_mib_per_s"),
+                pcpu=f("engine_pcpu"),
+                gpu_inst=f("gpu_util_pct"),
+                gpu_mean=f("gpu_util_mean_pct"),
+                foreign=f("foreign_legs"))
+
+
+def derived_rule_set(rf, scope, consts):
+    """(fired, not-evaluable) rule ids implied by one reading's own columns.
+
+    Each predicate mirrors the call site in `scripts/pub_preflight.py`, including the places where
+    the gate deliberately declines to claim: the idle-spin premise is the WINDOW mean when a window
+    is present (a zero instantaneous sample inside a busy window is not a spin — measured
+    2026-11-14 21:50), and the device ceiling is the whole-disk one only for readings that carry the
+    scope key. `engine-state-D` and `swap-rate` keep their own v9/v10 rows and are excluded here so
+    one rule has exactly one published cell.
+    """
+    fired, blind = set(), set()
+
+    def simple(key, rid, pred):
+        if rf[key] is None:
+            blind.add(rid)
+        elif pred(rf[key]):
+            fired.add(rid)
+
+    simple("health_code", "health-code-not-200", lambda x: int(x) != 200)
+    if rf["loaded"] is None:
+        blind.add("health-loaded-false")
+    elif rf["loaded"] in consts["BOOL_FALSE"]:
+        fired.add("health-loaded-false")
+    simple("serve_procs", "engine-process-absent", lambda x: x < 1)
+    simple("swap_free", "swap-free-low", lambda x: x < consts["SWAP_FREE_MIN_MIB"])
+    simple("mem_avail", "mem-available-low", lambda x: x < consts["MEM_AVAILABLE_MIN_MIB"])
+    simple("foreign", "foreign-legs", lambda x: x > 0)
+    if rf["blk"] is None:
+        blind.add("device-read")
+    else:
+        ceil = (consts["BLK_READ_MAX_MIB_S_WHOLE"] if scope == "whole-disk"
+                else consts["BLK_READ_MAX_MIB_S"])
+        if rf["blk"] >= ceil:
+            fired.add("device-read")
+    if rf["pcpu"] is None:
+        blind.add("idle-spin")
+    elif rf["pcpu"] > consts["IDLE_SPIN_PCPU"]:
+        if rf["gpu_mean"] is not None:
+            if rf["gpu_mean"] == 0.0:
+                fired.add("idle-spin")
+        elif rf["gpu_inst"] is not None and rf["gpu_inst"] == 0:
+            fired.add("idle-spin")
+        else:
+            blind.add("idle-spin")   # high CPU and no GPU premise to judge against
+    if rf["gpu_mean"] is None:
+        blind.add("gpu-busy")
+    elif rf["gpu_mean"] >= consts["GPU_UTIL_MAX_MEAN_PCT"]:
+        fired.add("gpu-busy")
+    return fired, blind
+
+
+# The two rules v9/v10 already re-derive; every OTHER rule in the table must join DERIVED_RULES.
+ALREADY_DERIVED_RULES = ("swap-rate", "engine-state-D")
+DERIVED_RULES = ["health-loaded-false", "health-code-not-200", "engine-process-absent",
+                 "swap-free-low", "mem-available-low", "device-read", "idle-spin",
+                 "gpu-busy", "foreign-legs"]
+
+# A drift or disagreement list is printed IN FULL up to this bound, with the not-printed count named
+# in words (tick 166's rule: a report may not print a silent subset of its own evidence). One corpus
+# refusal set is ~80 files; a cross-check that named 80 files would bury the arithmetic, so the cell
+# prints its counts first and the names second, and says how many names it withheld.
+DIFF_LIST_MAX = 6
+
+
+def diff_names(names):
+    names = sorted(names)
+    if not names:
+        return "none"
+    shown = names[:DIFF_LIST_MAX]
+    txt = ", ".join(shown)
+    if len(names) > len(shown):
+        txt += " (+%d more not printed)" % (len(names) - len(shown))
+    return txt
+
+
+ENGINE_PID_RE = re.compile(r"^#\s*engine pid=(\d+)", re.M)
+
+
+def engine_pid_of(txt):
+    """The engine process this reading actually sampled, from the producer's own comment line.
+
+    The producer names the pid it picked (tick 113's lesson: a pgrep that lands on the lifecycle
+    WRAPPER prints healthy numbers about a dead model), so the corpus carries an engine-GENERATION
+    marker in every reading since the comment shipped. The gate never reads it — comments are
+    skipped by its parser — which is exactly why no published statistic mentioned that a footprint
+    band can pool two different processes.
+    """
+    m = ENGINE_PID_RE.search(txt)
+    return m.group(1) if m else None
 
 
 def parse_stamp(path):
@@ -472,6 +637,7 @@ def census(directory, as_of, day, window_hours):
                          used=used,
                          scope=device_scope(txt),
                          state=st, blk=blk,
+                         rf=rule_fields(txt), pid=engine_pid_of(txt),
                          mean=(si + so) if (si is not None and so is not None) else None))
     return rows, unnamed, as_of
 
@@ -1132,6 +1298,23 @@ def day_band_text(d, swap_max):
     ]
 
 
+def _rule_derived_cell(p, rid):
+    """One published cell: this rule's derived firing set vs the gate's reason set, this scope.
+
+    The not-evaluable count sits INSIDE the cell rather than in a footnote: an AGREES over a
+    denominator the reader cannot see is the same defect as an unstated band denominator (tick
+    198's two-denominators rule), and a rule whose key never shipped (the GPU window, the
+    `health_loaded` flag) legitimately has a large not-evaluable group in the old corpus.
+    """
+    dv, rs, bl = p["derived"][rid], p["reason_sets"][rid], p["blind"][rid]
+    base = "; %d of %d attributed refusals cannot be evaluated from the columns" % (
+        len(bl), p["n_cap"])
+    if dv == rs:
+        return "AGREES (%d = %d%s)" % (len(dv), len(rs), base)
+    return ("DISAGREES (derived %d, reason %d; derived-only %s; reason-only %s%s)"
+            % (len(dv), len(rs), diff_names(dv - rs), diff_names(rs - dv), base))
+
+
 def rule_attribution_text(scopes, swap_max, consts):
     """WHICH gate rule refused, counted per scope (census v9, tick 197).
 
@@ -1185,6 +1368,23 @@ def rule_attribution_text(scopes, swap_max, consts):
                       if r["blk"] < (consts["BLK_READ_MAX_MIB_S_WHOLE"]
                                      if r["scope"] == "whole-disk"
                                      else consts["BLK_READ_MAX_MIB_S"]))
+        # Census v11: the same comparison for the nine rules that had no derivation. Over the
+        # refusals this scope can attribute, the firing set computed from the reading's columns must
+        # equal the set the gate's reason line names, rule by rule; a refusal whose columns cannot
+        # evaluate a rule is counted separately, never silently dropped from one side of the set.
+        d_sets = {rid: set() for rid in DERIVED_RULES}
+        b_sets = {rid: set() for rid in DERIVED_RULES}
+        r_sets = {rid: set() for rid in DERIVED_RULES}
+        for r in captured:
+            fired, blind = derived_rule_set(r["rf"], r["scope"], consts)
+            named = set(r["rules"])
+            for rid in DERIVED_RULES:
+                if rid in fired:
+                    d_sets[rid].add(r["name"])
+                if rid in blind:
+                    b_sets[rid].add(r["name"])
+                if rid in named:
+                    r_sets[rid].add(r["name"])
         per.append(dict(label=label, n_ref=len(refusals), n_cap=len(captured), counts=counts,
                         multi=multi, sole=sole, unattr=unattr, unparsed=unparsed,
                         ratio=len(ratio_set), reason=len(reason_set),
@@ -1194,7 +1394,8 @@ def rule_attribution_text(scopes, swap_max, consts):
                         s_derived=len(state_set), s_reason=len(state_reason),
                         only_state=sorted(state_set - state_reason),
                         only_state_reason=sorted(state_reason - state_set),
-                        d_named=len(d_named), d_blk=len(d_with_blk), d_quiet=d_quiet))
+                        d_named=len(d_named), d_blk=len(d_with_blk), d_quiet=d_quiet,
+                        derived=d_sets, blind=b_sets, reason_sets=r_sets))
 
     def cell(fn):
         return " / ".join("%s: %s" % (p["label"], fn(p)) for p in per)
@@ -1242,6 +1443,18 @@ def rule_attribution_text(scopes, swap_max, consts):
                                 if p["d_blk"] else
                                 "no denominator — none of the %d state-D refusals carries a device "
                                 "window" % p["d_named"]))))
+    # Census v11: one cross-check row per remaining rule. The label carries the rule's own anchor so
+    # the row says WHICH gate rule it audits, and the cell names how many refusals the rule cannot be
+    # evaluated on, because an AGREES cell over a shrunken denominator is not an agreement.
+    for rid in DERIVED_RULES:
+        L.append("| rule re-derived from the reading's own columns and compared with the gate's "
+                 "reason line: %s | %s |" % (
+                     rule_label(rid),
+                     cell(lambda p, rid=rid: _rule_derived_cell(p, rid))))
+    L.append("| gate rules whose firing set is computed from the stored columns at this cut | %s |"
+             % cell(lambda p: "%d of %d (v9 swap band, v10 engine state, v11 the other %d)"
+                    % (len(DERIVED_RULES) + len(ALREADY_DERIVED_RULES), len(REFUSAL_RULES),
+                       len(DERIVED_RULES))))
     gap_by = []
     for label, rows in scopes:
         c = {}
@@ -1266,7 +1479,140 @@ def rule_attribution_text(scopes, swap_max, consts):
                             "(derived-only %s, reason-only %s)"
                             % (p["label"], ", ".join(p["only_state"]) or "none",
                                ", ".join(p["only_state_reason"]) or "none"))
+        for rid in DERIVED_RULES:
+            dv, rs = p["derived"][rid], p["reason_sets"][rid]
+            if dv != rs:
+                findings.append("%s: `%s` derived/refusal-reason sets disagree "
+                                "(derived-only %s, reason-only %s)"
+                                % (p["label"], rid, ", ".join(sorted(dv - rs)) or "none",
+                                   ", ".join(sorted(rs - dv)) or "none"))
     return L, sorted(set(findings))
+
+
+# How many engine generations a scope can list before the cell says how many it withheld. One day
+# is normally one or two generations; the corpus spans however many restarts happened, and a cell
+# that truncated silently would hide exactly the restart this block exists to make visible.
+GENERATION_PRINT_MAX = 8
+
+
+def engine_generation_text(scopes):
+    """Which ENGINE GENERATION each pooled statistic in this table actually belongs to.
+
+    The producer writes the pid it sampled into a comment line, and the gate's parser skips comments,
+    so no published statistic had ever seen it. That matters the moment the endpoint's engine is
+    restarted (a version bump, a config ladder, a watchdog restart): every footprint, RSS and
+    page-cache figure in this table is then pooled over processes with different configs, and the
+    pre-registered footprint ceiling would be drawn from a process this cut no longer samples. The
+    block prints generation counts first and the per-generation detail up to GENERATION_PRINT_MAX,
+    and says so when a scope has no pid comment at all rather than printing 0.
+    """
+    L = []
+    per = []
+    for label, rows in scopes:
+        gens = {}
+        nopid = 0
+        for r in rows:
+            if r["pid"] is None:
+                nopid += 1
+                continue
+            g = gens.setdefault(r["pid"], dict(n=0, go=0, nogo=0, gap=0,
+                                               first=r["ts"], last=r["ts"],
+                                               first_name=r["name"], last_name=r["name"],
+                                               fp_go=None, fp_go_name=None,
+                                               fp_no=None, fp_no_name=None))
+            g["n"] += 1
+            if r["rc"] == 0:
+                g["go"] += 1
+                if r["vmswap"] is not None and (g["fp_go"] is None or r["vmswap"] > g["fp_go"]):
+                    g["fp_go"], g["fp_go_name"] = r["vmswap"], r["name"]
+            elif r["rc"] == 3:
+                g["nogo"] += 1
+                if r["vmswap"] is not None and (g["fp_no"] is None or r["vmswap"] > g["fp_no"]):
+                    g["fp_no"], g["fp_no_name"] = r["vmswap"], r["name"]
+            else:
+                g["gap"] += 1
+            if r["ts"] < g["first"]:
+                g["first"], g["first_name"] = r["ts"], r["name"]
+            if r["ts"] > g["last"]:
+                g["last"], g["last_name"] = r["ts"], r["name"]
+        go_pids = {r["pid"] for r in rows if r["rc"] == 0 and r["pid"]}
+        no_pids = {r["pid"] for r in rows if r["rc"] == 3 and r["pid"]}
+        newest = None
+        for r in rows:
+            if r["pid"] and (newest is None or r["ts"] > newest["ts"]):
+                newest = r
+        best = None
+        for r in rows:
+            if r["rc"] == 0 and r["vmswap"] is not None and r["pid"]:
+                if best is None or r["vmswap"] > best["vmswap"]:
+                    best = r
+        per.append(dict(label=label, gens=gens, nopid=nopid, n=len(rows),
+                        go_pids=go_pids, no_pids=no_pids, newest=newest, best=best))
+
+    def cell(fn):
+        return " / ".join("%s: %s" % (p["label"], fn(p)) for p in per)
+
+    def gen_txt(p):
+        items = sorted(p["gens"].items(), key=lambda kv: kv[1]["first"])
+        parts = []
+        for pid, g in items[:GENERATION_PRINT_MAX]:
+            parts.append("pid %s — %d readings (%d GO / %d NO-GO / %d input gap), first %s last %s, "
+                         "footprint max launchable %s / refused %s"
+                         % (pid, g["n"], g["go"], g["nogo"], g["gap"], g["first_name"],
+                            g["last_name"],
+                            ("%d MiB" % g["fp_go"]) if g["fp_go"] is not None else "no key",
+                            ("%d MiB" % g["fp_no"]) if g["fp_no"] is not None else "no key"))
+        withheld = len(items) - len(parts)
+        txt = "%d generations over %d readings" % (len(items), p["n"] - p["nopid"])
+        if withheld > 0:
+            txt += " (%d listed, %d not printed)" % (len(parts), withheld)
+        if parts:
+            txt += ": " + "; ".join(parts)
+        else:
+            txt += " — no denominator, no reading in this scope carries an engine pid"
+        return txt
+
+    L.append("| engine generations sampled in this scope (the producer's own `# engine pid=` "
+             "comment; the count precedes the list, at most %d generations listed) | %s |"
+             % (GENERATION_PRINT_MAX, cell(gen_txt)))
+    L.append("| readings in this scope whose producer comment carries no engine pid (unattributable "
+             "by this block; the gate never reads comments, so its verdict is unaffected) | %s |"
+             % cell(lambda p: "%d of %d readings" % (p["nopid"], p["n"])))
+
+    def overlap(p):
+        if not p["go_pids"] or not p["no_pids"]:
+            return ("no denominator — this scope has %d launchable-generation(s) and %d "
+                    "refused-generation(s)" % (len(p["go_pids"]), len(p["no_pids"])))
+        shared = p["go_pids"] & p["no_pids"]
+        word = ("SAME GENERATION (the launchable and refused statistics describe one process)"
+                if shared == p["go_pids"] == p["no_pids"] else
+                ("PARTIALLY OVERLAPPING (%d generation(s) carry both)" % len(shared)
+                 if shared else
+                 "DISJOINT GENERATIONS — launchable windows sit on %s and refused windows on %s, so "
+                 "the footprint band pools two processes with different configs"
+                 % (", ".join(sorted(p["go_pids"])), ", ".join(sorted(p["no_pids"])))))
+        return word
+    L.append("| launchable windows and refused windows on the same engine generation? | %s |"
+             % cell(overlap))
+
+    def stale(p):
+        if p["best"] is None:
+            return "no denominator — no launchable reading in this scope carries a footprint key"
+        b = p["best"]
+        txt = ("launchable footprint maximum %d MiB (`%s`) belongs to pid %s"
+               % (b["vmswap"], b["name"], b["pid"]))
+        if p["newest"] is None:
+            return txt + "; no newest generation to compare with"
+        if b["pid"] == p["newest"]["pid"]:
+            return txt + " — CURRENT (the newest reading in this scope sampled the same pid)"
+        return (txt + ", while the newest reading in this scope sampled pid %s (`%s`); pid %s was "
+                "last sampled by `%s` → GENERATION-STALE: a footprint ceiling drawn from this value "
+                "describes a process this cut no longer samples"
+                % (p["newest"]["pid"], p["newest"]["name"], b["pid"],
+                   p["gens"][b["pid"]]["last_name"]))
+    L.append("| the footprint dry-run ceiling's binding value, and the generation that produced it | %s |"
+             % cell(stale))
+    return L
 
 
 def build(rows, as_of, consts, day, window_hours, legs_started):
@@ -1516,6 +1862,21 @@ def build(rows, as_of, consts, day, window_hours, legs_started):
         [("DAY `%s`" % day, day_rows), ("last %d h" % window_hours, win_rows),
          ("whole corpus", rows)], consts["SWAP_RATE_MAX_MIB_S"], consts)
     L.extend(attr_lines)
+    L.append("")
+    L.append("**Which engine process a pooled statistic describes (census v11).** The producer names")
+    L.append("the pid it actually sampled in a comment line, and the gate's parser skips comments — so")
+    L.append("every footprint, RSS and page-cache figure above has always been pooled over whatever")
+    L.append("engine processes the corpus happened to contain. That is harmless while one process")
+    L.append("serves the whole window and wrong the moment the endpoint's engine is restarted (a")
+    L.append("version bump, a config ladder, a watchdog restart): a footprint maximum recorded by a")
+    L.append("retired process is not a property of the endpoint, and the pre-registered footprint")
+    L.append("ceiling would be drawn from precisely such a maximum. Generation counts are printed")
+    L.append("before the per-generation detail, the unattributable readings are printed as their own")
+    L.append("row, and the state word is computed:")
+    L.append("")
+    L.extend(engine_generation_text([("DAY `%s`" % day, day_rows),
+                                     ("last %d h" % window_hours, win_rows),
+                                     ("whole corpus", rows)]))
     L.append("")
     L.append("**Why a state variable joins a table of rates.** Every swap rule the gate has is a rate")
     L.append("over one 6 s window, and a rate is blind in BOTH directions: measured 2026-11-14")

@@ -1549,6 +1549,209 @@ def main():
     finally:
         shutil.rmtree(d16, ignore_errors=True)
 
+    # ---- census v11 (2026-11-16): EVERY gate rule re-derived from the stored columns, plus the
+    # engine generation that produced each pooled statistic ------------------------------------
+    # Why this exists: the published refusal table named rules from the gate's reason STRING, which
+    # says which rule the gate says fired but never which KEY and which CONSTANT produced it. On
+    # 2026-11-14 the device ceiling moved (100.0 inflated -> 50.0 whole-disk) without changing the
+    # SHAPE of any refusal line, so a table that only reads reason text cannot see that class at all.
+    check(re.search(r"^CENSUS_STAMP = 11$", src9, re.M) is not None,
+          "the census stamp is 11: the rule derivations and the generation block add published rows")
+    for const in ("SWAP_FREE_MIN_MIB", "MEM_AVAILABLE_MIN_MIB", "IDLE_SPIN_PCPU", "BOOL_FALSE"):
+        check(re.search(r"for key in \([^)]*%s" % const, src9, re.M | re.S) is not None,
+              "gate_constants reads %s out of the GATE source — a derivation that hardcodes 200 or "
+              "300 keeps printing AGREES after the gate moves the number" % const)
+    check(re.search(r"def rule_label\(", src9) is not None,
+          "rule ids are translated by one function rather than typed into a published label")
+    check(mod9.gate_constants().get("SWAP_FREE_MIN_MIB") is not None
+          and mod9.gate_constants().get("MEM_AVAILABLE_MIN_MIB") is not None
+          and mod9.gate_constants().get("IDLE_SPIN_PCPU") is not None,
+          "gate_constants returns the three thresholds the per-rule derivations compare against")
+    check("false" in mod9.gate_constants()["BOOL_FALSE"]
+          and "true" in mod9.gate_constants()["BOOL_TRUE"],
+          "the boolean vocabulary is the GATE's own, so a flag spelled differently in the two tools "
+          "becomes a loud census failure instead of a rule silently never firing")
+
+    # the coverage guard runs BOTH ways: a gate rule with no derivation, and a derivation with no
+    # gate rule, are both published fiction
+    probs11 = mod9.refusal_rule_guard()
+    check(probs11 == [], "the rule table and the derivations cover the gate source at current "
+                         "bytes, got %r" % (probs11,))
+    keep_derived = list(mod9.DERIVED_RULES)
+    try:
+        mod9.DERIVED_RULES = [r for r in keep_derived if r != "swap-free-low"]
+        probs11b = mod9.refusal_rule_guard()
+        check(any("no derivation in the census" in p for p in probs11b),
+              "dropping one rule's derivation must redden the census (the guard is two-way), got %r"
+              % (probs11b,))
+        mod9.DERIVED_RULES = keep_derived + ["rule-the-gate-does-not-have"]
+        probs11c = mod9.refusal_rule_guard()
+        check(any("does not know" in p for p in probs11c),
+              "a derivation for a rule the gate no longer has must redden the census, got %r"
+              % (probs11c,))
+    finally:
+        mod9.DERIVED_RULES = keep_derived
+    check(set(mod9.DERIVED_RULES) | set(mod9.ALREADY_DERIVED_RULES)
+          == {r for r, _k, _a, _s in mod9.REFUSAL_RULES},
+          "every rule in the gate table has a published derivation at this stamp — the day a gate "
+          "edit adds a refusal site, the coverage guard stops the census until it joins")
+
+    # the predicates themselves, off-corpus: each must fire on its own columns and refuse to fire
+    # when its premise is missing, with the gate's live constants (never literals here)
+    consts11 = mod9.gate_constants()
+    base_rf = dict(health_code=200.0, loaded="true", serve_procs=1.0, swap_free=57507.0,
+                   mem_avail=20278.0, blk=0.1, pcpu=9.6, gpu_inst=0.0, gpu_mean=0.0, foreign=0.0)
+
+    def fired11(over, scope="whole-disk"):
+        rf = dict(base_rf)
+        rf.update(over)
+        return mod9.derived_rule_set(rf, scope, consts11)[0]
+
+    check("device-read" in fired11({"blk": 60.0}),
+          "60 MiB/s on a whole-disk reading fires the device rule against the gate's 50.0 ceiling")
+    check("device-read" not in fired11({"blk": 60.0}, scope="unmarked"),
+          "the same number on an UNMARKED (pre-scope) reading is judged by the old 100.0 ceiling — "
+          "the scale fix must not retroactively refuse published bytes")
+    check("device-read" in fired11({"blk": 110.0}, scope="unmarked"),
+          "an unmarked reading still fires above the old 100.0 ceiling")
+    check("idle-spin" in fired11({"pcpu": 400.0}),
+          "high engine CPU with a 0%% window mean fires the idle-spin rule")
+    check("idle-spin" not in fired11({"pcpu": 400.0, "gpu_mean": 55.0}),
+          "the idle-spin premise is the WINDOW mean, so a zero instantaneous sample inside a busy "
+          "window must not fire (measured live 2026-11-14 21:50)")
+    check(fired11({"gpu_mean": float(consts11["GPU_UTIL_MAX_MEAN_PCT"])}) == {"gpu-busy"},
+          "the GPU-busy comparison uses the gate's ceiling as printed, boundary included")
+    check("swap-free-low" in fired11({"swap_free": consts11["SWAP_FREE_MIN_MIB"] - 1})
+          and "swap-free-low" not in fired11({"swap_free": consts11["SWAP_FREE_MIN_MIB"]}),
+          "the swap-free floor is strict-inequality at the gate's own constant")
+    check("mem-available-low" in fired11({"mem_avail": consts11["MEM_AVAILABLE_MIN_MIB"] - 1}),
+          "the memory floor is derived from the gate constant, not from a restated number")
+    check(fired11({"foreign": 1.0}) == {"foreign-legs"},
+          "one foreign leg on the endpoint is a refusal the census can derive")
+    check(fired11({"loaded": "false"}) == {"health-loaded-false"}
+          and fired11({"loaded": "true"}) == set(),
+          "the loaded flag is read with the gate's vocabulary in both directions")
+    check(fired11({"serve_procs": 0.0}) == {"engine-process-absent"}
+          and fired11({"health_code": 503.0}) == {"health-code-not-200"},
+          "the process and health rules derive from their own keys")
+    rf11 = dict(base_rf)
+    rf11["mem_avail"] = None
+    check("mem-available-low" not in mod9.derived_rule_set(rf11, "whole-disk", consts11)[0]
+          and "mem-available-low" in mod9.derived_rule_set(rf11, "whole-disk", consts11)[1],
+          "a missing key is NOT an innocent non-firing: the rule lands in the not-evaluable set so "
+          "the published cell shows the shrunken denominator")
+
+    # end to end: one refusal per rule, each named by the gate's OWN reason line. The derivation and
+    # the reason set must agree on all nine, and an unattributable reason would exit 4 instead.
+    d11 = tempfile.mkdtemp(prefix="pubcensus-v11-")
+    try:
+        per_rule = {
+            "preflight-20300101-0101.txt": {"health_code": "503"},
+            "preflight-20300101-0102.txt": {"health_loaded": "false"},
+            "preflight-20300101-0103.txt": {"engine_serve_procs": "0"},
+            # swap_free_mib and mem_available_mib are INT keys in the gate's parse: "8.0" is an
+            # unreadable number there and the reading answers an input gap, not a refusal. And the
+            # swap columns must still cross-foot (used + free == total within 64 MiB) or the gate
+            # refuses to judge the reading at all — the producer column mix-up guard. An integer
+            # literal with a consistent pair is what the producer emits.
+            "preflight-20300101-0104.txt": {"swap_free_mib": "8", "swap_used_mib": "65527"},
+            "preflight-20300101-0105.txt": {"mem_available_mib": "100"},
+            "preflight-20300101-0106.txt": {"blk_read_mib_per_s": "60.0"},
+            "preflight-20300101-0107.txt": {"engine_pcpu": "400.0"},
+            "preflight-20300101-0108.txt": {"gpu_util_mean_pct": "97.0", "gpu_util_peak_pct": "100"},
+            "preflight-20300101-0109.txt": {"foreign_legs": "2"},
+        }
+        write_fixtures(d11, per_rule)
+        rc11, out11 = run(["--dir", d11, "--no-transition", "--as-of", "20300101-1200"])
+        agree = [l for l in out11.splitlines()
+                 if l.startswith("| rule re-derived from the reading's own columns")]
+        check(rc11 == 0 and len(agree) == 9,
+              "the nine derived rule cells print for a corpus with one refusal per rule "
+              "(rc=%s cells=%d) %r" % (rc11, len(agree), out11[-500:]))
+        check(all(": AGREES (" in l for l in agree),
+              "with the gate's own reason lines the derivations must AGREE rule by rule, got %r"
+              % [l.split(" | ")[-1][:120] for l in agree if ": AGREES (" not in l])
+        check(sum(1 for l in agree if ": AGREES (1 = 1;" in l) == 9,
+              "one refusal per rule means nine cells each with exactly one firing on both sides; a "
+              "cell at (0 = 0) in this fixture set means the rule never fired and the cross-check "
+              "proved nothing about it, got %r"
+              % [l.split(" | ")[-1][:60] for l in agree if ": AGREES (1 = 1;" not in l])
+        check(all("0 of 9 attributed refusals cannot be evaluated" in l for l in agree),
+              "each cell names its not-evaluable count so an AGREES over a shrunken denominator is "
+              "never read as full agreement, got %r"
+              % [l.split(" | ")[-1][:120] for l in agree
+                 if "0 of 9 attributed" not in l])
+        check("of 11 (v9 swap band, v10 engine state, v11 the other 9)" in out11,
+              "the coverage row counts the rules re-derived and names the families that got here "
+              "when, got %r" % [l for l in out11.splitlines() if "the other 9" in l][:1])
+    finally:
+        shutil.rmtree(d11, ignore_errors=True)
+
+    # engine generation: the producer names the pid it sampled in a COMMENT line and the gate's
+    # parser skips comments, so a footprint maximum from a retired process used to look like a
+    # property of the endpoint. Three states, all computed: STALE, CURRENT, no denominator.
+    def with_pid_comment(path, pid):
+        """Prepend the producer's engine-pid comment to a fixture.
+
+        Written as a helper because the obvious one-liner is a trap:
+        `open(p, "w").write("# ...\\n" + open(p).read())` truncates the file BEFORE the read runs, so
+        the fixture ends up empty and the gate answers an input gap about a corpus with no keys — a
+        fixture bug that reads exactly like a tool bug.
+        """
+        body = open(path, encoding="utf-8").read()
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("# engine pid=%s\n" % pid + body)
+
+    d12 = tempfile.mkdtemp(prefix="pubcensus-gen-")
+    try:
+        # `engine_vmswap_mib` is the footprint key the dry-run ceiling is drawn from, so the
+        # generation fixtures must carry it: without it the row answers `no denominator`, which is
+        # the honest answer for the real pre-2026-11-14 corpus and a useless fixture.
+        write_fixtures(d12, {"preflight-20300101-0201.txt": {"engine_vmswap_mib": "9000"}})
+        with_pid_comment(os.path.join(d12, "preflight-20300101-0201.txt"), "1000")
+        write_fixtures(d12, {"preflight-20300101-0202.txt": {"engine_vmswap_mib": "3000"}})
+        with_pid_comment(os.path.join(d12, "preflight-20300101-0202.txt"), "2000")
+        write_fixtures(d12, {"preflight-20300101-0203.txt": {"engine_vmswap_mib": "3100"}})
+        rc12, out12 = run(["--dir", d12, "--no-transition", "--as-of", "20300101-1200"])
+        gl = [l for l in out12.splitlines() if "engine generations sampled in this scope" in l]
+        sl = [l for l in out12.splitlines() if "dry-run ceiling's binding value" in l]
+        check(rc12 == 0 and len(gl) == 1 and "2 generations over 2 readings" in gl[0],
+              "the block counts distinct sampled pids before listing them (rc=%s) %r"
+              % (rc12, gl[:1]))
+        check("1 of 3 readings" in "".join(gl + [l for l in out12.splitlines()
+                                                 if "carries no engine pid" in l]),
+              "the reading with no pid comment is counted as unattributable, not folded into a "
+              "generation, got %r" % [l for l in out12.splitlines() if "no engine pid" in l][:1])
+        check(sl and "GENERATION-STALE" in sl[0] and "pid 1000" in sl[0] and "pid 2000" in sl[0],
+              "the footprint maximum belongs to a pid the newest reading no longer samples, and the "
+              "row must say so rather than publish the number bare: %r" % (sl[:1],))
+        check("launchable windows and refused windows on the same engine generation" in out12,
+              "the table prints whether the launchable and refused statistics describe one process")
+    finally:
+        shutil.rmtree(d12, ignore_errors=True)
+    d13 = tempfile.mkdtemp(prefix="pubcensus-gen-cur-")
+    try:
+        for hh in ("0301", "0302"):
+            path = os.path.join(d13, "preflight-20300101-%s.txt" % hh)
+            write_fixtures(d13, {os.path.basename(path): {"engine_vmswap_mib": "9000"}})
+            with_pid_comment(path, "1000")
+        rc13, out13 = run(["--dir", d13, "--no-transition", "--as-of", "20300101-1200"])
+        check(rc13 == 0 and "CURRENT (the newest reading in this scope sampled the same pid)" in out13,
+              "one live generation reads CURRENT, so the stale word is computed and not a fixed "
+              "sentence (rc=%s)" % rc13)
+    finally:
+        shutil.rmtree(d13, ignore_errors=True)
+    d14 = tempfile.mkdtemp(prefix="pubcensus-gen-none-")
+    try:
+        write_fixtures(d14, {"preflight-20300101-0401.txt": {}})
+        rc14, out14 = run(["--dir", d14, "--no-transition", "--as-of", "20300101-1200"])
+        check(rc14 == 0
+              and "no denominator, no reading in this scope carries an engine pid" in out14,
+              "a corpus with no producer comment prints no denominator, never 0 generations "
+              "(rc=%s)" % rc14)
+    finally:
+        shutil.rmtree(d14, ignore_errors=True)
+
     # the census must not be able to reach the endpoint by accident: no ssh, no sockets
     src = open(TOOL, encoding="utf-8").read()
     for bad in ("ssh ", "requests", "urllib", "socket."):
