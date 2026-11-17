@@ -15,6 +15,22 @@ same model  ·  same frozen task prompts  ·  same seeds
         only the software around the model changes
 ```
 
+## Documentation audit update — 2026-11-17 (issue #25; nine-set digest)
+
+**Dated index reconciliation; not an independent benchmark re-score.** At this
+review, [PUB-DIGEST.md](benchmarks/public/PUB-DIGEST.md) contains **49 scored
+rows across nine distinct task-set names**: GSM8K, ARC-Easy, ARC-Challenge,
+HumanEval, GPQA-Diamond, MMLU-Pro, IFEval, BFCL and **LiveCodeBench**. The
+eight-set statement in the 2026-11-09 audit update below is preserved as a
+dated earlier observation, **not** the latest index count. LiveCodeBench rows
+include different checker contracts and retrospective re-scores of preserved
+answers; do not treat their percentages as directly comparable without checking
+[the per-set report](benchmarks/public/LIVECODEBENCH-RESULT.md), task IDs,
+scorer contracts, call conditions and provenance. This correction checks the
+published digest's table entries, not their raw outputs, validity or CI status.
+The separate README `Status checked:` date remains a historical snapshot;
+this scoped audit does not certify the entire landing page as freshly verified.
+
 ## Documentation audit update — 2026-11-09 13:22 CET (issue #25)
 
 **Current-facing index correction, not a new benchmark or independent validation.**
