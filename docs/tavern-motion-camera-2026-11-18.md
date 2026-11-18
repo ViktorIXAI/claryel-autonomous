@@ -100,8 +100,13 @@ above the same dark room produced no events.
 | CPU while idle (dark, no events) | **0.38 %** of one core |
 | CPU while processing events | ~2 % of one core |
 | Process RSS | **56.3 MB**; unit cgroup `MemoryCurrent` 20.3 MB, `TasksCurrent` 2 |
-| `NRestarts` | 0 |
-| Listeners opened by Motion | none |
+| `NRestarts` | 0 (before the drill) |
+| Listeners opened by Motion | none (`ss -ltnHp` shows no socket owned by the live service) |
+| Files written by the service | only `start-ts` (11 bytes) in the unit's private `/tmp` - no images/video |
+| Crash drill (SIGTERM the daemon) | systemd restarted it in ~7 s (`NRestarts=1`), `ExecStartPre` refreshed the guard timestamp, camera re-opened (YUYV 640x480), HA stayed quiet through the 30 s guard and 40 s after |
+| Manual light on / off (real pixels, both directions) | no motion event -> no light bounce-back |
+| Boot persistence | unit `enabled`, `WantedBy=multi-user.target` |
+| Caps actually applied by systemd | `MemoryHigh=300 MiB`, `MemoryMax=400 MiB`, `CPUWeight=20`, `Nice=10`, `RestartSec=5` |
 
 ## Operations
 
