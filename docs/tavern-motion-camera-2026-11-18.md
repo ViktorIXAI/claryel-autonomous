@@ -317,3 +317,43 @@ camera actually watching the entrance: 0 events in the quiet windows measured (0
 4. Left-over orphan entities in HA from the removed blind-window helpers
    (`timer.tavern_blind`, `input_boolean.tavern_light_blind`) show as `unavailable` and
    disappear on the next full HA start; they are not referenced by any automation.
+
+
+## Second suspicious lamp ON at 17:42, and the watchdog that went blind (2026-11-18 evening)
+
+`call_service` and `automation_triggered` **are** stored in the recorder (tables `events`,
+`event_data`, `event_types`; `events.event_type_id` joins `event_types`, `events.data_id` joins
+`event_data.data_id`, and `event_data.shared_data` holds the JSON payload). My earlier assumption
+that service calls were not persisted was wrong, and the `events` table closes the attribution
+question that state transitions alone could not answer: each row carries `origin` (1 = local REST
+call), `context_user_id` and the entity/service in `shared_data`.
+
+The 17:42 lamp ON was reconstructed this way:
+
+| time | what the events say |
+|---|---|
+| 17:42:06 | `input_boolean.toggle` on the motion flag, origin=local, user = Viktor's REST credential |
+| 17:42:10 | a second identical toggle 4 s later |
+| 17:42:10 | `input_boolean.tavern_motion_now` -> `on` (the flag, not the switch) |
+| — | **no** `switch.turn_on` event for the relay, so HA did not switch the lamp |
+| 17:51:46, 17:51:53 | two more flag toggles |
+| 17:57:10 | latch guard (`taverna_flazhok...sniat`) cleared the 15-minute-old flag |
+| 18:02:11 | the 5-minute-off automation turned the lamp off |
+
+The Motion journal logs nothing at 17:41-17:52 and nothing between 17:19:32 and 19:13:08, so the
+camera raised no events: the flag was moved by hand through the API/UI. The chain then behaved as
+designed - it lit the lamp, the 15-minute flag guard reclaimed the manual flag, the light went out
+and stayed out. Recorded as **owner action via the API, cleaned up by the guard**, not a camera
+false positive.
+
+**The silent failure this audit found**: Home Assistant logged 118 `invalid authentication`
+warnings today, 116 of them on exactly the two endpoints the 15-minute watchdog queries
+(`input_boolean.tavern_motion_now`, the relay switch) - one batch every cron tick from ~05:15 on.
+The same script run by hand authenticates fine, so the cron execution environment was substituting
+the credential: the watchdog had been **blind since the morning** while its `last_status` stayed
+`ok`. Fix in `~/.hermes/scripts/motion-tavern-watch.sh` (mirrored to
+`scripts/tavern-motion/motion-tavern-watch.sh`): `HA_URL` and `TOKEN_FILE` are now hard-pinned
+instead of `${VAR:-default}`, every GET captures the HTTP code, and a non-200 answer prints
+`HA UNREADABLE: http=NNN ...` as an alert line instead of being swallowed. A report-only watchdog
+must fail loudly - the failure mode of "curl returned junk, jq found nothing, script printed
+nothing" is invisible from the scheduler's point of view.

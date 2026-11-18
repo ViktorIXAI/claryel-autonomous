@@ -39,12 +39,25 @@ echo "$restarts" > "$STATE"
 #      переключает input_boolean.tavern_motion_now на каждом принятом кадре движения, а автомат
 #      tavern_motion_latch_guard снимает его, если 15 минут не было обновления. Сторож только
 #      кричит, если это не сработало: флажок всё ещё включён через 25+ минут после изменения.
-HA_URL=${HA_URL:-http://127.0.0.1:8123}
-TOKEN_FILE=${TOKEN_FILE:-/home/viktor/.config/motion/hass-token}
+# [EN] Pinned on purpose (no ${VAR:-} override): during the 2026-11-18 cron runs this script
+#      reached Home Assistant with a substituted credential and got 401 on 68 requests while
+#      printing nothing - a report-only watchdog that cannot read HA is worse than no watchdog.
+#      The HTTP code is now checked and a failure is shouted instead of swallowed.
+# [RU] Заданы жёстко (без ${VAR:-}): в кронах 2026-11-18 запросы в Home Assistant уходили с
+#      подменённым токеном и давали 401 (68 запросов), а сторож молчал. Сторож, который не видит
+#      HA, хуже отсутствующего - теперь код ответа проверяется и ошибка видна.
+HA_URL="http://127.0.0.1:8123"
+TOKEN_FILE="/home/viktor/.config/motion/hass-token"
 BOOLEAN=input_boolean.tavern_motion_now
+ha_get() { # ha_get <url> -> тело ответа, последней строкой HTTP-код
+    curl -s -m 5 -w '\n%{http_code}' -H "Authorization: Bearer $(cat "$TOKEN_FILE")" "$1" || printf '000'
+}
+ha_code() { printf '%s' "$1" | tail -n 1; }
+ha_body() { printf '%s' "$1" | sed '$d'; }
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
-    token=$(cat "$TOKEN_FILE")
-    body=$(curl -s -m 5 -H "Authorization: Bearer ***" "$HA_URL/api/states/$BOOLEAN")
+    resp=$(ha_get "$HA_URL/api/states/$BOOLEAN")
+    code=$(ha_code "$resp"); body=$(ha_body "$resp")
+    [ "$code" != "200" ] && echo "HA UNREADABLE: http=$code for $BOOLEAN - the tavern watchdog is blind (check token and HA_URL)"
     latch=$(printf '%s' "$body" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
     changed=$(printf '%s' "$body" | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
     if [ "$latch" = "on" ] && [ -n "$changed" ]; then
@@ -69,16 +82,16 @@ fi
 #      это состояние. Ручной режим (input_boolean.tavern_light_manual = on) — норма, тихо.
 SWITCH=switch.taverna_taverna_basicr4_sonoff_1002bd4e01_1
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
-    token=$(cat "$TOKEN_FILE")
-    lamp=$(curl -s -m 5 -H "Authorization: Bearer ***" "$HA_URL/api/states/$SWITCH" \
-        | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
+    resp=$(ha_get "$HA_URL/api/states/$SWITCH")
+    code=$(ha_code "$resp"); sbody=$(ha_body "$resp")
+    [ "$code" != "200" ] && echo "HA UNREADABLE: http=$code for $SWITCH - the lamp check is blind"
+    lamp=$(printf '%s' "$sbody" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
+    onsince=$(printf '%s' "$sbody" | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
     if [ "$lamp" = "on" ]; then
-        sensor=$(curl -s -m 5 -H "Authorization: Bearer ***" "$HA_URL/api/states/binary_sensor.taverna_motion" \
+        sensor=$(printf '%s' "$(ha_body "$(ha_get "$HA_URL/api/states/binary_sensor.taverna_motion")")" \
             | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
-        manual=$(curl -s -m 5 -H "Authorization: Bearer ***" "$HA_URL/api/states/input_boolean.tavern_light_manual" \
+        manual=$(printf '%s' "$(ha_body "$(ha_get "$HA_URL/api/states/input_boolean.tavern_light_manual")")" \
             | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
-        onsince=$(curl -s -m 5 -H "Authorization: Bearer ***" "$HA_URL/api/states/$SWITCH" \
-            | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
         age=$(( $(date +%s) - $(date -d "$onsince" +%s 2>/dev/null || echo $(date +%s)) ))
         if [ "$sensor" != "on" ] && [ "$manual" != "on" ] && [ "$age" -gt 900 ]; then
             echo "LAMP ON WITHOUT MOTION: $SWITCH has been on for ${age}s with motion sensor '$sensor' - automation taverna_svet_gorit_bez_dvizheniia_vykliuchit did not switch it off"
@@ -90,7 +103,7 @@ fi
 # (11:35, 11:36, 13:01, 13:11 local). HA reports 'unavailable'; a relay that is not answering
 # cannot be switched off by the motion chain either.
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
-    lampstate=$(curl -s -m 5 -H "Authorization: Bearer ***" "$HA_URL/api/states/$SWITCH" \
+    lampstate=$(printf '%s' "$(ha_body "$(ha_get "$HA_URL/api/states/$SWITCH")")" \
         | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
     [ "$lampstate" = "unavailable" ] && \
         echo "RELAY UNREACHABLE: $SWITCH is 'unavailable' in Home Assistant - Zigbee link to the tavern relay is down"
