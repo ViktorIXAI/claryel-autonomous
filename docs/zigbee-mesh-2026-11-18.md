@@ -129,3 +129,46 @@ A **Zigbee 3.0 router** (mains device with a neutral) placed between the basemen
    its rating.
 4. Physical: the coordinator sits on a USB extension out of the basement; if a router is added
    on the flat side, DOOR 1 and the fan relay both improve without moving it.
+
+## Second pass the same night: batteries, temperatures, names
+
+Battery values were re-checked against 60 days of recorder history instead of one snapshot:
+
+| device | now | 60-day min | note |
+|---|---|---|---|
+| Room3 TS0201 | 100 % | 100 % | |
+| Open-plan office TS0201 | 100 % | **1 %** | four distinct battery values in ten days, 1 % then back to 100 % - the channel is unreliable |
+| Server room TS0201 | 60 % | **50 %** | the only genuinely mid-range battery in the set; plan a replacement this season |
+| Claryel Garden TS0201 | 100 % | 100 % | |
+| Terrace TS0201 | no data | - | silent for 35 days |
+| Door DOOR 1 (SNZB-04PR2) | 89 % | 89 % | |
+| Door garden side / Ksu / Leo (SNZB-04PR2) | 100 % | 100 % | |
+| Fan relay (ZBMINIL2) | n/a | - | mains powered; ZHA exposes a phantom battery entity that stays `unknown` |
+
+The 1 % alert I sent earlier was therefore a **sensor glitch, not a dying battery**. The watchdog now
+requires **two consecutive low readings** before alerting (`batt_low` is kept in its state file); a real
+dying battery is still reported within twelve hours, a one-sample artefact never is.
+
+Temperatures cross-checked over thirty days - the spread between sensors is real, not a reporting bug:
+garden 5.6 °C (outdoor, range 3.1-17.6), Open-plan office 20.9 (18.2-23.6), Server room 18.7
+(18.1-22.2), Room3 17.5 (15.5-19.0) at 78 % humidity. Room3 is the coolest and most humid indoor room;
+if it stays at 17-18 °C, the exterior wall is the place to watch for condensation.
+(The `samples` column counts state *changes* and `max_gap` is the longest stretch with an unchanged
+value - 55 h in Room3 means the temperature sat still, not that the radio was silent.)
+
+Link quality from the device side (the newly enabled `sensor.*_lqi`) tells a sharper story than the
+coordinator's neighbour table: **Claryel Garden 7**, Room3 **21**, fan relay **40**. The garden sensor
+has the worst link in the house and still reports - it is the first candidate to go quiet, and the
+strongest argument for a router between it and the coordinator.
+
+Names: every Zigbee device is now named by location, so HA composes the entity names itself
+("Room3 Температура", "Дверь DOOR 1 Батарея"). Five identical `Wing TS0201` devices became Room3 /
+Open-plan office / Terrace / Server room / Claryel Garden; four identical `SONOFF SNZB-04PR2` became
+Дверь DOOR 1 / Дверь garden side / Дверь Ksu / Дверь Leo; `SONOFF ZBMINIL2` became "Вентилятор серверов
+(модуль в розетке)" with labels `zigbee_end_device` and `no_neutral`. The Open-plan temperature sensor
+carried a per-entity display override that showed it as "Room0" - cleared. `entity_id`s were not
+touched, so automations, scripts and dashboards are unaffected.
+
+Measured cost of the cloud path for the basement relay (Wi-Fi, eWeLink): the HA service call reached
+state `on` in **467 ms** and `off` in **416 ms**. A Zigbee relay in the basement would answer in single-digit
+milliseconds - worth knowing if the flicker ever matters.

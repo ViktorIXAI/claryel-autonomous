@@ -14,3 +14,10 @@ Home Assistant). The live copy is `~/.hermes/scripts/radio-health-watch.py`; thi
 
 Why the mesh needs a router at all, and what the L2 module can and cannot do:
 `docs/zigbee-mesh-2026-11-18.md`.
+
+## Battery rule (added after a false alarm)
+
+A TS0201 battery channel is noisy: one sensor reported 1 % while the same device reported 100 % an hour
+later, and its 60-day history holds four distinct values. The watchdog now records the last low reading
+in `batt_low` inside its state file and only alerts when the **same device reads low twice in a row**.
+A real dying battery is caught within a day; a single artefact never produces an alert.

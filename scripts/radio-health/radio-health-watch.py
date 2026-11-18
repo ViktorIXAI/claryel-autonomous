@@ -108,7 +108,17 @@ def main():
             except (TypeError, ValueError):
                 pass
 
-    findings = []
+    # A TS0201 battery channel is noisy: one run saw 1 % while the same device reported
+    # 100 % an hour later (60-day history shows 4 distinct values in 10 days). Alert only on
+    # two consecutive low readings - a real dying battery still gets reported within a day.
+    prev_low = {}
+    if os.path.exists(STATE_FILE):
+        try:
+            prev_low = json.load(open(STATE_FILE)).get("batt_low", {})
+        except (ValueError, OSError):
+            prev_low = {}
+
+    findings, cur_low = [], {}
     for key, rec in sorted(by_dev.items()):
         if rec["primary_offline"] or len(rec["offline"]) >= 3:
             findings.append("ZIGBEE OFFLINE: %s (%d entities unavailable)" % (key, len(rec["offline"])))
@@ -117,7 +127,11 @@ def main():
         if rec["rssi"] is not None and rec["rssi"] < RSSI_MAX:
             findings.append("ZIGBEE LINK WEAK: %s RSSI=%d dBm (below %d)" % (key, int(rec["rssi"]), RSSI_MAX))
         if rec["batt"] is not None and rec["batt"] < BATT_MIN:
-            findings.append("BATTERY LOW: %s = %d %%" % (key, int(rec["batt"])))
+            cur_low[key] = rec["batt"]
+            if key in prev_low:
+                findings.append("BATTERY LOW (confirmed twice): %s = %d %%" % (key, int(rec["batt"])))
+            else:
+                print("", file=sys.stderr)  # pending, not an alert yet
 
     os.makedirs(STATE_DIR, exist_ok=True)
     prev = {"findings": [], "at": 0}
@@ -135,7 +149,7 @@ def main():
         if old:
             for f in sorted(old - new):
                 print("RADIO RESTORED: %s" % f)
-            json.dump({"findings": [], "at": now}, open(STATE_FILE, "w"))
+            json.dump({"findings": [], "at": now, "batt_low": cur_low}, open(STATE_FILE, "w"))
         return 0
     if not changed and not stale:
         return 0                            # same problem, already reported recently
@@ -146,7 +160,7 @@ def main():
         print("  " + f)
     for f in sorted(old - new):
         print("  RADIO RESTORED: " + f)
-    json.dump({"findings": findings, "at": now}, open(STATE_FILE, "w"))
+    json.dump({"findings": findings, "at": now, "batt_low": cur_low}, open(STATE_FILE, "w"))
     return 0
 
 
