@@ -203,3 +203,81 @@ Watchdog additions from this incident (`scripts/radio-health/`): it now scans
 sends failed, naming the automations involved — a device that cannot be commanded looks healthy in
 `/api/states`. Dedup keys now replace digits (`LQI=#`), so a sensor bouncing between LQI 7 and 0 stays
 one problem instead of a new alert every tick.
+
+## The exhaust fan: manual control without losing the child lock (2026-11-18, 23:00)
+
+The operator reported: pressing the wall button switches the fan on and it immediately drops out
+(that part is the child lock working), but **switching it on from HA also dropped out** — he wants
+manual on/off from HA to just work, and the 3x/day schedule to stay.
+
+Cause, in `/config/configuration.yaml`: automation `vent_servers_room_guard` triggers every 10 min
+**and instantly on `switch.sonoff_zbminil2 -> on`**, and turns the fan off whenever the clock is
+outside 07:00-07:20 / 14:00-14:20 / 21:00-21:15. It cannot tell a person from a child, so it killed
+every manual switch-on the same way.
+
+Fix — distinguish who flipped it. A state change made through HA carries a `user_id` in its context;
+a change reported by the relay itself (wall button) carries none:
+
+```yaml
+input_boolean:
+  fan_servers_manual:      # "Вытяжка серверной: вручную (страж не тушит)"
+timer:
+  fan_servers_manual:      # duration 02:00:00
+
+automation:
+  - id: vent_servers_room_manual_permission   # user switched it on -> 2 h permission
+    triggers:  [{trigger: state, entity_id: switch.sonoff_zbminil2, to: "on"}]
+    conditions: [{{ trigger.to_state.context.user_id is not none }}]
+    actions:   input_boolean.turn_on + timer.start
+  - id: vent_servers_room_manual_release      # user switched it off -> drop the permission
+  - id: vent_servers_room_manual_expiry       # timer.finished -> drop the permission
+```
+
+and in the guard, before the time-window test:
+
+```yaml
+      - condition: state
+        entity_id: input_boolean.fan_servers_manual
+        state: "off"
+      - condition: template
+        value_template: >-
+          {{ trigger.platform != 'state' or trigger.to_state.context.user_id is none }}
+```
+
+Result: a person in the app gets the fan and keeps it (permission auto-expires after 2 h so a
+forgotten fan cannot run all night); a wall-button press is still cancelled outside the schedule;
+the three schedule automations were not touched.
+
+Verified against the live system:
+
+- manual `switch.turn_on` -> fan on, `input_boolean.fan_servers_manual` on, timer active, **still on
+  after 90 s** (the guard stood down);
+- manual `switch.turn_off` -> flag cleared, timer back to `idle`;
+- the non-user path (automation-triggered switch-on, which is what the wall button looks like to HA)
+  -> flag stayed off and the guard switched the fan off again, confirmed from the recorder: every
+  non-user `on` in that window was followed by a guard `off`.
+
+Two HA 2026 gotchas found while doing this:
+
+- an automation with `mode: restarted` loaded as **`unavailable` with no error in the log** (the other
+  automations in the same file were fine). With `mode: single` it works; the entity carries no
+  `current`/`last_triggered` attributes while it is unavailable, which is how to spot it.
+- the recorder schema changed: `states.last_changed` is now NULL and `states.context_user_id` is empty
+  — use `last_changed_ts` and `context_user_id_bin`, and join `states_meta` for `entity_id`.
+
+Backup of the config before the edit: `/config/configuration.yaml.bak-fan-manual-20261118`.
+
+## Room naming corrected: the servers room is in the basement, the fan is in the storage room
+
+The room that held the exhaust fan was always the **кладовка**, not the servers room; the servers room
+(itself, the UPS, the Zigbee coordinator and its temperature sensor) moved down to the **basement**.
+Areas now say so:
+
+- new area **Storage room** (`storage_room`) -> the Sonoff ZBMINI L2 module, renamed
+  **Вентилятор кладовки (модуль в розетке)**;
+- area **Server room** (`servers`) -> the TS0201 temperature sensor, `Claryel-UPS`, and the
+  CC2652 Zigbee coordinator (it had no area before);
+- entity ids were not touched, so `switch.sonoff_zbminil2` and every automation still works.
+
+The automation aliases still read "Вытяжка серверной" — renaming them would change their entity ids and
+drop their history, so they stay; the fan they control lives in the storage room.
