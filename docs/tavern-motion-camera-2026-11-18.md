@@ -29,7 +29,7 @@ reused. No Motion add-on, no camera/stream entity, no third-party integration wa
 
 | Path | Purpose |
 |---|---|
-| `~/.config/motion/motion-tavern.conf` | detection-only Motion config (640x480 @ 5 fps) |
+| `~/.config/motion/motion-tavern.conf` | detection-only Motion config (640x480 @ 2 fps, single-frame trigger) |
 | `~/.config/motion/hass-token` | HA long-lived token, mode `0600`, never printed |
 | `~/.local/libexec/tavern-motion-hook.sh` | `start` / `frame` / `end` / `failure` bridge into HA |
 | `/etc/systemd/system/motion-tavern.service` | own unit, own cgroup, `Restart=always`, nice/cgroup caps |
@@ -57,8 +57,9 @@ camera consumer, and a plain `apt install motion` can never steal the device aga
 * Device `32e6:9251 "USB Camera"`, `/dev/video0`, driver `uvcvideo`.
 * The driver does **not** expose 320x240; the smallest mode is **640x480**
   (MPEG-JPEG up to 30 fps, YUYV up to 30 fps). Motion picks YUYV 640x480 and is throttled to
-  **5 fps** (the device offers 2/5/10/15/20/30; `minimum_frame_time 0` since 2026-11-18,
-  earlier it was capped to 2 fps by `minimum_frame_time 0.5`) -> 0.4 s detection budget.
+  **2 fps** with `minimum_frame_time 0` (the device offers 2/5/10/15/20/30; the old cap was
+  `minimum_frame_time 0.5`). 2 fps + one-frame trigger gives the same 0.5 s reaction as 5 fps +
+  two-frame trigger, at half the CPU and with a wider lamp-step suppression window (1.5 s vs 0.6 s).
 * In a dark room the sensor is effectively blind: measured luma YAVG ~1-3 out of 255 even at
   79 % analogue gain. See "Darkness limitation" below.
 * The device is opened exclusively by Motion; a second consumer gets `Device or resource busy`
@@ -118,22 +119,37 @@ part - four filters were stacked in series:
 
 | stage | before | now |
 |---|---|---|
-| Motion needs N consecutive motion frames | 3 frames @ 2 fps = **1.5 s** | 2 frames @ 5 fps = **0.4 s** |
+| Motion needs N consecutive motion frames | 3 frames @ 2 fps = **1.5 s** | 1 frame @ 2 fps = **0.5 s** |
 | hook -> Home Assistant REST | ~0.1 s | ~0.1 s |
 | template sensor `delay_on` | **4 s** | **1 s** |
 | ON automation -> Zigbee relay | ~0.3-0.5 s | skipped (hook commands the relay at `on_event_start`) |
 | measured hook -> relay state `on` | - | **0.39-0.46 s** |
-| **person -> light** | **~6 s** | **~0.9 s** |
+| **person -> light** | **~6 s** | **~0.9-1.0 s** |
 
-What changed: `framerate 2 -> 5`, `minimum_frame_time 0.5 -> 0`, `minimum_motion_frames 3 -> 2`,
-template `delay_on: 4 s -> 1 s`, and the hook now calls `switch.turn_on` for the existing SONOFF
-entity at event start. `automation.tavern_motion_light_on` stays as a backup path, and Home
-Assistant still owns the OFF side (`delay_off: 5 min` -> `tavern_motion_light_off`).
+What changed: `minimum_motion_frames 3 -> 1`, `minimum_frame_time 0.5 -> 0`, template
+`delay_on: 4 s -> 1 s`, and the hook now calls `switch.turn_on` for the existing SONOFF entity at
+event start. `automation.tavern_motion_light_on` stays as a backup path, and Home Assistant still
+owns the OFF side (`delay_off: 5 min` -> `tavern_motion_light_off`).
+
+Two frame-rate variants were measured against the same anti-noise settings
+(`threshold 2000`, `noise_level 20`, `despeckle_filter EedDl`):
+
+| variant | detection budget | Motion CPU (idle room) | lamp-step window |
+|---|---|---|---|
+| 5 fps + `minimum_motion_frames 2` | 0.4 s | 0.93 % of one core | 0.6 s |
+| **2 fps + `minimum_motion_frames 1`** (live) | 0.5 s | **0.53 % of one core** | 1.5 s |
+
+Both end at ~1 s person-to-light, because 0.39-0.46 s of it is the SONOFF relay plus REST, which no
+frame rate can remove. 2 fps was kept: same speed, half the CPU, and `lightswitch_frames 3` then
+covers 1.5 s of the relay's own brightness jump instead of 0.6 s. The single-frame trigger is the
+open question, so it is being watched for an hour with five-minute reports
+(`scripts/tavern-motion/motion-fps-monitor.sh`, cron `8bb76bb16562`, 12 samples); if false events
+appear, the fallback is `minimum_motion_frames 2` at 2 fps (1.0 s) or 5 fps + 2 frames.
 
 Cost and regression gates, measured on the host (`scripts/tavern-motion/speedup-test.sh`):
 
-* CPU **0.38 % -> 0.93 %** of one core (24 cores), RSS 54 MB, 2 threads;
-* 2 min idle in the dark at 5 fps: **0** false events;
+* CPU **0.38 % -> 0.93 %** of one core (24 cores) at 5 fps, **0.53 %** at 2 fps; RSS 54 MB, 2 threads;
+* 2 min idle in the dark at 5 fps: **0** false events (re-running at 2 fps + single frame);
 * lamp switched on/off inside the watch window (global brightness step): **0** false events -
   `lightswitch_percent 30` / `lightswitch_frames 3` still suppress the relay's own step at 5 fps;
 * OFF leg re-verified after the change: the light went off **301 s** after the motion latch cleared.
@@ -142,12 +158,50 @@ Headroom, deliberately not used: the webcam offers up to 30 fps, so `framerate 1
 would bring detection down to 0.2 s for ~1.9 % CPU. It doubles the chance that one noise burst
 opens an event, and the remaining ~0.4 s is Zigbee relay time, which no frame rate can remove.
 
-Safety net for a lamp stuck on: the hook touches `~/.local/state/tavern-motion/heartbeat` on every
-accepted event; the 15-min watchdog (`motion-tavern-watch.sh`) clears `input_boolean.tavern_motion_now`
-when the latch is on but the heartbeat is older than 900 s - i.e. `on_event_end` was lost (daemon
-restarted mid-event, HA briefly unreachable). That re-arms the 5-minute off-delay, so the worst
-case is now ~20 min of light instead of forever. Lights turned on manually from the HA UI are never
-touched by the watchdog.
+### Latch guard (a lamp that would never go out)
+
+The direct relay command has one consequence: the OFF automation is armed by the **sensor**, and the
+sensor only turns on if the latch (`input_boolean.tavern_motion_now`) stays up for more than
+`delay_on`. Real events always hold the latch for at least `event_gap` = 15 s, so the OFF path is
+normally armed. If Motion's `on_event_end` never arrives (daemon restarted mid-event, HA restarting
+at that moment) the latch stays up and the lamp would burn indefinitely.
+
+Fix, entirely inside HA and the hook:
+
+* the hook's `frame` handler **toggles** the latch (`turn_off` then `turn_on`) while motion continues;
+  a plain `turn_on` over an already-on `input_boolean` changes nothing at all in Home Assistant -
+  `state`, `last_changed` and `last_updated` all stay put (verified against the REST API on
+  2026-11-18), so a no-op refresh cannot serve as a heartbeat;
+* `automation.taverna_flazhok_dvizheniia_gorit_slishkom_dolgo_sniat` (`id: tavern_motion_latch_guard`)
+  fires when the latch has been `on` **for 15 minutes** without a refresh and clears it, which
+  re-arms the 5-minute sensor delay: worst case ~20 min of light instead of forever;
+* `motion-tavern-watch.sh` only reports (`MOTION LATCH STUCK`) when the latch is still up 25 minutes
+  after its last change - i.e. when the HA guard itself failed. It never writes to HA and never
+  touches a light turned on manually.
+
+Verified end to end on 2026-11-18 (`scripts/tavern-motion/latch-guard-verify.sh`): a synthetic event
+was opened and its `end` deliberately never sent while `frame` toggles kept the latch alive -
+**0 sensor blips** across the toggles; the last refresh was 05:24:58, the guard fired at **05:39:58**
+(15 min), the sensor went off at **05:47:41** and the lamp at **05:47:42**. Before this guard the
+same scenario left the lamp on indefinitely.
+
+## Why the frame rate is not switched on the fly
+
+The obvious idea - idle at 2 fps, jump to 5 fps the moment something looks like motion, drop back
+when it turns out to be nothing - cannot be done inside Motion without a stream restart: `framerate`
+is only applied when the config is re-read, and each restart re-opens the camera, which is exactly
+the auto-exposure noise the 30 s boot guard exists to swallow. It also cannot speed up the first
+detection: at 2 fps the first candidate physically cannot exist before 0.5 s. Runtime changes would
+mean re-enabling `webcontrol_port`, a listening socket deliberately disabled for the no-listener
+guarantee, to save half a percent of one core. The same goal is reached instead by keeping 2 fps and
+letting `threshold`/`noise_level`/`despeckle_filter` do the noise filtering that
+`minimum_motion_frames` used to do.
+
+Why not a heartbeat file for the watchdog: the service runs with `ProtectSystem=strict` +
+`ProtectHome=read-only` + `PrivateTmp`, so the hook may write only inside its own private `/tmp` -
+nothing it writes is visible to another process, and a write anywhere else would abort the hook
+(`set -eu`) and take the whole chain down with it. A host-visible heartbeat would need
+`ReadWritePaths=` in the unit (root edit); the HA-side guard needs nothing.
 
 ## Operations
 

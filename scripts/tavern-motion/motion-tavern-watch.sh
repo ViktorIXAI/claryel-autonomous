@@ -31,32 +31,26 @@ fi
 
 echo "$restarts" > "$STATE"
 
-# [EN] Latch guard. Motion closes an event with the 'end' hook; if that call is lost (daemon
-#      restarted mid-event, HA unreachable at that moment) input_boolean.tavern_motion_now stays
-#      on and the light would never turn off. The hook touches HB_FILE on every accepted event, so
-#      "latch on + no heartbeat for STALE_S" means the camera stopped reporting while the latch
-#      stayed up: clear it and let HA's 5-minute delay switch the light off.
-# [RU] Защита от залипания. Motion закрывает событие хуком 'end'; если этот вызов потерялся
-#      (демон перезапустился посреди события, HA был недоступен в этот момент), флажок
-#      tavern_motion_now остаётся включённым и свет никогда не погаснет. Хук трогает HB_FILE на
-#      каждом принятом событии, поэтому «флажок включён + нет пульса STALE_S» означает, что камера
-#      перестала сообщать о движении, а флажок остался: снимаем его, и пауза HA в 5 минут гасит свет.
-HB_FILE=${HB_FILE:-/home/viktor/.local/state/tavern-motion/heartbeat}
+# [EN] Latch report (no writes). Home Assistant owns the latch: the hook toggles
+#      input_boolean.tavern_motion_now on every accepted frame, and automation
+#      tavern_motion_latch_guard clears it after 15 minutes without a refresh. This watchdog only
+#      shouts when that failed: latch still on 25+ minutes after its last change.
+# [RU] Сообщение о залипании (ничего не пишет). Флажком заведует Home Assistant: хук
+#      переключает input_boolean.tavern_motion_now на каждом принятом кадре движения, а автомат
+#      tavern_motion_latch_guard снимает его, если 15 минут не было обновления. Сторож только
+#      кричит, если это не сработало: флажок всё ещё включён через 25+ минут после изменения.
 HA_URL=${HA_URL:-http://127.0.0.1:8123}
 TOKEN_FILE=${TOKEN_FILE:-/home/viktor/.config/motion/hass-token}
 BOOLEAN=input_boolean.tavern_motion_now
-STALE_S=900
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     token=$(cat "$TOKEN_FILE")
-    latch=$(curl -s -m 5 -H "Authorization: Bearer ***" \
-            "$HA_URL/api/states/$BOOLEAN" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
-    hb_mtime=$(stat -c %Y "$HB_FILE" 2>/dev/null || echo 0)
-    hb_age=$(( $(date +%s) - hb_mtime ))
-    if [ "$latch" = "on" ] && [ "$hb_age" -gt "$STALE_S" ]; then
-        curl -s -m 5 -X POST -H "Authorization: Bearer ***" -H 'Content-Type: application/json' \
-             -d "{\"entity_id\":\"$BOOLEAN\"}" \
-             "$HA_URL/api/services/input_boolean/turn_off" -o /dev/null
-        echo "MOTION LATCH CLEARED: $BOOLEAN was on for ${hb_age}s with no camera heartbeat (hook 'end' lost) - HA delay will switch the light off"
+    body=$(curl -s -m 5 -H "Authorization: Bearer ***" "$HA_URL/api/states/$BOOLEAN")
+    latch=$(printf '%s' "$body" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
+    changed=$(printf '%s' "$body" | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
+    if [ "$latch" = "on" ] && [ -n "$changed" ]; then
+        age=$(( $(date +%s) - $(date -d "$changed" +%s 2>/dev/null || echo $(date +%s)) ))
+        [ -n "$age" ] && [ "$age" -gt 1500 ] && \
+            echo "MOTION LATCH STUCK: $BOOLEAN has been on for ${age}s - HA latch guard did not clear it, check automation.taverna_flazhok_dvizheniia_gorit_slishkom_dolgo_sniat"
     fi
 fi
 

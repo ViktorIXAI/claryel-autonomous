@@ -15,8 +15,11 @@ Install order on the host:
 
 The token is never stored in these files - the hook reads it from the `0600` file at runtime.
 
-Retuned 2026-11-18 for response latency (~6 s -> ~0.9 s): 5 fps, `minimum_frame_time 0`,
-`minimum_motion_frames 2`, HA `delay_on: 1 s`, and the hook commands the relay directly at event
-start. `speedup-test.sh` and `speedup-latency-verify.sh` are the gates that were run afterwards
-(false triggers in the dark, lamp on/off brightness step, measured ON latency, the 5-minute
-auto-off). `motion-tavern-watch.sh` also clears a motion latch whose `end` event was lost.
+Retuned 2026-11-18 for response latency (~6 s -> ~1 s): `minimum_frame_time 0`,
+`minimum_motion_frames 1`, HA `delay_on: 1 s`, and the hook commands the relay directly at event
+start (5 fps + 2 frames was measured too - same latency, twice the CPU, so 2 fps stayed live).
+Gates: `speedup-test.sh`, `speedup-latency-verify.sh` (dark idle, lamp on/off step, measured ON
+latency, 5-minute auto-off), `latch-guard-verify.sh` (lost `end` event -> latch cleared at 15 min,
+lamp out at 20 min, no sensor flicker during frame toggles), `ha-latch-timestamp-semantics.py`
+(why the hook must toggle the latch: a no-op `turn_on` changes nothing in HA), and
+`motion-fps-monitor.sh` (five-minute false-trigger report, cron `8bb76bb16562`).
