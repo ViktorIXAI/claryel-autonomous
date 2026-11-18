@@ -22,4 +22,13 @@ Gates: `speedup-test.sh`, `speedup-latency-verify.sh` (dark idle, lamp on/off st
 latency, 5-minute auto-off), `latch-guard-verify.sh` (lost `end` event -> latch cleared at 15 min,
 lamp out at 20 min, no sensor flicker during frame toggles), `ha-latch-timestamp-semantics.py`
 (why the hook must toggle the latch: a no-op `turn_on` changes nothing in HA), and
-`motion-fps-monitor.sh` (five-minute false-trigger report, cron `8bb76bb16562`).
+`motion-fps-monitor.sh` (five-minute false-trigger report, 12 samples).
+
+Forensics for the "lamp burned for 7 h 18 min" incident (2026-11-18): `lamp-history.py`,
+`lamp-times.py`, `lamp-window.py`, `relay-detail.py` read the Home Assistant recorder read-only -
+`docker exec -i homeassistant python3 - < script.py` against `file:/config/home-assistant_v2.db?mode=ro`.
+They resolve entity ids through `states_meta`, use `last_updated_ts` (the `last_changed` text column
+is NULL on recent rows) and attribute every state write with `origin_idx`: 0 = the device reported
+it, 4 = HA service call, 2 = restored after a restart. That is how the 06:01 ON was proven not to
+come from HA, from Motion or from a user. `lamp-guard-drill.sh` is the gate for the safety-net
+automation.

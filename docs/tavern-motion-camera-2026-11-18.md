@@ -72,10 +72,15 @@ camera consumer, and a plain `apt install motion` can never steal the device aga
   `delay_off: 5 min`: the sensor is the OFF authority and the backup ON path (the hook commands
   the relay directly at event start), and the light switches off
   5 minutes after the **last** motion; any new motion restarts the 5 minutes.
-* Two automations: sensor on -> `switch.turn_on`, sensor off -> `switch.turn_off`.
+* Three automations: sensor on -> `switch.turn_on`, sensor off -> `switch.turn_off`, and
+  `tavern_lamp_on_without_motion` -> any light that has been on for 10 minutes while the motion
+  sensor is off gets switched off (see the incident section; `input_boolean.tavern_light_manual`
+  disables that safety net when the room genuinely needs light without motion).
 * A new event re-arms the boolean and cancels nothing that could leave the light latched.
 * `on_camera_lost` and the hook's `failure` path clear the boolean: a dead camera cannot keep
   the light on.
+* The latch itself is heartbeated by the hook (`input_boolean.toggle` per accepted frame) and
+  cleared by `tavern_motion_latch_guard` after 15 minutes without a refresh.
 
 ## Anti-false-trigger measures (why the light does not blink by itself)
 
@@ -83,7 +88,7 @@ camera consumer, and a plain `apt install motion` can never steal the device aga
 |---|---|
 | Auto-exposure settling after Motion (re)starts | `ExecStartPre` writes `start-ts`; the hook drops every event in the first 30 s after the service starts |
 | The SONOFF switching the lamp on/off (brightness jump in the picture) | Motion `lightswitch_percent 30` + `lightswitch_frames 3` ignore a global brightness change |
-| Short noise blips | `minimum_motion_frames 2` (0.4 s at 5 fps) plus `threshold 2000`, `noise_level 20`, `despeckle_filter EedDl` and `delay_on: 1 s` on the HA sensor |
+| Short noise blips | `threshold 2000`, `noise_level 20`, `despeckle_filter EedDl`, `delay_on: 1 s` on the HA sensor (the event itself opens from a single frame at 2 fps) |
 | Sensor noise in near-dark frames (this specific camera is very noisy at high gain) | `noise_level 20`, `threshold 2000`, `despeckle_filter EedDl` |
 | Service restart storm | `Restart=always` with a 5 s period + the 30 s boot guard + watchdog alert |
 
@@ -184,6 +189,56 @@ was opened and its `end` deliberately never sent while `frame` toggles kept the 
 **0 sensor blips** across the toggles; the last refresh was 05:24:58, the guard fired at **05:39:58**
 (15 min), the sensor went off at **05:47:41** and the lamp at **05:47:42**. Before this guard the
 same scenario left the lamp on indefinitely.
+
+## Incident 2026-11-18: the lamp burned for 7 h 18 min in an empty room
+
+Viktor found the basement/tavern lamp hot around 13:00 and it stayed on until he walked around
+the room. Read from the Home Assistant recorder (`lamp-history.py`, `lamp-times.py`,
+`lamp-window.py`, `relay-detail.py` in `scripts/tavern-motion/`) and the systemd journal - all
+times local:
+
+| time | what happened | evidence |
+|---|---|---|
+| 02:08 | the relay entity appears in HA for the first time | first recorded state of `switch.taverna_...` |
+| 05:47:42 | last OFF produced by the motion chain | latch-guard drill |
+| **06:01:38** | **relay goes ON** | state row `on`, `origin_idx=0` (device push), `context_user_id` empty |
+| 05:50-06:10 | camera saw nothing | journal: 0 `Motion detected - starting event` |
+| 06:01-13:00 | latch and sensor never went on | latch: 05:39:58 then 13:00:25; sensor: 05:47:41 then 13:00:26 |
+| 11:35:56, 11:36:23 | relay `unavailable` (Zigbee) | 4 unavailable episodes that day: 11:35, 11:36, 13:01, 13:11 |
+| 13:00:26 | Viktor enters: sensor ON, 8 camera events, latch toggling until 13:11 | journal 12:55-13:25 UTC |
+| **13:20:12** | motion ends 5 min earlier -> sensor OFF -> **lamp OFF** | state row `off` at 13:20:12 |
+
+So the lamp was on for **7 h 18 min** and the motion chain put it out within one second of the
+sensor finally going off - the OFF path works, it just never had a state of its own to clean up.
+
+Why nothing switched it off: every automation in this room only reacts to the motion chain's own
+states, and the motion chain only switches off what it switched on. The ON at 06:01 came from
+neither: no Motion event, no HA service call in the recorder, no user in the state context, and
+`origin_idx=0` means the integration reported the device, not HA commanding it. The device's own
+`power_on_behavior` is `off`, so a plain power cycle would have restored OFF, not ON. The four
+Zigbee dropouts the same day say the radio link to that relay is marginal, which is the same
+symptom class as a relay that reports a state nobody asked for.
+
+What was added because of it:
+
+* automation `tavern_lamp_on_without_motion` (`automation.taverna_svet_gorit_bez_dvizheniia_vykliuchit`):
+  relay `on` for 10 minutes while `binary_sensor.taverna_motion` is off -> `switch.turn_off`.
+* `input_boolean.tavern_light_manual` ("Таверна: свет вручную") - while on, the safety net stands
+  down, so a deliberately switched-on light is left alone. Turn it off when leaving.
+* watchdog lines: `LAMP ON WITHOUT MOTION` (still on 15+ minutes into that state, i.e. the HA
+  automation failed) and `RELAY UNREACHABLE` (`unavailable` in HA).
+* gate `scripts/tavern-motion/lamp-guard-drill.sh`: switches the relay on by hand while nobody
+  touches the camera and waits for the safety net. Run on 2026-11-18: `turn_on` at 15:35:13,
+  **lamp OFF at 15:45:13 = 610 s**, motion sensor `off` the whole time, **0** camera events during
+  the drill (so the ON really was uncommanded), latch and manual override untouched. The 10 s over
+  600 s is the automation's `for:` bookkeeping plus the 10 s poll.
+
+Not fixed here (needs hands): the Zigbee path to the basement relay. Four `unavailable` episodes
+in one day, including twice while Viktor was in the room, mean the relay is on the edge of the
+mesh; a router device (any plugged Zigbee device) between the coordinator and the basement is the
+fix. Also still present in the UI: `input_boolean.tavern_light_blind` and two `automation.taverna_*slepoe_okno*`
+items from the abandoned blind-window design - all three are `unavailable` and can be deleted in
+the Home Assistant UI.
 
 ## Why the frame rate is not switched on the fly
 
