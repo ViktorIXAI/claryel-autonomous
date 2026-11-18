@@ -254,8 +254,10 @@ Verified against the live system:
   after 90 s** (the guard stood down);
 - manual `switch.turn_off` -> flag cleared, timer back to `idle`;
 - the non-user path (automation-triggered switch-on, which is what the wall button looks like to HA)
-  -> flag stayed off and the guard switched the fan off again, confirmed from the recorder: every
-  non-user `on` in that window was followed by a guard `off`.
+  -> flag stayed off and the guard killed it again in **about 1 second** (guard `last_triggered` moved
+  from 21:37:24Z to 21:45:59.018Z, one second after the trigger), so it is the instant state trigger
+  doing the work, not the 10-minute sweep. The recorder shows the same shape: every non-user `on` is
+  followed by a guard `off`.
 
 Two HA 2026 gotchas found while doing this:
 
