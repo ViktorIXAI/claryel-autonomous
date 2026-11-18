@@ -77,3 +77,47 @@ starting the same projects again on claryel01.
 `journalctl -b` boot warnings. To close them in one paste, run
 `sudo bash -c 'dmidecode -t memory -t baseboard; smartctl -H /dev/{sda,sdb,nvme0n1,nvme1n1,nvme2n1,nvme3n1,nvme4n1}; cat /proc/mdstat; vgs; cat /etc/nut/ups.conf /etc/nut/upsmon.conf; grep -h TOKEN /etc/claryel/* 2>/dev/null >/dev/null; echo done'`
 and the output can be appended to the passport (secrets stay out of the repo).
+
+## Where the bytes actually are (measured 2026-11-18, root-level `du` through container bind mounts)
+
+| tier | used | occupants |
+|---|---|---|
+| `/` (system, Lexar `nvme3n1p2`) | **138 GB / 196 (74 %)** | `/home` 40.7 (`.hermes` 9.6, `CLARYEL` 4.8, `claryel` 3.5, caches ~10), `/var` 29.2 (docker store 11.6, snapd 3.2, `/var/log` 3.8, journald 3.3), `/srv/claryel` on the root FS 19.6 (`src` 7.0 + `github-runners` 7.1 + config 36 MB + runtime 875 MB), `usr` 6.0, `opt` 1.6, `root` 1.3. **~39 GB unexplained**: `df` 138 vs root `du` 98.9, deleted-but-open files measure 0 |
+| **hot** (LV `claryel-hot-vg/data`) | 308 → **292 GB** | `b2003-strata` 186.3 (`models/IQ3_S` 78 + `models-staging` 100: gyro 55 / q36 22 / q27 14 / coder 9; mtp 6.5; packs 1.5), **`containerd` 106.7** (docker image store: content 21.5 + overlayfs 85.2), `docker` 11.6 (volumes 4.9 + containers 6.7 = the same tree as `/var/lib/docker`), `database` 2.1, `tbench` 0.8 |
+| **warm** (md2) | **189 GB** | single dir `current/` = full copy of `hot/b2003-strata` + tbench, all mtimes 2026-10-12 |
+| **backup** (md0, SAS) | **410 GB** | `hot-current` 189 (third copy of the same 187 GB), `system-current` 98.3 (whole-FS image dated 2026-07-18), `archive-current` 54.2 (copy of the archive tier), `one-time-recovery` 51.5 (2026-08-10), `archive` 7.8, `snapshots` 5.9 (8 dated hot snapshots, mostly hardlinked), `migration` 2.5, `homeassistant` 0.09, `storage-metadata` 16 MB |
+| **archive** (Samsung 990 PRO) | **121 GB** | `models-from-home` 43.8 (models from the previous machine), `seaweedfs` 35.0 (**live** — bound as `/data` into `claryel-box-seaweedfs-1`), `models` 7.4, `backups` 2.3, logs 0.26 |
+
+**The same 187 GB payload (B2003 model packs + benchmark output, untouched since 2026-10-12) exists three times**:
+`/srv/claryel/hot/b2003-strata`, `/srv/claryel/warm/current`, `/srv/claryel/backup/hot-current` — 561 GB for one
+dataset. Docker's image/build store lives on the **hot** tier (`hot/containerd`), not on `/`.
+Total occupied ~1.16 TB, of which unique-and-live is ~300 GB.
+
+## Reclaim menu (sizes measured, risk labelled)
+
+| option | frees | risk |
+|---|---|---|
+| A. Drop the two duplicate copies of the 187 GB payload, keep one | **376 GB** | none |
+| B. `hot/b2003-strata/models-staging` (experiment staging) | 100 GB | low: the live brain (Basalt on P2005) needs no local copy |
+| C. `archive/models-from-home` + `archive/models` | 51 GB | low-medium: verify P2005/P3001 carry the IQ3_S pack first |
+| D. Old system images `system-current` (Jul) + `one-time-recovery` + `archive-current` | 204 GB | medium: only full-system backup — take one fresh image first |
+| E. Superseded images (ERPNext v16.32.3, HA 2026.7.1, openbot, ollama, old librechat/activepieces) | 20–30 GB | none if no rollback to those tags |
+| F. Caches on `/` (snapd disabled revisions, `journalctl --vacuum-size=1G`, user caches) | 10–12 GB | none |
+
+Already reclaimed 2026-11-18 (caches only, no images/volumes/data touched): `docker builder prune` **15.1 GB**,
+`docker image prune` (dangling) **2.1 GB** (118 → 113 images), apt archives **0.6 GB** → hot 308 → 292 GB,
+`/` 138 → 137 GB.
+
+## What should actually cross to P3001 from the SAS array
+
+~215 GB, not 410: `homeassistant` (92 MB), `storage-metadata`, `logical`, `snapshots`, `archive` 7.8,
+`archive/seaweedfs` 35, `models/IQ3_S` 78, plus one fresh full-system image (~60 GB). The duplicates
+(`hot-current`, `archive-current`) and the July `system-current` must not be carried — they are copies of
+things the target either receives fresh or does not need.
+
+## Open oddity
+
+`/` reports 138 GB used but a root `du -x` of the whole tree gives 98.9 GB, and no process holds
+deleted-but-open files (measured 0 B). Leading hypothesis: data written into the mount-point directories
+(`/srv/claryel/{hot,warm,backup,archive}`) before those volumes were mounted there. Needs a read-only
+check from root; it does not change the plan, but it hides ~39 GB from every `du`-based estimate.
