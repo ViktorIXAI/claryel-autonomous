@@ -281,16 +281,39 @@ consequences and options:
 * For genuinely dark hours either keep a low-wattage nightlight inside the camera's field of
   view, or add a Zigbee PIR sensor for those hours (ZHA is already paired on this host) and
   keep the camera for the lit hours.
-* Detection range in the dark should be re-measured after the camera is physically mounted in
-  the tavern, because the webcam currently sits on the desk at `claryel01`.
+* Camera placement (confirmed by Viktor on 2026-11-18, my earlier note about a desk in the
+  server room was wrong): the webcam **stands on a table in the basement/tavern and looks toward
+  the tavern entrance**. It is not yet fixed in place, so the field of view and the dark-range
+  measurement still have to be re-taken after a permanent mount.
+
+## Real person in frame (measured live, 2026-11-18)
+
+Viktor walked into the basement twice; the camera is in that room, so these are genuine
+end-to-end acceptances, not drills (local times):
+
+| time | event |
+|---|---|
+| 17:19:31 | first `Motion detected - starting event` |
+| **17:19:31** | **relay ON - same second as the detection** (the owner's words: "моментально, секунду") |
+| 17:19:32 | template sensor `on` (`delay_on: 1 s`), backup ON automation also fired |
+| 17:19:31-17:20:53 | latch heartbeats every ~20 s while he moved |
+| 17:20:53 | last motion (latch off, `event_gap 15` merged the walk into 2 events) |
+| **17:25:53** | sensor `off` after exactly 300 s -> `taverna_5_minut...` fired -> **lamp OFF** |
+
+The 10-minute uncommanded-light guard did not fire (its `last_triggered` stayed at the drill
+15:45:03), so the safety net does not interfere with the normal path. False triggers with the
+camera actually watching the entrance: 0 events in the quiet windows measured (05:54-06:49 and
+15:45-17:19).
 
 ## Known gaps / next steps
 
-1. Person-in-frame acceptance test (wave in front of the camera, confirm the light path).
+1. ~~Person-in-frame acceptance test~~ - done 2026-11-18, see the section above: ON latency under
+   1 s, OFF exactly 300 s after the last motion.
 2. Reboot test: after a host reboot the unit must come up, the boot guard must swallow the
    initial noise and the light must follow motion.
-3. Camera is still on the desk, not in the tavern - the detection area must be re-checked and
-   `threshold`/`lightswitch` re-tuned for the real field of view.
+3. The camera is in the tavern but only standing loose on a table, aimed at the entrance - mount
+   it permanently, then re-measure the dark range and re-tune `threshold`/`lightswitch` for the
+   final field of view.
 4. Left-over orphan entities in HA from the removed blind-window helpers
    (`timer.tavern_blind`, `input_boolean.tavern_light_blind`) show as `unavailable` and
    disappear on the next full HA start; they are not referenced by any automation.
