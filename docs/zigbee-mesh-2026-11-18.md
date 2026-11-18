@@ -281,3 +281,20 @@ Areas now say so:
 
 The automation aliases still read "Вытяжка серверной" — renaming them would change their entity ids and
 drop their history, so they stay; the fan they control lives in the storage room.
+
+### Wording correction after the operator pushed back
+
+I described the two paths as "a person in HA" vs "a child at the button", which is wrong and confusing:
+**children are people too**. The distinction is the **path the command took**, nothing else:
+
+- `context.user_id` is set when the command came **through HA** (app, dashboard, voice, API) and HA knows
+  which account issued it;
+- it is empty when the state change was **reported by the relay itself**, i.e. someone pressed the physical
+  button on the module.
+
+So the child lock works on the wall button, and a manual switch from HA is honoured for 2 h regardless of who
+was holding the phone. If the operator ever wants the app path restricted too, the condition is one line —
+compare `trigger.to_state.context.user_id` against a specific account id — but that would also block the rest
+of the family (HA has `person.viktor` plus two Samsung phone trackers), so it is not on by default.
+Renamed UI labels for this reason: `input_boolean.fan_servers_manual` is now "Вытяжка кладовки: включено из HA
+— страж не трогает 2 ч" and the three automations read "включено/выключено из HA"; entity ids did not change.
