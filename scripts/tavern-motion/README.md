@@ -14,3 +14,9 @@ Install order on the host:
 5. Register `motion-tavern-watch.sh` as a 15-minute no-agent cron job.
 
 The token is never stored in these files - the hook reads it from the `0600` file at runtime.
+
+Retuned 2026-11-18 for response latency (~6 s -> ~0.9 s): 5 fps, `minimum_frame_time 0`,
+`minimum_motion_frames 2`, HA `delay_on: 1 s`, and the hook commands the relay directly at event
+start. `speedup-test.sh` and `speedup-latency-verify.sh` are the gates that were run afterwards
+(false triggers in the dark, lamp on/off brightness step, measured ON latency, the 5-minute
+auto-off). `motion-tavern-watch.sh` also clears a motion latch whose `end` event was lost.

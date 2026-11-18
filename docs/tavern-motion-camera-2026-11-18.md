@@ -16,7 +16,8 @@ USB cam -> motion-tavern.service (detection, no recording, no stream)
   ~/.local/libexec/tavern-motion-hook.sh  --loopback-->  HA REST API
               input_boolean.tavern_motion_now  (carrier)
                         v
-  template binary_sensor.taverna_motion  (delay_on 4 s, delay_off 5 min)
+  template binary_sensor.taverna_motion  (delay_on 1 s, delay_off 5 min)
+  hook also commands the relay directly at on_event_start (fast path, see 'Response latency')
                         v
   automation -> switch.taverna_taverna_basicr4_sonoff_1002bd4e01_1   (SONOFF BasicR4, TAVERNA-BASICR4)
 ```
@@ -28,7 +29,7 @@ reused. No Motion add-on, no camera/stream entity, no third-party integration wa
 
 | Path | Purpose |
 |---|---|
-| `~/.config/motion/motion-tavern.conf` | detection-only Motion config (640x480 @ 2 fps) |
+| `~/.config/motion/motion-tavern.conf` | detection-only Motion config (640x480 @ 5 fps) |
 | `~/.config/motion/hass-token` | HA long-lived token, mode `0600`, never printed |
 | `~/.local/libexec/tavern-motion-hook.sh` | `start` / `frame` / `end` / `failure` bridge into HA |
 | `/etc/systemd/system/motion-tavern.service` | own unit, own cgroup, `Restart=always`, nice/cgroup caps |
@@ -56,7 +57,8 @@ camera consumer, and a plain `apt install motion` can never steal the device aga
 * Device `32e6:9251 "USB Camera"`, `/dev/video0`, driver `uvcvideo`.
 * The driver does **not** expose 320x240; the smallest mode is **640x480**
   (MPEG-JPEG up to 30 fps, YUYV up to 30 fps). Motion picks YUYV 640x480 and is throttled to
-  **2 fps** by `minimum_frame_time 0.5` -> 0.5 s latency budget, ~1.2 MB/s USB traffic.
+  **5 fps** (the device offers 2/5/10/15/20/30; `minimum_frame_time 0` since 2026-11-18,
+  earlier it was capped to 2 fps by `minimum_frame_time 0.5`) -> 0.4 s detection budget.
 * In a dark room the sensor is effectively blind: measured luma YAVG ~1-3 out of 255 even at
   79 % analogue gain. See "Darkness limitation" below.
 * The device is opened exclusively by Motion; a second consumer gets `Device or resource busy`
@@ -65,8 +67,9 @@ camera consumer, and a plain `apt install motion` can never steal the device aga
 ## Light policy (Home Assistant side)
 
 * `input_boolean.tavern_motion_now` - raw "Motion sees something right now" carrier.
-* `binary_sensor.taverna_motion` (template, `device_class: motion`) - `delay_on: 4 s`,
-  `delay_off: 5 min`: the light only reacts to motion that persisted 4 s, and switches off
+* `binary_sensor.taverna_motion` (template, `device_class: motion`) - `delay_on: 1 s`,
+  `delay_off: 5 min`: the sensor is the OFF authority and the backup ON path (the hook commands
+  the relay directly at event start), and the light switches off
   5 minutes after the **last** motion; any new motion restarts the 5 minutes.
 * Two automations: sensor on -> `switch.turn_on`, sensor off -> `switch.turn_off`.
 * A new event re-arms the boolean and cancels nothing that could leave the light latched.
@@ -79,7 +82,7 @@ camera consumer, and a plain `apt install motion` can never steal the device aga
 |---|---|
 | Auto-exposure settling after Motion (re)starts | `ExecStartPre` writes `start-ts`; the hook drops every event in the first 30 s after the service starts |
 | The SONOFF switching the lamp on/off (brightness jump in the picture) | Motion `lightswitch_percent 30` + `lightswitch_frames 3` ignore a global brightness change |
-| Short noise blips | `minimum_motion_frames 3` (1.5 s at 2 fps) plus `delay_on: 4 s` on the HA sensor |
+| Short noise blips | `minimum_motion_frames 2` (0.4 s at 5 fps) plus `threshold 2000`, `noise_level 20`, `despeckle_filter EedDl` and `delay_on: 1 s` on the HA sensor |
 | Sensor noise in near-dark frames (this specific camera is very noisy at high gain) | `noise_level 20`, `threshold 2000`, `despeckle_filter EedDl` |
 | Service restart storm | `Restart=always` with a 5 s period + the 30 s boot guard + watchdog alert |
 
@@ -107,6 +110,44 @@ above the same dark room produced no events.
 | Manual light on / off (real pixels, both directions) | no motion event -> no light bounce-back |
 | Boot persistence | unit `enabled`, `WantedBy=multi-user.target` |
 | Caps actually applied by systemd | `MemoryHigh=300 MiB`, `MemoryMax=400 MiB`, `CPUWeight=20`, `Nice=10`, `RestartSec=5` |
+
+## Response latency (retuned 2026-11-18: ~6 s -> ~0.9 s)
+
+The owner reported the lamp coming on ~5 s after a person appeared. The camera was not the slow
+part - four filters were stacked in series:
+
+| stage | before | now |
+|---|---|---|
+| Motion needs N consecutive motion frames | 3 frames @ 2 fps = **1.5 s** | 2 frames @ 5 fps = **0.4 s** |
+| hook -> Home Assistant REST | ~0.1 s | ~0.1 s |
+| template sensor `delay_on` | **4 s** | **1 s** |
+| ON automation -> Zigbee relay | ~0.3-0.5 s | skipped (hook commands the relay at `on_event_start`) |
+| measured hook -> relay state `on` | - | **0.39-0.46 s** |
+| **person -> light** | **~6 s** | **~0.9 s** |
+
+What changed: `framerate 2 -> 5`, `minimum_frame_time 0.5 -> 0`, `minimum_motion_frames 3 -> 2`,
+template `delay_on: 4 s -> 1 s`, and the hook now calls `switch.turn_on` for the existing SONOFF
+entity at event start. `automation.tavern_motion_light_on` stays as a backup path, and Home
+Assistant still owns the OFF side (`delay_off: 5 min` -> `tavern_motion_light_off`).
+
+Cost and regression gates, measured on the host (`scripts/tavern-motion/speedup-test.sh`):
+
+* CPU **0.38 % -> 0.93 %** of one core (24 cores), RSS 54 MB, 2 threads;
+* 2 min idle in the dark at 5 fps: **0** false events;
+* lamp switched on/off inside the watch window (global brightness step): **0** false events -
+  `lightswitch_percent 30` / `lightswitch_frames 3` still suppress the relay's own step at 5 fps;
+* OFF leg re-verified after the change: the light went off **301 s** after the motion latch cleared.
+
+Headroom, deliberately not used: the webcam offers up to 30 fps, so `framerate 10` with 2 frames
+would bring detection down to 0.2 s for ~1.9 % CPU. It doubles the chance that one noise burst
+opens an event, and the remaining ~0.4 s is Zigbee relay time, which no frame rate can remove.
+
+Safety net for a lamp stuck on: the hook touches `~/.local/state/tavern-motion/heartbeat` on every
+accepted event; the 15-min watchdog (`motion-tavern-watch.sh`) clears `input_boolean.tavern_motion_now`
+when the latch is on but the heartbeat is older than 900 s - i.e. `on_event_end` was lost (daemon
+restarted mid-event, HA briefly unreachable). That re-arms the 5-minute off-delay, so the worst
+case is now ~20 min of light instead of forever. Lights turned on manually from the HA UI are never
+touched by the watchdog.
 
 ## Operations
 
