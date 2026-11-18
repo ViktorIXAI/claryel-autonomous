@@ -21,3 +21,14 @@ A TS0201 battery channel is noisy: one sensor reported 1 % while the same device
 later, and its 60-day history holds four distinct values. The watchdog now records the last low reading
 in `batt_low` inside its state file and only alerts when the **same device reads low twice in a row**.
 A real dying battery is caught within a day; a single artefact never produces an alert.
+
+## What it also watches: commands that never arrive (added 2026-11-18 night)
+
+A Zigbee device can look perfectly online in HA and still refuse every command: ZHA logs
+`MAC_NO_ACK` / `NWK_NO_ROUTE` when a send never reached it. That is invisible in `/api/states`, so the
+watchdog also scans `docker logs --since 12h homeassistant` and alerts when more than 5 sends failed,
+naming the automations involved. This is how the ZBMINI L2 incident was found: 34 failed sends in 12 h
+while its switch entity looked healthy.
+
+Dedup keys have their digits replaced (`LQI=#`), so a sensor whose LQI bounces 7 -> 0 -> 21 stays one
+problem instead of re-alerting on every tick.

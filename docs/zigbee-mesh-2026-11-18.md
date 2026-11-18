@@ -172,3 +172,34 @@ touched, so automations, scripts and dashboards are unaffected.
 Measured cost of the cloud path for the basement relay (Wi-Fi, eWeLink): the HA service call reached
 state `on` in **467 ms** and `off` in **416 ms**. A Zigbee relay in the basement would answer in single-digit
 milliseconds - worth knowing if the flicker ever matters.
+
+## The owner re-paired the fan relay at 21:59 — and the network refused it for ten minutes
+
+Log trail (HA container, local time): `21:59:06 Device 0xe25a left the network`, then it joined three
+times in twenty seconds (`0x94a9`, `0xc413`, final `0x580b`), ZHA re-interviewed it
+(`zhaquirks.sonoff.zbminil2`, `pairing_status: CONFIGURED -> INITIALIZED`). Between **22:02 and 22:07**
+every command from HA failed with `Status.NWK_NO_ROUTE: 205` or `Status.MAC_NO_ACK: 233` — **34 failed
+sends in 12 h** — and the `vytyazhka servernoy` automation errorred on every run. Meanwhile the module
+kept reporting: pressing its physical button still changed the fan state and HA showed it correctly.
+That asymmetry is the signature: reports (device -> coordinator) got through, commands (coordinator ->
+device) did not.
+
+By 22:13 it healed on its own. Measured after that: `turn_on` confirmed in **244 ms**, `turn_off` in
+**233 ms**, zero further delivery errors, and its link improved from LQI **39 to 58**.
+
+What the re-pair did *not* change — the interview is explicit:
+`logical_type=EndDevice`, `is_mains_powered=False`, `is_receiver_on_when_idle=False`, `is_router=False`,
+`relays_v16` still empty. The module tells the network it is a battery device that switches its receiver
+off when idle; that is exactly why it can go "visible but uncommandable", and it will never repeat for
+anyone else.
+
+The label photo confirms the other argument: `ZBMINI L2`, **"No Neutral Required"**, `6A MAX Resistive
+Load`, `LED: 150 W @ 100 V / 300 W @ 240 V`. Resistive and lamp loads only — the fan motor is outside
+that rating, so the unit is a replacement candidate regardless of the radio story. Sonoff's OTA endpoint
+offers only `0x100E` (the version already installed, listed as a downgrade), so no firmware fix exists.
+
+Watchdog additions from this incident (`scripts/radio-health/`): it now scans
+`docker logs --since 12h homeassistant` for `MAC_NO_ACK` / `NWK_NO_ROUTE` and alerts when more than five
+sends failed, naming the automations involved — a device that cannot be commanded looks healthy in
+`/api/states`. Dedup keys now replace digits (`LQI=#`), so a sensor bouncing between LQI 7 and 0 stays
+one problem instead of a new alert every tick.
