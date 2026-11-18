@@ -349,11 +349,73 @@ false positive.
 **The silent failure this audit found**: Home Assistant logged 118 `invalid authentication`
 warnings today, 116 of them on exactly the two endpoints the 15-minute watchdog queries
 (`input_boolean.tavern_motion_now`, the relay switch) - one batch every cron tick from ~05:15 on.
-The same script run by hand authenticates fine, so the cron execution environment was substituting
-the credential: the watchdog had been **blind since the morning** while its `last_status` stayed
-`ok`. Fix in `~/.hermes/scripts/motion-tavern-watch.sh` (mirrored to
+The same script run by hand authenticates fine, so the credential that reached HA inside those runs
+was not the one in the token file. I did not prove the mechanism (the path comes from
+`${TOKEN_FILE:-...}`, and nothing in the cron environment could be shown holding a different value);
+what is proven is that after pinning the path and checking HTTP codes the 401s stopped completely -
+zero `invalid authentication` lines across the 21:15 and 21:26 ticks, verified with an explicit
+local timestamp window (`docker logs --since 21:00` parses as UTC, which is how I mis-measured this
+the first time). Net effect either way: the watchdog had been **blind since ~05:15** while its
+`last_status` stayed `ok`. Fix in `~/.hermes/scripts/motion-tavern-watch.sh` (mirrored to
 `scripts/tavern-motion/motion-tavern-watch.sh`): `HA_URL` and `TOKEN_FILE` are now hard-pinned
 instead of `${VAR:-default}`, every GET captures the HTTP code, and a non-200 answer prints
 `HA UNREADABLE: http=NNN ...` as an alert line instead of being swallowed. A report-only watchdog
 must fail loudly - the failure mode of "curl returned junk, jq found nothing, script printed
 nothing" is invisible from the scheduler's point of view.
+
+
+## Zigbee mesh vs the Wi-Fi relay: what the registries actually say (2026-11-18, evening)
+
+Viktor corrected two of my assumptions, and the HA storage confirms him on both. Source:
+`/config/.storage/core.{device,entity,area}_registry`, `core.config_entries`, `zigbee.db`
+(`devices_v16`, `node_descriptors_v16`, `neighbors_v16`, `relays_v16`, `routes_v16`) read through a
+read-only bind-mount container, plus the recorder for `unavailable` counts.
+
+**The tavern light is not Zigbee.** The device behind
+`switch.taverna_taverna_basicr4_sonoff_1002bd4e01_1` is `TAVERNA-BASICR4` (model `BASICR4`), owned
+by the `sonoff` config entry = **eWeLink cloud**. There is no `sonofflan`/MQTT config entry, so the
+motion chain reaches the lamp through the cloud, not the LAN. The `sensor.*_rssi` /
+`*_connection` / `*_detach` entities that exist in the entity registry belong to a **removed**
+AlexxIT "Sonoff LAN" integration (their device entry now points at `marketplace`), which is why they
+are missing from `/api/states` - HA currently has **no visibility into the RSSI of the lamp's Wi-Fi
+link**. So the 4 `unavailable` episodes on 2026-11-18 were a Wi-Fi/eWeLink path problem; my earlier
+"physical Zigbee break in the basement, needs a Zigbee router" was wrong twice: wrong radio, and the
+coordinator is already in the basement.
+
+**Zigbee fleet** (all `zha`; coordinator = TI CC2652 ZNP stick on `/dev/ttyUSB0` of the basement
+box, `network id redacted`), 11 devices):
+
+| area | device | model | LQI to coordinator | last seen | logical type |
+|---|---|---|---|---|---|
+| Server room | Wing TS0201 | TS0201 | 121 | now | 2 = end device |
+| Open-plan office | Door Garden | SNZB-04PR2 | 116 | now | 2 |
+| Room 1 Leo | Door Leo | SNZB-04PR2 | 99 | now | 2 |
+| Room 2 Ksu | Door Ksu | SNZB-04PR2 | 54 | now | 2 |
+| Open-plan office | DOOR 1 | SNZB-04PR2 | 39 | now | 2 |
+| Server room | Cooler servers room | **ZBMINIL2** | **39** | now | **2 = end device** |
+| Terrace | Wing TS0201 | TS0201 | absent | **35 days ago** | 2 |
+| Claryel Garden / Room3 / Open-plan office | 3x Wing TS0201 | TS0201 | absent (sleepy, reports fine) | <1 h | 2 |
+
+Findings that do **not** match the intended picture:
+
+1. **The mains-powered ZBMINIL2 is not repeating anything.** Its node descriptor says
+   `logical_type=2` (end device) and `rx_on_when_idle=0`; `relays_v16` is empty (0 rows) and
+   `routes_v16` has a single row; every device the coordinator lists sits at `depth=1`. So the
+   network is a star out of the basement - no device is two hops away, and the relay that was
+   supposed to be the in-apartment router is itself the second-weakest link (LQI 39).
+2. **Coverage really does fall off in the flat**: LQI 39 (DOOR 1) and 54 (Door Ksu) are marginal,
+   and the Terrace `TS0201` has been silent for **35 days** (currently `unavailable`, 12
+   `unavailable` transitions in the last 7 days before it died; battery unknown because the entity
+   is dead). Weak/unreachable sensors are the battery end devices - they cannot route, only a mains
+   device can.
+3. Batteries are fine everywhere that reports: 89-100 %.
+4. `neighbors_v16` also holds one stale junk row (`nwk=42177`, `lqi=170`, IEEE that is not in the
+   device registry) - harmless, but it is why the "strongest link" number is misleading.
+5. Naming drift: the ZBMINIL2 is called `Cooler servers room` and is filed under area
+   `Server room`, while the servers (and the coordinator) are physically in the basement now.
+
+What follows from the numbers: to fix the apartment-side Zigbee holes you need a **real Zigbee 3.0
+router on 220 V roughly between the basement and the flat** (or re-pair the ZBMINIL2 and check in
+its ZHA card whether it reports as a router at all). To make the tavern light robust and observable
+again, move it back to a **local** path (local Sonoff/MQTT instead of eWeLink cloud) so that the
+chain does not depend on the internet and HA can see the RSSI again.

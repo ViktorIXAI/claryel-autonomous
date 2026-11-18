@@ -99,14 +99,15 @@ if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     fi
 fi
 
-# Zigbee reachability of the relay: it dropped out of the mesh 4 times on 2026-11-18
-# (11:35, 11:36, 13:01, 13:11 local). HA reports 'unavailable'; a relay that is not answering
-# cannot be switched off by the motion chain either.
+# Reachability of the relay: it went 'unavailable' 4 times on 2026-11-18 (11:35, 11:36, 13:01,
+# 13:11 local). The BASICR4 is a Wi-Fi device on the eWeLink cloud integration - it is NOT part of
+# the Zigbee mesh, so a drop here means the Wi-Fi/cloud path, not the Zigbee radio. A relay that is
+# not answering cannot be switched off by the motion chain either.
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     lampstate=$(printf '%s' "$(ha_body "$(ha_get "$HA_URL/api/states/$SWITCH")")" \
         | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
     [ "$lampstate" = "unavailable" ] && \
-        echo "RELAY UNREACHABLE: $SWITCH is 'unavailable' in Home Assistant - Zigbee link to the tavern relay is down"
+        echo "RELAY UNREACHABLE: $SWITCH is 'unavailable' in Home Assistant - the Wi-Fi/eWeLink path to the tavern relay is down"
 fi
 
 # camera present? (motion reopens it itself, but a missing device means the light is blind)
