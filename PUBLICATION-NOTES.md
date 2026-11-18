@@ -1,5 +1,7 @@
 # Publication edits vs. the original run snapshots
 
+> **Temporal scope clarification — 2026-11-18 (issue #25).** The opening statements below describe the **original publication pass and its then-known run snapshots**, not an exhaustive byte-for-byte attestation of every file in the repository at the current HEAD. In particular, “ONLY differences” and “No file had logic, prompts, scorers or thresholds altered” are claims scoped to that historical publication comparison, **not** a guarantee about subsequent commits, new scripts, revised scoring contracts, or later operational experiments. The original wording and chronological entries are preserved for provenance. To assess a later claim, compare the relevant dated commit, archived snapshot, result contract and [evidence-preservation policy](docs/EVIDENCE-PRESERVATION.md); this addendum is a documentation clarification, not independent verification of the archived byte comparisons.
+
 Every published code file is a snapshot taken from the live rig. The edits below
 are the ONLY differences from the exact bytes that produced the archived results
 (the raw snapshots stay on the rig; `logs/INDEX.md` pins the result artifacts
