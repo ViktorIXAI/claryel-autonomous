@@ -33,7 +33,16 @@ def radio_gain():
         return open(GAIN_FILE).read().strip() or "-24"
     except OSError:
         return os.environ.get("GREET_RADIO_GAIN", "-24")
-COOLDOWN_S = int(os.environ.get("GREET_COOLDOWN", "300"))
+COOLDOWN_FILE = os.path.join(MEDIA, "greet_cooldown")
+
+
+def cooldown_s():
+    """Seconds between greetings. Kept in a file: 300 s once swallowed a real guest's greeting
+    that arrived 80 s after a test, and the operator wants a greeting per visitor."""
+    try:
+        return int(open(COOLDOWN_FILE).read().strip())
+    except (OSError, ValueError):
+        return int(os.environ.get("GREET_COOLDOWN", "90"))
 MAX_RADIO_S = int(os.environ.get("GREET_MAX_RADIO_S", "1800"))
 VOICE_TIMEOUT_S = 60
 
@@ -153,7 +162,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, {"ok": True, "greets": _state["greets"],
                              "voice": os.path.basename(VOICE), "radio": radio_url(),
                              "radio_playing": bool(_radio and _radio.poll() is None),
-                             "radio_gain_db": radio_gain(), "cooldown_s": COOLDOWN_S})
+                             "radio_gain_db": radio_gain(), "cooldown_s": cooldown_s()})
         else:
             self._send(404, {"error": "unknown path"})
 
@@ -164,17 +173,21 @@ class Handler(BaseHTTPRequestHandler):
             self._send(403, {"error": deny})
             return
         if action == "stop":
+            print("%s stop requested" % time.strftime("%H:%M:%S"), flush=True)
             stop_radio()
             self._send(200, {"radio": "stopped"})
             return
         now = time.time()
         with _lock:
             since = now - _state["last_greet"]
-            if since < COOLDOWN_S:
+            if since < cooldown_s():
+                print("%s greet SKIPPED cooldown (%.0f s of %d s)"
+                      % (time.strftime("%H:%M:%S"), since, cooldown_s()), flush=True)
                 self._send(200, {"skipped": "cooldown", "seconds_since_last": round(since, 1)})
                 return
             _state["last_greet"] = now
             _state["greets"] += 1
+        print("%s greet ACCEPTED (voice + radio)" % time.strftime("%H:%M:%S"), flush=True)
         threading.Thread(target=greet_flow, daemon=True).start()
         self._send(202, {"greeting": os.path.basename(VOICE), "then_radio": radio_url()})
 
@@ -190,7 +203,7 @@ def main():
             return 1
     sweep_players()
     print("listening on 127.0.0.1:%d | voice=%s | radio=%s @ %s dB | cooldown %ds | radio cap %ds"
-          % (PORT, VOICE, radio_url(), radio_gain(), COOLDOWN_S, MAX_RADIO_S), flush=True)
+          % (PORT, VOICE, radio_url(), radio_gain(), cooldown_s(), MAX_RADIO_S), flush=True)
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
 
 

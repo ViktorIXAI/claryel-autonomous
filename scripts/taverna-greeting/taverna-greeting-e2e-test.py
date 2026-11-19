@@ -42,6 +42,7 @@ print("lamp now:", next(s["state"] for s in st if s["entity_id"] == LAMP))
 print("player:", ping())
 
 print("\nclean transition: lamp off, wait, lamp on at", time.strftime("%H:%M:%S"))
+subprocess.run(["tail", "-4", "/home/viktor/.local/state/taverna-greeting/listener.log"])
 api("/api/services/switch/turn_off", {"entity_id": LAMP})
 time.sleep(6)
 api("/api/services/switch/turn_on", {"entity_id": LAMP})
