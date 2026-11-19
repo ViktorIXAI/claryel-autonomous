@@ -13,8 +13,10 @@ lamp ON (any source)
         -> taverna-greeting-listen.py on the host plays:
              1. greeting_voice.wav  "Добро пожаловать!" + Italian phrase (8.0 s)
              2. radio stream https://stream.radioparadise.com/mellow-32 (32 kbit/s AAC)
-lamp OFF
+2 quiet minutes (motion gone)
   -> HA automation taverna_greeting_music_off -> POST /stop/<secret> -> radio ends
+3 quiet minutes
+  -> light automation -> lamp OFF (which also stops the radio, as a backup)
 ```
 
 Home Assistant runs with host networking, so `127.0.0.1:8124` from inside the container is the
@@ -32,7 +34,7 @@ container (`Dockerfile.audio`: alsa-utils + ffmpeg) with `--device /dev/snd`.
 | `~/.hermes/scripts/taverna-greeting-e2e-test.py` | end-to-end test (toggles the lamp) |
 | `~/.hermes/media/greeting_voice.wav` | the announcement clip (9.5 s, 48 kHz stereo: Russian 1.66 s at 0.92 FS, then Italian 6.6 s at 0.78 FS) |
 | `~/.hermes/media/radio.url` | station URL, one line |
-| `~/.hermes/media/radio_gain` | radio level in dB, one line (currently `-36`) |
+| `~/.hermes/media/radio_gain` | radio level in dB, one line (currently `-39`) |
 | `~/.hermes/media/greet.secret` | path secret, mode 0600 — never committed |
 
 HA side lives in `/config/configuration.yaml`: `rest_command.taverna_greeting`,
@@ -47,8 +49,10 @@ Commit [`929b865`](https://github.com/ViktorIXAI/claryel-autonomous/commit/929b8
 
 * Volume of the music: `echo -36 > ~/.hermes/media/radio_gain`, then restart the listener
   (`pkill -f "[t]averna-greeting-listen.py"; ~/.hermes/scripts/taverna-greeting-ensure.sh`).
-  Measured ladder the operator walked down: `-14` «ужас как громко», `-24` = half of that,
-  `-30` = half again, `-36` kept. Halving the perceived level is `-6 dB`, not `-12`.
+  Measured ladder the operator walked down: `-14` «ужас как громко», `-24`, `-30`, `-36`,
+  **`-39` kept**. Halving the perceived level is `-6 dB`, "чуть-чуть на 30 %" is `-3 dB`.
+  The board mixer went back to `Master 100%` and the clip to 0.99 FS because the operator wants
+  the voice at maximum while the music keeps going down.
 * Announcement text and levels: `python3 taverna-voice-build.py` regenerates
   `greeting_voice.wav` (each phrase normalized separately, so the short Russian one cannot be
   drowned by the long Italian one); `python3 wav-profile.py <file>` prints peak/RMS per 0.2 s
