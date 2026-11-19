@@ -25,3 +25,6 @@ swap_out_max_ps = 0.00
 power_samples_with_rapl = 67.00
 ac_online_in_rapl_window = 67.00
 brain_llm_turns = 1833.00
+cpu_truly_idle_min = 930.00
+gpu_over150W_min = 154.00
+gpu_mean_active_w = 155.30

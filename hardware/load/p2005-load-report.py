@@ -139,6 +139,10 @@ summary = {
     "power_samples_with_rapl": sum(1 for r in therm if r["pkg_w"]),
     "ac_online_in_rapl_window": sum(1 for r in therm if r["pkg_w"] and r["ac_online"] == "1"),
     "brain_llm_turns": len(turns),
+    "cpu_truly_idle_min": 10 * sum(1 for _, v in cpu_idle if 100 - v < 2),
+    "gpu_over150W_min": 2 * sum(1 for r in therm if float(r["gpu_w"]) >= 150),
+    "gpu_mean_active_w": (sum(float(r["gpu_w"]) for r in therm if float(r["gpu_w"]) > 60)
+                         / max(1, sum(1 for r in therm if float(r["gpu_w"]) > 60))),
 }
 with open(BASE + "/summary-2026-11-18.txt", "w") as fh:
     for k, v in summary.items():
