@@ -4,6 +4,26 @@ When the taverna lamp turns on — from the motion camera, from the app, or from
 relay — the server speaks an announcement over the analog Line Out and then plays quiet
 internet radio until the lamp goes off.
 
+## Current-configuration scope note — 2026-11-19 (issue #25)
+
+This README contains **time-layered operator observations**, not one independently
+verified live configuration. The earlier chain diagram and adjustment examples
+retain historical values. The later [timeout change](https://github.com/ViktorIXAI/claryel-autonomous/commit/194d822856f2d49045b512f11cf939041a94327a)
+introduced a **2-minute quiet-motion radio stop** and **3-minute quiet-motion lamp
+stop**; lamp-off remains an additional radio-stop trigger. The checked-in
+[listener source](taverna-greeting-listen.py) defaults to a **90-second greeting
+cooldown** if the optional cooldown file and environment override are absent;
+the 300 shown below is an earlier setting, not the current source default.
+The top chain's **8.0-second clip** and the file table's **9.5-second clip**
+are conflicting recorded durations; neither establishes the current host WAV
+length without reading that file. Likewise, the **80%** and **100%** mixer
+statements below describe different operator adjustments, not a verified
+current hardware state. The older [dated audio note](../../docs/taverna-greeting-2026-11-19.md)
+records still earlier -30 dB radio gain, while this README reports -39 dB;
+verify the host radio_gain file before asserting the current setting.
+No live host, secret, physical lamp, audio output or CI test was accessed for
+this clarification. Source and historical measurements are preserved.
+
 ## Chain
 
 ```
