@@ -30,9 +30,9 @@ container (`Dockerfile.audio`: alsa-utils + ffmpeg) with `--device /dev/snd`.
 | `~/.hermes/scripts/taverna-greeting-listen.py` | the loopback player/trigger |
 | `~/.hermes/scripts/taverna-greeting-ensure.sh` | watchdog: silent if `/ping` succeeds; otherwise attempts restart and prints `RESTARTED` or `DOWN` |
 | `~/.hermes/scripts/taverna-greeting-e2e-test.py` | end-to-end test (toggles the lamp) |
-| `~/.hermes/media/greeting_voice.wav` | the announcement clip (48 kHz stereo, peak 0.53 FS) |
+| `~/.hermes/media/greeting_voice.wav` | the announcement clip (9.5 s, 48 kHz stereo: Russian 1.66 s at 0.92 FS, then Italian 6.6 s at 0.78 FS) |
 | `~/.hermes/media/radio.url` | station URL, one line |
-| `~/.hermes/media/radio_gain` | radio level in dB, one line (currently `-30`) |
+| `~/.hermes/media/radio_gain` | radio level in dB, one line (currently `-36`) |
 | `~/.hermes/media/greet.secret` | path secret, mode 0600 — never committed |
 
 HA side lives in `/config/configuration.yaml`: `rest_command.taverna_greeting`,
@@ -45,9 +45,14 @@ Commit [`929b865`](https://github.com/ViktorIXAI/claryel-autonomous/commit/929b8
 
 ## Adjusting
 
-* Volume of the music: `echo -34 > ~/.hermes/media/radio_gain` then
-  `~/.hermes/scripts/taverna-greeting-ensure.sh` after restarting the listener. Measured ladder:
-  `-14` was too loud, `-24` was "half", `-30` is the level the operator kept.
+* Volume of the music: `echo -36 > ~/.hermes/media/radio_gain`, then restart the listener
+  (`pkill -f "[t]averna-greeting-listen.py"; ~/.hermes/scripts/taverna-greeting-ensure.sh`).
+  Measured ladder the operator walked down: `-14` «ужас как громко», `-24` = half of that,
+  `-30` = half again, `-36` kept. Halving the perceived level is `-6 dB`, not `-12`.
+* Announcement text and levels: `python3 taverna-voice-build.py` regenerates
+  `greeting_voice.wav` (each phrase normalized separately, so the short Russian one cannot be
+  drowned by the long Italian one); `python3 wav-profile.py <file>` prints peak/RMS per 0.2 s
+  window, which is how "I did not hear the Russian part" was turned into a number.
 * Speaker-side volume is a physical knob; the software mixer on the board is set to 80 %
   (`amixer -c 0 set Master 80%`, i.e. -12.75 dB).
 * Station: overwrite `radio.url`. Only low-bitrate endpoints: 32 kbit/s costs ~41 kbit/s on the
