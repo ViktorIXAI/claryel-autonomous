@@ -24,6 +24,13 @@ A real dying battery is caught within a day; a single artefact never produces an
 
 ## What it also watches: commands that never arrive (added 2026-11-18 night)
 
+**One incident is reported once.** The container log window rolls (12 h), so counting every
+hit inside it would re-alert the same incident on every run until it ages out. The scan keeps
+a watermark (`deliv_seen` in the state file) and counts only lines stamped after it. HA writes
+`2026-11-18 21:59:32.132+01:00 ...` with ANSI colour codes in front, and traceback
+continuation lines carry no stamp of their own - the nearest preceding stamp is used, which is
+what an unhandled exception in an automation does to these log lines.
+
 A Zigbee device can look perfectly online in HA and still refuse every command: ZHA logs
 `MAC_NO_ACK` / `NWK_NO_ROUTE` when a send never reached it. That is invisible in `/api/states`, so the
 watchdog also scans `docker logs --since 12h homeassistant` and alerts when more than 5 sends failed,

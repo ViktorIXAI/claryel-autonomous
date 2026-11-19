@@ -9,6 +9,7 @@ once per RE_ALERT_H, so a permanently dead sensor does not become daily noise.
 (LQI/RSSI из ZHA), севшие батарейки. Ничего не печатает, если проблем нет или
 набор проблем не изменился с прошлого доклада.
 """
+import calendar
 import hashlib
 import json
 import os
@@ -33,23 +34,66 @@ LQI_PAT = re.compile(r"_(lqi|rssi)(_|$)")
 PRIMARY_PAT = re.compile(r"_(temperatura|vlazhnost|batareia|dver|dvizhenie|gorenie|vodakanalit)(_|$)")
 
 
-def delivery_errors():
+ANSI_PAT = re.compile(r"\x1b\[[0-9;]*m")
+LOG_TS_PAT = re.compile(r"(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})(?:\.\d+)?([+-]\d{2}):(\d{2})")
+
+
+def log_ts(line):
+    """Epoch of an HA container log line.
+
+    HA writes "<local wall clock>+01:00 LEVEL ..." and docker leaves ANSI colour codes in
+    front of it, so an anchored match on the raw line never hits.
+    """
+    m = LOG_TS_PAT.match(ANSI_PAT.sub("", line))
+    if not m:
+        return None
+    day, clock, off_h, off_m = m.groups()
+    sign = -1 if off_h.startswith("-") else 1
+    offset = sign * (abs(int(off_h)) * 3600 + int(off_m) * 60)
+    return calendar.timegm(time.strptime("%s %s" % (day, clock), "%Y-%m-%d %H:%M:%S")) - offset
+
+
+def load_prev():
+    if os.path.exists(STATE_FILE):
+        try:
+            return json.load(open(STATE_FILE))
+        except (ValueError, OSError):
+            pass
+    return {"keys": [], "at": 0}
+
+
+def delivery_errors(since_ts=0.0):
     """Devices that are online but uncommandable: ZHA logs MAC_NO_ACK / NWK_NO_ROUTE when a
     Zigbee send never reached the device. HA state looks healthy, so this is invisible in
-    /api/states — only the container log shows it."""
+    /api/states — only the container log shows it.
+
+    The log window rolls, so hits at or before the stored watermark are not counted again;
+    without that, one incident keeps re-alerting on every run until it ages out of the window.
+    Returns (new_hits, culprits, watermark_of_newest_hit).
+    """
     try:
         out = subprocess.run(["docker", "logs", "--since", DELIV_WINDOW, "homeassistant"],
                              capture_output=True, text=True, timeout=90)
     except (OSError, subprocess.TimeoutExpired) as exc:
         print("delivery-error scan failed: %s" % exc, file=sys.stderr)
-        return 0, []
-    hits = [ln for ln in out.stderr.splitlines()
-            if "MAC_NO_ACK" in ln or "NWK_NO_ROUTE" in ln]
+        return 0, [], since_ts
+    hits, newest, last_ts = [], since_ts, 0.0
+    for ln in out.stderr.splitlines():
+        stamp = log_ts(ln)
+        if stamp:
+            last_ts = stamp
+        if "MAC_NO_ACK" not in ln and "NWK_NO_ROUTE" not in ln:
+            continue
+        ts = last_ts                # traceback continuation lines carry no stamp of their own
+        if ts and ts <= since_ts:   # watermark and stamps share one clock, so dedup is exact
+            continue
+        newest = max(newest, ts)
+        hits.append(ln)
     who = set()
     for ln in hits:
         m = re.search(r"automation\.([a-z0-9_]+)", ln)
         who.add(m.group(1) if m else "manual/service call")
-    return len(hits), sorted(who)
+    return len(hits), sorted(who), newest
 
 
 ROLE_WORDS = ("lqi", "rssi", "temperatura", "vlazhnost", "batareia", "dver", "dvizhenie",
@@ -158,20 +202,14 @@ def main():
             if key in prev_low:
                 add("BATTERY LOW (confirmed twice): %s = %d %%" % (key, int(rec["batt"])))
 
-    n_err, who = delivery_errors()
+    os.makedirs(STATE_DIR, exist_ok=True)
+    prev = load_prev()
+    n_err, who, newest = delivery_errors(prev.get("deliv_seen", 0.0))
     if n_err > DELIV_MAX:
         # the count stays out of the message so a repeating incident dedups instead of re-alerting
         print("failed Zigbee sends in %s: %d" % (DELIV_WINDOW, n_err), file=sys.stderr)
         add("ZIGBEE SENDS NOT REACHING DEVICES (device looks online but cannot be commanded): %s"
             % ", ".join(who[:4]))
-
-    os.makedirs(STATE_DIR, exist_ok=True)
-    prev = {"keys": [], "at": 0}
-    if os.path.exists(STATE_FILE):
-        try:
-            prev = json.load(open(STATE_FILE))
-        except (ValueError, OSError):
-            pass
     prev_keys = set(prev.get("keys", prev.get("findings", [])))
     keys = {k for k, _ in findings}
 
@@ -181,7 +219,7 @@ def main():
     if not findings:
         for k in sorted(prev_keys):
             print("RADIO RESTORED: %s" % k)
-        json.dump({"keys": [], "at": now, "batt_low": cur_low}, open(STATE_FILE, "w"))
+        json.dump({"keys": [], "at": now, "batt_low": cur_low, "deliv_seen": newest}, open(STATE_FILE, "w"))
         return 0
     if not changed and not stale:
         return 0                            # same problem, already reported recently
@@ -191,9 +229,8 @@ def main():
         print("  " + msg)
     for k in sorted(prev_keys - keys):
         print("  RADIO RESTORED: " + k)
-    json.dump({"keys": sorted(keys), "at": now, "batt_low": cur_low}, open(STATE_FILE, "w"))
-    return 0
-    json.dump({"findings": findings, "at": now, "batt_low": cur_low}, open(STATE_FILE, "w"))
+    json.dump({"keys": sorted(keys), "at": now, "batt_low": cur_low, "deliv_seen": newest},
+              open(STATE_FILE, "w"))
     return 0
 
 
