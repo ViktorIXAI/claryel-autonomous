@@ -28,7 +28,7 @@ container (`Dockerfile.audio`: alsa-utils + ffmpeg) with `--device /dev/snd`.
 | Path | Purpose |
 |---|---|
 | `~/.hermes/scripts/taverna-greeting-listen.py` | the loopback player/trigger |
-| `~/.hermes/scripts/taverna-greeting-ensure.sh` | start it if it died; prints its status |
+| `~/.hermes/scripts/taverna-greeting-ensure.sh` | watchdog: silent if `/ping` succeeds; otherwise attempts restart and prints `RESTARTED` or `DOWN` |
 | `~/.hermes/scripts/taverna-greeting-e2e-test.py` | end-to-end test (toggles the lamp) |
 | `~/.hermes/media/greeting_voice.wav` | the announcement clip (48 kHz stereo, peak 0.53 FS) |
 | `~/.hermes/media/radio.url` | station URL, one line |
@@ -38,6 +38,10 @@ container (`Dockerfile.audio`: alsa-utils + ffmpeg) with `--device /dev/snd`.
 HA side lives in `/config/configuration.yaml`: `rest_command.taverna_greeting`,
 `rest_command.taverna_greeting_stop` and the two automations. Backup of the previous file:
 `configuration.yaml.bak-greet-20261119`.
+
+## Documentation clarification — 2026-11-19 (issue #25)
+
+Commit [`929b865`](https://github.com/ViktorIXAI/claryel-autonomous/commit/929b86585b273731f9119fc6af76d3d2c96c6e73) changed the watchdog's normal output contract: a successful `/ping` now exits silently; restart and failure paths emit status. The original README wording above was updated to match that implementation. This is a documentation-only reconciliation, **not** an independent live-host or CI verification. The original wording remains recoverable in Git history.
 
 ## Adjusting
 
