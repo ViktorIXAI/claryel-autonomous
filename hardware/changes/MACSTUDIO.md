@@ -175,3 +175,64 @@ beyond read-only inspection.
 
 **Passport:** drift-history note in `hardware/inventory/mac-studio-m3u.md`
 extended with the 2026-11-18 and 2026-11-20 boots.
+
+## CHG-004 — unannounced hardware change detected (2026-11-20 10:42 UTC, status: detected)
+
+**Trigger:** the hourly fleet drift audit (`hw-fingerprint` probe script)
+reported a fingerprint change for MACSTUDIO. No operator-announced change existed.
+
+**Monitor diff (fingerprint, previous → current, verbatim):**
+
+```diff
+  3,4d2
+  <    1:                        EFI EFI                     209.7 MB   disk6s1
+  <    2:                 Apple_APFS Container disk7         2.0 TB     disk6s2
+```
+
+(RAM line `274877906944` B = 256 GiB and the `Apple M3 Ultra` GPU line are
+identical in both fingerprints; both external-storage lines are **gone** from
+the current fingerprint — unlike CHG-001/002/003 this is not a node renaming:
+the external disk is no longer enumerated at all.)
+
+**Diagnosis (live re-inventory over SSH, 2026-11-20 10:44 UTC): the external
+2 TB NVMe drive has been physically detached — this is the first MACSTUDIO
+drift with a real hardware delta.**
+
+| item | previous fingerprint (ack 2026-11-20 03:13 UTC) | current fingerprint |
+|---|---|---|
+| external disk lines | present: `disk6s1` EFI 209.7 MB + `disk7` APFS container 2.0 TB | absent — `diskutil list` shows only the internal 2.0 TB disk |
+| drive bus visibility | WD Blue SN5000 2TB enumerated (External, SMART Verified) | not on Thunderbolt (all 5 ports `Status: No device connected`), not on USB (no mass-storage driver instances; only a "USB Receiver" HID dongle on the bus) |
+| boot producing each state | 2026-11-20 03:55 local (drive present) | 2026-11-20 11:29:31 local (`kern.boottime`; `last reboot` also shows an 11:16 local boot) — both CET |
+| RAM / GPU lines | 256 GiB / Apple M3 Ultra | identical |
+
+- The drive was last seen enumerated at the 03:55 local boot (CHG-003
+  confirmed its identity and layout). Two further unannounced power cycles
+  followed (2026-11-20 11:16 and 11:29 local); the 11:29 boot came up with the
+  drive absent from every bus, so the detach happened between 04:13 and
+  11:42 local on 2026-11-20 — announced to no ledger.
+- `/Volumes` now contains only the system volume; the external APFS volume
+  (previously mounted, 1.1 TB free of 2.0 TB) is not present.
+- The detach cause (operator unplug vs. enclosure/cable/drive failure) is not
+  distinguishable remotely — the bus reports nothing attached.
+
+**Impact:**
+- 2 TB of external storage (~0.9 TB previously used) is offline; what was on
+  that volume and where its consumers now read from is an open maintainer
+  question.
+- Serve on :8080 answered HTTP 200 at the 10:44 UTC check (user-space python
+  listener) — the serving endpoint does not depend on the detached volume.
+- The internal data volume measured 1.6 TiB used of 1.8 TiB (88 %) at the same
+  check — capacity is a maintainer call, flagged not acted on.
+
+**Benchmark comparison:** not applicable — the change removes a storage device
+that carries no benchmark fixtures or serving artifacts recorded in this repo;
+no suite baseline is affected by the detach itself. Re-run only if a suite is
+found to read from that volume.
+
+**Open maintainer decision:** why the external drive left the box (unplugged,
+enclosure failure or drive failure) and whether its ~0.9 TB of content is
+recoverable; the 11:16 and 11:29 local power cycles were likewise unannounced.
+Nothing on the box was touched beyond read-only inspection.
+
+**Passport:** `hardware/inventory/mac-studio-m3u.md` external-storage row and
+drift-history note updated to the detached state.
