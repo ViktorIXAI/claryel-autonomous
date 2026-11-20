@@ -83,6 +83,34 @@ Verified live: fps switch through the API → one marker, `pid 2699640 -> 272100
 `kill -TERM` on the MainPID with no marker → exactly one line
 "restarted 1 time(s) since last check (total 10, 0 were fps switches)".
 
+## Relay outage 11:07-11:19 (2026-11-20)
+
+`switch.taverna_taverna_basicr4_sonoff_1002bd4e01_1` went `unavailable` at 11:07:08 and returned `off`
+at 11:19:37 (12.5 min). Home Assistant logged `Cloud ERROR: 504 Request Timeout` for the device, and
+the OFF that the 3-minute hold tried to send at 11:11:58 failed with "Referenced entities … are missing
+or not currently available".
+
+Impact, stated plainly: motion was detected at 11:06:54 (somebody went downstairs), the ON command
+never reached the relay, so the room stayed dark. While the entity is `unavailable`, every lamp guard
+(the 60 s fast-off, the 10-minute guard, the watchdog's lamp branch) is blind - the watchdog's
+`RELAY UNREACHABLE` line is the only thing that sees it, and that is what fired.
+
+Recovery from the host: `POST /api/config/config_entries/entry/<eWeLink entry>/reload` - the entity
+came back 45 s later. Safe here because the Zigbee devices live on a *different* config entry (checked
+through the entity registry: the eWeLink entry owns only the 7 BASICR4 entities), so reloading it does
+not touch the mesh. Confirm that ownership before ever reloading an entry; the REST entity-registry
+endpoints are 404 in HA 2026, use WS `config/entity_registry/list`.
+
+Root cause is now measurable: the integration ships `sensor.taverna_basicr4_sonoff_1002bd4e01_rssi`
+and `..._connection` **disabled**; `scripts/tavern-motion/ha-enable-relay-diagnostics.py` turns them on
+and they read **RSSI −72 dBm**, **connection = cloud**. A Wi-Fi relay at −72 dBm reachable only through
+the eWeLink cloud explains the 504 timeouts, the two uncommanded ONs and this outage as one class.
+What could actually change it needs a hand at the eWeLink app (DIY Mode / local control) or better
+placement / a wired or Zigbee relay.
+
+Log hygiene: the sonoff integration prints the per-device eWeLink apikey (a UUID) inside those WARNING
+lines, so `docker logs` excerpts are never committed; the push gate carries a UUID rule for exactly this.
+
 ## Files
 
 - `~/.hermes/scripts/taverna-camera-ctl.py` — loopback fps switch + JPEG frame service
