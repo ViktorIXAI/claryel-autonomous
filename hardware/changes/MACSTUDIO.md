@@ -236,3 +236,64 @@ Nothing on the box was touched beyond read-only inspection.
 
 **Passport:** `hardware/inventory/mac-studio-m3u.md` external-storage row and
 drift-history note updated to the detached state.
+
+## CHG-005 — unannounced hardware change detected (2026-11-20 11:48 UTC, status: detected)
+
+**Trigger:** the hourly fleet drift audit (`hw-fingerprint` probe script)
+reported a fingerprint change for MACSTUDIO. No operator-announced change existed.
+
+**Monitor diff (fingerprint, previous → current, verbatim):**
+
+```diff
+  2a3,4
+  >    1:                        EFI EFI                     209.7 MB   disk4s1
+  >    2:                 Apple_APFS Container disk5         2.0 TB     disk4s2
+```
+
+(RAM line `274877906944` B = 256 GiB and the `Apple M3 Ultra` GPU line are
+identical in both fingerprints; both external-storage lines are **back** in
+the fingerprint — the inverse delta of CHG-004, where they left.)
+
+**Diagnosis (live re-inventory over SSH, 2026-11-20 11:50 UTC): the detached
+external 2 TB NVMe has been re-attached — the CHG-004 detach is reversed and
+the drive is present again on the bus.**
+
+| item | previous fingerprint (ack 2026-11-20 11:42 UTC, CHG-004) | current fingerprint |
+|---|---|---|
+| external disk lines | absent — drive not enumerated on any bus | present: `disk4s1` EFI 209.7 MB + `disk5` APFS container 2.0 TB |
+| drive identity | not visible (detached) | `WD Blue SN5000 2TB`, PCI-Express, External, Solid State: Yes, SMART Verified — same physical drive as CHG-001..004 |
+| layout / content | n/a | 2.0 TB GUID, one APFS container, volume `2` **935.2 GB used** — byte-for-byte the volume-usage figure read at CHG-001, contents intact and mounted |
+| boot producing it | 2026-11-20 11:29:31 local | **unchanged** — `kern.boottime` still 2026-11-20 11:29:31 local, `uptime` 1h21m at the 11:50 UTC check |
+
+- The re-attach is a **hot-plug within the same boot**: no new reboot appears
+  in `last reboot` after the 11:29 local boot that CHG-004 recorded. The
+  attach window is bounded by CHG-004's live check (10:44 UTC, drive absent)
+  and this probe (11:48 UTC, drive present) — i.e. between 11:44 and 12:48
+  local on 2026-11-20.
+- The drive came back with the `disk4`/`disk5` enumeration (the numbering
+  this box shows on most boots; CHG-001/002 recorded it) — node naming, not
+  a second drive.
+- Cause of the original detach is still not determinable remotely: an
+  operator unplug-then-replug and an intermittent cable/enclosure/port
+  failure produce the same fingerprint trail. If it was intermittent, the
+  volume can drop again on the next power cycle — open maintainer question.
+
+**Impact: none remaining.**
+- Serve on :8080 answered HTTP 200 at the 11:50 UTC check — unchanged.
+- External volume mounted again at `/Volumes/2` (935.2 GB used of 2.0 TB);
+  the CHG-004 storage outage window was ~0.5–1.5 h with no recorded consumer
+  of that volume in this repo.
+- Internal data volume measured 1.6 TiB used of 1.8 TiB (88 %) again — same
+  figure as CHG-004, still a maintainer call, not acted on.
+
+**Benchmark comparison:** not applicable — re-attaching a storage device that
+carries no benchmark fixtures or serving artifacts changes no suite baseline;
+no cold-ladder or contour re-run required for this entry.
+
+**Open maintainer decision:** whether the 2026-11-20 detach→re-attach was
+intentional (operator responding to the drift alert) or an intermittent
+interconnect; if the latter, the cable/enclosure should be checked before the
+next power cycle. Nothing on the box was touched beyond read-only inspection.
+
+**Passport:** `hardware/inventory/mac-studio-m3u.md` external-storage row and
+drift-history note updated to the re-attached state.
