@@ -120,11 +120,30 @@ fi
 # 13:11 local). The BASICR4 is a Wi-Fi device on the eWeLink cloud integration - it is NOT part of
 # the Zigbee mesh, so a drop here means the Wi-Fi/cloud path, not the Zigbee radio. A relay that is
 # not answering cannot be switched off by the motion chain either.
+# 2026-11-20: three drops in 25 minutes (11:07, 11:21, 11:30) with RSSI -72 dBm and connection=none.
+# The integration stops refreshing the device until its config entry is reloaded, and a reload brings
+# the relay back in ~45 s - so the watchdog now performs it itself, at most once per 10 minutes, and
+# says so. The Zigbee devices live on a different config entry, so this reload cannot drop the mesh.
+SONOFF_ENTRY=01M7P351JEYY2KWTXH2A4EWNPA
+RELOAD_MARK=/tmp/motion-tavern/relay-reload.state
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     lampstate=$(printf '%s' "$(ha_body "$(ha_get "$HA_URL/api/states/$SWITCH")")" \
         | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
-    [ "$lampstate" = "unavailable" ] && \
-        echo "RELAY UNREACHABLE: $SWITCH is 'unavailable' in Home Assistant - the Wi-Fi/eWeLink path to the tavern relay is down"
+    if [ "$lampstate" = "unavailable" ]; then
+        rssi=$(printf '%s' "$(ha_body "$(ha_get "$HA_URL/api/states/sensor.taverna_basicr4_sonoff_1002bd4e01_rssi")")" \
+            | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
+        conn=$(printf '%s' "$(ha_body "$(ha_get "$HA_URL/api/states/sensor.taverna_basicr4_sonoff_1002bd4e01_connection")")" \
+            | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
+        echo "RELAY UNREACHABLE: $SWITCH is 'unavailable' in Home Assistant - the Wi-Fi/eWeLink path to the tavern relay is down (last rssi=$rssi connection=$conn)"
+        now=$(date +%s); last=$(cat "$RELOAD_MARK" 2>/dev/null || echo 0)
+        if [ $((now - last)) -ge 600 ]; then
+            echo "$now" > "$RELOAD_MARK"
+            code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' -X POST \
+                -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
+                "$HA_URL/api/config/config_entries/entry/$SONOFF_ENTRY/reload")
+            echo "RELAY RELOAD: forced eWeLink entry reload http=$code - the relay should answer within ~1 min; if this repeats all day the relay needs DIY Mode or a power cycle by hand"
+        fi
+    fi
 fi
 
 # camera present? (motion reopens it itself, but a missing device means the light is blind)

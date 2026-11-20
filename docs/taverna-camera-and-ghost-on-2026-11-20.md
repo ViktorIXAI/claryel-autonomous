@@ -111,6 +111,17 @@ placement / a wired or Zigbee relay.
 Log hygiene: the sonoff integration prints the per-device eWeLink apikey (a UUID) inside those WARNING
 lines, so `docker logs` excerpts are never committed; the push gate carries a UUID rule for exactly this.
 
+### Self-heal added after the 3rd drop (11:30)
+
+The relay dropped three times in 25 minutes (11:07:08, 11:21:21 for 0.5 s, 11:30:30) and the integration
+stopped refreshing the device on its own. The watchdog (`scripts/tavern-motion/motion-tavern-watch.sh`)
+now does what was done by hand: on `unavailable` it reports the line with the last known
+`rssi`/`connection`, then POSTs the eWeLink entry reload itself, at most once per 10 minutes
+(`/tmp/motion-tavern/relay-reload.state`), and prints `RELAY RELOAD: … http=200`. Verified live at
+11:31: alert + `http=200`, entity back to `off` 40 s later, next check silent. Measured RSSI on the two
+replies: −72 dBm then −67 dBm — marginal, which is why this will keep happening until the relay gets DIY
+Mode (local control), a better position, or a wired/Zigbee replacement.
+
 ## Files
 
 - `~/.hermes/scripts/taverna-camera-ctl.py` — loopback fps switch + JPEG frame service
