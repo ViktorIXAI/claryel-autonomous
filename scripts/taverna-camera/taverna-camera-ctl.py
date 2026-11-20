@@ -28,6 +28,8 @@ SECRET_FILE = os.path.join(MEDIA, "camera.secret")
 BOOST_FPS_FILE = os.path.join(MEDIA, "camera_boost_fps")
 BOOST_S_FILE = os.path.join(MEDIA, "camera_boost_s")
 SERVICE = "motion-tavern.service"
+STATE_DIR = os.path.expanduser("~/.local/state/taverna-greeting")
+RESTART_LOG = os.path.join(STATE_DIR, "motion-restarts.log")
 STREAM_URL = "http://127.0.0.1:8125/shot.jpg"
 _frame = {"jpg": None, "ts": 0.0}
 _frame_lock = threading.Lock()
@@ -101,6 +103,30 @@ def main_pid():
     return int(out) if out.isdigit() else 0
 
 
+def unit_state():
+    return subprocess.run(["systemctl", "show", SERVICE, "-p", "ActiveState", "--value"],
+                          capture_output=True, text=True).stdout.strip()
+
+
+def note_restart(pid, n):
+    """Record that THIS restart was asked for, so the motion watchdog does not report an fps
+    switch as a crash. The watchdog subtracts these from its restart delta."""
+    os.makedirs(STATE_DIR, exist_ok=True)
+    with open(RESTART_LOG, "a") as f:
+        f.write("%d pid=%d fps=%d\n" % (time.time(), pid, n))
+
+
+def wait_restarted(old_pid, timeout=8.0):
+    """Poll until systemd has brought back a different MainPID (keeps HA's rest_command happy)."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        pid = main_pid()
+        if pid and pid != old_pid:
+            return pid
+        time.sleep(0.4)
+    return 0
+
+
 def set_fps(n, restart=True):
     """Rewrite the framerate line and let systemd re-exec Motion with the new config."""
     txt = open(CONF).read()
@@ -115,8 +141,15 @@ def set_fps(n, restart=True):
     pid = main_pid()
     if not pid:
         return False, "service not running"
+    note_restart(pid, n)
     os.kill(pid, signal.SIGTERM)
-    return True, "framerate %d, motion (pid %d) restarted" % (n, pid)
+    new_pid = wait_restarted(pid)
+    if new_pid:
+        return True, "framerate %d, motion pid %d -> %d" % (n, pid, new_pid)
+    if unit_state() in ("active", "activating"):
+        return True, "framerate %d, motion (pid %d) restarting, state %s" % (n, pid, unit_state())
+    return False, "framerate %d written but %s state is '%s' - check journalctl -u %s" % (
+        n, SERVICE, unit_state(), SERVICE)
 
 
 def flip_boolean(state):

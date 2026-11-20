@@ -25,11 +25,28 @@ if [ "$state" != "active" ]; then
     exit 0
 fi
 
-if [ -n "$restarts" ] && [ -n "$prev" ] && [ "$restarts" -gt "$prev" ]; then
-    echo "MOTION RESTARTED: $UNIT restarted $((restarts - prev)) time(s) since last check (total $restarts) - check the camera / journalctl -u $UNIT"
+# [EN] Raising/lowering the frame rate (dashboard button, taverna-camera-ctl.py) restarts Motion on
+#      purpose - camera-ctl appends one line per requested restart to motion-restarts.log. The state
+#      file stores "restarts markers", so only restarts beyond the markers recorded since the last
+#      check reach the chat.
+# [RU] Поднятие/спускание частоты кадров (кнопка в дашборде, taverna-camera-ctl.py) перезапускает
+#      Motion намеренно — camera-ctl дописывает строку на каждый такой запрос в motion-restarts.log.
+#      В state-файле пишутся "перезапуски метки", поэтому в чат проходит только то, что сверх меток.
+FPS_LOG=/home/viktor/.local/state/taverna-greeting/motion-restarts.log
+markers=0
+[ -r "$FPS_LOG" ] && markers=$(wc -l < "$FPS_LOG")
+
+if [ -n "$restarts" ] && [ -n "$prev" ]; then
+    prev_restart=$(printf '%s' "$prev" | awk '{print $1}')
+    prev_markers=$(printf '%s' "$prev" | awk '{print $2}'); prev_markers=${prev_markers:-$markers}
+    delta=$((restarts - prev_restart))
+    explained=$((markers - prev_markers)); [ "$explained" -lt 0 ] && explained=0
+    if [ "$delta" -gt "$explained" ]; then
+        echo "MOTION RESTARTED: $UNIT restarted $((delta - explained)) time(s) since last check (total $restarts, $explained were fps switches) - check the camera / journalctl -u $UNIT"
+    fi
 fi
 
-echo "$restarts" > "$STATE"
+echo "$restarts $markers" > "$STATE"
 
 # [EN] Latch report (no writes). Home Assistant owns the latch: the hook toggles
 #      input_boolean.tavern_motion_now on every accepted frame, and automation

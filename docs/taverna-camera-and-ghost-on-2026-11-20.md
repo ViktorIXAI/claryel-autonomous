@@ -65,6 +65,24 @@ Verified both directions: 09:04 -> framerate 5 through the HA button, and back t
 Each fps change restarts Motion, which re-runs its 30 s boot guard (no detection during it). That
 is why 2 fps is the resting value and 5 fps is only for a look.
 
+## Restart accounting (same day, after a watchdog alert)
+
+The motion watchdog (`scripts/tavern-motion/motion-tavern-watch.sh`) alerted "restarted 2 time(s)
+since last check" — both restarts were my own config/fps changes, not a fault. An fps switch is a
+restart, so the watchdog needed to know which restarts were ordered:
+
+- `taverna-camera-ctl.py` appends `epoch pid=… fps=…` to
+  `~/.local/state/taverna-greeting/motion-restarts.log` **before** it signals Motion, then polls
+  `ExecMainPID` (8 s) and reports `pid A -> B`. A switch that does not bring the service back returns
+  `ok: false` with the unit state instead of claiming success — the earlier version answered
+  `{"ok": true}` from the config write alone and never checked the restart.
+- the watchdog state file now holds `"<NRestarts> <marker_lines>"`; only restarts beyond the markers
+  recorded since the previous check are reported.
+
+Verified live: fps switch through the API → one marker, `pid 2699640 -> 2721006`, watchdog silent;
+`kill -TERM` on the MainPID with no marker → exactly one line
+"restarted 1 time(s) since last check (total 10, 0 were fps switches)".
+
 ## Files
 
 - `~/.hermes/scripts/taverna-camera-ctl.py` — loopback fps switch + JPEG frame service
