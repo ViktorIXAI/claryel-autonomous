@@ -300,3 +300,24 @@ compare `trigger.to_state.context.user_id` against a specific account id — but
 of the family (HA has `person.viktor` plus two Samsung phone trackers), so it is not on by default.
 Renamed UI labels for this reason: `input_boolean.fan_servers_manual` is now "Вытяжка кладовки: включено из HA
 — страж не трогает 2 ч" and the three automations read "включено/выключено из HA"; entity ids did not change.
+
+## Follow-up measurement, 2026-11-20 20:00
+
+The radio watchdog alerted twice: `wing_ts0201` (Room3) LQI 14 and `sonoff_snzb_04pr2` (Door Ksu) LQI 29.
+Re-measured before drawing any conclusion:
+
+| device | samples in 24 h | LQI range | note |
+|---|---|---|---|
+| Room3 `wing_ts0201` | 275 | 0 - 43 (evening band 0-18) | flapping, not decaying |
+| Garden `claryel_garden_wing_ts0201` | 183 | 0 - 58 | flapping |
+| Door Ksu `sonoff_snzb_04pr2` | 10 | 29 - 72 | ~one sample per 3 h |
+
+Nothing is offline (every Zigbee device answered today between 18:20 and 20:01 local), and the HA log
+holds no `zigpy`/ZHA errors in 8 hours - the coordinator is fine. `relays_v16` and `routes_v16` are still
+**0 rows**, and all 10 devices are `logical_type=2` (EndDevice): the network is still a star out of the
+basement with no router in it.
+
+So a single low LQI reading on the two far sensors is this network's normal state, not a fresh failure.
+Nothing on the software side moves it: the fix is one mains-powered Zigbee router. The lamp relay in the
+tavern is the natural place for it - see `docs/taverna-camera-and-ghost-on-2026-11-20.md`: replacing the
+Wi-Fi BASICR4 with a mains Zigbee relay removes the cloud hop **and** finally puts a router in the house.
