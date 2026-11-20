@@ -98,3 +98,27 @@ statement is honest.
 The owner requires maximum preservation of historical material. Apply [Evidence Preservation and Temporal Provenance](EVIDENCE-PRESERVATION.md): **do not delete or silently replace original evidence or historical claims**. When a current-facing statement needs clarification, attach a dated, versioned correction and a link to the prior source. Preserve both earlier and later interpretations. Record exact timestamps and environments when available; never infer missing historical metadata. Third-party titles, quotes and archived language remain intact with appropriate scope notes.
 
 Earlier wording in this policy about moving a claim into `history/` should be read as *adding a historical copy or cross-reference*, never removing its original provenance. Corrections to mutable README summaries remain visible through Git history and must be documented in a dated audit entry.
+
+## CI coverage clarification (2026-11-20; issue #25)
+
+This dated note clarifies the earlier paragraph about online link checking without
+removing or replacing that historical policy wording. The scheduled
+`.github/workflows/docs-freshness.yml` runs only
+`python scripts/qa/docs_policy.py --daily`. That command checks README structure,
+status-date freshness, public-document wording, and **local** Markdown targets
+in three named documents; it skips HTTP(S) URLs. Thus a successful scheduled
+`docs-freshness` run is **not** evidence that external links are reachable.
+
+The separate `.github/workflows/selftest.yml` defines
+`python scripts/check_links.py` for push and pull-request runs, including online
+link integrity. The existence of that step does not establish that it passed
+for any particular commit. Pre-push behavior depends on the installed hook
+and must be verified separately; this note makes no assertion about an
+operator's local hooks. A remote HTTP 429 response indicates rate limiting,
+not proof that a target has disappeared. Cite the exact workflow, run, job,
+commit SHA and observation date when reporting link-check results.
+
+Evidence: issue #25, 2026-11-20 workflow-policy checkpoint; the two workflow
+files and `scripts/qa/docs_policy.py` at HEAD
+`f77471bb2c80d2f2ff98b18d927f49f2d46d65ab`. This clarification is
+about test scope only; it does not relax any link checks or change CI.
