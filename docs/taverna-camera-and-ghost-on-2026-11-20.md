@@ -134,3 +134,40 @@ Mode (local control), a better position, or a wired/Zigbee replacement.
   `configuration.yaml.bak-camera-20261120`)
 
 Secrets (HA token, eWeLink credentials, the loopback path secrets) stay out of this repository.
+
+## Can this relay be driven without the eWeLink cloud? (tested 2026-11-20)
+
+Asked after a walk downstairs at 11:06-11:09 produced **no light**: motion was detected at 11:06:54
+and the relay dropped at 11:07:08, so the ON never arrived. An earlier walk at 10:20:07 worked
+normally (ON 10:20:07, OFF 10:23:23 = the 3-minute hold).
+
+What was probed, with the tools in `scripts/tavern-motion/`:
+
+- `mdns-ewelink-probe.py` - multicast query for `_ewelink._tcp.local.` (the zeroconf type the Sonoff
+  integration uses to find LAN devices): **no answers on this LAN**.
+- `relay-local-probe.py` - TCP 8081 against every host in the ARP table: **only a docker bridge answers**
+  (uvicorn), no eWeLink LAN API. No ARP entry carries an Espressif/eWeLink OUI.
+- Integration is `custom_components/sonoff` = **SonoffLAN 3.13.3**, whose `mode` option already defaults
+  to `auto` (prefer LAN when the device is reachable). So the Home Assistant side is configured for
+  local control; the device simply does not expose a local protocol here.
+- Relay radio: **RSSI −72 dBm then −67 dBm**, `connection = cloud`.
+
+Vendor reality (checked in the docs and the integration's issue tracker): the official DIY-mode list is
+BASICR3 / RFR3 / MINIR2 / MINIR3 / D1 / SPM-Main / bulbs - **BASICR4 is not in it**, and the R4 generation
+is reported by users to have lost DIY/local HTTP entirely; its "local" story is eWeLink-Remote
+(Bluetooth) through an iHost gateway, which is another box.
+
+Verdict: with this relay Home Assistant has no path except the eWeLink cloud, so "work locally, no
+cloud" is not achievable for the tavern lamp as installed. Real options:
+
+1. Replace the relay with a **Zigbee** relay on the existing CC2652 coordinator - fully local, and being
+   mains-powered in the basement it becomes a Zigbee router, which also helps `wing_ts0201` (LQI 25) and
+   the garden wing (LQI 40). Needs a neutral at the lamp box for some models - check before buying.
+2. Replace with **BASICR3** (DIY mode = local HTTP on 8081) - local, but still Wi-Fi at −72 dBm.
+3. Keep the cloud and live with the mitigations: 60 s cut of an uncommanded light, the watchdog reloading
+   the integration entry by itself, and a loud phone alert the moment the relay is lost.
+
+Mitigation 3 shipped the same day: automation `tavern_rele_nedostupno_ne_molchat`
+(id `tavern_relay_unreachable_alert`) sends an iOS **critical** notification after the relay has been
+`unavailable` for 60 s (config backup `configuration.yaml.bak-relay-alert-20261120`). Test-fired at
+12:41:07 - `last_triggered` moved, no notify error in the HA log.
