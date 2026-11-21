@@ -281,3 +281,36 @@ Pitfall found while doing it: `automation/reload`, `timer/reload` and `input_boo
 even when the YAML insert never happened - the first attempt added the three automations but skipped the
 timer, because the insert guard matched the `input_boolean:` helper block which already contains the same
 name. After any helper reload, query the new entity id over `/api/states/...`; the HTTP code proves nothing.
+
+## The relay alert at 06:16 was a symptom: the house lost the internet, 2026-11-21 06:08
+
+Triage of `RELAY UNREACHABLE` (drop 06:08:57, "back" 06:15:58):
+
+- egress from claryel01 is dead: `https://example.com` and `http://1.1.1.1` both fail, `ping 1.1.1.1` loses
+  100 %, and name resolution through the house router (`homenet.telecomitalia.it` resolver) returns nothing
+- Home Assistant logs the same cause: `Cloud WS Connection error: ClientConnectorDNSError` repeated
+  06:08-06:16, and `Can't load devices` at 06:15:52
+- the Hermes Telegram adapter disconnected at the same time and its reconnects fail - so **Telegram-delivered
+  alerts do not arrive during a WAN outage**, and HA push to the phone goes through the cloud as well
+- the LAN is fine: LAN peers answer, Docker/HA/Zigbee/Motion/camera all healthy, RSSI of the relay sensor
+  was -56/-57 just before the drop
+
+The important correction about local control: after the reload the `..._connection` sensor read **`local`**,
+which looks like the repeater finally gave the relay a LAN path. It did not. The integration's own data for
+the device has `local: True` but `host = None`, and every command raises inside
+`custom_components/sonoff/core/ewelink/local.py:183` - `host = device["host"]` → **`KeyError: 'host'`**
+(repeated 06:16-06:20). The ARP table holds 31 clients on the house `/24` and the relay is not one of them,
+because the repeater serves its own network. So `local`/`duplex` are labels, not a path: with the WAN dead the
+lamp is unswitchable, and the entity state that came back at 06:15:58 was restored from cache - the worst kind
+of blind, because nothing looked broken.
+
+Watchdog additions from this (`scripts/tavern-motion/motion-tavern-watch.sh`):
+
+1. **Egress probe** - `https://example.com` (needs DNS) and `http://1.1.1.1` (raw IP) are checked every run;
+   `HOUSE INTERNET DOWN` / `HOUSE DNS BROKEN` / `HOUSE INTERNET BACK` is printed once per transition, so a
+   WAN outage is named as the cause instead of an endless stream of relay alerts. Verified live: printed once,
+   the second run stayed quiet.
+2. **Telemetry staleness** - if `sensor.…_rssi` has not changed for >20 min, the relay is unreachable even
+   when the switch entity still reads `off`/`on`: one `RELAY SILENT` line on entering that state, one
+   `RELAY TALKING AGAIN` on leaving it. `unavailable` alone is not a reliable reachability signal.
+3. The reload message no longer suggests DIY Mode for this relay (BASICR4 has no local API - measured twice).

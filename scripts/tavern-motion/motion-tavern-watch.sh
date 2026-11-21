@@ -147,7 +147,7 @@ if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
             code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' -X POST \
                 -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
                 "$HA_URL/api/config/config_entries/entry/$SONOFF_ENTRY/reload")
-            echo "RELAY RELOAD: forced eWeLink entry reload http=$code - the relay should answer within ~1 min; if this repeats all day the relay needs DIY Mode or a power cycle by hand"
+            echo "RELAY RELOAD: forced eWeLink entry reload http=$code - the relay should answer within ~1 min. This BASICR4 has no local/DIY path (checked 2026-11-20/21), so if HOUSE INTERNET DOWN is printed too, the outage is the WAN and no reload or power cycle will help"
         fi
     fi
 fi
@@ -188,6 +188,51 @@ print(drops, longest)
     if [ "$drops" -gt 0 ] && [ "$drops" -gt "$prev_drops" ]; then
         echo "RELAY FLAPPY: $drops 'unavailable' transitions on $SWITCH in the last 60 min (longest ${longest}s) - the eWeLink/Wi-Fi path keeps blinking; signal alone does not explain it (RSSI was -55 dBm during the 4 drops on 2026-11-21)"
         echo "$drops $longest" > "$FLAP_MARK"
+    fi
+fi
+
+# House egress probe, added 2026-11-21 06:20. At 06:08 the house lost the internet: DNS through the router
+# stopped answering, ping/curl to 1.1.1.1 lost 100 %, HA logged Cloud WS `ClientConnectorDNSError`, the
+# Telegram adapter dropped, and the tavern relay went 'unavailable' - all from one cause. The BASICR4 is a
+# cloud-only device, so during a WAN outage the lamp cannot be switched at all, and HA keeps showing it as
+# `off` from cache, which makes the guards look healthy while they are blind. Name the real cause instead of
+# blaming the relay, and report transitions rather than every 15 minutes.
+INET_MARK=/tmp/motion-tavern/internet.state
+dns_ok=0; wan_ok=0
+curl -s -o /dev/null --max-time 8 https://example.com && dns_ok=1
+curl -s -o /dev/null --max-time 8 http://1.1.1.1 && wan_ok=1
+if [ "$wan_ok" = "1" ]; then
+    net=up; [ "$dns_ok" = "1" ] || net=dns
+elif [ "$dns_ok" = "1" ]; then
+    net=wan   # name resolution works but raw IP egress does not
+else
+    net=wan
+fi
+prev_net=$(cat "$INET_MARK" 2>/dev/null || echo up)
+if [ "$net" != "$prev_net" ]; then
+    case "$net" in
+        wan) echo "HOUSE INTERNET DOWN: claryel01 has no egress (https://example.com and http://1.1.1.1 both fail) - the eWeLink cloud is unreachable, so the tavern relay CANNOT be switched from HA and HA phone pushes will not arrive either; reloads of the relay entry cannot help while the WAN is dead" ;;
+        dns) echo "HOUSE DNS BROKEN: raw internet works (1.1.1.1 answers) but name resolution fails through the router - eWeLink and any name-based integration will fail" ;;
+        up)  echo "HOUSE INTERNET BACK: egress from claryel01 works again$( [ "$prev_net" = "up" ] && echo ' (it was never recorded as down)' )" ;;
+    esac
+    echo "$net" > "$INET_MARK"
+fi
+
+# Telemetry staleness of the relay. A cloud-only device whose last telemetry is old is unreachable even when
+# its HA state still reads off/on, so an unavailable-only alert misses that case.
+if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
+    rssi_resp=$(ha_get "$HA_URL/api/states/sensor.taverna_basicr4_sonoff_1002bd4e01_rssi")
+    rssi_changed=$(ha_body "$rssi_resp" | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
+    if [ -n "$rssi_changed" ]; then
+        silent=$(( $(date +%s) - $(date -d "$rssi_changed" +%s 2>/dev/null || echo $(date +%s)) ))
+        was_silent=$(cat /tmp/motion-tavern/relay-silent.state 2>/dev/null || echo "")
+        if [ "$silent" -gt 1200 ] && [ "$was_silent" != "silent" ]; then
+            echo "RELAY SILENT: the tavern relay has sent no telemetry for ${silent}s (rssi sensor last changed $rssi_changed) - HA may still show it as off/on from cache, but commands are not reaching it"
+            echo silent > /tmp/motion-tavern/relay-silent.state
+        elif [ "$silent" -le 1200 ] && [ "$was_silent" = "silent" ]; then
+            echo "RELAY TALKING AGAIN: telemetry resumed after ${silent}s gap"
+            : > /tmp/motion-tavern/relay-silent.state
+        fi
     fi
 fi
 
