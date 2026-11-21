@@ -198,10 +198,17 @@ from the phone (eWeLink app or the HA dashboard), and from that instant the came
 their job. Motion 4.6 also has `lightswitch_percent/frames` and no `lightswitch_ignore`, so a genuine
 light-change event cannot be filtered in the daemon.
 
-The relay dropped again during this test (entity `unavailable` from ~03:53, the OFF command never reached
-the device, so the lamp stayed physically on while the camera confirmed it). The watchdog reload was issued
-at 03:54:28 (`http=200`); `input_boolean.tavern_light_manual` was raised at 03:56:55 so the ghost-light
-cutoffs would not switch off the light of a person standing in the room.
+The relay dropped again during this test (entity `unavailable` from 03:53:03, the OFF command never reached
+the device, so the lamp stayed physically on while the camera confirmed it: YAVG 143.7 at 04:01). The
+watchdog reload was issued at 03:54:28 (`http=200`); `input_boolean.tavern_light_manual` was raised at
+03:56:55 so the ghost-light cutoffs would not switch off the light of a person standing in the room.
+Resolution: the entity came back at **04:05:02** reading `on` (which matches the camera), with
+`rssi = -56 dBm` (previously -67…-72) and `connection = duplex`. No further reload had been issued after
+03:54:28, so either the device recovered by itself or the reload took 11 minutes - the two cannot be
+separated from these logs. Re-running the LAN probes at 04:05:57 still found **no `_ewelink._tcp.local.`
+announcement**, so `duplex` is the integration's own label and not proof that the lamp can be driven without
+the eWeLink cloud. During the 12-minute outage HA logged six `Referenced entities … are missing or not
+currently available` warnings: every lamp automation was blind, as expected.
 
 Operational note from this test: the mute failed because the automation was addressed by its YAML `id`
 (`automation.taverna_greeting_voice`), which is **not** its entity id - the entity id comes from the alias
