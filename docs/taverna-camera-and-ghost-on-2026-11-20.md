@@ -202,13 +202,38 @@ The relay dropped again during this test (entity `unavailable` from 03:53:03, th
 the device, so the lamp stayed physically on while the camera confirmed it: YAVG 143.7 at 04:01). The
 watchdog reload was issued at 03:54:28 (`http=200`); `input_boolean.tavern_light_manual` was raised at
 03:56:55 so the ghost-light cutoffs would not switch off the light of a person standing in the room.
-Resolution: the entity came back at **04:05:02** reading `on` (which matches the camera), with
-`rssi = -56 dBm` (previously -67…-72) and `connection = duplex`. No further reload had been issued after
-03:54:28, so either the device recovered by itself or the reload took 11 minutes - the two cannot be
-separated from these logs. Re-running the LAN probes at 04:05:57 still found **no `_ewelink._tcp.local.`
-announcement**, so `duplex` is the integration's own label and not proof that the lamp can be driven without
-the eWeLink cloud. During the 12-minute outage HA logged six `Referenced entities … are missing or not
-currently available` warnings: every lamp automation was blind, as expected.
+Resolution: the `unavailable` window was **03:53:03 → 04:01:30** (8 min 27 s, the longest of the night), after
+which the entity went `off` → `on` (04:05:02) - matching the lamp being physically lit, which the camera
+confirmed. At the same moment `rssi` moved from **-69/-70** to **-53…-57 dBm** and `connection` became
+`duplex`. No further reload had been issued after 03:54:28, so either the device recovered by itself or the
+reload took several minutes - the two cannot be separated from these logs. Re-running the LAN probes at
+04:05:57 still found **no `_ewelink._tcp.local.` announcement**, so `duplex` is the integration's own label
+and not proof that the lamp can be driven without the eWeLink cloud. During the outage HA logged six
+`Referenced entities … are missing or not currently available` warnings: every lamp automation was blind, as
+expected.
+
+## The relay flapped four times in one hour at strong signal, 2026-11-21 03:35-04:31
+
+Recorder history for `switch.taverna_taverna_basicr4_sonoff_1002bd4e01_1` between 03:35 and 04:31:
+
+| `unavailable` from | back | how long |
+|---|---|---|
+| 03:35:52 | 03:40:10 | 4 min 18 s |
+| 03:53:03 | 04:01:30 | 8 min 27 s |
+| 04:16:18 | 04:16:19 | 1 s |
+| 04:30:25 | 04:30:52 | 27 s |
+
+`rssi` in that window: -70, -69 before the first two drops, then **-53 to -57 dBm** from 04:01 onwards - the
+last two drops happened while the signal was good. The 504 `Cloud ERROR` line is logged by the integration for
+this device at 03:53:08. Conclusion, replacing the earlier "weak signal is the single root cause": signal
+quality is a contributing factor, not the cause - the eWeLink path blinks even at -55 dBm. That also means a
+Wi-Fi repeater is worth having but will not make the lamp dependable by itself.
+
+Watchdog change made from this data (`scripts/tavern-motion/motion-tavern-watch.sh`): besides the per-drop
+alert it now counts `unavailable` transitions for this entity over the last 60 minutes from the HA recorder
+and prints one `RELAY FLAPPY: N transitions (longest Xs)` line whenever that count grows, so the trend is
+visible instead of a stream of identical alerts. Verified live: first run printed
+`4 transitions ... longest 506s`, the next run stayed silent.
 
 Operational note from this test: the mute failed because the automation was addressed by its YAML `id`
 (`automation.taverna_greeting_voice`), which is **not** its entity id - the entity id comes from the alias

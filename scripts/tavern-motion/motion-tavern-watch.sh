@@ -124,8 +124,14 @@ fi
 # The integration stops refreshing the device until its config entry is reloaded, and a reload brings
 # the relay back in ~45 s - so the watchdog now performs it itself, at most once per 10 minutes, and
 # says so. The Zigbee devices live on a different config entry, so this reload cannot drop the mesh.
+# 2026-11-21 04:31: measured FOUR drops in one hour (03:35:52, 03:53:03, 04:16:18, 04:30:25) while RSSI had
+# improved from -70 to -55 dBm, three of them self-recovering in 1-30 s and one lasting 12 minutes. So the
+# weak Wi-Fi signal is not the whole cause, and the number of drops is the number the owner actually needs:
+# the per-drop alert alone hides whether things are getting better or worse. One extra summary line per
+# increase in the drop count, plus the longest outage in the window, from the HA recorder history API.
 SONOFF_ENTRY=01M7P351JEYY2KWTXH2A4EWNPA
 RELOAD_MARK=/tmp/motion-tavern/relay-reload.state
+FLAP_MARK=/tmp/motion-tavern/relay-flap.state
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     lampstate=$(printf '%s' "$(ha_body "$(ha_get "$HA_URL/api/states/$SWITCH")")" \
         | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
@@ -143,6 +149,45 @@ if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
                 "$HA_URL/api/config/config_entries/entry/$SONOFF_ENTRY/reload")
             echo "RELAY RELOAD: forced eWeLink entry reload http=$code - the relay should answer within ~1 min; if this repeats all day the relay needs DIY Mode or a power cycle by hand"
         fi
+    fi
+fi
+
+# Flap counter: the per-drop alert above only speaks while a drop is happening, so an hour of 1-30 s
+# micro-outages reads as noise and hides the trend. Count the 'unavailable' transitions in the last 60
+# minutes from the HA recorder, keep the longest one, and print one summary line only when the count grew.
+if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
+    hist=$(curl -s -m 20 -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
+        "$HA_URL/api/history/period/$(date -u -d '-60 minutes' +%Y-%m-%dT%H:%M:%S)Z?filter_entity_id=$SWITCH")
+    flap=$(printf '%s' "$hist" | python3 -c '
+import json, sys, datetime
+rows = []
+try:
+    chunks = json.load(sys.stdin)
+except Exception:
+    print("-1 0"); sys.exit(0)
+for chunk in chunks:
+    for s in chunk:
+        try:
+            rows.append((datetime.datetime.fromisoformat(s["last_changed"]), s["state"]))
+        except Exception:
+            continue
+rows.sort()
+drops = 0; longest = 0; start = None
+for ts, st in rows:
+    if st == "unavailable" and start is None:
+        start = ts; drops += 1
+    elif st != "unavailable" and start is not None:
+        longest = max(longest, int((ts - start).total_seconds())); start = None
+if start is not None:
+    longest = max(longest, int((datetime.datetime.now(datetime.timezone.utc) - start).total_seconds()))
+print(drops, longest)
+' 2>/dev/null || echo "-1 0")
+    drops=$(printf '%s' "$flap" | awk '{print $1}'); longest=$(printf '%s' "$flap" | awk '{print $2}')
+    prev_drops=$(cat "$FLAP_MARK" 2>/dev/null | awk '{print $1}'); prev_drops=${prev_drops:--1}
+    case "$drops" in ''|*[!0-9]*) drops=-1 ;; esac
+    if [ "$drops" -gt 0 ] && [ "$drops" -gt "$prev_drops" ]; then
+        echo "RELAY FLAPPY: $drops 'unavailable' transitions on $SWITCH in the last 60 min (longest ${longest}s) - the eWeLink/Wi-Fi path keeps blinking; signal alone does not explain it (RSSI was -55 dBm during the 4 drops on 2026-11-21)"
+        echo "$drops $longest" > "$FLAP_MARK"
     fi
 fi
 
