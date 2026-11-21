@@ -333,3 +333,14 @@ entry moved `last_changed` in 8 s while the value stayed -56. Internet was up th
 The check now treats the newer of the rssi timestamp and the switch timestamp as proof of life. When both
 are older than 20 min and egress is up, it reloads the entry once and prints `RELAY SILENT` only if that
 probe does not wake the timestamp. A WAN-down silence still alerts immediately, because a reload cannot help.
+
+## The quiet-room probe was chatting every half hour, 2026-11-21 13:15-14:00
+
+Two `RELAY PROBE` lines (13:15, 14:00) each reloaded the eWeLink entry because rssi and the switch had both
+been unchanged for ~27 min. Both answered in about a second (value stayed -58, `last_changed` moved) and each
+reload flipped the entity `unavailable` for that second. Six such blips between 12:32 and 14:00. A stable
+reading is not a dead relay, and a successful probe must not print: cron delivers any stdout.
+
+The probe is now silent unless the reload HTTP status is not 200. After a probe that wakes the timestamp,
+the watchdog records a proof and does not probe again for 6 h. The unavailable path still reloads at once if
+the entity actually drops. Verified: a run 70 s after the 14:00 probe printed nothing and wrote the proof mark.

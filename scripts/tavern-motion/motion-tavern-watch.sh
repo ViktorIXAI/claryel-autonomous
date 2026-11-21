@@ -225,6 +225,11 @@ fi
 # life is the newer of rssi last_changed and the switch last_changed. When BOTH are stale and the WAN is up,
 # probe with one entry reload and only call it silent if that probe does not move the timestamp — a quiet
 # room with a healthy relay answers a reload in seconds (measured 8 s, value unchanged, last_changed moved).
+# A successful probe must not print: the 13:15 and 14:00 probes both woke a healthy relay in ~1 s and each
+# line landed in chat, and the reload itself flips the entity unavailable for that second. After a proof,
+# do not probe again for 6 h — the unavailable path still reloads immediately if the entity actually drops.
+PROVED_MARK=/tmp/motion-tavern/relay-proved.state
+PROVED_HOLD=21600
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     rssi_resp=$(ha_get "$HA_URL/api/states/sensor.taverna_basicr4_sonoff_1002bd4e01_rssi")
     rssi_changed=$(ha_body "$rssi_resp" | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
@@ -239,7 +244,12 @@ if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
         fresh=$rssi_age
         [ "$sw_age" -lt "$fresh" ] && fresh=$sw_age
         was_silent=$(cat /tmp/motion-tavern/relay-silent.state 2>/dev/null || echo "")
+        last_reload=$(cat "$RELOAD_MARK" 2>/dev/null || echo 0)
+        case "$last_reload" in ''|*[!0-9]*) last_reload=0 ;; esac
         if [ "$fresh" -le 1200 ]; then
+            if [ "$last_reload" -gt 0 ] && [ $((now_s - last_reload)) -lt 300 ]; then
+                echo "$now_s" > "$PROVED_MARK"
+            fi
             if [ "$was_silent" = "silent" ]; then
                 echo "RELAY TALKING AGAIN: telemetry resumed after ${fresh}s gap"
                 : > /tmp/motion-tavern/relay-silent.state
@@ -250,10 +260,12 @@ if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
                 echo silent > /tmp/motion-tavern/relay-silent.state
             fi
         else
-            last_reload=$(cat "$RELOAD_MARK" 2>/dev/null || echo 0)
-            case "$last_reload" in ''|*[!0-9]*) last_reload=0 ;; esac
+            proved=$(cat "$PROVED_MARK" 2>/dev/null || echo 0)
+            case "$proved" in ''|*[!0-9]*) proved=0 ;; esac
             stale_since=$((now_s - fresh))
-            if [ "$last_reload" -gt "$stale_since" ] && [ $((now_s - last_reload)) -gt 90 ] && [ "$was_silent" != "silent" ]; then
+            if [ "$proved" -gt 0 ] && [ $((now_s - proved)) -lt "$PROVED_HOLD" ]; then
+                :
+            elif [ "$last_reload" -gt "$stale_since" ] && [ $((now_s - last_reload)) -gt 90 ] && [ "$was_silent" != "silent" ]; then
                 echo "RELAY SILENT: the tavern relay has sent no telemetry for ${fresh}s and a reload of the eWeLink entry did not wake it (rssi last changed $rssi_changed) - HA may still show it as off/on from cache, but commands are not reaching it"
                 echo silent > /tmp/motion-tavern/relay-silent.state
             elif [ $((now_s - last_reload)) -ge 600 ]; then
@@ -261,7 +273,9 @@ if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
                 code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' -X POST \
                     -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
                     "$HA_URL/api/config/config_entries/entry/$SONOFF_ENTRY/reload")
-                echo "RELAY PROBE: rssi and switch both stale for ${fresh}s, reloaded eWeLink entry http=$code - alerting only if the next check still shows no telemetry"
+                if [ "$code" != "200" ]; then
+                    echo "RELAY PROBE FAILED: eWeLink entry reload http=$code while rssi and switch were stale for ${fresh}s"
+                fi
             fi
         fi
     fi
