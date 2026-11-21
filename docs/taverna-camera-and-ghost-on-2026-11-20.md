@@ -188,11 +188,24 @@ was bought or moved - this is a placement/ambient-light problem, and the fixes a
 stair/entrance area where light leaks in, leave a small night light in the basement, or run the lamp from the
 manual flag `input_boolean.tavern_light_manual` during the hours the room is occupied.
 
-Side effect measured in the same test: **switching the lamp on itself creates a motion event** (event 3 at
-03:51:48, two seconds after `turn_on`, ended 03:52:34). Motion 4.6 has `lightswitch_percent/frames` but no
-`lightswitch_ignore`, so the spurious event stays. It only extends the light hold; the greeting fires from
-the light state, not from motion.
+What the same test proved about night use, stated carefully: motion event 3 started 03:51:48, two seconds
+after `turn_on`, and ended 03:52:34 - but the frames taken after the lamp came on show **a person standing
+in the background** (visible at 03:51 and still at 03:56, room YAVG ~140). The event therefore cannot be
+attributed to the lamp alone: the room became visible for the camera at the moment the lamp lit. The useful
+rule that follows is the one that matters at night - **the camera is blind until there is light, and works
+normally the second the lamp is on**. So a night arrival can be handed over manually: switch the lamp on
+from the phone (eWeLink app or the HA dashboard), and from that instant the camera and the 3-minute hold do
+their job. Motion 4.6 also has `lightswitch_percent/frames` and no `lightswitch_ignore`, so a genuine
+light-change event cannot be filtered in the daemon.
 
-Operational note from this test: `homeassistant/update_entity_state` returns **400 Bad Request** for an
-automation entity - mute an automation with `automation/turn_off` / `automation/turn_on` instead. The test
-therefore played the greeting and radio for ~20 s at 03:51 while the lamp was on.
+The relay dropped again during this test (entity `unavailable` from ~03:53, the OFF command never reached
+the device, so the lamp stayed physically on while the camera confirmed it). The watchdog reload was issued
+at 03:54:28 (`http=200`); `input_boolean.tavern_light_manual` was raised at 03:56:55 so the ghost-light
+cutoffs would not switch off the light of a person standing in the room.
+
+Operational note from this test: the mute failed because the automation was addressed by its YAML `id`
+(`automation.taverna_greeting_voice`), which is **not** its entity id - the entity id comes from the alias
+(`automation.taverna_italianskoe_privetstvie_i_muzyka_pri_vkliuchenii_sveta`). Calling
+`homeassistant/update_entity_state` on the non-existent id returns 400 Bad Request; mute with
+`automation/turn_off` against the alias-derived entity id instead. The test therefore played the greeting
+and radio for ~20 s at 03:51 while the lamp was on.
