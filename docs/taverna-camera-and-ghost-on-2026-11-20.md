@@ -171,3 +171,28 @@ Mitigation 3 shipped the same day: automation `tavern_rele_nedostupno_ne_molchat
 (id `tavern_relay_unreachable_alert`) sends an iOS **critical** notification after the relay has been
 `unavailable` for 60 s (config backup `configuration.yaml.bak-relay-alert-20261120`). Test-fired at
 12:41:07 - `last_triggered` moved, no notify error in the HA log.
+
+## Night test of the camera, 2026-11-21 03:33-03:53 (the camera has no night illumination)
+
+Measured with the loopback still endpoint (`:8126/frame.jpg`) and ffmpeg `signalstats`:
+
+| condition | YAVG | verdict |
+|---|---|---|
+| 03:33, lamp off, basement dark | 32.4 - 34.9 | noise floor; vision model rated usable detail **0/10**, no IR glow |
+| 03:51, lamp on, same framing | 133 - 145 | picture is fine, framing kept |
+
+So the USB webcam (`32e6:9251 USB Camera`, no IR LEDs, no IR-cut control exposed) is **blind when the room is
+dark**. Both real detections on 2026-11-20 (10:20:06 and 11:06:51) happened when the basement already had
+daylight; at night the chain cannot start by itself, because the first link (motion) sees nothing. Nothing
+was bought or moved - this is a placement/ambient-light problem, and the fixes are free: aim the camera at the
+stair/entrance area where light leaks in, leave a small night light in the basement, or run the lamp from the
+manual flag `input_boolean.tavern_light_manual` during the hours the room is occupied.
+
+Side effect measured in the same test: **switching the lamp on itself creates a motion event** (event 3 at
+03:51:48, two seconds after `turn_on`, ended 03:52:34). Motion 4.6 has `lightswitch_percent/frames` but no
+`lightswitch_ignore`, so the spurious event stays. It only extends the light hold; the greeting fires from
+the light state, not from motion.
+
+Operational note from this test: `homeassistant/update_entity_state` returns **400 Bad Request** for an
+automation entity - mute an automation with `automation/turn_off` / `automation/turn_on` instead. The test
+therefore played the greeting and radio for ~20 s at 03:51 while the lamp was on.
