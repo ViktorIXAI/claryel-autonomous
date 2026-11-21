@@ -322,3 +322,14 @@ watchdog pushes whatever `~/sah-main` has pending (`ahead > 0`) with `ALLOW_HARD
 `REPO PUSHED` or `REPO PUSH FAILED` once - commits must not sit unpushed because nobody noticed the internet
 was gone. The push branch was exercised while offline: it printed the `PUSH FAILED` line with the DNS error
 verbatim and the watchdog itself stayed silent because its own egress probe said `wan`.
+
+## RELAY SILENT at 12:31 was a stable RSSI, not a dead relay, 2026-11-21
+
+The watchdog printed `RELAY SILENT` for 1569 s because `sensor.…_rssi` `last_changed` was stuck at 12:04:39.
+That sensor only writes when the number changes. Over the same window the switch itself moved six times
+(12:09 on, 12:15 off, 12:15 on, 12:19 off, 12:19 on, 12:22 off) on real motion, and a reload of the eWeLink
+entry moved `last_changed` in 8 s while the value stayed -56. Internet was up the whole time.
+
+The check now treats the newer of the rssi timestamp and the switch timestamp as proof of life. When both
+are older than 20 min and egress is up, it reloads the entry once and prints `RELAY SILENT` only if that
+probe does not wake the timestamp. A WAN-down silence still alerts immediately, because a reload cannot help.

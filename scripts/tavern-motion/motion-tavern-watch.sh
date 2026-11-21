@@ -220,18 +220,49 @@ fi
 
 # Telemetry staleness of the relay. A cloud-only device whose last telemetry is old is unreachable even when
 # its HA state still reads off/on, so an unavailable-only alert misses that case.
+# RSSI last_changed does NOT move while the number is stable (measured 2026-11-21 12:04-12:31: rssi stuck at
+# -56 while the switch itself toggled on/off six times). A stuck rssi sensor alone is not silence. Proof of
+# life is the newer of rssi last_changed and the switch last_changed. When BOTH are stale and the WAN is up,
+# probe with one entry reload and only call it silent if that probe does not move the timestamp — a quiet
+# room with a healthy relay answers a reload in seconds (measured 8 s, value unchanged, last_changed moved).
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     rssi_resp=$(ha_get "$HA_URL/api/states/sensor.taverna_basicr4_sonoff_1002bd4e01_rssi")
     rssi_changed=$(ha_body "$rssi_resp" | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
+    sw_changed=$(ha_body "$(ha_get "$HA_URL/api/states/$SWITCH")" | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
     if [ -n "$rssi_changed" ]; then
-        silent=$(( $(date +%s) - $(date -d "$rssi_changed" +%s 2>/dev/null || echo $(date +%s)) ))
+        now_s=$(date +%s)
+        rssi_age=$(( now_s - $(date -d "$rssi_changed" +%s 2>/dev/null || echo "$now_s") ))
+        sw_age=$rssi_age
+        if [ -n "$sw_changed" ]; then
+            sw_age=$(( now_s - $(date -d "$sw_changed" +%s 2>/dev/null || echo "$now_s") ))
+        fi
+        fresh=$rssi_age
+        [ "$sw_age" -lt "$fresh" ] && fresh=$sw_age
         was_silent=$(cat /tmp/motion-tavern/relay-silent.state 2>/dev/null || echo "")
-        if [ "$silent" -gt 1200 ] && [ "$was_silent" != "silent" ]; then
-            echo "RELAY SILENT: the tavern relay has sent no telemetry for ${silent}s (rssi sensor last changed $rssi_changed) - HA may still show it as off/on from cache, but commands are not reaching it"
-            echo silent > /tmp/motion-tavern/relay-silent.state
-        elif [ "$silent" -le 1200 ] && [ "$was_silent" = "silent" ]; then
-            echo "RELAY TALKING AGAIN: telemetry resumed after ${silent}s gap"
-            : > /tmp/motion-tavern/relay-silent.state
+        if [ "$fresh" -le 1200 ]; then
+            if [ "$was_silent" = "silent" ]; then
+                echo "RELAY TALKING AGAIN: telemetry resumed after ${fresh}s gap"
+                : > /tmp/motion-tavern/relay-silent.state
+            fi
+        elif [ "$net" != "up" ]; then
+            if [ "$was_silent" != "silent" ]; then
+                echo "RELAY SILENT: the tavern relay has sent no telemetry for ${fresh}s (rssi last changed $rssi_changed, switch last changed ${sw_changed:-unknown}) and the house has no egress - HA may still show it as off/on from cache"
+                echo silent > /tmp/motion-tavern/relay-silent.state
+            fi
+        else
+            last_reload=$(cat "$RELOAD_MARK" 2>/dev/null || echo 0)
+            case "$last_reload" in ''|*[!0-9]*) last_reload=0 ;; esac
+            stale_since=$((now_s - fresh))
+            if [ "$last_reload" -gt "$stale_since" ] && [ $((now_s - last_reload)) -gt 90 ] && [ "$was_silent" != "silent" ]; then
+                echo "RELAY SILENT: the tavern relay has sent no telemetry for ${fresh}s and a reload of the eWeLink entry did not wake it (rssi last changed $rssi_changed) - HA may still show it as off/on from cache, but commands are not reaching it"
+                echo silent > /tmp/motion-tavern/relay-silent.state
+            elif [ $((now_s - last_reload)) -ge 600 ]; then
+                echo "$now_s" > "$RELOAD_MARK"
+                code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' -X POST \
+                    -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
+                    "$HA_URL/api/config/config_entries/entry/$SONOFF_ENTRY/reload")
+                echo "RELAY PROBE: rssi and switch both stale for ${fresh}s, reloaded eWeLink entry http=$code - alerting only if the next check still shows no telemetry"
+            fi
         fi
     fi
 fi
