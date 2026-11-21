@@ -61,3 +61,27 @@ router — overwriting early locks us out of the only box we are trying to reach
 embed credentials or derivatives of them; secrets live only in a `chmod 600` `.env`; campaign artifacts live outside
 any agent profile home, because a profile delete is destructive and there is no restore command. No secret, MAC or
 LAN address in this repository.
+
+## Both router-class boxes went dark, 2026-11-21 05:05-08:40
+
+| Time (CET) | Observation |
+|---|---|
+| 05:05 | CCR5009 still answering `ping6` on its derived link-local address, 3/3 replies |
+| 05:36 | `ping6` returns 0/3, but the watchdog reported *present* anyway - it fell back to a leftover `STALE` neighbour entry |
+| 06:08 | the house default gateway stops answering: DNS fails, `HA` logs the cloud WebSocket DNS error, the tavern relay goes `unavailable` |
+| 06:38 | still reporting *present* from the same cached entry |
+| 07:09 | first honest `absent` sample (miss=1) |
+| 07:40 | miss=2, state becomes `absent` |
+| 08:40 | the `LOST` line finally reaches the chat - about three hours after the box actually went quiet |
+| 08:41 | measured now: both link-local addresses 0/3, the gateway 0/2, ARP down from 43 to 23 entries with 9 `FAILED` (the Wi-Fi clients are gone), while the wired hosts still reach each other and Home Assistant answers |
+
+Reading: the wired segment and the switch are alive, so this is not a patch cord on one host - the router and the
+CCR5009 both stopped being reachable on the wire within an hour of each other, which points at power or an
+uplink on the shelf. Nothing on either box was changed by any agent; the watchdog is read-only.
+
+Watchdog defect found by this incident: the `ip neigh` fallback counted `STALE` entries as presence. A cached
+neighbour entry is not proof of life - it kept the alert quiet for three hours. Now only `REACHABLE`/`DELAY`
+count (`FAILED`, `INCOMPLETE`, `STALE`, `PERMANENT` are rejected). The `LOST` line also probes the default
+gateway and states which case it looks like, so "one box off" and "the whole shelf is off" no longer read the
+same: tested in a scratch copy with seeded state - first sample silent, second prints
+`... the house router does not answer either - check power/switch on the shelf before the cable ...`, third silent.
