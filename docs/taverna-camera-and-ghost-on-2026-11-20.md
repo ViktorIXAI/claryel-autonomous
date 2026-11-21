@@ -241,3 +241,43 @@ Operational note from this test: the mute failed because the automation was addr
 `homeassistant/update_entity_state` on the non-existent id returns 400 Bad Request; mute with
 `automation/turn_off` against the alias-derived entity id instead. The test therefore played the greeting
 and radio for ~20 s at 03:51 while the lamp was on.
+
+## The operator added a dedicated Wi-Fi repeater in the tavern, 2026-11-21 ~04:00
+
+The relay was moved onto the repeater's own access point (the tavern now has its own Wi-Fi network).
+Measured around that change:
+
+| | before | after |
+|---|---|---|
+| `rssi` | -69 / -70 dBm | **-53 to -57 dBm** steady (04:31-05:46) |
+| `connection` | `cloud` | `duplex` (since 04:00:05) |
+| cloud `504 / Request Timeout` in HA log | recurring | **0 in the following hour** |
+| `unavailable` drops | 4 in the hour 03:35-04:31 | 04:16:18 (1 s), 04:30:25 (27 s), **none after 04:30:52** |
+
+The two short drops right after the switch are the relay re-associating. So the repeater did what it should:
+signal improved by ~14 dB and the hour since has been clean. It has **not** created a local control path:
+`_ewelink._tcp.local.` still gets no mDNS answers, nothing on TCP 8081 belongs to eWeLink, and the ARP table
+has 31 clients on the house `/24` with no Espressif/ITead OUI among them - the relay is on the repeater's own
+network and is not visible from the house LAN at all. That is fine for cloud control and is an extra wall for
+any future local control.
+
+## The manual-light flag is now time-boxed to 4 hours, 2026-11-21 05:50
+
+What was wrong: `input_boolean.tavern_light_manual` was raised at 03:56 for a camera test and was still on at
+05:46 in an empty, dark room. While that flag is on, the 60-second uncommanded-ON guard stands down, so a
+forgotten flag disables the protection for as long as nobody remembers it.
+
+Added to `/config/configuration.yaml` (backup `configuration.yaml.bak-manual-timer-20261121`):
+
+- `timer.tavern_light_manual` - 4 hours
+- `automation.tavern_light_manual_armed` - raising the flag starts the timer
+- `automation.tavern_light_manual_release` - the lamp going OFF ends the window (flag off, timer cancelled)
+- `automation.tavern_light_manual_expiry` - `timer.finished` drops the flag and writes a logbook line
+
+Verified live: flag ON gave `timer.tavern_light_manual = active, 4:00:00`; restarting the timer with
+`duration: 00:00:05` expired and the flag went `off` by itself, timer back to `idle`.
+
+Pitfall found while doing it: `automation/reload`, `timer/reload` and `input_boolean/reload` all answer 200
+even when the YAML insert never happened - the first attempt added the three automations but skipped the
+timer, because the insert guard matched the `input_boolean:` helper block which already contains the same
+name. After any helper reload, query the new entity id over `/api/states/...`; the HTTP code proves nothing.
