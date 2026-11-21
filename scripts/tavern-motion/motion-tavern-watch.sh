@@ -236,6 +236,23 @@ if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     fi
 fi
 
+# Pending commits must not rot while the house is offline: during the 2026-11-21 WAN outage several
+# commits piled up in ~/sah-main and every reminder about them died on `Could not resolve host`. Once
+# egress is back, send them from here (plain push, no automatic rebase - a conflict must be mine to fix)
+# and say so in one line. Silent when the repo is already in sync.
+if [ "$net" = "up" ] && [ -d "$HOME/sah-main/.git" ]; then
+    ahead=$(git -C "$HOME/sah-main" rev-list --count origin/main..HEAD 2>/dev/null || echo 0)
+    case "$ahead" in ''|*[!0-9]*) ahead=0 ;; esac
+    if [ "$ahead" -gt 0 ]; then
+        push_out=$(ALLOW_HARD_V6_PUSH=1 git -C "$HOME/sah-main" push -q origin main 2>&1); push_rc=$?
+        if [ "$push_rc" -eq 0 ]; then
+            echo "REPO PUSHED: $ahead pending commit(s) from ~/sah-main sent after the outage"
+        else
+            echo "REPO PUSH FAILED: git push rc=$push_rc - $(printf '%s' "$push_out" | tail -1 | cut -c1-120)"
+        fi
+    fi
+fi
+
 # camera present? (motion reopens it itself, but a missing device means the light is blind)
 if [ ! -e /dev/video0 ]; then
     echo "CAMERA MISSING: /dev/video0 is gone from claryel01 - motion has no input"

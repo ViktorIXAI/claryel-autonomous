@@ -314,3 +314,11 @@ Watchdog additions from this (`scripts/tavern-motion/motion-tavern-watch.sh`):
    when the switch entity still reads `off`/`on`: one `RELAY SILENT` line on entering that state, one
    `RELAY TALKING AGAIN` on leaving it. `unavailable` alone is not a reliable reachability signal.
 3. The reload message no longer suggests DIY Mode for this relay (BASICR4 has no local API - measured twice).
+
+The new alerts proved themselves during the same outage: at 06:46 `RELAY SILENT` reported 1801 s without
+telemetry while the switch entity still read `off` (cached), and the egress line stayed suppressed after its
+first print instead of repeating. One more behaviour added from the same event: when egress returns, the
+watchdog pushes whatever `~/sah-main` has pending (`ahead > 0`) with `ALLOW_HARD_V6_PUSH=1` and prints
+`REPO PUSHED` or `REPO PUSH FAILED` once - commits must not sit unpushed because nobody noticed the internet
+was gone. The push branch was exercised while offline: it printed the `PUSH FAILED` line with the DNS error
+verbatim and the watchdog itself stayed silent because its own egress probe said `wan`.
