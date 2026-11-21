@@ -85,3 +85,29 @@ count (`FAILED`, `INCOMPLETE`, `STALE`, `PERMANENT` are rejected). The `LOST` li
 gateway and states which case it looks like, so "one box off" and "the whole shelf is off" no longer read the
 same: tested in a scratch copy with seeded state - first sample silent, second prints
 `... the house router does not answer either - check power/switch on the shelf before the cable ...`, third silent.
+
+## The box is back and now answers on management ports, 2026-11-21 11:46
+
+The watchdog reported `FOUND`: ether1 answers its derived IPv6 link-local address 3/3 at 0.7 ms, and the
+state file went from `absent` to `present`. What changed since the 2026-11-15 lockdown:
+
+| Probe | 2026-11-15 | 2026-11-21 11:48 |
+|---|---|---|
+| `ping6` on ether1 link-local | 3/3, 0.5 ms (box was up then too) | 3/3, 0.7 ms |
+| SSH / telnet / WebConfig / Winbox / API | all closed or filtered | **22, 23, 80, 8291, 8728 open** |
+| IPv4 entry in ARP for either MAC | none | none |
+| House router (default gateway) | alive | **silent since 06:08**, no egress for 5 h 40 min |
+
+So somebody reconfigured or reset the CCR5009 between the two measurements - services that were previously not
+reachable on this interface are now listening - but it still holds no IPv4 address, is not the gateway and does
+not serve DHCP: it is not carrying the house traffic yet, and the house is therefore offline with the old
+router unplugged or off.
+
+The standing campaign step ("snapshot `/export verbose` before any change") was attempted and is blocked: the
+RouterOS API on the link-local address answers the factory empty-password login with `not logged in`, so a
+password is set. Stopped there - no password guessing, nothing else tried, no other port touched. The read-only
+client used for the attempt is `~/.hermes/cache/scratch/ros-api.py` (stdlib only; it refuses any command path
+that is not a `print`/`export`-class path, and it would have written the raw export to a local `0600` file with
+password lines masked before anything reached stdout, because RouterOS prints user passwords in clear text).
+To unblock the snapshot the login has to be placed in `~/.hermes/.env` by the operator himself
+(`MIKROTIK_ROS_LOGIN`, `MIKROTIK_ROS_PASSWORD`) - credentials must not pass through chat.
