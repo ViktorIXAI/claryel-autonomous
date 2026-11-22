@@ -1,0 +1,32 @@
+# Issue #25 audit run 25 — current-head reconciliation
+
+- record_id: correction-20261122-issue25-run25
+- event_time_utc: 2026-11-22T20:30:56Z
+- review_time_utc: 2026-11-22T20:30:56Z
+- publication_time_utc: not_recorded
+- source_path: repository-wide current-facing documentation and GitHub metadata
+- source_commit: dd98507dd5f601d492dc9bc6058045d90693f6d2
+- affected_run_ids: []
+- original_claim: "Issue #25 remains an unfinished repository-wide consistency audit."
+- original_scope: "Current repository state as observed in this audit run."
+- new_interpretation: "No acceptance criterion can be marked complete from the independently accessible evidence in this run."
+- reason: "Fresh inspection of issue state, current branch, documentation, audit tree, repository metadata, combined status, and commit-associated workflow lookup."
+- evidence:
+  - "Issue #25 is open."
+  - "Default branch is main; current HEAD remains dd98507dd5f601d492dc9bc6058045d90693f6d2."
+  - "Repository is public; connected permissions report admin/maintain/push/triage/pull."
+  - "Recursive tree response is non-truncated."
+  - "Combined status for dd98507 is an empty list."
+  - "Commit-associated workflow-run lookup returned no runs."
+  - "The CI observations are indeterminate, not passing or failing evidence."
+  - "README.md, docs/TESTING-PHILOSOPHY.md, docs/EVIDENCE-PRESERVATION.md, and versions/VERSIONS.md were re-read."
+- reviewer: ViktorIXAI (direct connected GitHub execution)
+- confidence: high for observed metadata; low/unknown for CI completeness
+- status: open
+- historical_data_modified: false
+- provenance_note: "Append-only audit record. No historical audit file, frozen benchmark result, security policy, secret, permission, or production setting was altered or deleted."
+- unresolved_owner_questions:
+  - "Can independently verifiable CI evidence be produced for the current HEAD?"
+  - "Has complete path-by-path content coverage been independently demonstrated?"
+  - "Has owner-question and GitHub metadata reconciliation been completed?"
+  - "Has watchdog/reload-probe QA been independently evidenced?"
