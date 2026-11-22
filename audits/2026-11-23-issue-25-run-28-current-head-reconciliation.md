@@ -1,0 +1,27 @@
+# Issue #25 audit run 28 — current-head reconciliation
+
+- record_id: correction-20261123-issue25-run28
+- event_time_utc: 2026-11-22T23:42:11Z
+- review_time_utc: 2026-11-22T23:42:11Z
+- publication_time_utc: not_recorded
+- source_path: issue #25, latest commit, current-facing documentation, repository metadata, audit directory, issue #13
+- source_commit: 98418cf2990945d139eff52600d0389872950dc8
+- affected_run_ids: []
+- original_claim: "Issue #25 remains an unfinished repository-wide consistency audit."
+- original_scope: "Current repository state observed in this scheduled audit run."
+- new_interpretation: "Acceptance criteria remain unverified; issue stays open."
+- reason: "Fresh inspection of issue status/comments, default-branch HEAD, latest commit diff, README, testing/evidence/version documents, repository metadata and permissions, audit directory, combined status, commit workflow lookup, and closed owner-stop issue #13."
+- evidence:
+  - "Issue #25 is open; no verified completion record is present."
+  - "Default branch is main; current HEAD is 98418cf2990945d139eff52600d0389872950dc8."
+  - "Latest commit is append-only audit record run 27; no non-audit correction is independently verified."
+  - "Repository is public; connected permissions report admin/maintain/push/triage/pull."
+  - "Combined status for HEAD is an empty list; commit-associated workflow lookup returned no runs."
+  - "CI state is indeterminate, not passing or failing evidence."
+  - "Issue #13 is closed with owner-stop instructions; no new benchmark execution was initiated."
+  - "No historical audit record, frozen benchmark result, secret, security policy, permission, or production setting was changed or deleted."
+- reviewer: ViktorIXAI (direct connected GitHub execution)
+- confidence: high for observed metadata; low/unknown for CI completeness and exhaustive repository coverage
+- status: open
+- historical_data_modified: false
+- provenance_note: "Append-only record; prior history remains reachable through parent commit 98418cf2990945d139eff52600d0389872950dc8."
