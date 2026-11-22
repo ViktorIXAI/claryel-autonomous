@@ -1,0 +1,27 @@
+# Issue #25 audit run 27 — current-head reconciliation
+
+- record_id: correction-20261122-issue25-run27
+- event_time_utc: 2026-11-22T22:24:18Z
+- review_time_utc: 2026-11-22T22:24:18Z
+- publication_time_utc: not_recorded
+- source_path: issue #25, current-facing documentation, latest commit, repository metadata, audit directory
+- source_commit: fb9bbc2a6572d450e2f25d2be4c18c61c5ded78d
+- affected_run_ids: []
+- original_claim: "Issue #25 remains an unfinished repository-wide consistency audit."
+- original_scope: "Current repository state as observed in this audit run."
+- new_interpretation: "Acceptance criteria remain unverified; issue must stay open."
+- reason: "Fresh read of issue status/comments, latest commit and audit record, README/testing/evidence/version documents, repository metadata, combined status, and commit-associated workflow lookup."
+- evidence:
+  - "Issue #25 is open with no completion evidence."
+  - "Default branch is main; current HEAD is fb9bbc2a6572d450e2f25d2be4c18c61c5ded78d."
+  - "Repository is public; connected permissions report admin/maintain/push/triage/pull."
+  - "Combined status for fb9bbc2a6572d450e2f25d2be4c18c61c5ded78d is an empty list."
+  - "Commit-associated workflow-run lookup returned no runs."
+  - "CI observations are indeterminate, not passing or failing evidence."
+  - "Repository metadata still contains current-facing autonomy/product wording requiring owner review under issue #25."
+  - "No historical audit record, frozen benchmark result, secret, security policy, permission, or production setting was changed or deleted."
+- reviewer: ViktorIXAI (direct connected GitHub execution)
+- confidence: high for observed metadata; low/unknown for CI completeness
+- status: open
+- historical_data_modified: false
+- provenance_note: "Append-only audit record; prior history remains reachable through parent commit fb9bbc2a6572d450e2f25d2be4c18c61c5ded78d."
