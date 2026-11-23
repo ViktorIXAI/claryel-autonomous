@@ -1,0 +1,27 @@
+# Issue #25 audit run 31 — current-head reconciliation
+
+- record_id: correction-20261123-issue25-run31
+- event_time_utc: 2026-11-23T03:15:13Z
+- review_time_utc: 2026-11-23T03:15:13Z
+- publication_time_utc: not_recorded
+- source_path: issue #25, latest commit, repository metadata, current README, testing philosophy, evidence-preservation policy, recursive tree, combined status, commit workflow lookup
+- source_commit: a59e9f001fc00a45d0ed2e08f42ab202e46c0635
+- affected_run_ids: []
+- original_claim: "Issue #25 remains an unfinished repository-wide consistency audit."
+- original_scope: "Current repository state observed in this scheduled audit run."
+- new_interpretation: "Acceptance criteria remain unverified; issue stays open."
+- reason: "Fresh direct reconciliation found issue #25 open, current HEAD a59e9f0 is an append-only audit record, the recursive tree is not truncated, combined status is empty, and commit-associated workflow lookup returns no runs. No independently verified non-audit correction or completion evidence was found in this bounded pass."
+- evidence:
+  - "Issue #25 is open; no closed_at value."
+  - "Default branch is main; current HEAD is a59e9f001fc00a45d0ed2e08f42ab202e46c0635."
+  - "Repository permissions report admin/maintain/push/triage/pull."
+  - "Recursive tree response reports truncated=false."
+  - "Combined status for HEAD is an empty list; commit-associated workflow lookup returned no runs."
+  - "CI state is indeterminate, not passing or failing evidence."
+  - "README, docs/TESTING-PHILOSOPHY.md, and docs/EVIDENCE-PRESERVATION.md require provenance-aware, evidence-preserving review and prohibit unsupported completion claims."
+  - "No historical audit record, frozen benchmark result, secret, security policy, permission, or production setting was changed or deleted."
+- reviewer: ViktorIXAI (direct connected GitHub execution)
+- confidence: high for observed metadata; low/unknown for CI completeness, exhaustive content coverage, owner-question reconciliation, GitHub About/topics reconciliation, and watchdog/reload-probe QA
+- status: open
+- historical_data_modified: false
+- provenance_note: "Append-only record; prior history remains reachable through parent commit a59e9f001fc00a45d0ed2e08f42ab202e46c0635."
