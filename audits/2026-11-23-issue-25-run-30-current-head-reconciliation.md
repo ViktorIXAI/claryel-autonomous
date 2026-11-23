@@ -1,0 +1,27 @@
+# Issue #25 audit run 30 — current-head reconciliation
+
+- record_id: correction-20261123-issue25-run30
+- event_time_utc: 2026-11-23T02:00:35Z
+- review_time_utc: 2026-11-23T02:00:35Z
+- publication_time_utc: not_recorded
+- source_path: issue #25, latest commit, current-facing documentation, evidence-preservation policy, repository metadata, audit directory, combined status, workflow lookup
+- source_commit: 44d83da4021adb970707754b150be5ab5c09f2e3
+- affected_run_ids: []
+- original_claim: "Issue #25 remains an unfinished repository-wide consistency audit."
+- original_scope: "Current repository state observed in this scheduled audit run."
+- new_interpretation: "Acceptance criteria remain unverified; issue stays open."
+- reason: "Fresh direct reconciliation found the repository still at append-only audit commit 44d83da; issue #25 remains open; the combined status is empty and commit-associated workflow lookup returns no runs; current README and policies still require evidence-preserving, provenance-aware verification."
+- evidence:
+  - "Issue #25 is open."
+  - "Default branch is main; current HEAD is 44d83da4021adb970707754b150be5ab5c09f2e3."
+  - "HEAD is an append-only audit record; no non-audit correction was independently verified in this run."
+  - "Repository permissions report admin/maintain/push/triage/pull."
+  - "Combined status for HEAD is an empty list; commit-associated workflow lookup returned no runs."
+  - "CI state is indeterminate, not passing or failing evidence."
+  - "README, docs/TESTING-PHILOSOPHY.md, and docs/EVIDENCE-PRESERVATION.md continue to require explicit provenance, preservation of historical evidence, and no unsupported completion claims."
+  - "No historical audit record, frozen benchmark result, secret, security policy, permission, or production setting was changed or deleted."
+- reviewer: ViktorIXAI (direct connected GitHub execution)
+- confidence: high for observed metadata; low/unknown for CI completeness, exhaustive path coverage, owner-question reconciliation, and watchdog/reload-probe QA
+- status: open
+- historical_data_modified: false
+- provenance_note: "Append-only record; prior history remains reachable through parent commit 44d83da4021adb970707754b150be5ab5c09f2e3."
