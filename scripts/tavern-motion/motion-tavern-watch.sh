@@ -73,7 +73,11 @@ ha_code() { printf '%s' "$1" | tail -n 1; }
 ha_body() { printf '%s' "$1" | sed '$d'; }
 if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
     resp=$(ha_get "$HA_URL/api/states/$BOOLEAN")
-    code=$(ha_code "$resp"); body=$(ha_body "$resp")
+    code=$(ha_code "$resp")
+    # One retry before declaring blindness: on 2026-11-24 09:15 one /api/states call timed out while
+    # HA was healthy (logged nothing, answered 0.5 ms a minute later, container up 3 h).
+    if [ "$code" != "200" ]; then sleep 3; resp=$(ha_get "$HA_URL/api/states/$BOOLEAN"); code=$(ha_code "$resp"); fi
+    body=$(ha_body "$resp")
     [ "$code" != "200" ] && echo "HA UNREADABLE: http=$code for $BOOLEAN - the tavern watchdog is blind (check token and HA_URL)"
     latch=$(printf '%s' "$body" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p' | head -1)
     changed=$(printf '%s' "$body" | sed -n 's/.*"last_changed":"\([^"]*\)".*/\1/p' | head -1)
