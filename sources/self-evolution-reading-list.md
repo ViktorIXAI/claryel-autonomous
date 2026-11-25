@@ -144,3 +144,38 @@ The agent must run the following process once per day:
 7. Do not modify production code or the hard bank without explicit approval and paired evidence.
 
 All additions must preserve the existing style: English, practical, and tied to measurable harness changes.
+
+## Daily Summary 2026-11-25
+
+Selected four recent papers with strong empirical grounding and direct applicability to frozen-model harnesses that use paired evidence and an autonomy ledger.
+
+### Which Failure Does an Intervention Repair? (arXiv:2611.29290)
+Core claim: Interventions (skills, harnesses, budget) interact rather than add; a harness can absorb, rescue, or preserve a skill's effect. Matched factorial study (~0.9M trajectories) shows self-evolved skills rarely beat short human skills, can learn shortcuts, and fail to transfer. Feedback recovers mainly failures with visible error signals.
+Evidence: 1,872 instances × 4 models × 4 skills × 4 harness levels × 3 budgets, three repeats each; code and data released.
+Concrete tasks: Classify recent hard-bank failures by presence/absence of visible error signal; measure whether current repair paths preferentially convert signal-bearing failures. Add a protected-case check that rejects any proposed skill/harness edit which collapses score on a held-out model or harness level.
+Risks: Over-fitting to the paper's harness ladder; applying a skill that was optimal for one local model to another without re-validation.
+
+### Harnesses That Improve Themselves: A Unifying Framework (arXiv:2611.22299)
+Core claim: Four editable runtime components + four-stage diagnose-propose-validate-deploy loop with modular gated evolution outperforms full-harness rewrites and pure prompt reflection on SWE-bench Lite at lower token cost. Defenses against prompt bloat, benchmark gaming, and evaluator tampering are required.
+Evidence: Experiments across models and repositories showing modular updates generalize better.
+Concrete tasks: Map current gate/fixer/validator/telemetry surfaces onto the four components; propose one modular patch that targets only the verification-and-recovery component and require a non-regression gate on a fixed protected subset before acceptance.
+Risks: Full-rewrite style proposals that overfit the current bank and regress on OOD tasks.
+
+### GUARD: Stabilizing Recursive Self-Improvement with Regret Guidance (arXiv:2611.23476)
+Core claim: Directional regret over pre-execution self-checks plus a Soft-HURT gate that promotes an edit only when gains outweigh regressions prevents catastrophic forgetting and memory bloat while improving performance and cutting deployment tokens.
+Evidence: Consistent gains across memory, skill-evolution, continual-stream, and domain-reasoning benchmarks with zero measured post-block forgetting.
+Concrete tasks: Define a small set of pre-execution self-checks derived from existing validators; log directional regret for each autonomy proposal and reject any edit whose Soft-HURT score is non-positive on the protected-case buffer.
+Risks: Incorrect self-check decomposition can pin the wrong rules and freeze useful exploration.
+
+### The Resolution Hypothesis (arXiv:2611.23068)
+Core claim: Agent evolution is bottlenecked by noisy evaluation that cannot reliably identify true improvements (selection ≈ random; method margins smaller than run-to-run variance). Over 10M calls across 7 methods and 6 models.
+Evidence: Repeated evaluations show helpful candidates exist but selectors fail to find them; published rankings often rest on luck.
+Concrete tasks: Require at least two independent paired seeds (or a bootstrap CI that excludes zero) before any autonomy acceptance decision. Log the resolution width of every score used for promotion.
+Risks: Stricter gates slow progress if the current bank already has low variance; may reject real but small gains.
+
+**Proposed concrete tasks (2026-11-25):**
+1. Attribute the last 30 hard-bank failures to presence/absence of a visible error signal and measure current repair conversion rates on each subset (paired).
+2. Add a Soft-HURT-style non-regression gate over a frozen protected-case buffer to the autonomy acceptance rule and re-evaluate the last three rejected proposals under it.
+3. Require resolution evidence (multi-seed CI or bootstrap) in the next autonomy ledger entry before any harness change is marked Autonomously-adopted.
+
+**Question for operator:** Approve running a controlled, non-production experiment that implements the Soft-HURT-style gate and the visible-error-signal attribution on a frozen subset of the hard bank (no production code or bank changes)? Yes / No / Modify.
