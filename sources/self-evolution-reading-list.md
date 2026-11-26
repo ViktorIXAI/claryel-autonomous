@@ -179,3 +179,22 @@ Risks: Stricter gates slow progress if the current bank already has low variance
 3. Require resolution evidence (multi-seed CI or bootstrap) in the next autonomy ledger entry before any harness change is marked Autonomously-adopted.
 
 **Question for operator:** Approve running a controlled, non-production experiment that implements the Soft-HURT-style gate and the visible-error-signal attribution on a frozen subset of the hard bank (no production code or bank changes)? Yes / No / Modify.
+
+## Daily Summary 2026-11-26
+
+See full write-up in `sources/daily/2026-11-26-self-evolution.md`.
+
+Selected four papers focused on context/skill management, coverage-guided revision, detection gaps in self-improvement, and feedback-free skill erosion.
+
+Key practical takeaways for the harness:
+- Prefer individually accessible raw records (context folding) over pure summarization in the autonomy ledger.
+- Use instruction-level coverage labels to target repairs at actual instruction faults rather than whole-run outcomes.
+- Measure and log the detection rate of existing gates (surfaced vs silent failures); silent failures stay unrepaired.
+- Block pure feedback-free self-rewrites of rules; require paired evidence and a prior-divergence check.
+
+**Proposed concrete tasks (2026-11-26):**
+1. Measure detection rate on last 50 hard-bank failures.
+2. Prototype context folding on last 10 autonomy proposals (paired).
+3. Generate one coverage-targeted repair proposal for operator review.
+
+**Question for operator:** Approve a controlled, non-production experiment that measures the detection gap and tests context folding versus current ledger summarization (paired evidence only, no production code or hard-bank changes)? Yes / No / Modify.
