@@ -151,7 +151,16 @@ if [ "$state" = "active" ] && [ -r "$TOKEN_FILE" ]; then
             code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' -X POST \
                 -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
                 "$HA_URL/api/config/config_entries/entry/$SONOFF_ENTRY/reload")
-            echo "RELAY RELOAD: forced eWeLink entry reload http=$code - the relay should answer within ~1 min. This BASICR4 has no local/DIY path (checked 2026-11-20/21), so if HOUSE INTERNET DOWN is printed too, the outage is the WAN and no reload or power cycle will help"
+            if [ "$code" = "000" ]; then
+                # 2026-11-27 20:00: the reload call hung 60 s while the eWeLink websocket was wedged
+                # ('Received message 257 is not TEXT' + dispatcher_wait). A hung reload never recovers
+                # by itself - only a restart of the homeassistant container clears it (~20 s, verified).
+                # Each hung call leaves another stuck task in HA, so do not retry for ~1 h.
+                echo $(( $(date +%s) + 3000 )) > "$RELOAD_MARK"
+                echo "RELAY RELOAD HUNG: the eWeLink entry reload did not answer in 20 s - the integration task is deadlocked, a retry cannot help; run: docker restart homeassistant"
+            else
+                echo "RELAY RELOAD: forced eWeLink entry reload http=$code - the relay should answer within ~1 min. This BASICR4 has no local/DIY path (checked 2026-11-20/21), so if HOUSE INTERNET DOWN is printed too, the outage is the WAN and no reload or power cycle will help"
+            fi
         fi
     fi
 fi
