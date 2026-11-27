@@ -198,3 +198,22 @@ Key practical takeaways for the harness:
 3. Generate one coverage-targeted repair proposal for operator review.
 
 **Question for operator:** Approve a controlled, non-production experiment that measures the detection gap and tests context folding versus current ledger summarization (paired evidence only, no production code or hard-bank changes)? Yes / No / Modify.
+
+## Daily Summary 2026-11-27
+
+See full write-up in `sources/daily/2026-11-27-self-evolution.md`.
+
+Selected four papers emphasizing transferable interventions, auditable certificates, and shared failure modes.
+
+Key practical takeaways for the harness:
+- Evolve intervention policies from same-task success/failure contrasts and filter with protected-subset replay to reduce overfitting.
+- Require claim-obligation certificates (not just scores) before accepting repairs in the autonomy ledger.
+- Generate probe tasks that isolate recurring failure modes and add them to the protected-case buffer.
+- Annotate every proposal with the explicit + implicit requirement it satisfies.
+
+**Proposed concrete tasks (2026-11-27):**
+1. Author two TransHarness-style intervention policies from recent same-task pairs and evaluate only on a frozen protected subset (paired).
+2. Prototype a minimal claim-obligation certificate for three recent failures.
+3. Generate one ProbeAgent-style probe for the highest-frequency failure mode and add it to the protected-case buffer.
+
+**Question for operator:** Approve a controlled, non-production experiment that implements the TransHarness-style same-task contrast + protected-subset replay and the claim-obligation certificate check on a frozen subset of the hard bank (no production code changes, no hard-bank modifications)? Yes / No / Modify.
