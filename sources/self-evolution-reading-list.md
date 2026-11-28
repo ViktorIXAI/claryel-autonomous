@@ -217,3 +217,22 @@ Key practical takeaways for the harness:
 3. Generate one ProbeAgent-style probe for the highest-frequency failure mode and add it to the protected-case buffer.
 
 **Question for operator:** Approve a controlled, non-production experiment that implements the TransHarness-style same-task contrast + protected-subset replay and the claim-obligation certificate check on a frozen subset of the hard bank (no production code changes, no hard-bank modifications)? Yes / No / Modify.
+
+## Daily Summary 2026-11-28
+
+See full write-up in `sources/daily/2026-11-28-self-evolution.md`.
+
+Selected four papers on evidence-producing verification, context/skill management for long-horizon evolution, held-out gated memory evolution, and requirement-centered harness engineering.
+
+Key practical takeaways for the harness:
+- Require claim-obligation certificates (not scalar scores alone) before accepting any repair or edit in the autonomy ledger.
+- Prefer context folding (individually accessible digests + on-demand full records) over pure summarization; selectively delete unused skills.
+- Accept macro rules or ledger patterns only when held-out paired accuracy rises.
+- Annotate proposals with the explicit (and inferred implicit) requirement they satisfy and verify resolution on a protected subset.
+
+**Proposed concrete tasks (2026-11-28):**
+1. Prototype a minimal claim-obligation certificate on the last five hard-bank failures and log detection of silent or contract-violating cases (paired with current gates).
+2. Implement context folding for the last 10 autonomy proposals and measure token cost + hard-bank score versus current summarization (paired, non-production).
+3. Add a held-out accuracy gate for macro-rule / pattern proposals and re-score the last three ledger entries under it.
+
+**Question for operator:** Approve a controlled, non-production experiment that implements the claim-obligation certificate check and context-folding prototype on a frozen subset of the hard bank (no production code changes, no hard-bank modifications)? Yes / No / Modify.
